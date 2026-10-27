@@ -15,7 +15,9 @@
  *   App-Updates (neue Versionen kommen über die Synology auf PC und Handy):
  *   GET  api.php?a=version             -> {version}
  *   GET  api.php?a=app[&web=1]         -> die aktuelle App (HTML)
- *   POST api.php?a=deploy  (X-Deploy-Key, Body = HTML)  -> {version}   (nur der GitHub-Build)
+ *   POST api.php?a=deploy  (X-Deploy-Token, Body = HTML) -> {version}
+ *        Nur der GitHub-Build von minghatsu/Haushaltsbuch (Branch main) darf das: er schickt ein von GitHub
+ *        signiertes Kurzzeit-Token (OIDC), das hier mit GitHubs öffentlichen Schlüsseln geprüft wird.
  */
 
 header('Access-Control-Allow-Origin: *');
@@ -29,7 +31,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204);
 
 // Datenordner mit zufälligem Namen, damit die Datenbank-Datei nicht erraten und heruntergeladen werden kann.
 const DATA_DIR = __DIR__ . '/data-__DATA_SUFFIX__';
-const DEPLOY_HASH = '__DEPLOY_HASH__';
+const DEPLOY_REPO = 'minghatsu/haushaltsbuch';
+const DEPLOY_AUD = 'haushaltsbuch-deploy';
+const GH_ISSUER = 'https://token.actions.githubusercontent.com';
 const ALLOWED_COLS = ['tx', 'txb', 'fixed', 'months', 'debts', 'app'];
 
 function out($data, int $code = 200): void {
@@ -90,6 +94,64 @@ function appVersion(string $html): int {
 }
 function appFile(): string { return DATA_DIR . '/app.html'; }
 function currentApp(): string { return is_file(appFile()) ? (string)file_get_contents(appFile()) : ''; }
+/* ---- GitHub OIDC token check (for automatic updates from the GitHub build) ---- */
+function b64u(string $s): string { return (string)base64_decode(strtr($s, '-_', '+/') . str_repeat('=', (4 - strlen($s) % 4) % 4)); }
+function derLen(int $l): string { if ($l < 128) return chr($l); $b = ltrim(pack('N', $l), "\0"); return chr(0x80 | strlen($b)) . $b; }
+function derInt(string $x): string { if (ord($x[0]) > 127) $x = "\0" . $x; return "\x02" . derLen(strlen($x)) . $x; }
+function jwkToPem(string $n, string $e): string {
+    $ints = derInt($n) . derInt($e);
+    $rsa = "\x30" . derLen(strlen($ints)) . $ints;
+    $bit = "\x03" . derLen(strlen($rsa) + 1) . "\x00" . $rsa;
+    $alg = "\x30\x0d\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01\x05\x00";
+    $spki = "\x30" . derLen(strlen($alg . $bit)) . $alg . $bit;
+    return "-----BEGIN PUBLIC KEY-----\n" . chunk_split(base64_encode($spki), 64, "\n") . "-----END PUBLIC KEY-----\n";
+}
+function httpGet(string $url): string {
+    if (function_exists('curl_init')) {
+        $c = curl_init($url);
+        curl_setopt_array($c, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 15, CURLOPT_FOLLOWLOCATION => true]);
+        $r = curl_exec($c);
+        curl_close($c);
+        return is_string($r) ? $r : '';
+    }
+    $r = @file_get_contents($url, false, stream_context_create(['http' => ['timeout' => 15]]));
+    return is_string($r) ? $r : '';
+}
+function githubKeys(bool $refresh): array {
+    $f = DATA_DIR . '/github-keys.json';
+    if ($refresh || !is_file($f) || filemtime($f) < time() - 86400) {
+        $conf = json_decode(httpGet(GH_ISSUER . '/.well-known/openid-configuration'), true);
+        $uri = is_array($conf) ? (string)($conf['jwks_uri'] ?? '') : '';
+        $jwks = $uri !== '' && strpos($uri, GH_ISSUER . '/') === 0 ? httpGet($uri) : '';
+        if (is_array(json_decode($jwks, true))) file_put_contents($f, $jwks);
+    }
+    $k = is_file($f) ? json_decode((string)file_get_contents($f), true) : null;
+    return is_array($k) ? ($k['keys'] ?? []) : [];
+}
+function githubBuildAllowed(string $jwt): bool {
+    $p = explode('.', $jwt);
+    if (count($p) !== 3) return false;
+    $h = json_decode(b64u($p[0]), true);
+    $c = json_decode(b64u($p[1]), true);
+    if (!is_array($h) || !is_array($c) || ($h['alg'] ?? '') !== 'RS256') return false;
+    $verified = false;
+    foreach ([false, true] as $refresh) {
+        foreach (githubKeys($refresh) as $k) {
+            if (($k['kid'] ?? null) !== ($h['kid'] ?? '') || empty($k['n']) || empty($k['e'])) continue;
+            $verified = openssl_verify($p[0] . '.' . $p[1], b64u($p[2]), jwkToPem(b64u($k['n']), b64u($k['e'])), OPENSSL_ALGO_SHA256) === 1;
+            break 2;
+        }
+    }
+    if (!$verified) return false;
+    $now = time();
+    return ($c['iss'] ?? '') === GH_ISSUER
+        && ($c['aud'] ?? '') === DEPLOY_AUD
+        && strtolower((string)($c['repository'] ?? '')) === DEPLOY_REPO
+        && ($c['ref'] ?? '') === 'refs/heads/main'
+        && (int)($c['exp'] ?? 0) > $now - 60
+        && (int)($c['iat'] ?? 0) < $now + 300;
+}
+
 function checkPassword(string $pw): bool {
     $hash = meta('password');
     return $hash !== null && password_verify($pw, $hash);
@@ -114,8 +176,8 @@ try {
     }
 
     if ($a === 'deploy') {
-        $key = (string)($_SERVER['HTTP_X_DEPLOY_KEY'] ?? '');
-        if ($key === '' || !hash_equals(DEPLOY_HASH, hash('sha256', $key))) { sleep(2); fail('Nicht erlaubt', 403); }
+        db();
+        if (!githubBuildAllowed((string)($_SERVER['HTTP_X_DEPLOY_TOKEN'] ?? ''))) { sleep(2); fail('Nicht erlaubt', 403); }
         $html = (string)file_get_contents('php://input');
         $v = appVersion($html);
         if (strlen($html) > 5000000 || strpos($html, 'id="loginBg"') === false || $v < 1) fail('Das ist keine gültige App-Version', 400);
