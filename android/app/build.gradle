@@ -1,0 +1,39 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'de.sascha.haushaltsbuch'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'de.sascha.haushaltsbuch'
+        minSdk 29
+        targetSdk 34
+        // CI sets the build number so every new APK installs over the old one
+        versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int)
+        versionName "1.0.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
+    }
+
+    signingConfigs {
+        release {
+            // fixed key, so updates install over the previous version without losing data
+            storeFile file('../keystore/haushaltsbuch.jks')
+            storePassword 'haushaltsbuch'
+            keyAlias 'haushaltsbuch'
+            keyPassword 'haushaltsbuch'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
