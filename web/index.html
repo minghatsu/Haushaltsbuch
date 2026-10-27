@@ -338,6 +338,10 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="field"><label>Einnahmen</label><div id="catEd-einnahme"></div></div>
       <div class="section-title">Import</div>
       <div class="field"><label>Meine Spaces und eigenen Konten</label><span class="small muted" style="margin-top:-2px">Geld zwischen diesen Konten ist eine Umbuchung, keine Einnahme oder Ausgabe.</span><div class="chips" id="spaceEd"></div><div id="spaceClean"></div></div>
+      <div id="syncBox" hidden>
+        <div class="section-title">Abgleich mit der Synology</div>
+        <div class="switch"><span><b id="syncState">–</b><br><span class="small muted" id="syncDetail"></span></span><span class="row-btns" style="flex:0 0 auto"><button class="btn" id="syncNow">Jetzt abgleichen</button><button class="btn" id="syncLogout">Abmelden</button></span></div>
+      </div>
       <div class="section-title">Backup</div>
       <div class="switch"><span><b>Alle Daten sichern</b><br><span class="small muted" id="backupInfo">Speichert Buchungen, Fixkosten, Schulden und Einstellungen in einer Datei.</span></span><button class="btn" id="backupSave">Backup speichern</button></div>
       <div class="switch" id="backupLoadRow"><span><b>Backup laden</b><br><span class="small muted">Ersetzt alle Daten in dieser App durch die Datei.</span></span><button class="btn" id="backupLoad">Laden</button></div>
@@ -377,6 +381,19 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
     <div><label class="lbl" for="fNote">Notiz (optional)</label><input class="in" id="fNote" placeholder="z. B. Rewe, Kino, Tankstelle" autocomplete="off"></div>
     <button class="btn primary block" id="saveBtn">Speichern</button>
     <div class="row-btns" id="editBtns" hidden><button class="btn danger" id="delBtn">Löschen</button></div>
+  </div>
+</div>
+<div class="backdrop show" id="loginBg" hidden style="align-items:center">
+  <div class="sheet" style="transform:none;border-radius:28px;max-width:420px;gap:14px" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <span class="ictile" style="width:52px;height:52px;border-radius:17px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24" style="width:26px;height:26px"><path d="M7 18.5a4 4 0 0 1-.6-8 5.5 5.5 0 0 1 10.6-1.3A4.3 4.3 0 0 1 17.5 18.5z"/></svg></span>
+    <h2 id="loginTitle" style="font-family:var(--f-display);margin:0">Mit deiner Synology verbinden</h2>
+    <p class="small muted" id="loginText" style="margin:0"></p>
+    <div class="field" id="loginUrlRow" hidden><label for="loginUrl">Adresse der Synology</label><input class="in" id="loginUrl" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="z. B. 192.168.178.32"></div>
+    <div class="field"><label for="loginPw">Passwort</label><input class="in" type="password" id="loginPw" autocomplete="current-password"></div>
+    <div class="field" id="loginPw2Row" hidden><label for="loginPw2">Passwort wiederholen</label><input class="in" type="password" id="loginPw2" autocomplete="new-password"></div>
+    <div class="small" id="loginErr" style="color:var(--bad)"></div>
+    <button class="btn primary block" id="loginGo">Verbinden</button>
+    <button class="btn" id="loginSkip">Erst einmal ohne Abgleich</button>
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastText"></span><button id="toastAct" hidden>Rückgängig</button></div>
@@ -451,10 +468,18 @@ function tile(kind, name, color){
 const S = { settings: clone(DEFAULT_SETTINGS), tx: [], txSingle: [], txb: {}, fixed: [], months: {}, debts: [] };
 const UI = { view:"home", ym: ymOf(new Date()), kind:"ausgabe", cat:null, editId:null, fixEdit:false, debtEdit:false, filter:"alle", q:"" };
 let db = null, mem = false;
-const NATIVE = !!window.AndroidBridge;   // running inside the Android APK: data lives on the phone
+const NATIVE = !!window.AndroidBridge;   // running inside the Android APK
+// Copies served from the Synology (and the APK) carry <meta name="hb-server"> with the sync address
+const META_SERVER = (document.querySelector('meta[name="hb-server"]')||{}).content || "";
+const SERVER_KEY = "haushaltsbuch-server";
+// the APK lets the user change the Synology address (home WLAN vs. internet); the web copy on the NAS uses its own api.php
+let SERVER = (NATIVE && (()=>{ try { return localStorage.getItem(SERVER_KEY)||""; } catch(e){ return ""; } })()) || META_SERVER;
+const SYNCABLE = NATIVE || !!META_SERVER;
+const LOCAL = SYNCABLE;                   // data kept on the device (and synced with the Synology)
 const LS_KEY = "haushaltsbuch-v1";
+const SYNC_KEY = "haushaltsbuch-sync-v1";
 function persistLocal(){
-  if (!NATIVE) return;
+  if (!LOCAL) return;
   try { localStorage.setItem(LS_KEY, JSON.stringify({version:1, settings:S.settings, ...memStore})); }
   catch(e){ toast("Speichern auf dem Handy fehlgeschlagen"); }
 }
@@ -468,11 +493,15 @@ function backupData(){
   for (const d of S.debts){ const r={...d}; delete r.id; o.debts[d.id]=r; }
   return o;
 }
-function loadBackupObj(o){
+function loadBackupObj(o, fromFile){
   if (!o || o.version!==1 || typeof o.fixed!=="object") throw new Error("bad");
   for (const k of ["tx","txb","fixed","months","debts"]) memStore[k]=clone(o[k]||{});
   const m={...clone(DEFAULT_SETTINGS),...clone(o.settings||{})}; m.cats={...clone(DEFAULT_SETTINGS.cats),...((o.settings&&o.settings.cats)||{})};
   S.settings=m; persistLocal(); rebuildMem();
+  if (fromFile && SYNC.token){ // push everything from the backup to the server
+    for (const k of ["tx","txb","fixed","months","debts"]) for (const [id,d] of Object.entries(memStore[k])) SYNC.queue.push({col:k,id,data:d});
+    SYNC.queue.push({col:"app",id:"settings",data:clone(S.settings)}); saveSync(); flushSoon(0);
+  }
 }
 const memStore = { tx:{}, txb:{}, fixed:{}, months:{}, debts:{} };
 
@@ -530,9 +559,9 @@ function catColor(kind, name){
 }
 
 /* ---------- storage ---------- */
-async function put(col,id,data){ if (mem){ memStore[col][id]=clone(data); persistLocal(); rebuildMem(); return; } await db.collection(col).doc(id).set(data); }
-async function del(col,id){ if (mem){ delete memStore[col][id]; persistLocal(); rebuildMem(); return; } await db.collection(col).doc(id).delete(); }
-async function saveSettings(){ if (mem){ persistLocal(); render(); return; } try { await db.doc("app/settings").set(clone(S.settings)); } catch(e){ reportErr(e); } }
+async function put(col,id,data){ if (mem){ memStore[col][id]=clone(data); persistLocal(); enqueue(col,id,data); rebuildMem(); return; } await db.collection(col).doc(id).set(data); }
+async function del(col,id){ if (mem){ delete memStore[col][id]; persistLocal(); enqueue(col,id,null); rebuildMem(); return; } await db.collection(col).doc(id).delete(); }
+async function saveSettings(){ if (mem){ persistLocal(); enqueue("app","settings",S.settings); render(); return; } try { await db.doc("app/settings").set(clone(S.settings)); } catch(e){ reportErr(e); } }
 function rebuildMem(){
   S.txSingle = Object.entries(memStore.tx).map(([id,d])=>({id,...d}));
   S.txb = {}; for (const [id,d] of Object.entries(memStore.txb)) S.txb[id]=(d&&d.items)||{};
@@ -616,7 +645,7 @@ function render(){
   $("settingsBtn").setAttribute("aria-pressed", String(UI.view==="more"));
   document.querySelectorAll(".tab[data-go]").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.go===(UI.view==="import"?"list":UI.view))));
   document.querySelectorAll("[data-view]").forEach(s=>s.hidden = s.dataset.view!==UI.view);
-  $("banner").innerHTML = (mem && !NATIVE) ? `<div class="notice warn" style="margin-bottom:14px"><span>Speichern ist hier gerade nicht möglich. Öffne die App über deinen Link in Claude, während du angemeldet bist.</span></div>` : "";
+  $("banner").innerHTML = (mem && !LOCAL) ? `<div class="notice warn" style="margin-bottom:14px"><span>Speichern ist hier gerade nicht möglich. Öffne die App über deinen Link in Claude, während du angemeldet bist.</span></div>` : "";
   ({home:renderHome, list:renderList, fix:renderFix, year:renderYear, more:renderMore, import:renderImport})[UI.view]();
   if (!$("sheetBg").hidden) renderSheet();
 }
@@ -816,7 +845,8 @@ function renderMore(){
   setVal("sRate",numStr(st.reserveRate)); setVal("sKUlimit",numStr(st.kuLimit)); setVal("sVat",numStr(st.vatRate));
   setVal("sVors",numStr(st.vorsorge)); setVal("sAbz",numStr(st.abzuege)); setVal("sPartner",numStr(st.partnerZvE));
   $("rulesInfo").textContent = rulesInfoText();
-  $("backupLoadRow").hidden = !NATIVE;
+  $("backupLoadRow").hidden = !LOCAL;
+  renderSyncInfo();
   renderSpaces();
   $("sKU").checked=!!st.kleinunternehmer; $("sSplit").checked=!!st.splitting; $("partnerField").hidden=!st.splitting;
   for (const k of ["ausgabe","betrieb"]) $("catEd-"+k).innerHTML = cats(k).map(n=>`<span class="chip">${esc(n)}<button class="x" data-catdel="${k}|${esc(n)}" aria-label="${esc(n)} entfernen">×</button></span>`).join("")+`<button class="chip" data-catadd="${k}">+ Neu</button>`;
@@ -1327,6 +1357,7 @@ $("v-import").addEventListener("change", e => {
 async function saveBackup(){
   const name = "haushaltsbuch-backup-"+isoToday()+".json";
   const text = JSON.stringify(backupData());
+  if (LOCAL && !NATIVE){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([text],{type:"application/json"})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000); toast("Backup wird heruntergeladen"); return; }
   if (NATIVE){ try { const r = window.AndroidBridge.saveFile(name, text); toast(r ? "Backup in Downloads gespeichert" : "Backup konnte nicht gespeichert werden"); } catch(e){ toast("Backup konnte nicht gespeichert werden"); } return; }
   let dl=null; try { dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null; } catch(e){}
   if (!dl){ toast("Speichern ist in dieser Ansicht nicht möglich"); return; }
@@ -1335,7 +1366,7 @@ async function saveBackup(){
 }
 $("backupFile").addEventListener("change", async e => {
   const f=e.target.files[0]; e.target.value=""; if (!f) return;
-  try { const o=JSON.parse(await f.text()); if (!mem){ toast("Backup laden geht nur in der Handy-App"); return; } loadBackupObj(o); toast("Backup geladen"); UI.view="home"; render(); }
+  try { const o=JSON.parse(await f.text()); if (!mem){ toast("Backup laden geht nur in der Handy-App"); return; } loadBackupObj(o, true); toast("Backup geladen"); UI.view="home"; render(); }
   catch(err){ toast("Diese Datei ist kein gültiges Backup"); }
 });
 
@@ -1346,6 +1377,143 @@ window.hbBack = () => {
   if (UI.view!=="home"){ UI.imp=null; UI.view="home"; render(); window.scrollTo({top:0}); return true; }
   return false;
 };
+
+/* ---------- sync with the Synology ---------- */
+const SYNC = { token:"", rev:0, queue:[], state:"off", last:0, busy:false, skipped:false, setup:false };
+function loadSync(){ try { Object.assign(SYNC, JSON.parse(localStorage.getItem(SYNC_KEY)||"{}")); } catch(e){} SYNC.busy=false; }
+function saveSync(){ try { localStorage.setItem(SYNC_KEY, JSON.stringify({token:SYNC.token, rev:SYNC.rev, queue:SYNC.queue, last:SYNC.last, skipped:SYNC.skipped})); } catch(e){} }
+function enqueue(col,id,data){
+  if (!SERVER || !SYNC.token) return;
+  SYNC.queue = SYNC.queue.filter(o=>!(o.col===col && o.id===id));
+  SYNC.queue.push({col,id,data: data===null ? null : clone(data)});
+  saveSync(); flushSoon();
+}
+let flushTimer=null;
+function flushSoon(ms){ clearTimeout(flushTimer); flushTimer=setTimeout(syncNow, ms===undefined?400:ms); }
+async function api(action, opts={}){
+  const url = SERVER + (SERVER.includes("?")?"&":"?") + "a=" + action + (opts.qs||"");
+  const r = await fetch(url, { method: opts.body ? "POST" : "GET", headers: Object.assign({"Content-Type":"application/json"}, SYNC.token ? {Authorization:"Bearer "+SYNC.token} : {}), body: opts.body ? JSON.stringify(opts.body) : undefined, cache:"no-store" });
+  let j={}; try { j = await r.json(); } catch(e){}
+  if (!r.ok){ const err = new Error(j.error||("HTTP "+r.status)); err.status=r.status; throw err; }
+  return j;
+}
+async function syncNow(){
+  if (!SERVER || !SYNC.token || SYNC.busy) return;
+  SYNC.busy = true;
+  try {
+    if (SYNC.queue.length){
+      const ops = SYNC.queue.slice(0, 400);
+      await api("push", {body:{ops}});
+      SYNC.queue = SYNC.queue.filter(o=>!ops.includes(o)); saveSync();
+    }
+    const res = await api("pull", {qs:"&since="+SYNC.rev});
+    const pending = new Set(SYNC.queue.map(o=>o.col+"/"+o.id));
+    let changed=false;
+    for (const d of res.docs||[]){
+      if (pending.has(d.col+"/"+d.id)) continue;
+      changed=true;
+      if (d.col==="app"){ if (d.id==="settings" && d.data){ const m={...clone(DEFAULT_SETTINGS),...d.data}; m.cats={...clone(DEFAULT_SETTINGS.cats),...(d.data.cats||{})}; S.settings=m; } continue; }
+      if (!memStore[d.col]) continue;
+      if (d.data===null) delete memStore[d.col][d.id]; else memStore[d.col][d.id]=d.data;
+    }
+    SYNC.rev = res.rev || SYNC.rev; SYNC.last = Date.now(); SYNC.state = SYNC.queue.length ? "pending" : "ok"; saveSync();
+    if (changed){ persistLocal(); rebuildMem(); } else renderSyncDot();
+    if (SYNC.queue.length) flushSoon(200);
+  } catch(e){
+    if (e.status===401){ SYNC.token=""; SYNC.state="login"; saveSync(); showLogin(); }
+    else SYNC.state = navigator.onLine===false ? "offline" : "error";
+    renderSyncDot();
+  } finally { SYNC.busy=false; }
+}
+let syncTimers=false;
+function startSync(){
+  renderSyncDot();
+  if (!SYNC.token){ if (!SYNC.skipped) showLogin(); return; }
+  syncNow();
+  if (syncTimers) return; syncTimers=true;
+  setInterval(()=>{ if (document.visibilityState==="visible") syncNow(); }, 5000);
+  document.addEventListener("visibilitychange", ()=>{ if (document.visibilityState==="visible") syncNow(); });
+  window.addEventListener("online", ()=>syncNow());
+}
+function normServer(v){
+  v=(v||"").trim(); if (!v) return "";
+  if (!/^https?:\/\//i.test(v)) v="http://"+v;
+  try { const u=new URL(v); let p=u.pathname.replace(/\/+$/,"");
+    if (!/\.php$/i.test(p)) p = (p ? p : "/haushaltsbuch") + "/api.php";
+    return u.origin + p; } catch(e){ return ""; }
+}
+let loginChecked="";
+async function showLogin(){
+  const bg=$("loginBg"); bg.hidden=false; $("loginErr").textContent="";
+  $("loginUrlRow").hidden = !NATIVE;
+  if (NATIVE && document.activeElement!==$("loginUrl")) $("loginUrl").value = SERVER;
+  loginChecked="";
+  if (!SERVER){ $("loginText").textContent="Gib die Adresse deiner Synology ein und tippe auf „Verbinden“."; $("loginGo").disabled=false; return; }
+  $("loginText").textContent="Verbindung wird geprüft …"; $("loginGo").disabled=true;
+  try { const st = await api("status"); SYNC.setup = !!st.setup; loginChecked=SERVER; }
+  catch(e){ $("loginText").textContent = NATIVE ? "Unter dieser Adresse ist die Synology gerade nicht erreichbar. Prüfe die Adresse oder mach erst einmal ohne Abgleich weiter." : "Die Synology ist gerade nicht erreichbar. Du kannst erst einmal ohne Abgleich weitermachen."; $("loginGo").disabled=false; return; }
+  $("loginGo").disabled=false;
+  $("loginPw2Row").hidden = !SYNC.setup;
+  $("loginTitle").textContent = SYNC.setup ? "Passwort festlegen" : "Mit deiner Synology verbinden";
+  $("loginText").textContent = SYNC.setup
+    ? "Lege ein Passwort für dein Haushaltsbuch fest (mindestens 8 Zeichen). Damit meldest du dich auf jedem Gerät einmal an."
+    : "Gib dein Haushaltsbuch-Passwort ein. Danach siehst du auf diesem Gerät dieselben Daten wie überall.";
+  setTimeout(()=>$("loginPw").focus(), 50);
+}
+async function doLogin(){
+  if (NATIVE){
+    const u=normServer($("loginUrl").value);
+    if (!u){ $("loginErr").textContent="Bitte gib die Adresse deiner Synology ein."; return; }
+    if (u!==SERVER || loginChecked!==SERVER){
+      SERVER=u; $("loginUrl").value=u; try { localStorage.setItem(SERVER_KEY,u); } catch(e){}
+      await showLogin(); if (loginChecked===SERVER && !$("loginPw").value) return;
+      if (loginChecked!==SERVER) return;
+    }
+  }
+  const pw=$("loginPw").value;
+  if (SYNC.setup && pw!==$("loginPw2").value){ $("loginErr").textContent="Die beiden Passwörter sind nicht gleich."; return; }
+  $("loginGo").disabled=true; $("loginErr").textContent="";
+  try {
+    const r = await api(SYNC.setup ? "setup" : "login", {body:{password:pw}});
+    const firstSetup = SYNC.setup;
+    SYNC.token=r.token; SYNC.rev=0; SYNC.skipped=false; SYNC.queue=[];
+    if (firstSetup){ // new server: upload what this device has
+      for (const k of ["tx","txb","fixed","months","debts"]) for (const [id,d] of Object.entries(memStore[k])) SYNC.queue.push({col:k,id,data:d});
+      SYNC.queue.push({col:"app",id:"settings",data:clone(S.settings)});
+    } else { // existing server: this device takes over the server's data
+      for (const k of ["tx","txb","fixed","months","debts"]) memStore[k]={};
+    }
+    saveSync(); $("loginBg").hidden=true; $("loginPw").value=""; $("loginPw2").value="";
+    toast(firstSetup ? "Passwort gespeichert, Daten werden hochgeladen" : "Verbunden");
+    startSync();
+  } catch(e){ $("loginErr").textContent = e.status===403 ? "Falsches Passwort." : (e.message||"Verbindung fehlgeschlagen."); }
+  finally { $("loginGo").disabled=false; }
+}
+$("loginGo").onclick = doLogin;
+["loginPw","loginPw2"].forEach(id=>$(id).addEventListener("keydown", e=>{ if (e.key==="Enter") doLogin(); }));
+$("loginSkip").onclick = ()=>{ SYNC.skipped=true; saveSync(); $("loginBg").hidden=true; renderSyncDot(); toast("Ohne Abgleich – anmelden kannst du dich unter Einstellungen"); };
+function renderSyncDot(){
+  const b=$("settingsBtn"); if (!SYNCABLE){ return; }
+  const col = !SYNC.token ? "var(--faint)" : SYNC.state==="ok" ? "var(--good)" : SYNC.state==="pending" ? "var(--warn)" : "var(--bad)";
+  b.style.boxShadow = `var(--shadow), inset 0 0 0 2px ${col}`;
+  if (UI.view==="more") renderSyncInfo();
+}
+function renderSyncInfo(){
+  $("syncBox").hidden = !SYNCABLE; if (!SYNCABLE) return;
+  const t = SYNC.last ? new Date(SYNC.last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "noch nie";
+  const st = !SYNC.token ? "Nicht angemeldet" : SYNC.state==="ok" ? "Abgeglichen" : SYNC.state==="pending" ? `${SYNC.queue.length} Änderungen warten` : SYNC.state==="offline" ? "Offline – wird nachgeholt" : "Synology nicht erreichbar";
+  $("syncState").textContent = st;
+  $("syncDetail").textContent = SYNC.token ? `Zuletzt abgeglichen: ${t}` : "Melde dich an, um Handy und PC abzugleichen.";
+  $("syncLogout").textContent = SYNC.token ? "Abmelden" : "Anmelden";
+}
+document.addEventListener("click", e=>{
+  if (e.target.closest("#syncNow")){ syncNow().then(()=>{ renderSyncInfo(); toast(SYNC.state==="ok"?"Abgeglichen":"Abgleich gerade nicht möglich"); }); }
+  if (e.target.closest("#syncLogout")){
+    if (!SYNC.token){ showLogin(); return; }
+    const b=e.target.closest("#syncLogout"); if (b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Wirklich abmelden?"; setTimeout(()=>{ b.dataset.armed=""; renderSyncInfo(); },3000); return; }
+    api("logout",{body:{}}).catch(()=>{}); SYNC.token=""; SYNC.queue=[]; SYNC.state="off"; saveSync(); renderSyncInfo(); renderSyncDot();
+  }
+});
 
 /* ---------- boot ---------- */
 const DEMO_FIXED = [
@@ -1360,13 +1528,18 @@ const DEMO_DEBTS = [["steuerschulden","Steuerschulden",30000,"steuerschulden"],[
 render();
 (async () => {
   try { db = window.claude && window.claude.use ? await window.claude.use("db") : null; } catch(e){ db=null; }
-  if (NATIVE){
+  if (LOCAL){
     mem = true; let saved=null;
     try { saved = JSON.parse(localStorage.getItem(LS_KEY)||"null"); } catch(e){}
-    if (saved){ try { loadBackupObj(saved); return; } catch(e){} }
-    DEMO_FIXED.forEach(([id,name,amount,kind],i)=>memStore.fixed[id]={name,amount,kind,order:i});
-    DEMO_DEBTS.forEach(([id,name,start,fixedId])=>memStore.debts[id]={name,start,since:"2026-01",fixedId});
-    persistLocal(); rebuildMem(); return;
+    let ok=false;
+    if (saved){ try { loadBackupObj(saved); ok=true; } catch(e){} }
+    if (!ok){
+      DEMO_FIXED.forEach(([id,name,amount,kind],i)=>memStore.fixed[id]={name,amount,kind,order:i});
+      DEMO_DEBTS.forEach(([id,name,start,fixedId])=>memStore.debts[id]={name,start,since:"2026-01",fixedId});
+      persistLocal(); rebuildMem();
+    }
+    if (SYNCABLE){ loadSync(); startSync(); }
+    return;
   }
   if (!db){
     mem = true;

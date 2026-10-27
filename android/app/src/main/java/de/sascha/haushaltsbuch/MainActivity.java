@@ -25,6 +25,7 @@ public class MainActivity extends Activity {
     private ValueCallback<Uri[]> fileCallback;
 
     @Override
+    @SuppressWarnings("deprecation")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         web = new WebView(this);
@@ -35,6 +36,9 @@ public class MainActivity extends Activity {
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
         s.setAllowFileAccess(true);
+        // the app (a local file) talks to the user's own Synology for syncing
+        s.setAllowUniversalAccessFromFileURLs(true);
+        s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         s.setTextZoom(100);
 
         web.addJavascriptInterface(new Bridge(), "AndroidBridge");
