@@ -11,6 +11,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      HB_DEPLOY_URL: ${{ secrets.HB_DEPLOY_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -30,11 +32,13 @@ jobs:
             printf '<!doctype html><html lang="de"><head><meta charset="utf-8">'
             printf '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
             printf '<meta name="hb-server" content="http://192.168.178.32/haushaltsbuch/api.php">'
+            printf '<meta name="hb-version" content="%s">' "${{ github.run_number }}"
             printf '<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%%}[hidden]{display:none!important}</style>'
             printf '</head><body>'
             cat web/index.html
             printf '</body></html>'
-          } > android/app/src/main/assets/index.html
+          } > app.html
+          cp app.html android/app/src/main/assets/index.html
 
       - name: APK bauen
         working-directory: android
@@ -46,6 +50,15 @@ jobs:
         run: |
           cp android/app/build/outputs/apk/release/app-release.apk Haushaltsbuch.apk
           gh release delete neueste -y --cleanup-tag || true
-          gh release create neueste Haushaltsbuch.apk \
+          gh release create neueste Haushaltsbuch.apk app.html \
             --title "Haushaltsbuch (Build ${{ github.run_number }})" \
             --notes "Neueste Version. Auf dem Handy herunterladen und installieren."
+
+      - name: Neue Version an die Synology schicken (PC und Handy aktualisieren sich dann selbst)
+        if: ${{ env.HB_DEPLOY_URL != '' }}
+        continue-on-error: true
+        env:
+          HB_DEPLOY_KEY: ${{ secrets.HB_DEPLOY_KEY }}
+        run: |
+          curl -fsS --retry 3 -X POST -H "X-Deploy-Key: $HB_DEPLOY_KEY" -H "Content-Type: text/html" \
+            --data-binary @app.html "$HB_DEPLOY_URL?a=deploy"

@@ -537,10 +537,10 @@ function dayLabel(iso){
 function shortDate(iso){ const [,m,d]=iso.split("-"); return Number(d)+". "+MSHORT[Number(m)-1]; }
 const $ = id => document.getElementById(id);
 function newId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
-function toast(text, action){
+function toast(text, action, label, ms){
   $("toastText").textContent = text;
-  const b = $("toastAct"); b.hidden = !action; b.onclick = action ? async () => { $("toast").classList.remove("show"); await action(); } : null;
-  $("toast").classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(()=>$("toast").classList.remove("show"), action ? 5000 : 2000);
+  const b = $("toastAct"); b.hidden = !action; b.textContent = label || "Rückgängig"; b.onclick = action ? async () => { $("toast").classList.remove("show"); await action(); } : null;
+  $("toast").classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(()=>$("toast").classList.remove("show"), ms || (action ? 5000 : 2000));
 }
 function greeting(){ const h=new Date().getHours(); return h<11?"Guten Morgen, Sascha":h<17?"Hallo Sascha":h<22?"Guten Abend, Sascha":"Gute Nacht, Sascha"; }
 
@@ -1390,11 +1390,23 @@ function enqueue(col,id,data){
 }
 let flushTimer=null;
 function flushSoon(ms){ clearTimeout(flushTimer); flushTimer=setTimeout(syncNow, ms===undefined?400:ms); }
+// In the APK requests go through Android itself (AndroidBridge.http), in the browser through fetch
+const httpWaiting = {};
+window.hbHttpDone = (id, status, text) => { const done = httpWaiting[id]; if (done){ delete httpWaiting[id]; done({status, text}); } };
+async function request(url, body){
+  if (NATIVE && window.AndroidBridge.http){
+    const r = await new Promise(res => { const id = newId(); httpWaiting[id] = res; window.AndroidBridge.http(id, body ? "POST" : "GET", url, SYNC.token ? "Bearer "+SYNC.token : "", body ? JSON.stringify(body) : ""); });
+    if (!r.status) throw new Error("Keine Verbindung");
+    return r;
+  }
+  const r = await fetch(url, { method: body ? "POST" : "GET", headers: Object.assign({"Content-Type":"application/json"}, SYNC.token ? {Authorization:"Bearer "+SYNC.token} : {}), body: body ? JSON.stringify(body) : undefined, cache:"no-store" });
+  return {status: r.status, text: await r.text()};
+}
 async function api(action, opts={}){
   const url = SERVER + (SERVER.includes("?")?"&":"?") + "a=" + action + (opts.qs||"");
-  const r = await fetch(url, { method: opts.body ? "POST" : "GET", headers: Object.assign({"Content-Type":"application/json"}, SYNC.token ? {Authorization:"Bearer "+SYNC.token} : {}), body: opts.body ? JSON.stringify(opts.body) : undefined, cache:"no-store" });
-  let j={}; try { j = await r.json(); } catch(e){}
-  if (!r.ok){ const err = new Error(j.error||("HTTP "+r.status)); err.status=r.status; throw err; }
+  const r = await request(url, opts.body);
+  let j={}; try { j = JSON.parse(r.text); } catch(e){}
+  if (r.status < 200 || r.status >= 300){ const err = new Error(j.error||("HTTP "+r.status)); err.status=r.status; throw err; }
   return j;
 }
 async function syncNow(){
@@ -1419,11 +1431,31 @@ async function syncNow(){
     SYNC.rev = res.rev || SYNC.rev; SYNC.last = Date.now(); SYNC.state = SYNC.queue.length ? "pending" : "ok"; saveSync();
     if (changed){ persistLocal(); rebuildMem(); } else renderSyncDot();
     if (SYNC.queue.length) flushSoon(200);
+    checkUpdate();
   } catch(e){
     if (e.status===401){ SYNC.token=""; SYNC.state="login"; saveSync(); showLogin(); }
     else SYNC.state = navigator.onLine===false ? "offline" : "error";
     renderSyncDot();
   } finally { SYNC.busy=false; }
+}
+/* ---------- automatic updates (new versions are delivered through the Synology) ---------- */
+const HB_VERSION = +((document.querySelector('meta[name="hb-version"]')||{}).content||0);
+let updLast=0, updSeen=0;
+async function checkUpdate(force){
+  if (!SERVER || !HB_VERSION) return;
+  if (!force && Date.now()-updLast < 10*60*1000) return; updLast=Date.now();
+  try {
+    const v = (await api("version")).version|0;
+    if (v <= HB_VERSION || v <= updSeen) return;
+    if (NATIVE){
+      if (!window.AndroidBridge.saveApp) return; // older APK without self-update
+      const r = await request(SERVER + (SERVER.includes("?")?"&":"?") + "a=app");
+      if (r.status !== 200 || !window.AndroidBridge.saveApp(r.text)) return;
+    }
+    updSeen = v;
+    const go = () => { if (NATIVE) window.AndroidBridge.reloadApp(); else location.reload(); };
+    toast("Neue Version ist da – wird beim nächsten Start aktiv", go, "Jetzt laden", 15000);
+  } catch(e){}
 }
 let syncTimers=false;
 function startSync(){

@@ -11,11 +11,17 @@
  *   GET  api.php?a=pull&since=N        -> {rev, docs:[{col,id,data,rev}]}   (Authorization: Bearer <token>)
  *   POST api.php?a=push   {ops:[{col,id,data}]} -> {rev}                    (data null = löschen)
  *   POST api.php?a=logout
+ *
+ *   App-Updates (neue Versionen kommen über die Synology auf PC und Handy):
+ *   GET  api.php?a=version             -> {version}
+ *   GET  api.php?a=app[&web=1]         -> die aktuelle App (HTML)
+ *   POST api.php?a=deploy  (X-Deploy-Key, Body = HTML)  -> {version}   (nur der GitHub-Build)
  */
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Authorization, Content-Type');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Private-Network: true');
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
@@ -23,6 +29,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204);
 
 // Datenordner mit zufälligem Namen, damit die Datenbank-Datei nicht erraten und heruntergeladen werden kann.
 const DATA_DIR = __DIR__ . '/data-__DATA_SUFFIX__';
+const DEPLOY_HASH = '__DEPLOY_HASH__';
 const ALLOWED_COLS = ['tx', 'txb', 'fixed', 'months', 'debts', 'app'];
 
 function out($data, int $code = 200): void {
@@ -78,6 +85,11 @@ function requireAuth(): void {
     $s->execute([time(), hash('sha256', strtolower($m[1]))]);
     if ($s->rowCount() !== 1) fail('Nicht angemeldet', 401);
 }
+function appVersion(string $html): int {
+    return preg_match('/name="hb-version" content="(\d+)"/', $html, $m) ? (int)$m[1] : 0;
+}
+function appFile(): string { return DATA_DIR . '/app.html'; }
+function currentApp(): string { return is_file(appFile()) ? (string)file_get_contents(appFile()) : ''; }
 function checkPassword(string $pw): bool {
     $hash = meta('password');
     return $hash !== null && password_verify($pw, $hash);
@@ -85,6 +97,35 @@ function checkPassword(string $pw): bool {
 
 try {
     $a = $_GET['a'] ?? '';
+
+    if ($a === 'version') { db(); out(['version' => appVersion(currentApp())]); }
+
+    if ($a === 'app') {
+        db();
+        $html = currentApp();
+        if ($html === '') fail('Noch keine App-Version hochgeladen', 404);
+        if (!empty($_GET['web'])) { // web copy on the NAS: sync with this server, installable on the PC
+            $html = preg_replace('/<meta name="hb-server" content="[^"]*">/', '<meta name="hb-server" content="api.php">', $html, 1);
+            $html = preg_replace('/<meta charset="utf-8">/', '<meta charset="utf-8"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#147A5B">', $html, 1);
+        }
+        header('Content-Type: text/html; charset=utf-8');
+        echo $html;
+        exit;
+    }
+
+    if ($a === 'deploy') {
+        $key = (string)($_SERVER['HTTP_X_DEPLOY_KEY'] ?? '');
+        if ($key === '' || !hash_equals(DEPLOY_HASH, hash('sha256', $key))) { sleep(2); fail('Nicht erlaubt', 403); }
+        $html = (string)file_get_contents('php://input');
+        $v = appVersion($html);
+        if (strlen($html) > 5000000 || strpos($html, 'id="loginBg"') === false || $v < 1) fail('Das ist keine gültige App-Version', 400);
+        db();
+        $cur = appVersion(currentApp());
+        if ($v <= $cur) out(['version' => $cur, 'unchanged' => true]);
+        $tmp = appFile() . '.tmp';
+        if (file_put_contents($tmp, $html) === false || !rename($tmp, appFile())) fail('App-Version konnte nicht gespeichert werden', 500);
+        out(['version' => $v]);
+    }
 
     if ($a === 'status') out(['setup' => meta('password') === null, 'rev' => (int)(meta('rev') ?? 0)]);
 
