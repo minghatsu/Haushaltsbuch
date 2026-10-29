@@ -481,7 +481,7 @@ const DEFAULT_SETTINGS = {
   cats: {
     ausgabe: ["Haushalt & Pflichten","Spaß & Freizeit","Tanken & Parken","Bargeldabhebung"],
     betrieb: ["Bürostuff","Sonstiges"],
-    einnahme: [{name:"ALG1", art:"lohnersatz"},{name:"Produktion", art:"selbst"},{name:"Sonstige Einnahme", art:"sonstige"}]
+    einnahme: [{name:"ALG1", art:"lohnersatz"},{name:"Produktion", art:"selbst"},{name:"Sonstige Einnahme", art:"sonstige"},{name:"Erstattungen & Sonstiges", art:"sonstige"}]
   }
 };
 const KIND_LABEL = {ausgabe:"Ausgabe", betrieb:"Betrieblich", einnahme:"Einnahme", vorauszahlung:"Steuer-Vorauszahlung"};
@@ -1269,6 +1269,7 @@ function catByWord(kind, word){ return cats(kind).find(c=>c.toLowerCase().includ
 function suggest(r){
   const text = nrm(r.payee+" "+r.ref+" "+r.type), payee = nrm(r.payee);
   for (const rule of (S.settings.rules||[])){
+    if (r.amount>0 && String(rule.target).startsWith("fix|")) continue; // money coming in is never a paid fixed cost
     if (rule.match && (payee===rule.match || (rule.match.length>=4 && text.includes(rule.match)))) { if (validTarget(rule.target)) return {target:rule.target, sure:true, learned:true}; }
   }
   if (r.amount<0){
@@ -1282,12 +1283,14 @@ function suggest(r){
     return {target:"ausgabe|"+(cats("ausgabe")[0]||""), sure:false};
   }
   if (/bundesagentur|arbeitsagentur|agentur für arbeit|agentur fuer arbeit/.test(text)){ const c=incCats().find(c=>c.art==="lohnersatz"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
-  if (/\bn26\b|\bspaces?\b/.test(text)) return {target:"skip|", sure:false};
-  if (/erstattung|rückerstattung|rueckerstattung|refund|gutschrift|storno|rückbuchung|rueckbuchung/.test(text)) return {target:"skip|", sure:false};
+  if (/\bspaces?\b/.test(text)) return {target:"skip|", sure:false};
+  // money that really comes in, but is no earned income: refunds, cashback, N26 instalment credits, sold shares/crypto, cash deposits
+  if (/erstattung|rückerstattung|rueckerstattung|refund|gutschrift|storno|rückbuchung|rueckbuchung|cashback|reward|ratenzahlung|equities|bitpanda|crypto|cash26|bareinzahlung|\bn26\b/.test(text)){ const c=refundCat(); if (c) return {target:"einnahme|"+c.name, sure:true}; }
   if (/\b(lohn|gehalt|salary|entgelt|bezüge|bezuege)\b/.test(text)){ const c=incCats().find(c=>c.art!=="selbst"&&c.art!=="lohnersatz")||incCats()[0]; if (c) return {target:"einnahme|"+c.name, sure:false}; }
   const other = incCats().find(c=>/sonstig/i.test(c.name)) || incCats().find(c=>c.art==="selbst") || incCats()[0];
   return other ? {target:"einnahme|"+other.name, sure:false} : {target:"skip|", sure:false};
 }
+function refundCat(){ return incCats().find(c=>/erstatt/i.test(c.name)) || incCats().find(c=>/sonstig/i.test(c.name)) || null; }
 function validTarget(t){
   const [k,v]=String(t||"").split("|");
   if (k==="skip"||k==="vz") return true;
@@ -1301,7 +1304,7 @@ function targetOptions(sel, positive){
   const grp=(label, items)=> items.length?`<optgroup label="${esc(label)}">${items.join("")}</optgroup>`:"";
   const inc = grp("Einnahme", incCats().map(c=>o("einnahme|"+c.name, c.name)));
   const out = grp("Ausgabe privat", cats("ausgabe").map(c=>o("ausgabe|"+c, c)))
-    + grp("Fixkosten abhaken", fixedSorted().map(f=>o("fix|"+f.id, f.name+" ("+eur(f.amount)+")")))
+    + (positive ? "" : grp("Fixkosten abhaken", fixedSorted().map(f=>o("fix|"+f.id, f.name+" ("+eur(f.amount)+")"))))
     + grp("Ausgabe betrieblich", cats("betrieb").map(c=>o("betrieb|"+c, c)))
     + grp("Sonstiges", [o("vz|","Steuer-Vorauszahlung")]);
   return (positive ? inc+out : out+inc) + o("skip|","Nicht übernehmen");
