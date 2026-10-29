@@ -692,8 +692,9 @@ function monthCalc(ym){
 function startBal(y){ const v=S.settings.startBalance && S.settings.startBalance[String(y)]; return Number(v)||0; }
 function yearCum(ym){
   const [y,m]=ymParts(ym); let bal=startBal(y), rin=0, rout=0;
-  for (let i=1;i<=m;i++){ const c=monthCalc(y+"-"+pad(i)); bal+=c.net; rin+=c.reserve; rout+=c.vz; }
-  return { balance:bal, reserveIn:rin, reserveOut:rout, reserveBal:Math.max(0,rin-rout) };
+  let out=0;
+  for (let i=1;i<=m;i++){ const c=monthCalc(y+"-"+pad(i)); bal+=c.net; rin+=c.reserve; rout+=c.vz; out+=c.expenses; }
+  return { balance:bal, outSum:out, reserveIn:rin, reserveOut:rout, reserveBal:Math.max(0,rin-rout) };
 }
 function debtState(d){
   let paid=0;
@@ -771,12 +772,13 @@ function renderHome(){
   $("v-home").innerHTML = `
     ${needStart?`<div class="notice info"><span>Trag einmal deinen Kontostand vom 1.1.${y} ein, dann stimmt die Rechnung.</span><button class="btn primary" data-go="more">Eintragen</button></div>`:""}
     <div class="cols"><div class="col">
-    <div class="hero ${free<0?"minus":""}" style="order:1">
-      <div class="eyebrow">Frei verfügbar · ${esc(MONTHS[ymParts(ym)[1]-1])}</div>
-      <div class="big">${esc(eur(free))}</div>
-      ${days?`<span class="chip-day">${ic("spark",16)} ${esc(eur(free/days))} pro Tag · ${esc(dayNote)}</span>`:`<span class="chip-day">Stand am Monatsende</span>`}
+    <div class="hero ${cum.balance<0?"minus":""}" style="order:1">
+      <div class="eyebrow">Kontostand · ${ym===cur?"heute":ym<cur?"Ende "+esc(MONTHS[ymParts(ym)[1]-1]):"voraussichtlich Ende "+esc(MONTHS[ymParts(ym)[1]-1])}</div>
+      <div class="big">${esc(eur(cum.balance))}</div>
+      ${(c.fixOpen||cum.reserveBal) && ym>=cur ? `<span class="chip-day">${ic("spark",16)} Frei nach offenen Fixkosten${cum.reserveBal?" und Rücklage":""}: ${esc(eur(free))}${days&&free>0?` · ${esc(eur(free/days))} pro Tag`:""}</span>` : (days?`<span class="chip-day">${ic("spark",16)} ${esc(eur(cum.balance/days))} pro Tag · ${esc(dayNote)}</span>`:"")}
       <details id="heroDetails" ${UI.heroOpen?"open":""}><summary>So berechnet ${ic("chevron",16)}</summary>
-        <div class="eq"><span>Kontostand</span><span>${esc(eur(cum.balance))}</span><span>− Rücklage für Steuern</span><span>${esc(eur(cum.reserveBal))}</span><span>− Fixkosten noch offen</span><span>${esc(eur(c.fixOpen))}</span></div>
+        <div class="eq"><span>Kontostand 1.1.${esc(y)}</span><span>${esc(eur(startBal(y)))}</span><span>+ Einnahmen bis ${ym===cur?"heute":"Monatsende"}</span><span>${esc(eur(cum.balance-startBal(y)+cum.outSum))}</span><span>− Ausgaben bis ${ym===cur?"heute":"Monatsende"}</span><span>${esc(eur(cum.outSum))}</span><span>= Kontostand</span><span>${esc(eur(cum.balance))}</span>
+        ${ym>=cur?`<span>− Fixkosten noch offen (${c.openCount})</span><span>${esc(eur(c.fixOpen))}</span>${cum.reserveBal?`<span>− Rücklage für Steuern</span><span>${esc(eur(cum.reserveBal))}</span>`:""}<span>= Frei verfügbar</span><span>${esc(eur(free))}</span>`:""}</div>
       </details>
     </div>
     <div class="quick" style="order:2">
