@@ -1,4 +1,4 @@
-name: APK bauen
+name: Apps bauen (Android + Windows)
 
 on:
   push:
@@ -7,52 +7,134 @@ on:
 
 permissions:
   contents: write
-  id-token: write   # signiertes GitHub-Token, mit dem die Synology neue Versionen annimmt
 
 jobs:
-  build:
+  web:
+    name: Web-App zusammenstellen
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
-
-      - name: Web-App in die APK packen
+      - name: app.html bauen
         run: |
-          mkdir -p android/app/src/main/assets
           {
             printf '<!doctype html><html lang="de"><head><meta charset="utf-8">'
             printf '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
             printf '<meta name="hb-server" content="http://192.168.178.32/haushaltsbuch/api.php">'
             printf '<meta name="hb-version" content="%s">' "${{ github.run_number }}"
+            printf '<title>Haushaltsbuch</title>'
             printf '<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%%}[hidden]{display:none!important}</style>'
             printf '</head><body>'
             cat web/index.html
             printf '</body></html>'
           } > app.html
-          cp app.html android/app/src/main/assets/index.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-html
+          path: app.html
 
+  android:
+    name: Android-App (APK)
+    needs: web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-html
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
       - name: APK bauen
-        working-directory: android
-        run: gradle assembleRelease --no-daemon
+        run: |
+          mkdir -p android/app/src/main/assets
+          cp app.html android/app/src/main/assets/index.html
+          cd android && gradle assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk ../Haushaltsbuch.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: Haushaltsbuch.apk
 
-      - name: APK als Download bereitstellen
+  windows-test:
+    name: Windows-App testen (Start + Abgleich)
+    needs: web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-html
+          path: desktop
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Testumgebung
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb php-cli php-sqlite3 >/dev/null
+      - name: Test-Synology starten
+        run: |
+          mkdir -p /tmp/srv/haushaltsbuch
+          sed 's/__DATA_SUFFIX__/test/' server/api.php > /tmp/srv/haushaltsbuch/api.php
+          (cd /tmp/srv && nohup php -S 127.0.0.1:8099 >/tmp/php.log 2>&1 &)
+          sleep 1
+          curl -fsS "http://127.0.0.1:8099/haushaltsbuch/api.php?a=status"
+      - name: App starten und prüfen
+        working-directory: desktop
+        env:
+          SMOKE_SERVER: http://127.0.0.1:8099/haushaltsbuch/api.php
+        run: |
+          npm install --no-audit --no-fund
+          xvfb-run -a npm run smoke
+
+  windows:
+    name: Windows-App (Installer)
+    needs: web
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-html
+          path: desktop
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Installer bauen
+        working-directory: desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          npm install --no-audit --no-fund
+          npm run dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: desktop/dist/Haushaltsbuch-Setup.exe
+
+  release:
+    name: Veröffentlichen
+    needs: [android, windows, windows-test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write   # signiertes GitHub-Token, mit dem die Synology neue Versionen annimmt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - name: Downloads bereitstellen
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp android/app/build/outputs/apk/release/app-release.apk Haushaltsbuch.apk
+          ls -la
           gh release delete neueste -y --cleanup-tag || true
-          gh release create neueste Haushaltsbuch.apk app.html \
+          gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html \
             --title "Haushaltsbuch (Build ${{ github.run_number }})" \
-            --notes "Neueste Version. Auf dem Handy herunterladen und installieren."
-
+            --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen."
       - name: Neue Version an die Synology schicken (PC und Handy aktualisieren sich dann selbst)
         continue-on-error: true
         env:
