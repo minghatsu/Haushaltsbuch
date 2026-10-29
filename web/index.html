@@ -643,12 +643,26 @@ async function put(col,id,data){ if (mem){ memStore[col][id]=clone(data); persis
 async function del(col,id){ if (mem){ delete memStore[col][id]; persistLocal(); enqueue(col,id,null); rebuildMem(); return; } await db.collection(col).doc(id).delete(); }
 async function saveSettings(){ if (mem){ persistLocal(); enqueue("app","settings",S.settings); render(); return; } try { await db.doc("app/settings").set(clone(S.settings)); } catch(e){ reportErr(e); } }
 let migrating=false;
+const SELF_KEYS = ["kq4rvnm1q", "k1hjxxkv1i", "k16qwhxn1b", "k43eyen1d", "k14vux5o1u", "k8569lg1b", "k10r8mgd1r", "k3nfzsk1b", "k1nf4o991n", "k170l0kz1d", "kw7lynt18", "kwa7ovx1t", "k6wzukm1r", "k9bb3t71r", "kkgnvr41r", "kohkb1318", "k1acmnxd1h", "k16h99wa1e", "kl2evjg1r", "k1w4gghj18", "klbtkj41r", "kr9kbip18", "kub6sxy1f", "kp7c4as27", "kd456g326", "k1tpxnwh1r"];
 async function runMigrations(){
   if (!mem || migrating) return;
   if (!S.settings.migHauptkonto){
     S.settings.migHauptkonto=1;
     if (!(S.settings.accountAnchors||{}).Hauptkonto) S.settings.accountAnchors={...(S.settings.accountAnchors||{}), Hauptkonto:{date:"2026-10-29", balance:123}};
     await saveSettings();
+  }
+  if (!S.settings.migSelbst){
+    const keys=new Set(SELF_KEYS), sc=incCats().find(c=>c.art==="selbst"), vat=(Number(S.settings.vatRate)||0)/100;
+    const hits=S.tx.filter(x=>x.kind==="einnahme" && keys.has(x.importKey) && sc && x.cat!==sc.name);
+    if (sc){
+      migrating=true;
+      try {
+        const byB={};
+        for (const x of hits){ const doc=plainTx(x); doc.cat=sc.name; if (!S.settings.kleinunternehmer) doc.net=Math.round(x.amount/(1+vat)*100)/100; if (x._b) (byB[x._b]=byB[x._b]||{})[x.id]=doc; else await put("tx", x.id, doc); }
+        for (const [b,docs] of Object.entries(byB)){ const items=clone(S.txb[b]||{}); Object.assign(items, docs); await put("txb", b, {items}); }
+        S.settings.migSelbst=1; await saveSettings();
+      } catch(e){ console.error(e); } finally { migrating=false; }
+    }
   }
   const t = S.tx.find(x=>x.importKey==="k1uhc12s2g" && x.kind==="vorauszahlung" && Math.abs(x.amount-25101)<0.01);
   if (!t) return;
@@ -703,7 +717,7 @@ function monthCalc(ym){
   const by = k => tx.filter(t=>t.kind===k);
   const inc = by("einnahme");
   const income = sum(inc,t=>t.amount);
-  const selfInc = sum(inc.filter(t=>incArt(t.cat)==="selbst"),t=>t.amount);
+  const selfInc = sum(inc.filter(t=>incArt(t.cat)==="selbst"),t=>t.net!=null?Number(t.net)||0:t.amount);
   const ersatz = sum(inc.filter(t=>incArt(t.cat)==="lohnersatz"),t=>t.amount);
   const aus = sum(by("ausgabe"),t=>t.amount), bet = sum(by("betrieb"),t=>t.amount), vz = sum(by("vorauszahlung"),t=>t.amount);
   const paid = (S.months[ym] && S.months[ym].paid) || {};
@@ -1317,6 +1331,7 @@ function suggest(r){
     for (const [re,kind,word] of KW){ if (re.test(text)){ const c=catByWord(kind,word); if (c) return {target:kind+"|"+c, sure:true}; } }
     return {target:"ausgabe|"+(cats("ausgabe")[0]||""), sure:false};
   }
+  if (/(^|\D)\d{2,4}\s?[\/\-]\s?20\d\d(\D|$)|(^|\D)\d{3} 20\d\d(\D|$)/.test(nrm(r.ref))){ const c=incCats().find(c=>c.art==="selbst"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
   if (/bundesagentur|arbeitsagentur|agentur für arbeit|agentur fuer arbeit/.test(text)){ const c=incCats().find(c=>c.art==="lohnersatz"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
   if (/\bspaces?\b/.test(text)) return {target:"skip|", sure:false};
   // money that really comes in, but is no earned income: refunds, cashback, N26 instalment credits, sold shares/crypto, cash deposits
@@ -1490,7 +1505,7 @@ function renderImport(){
       <div class="card-head"><h2>Buchungen prüfen</h2><span class="small muted">${fresh.length} neu</span></div>
       ${fresh.some(i=>i.payee)?`<label class="rem" style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;padding:10px 12px;margin-bottom:6px;background:var(--sunk);border-radius:12px;cursor:pointer"><input type="checkbox" id="impAll" data-impall="1" style="width:19px;height:19px;accent-color:var(--accent)" ${fresh.filter(i=>i.payee).every(i=>i.remember)?"checked":""}>Alle markieren <span class="small muted" style="font-weight:600">(alle Empfänger merken)</span></label>`:""}
       ${fresh.length ? fresh.map(it=>{ const idx=imp.items.indexOf(it), pos=it.amount>0;
-        const selfNote = it.target.startsWith("einnahme|") && incArt(it.target.slice(9))==="selbst" && !S.settings.kleinunternehmer ? `<span class="small muted">wird netto gespeichert: ${esc(eur(it.amount/(1+vat)))}</span>` : "";
+        const selfNote = it.target.startsWith("einnahme|") && incArt(it.target.slice(9))==="selbst" && !S.settings.kleinunternehmer ? `<span class="small muted">davon netto: ${esc(eur(it.amount/(1+vat)))}</span>` : "";
         return `<div class="imp" data-imp="${idx}"><div style="min-width:0"><div class="who">${esc(it.payee||it.ref||"Ohne Namen")}</div><div class="ref">${esc(shortDate(it.date))}${it.ref&&it.payee?" · "+esc(it.ref):""}</div></div>
           <div class="amt ${pos?"inc":""}" style="text-align:right">${pos?"+":"−"} ${esc(eur(Math.abs(it.amount)))}</div>
           <div class="ctl"><select class="in" id="imp-${idx}" data-imptarget="${idx}" aria-label="Zuordnung" style="${it.sure?"":"border-color:var(--warn)"}">${targetOptions(it.target,pos)}</select>
@@ -1524,8 +1539,8 @@ async function commitImport(){
       m.paidKeys[v]=it.key; m.importKeys=[...(m.importKeys||[]), it.key]; m._fresh[v]=true; nFix++;
     } else {
       let amount=Math.abs(it.amount), note=(it.payee||"").trim().slice(0,80);
-      if (k==="einnahme" && incArt(v)==="selbst" && !S.settings.kleinunternehmer){ amount=amount/(1+vat); note=(note?note+" · ":"")+"brutto "+eur(Math.abs(it.amount)); }
       const doc={ date:it.date, amount:Math.round(amount*100)/100, kind:k==="vz"?"vorauszahlung":k, cat:k==="vz"?"Steuer-Vorauszahlung":v, note, ts:Date.now(), importKey:it.key, source:"n26" };
+      if (k==="einnahme" && incArt(v)==="selbst" && !S.settings.kleinunternehmer) doc.net=Math.round(amount/(1+vat)*100)/100; // invoice incl. VAT: the balance counts it all, taxes use the net amount
       (bundles[ym]=bundles[ym]||{})[newId()+nTx.toString(36)]=doc; nTx++;
     }
   }
