@@ -90,6 +90,8 @@ main{padding-block:6px 120px}
 .hero .big{font-family:var(--f-display);font-weight:800;font-size:clamp(38px,11vw,52px);line-height:1;margin:8px 0 12px;letter-spacing:-.035em}
 .hero .chip-day{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);border-radius:999px;padding:6px 12px;font-weight:700;font-size:13.5px}
 .hero details{margin-top:14px;position:relative;z-index:1}
+.hero .acctline{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-size:13.5px;position:relative;z-index:1}
+.hero .acctline span{opacity:.9}.hero .acctline b{opacity:1;font-weight:800}
 .hero summary{cursor:pointer;font-size:13px;font-weight:700;opacity:.9;list-style:none;display:inline-flex;align-items:center;gap:4px}
 .hero summary::-webkit-details-marker{display:none}
 .hero details[open] summary svg{transform:rotate(180deg)}
@@ -170,6 +172,7 @@ main{padding-block:6px 120px}
 .fx .fxamt:hover{background:var(--surface);border-bottom-color:var(--faint)}
 .fx .check{padding:0;background:none}
 .fx .fxamt-in{width:110px;padding:7px 10px;text-align:right;font-weight:800}
+.edit-row.acct-row{grid-template-columns:minmax(0,1fr) 150px}
 .mchips{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 8px}
 .mchip{border:0;background:var(--sunk);border-radius:999px;padding:6px 11px;font-weight:700;font-size:12.5px;color:var(--muted)}
 .mchip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
@@ -405,6 +408,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="field"><label>Ausgaben privat</label><div class="chips" id="catEd-ausgabe"></div></div>
       <div class="field"><label>Ausgaben betrieblich</label><div class="chips" id="catEd-betrieb"></div></div>
       <div class="field"><label>Einnahmen</label><div id="catEd-einnahme"></div></div>
+      <div class="section-title">Konten</div>
+      <div class="field"><span class="small muted" style="margin-top:-2px">Trag einmal ein, was heute auf einem Konto ist. Die App rechnet den Stand für jeden Monat aus deinen importierten Kontoauszügen aus.</span><div id="acctEd"></div></div>
       <div class="section-title">Import</div>
       <div class="field"><label>Meine Spaces und eigenen Konten</label><span class="small muted" style="margin-top:-2px">Geld zwischen diesen Konten ist eine Umbuchung, keine Einnahme oder Ausgabe.</span><div class="chips" id="spaceEd"></div><div id="spaceClean"></div></div>
       <div id="syncBox" hidden>
@@ -568,15 +573,17 @@ function backupData(){
 }
 function loadBackupObj(o, fromFile){
   if (!o || o.version!==1 || typeof o.fixed!=="object") throw new Error("bad");
-  for (const k of ["tx","txb","fixed","months","debts"]) memStore[k]=clone(o[k]||{});
+  for (const k of ["tx","txb","fixed","months","debts","acct"]) memStore[k]=clone(o[k]||{});
   const m={...clone(DEFAULT_SETTINGS),...clone(o.settings||{})}; m.cats={...clone(DEFAULT_SETTINGS.cats),...((o.settings&&o.settings.cats)||{})};
   S.settings=m; persistLocal(); rebuildMem();
   if (fromFile && SYNC.token){ // push everything from the backup to the server
     for (const k of ["tx","txb","fixed","months","debts"]) for (const [id,d] of Object.entries(memStore[k])) SYNC.queue.push({col:k,id,data:d});
+    for (const [id,d] of Object.entries(memStore.acct)) SYNC.queue.push({col:"app",id:"acct-"+id,data:d});
     SYNC.queue.push({col:"app",id:"settings",data:clone(S.settings)}); saveSync(); flushSoon(0);
   }
 }
-const memStore = { tx:{}, txb:{}, fixed:{}, months:{}, debts:{} };
+// acct: per-account movements from the bank export (incl. transfers between spaces), one doc per month: {rows:{key:[account, amount, date]}}
+const memStore = { tx:{}, txb:{}, fixed:{}, months:{}, debts:{}, acct:{} };
 
 /* ---------- helpers ---------- */
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
@@ -782,6 +789,9 @@ function renderHome(){
   const fx = fixedForMonth(ym).length, fxDone = fx - c.openCount;
   const debtsTotal = sum(S.debts, d=>debtState(d).remaining);
   const incW = c.income+c.expenses>0 ? c.income/(c.income+c.expenses)*100 : 50;
+  const asOf = ym===cur ? isoOf(new Date()) : lastDayOf(ym);
+  const anchored = ym<=cur ? accountNames().filter(n=>(S.settings.accountAnchors||{})[n]) : [];
+  const acctLine = anchored.length ? `<div class="acctline">${anchored.map(n=>`<span>${esc(n)} <b>${esc(eur(accountBalance(n,asOf)))}</b></span>`).join("")}</div>` : "";
 
   $("v-home").innerHTML = `
     ${needStart?`<div class="notice info"><span>Trag einmal deinen Kontostand vom 1.1.${y} ein, dann stimmt die Rechnung.</span><button class="btn primary" data-go="more">Eintragen</button></div>`:""}
@@ -790,6 +800,7 @@ function renderHome(){
       <div class="eyebrow">Kontostand · ${ym===cur?"heute":ym<cur?"Ende "+esc(MONTHS[ymParts(ym)[1]-1]):"voraussichtlich Ende "+esc(MONTHS[ymParts(ym)[1]-1])}</div>
       <div class="big">${esc(eur(cum.balance))}</div>
       ${(c.fixOpen||cum.reserveBal) && ym>=cur ? `<span class="chip-day">${ic("spark",16)} Frei nach offenen Fixkosten${cum.reserveBal?" und Rücklage":""}: ${esc(eur(free))}${days&&free>0?` · ${esc(eur(free/days))} pro Tag`:""}</span>` : (days?`<span class="chip-day">${ic("spark",16)} ${esc(eur(cum.balance/days))} pro Tag · ${esc(dayNote)}</span>`:"")}
+      ${acctLine}
       <details id="heroDetails" ${UI.heroOpen?"open":""}><summary>So berechnet ${ic("chevron",16)}</summary>
         <div class="eq"><span>Kontostand 1.1.${esc(y)}</span><span>${esc(eur(startBal(y)))}</span><span>+ Einnahmen bis ${ym===cur?"heute":"Monatsende"}</span><span>${esc(eur(cum.balance-startBal(y)+cum.outSum))}</span><span>− Ausgaben bis ${ym===cur?"heute":"Monatsende"}</span><span>${esc(eur(cum.outSum))}</span><span>= Kontostand</span><span>${esc(eur(cum.balance))}</span>
         ${ym>=cur&&(c.fixOpen||cum.reserveBal)?`<span>− Fixkosten noch offen (${c.openCount})</span><span>${esc(eur(c.fixOpen))}</span>${cum.reserveBal?`<span>− Rücklage für Steuern</span><span>${esc(eur(cum.reserveBal))}</span>`:""}<span>= Frei verfügbar</span><span>${esc(eur(free))}</span>`:""}</div>
@@ -963,6 +974,7 @@ function renderMore(){
   $("backupLoadRow").hidden = !LOCAL;
   renderSyncInfo();
   renderSpaces();
+  renderAccounts();
   $("sKU").checked=!!st.kleinunternehmer; $("sSplit").checked=!!st.splitting; $("partnerField").hidden=!st.splitting;
   for (const k of ["ausgabe","betrieb"]) $("catEd-"+k).innerHTML = cats(k).map(n=>`<span class="chip">${esc(n)}<button class="x" data-catdel="${k}|${esc(n)}" aria-label="${esc(n)} entfernen">×</button></span>`).join("")+`<button class="chip" data-catadd="${k}">+ Neu</button>`;
   $("catEd-einnahme").innerHTML = incCats().map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:5px 0"><b style="flex:1">${esc(c.name)}</b><select class="in" style="width:auto" data-incart="${esc(c.name)}" aria-label="Art von ${esc(c.name)}"><option value="selbst" ${c.art==="selbst"?"selected":""}>Selbstständig</option><option value="lohnersatz" ${c.art==="lohnersatz"?"selected":""}>Lohnersatz (ALG1)</option><option value="sonstige" ${c.art==="sonstige"?"selected":""}>Sonstige</option></select><button class="icon-btn" data-catdel="einnahme|${esc(c.name)}" aria-label="${esc(c.name)} entfernen">×</button></div>`).join("")+`<button class="chip" data-catadd="einnahme" style="margin-top:6px">+ Neu</button>`;
@@ -1341,8 +1353,51 @@ async function loadCsv(file){
   if (map.account===map.payee) map.account=-1;
   UI.imp = { fileName:file.name, headers, raw: rows.slice(hi+1, hi+1+2000), map, items:null };
   buildItems();
+  recordAccounts(UI.imp.items);
   UI.view="import"; render(); window.scrollTo({top:0});
 }
+/* ---------- balances per account (Hauptkonto, Spaces) ---------- */
+function recordAccounts(items){
+  if (!mem || !items || !items.some(it=>it.acct)) return;
+  const byMonth={};
+  for (const it of items){ if (!it.acct) continue; (byMonth[it.date.slice(0,7)]=byMonth[it.date.slice(0,7)]||[]).push(it); }
+  for (const [ym,list] of Object.entries(byMonth)){
+    const doc=clone(memStore.acct[ym]||{rows:{}}); doc.rows=doc.rows||{}; let changed=false;
+    for (const it of list){ const v=[it.acct, Math.round(it.amount*100)/100, it.date]; const o=doc.rows[it.key]; if (!o || o[0]!==v[0] || o[1]!==v[1] || o[2]!==v[2]){ doc.rows[it.key]=v; changed=true; } }
+    if (changed){ memStore.acct[ym]=doc; enqueue("app","acct-"+ym,doc); }
+  }
+  persistLocal();
+}
+function accountNames(){
+  const n=new Set(); for (const d of Object.values(memStore.acct)) for (const r of Object.values(d.rows||{})) n.add(r[0]);
+  return [...n].sort((a,b)=>(b==="Hauptkonto")-(a==="Hauptkonto") || a.localeCompare(b,"de"));
+}
+// balance of one account at the end of day "asOf", counted from the balance you entered for a day ("anchor")
+function accountBalance(name, asOf){
+  const a=(S.settings.accountAnchors||{})[name]; if (!a) return null;
+  let b=Number(a.balance)||0;
+  for (const d of Object.values(memStore.acct)) for (const [acc,v,date] of Object.values(d.rows||{})){
+    if (acc!==name) continue;
+    if (date>a.date && date<=asOf) b+=v; else if (date<=a.date && date>asOf) b-=v;
+  }
+  return Math.round(b*100)/100;
+}
+function lastDayOf(ym){ return ym+"-"+pad(daysIn(ym)); }
+function renderAccounts(){
+  const el=$("acctEd"); if (!el || el.contains(document.activeElement)) return;
+  const names=accountNames(), today=isoOf(new Date());
+  if (!names.length){ el.innerHTML=`<span class="small muted">Importier einmal deine Kontoauszüge von N26 (2025 und 2026). Dann erscheinen hier dein Hauptkonto und deine Spaces.</span>`; return; }
+  el.innerHTML = names.map(n=>{ const b=accountBalance(n,today), a=(S.settings.accountAnchors||{})[n];
+    return `<div class="edit-row acct-row"><span><b>${esc(n)}</b><br><span class="small muted">${b===null?"Stand noch nicht eingetragen":`heute ${esc(eur(b))}${a&&a.date!==today?` · eingetragen am ${esc(shortDate(a.date))}`:""}`}</span></span><input class="in" data-acctbal="${esc(n)}" inputmode="decimal" placeholder="Stand heute" aria-label="Kontostand ${esc(n)} heute" value=""></div>`; }).join("");
+}
+document.addEventListener("change", e=>{
+  const el=e.target.closest("[data-acctbal]"); if (!el) return;
+  const raw=el.value.trim(); const s={...(S.settings.accountAnchors||{})};
+  if (raw===""){ return; }
+  const v=parseAmt(raw); if (!isFinite(v)){ toast("Bitte eine Zahl eingeben"); return; }
+  s[el.dataset.acctbal]={date:isoOf(new Date()), balance:Math.round(v*100)/100};
+  S.settings.accountAnchors=s; saveSettings(); toast("Gespeichert"); el.value=""; renderAccounts();
+});
 function buildItems(){
   const imp=UI.imp, m=imp.map;
   if (m.date<0 || m.amount<0){ imp.items=null; return; }
@@ -1354,7 +1409,7 @@ function buildItems(){
   for (const r of imp.raw){
     const date=parseDate(r[m.date]), amount=parseBankAmt(r[m.amount]);
     if (!date || !isFinite(amount) || amount===0) continue;
-    const it = { date, amount, payee:(m.payee>=0?r[m.payee]:"")||"", ref:(m.ref>=0?r[m.ref]:"")||"", type:(m.type>=0?r[m.type]:"")||"" };
+    const it = { date, amount, payee:(m.payee>=0?r[m.payee]:"")||"", ref:(m.ref>=0?r[m.ref]:"")||"", type:(m.type>=0?r[m.type]:"")||"", acct:(m.account>=0?String(r[m.account]||"").trim():"") };
     let key = hashKey(date+"|"+amount.toFixed(2)+"|"+nrm(it.payee)+"|"+nrm(it.ref).slice(0,60));
     while (seen.has(key)) key += "b"; seen.add(key);
     it.key=key; it.ignored = ignored.has(key) && !keys.has(key); it.dup = keys.has(key) || (it.ignored && !imp.showIgnored);
@@ -1586,6 +1641,7 @@ async function syncNow(){
     for (const d of res.docs||[]){
       if (pending.has(d.col+"/"+d.id)) continue;
       changed=true;
+      if (d.col==="app" && d.id.startsWith("acct-")){ const k=d.id.slice(5); if (d.data===null) delete memStore.acct[k]; else memStore.acct[k]=d.data; continue; }
       if (d.col==="app"){ if (d.id==="settings" && d.data){ const m={...clone(DEFAULT_SETTINGS),...d.data}; m.cats={...clone(DEFAULT_SETTINGS.cats),...(d.data.cats||{})}; S.settings=m; } continue; }
       if (!memStore[d.col]) continue;
       if (d.data===null) delete memStore[d.col][d.id]; else memStore[d.col][d.id]=d.data;
@@ -1673,9 +1729,10 @@ async function doLogin(){
     SYNC.token=r.token; SYNC.rev=0; SYNC.skipped=false; SYNC.queue=[];
     if (firstSetup){ // new server: upload what this device has
       for (const k of ["tx","txb","fixed","months","debts"]) for (const [id,d] of Object.entries(memStore[k])) SYNC.queue.push({col:k,id,data:d});
+      for (const [id,d] of Object.entries(memStore.acct)) SYNC.queue.push({col:"app",id:"acct-"+id,data:d});
       SYNC.queue.push({col:"app",id:"settings",data:clone(S.settings)});
     } else { // existing server: this device takes over the server's data
-      for (const k of ["tx","txb","fixed","months","debts"]) memStore[k]={};
+      for (const k of ["tx","txb","fixed","months","debts","acct"]) memStore[k]={};
     }
     saveSync(); $("loginBg").hidden=true; $("loginPw").value=""; $("loginPw2").value="";
     toast(firstSetup ? "Passwort gespeichert, Daten werden hochgeladen" : "Verbunden");
