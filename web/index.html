@@ -284,6 +284,67 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   .cat .ictile{width:30px;height:30px;border-radius:10px}
   .btn.block{padding:12px}
 }
+/* home columns: on phones the column wrappers disappear and "order" restores the one-column sequence */
+.cols,.col{display:contents}
+.brand,.deskonly,.tab .tlabel{display:none}
+
+/* ---------- desktop / wide window: sidebar on the left, content in columns ---------- */
+@media (min-width:1000px){
+  body{padding-left:236px}
+  .wrap{max-width:1280px;padding-left:32px;padding-right:32px}
+  .top .wrap{padding-block:18px}
+  .hello b{font-size:26px}
+  main{padding-block:6px 48px}
+  .tabs{left:0;top:0;bottom:0;transform:none;width:236px;border-radius:0;box-shadow:none;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:22px 14px;background:var(--surface)}
+  .brand{order:-2;display:flex;align-items:center;gap:10px;padding:0 8px 18px;font-family:var(--f-display);font-weight:800;font-size:18px;letter-spacing:-.01em}
+  .brand .ictile{width:36px;height:36px;border-radius:11px;background:var(--accent);color:var(--accent-ink)}
+  .tab{flex-direction:row;justify-content:flex-start;gap:12px;font-size:14.5px;padding:11px 14px;color:var(--muted);border-radius:13px;text-align:left}
+  .tab:hover{background:var(--sunk);color:var(--fg)}
+  .tab[aria-selected="true"]{background:var(--accent-soft);color:var(--accent)}
+  .tab.plus{order:-1;width:100%;height:auto;border-radius:14px;padding:12px 14px;display:flex;justify-content:flex-start;gap:12px;margin-bottom:14px;font-size:15px}
+  .tab.plus svg.i{width:22px;height:22px}
+  .tab .tlabel{display:inline}
+  .deskonly{display:flex}
+  .tabs .spacer{flex:1}
+  #settingsBtn{display:none}
+  .toast{bottom:28px;left:calc(50% + 118px)}
+  .stickybar{bottom:16px}
+  .view{gap:18px}
+
+  /* Start */
+  .cols{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:18px;align-items:start}
+  .col{display:flex;flex-direction:column;gap:18px}
+  .hero .big{font-size:56px}
+
+  /* Buchungen: search and filters on the left, list on the right */
+  #v-list{display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px 18px;align-items:start;align-content:start}
+  #v-list>*{grid-column:1}
+  #v-list>#listCard{grid-column:2;grid-row:1/span 6}
+  #v-list .filters{flex-wrap:wrap;overflow:visible}
+
+  /* Fixkosten: private and business side by side */
+  #v-fix{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+  #v-fix>*{grid-column:1/-1}
+  #v-fix>.fxcol{grid-column:auto}
+  #v-fix>.row-btns{justify-content:flex-start}
+  #v-fix>.row-btns .btn{flex:0 0 auto}
+
+  /* Jahr */
+  #v-year{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+  #v-year>*{grid-column:1/-1}
+  #v-year>.half{grid-column:auto}
+  #v-year .chart svg{max-height:320px}
+  .table-wrap table{min-width:0}
+
+  /* Einstellungen */
+  #v-more{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:18px;align-items:start}
+
+  /* Import */
+  #v-import{max-width:920px}
+}
+@media (min-width:1400px){
+  #v-list{grid-template-columns:340px minmax(0,1fr)}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -352,11 +413,14 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 </main>
 
 <nav class="tabs" aria-label="Bereiche" role="tablist">
+  <div class="brand"><span class="ictile"><svg class="i" viewBox="0 0 24 24"><path d="M6 4.5h11a1.5 1.5 0 0 1 1.5 1.5v13.5H7.5A1.5 1.5 0 0 1 6 18z"/><path d="M15 9.2a3 3 0 1 0 0 4.6M10 10.6h4M10 12.4h4"/></svg></span>Haushaltsbuch</div>
   <button class="tab" role="tab" data-go="home" aria-selected="true"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>Start</button>
   <button class="tab" role="tab" data-go="list" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".6"/><circle cx="4" cy="12" r=".6"/><circle cx="4" cy="18" r=".6"/></svg>Buchungen</button>
-  <button class="tab plus" data-add="ausgabe" aria-label="Neue Buchung"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button class="tab plus" data-add="ausgabe" aria-label="Neue Buchung"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="tlabel">Neue Buchung</span></button>
   <button class="tab" role="tab" data-go="fix" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M17 3v4M7 3v4"/><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="m9 13.5 2 2 4-4"/></svg>Fixkosten</button>
   <button class="tab" role="tab" data-go="year" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M5 20v-7M10 20V6M15 20v-9M20 20V9"/></svg>Jahr</button>
+  <span class="spacer deskonly"></span>
+  <button class="tab deskonly" role="tab" data-go="more" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Einstellungen</button>
 </nav>
 
 <div class="backdrop" id="sheetBg" hidden>
@@ -466,7 +530,8 @@ function tile(kind, name, color){
 
 /* ---------- state ---------- */
 const S = { settings: clone(DEFAULT_SETTINGS), tx: [], txSingle: [], txb: {}, fixed: [], months: {}, debts: [] };
-const UI = { view:"home", ym: ymOf(new Date()), kind:"ausgabe", cat:null, editId:null, fixEdit:false, debtEdit:false, filter:"alle", q:"" };
+const WIDE = matchMedia("(min-width:1000px)");   // desktop layout with sidebar
+const UI = { view:"home", ym: ymOf(new Date()), kind:"ausgabe", cat:null, editId:null, fixEdit:false, debtEdit:false, filter:"alle", q:"", get wide(){ return WIDE.matches; } };
 let db = null, mem = false;
 const NATIVE = !!window.AndroidBridge;   // running inside the Android APK
 // Copies served from the Synology (and the APK) carry <meta name="hb-server"> with the sync address
@@ -637,6 +702,7 @@ function taxCalc(year){
 }
 
 /* ---------- render ---------- */
+WIDE.addEventListener("change", ()=>render());
 function render(){
   $("greet").textContent = greeting();
   $("viewTitle").textContent = TITLES[UI.view];
@@ -682,7 +748,8 @@ function renderHome(){
 
   $("v-home").innerHTML = `
     ${needStart?`<div class="notice info"><span>Trag einmal deinen Kontostand vom 1.1.${y} ein, dann stimmt die Rechnung.</span><button class="btn primary" data-go="more">Eintragen</button></div>`:""}
-    <div class="hero ${free<0?"minus":""}">
+    <div class="cols"><div class="col">
+    <div class="hero ${free<0?"minus":""}" style="order:1">
       <div class="eyebrow">Frei verfügbar · ${esc(MONTHS[ymParts(ym)[1]-1])}</div>
       <div class="big">${esc(eur(free))}</div>
       ${days?`<span class="chip-day">${ic("spark",16)} ${esc(eur(free/days))} pro Tag · ${esc(dayNote)}</span>`:`<span class="chip-day">Stand am Monatsende</span>`}
@@ -690,12 +757,12 @@ function renderHome(){
         <div class="eq"><span>Kontostand</span><span>${esc(eur(cum.balance))}</span><span>− Rücklage für Steuern</span><span>${esc(eur(cum.reserveBal))}</span><span>− Fixkosten noch offen</span><span>${esc(eur(c.fixOpen))}</span></div>
       </details>
     </div>
-    <div class="quick">
+    <div class="quick" style="order:2">
       <button class="qa" data-add="ausgabe"><span class="ic" style="background:var(--bad-soft);color:var(--bad)">${ic("minus",22)}</span>Ausgabe</button>
       <button class="qa" data-add="einnahme"><span class="ic" style="background:var(--good-soft);color:var(--good)">${ic("plusIn",22)}</span>Einnahme</button>
       <button class="qa" data-go="fix">${c.openCount&&fx?`<span class="badge">${c.openCount}</span>`:""}<span class="ic" style="background:var(--accent-soft);color:var(--accent)">${ic("check",22)}</span>Fixkosten</button>
     </div>
-    <div class="card">
+    <div class="card" style="order:3">
       <div class="card-head"><h2>${esc(MONTHS[ymParts(ym)[1]-1])} im Überblick</h2></div>
       <div class="duo">
         <div><div class="k"><span class="ictile" style="background:var(--good-soft);color:var(--good);width:30px;height:30px;border-radius:10px">${ic("arrowDown",16)}</span><span class="eyebrow">Einnahmen</span></div><div class="v pos">${esc(eur(c.income))}</div></div>
@@ -704,24 +771,26 @@ function renderHome(){
       <div class="splitbar">${c.income+c.expenses>0?`<i style="width:${incW}%;background:var(--good)"></i><i style="flex:1;background:var(--c2)"></i>`:""}</div>
       <div class="saldo"><span>Saldo</span><span class="${c.net<0?"neg":"pos"}">${c.net>=0?"+":""}${esc(eur(c.net))}</span></div>
     </div>
-    <div class="card">
-      <div class="card-head"><h2>Wohin dein Geld fließt</h2></div>
-      ${g.length ? g.map(x=>`<div class="catrow">${tile(x.kind,x.cat)}<div class="grow"><div class="top-l"><span>${esc(x.label||x.cat)}${x.kind==="betrieb"?` <span class="small muted">· Betrieb</span>`:""}</span><span>${esc(eur(x.v))}</span></div><div class="sub"><div class="track"><div class="fill" style="width:${Math.max(3,x.v/gMax*100)}%;background:${catColor(x.kind,x.cat)}"></div></div><span class="pct">${Math.round(x.v/gTot*100)} %</span></div></div></div>`).join("")
-        : emptyState("basket","Noch nichts ausgegeben","Tipp auf das Plus, um deine erste Ausgabe einzutragen.")}
-    </div>
-    <div class="card">
+    <div class="card" style="order:5">
       <div class="card-head"><h2>Fixkosten</h2><button class="link" data-go="fix">Abhaken ${ic("right",16)}</button></div>
       <div class="meta-row"><span><b>${fxDone}</b> von ${fx} bezahlt</span><span>noch offen <b>${esc(eur(c.fixOpen))}</b></span></div>
       <div class="progress-big"><div class="fill" style="width:${fx?fxDone/fx*100:0}%"></div></div>
     </div>
-    ${c.selfInc?`<div class="card"><div class="card-head"><h2>Steuer-Rücklage</h2><span class="pill ok">${esc(S.settings.reserveRate)} %</span></div><div class="kv"><span>Selbstständige Einnahmen</span><span>${esc(eur(c.selfInc))}</span><span>Diesen Monat zurücklegen</span><span class="pos">${esc(eur(c.reserve))}</span><span>Rücklage insgesamt</span><span>${esc(eur(cum.reserveBal))}</span></div></div>`:""}
-    ${S.debts.length?`<div class="card"><div class="card-head"><h2>Schulden</h2><button class="link" data-go="more">Details ${ic("right",16)}</button></div>
+    ${c.selfInc?`<div class="card" style="order:6"><div class="card-head"><h2>Steuer-Rücklage</h2><span class="pill ok">${esc(S.settings.reserveRate)} %</span></div><div class="kv"><span>Selbstständige Einnahmen</span><span>${esc(eur(c.selfInc))}</span><span>Diesen Monat zurücklegen</span><span class="pos">${esc(eur(c.reserve))}</span><span>Rücklage insgesamt</span><span>${esc(eur(cum.reserveBal))}</span></div></div>`:""}
+    ${S.debts.length?`<div class="card" style="order:7"><div class="card-head"><h2>Schulden</h2><button class="link" data-go="more">Details ${ic("right",16)}</button></div>
       <div class="meta-row" style="margin-bottom:10px"><span>Insgesamt offen</span><b>${esc(eur(debtsTotal))}</b></div>
       ${S.debts.map(d=>{const s=debtState(d); return `<div style="margin-top:10px"><div class="meta-row"><span>${esc(d.name)}</span><span>${esc(eur(s.remaining))}</span></div><div class="track" style="margin-top:6px"><div class="fill" style="width:${s.pct*100}%;background:var(--accent)"></div></div></div>`;}).join("")}</div>`:""}
-    <div class="card">
+    </div><div class="col">
+    <div class="card" style="order:4">
+      <div class="card-head"><h2>Wohin dein Geld fließt</h2></div>
+      ${g.length ? g.map(x=>`<div class="catrow">${tile(x.kind,x.cat)}<div class="grow"><div class="top-l"><span>${esc(x.label||x.cat)}${x.kind==="betrieb"?` <span class="small muted">· Betrieb</span>`:""}</span><span>${esc(eur(x.v))}</span></div><div class="sub"><div class="track"><div class="fill" style="width:${Math.max(3,x.v/gMax*100)}%;background:${catColor(x.kind,x.cat)}"></div></div><span class="pct">${Math.round(x.v/gTot*100)} %</span></div></div></div>`).join("")
+        : emptyState("basket","Noch nichts ausgegeben","Tipp auf das Plus, um deine erste Ausgabe einzutragen.")}
+    </div>
+    <div class="card" style="order:8">
       <div class="card-head"><h2>Letzte Buchungen</h2>${c.tx.length?`<button class="link" data-go="list">Alle ${ic("right",16)}</button>`:""}</div>
-      ${c.tx.length ? sortTx(c.tx).slice(0,5).map(t=>txRow(t,true)).join("") : emptyState("receipt","Noch keine Buchungen","Alles, was du einträgst, erscheint hier.", `<button class="btn primary" data-add="ausgabe">Erste Buchung eintragen</button>`)}
-    </div>`;
+      ${c.tx.length ? sortTx(c.tx).slice(0,UI.wide?8:5).map(t=>txRow(t,true)).join("") : emptyState("receipt","Noch keine Buchungen","Alles, was du einträgst, erscheint hier.", `<button class="btn primary" data-add="ausgabe">Erste Buchung eintragen</button>`)}
+    </div>
+    </div></div>`;
   const det = $("heroDetails"); if (det) det.addEventListener("toggle", ()=>{ UI.heroOpen = det.open; });
 }
 
@@ -762,8 +831,8 @@ function renderFix(){
       <div class="progress-big"><div class="fill" style="width:${fx.length?done/fx.length*100:0}%"></div></div>
       <div class="meta-row"><span>Noch offen</span><b class="${c.fixOpen?"":"pos"}">${c.fixOpen?esc(eur(c.fixOpen)):"Alles bezahlt"}</b></div>
     </div>
-    <div class="card"><div class="card-head"><h2>Privat</h2><span class="small muted">${esc(eur(sum(priv,f=>f.amount)))}</span></div>${priv.map(row).join("")||emptyState("repeat","Keine privaten Fixkosten","")}</div>
-    <div class="card"><div class="card-head"><h2>Betrieblich</h2><span class="small muted">${esc(eur(sum(bet,f=>f.amount)))}</span></div>${bet.map(row).join("")||emptyState("case","Keine betrieblichen Fixkosten","")}</div>
+    <div class="card fxcol"><div class="card-head"><h2>Privat</h2><span class="small muted">${esc(eur(sum(priv,f=>f.amount)))}</span></div>${priv.map(row).join("")||emptyState("repeat","Keine privaten Fixkosten","")}</div>
+    <div class="card fxcol"><div class="card-head"><h2>Betrieblich</h2><span class="small muted">${esc(eur(sum(bet,f=>f.amount)))}</span></div>${bet.map(row).join("")||emptyState("case","Keine betrieblichen Fixkosten","")}</div>
     <div class="row-btns"><button class="btn" id="payAll" ${done===fx.length?"disabled":""}>Alle abhaken</button><button class="btn" id="fixEditBtn">Liste bearbeiten</button></div>`;
 }
 function debtFor(fid){ return S.debts.find(d=>d.fixedId===fid); }
@@ -794,21 +863,21 @@ function renderYear(){
       <div class="card"><div class="eyebrow">Kontostand 31.12.</div><div class="v ${endBal<0?"neg":""}">${esc(eur0(endBal))}</div></div>
     </div>
     <div class="card chart"><div class="card-head"><h2>Monat für Monat</h2><div class="legend"><span><i style="background:var(--good)"></i>Ein</span><span><i style="background:var(--c2)"></i>Aus</span></div></div>${svg}</div>
-    <div class="card"><div class="card-head"><h2>Jahresplan</h2><span class="small muted">Monat antippen</span></div>
+    <div class="card"><div class="card-head"><h2>Jahresplan</h2><span class="small muted">${UI.wide?"Monat anklicken":"Monat antippen"}</span></div>
       <div class="table-wrap"><table>
         <thead><tr><th>Monat</th>${incCats().map(c=>`<th>${esc(c.name)}</th>`).join("")}<th>Privat</th><th>Betrieb</th><th>Saldo</th></tr></thead>
         <tbody>${rows.map(r=>{ const per=incCats().map(ic=>sum(r.c.tx.filter(t=>t.kind==="einnahme"&&t.cat===ic.name),t=>t.amount));
           return `<tr class="${r.ym===cur?"cur":""}" data-open="${r.ym}"><td>${MONTHS[r.i-1]}</td>${per.map(v=>`<td>${v?esc(eur(v)):"–"}</td>`).join("")}<td>${esc(eur(r.c.aus+r.c.fixPaidPriv))}</td><td>${esc(eur(r.c.bet+r.c.fixPaidBet))}</td><td class="${r.c.net<0?"neg":r.c.net>0?"pos":""}">${esc(eur(r.c.net))}</td></tr>`; }).join("")}</tbody>
         <tfoot><tr><td>Gesamt</td>${incCats().map(c=>`<td>${esc(eur(incSum(c.name)))}</td>`).join("")}<td>${esc(eur(T("aus")+T("fixPaidPriv")))}</td><td>${esc(eur(T("bet")+T("fixPaidBet")))}</td><td class="${inc-exp<0?"neg":"pos"}">${esc(eur(inc-exp))}</td></tr></tfoot>
       </table></div></div>
-    <div class="card"><div class="card-head"><h2>Selbstständig</h2><span class="pill ${st.kleinunternehmer?(kuOver?"bad":"ok"):""}">${st.kleinunternehmer?"Kleinunternehmer":"Mit Umsatzsteuer"}</span></div>
+    <div class="card half"><div class="card-head"><h2>Selbstständig</h2><span class="pill ${st.kleinunternehmer?(kuOver?"bad":"ok"):""}">${st.kleinunternehmer?"Kleinunternehmer":"Mit Umsatzsteuer"}</span></div>
       <div class="kv"><span>Einnahmen netto</span><span>${esc(eur(self))}</span>
         ${st.kleinunternehmer?"":`<span>Umsatzsteuer ${esc(st.vatRate)} %</span><span>${esc(eur(self*vat))}</span><span>Brutto</span><span>${esc(eur(self*(1+vat)))}</span>`}
         <span>Betriebsausgaben</span><span>− ${esc(eur(tax.betr))}</span><span class="sum">Gewinn</span><span class="sum">${esc(eur(tax.gewinn))}</span></div>
       ${st.kleinunternehmer?`<div style="margin-top:16px"><div class="meta-row"><span>Umsatzgrenze</span><span><b>${esc(eur0(self))}</b> von ${esc(eur0(st.kuLimit))}</span></div><div class="progress-big"><div class="fill" style="width:${Math.min(100,self/(st.kuLimit||1)*100)}%;background:${kuOver?"var(--bad)":self/(st.kuLimit||1)>.8?"var(--warn)":"var(--accent)"}"></div></div>${kuOver?`<div class="notice bad">Grenze überschritten. Klär mit deinem Steuerbüro, ab wann du Umsatzsteuer berechnen musst.</div>`:""}</div>`
         :`<div class="notice warn" style="margin-top:14px"><span>Ans Finanzamt abzuführen: <b>${esc(eur(self*vat))}</b> Umsatzsteuer (ohne Vorsteuer gerechnet).</span></div>`}
     </div>
-    <div class="card"><div class="card-head"><h2>Einkommensteuer ${y}</h2><span class="pill">Schätzung</span></div>
+    <div class="card half"><div class="card-head"><h2>Einkommensteuer ${y}</h2><span class="pill">Schätzung</span></div>
       <div class="kv"><span>Gewinn</span><span>${esc(eur(tax.gewinn))}</span><span>− Vorsorge &amp; Abzüge</span><span>${esc(eur((Number(st.vorsorge)||0)+(Number(st.abzuege)||0)))}</span><span>Zu versteuerndes Einkommen</span><span>${esc(eur(tax.zve))}</span>
         ${tax.ersatz?`<span>Lohnersatz (Progressionsvorbehalt)</span><span>${esc(eur(tax.ersatz))}</span>`:""}
         ${st.splitting?`<span>Gemeinsame Steuer (Splitting)</span><span>${esc(eur(tax.joint))}</span><span>Steuer Partner/in allein</span><span>− ${esc(eur(tax.partnerAlone))}</span>`:""}
