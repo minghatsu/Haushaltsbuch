@@ -635,6 +635,19 @@ function catColor(kind, name){
 async function put(col,id,data){ if (mem){ memStore[col][id]=clone(data); persistLocal(); enqueue(col,id,data); rebuildMem(); return; } await db.collection(col).doc(id).set(data); }
 async function del(col,id){ if (mem){ delete memStore[col][id]; persistLocal(); enqueue(col,id,null); rebuildMem(); return; } await db.collection(col).doc(id).delete(); }
 async function saveSettings(){ if (mem){ persistLocal(); enqueue("app","settings",S.settings); render(); return; } try { await db.doc("app/settings").set(clone(S.settings)); } catch(e){ reportErr(e); } }
+let migrating=false;
+async function runMigrations(){
+  if (!mem || migrating) return;
+  const t = S.tx.find(x=>x.importKey==="k1uhc12s2g" && x.kind==="vorauszahlung" && Math.abs(x.amount-25101)<0.01);
+  if (!t) return;
+  migrating=true;
+  try {
+    const c=clone(S.settings.cats||DEFAULT_SETTINGS.cats);
+    if (!c.ausgabe.includes("Steuerschulden")){ c.ausgabe.push("Steuerschulden"); S.settings.cats=c; await saveSettings(); }
+    const doc=plainTx(t); doc.kind="ausgabe"; doc.cat="Steuerschulden"; doc.note="Finanzamt D-Dorf Nord · Steuerschulden 2022";
+    await saveTxDoc(t.id, doc, t);
+  } catch(e){ console.error(e); } finally { migrating=false; }
+}
 function rebuildMem(){
   S.txSingle = Object.entries(memStore.tx).map(([id,d])=>({id,...d}));
   S.txb = {}; for (const [id,d] of Object.entries(memStore.txb)) S.txb[id]=(d&&d.items)||{};
@@ -643,6 +656,7 @@ function rebuildMem(){
   S.months = {}; for (const [id,d] of Object.entries(memStore.months)) S.months[id]=d;
   S.debts = Object.entries(memStore.debts).map(([id,d])=>({id,...d}));
   render();
+  setTimeout(runMigrations, 0);
 }
 function reportErr(e){
   const c = e && e.code;
@@ -666,10 +680,10 @@ function rhythmText(f){
 // amount planned for this month: a one-month change wins over the list amount
 function monthAmounts(ym){ return (S.months[ym]&&S.months[ym].amounts)||{}; }
 function planAmt(f, ym){ const o=monthAmounts(ym); return f.id in o ? (Number(o[f.id])||0) : (f.amount||0); }
-// past months only show fixed costs that were actually ticked; current and future months show what is due
+// every month only shows (and counts) the fixed costs that were ticked; "all" adds the ones due, to tick them
 function fixedForMonth(ym, all){
   const paid=(S.months[ym]&&S.months[ym].paid)||{};
-  if (all || ym >= ymOf(new Date())) return S.fixed.filter(f=>dueIn(f,ym) || f.id in paid);
+  if (all) return S.fixed.filter(f=>dueIn(f,ym) || f.id in paid);
   return S.fixed.filter(f=>f.id in paid);
 }
 function monthCalc(ym){
@@ -778,7 +792,7 @@ function renderHome(){
       ${(c.fixOpen||cum.reserveBal) && ym>=cur ? `<span class="chip-day">${ic("spark",16)} Frei nach offenen Fixkosten${cum.reserveBal?" und Rücklage":""}: ${esc(eur(free))}${days&&free>0?` · ${esc(eur(free/days))} pro Tag`:""}</span>` : (days?`<span class="chip-day">${ic("spark",16)} ${esc(eur(cum.balance/days))} pro Tag · ${esc(dayNote)}</span>`:"")}
       <details id="heroDetails" ${UI.heroOpen?"open":""}><summary>So berechnet ${ic("chevron",16)}</summary>
         <div class="eq"><span>Kontostand 1.1.${esc(y)}</span><span>${esc(eur(startBal(y)))}</span><span>+ Einnahmen bis ${ym===cur?"heute":"Monatsende"}</span><span>${esc(eur(cum.balance-startBal(y)+cum.outSum))}</span><span>− Ausgaben bis ${ym===cur?"heute":"Monatsende"}</span><span>${esc(eur(cum.outSum))}</span><span>= Kontostand</span><span>${esc(eur(cum.balance))}</span>
-        ${ym>=cur?`<span>− Fixkosten noch offen (${c.openCount})</span><span>${esc(eur(c.fixOpen))}</span>${cum.reserveBal?`<span>− Rücklage für Steuern</span><span>${esc(eur(cum.reserveBal))}</span>`:""}<span>= Frei verfügbar</span><span>${esc(eur(free))}</span>`:""}</div>
+        ${ym>=cur&&(c.fixOpen||cum.reserveBal)?`<span>− Fixkosten noch offen (${c.openCount})</span><span>${esc(eur(c.fixOpen))}</span>${cum.reserveBal?`<span>− Rücklage für Steuern</span><span>${esc(eur(cum.reserveBal))}</span>`:""}<span>= Frei verfügbar</span><span>${esc(eur(free))}</span>`:""}</div>
       </details>
     </div>
     <div class="quick" style="order:2">
@@ -796,9 +810,8 @@ function renderHome(){
       <div class="saldo"><span>Saldo</span><span class="${c.net<0?"neg":"pos"}">${c.net>=0?"+":""}${esc(eur(c.net))}</span></div>
     </div>
     <div class="card" style="order:5">
-      <div class="card-head"><h2>Fixkosten</h2><button class="link" data-go="fix">Abhaken ${ic("right",16)}</button></div>
-      <div class="meta-row"><span><b>${fxDone}</b> von ${fx} bezahlt</span><span>noch offen <b>${esc(eur(c.fixOpen))}</b></span></div>
-      <div class="progress-big"><div class="fill" style="width:${fx?fxDone/fx*100:0}%"></div></div>
+      <div class="card-head"><h2>Fixkosten</h2><button class="link" data-go="fix">Ansehen ${ic("right",16)}</button></div>
+      <div class="meta-row"><span><b>${fxDone}</b> Posten bezahlt</span><b>${esc(eur(c.fixPaid))}</b></div>
     </div>
     ${c.selfInc?`<div class="card" style="order:6"><div class="card-head"><h2>Steuer-Rücklage</h2><span class="pill ok">${esc(S.settings.reserveRate)} %</span></div><div class="kv"><span>Selbstständige Einnahmen</span><span>${esc(eur(c.selfInc))}</span><span>Diesen Monat zurücklegen</span><span class="pos">${esc(eur(c.reserve))}</span><span>Rücklage insgesamt</span><span>${esc(eur(cum.reserveBal))}</span></div></div>`:""}
     ${S.debts.length?`<div class="card" style="order:7"><div class="card-head"><h2>Schulden</h2><button class="link" data-go="more">Details ${ic("right",16)}</button></div>
@@ -859,16 +872,14 @@ function renderFix(){
                  : `<button class="amt fxamt" data-fxamt="${esc(f.id)}" title="Betrag nur für ${esc(mName)} ändern" aria-label="${esc(f.name)}: ${esc(eur(amt))}, Betrag für ${esc(mName)} ändern">${esc(eur(amt))}</button>`)
       + `<button class="check" role="checkbox" aria-checked="${isPaid}" data-pay="${esc(f.id)}" aria-label="${esc(f.name)} ${isPaid?"bezahlt":"als bezahlt abhaken"}"></button></div>`;
   };
-  const pastNote = past ? `<div class="notice info"><span>${UI.fixShowAll?"Alle Fixkosten werden angezeigt.":"Vergangener Monat: Es werden nur bezahlte Fixkosten angezeigt."}</span><button class="btn" id="fixShowAll">${UI.fixShowAll?"Nur bezahlte":"Alle zeigen"}</button></div>` : "";
+  const pastNote = `<div class="notice info"><span>${UI.fixShowAll?"Alle Fixkosten aus deiner Liste werden angezeigt. Tipp auf einen Posten, um ihn abzuhaken.":"Es werden nur abgehakte Fixkosten angezeigt. Nicht abgehakte zählen nirgends mit."}</span><button class="btn" id="fixShowAll">${UI.fixShowAll?"Nur abgehakte":"Weitere abhaken"}</button></div>`;
   $("v-fix").innerHTML = `${pastNote}
     <div class="card">
-      <div class="meta-row"><span><b>${done}</b> von ${fx.length} bezahlt</span><span>${esc(eur(c.fixPaid))} / ${esc(eur(c.fixTotal))}</span></div>
-      <div class="progress-big"><div class="fill" style="width:${fx.length?done/fx.length*100:0}%"></div></div>
-      <div class="meta-row"><span>Noch offen</span><b class="${c.fixOpen?"":"pos"}">${c.fixOpen?esc(eur(c.fixOpen)):"Alles bezahlt"}</b></div>
+      <div class="meta-row"><span><b>${done}</b> ${done===1?"Posten":"Posten"} bezahlt</span><b>${esc(eur(c.fixPaid))}</b></div>
     </div>
     <div class="card fxcol"><div class="card-head"><h2>Privat</h2><span class="small muted">${esc(eur(sum(priv,f=>f.id in paid?Number(paid[f.id])||0:planAmt(f,UI.ym))))}</span></div>${priv.map(row).join("")||emptyState("repeat","Keine privaten Fixkosten","")}</div>
     <div class="card fxcol"><div class="card-head"><h2>Betrieblich</h2><span class="small muted">${esc(eur(sum(bet,f=>f.id in paid?Number(paid[f.id])||0:planAmt(f,UI.ym))))}</span></div>${bet.map(row).join("")||emptyState("case","Keine betrieblichen Fixkosten","")}</div>
-    <div class="row-btns"><button class="btn" id="payAll" ${done===fx.length?"disabled":""}>Alle abhaken</button><button class="btn" id="fixEditBtn">Liste bearbeiten</button></div>`;
+    <div class="row-btns">${UI.fixShowAll?`<button class="btn" id="payAll" ${done===fx.length?"disabled":""}>Alle abhaken</button>`:""}<button class="btn" id="fixEditBtn">Liste bearbeiten</button></div>`;
 }
 function debtFor(fid){ return S.debts.find(d=>d.fixedId===fid); }
 
