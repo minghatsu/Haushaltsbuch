@@ -165,11 +165,19 @@ main{padding-block:6px 120px}
 .fx .t{font-weight:700}
 .fx .s{font-size:12.5px;color:var(--muted)}
 .check{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;flex:none;transition:background .15s,border-color .15s}
+.fx .fxhit{flex:1;min-width:0;border:0;background:none;padding:0;display:flex;align-items:center;gap:12px;text-align:left}
+.fx .fxamt{border:0;background:none;padding:6px 8px;margin:-6px 0;border-radius:10px;color:inherit;border-bottom:1.5px dashed transparent}
+.fx .fxamt:hover{background:var(--surface);border-bottom-color:var(--faint)}
+.fx .check{padding:0;background:none}
+.fx .fxamt-in{width:110px;padding:7px 10px;text-align:right;font-weight:800}
+.mchips{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 8px}
+.mchip{border:0;background:var(--sunk);border-radius:999px;padding:6px 11px;font-weight:700;font-size:12.5px;color:var(--muted)}
+.mchip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .fx[aria-checked="true"] .check{background:var(--accent);border-color:var(--accent)}
 .fx[aria-checked="true"] .check::after{content:"";width:6px;height:11px;border:solid var(--accent-ink);border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}
 .fx[aria-checked="true"] .t,.fx[aria-checked="true"] .amt{color:var(--faint)}
-.edit-row{display:grid;grid-template-columns:minmax(0,1fr) 104px 118px 40px;gap:8px;align-items:center;padding:5px 0}
-@media (max-width:520px){.edit-row{grid-template-columns:minmax(0,1fr) 92px 40px}.edit-row select{grid-column:1/3}}
+.edit-row{display:grid;grid-template-columns:minmax(0,1fr) 104px 178px 124px 40px;gap:8px;align-items:center;padding:5px 0}
+@media (max-width:620px){.edit-row{grid-template-columns:minmax(0,1fr) 92px 40px;border-top:1px solid var(--line);padding-top:10px}.edit-row:first-of-type{border-top:0}.edit-row select[data-fxf="rhythm"]{grid-column:1/2}.edit-row select[data-fxf="kind"]{grid-column:2/4}.edit-row .icon-btn{grid-column:3;grid-row:1}}
 .in{width:100%;background:var(--sunk);border:2px solid transparent;border-radius:13px;padding:11px 13px;font-size:15px;min-width:0}
 .in:focus{border-color:var(--accent);outline:none;background:var(--surface)}
 .icon-btn{border:0;background:none;width:40px;height:40px;border-radius:12px;color:var(--muted);display:grid;place-items:center}
@@ -645,10 +653,24 @@ async function safe(fn){ try { await fn(); return true; } catch(e){ reportErr(e)
 
 /* ---------- calculations ---------- */
 function fixedSorted(){ return S.fixed.slice().sort((a,b)=>(a.order??999)-(b.order??999) || (b.amount||0)-(a.amount||0)); }
-// past months only show fixed costs that were actually ticked; current and future months show the whole list
+// Rhythm of a fixed cost: no "months" list = every month, otherwise only in the listed months (1–12)
+const RHYTHMS = [["monatlich","Monatlich"],["quartal","Vierteljährlich"],["halbjahr","Halbjährlich"],["jahr","Jährlich"],["monate","Bestimmte Monate"]];
+function dueIn(f, ym){ return !Array.isArray(f.months) || !f.months.length || f.months.includes(Number(ym.slice(5,7))); }
+function rhythmMonths(r, start){ const st=Number(start)||1, step={quartal:3,halbjahr:6,jahr:12}[r]; if (!step) return null; const out=[]; for (let k=0;k<12/step;k++) out.push(((st-1+k*step)%12)+1); return out.sort((a,b)=>a-b); }
+function rhythmText(f){
+  if (!Array.isArray(f.months)||!f.months.length) return "";
+  const names=f.months.slice().sort((a,b)=>a-b).map(m=>MSHORT[m-1]).join(", ");
+  const r={quartal:"vierteljährlich",halbjahr:"halbjährlich",jahr:"jährlich"}[f.rhythm];
+  return r ? `${r} · ${names}` : names;
+}
+// amount planned for this month: a one-month change wins over the list amount
+function monthAmounts(ym){ return (S.months[ym]&&S.months[ym].amounts)||{}; }
+function planAmt(f, ym){ const o=monthAmounts(ym); return f.id in o ? (Number(o[f.id])||0) : (f.amount||0); }
+// past months only show fixed costs that were actually ticked; current and future months show what is due
 function fixedForMonth(ym, all){
   const paid=(S.months[ym]&&S.months[ym].paid)||{};
-  return (all || ym >= ymOf(new Date())) ? S.fixed : S.fixed.filter(f=>f.id in paid);
+  if (all || ym >= ymOf(new Date())) return S.fixed.filter(f=>dueIn(f,ym) || f.id in paid);
+  return S.fixed.filter(f=>f.id in paid);
 }
 function monthCalc(ym){
   const tx = S.tx.filter(t=>(t.date||"").startsWith(ym));
@@ -661,7 +683,7 @@ function monthCalc(ym){
   const paid = (S.months[ym] && S.months[ym].paid) || {};
   let fixPaidPriv=0, fixPaidBet=0, fixOpen=0, fixTotal=0, openCount=0;
   for (const [fid,amt] of Object.entries(paid)){ const f=S.fixed.find(x=>x.id===fid); if (f && f.kind==="betrieb") fixPaidBet+=Number(amt)||0; else fixPaidPriv+=Number(amt)||0; }
-  for (const f of fixedForMonth(ym)){ const a = f.id in paid ? (Number(paid[f.id])||0) : (f.amount||0); fixTotal+=a; if (!(f.id in paid)){ fixOpen+=f.amount||0; openCount++; } }
+  for (const f of fixedForMonth(ym)){ const a = f.id in paid ? (Number(paid[f.id])||0) : planAmt(f,ym); fixTotal+=a; if (!(f.id in paid)){ fixOpen+=planAmt(f,ym); openCount++; } }
   const fixPaid = fixPaidPriv+fixPaidBet;
   const expenses = aus+bet+vz+fixPaid;
   const rate = (Number(S.settings.reserveRate)||0)/100;
@@ -742,7 +764,7 @@ function renderHome(){
   if (c.vz) groups["vz"]={v:c.vz,kind:"vorauszahlung",cat:"Steuer",label:"Steuer-Vorauszahlung"};
   const g = Object.values(groups).sort((a,b)=>b.v-a.v);
   const gTot = sum(g,x=>x.v)||1, gMax = g.length?g[0].v:1;
-  const fx = S.fixed.length, fxDone = fx - c.openCount;
+  const fx = fixedForMonth(ym).length, fxDone = fx - c.openCount;
   const debtsTotal = sum(S.debts, d=>debtState(d).remaining);
   const incW = c.income+c.expenses>0 ? c.income/(c.income+c.expenses)*100 : 50;
 
@@ -810,7 +832,7 @@ function renderList(){
 }
 
 function renderFix(){
-  if (UI.fixEdit && $("v-fix").contains(document.activeElement) && document.activeElement.tagName!=="BUTTON") return;
+  if ($("v-fix").contains(document.activeElement) && /^(INPUT|SELECT)$/.test(document.activeElement.tagName)) return;
   const c=monthCalc(UI.ym), paid=c.paid, past=UI.ym<ymOf(new Date());
   const shown=new Set(fixedForMonth(UI.ym, UI.fixShowAll).map(f=>f.id));
   const fx=UI.fixEdit ? fixedSorted() : fixedSorted().filter(f=>shown.has(f.id));
@@ -818,12 +840,23 @@ function renderFix(){
   const done=fx.filter(f=>f.id in paid).length;
   if (UI.fixEdit){
     $("v-fix").innerHTML = `<div class="card"><div class="card-head"><h2>Liste bearbeiten</h2><button class="btn primary" id="fixDone">Fertig</button></div>
-      <p class="small muted" style="margin:-4px 0 10px">Änderungen gelten ab jetzt für alle Monate. Schon abgehakte Beträge bleiben, wie sie waren.</p>
-      ${fx.map(f=>`<div class="edit-row" data-fid="${esc(f.id)}"><input class="in" id="fxn-${esc(f.id)}" data-fxf="name" value="${esc(f.name)}" aria-label="Name"><input class="in" id="fxa-${esc(f.id)}" data-fxf="amount" inputmode="decimal" value="${esc(numStr(f.amount))}" aria-label="Betrag"><select class="in" id="fxk-${esc(f.id)}" data-fxf="kind" aria-label="Art"><option value="privat" ${f.kind!=="betrieb"?"selected":""}>Privat</option><option value="betrieb" ${f.kind==="betrieb"?"selected":""}>Betrieblich</option></select><button class="icon-btn" data-fxdel="${esc(f.id)}" aria-label="${esc(f.name)} löschen"><svg class="i" viewBox="0 0 24 24"><path d="M5 7h14M10 11v6M14 11v6M6.5 7l1 12.5h9L17.5 7M9.5 7V4.5h5V7"/></svg></button></div>`).join("")}
+      <p class="small muted" style="margin:-4px 0 10px">Änderungen gelten ab jetzt für alle Monate. Schon abgehakte Beträge bleiben, wie sie waren. Bei „Vierteljährlich“, „Halbjährlich“, „Jährlich“ oder „Bestimmte Monate“ tippst du an, in welchen Monaten der Posten fällig ist.</p>
+      ${fx.map(f=>`<div class="edit-row" data-fid="${esc(f.id)}"><input class="in" id="fxn-${esc(f.id)}" data-fxf="name" value="${esc(f.name)}" aria-label="Name"><input class="in" id="fxa-${esc(f.id)}" data-fxf="amount" inputmode="decimal" value="${esc(numStr(f.amount))}" aria-label="Betrag"><select class="in" id="fxr-${esc(f.id)}" data-fxf="rhythm" aria-label="Rhythmus">${RHYTHMS.map(([k,l])=>`<option value="${k}" ${(f.rhythm||"monatlich")===k?"selected":""}>${l}</option>`).join("")}</select><select class="in" id="fxk-${esc(f.id)}" data-fxf="kind" aria-label="Art"><option value="privat" ${f.kind!=="betrieb"?"selected":""}>Privat</option><option value="betrieb" ${f.kind==="betrieb"?"selected":""}>Betrieblich</option></select><button class="icon-btn" data-fxdel="${esc(f.id)}" aria-label="${esc(f.name)} löschen"><svg class="i" viewBox="0 0 24 24"><path d="M5 7h14M10 11v6M14 11v6M6.5 7l1 12.5h9L17.5 7M9.5 7V4.5h5V7"/></svg></button>
+        ${(f.rhythm||"monatlich")!=="monatlich"?`<div class="mchips" role="group" aria-label="Monate für ${esc(f.name)}">${MSHORT.map((n,i)=>`<button class="mchip" data-fxmon="${esc(f.id)}|${i+1}" aria-pressed="${(f.months||[]).includes(i+1)}">${n}</button>`).join("")}</div>`:""}</div>`).join("")}
       <button class="btn" id="fixAdd" style="margin-top:12px">+ Fixkosten hinzufügen</button></div>`;
     return;
   }
-  const row = f => `<button class="fx" role="checkbox" aria-checked="${f.id in paid}" data-pay="${esc(f.id)}">${tile(f.kind==="betrieb"?"betrieb":"fix", f.name, f.kind==="betrieb"?"var(--c3)":"var(--c1)")}<span class="grow"><div class="t">${esc(f.name)}</div>${debtFor(f.id)?`<div class="s">Rate ${esc(debtFor(f.id).name)}</div>`:""}</span><span class="amt">${esc(eur(f.id in paid?paid[f.id]:f.amount))}</span><span class="check"></span></button>`;
+  const ov = monthAmounts(UI.ym), mName = MONTHS[Number(UI.ym.slice(5,7))-1];
+  const row = f => {
+    const isPaid = f.id in paid, amt = isPaid ? Number(paid[f.id])||0 : planAmt(f,UI.ym);
+    const subs = [debtFor(f.id)?`Rate ${esc(debtFor(f.id).name)}`:"", rhythmText(f)?esc(rhythmText(f)):"",
+      (f.id in ov && !isPaid) || (isPaid && Math.abs(amt-(f.amount||0))>0.004) ? `nur im ${esc(mName)} · sonst ${esc(eur(f.amount||0))}${!isPaid?` · <span class="link small" role="button" tabindex="0" data-fxreset="${esc(f.id)}">zurücksetzen</span>`:""}` : ""].filter(Boolean);
+    const editing = UI.amtEdit===f.id;
+    return `<div class="fx" aria-checked="${isPaid}"><button class="fxhit" data-pay="${esc(f.id)}" tabindex="-1">${tile(f.kind==="betrieb"?"betrieb":"fix", f.name, f.kind==="betrieb"?"var(--c3)":"var(--c1)")}<span class="grow"><div class="t">${esc(f.name)}</div>${subs.length?`<div class="s">${subs.join(" · ")}</div>`:""}</span></button>`
+      + (editing ? `<input class="in fxamt-in" id="fxAmtIn" data-fxamtin="${esc(f.id)}" inputmode="decimal" value="${esc(numStr(amt))}" aria-label="Betrag für ${esc(f.name)} im ${esc(mName)}">`
+                 : `<button class="amt fxamt" data-fxamt="${esc(f.id)}" title="Betrag nur für ${esc(mName)} ändern" aria-label="${esc(f.name)}: ${esc(eur(amt))}, Betrag für ${esc(mName)} ändern">${esc(eur(amt))}</button>`)
+      + `<button class="check" role="checkbox" aria-checked="${isPaid}" data-pay="${esc(f.id)}" aria-label="${esc(f.name)} ${isPaid?"bezahlt":"als bezahlt abhaken"}"></button></div>`;
+  };
   const pastNote = past ? `<div class="notice info"><span>${UI.fixShowAll?"Alle Fixkosten werden angezeigt.":"Vergangener Monat: Es werden nur bezahlte Fixkosten angezeigt."}</span><button class="btn" id="fixShowAll">${UI.fixShowAll?"Nur bezahlte":"Alle zeigen"}</button></div>` : "";
   $("v-fix").innerHTML = `${pastNote}
     <div class="card">
@@ -831,8 +864,8 @@ function renderFix(){
       <div class="progress-big"><div class="fill" style="width:${fx.length?done/fx.length*100:0}%"></div></div>
       <div class="meta-row"><span>Noch offen</span><b class="${c.fixOpen?"":"pos"}">${c.fixOpen?esc(eur(c.fixOpen)):"Alles bezahlt"}</b></div>
     </div>
-    <div class="card fxcol"><div class="card-head"><h2>Privat</h2><span class="small muted">${esc(eur(sum(priv,f=>f.amount)))}</span></div>${priv.map(row).join("")||emptyState("repeat","Keine privaten Fixkosten","")}</div>
-    <div class="card fxcol"><div class="card-head"><h2>Betrieblich</h2><span class="small muted">${esc(eur(sum(bet,f=>f.amount)))}</span></div>${bet.map(row).join("")||emptyState("case","Keine betrieblichen Fixkosten","")}</div>
+    <div class="card fxcol"><div class="card-head"><h2>Privat</h2><span class="small muted">${esc(eur(sum(priv,f=>f.id in paid?Number(paid[f.id])||0:planAmt(f,UI.ym))))}</span></div>${priv.map(row).join("")||emptyState("repeat","Keine privaten Fixkosten","")}</div>
+    <div class="card fxcol"><div class="card-head"><h2>Betrieblich</h2><span class="small muted">${esc(eur(sum(bet,f=>f.id in paid?Number(paid[f.id])||0:planAmt(f,UI.ym))))}</span></div>${bet.map(row).join("")||emptyState("case","Keine betrieblichen Fixkosten","")}</div>
     <div class="row-btns"><button class="btn" id="payAll" ${done===fx.length?"disabled":""}>Alle abhaken</button><button class="btn" id="fixEditBtn">Liste bearbeiten</button></div>`;
 }
 function debtFor(fid){ return S.debts.find(d=>d.fixedId===fid); }
@@ -1066,6 +1099,9 @@ document.addEventListener("click", async e => {
   const cb = t.closest("#catGrid [data-cat]"); if (cb){ UI.cat=cb.dataset.cat; renderSheet(); return; }
   const dc = t.closest("#dateChips .dchip"); if (dc){ $("fDate").value=isoDaysAgo(Number(dc.dataset.day)); renderSheet(); return; }
   const fl = t.closest("[data-filter]"); if (fl){ UI.filter=fl.dataset.filter; renderList(); return; }
+  const fr = t.closest("[data-fxreset]"); if (fr){ const f=S.fixed.find(x=>x.id===fr.dataset.fxreset); if (f) await setMonthAmount(f.id, f.amount||0); return; }
+  const fa = t.closest("[data-fxamt]"); if (fa){ UI.amtEdit=fa.dataset.fxamt; renderFix(); const el=$("fxAmtIn"); if (el){ el.focus(); el.select(); } return; }
+  const mc = t.closest("[data-fxmon]"); if (mc){ await toggleFixMonth(...mc.dataset.fxmon.split("|")); return; }
   const pay = t.closest("[data-pay]"); if (pay){ await togglePaid(pay.dataset.pay); return; }
   if (t.closest("#payAll")){ await payAll(); return; }
   if (t.closest("#fixShowAll")){ UI.fixShowAll=!UI.fixShowAll; renderFix(); return; }
@@ -1097,20 +1133,61 @@ $("delBtn").onclick = deleteTx;
 async function togglePaid(fid){
   const ym=UI.ym, f=S.fixed.find(x=>x.id===fid); if (!f) return;
   const m=clone(S.months[ym]||{paid:{}}); m.paid=m.paid||{};
-  if (fid in m.paid) delete m.paid[fid]; else m.paid[fid]=f.amount;
+  if (fid in m.paid) delete m.paid[fid]; else m.paid[fid]=planAmt(f,ym);
   await safe(()=>put("months", ym, m));
 }
 async function payAll(){
   const ym=UI.ym, before=clone(S.months[ym]||{paid:{}}), m=clone(before); m.paid=m.paid||{};
-  for (const f of fixedForMonth(ym, UI.fixShowAll)) if (!(f.id in m.paid)) m.paid[f.id]=f.amount;
+  for (const f of fixedForMonth(ym, UI.fixShowAll)) if (!(f.id in m.paid)) m.paid[f.id]=planAmt(f,ym);
   if (await safe(()=>put("months", ym, m))) toast("Alle abgehakt", ()=>safe(()=>put("months", ym, before)));
 }
+// amount of one fixed cost for the shown month only (ticked: the paid amount, otherwise the planned amount)
+async function setMonthAmount(fid, v){
+  const ym=UI.ym, f=S.fixed.find(x=>x.id===fid); if (!f) return;
+  const before=clone(S.months[ym]||{paid:{}}), m=clone(before); m.paid=m.paid||{};
+  v=Math.round(v*100)/100;
+  if (fid in m.paid) m.paid[fid]=v;
+  else { m.amounts=m.amounts||{}; if (Math.abs(v-(f.amount||0))<0.005) delete m.amounts[fid]; else m.amounts[fid]=v; }
+  UI.amtEdit=null;
+  if (await safe(()=>put("months", ym, m))) toast(`${f.name}: ${eur(v)} im ${MONTHS[Number(ym.slice(5,7))-1]}`, ()=>safe(()=>put("months", ym, before)));
+  renderFix();
+}
+async function toggleFixMonth(fid, mo){
+  const f=S.fixed.find(x=>x.id===fid); if (!f) return;
+  const d={...f}; delete d.id;
+  const ms=new Set(f.months||[]), n=Number(mo); if (ms.has(n)) ms.delete(n); else ms.add(n);
+  if (!ms.size){ toast("Mindestens ein Monat muss ausgewählt sein"); return; }
+  d.months=[...ms].sort((a,b)=>a-b);
+  const preset=rhythmMonths(d.rhythm, d.months[0]); if (!preset || preset.join()!==d.months.join()) d.rhythm="monate";
+  await safe(()=>put("fixed", fid, d));
+}
+$("v-fix").addEventListener("keydown", e => {
+  if (e.target.id!=="fxAmtIn") return;
+  if (e.key==="Enter") e.target.blur();
+  if (e.key==="Escape"){ UI.amtEdit=null; e.target.dataset.cancel="1"; e.target.blur(); }
+});
+$("v-fix").addEventListener("focusout", e => {
+  const el=e.target; if (el.id!=="fxAmtIn") return;
+  if (el.dataset.cancel==="1"){ UI.amtEdit=null; renderFix(); return; }
+  const v=parseAmt(el.value);
+  if (!(v>=0)){ toast("Betrag ungültig"); UI.amtEdit=null; renderFix(); return; }
+  setMonthAmount(el.dataset.fxamtin, v);
+});
 $("v-fix").addEventListener("change", async e => {
   const el=e.target.closest("[data-fxf]"); if (!el) return;
   const id=el.closest("[data-fid]").dataset.fid, f=S.fixed.find(x=>x.id===id); if (!f) return;
   const d={...f}; delete d.id; const k=el.dataset.fxf;
   if (k==="amount"){ const v=parseAmt(el.value); if (!(v>=0)){ toast("Betrag ungültig"); return; } d.amount=Math.round(v*100)/100; }
-  else if (k==="name"){ const v=el.value.trim(); if (!v) return; d.name=v; } else d.kind=el.value;
+  else if (k==="name"){ const v=el.value.trim(); if (!v) return; d.name=v; }
+  else if (k==="rhythm"){
+    const cur=Number(UI.ym.slice(5,7)), had=Array.isArray(f.months)&&f.months.length;
+    d.rhythm=el.value;
+    if (el.value==="monatlich") delete d.months;
+    else if (el.value==="monate") d.months = had ? f.months.slice() : [cur];
+    else d.months = rhythmMonths(el.value, had ? Math.min(...f.months) : cur);
+    await safe(()=>put("fixed", id, d)); el.blur(); renderFix(); return;
+  }
+  else d.kind=el.value;
   await safe(()=>put("fixed", id, d));
 });
 $("debtCard").addEventListener("change", async e => {
