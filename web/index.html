@@ -645,6 +645,11 @@ async function saveSettings(){ if (mem){ persistLocal(); enqueue("app","settings
 let migrating=false;
 async function runMigrations(){
   if (!mem || migrating) return;
+  if (!S.settings.migHauptkonto){
+    S.settings.migHauptkonto=1;
+    if (!(S.settings.accountAnchors||{}).Hauptkonto) S.settings.accountAnchors={...(S.settings.accountAnchors||{}), Hauptkonto:{date:"2026-10-29", balance:123}};
+    await saveSettings();
+  }
   const t = S.tx.find(x=>x.importKey==="k1uhc12s2g" && x.kind==="vorauszahlung" && Math.abs(x.amount-25101)<0.01);
   if (!t) return;
   migrating=true;
@@ -790,7 +795,8 @@ function renderHome(){
   const debtsTotal = sum(S.debts, d=>debtState(d).remaining);
   const incW = c.income+c.expenses>0 ? c.income/(c.income+c.expenses)*100 : 50;
   const asOf = ym===cur ? isoOf(new Date()) : lastDayOf(ym);
-  const anchored = ym<=cur ? accountNames().filter(n=>(S.settings.accountAnchors||{})[n]) : [];
+  const known = new Set(accountNames());
+  const anchored = ym<=cur ? Object.keys(S.settings.accountAnchors||{}).filter(n=>known.has(n) || ym===cur).sort((a,b)=>(b==="Hauptkonto")-(a==="Hauptkonto")||a.localeCompare(b,"de")) : [];
   // the Hauptkonto is the big number once its balance is entered; the total incl. Spaces goes underneath
   const mainName = anchored.includes("Hauptkonto") ? "Hauptkonto" : "";
   const mainBal = mainName ? accountBalance(mainName, asOf) : cum.balance;
@@ -1391,8 +1397,12 @@ function renderAccounts(){
   const el=$("acctEd"); if (!el || el.contains(document.activeElement)) return;
   const names=accountNames(), today=isoOf(new Date());
   if (!names.length){ el.innerHTML=`<span class="small muted">Importier einmal deine Kontoauszüge von N26 (2025 und 2026). Dann erscheinen hier dein Hauptkonto und deine Spaces.</span>`; return; }
-  el.innerHTML = names.map(n=>{ const b=accountBalance(n,today), a=(S.settings.accountAnchors||{})[n];
-    return `<div class="edit-row acct-row"><span><b>${esc(n)}</b><br><span class="small muted">${b===null?"Stand noch nicht eingetragen":`heute ${esc(eur(b))}${a&&a.date!==today?` · eingetragen am ${esc(shortDate(a.date))}`:""}`}</span></span><input class="in" data-acctbal="${esc(n)}" inputmode="decimal" placeholder="Stand heute" aria-label="Kontostand ${esc(n)} heute" value=""></div>`; }).join("");
+  el.innerHTML = acctRows(names);
+}
+function acctRows(names){
+  const today=isoOf(new Date());
+  return names.map(n=>{ const b=accountBalance(n,today), a=(S.settings.accountAnchors||{})[n];
+    return `<div class="edit-row acct-row"><span><b>${esc(n)}</b><br><span class="small muted">${b===null?"Stand noch nicht eingetragen":`heute ${esc(eur(b))}${a&&a.date!==today?` · eingetragen am ${esc(shortDate(a.date))}`:""}`}</span></span><input class="in" data-acctbal="${esc(n)}" inputmode="decimal" placeholder="${b===null?"Stand heute":"ändern"}" aria-label="Kontostand ${esc(n)} heute" value=""></div>`; }).join("");
 }
 document.addEventListener("change", e=>{
   const el=e.target.closest("[data-acctbal]"); if (!el) return;
@@ -1400,7 +1410,7 @@ document.addEventListener("change", e=>{
   if (raw===""){ return; }
   const v=parseAmt(raw); if (!isFinite(v)){ toast("Bitte eine Zahl eingeben"); return; }
   s[el.dataset.acctbal]={date:isoOf(new Date()), balance:Math.round(v*100)/100};
-  S.settings.accountAnchors=s; saveSettings(); toast("Gespeichert"); el.value=""; renderAccounts();
+  S.settings.accountAnchors=s; el.value=""; el.blur(); saveSettings(); toast("Gespeichert"); render();
 });
 function buildItems(){
   const imp=UI.imp, m=imp.map;
@@ -1475,6 +1485,7 @@ function renderImport(){
       ${nIgn&&!imp.showIgnored?`<div class="notice info" style="margin-top:14px"><span>${nIgn} davon hast du früher bewusst übersprungen.</span><button class="btn" id="impShowIgn">Wieder anzeigen</button></div>`:""}
       ${unsure?`<div class="notice warn" style="margin-top:14px"><span><b>${unsure}</b> ${unsure===1?"Buchung ist":"Buchungen sind"} unsicher zugeordnet und gelb markiert. Kurz prüfen, dann importieren.</span></div>`:""}
     </div>
+    ${(()=>{ const names=[...new Set(imp.items.map(i=>i.acct).filter(Boolean))].sort((a,b)=>(b==="Hauptkonto")-(a==="Hauptkonto")||a.localeCompare(b,"de")); return names.length&&mem ? `<div class="card"><div class="card-head"><h2>Kontostände</h2><span class="small muted">aus dieser Datei</span></div><p class="small muted" style="margin:-6px 0 8px">Trag ein, was heute auf dem Konto ist. Den Rest rechnet die App aus.</p>${acctRows(names)}</div>` : ""; })()}
     <div class="card">
       <div class="card-head"><h2>Buchungen prüfen</h2><span class="small muted">${fresh.length} neu</span></div>
       ${fresh.some(i=>i.payee)?`<label class="rem" style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;padding:10px 12px;margin-bottom:6px;background:var(--sunk);border-radius:12px;cursor:pointer"><input type="checkbox" id="impAll" data-impall="1" style="width:19px;height:19px;accent-color:var(--accent)" ${fresh.filter(i=>i.payee).every(i=>i.remember)?"checked":""}>Alle markieren <span class="small muted" style="font-weight:600">(alle Empfänger merken)</span></label>`:""}
@@ -1488,7 +1499,7 @@ function renderImport(){
         : emptyState("check","Alles schon importiert","In dieser Datei sind keine neuen Buchungen.")}
     </div>
     ${mapping}
-    <div class="row-btns stickybar"><button class="btn" id="impCancel" style="background:var(--surface);box-shadow:var(--shadow)">Abbrechen</button><button class="btn primary" id="impGo" ${take.length?"":"disabled"} style="flex:2;box-shadow:var(--shadow)">${take.length?`${take.length} übernehmen`:"Nichts zu übernehmen"}</button></div>`;
+    <div class="row-btns stickybar"><button class="btn" id="impCancel" style="background:var(--surface);box-shadow:var(--shadow)">Abbrechen</button>${take.length?`<button class="btn primary" id="impGo" style="flex:2;box-shadow:var(--shadow)">${take.length} übernehmen</button>`:`<button class="btn primary" id="impDone" style="flex:2;box-shadow:var(--shadow)">Fertig</button>`}</div>`;
 }
 async function runLimited(tasks, n, onDone){
   let i=0; const workers=[];
@@ -1563,6 +1574,7 @@ document.addEventListener("click", e => {
     inp.addEventListener("blur",()=>{ const n=inp.value.trim(); if (n && !(S.settings.spaces||[]).some(x=>nrm(x)===nrm(n))){ S.settings.spaces=[...(S.settings.spaces||[]), n]; saveSettings(); } renderMore(); },{once:true}); return; }
   if (e.target.closest("#backupSave")){ saveBackup(); return; }
   if (e.target.closest("#backupLoad")){ const b=e.target.closest("#backupLoad"); if (b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Alles ersetzen?"; setTimeout(()=>{ b.dataset.armed=""; b.textContent="Laden"; },4000); return; } b.dataset.armed=""; b.textContent="Laden"; $("backupFile").click(); return; }
+  if (e.target.closest("#impDone")){ UI.imp=null; UI.view="home"; render(); window.scrollTo({top:0}); return; }
   if (e.target.closest("#impShowIgn") && UI.imp){ UI.imp.showIgnored=true; buildItems(); renderImport(); }
   if (e.target.closest("#rulesReset")){ const b=e.target.closest("#rulesReset"); if (b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Wirklich zurücksetzen?"; setTimeout(()=>{ b.dataset.armed=""; b.textContent="Zurücksetzen"; },3000); return; } S.settings.rules=[]; S.settings.ignoredKeys=[]; saveSettings(); renderMore(); toast("Gemerkte Zuordnungen gelöscht"); }
 });
