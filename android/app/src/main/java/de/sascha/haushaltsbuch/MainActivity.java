@@ -24,7 +24,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import org.json.JSONArray;
 import org.json.JSONObject;
+import android.graphics.Rect;
+import androidx.core.content.FileProvider;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.text.Text;
+import com.google.mlkit.vision.text.TextRecognition;
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.nio.charset.StandardCharsets;
@@ -36,6 +43,10 @@ import java.nio.charset.StandardCharsets;
  */
 public class MainActivity extends Activity {
     private static final int FILE_REQUEST = 1;
+    private static final int SCAN_CAMERA = 2;
+    private static final int SCAN_GALLERY = 3;
+    private String scanId;
+    private Uri scanUri;
     private static final String APP_URL = "file:///android_asset/index.html";
     private static final Pattern VERSION = Pattern.compile("name=\"hb-version\" content=\"(\\d+)\"");
     private WebView web;
@@ -142,6 +153,13 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SCAN_CAMERA || requestCode == SCAN_GALLERY) {
+            if (resultCode != RESULT_OK) { scanDone(null, "cancel"); return; }
+            Uri uri = requestCode == SCAN_CAMERA ? scanUri : (data != null ? data.getData() : null);
+            if (uri == null) { scanDone(null, "Kein Bild erhalten"); return; }
+            recognize(uri);
+            return;
+        }
         if (requestCode == FILE_REQUEST && fileCallback != null) {
             Uri[] result = null;
             if (resultCode == RESULT_OK && data != null && data.getData() != null) result = new Uri[]{data.getData()};
@@ -158,6 +176,62 @@ public class MainActivity extends Activity {
         web.evaluateJavascript("(window.hbBack && window.hbBack()) ? 'yes' : 'no'", value -> {
             if (value == null || !value.contains("yes")) finish();
         });
+    }
+
+    /* ---------- receipt scan: photo -> text recognition on the phone -> lines with positions to the app ---------- */
+    private void startScan(String source) {
+        try {
+            if ("gallery".equals(source)) {
+                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                i.setType("image/*");
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(Intent.createChooser(i, "Quittung auswählen"), SCAN_GALLERY);
+            } else {
+                File dir = new File(getCacheDir(), "scan");
+                dir.mkdirs();
+                File f = new File(dir, "quittung.jpg");
+                scanUri = FileProvider.getUriForFile(this, "de.sascha.haushaltsbuch.files", f);
+                Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                i.putExtra(MediaStore.EXTRA_OUTPUT, scanUri);
+                i.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivityForResult(i, SCAN_CAMERA);
+            }
+        } catch (Exception e) {
+            scanDone(null, "Kamera konnte nicht geöffnet werden");
+        }
+    }
+
+    private void recognize(Uri uri) {
+        try {
+            InputImage img = InputImage.fromFilePath(this, uri);
+            TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS).process(img)
+                .addOnSuccessListener(text -> {
+                    try {
+                        JSONArray arr = new JSONArray();
+                        for (Text.TextBlock b : text.getTextBlocks()) {
+                            for (Text.Line l : b.getLines()) {
+                                JSONObject o = new JSONObject();
+                                o.put("t", l.getText());
+                                Rect r = l.getBoundingBox();
+                                if (r != null) { o.put("x", r.left); o.put("y", r.top); o.put("w", r.width()); o.put("h", r.height()); }
+                                arr.put(o);
+                            }
+                        }
+                        scanDone(arr.toString(), null);
+                    } catch (Exception e) {
+                        scanDone(null, "Text konnte nicht erkannt werden");
+                    }
+                })
+                .addOnFailureListener(e -> scanDone(null, "Text konnte nicht erkannt werden"));
+        } catch (Exception e) {
+            scanDone(null, "Bild konnte nicht gelesen werden");
+        }
+    }
+
+    private void scanDone(String json, String err) {
+        final String js = "window.hbScanDone && window.hbScanDone(" + JSONObject.quote(scanId == null ? "" : scanId) + ","
+            + (json == null ? "null" : JSONObject.quote(json)) + "," + (err == null ? "null" : JSONObject.quote(err)) + ")";
+        runOnUiThread(() -> web.evaluateJavascript(js, null));
     }
 
     /** Called from JavaScript as window.AndroidBridge */
@@ -211,6 +285,11 @@ public class MainActivity extends Activity {
                 final String js = "window.hbHttpDone&&window.hbHttpDone(" + JSONObject.quote(id) + "," + code + "," + JSONObject.quote(text) + ")";
                 runOnUiThread(() -> web.evaluateJavascript(js, null));
             }).start();
+        }
+
+        @JavascriptInterface
+        public void scanReceipt(String id, String source) {
+            runOnUiThread(() -> { scanId = id; startScan(source); });
         }
 
         @JavascriptInterface

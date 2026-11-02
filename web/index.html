@@ -173,6 +173,10 @@ main{padding-block:6px 120px}
 .fx .check{padding:0;background:none}
 .fx .fxamt-in{width:110px;padding:7px 10px;text-align:right;font-weight:800}
 .edit-row.acct-row{grid-template-columns:minmax(0,1fr) 150px}
+.scanrow{display:flex;gap:8px;align-items:stretch}
+.scanrow .importbtn{flex:1}
+.scanrow .btn{flex:none;background:var(--sunk)}
+.scanrow.busy .importbtn{opacity:.7;pointer-events:none}
 .mchips{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 8px}
 .mchip{border:0;background:var(--sunk);border-radius:999px;padding:6px 11px;font-weight:700;font-size:12.5px;color:var(--muted)}
 .mchip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
@@ -441,6 +445,11 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
     <div class="grab"></div>
     <div class="sheet-head"><h2 id="sheetTitle">Neue Buchung</h2><button class="icon-btn" id="sheetClose" aria-label="Schließen" style="color:var(--muted)"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <button class="importbtn" id="sheetImport" style="box-shadow:none;background:var(--sunk);padding:10px 12px"><span class="ictile" style="width:34px;height:34px;border-radius:11px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span style="flex:1;text-align:left"><b>Kontoauszug importieren</b><br><span class="small muted">CSV-Datei von N26 auswählen</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+    <div class="scanrow" id="scanRow">
+      <button class="importbtn" id="scanCam" style="box-shadow:none;background:var(--sunk);padding:10px 12px"><span class="ictile" style="width:34px;height:34px;border-radius:11px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span style="flex:1;text-align:left"><b id="scanTitle">Quittung fotografieren</b><br><span class="small muted" id="scanSub">Betrag, Datum und Geschäft werden ausgefüllt</span></span></button>
+      <button class="btn" id="scanPick" hidden>Aus Galerie</button>
+    </div>
+    <input type="file" id="scanFile" accept="image/*" hidden>
     <div class="seg" id="kindSeg" role="group" aria-label="Art der Buchung">
       <button data-kind="ausgabe" aria-pressed="true">Ausgabe</button>
       <button data-kind="einnahme" aria-pressed="false">Einnahme</button>
@@ -1083,6 +1092,9 @@ function renderSheet(){
   $("saveBtn").textContent = UI.editId ? "Änderung speichern" : "Speichern";
   $("editBtns").hidden = !UI.editId;
   $("sheetImport").hidden = !!UI.editId;
+  $("scanRow").hidden = !!UI.editId;
+  $("scanPick").hidden = !NATIVE_SCAN;
+  if (!NATIVE_SCAN){ $("scanTitle").textContent="Quittung einlesen"; }
   const d=$("fDate").value;
   fillDateSelects();
   document.querySelectorAll("#dateChips .dchip").forEach(b=>b.setAttribute("aria-pressed", String(isoDaysAgo(Number(b.dataset.day))===d)));
@@ -1173,6 +1185,87 @@ $("nextM").onclick = () => { UI.ym = UI.view==="year" ? (Number(UI.ym.slice(0,4)
 $("q").addEventListener("input", e => { UI.q=e.target.value; renderList(); });
 $("sheetClose").onclick = closeSheet;
 $("sheetImport").onclick = () => { $("csvFile").click(); closeSheet(); };
+
+/* ---------- receipt scan: photo -> text recognition -> amount, date, shop ---------- */
+const NATIVE_SCAN = !!(window.AndroidBridge && window.AndroidBridge.scanReceipt); // Android: camera + on-device text recognition
+const scanWaiting = {};
+window.hbScanDone = (id, json, err) => { const f=scanWaiting[id]; if (f){ delete scanWaiting[id]; f(json, err); } };
+function scanBusy(on, text){
+  $("scanRow").classList.toggle("busy", on);
+  $("scanSub").textContent = on ? (text||"Quittung wird gelesen …") : "Betrag, Datum und Geschäft werden ausgefüllt";
+}
+async function scanNative(source){
+  const id=newId();
+  const res = await new Promise(r=>{ scanWaiting[id]=(json,err)=>r({json,err}); window.AndroidBridge.scanReceipt(id, source); });
+  if (res.err==="cancel" || (!res.json && !res.err)) return null;
+  if (res.err) throw new Error(res.err);
+  return JSON.parse(res.json);
+}
+let tessLoad=null;
+function loadTesseract(){
+  if (window.Tesseract) return Promise.resolve();
+  return tessLoad || (tessLoad = new Promise((ok,bad)=>{ const sc=document.createElement("script"); sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"; sc.onload=ok; sc.onerror=()=>{ tessLoad=null; bad(new Error("Texterkennung konnte nicht geladen werden – bist du online?")); }; document.head.appendChild(sc); }));
+}
+async function scanImageFile(file){
+  scanBusy(true, "Texterkennung wird geladen …");
+  await loadTesseract();
+  scanBusy(true, "Quittung wird gelesen …");
+  const r = await window.Tesseract.recognize(file, "deu");
+  return ((r.data && r.data.lines) || []).map(l=>({t:l.text.trim(), x:l.bbox.x0, y:l.bbox.y0, w:l.bbox.x1-l.bbox.x0, h:l.bbox.y1-l.bbox.y0})).filter(l=>l.t);
+}
+const AMT_RE = /(^|[^\d,.])(\d{1,4}(?:\.\d{3})*|\d{1,6})\s?[,.]\s?(\d{2})(?!\d)/g;
+function amountsIn(t){ const out=[]; let m; AMT_RE.lastIndex=0; while ((m=AMT_RE.exec(t))){ const v=Number(m[2].replace(/\./g,"")+"."+m[3]); if (v>0 && v<100000) out.push(v); } return out; }
+// reads the paid total, the date and the shop from the recognised lines of a receipt
+function parseReceipt(lines){
+  lines = lines.map((l,i)=>({...l, i, n:nrm(l.t)}));
+  const TOTAL = [/zu zahlen|zahlbetrag|gesamtbetrag|endbetrag|gesamtsumme|summe|gesamt|total|betrag eur|\beur\b.*summe/, /ec[- ]?karte|girocard|kartenzahlung|karte|visa|mastercard|maestro|bar\b|zahlung/];
+  const SKIP = /zwischensumme|mwst|ust|netto|steuer|rückgeld|rueckgeld|zurück|rabatt|pfand|bonus|punkte|tip|trinkgeld|kunden/;
+  const near = (a,b) => a.y!=null && b.y!=null && Math.abs((a.y+a.h/2)-(b.y+b.h/2)) < Math.max(a.h,b.h)*0.7;
+  let best=null;
+  TOTAL.forEach((re,prio)=>{
+    for (const l of lines){
+      if (!re.test(l.n) || SKIP.test(l.n)) continue;
+      let vals = amountsIn(l.t);
+      if (!vals.length){ const row = lines.filter(o=>o!==l && near(o,l) && (o.x==null||l.x==null||o.x>l.x)); vals = row.flatMap(o=>amountsIn(o.t)); }
+      if (!vals.length && l.y==null){ const nx=lines[l.i+1]; if (nx) vals=amountsIn(nx.t); }
+      // total lines: the largest amount; payment lines (card, cash): the smallest, because "Bar 20,00" may be the cash handed over
+      for (const v of vals){ const c={v, prio, i:l.i}; if (!best || c.prio<best.prio || (c.prio===best.prio && (prio===0 ? c.v>best.v : c.v<best.v))) best=c; }
+    }
+  });
+  let amount = best ? best.v : null;
+  if (amount==null){ const all=lines.filter(l=>!SKIP.test(l.n)).flatMap(l=>amountsIn(l.t)); if (all.length) amount=Math.max(...all); }
+  // date: first plausible dd.mm.yy(yy) that is not in the future
+  let date=null; const today=isoToday();
+  for (const l of lines){ const m=l.t.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})/); if (!m) continue;
+    const y=m[3].length===2?"20"+m[3]:m[3], d=y+"-"+pad(m[2])+"-"+pad(m[1]);
+    if (Number(m[2])>=1 && Number(m[2])<=12 && Number(m[1])>=1 && Number(m[1])<=31 && d<=today && d>"2000") { date=d; break; } }
+  // shop: a known chain anywhere, otherwise the first line with real words near the top
+  const all = lines.map(l=>l.n).join(" ");
+  const chain = all.match(/\b(rewe|edeka|aldi(?: süd| nord)?|lidl|netto|penny|kaufland|rossmann|dm|norma|globus|real|famila|hit|tegut|denns|alnatura|ikea|obi|hornbach|bauhaus|toom|action|tedi|müller|mueller|saturn|media ?markt|aral|shell|esso|jet|total|agip|star|avia|mcdonalds|burger king|kfc|subway|bäckerei \w+|apotheke)\b/);
+  let shop = chain ? chain[1].replace(/\b\w/g,c=>c.toUpperCase()) : "";
+  if (!shop){ const top=lines.slice(0,6).find(l=>/[a-zäöüß]{3,}/i.test(l.t) && !/beleg|kasse|bon|tel|fax|www|@|str\.|straße|strasse|\d{5}|uhrzeit|datum/i.test(l.t)); if (top) shop=top.t.replace(/\s+/g," ").slice(0,40); }
+  // category from the same keywords the bank import uses
+  let cat=null; for (const [re,kind,word] of KW){ if (kind==="ausgabe" && re.test(all+" "+nrm(shop))){ cat=catByWord("ausgabe",word); if (cat) break; } }
+  return { amount, date, shop, cat };
+}
+async function runScan(source){
+  try {
+    let lines;
+    if (NATIVE_SCAN){ scanBusy(true); lines = await scanNative(source); if (!lines){ scanBusy(false); return; } }
+    else { const f = await new Promise(r=>{ const inp=$("scanFile"); inp.value=""; inp.onchange=()=>r(inp.files[0]||null); inp.click(); }); if (!f) return; lines = await scanImageFile(f); }
+    scanBusy(false);
+    const r = parseReceipt(lines||[]);
+    if (r.amount==null){ toast("Auf der Quittung wurde kein Betrag gefunden"); return; }
+    UI.kind="ausgabe"; if (r.cat) UI.cat=r.cat;
+    $("fAmount").value=r.amount.toFixed(2).replace(".",",");
+    if (r.date) $("fDate").value=r.date;
+    if (r.shop && !$("fNote").value.trim()) $("fNote").value=r.shop;
+    renderSheet();
+    toast(`Erkannt: ${eur(r.amount)}${r.date?" am "+shortDate(r.date):""} – bitte kurz prüfen`, null, null, 4000);
+  } catch(e){ scanBusy(false); toast(e.message||"Quittung konnte nicht gelesen werden"); }
+}
+$("scanCam").onclick = () => runScan("camera");
+$("scanPick").onclick = () => runScan("gallery");
 $("sheetBg").addEventListener("click", e => { if (e.target===$("sheetBg")) closeSheet(); });
 document.addEventListener("keydown", e => { if (e.key==="Escape" && !$("sheetBg").hidden) closeSheet(); });
 $("saveBtn").onclick = saveTx;
@@ -1311,7 +1404,7 @@ const KW = [
   [/\b(rewe|edeka|aldi|lidl|netto|penny|kaufland|rossmann|dm[- ]drogerie|dm fil|norma|globus|tegut|denns|alnatura|bäckerei|baeckerei)\b/, "ausgabe","haushalt"],
   [/\b(aral|shell|esso|jet|totalenergies|total|agip|avia|tankstelle|star tankst|parkhaus|parken|apcoa|easypark|contipark|park ?now|q-park)\b/, "ausgabe","tank"],
   [/\b(geldautomat|atm|bargeld|cash ?withdrawal|bargeldauszahlung|auszahlung)\b/, "ausgabe","bargeld"],
-  [/\b(kino|cinema|steam|playstation|xbox|restaurant|lieferando|wolt|uber eats|mcdonald|burger king|kfc|subway|bar|cafe|café|eventim|ticketmaster)\b/, "ausgabe","spaß"]
+  [/\b(kino|cinema|steam|playstation|xbox|restaurant|pizzeria|imbiss|döner|doener|gaststätte|trattoria|ristorante|lieferando|wolt|uber eats|mcdonald|burger king|kfc|subway|bar|cafe|café|eventim|ticketmaster)\b/, "ausgabe","spaß"]
 ];
 const FIX_ALIAS = { "ksk":["künstlersozialkasse","kuenstlersozialkasse","ksk"], "amazon prime":["amazon prime","prime video","amazon digital","amzn digital"], "handy prepaid":["prepaid","aufladung"], "mobiles internet":["datenvolumen","mobile data"], "bankgebühren":["n26 kontoführung","kontoführung","n26 smart","n26 you","n26 metal","n26 go"], "studienkredit":["kfw","studienkredit","bafög","bafoeg"] };
 function catByWord(kind, word){ return cats(kind).find(c=>c.toLowerCase().includes(word)) || null; }

@@ -37,3 +37,9 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 }
+
+dependencies {
+    // receipt scan: text recognition runs on the phone (model is inside the app, works offline)
+    implementation 'com.google.mlkit:text-recognition:16.0.1'
+    implementation 'androidx.core:core:1.13.1'
+}
