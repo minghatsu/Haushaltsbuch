@@ -52,7 +52,12 @@ jobs:
         run: |
           mkdir -p android/app/src/main/assets
           cp app.html android/app/src/main/assets/index.html
-          cd android && gradle assembleRelease --no-daemon
+          cd android
+          if ! gradle assembleRelease --no-daemon > ../gradle.log 2>&1; then
+            # show the compiler/gradle errors as annotations, so they can be read without the full log
+            grep -E "error:|ERROR|What went wrong|FAILURE|Could not|> " ../gradle.log | head -30 | while IFS= read -r l; do echo "::error::$l"; done
+            exit 1
+          fi
           cp app/build/outputs/apk/release/app-release.apk ../Haushaltsbuch.apk
       - uses: actions/upload-artifact@v4
         with:
