@@ -173,6 +173,16 @@ main{padding-block:6px 120px}
 .fx .check{padding:0;background:none}
 .fx .fxamt-in{width:110px;padding:7px 10px;text-align:right;font-weight:800}
 .edit-row.acct-row{grid-template-columns:minmax(0,1fr) 150px}
+.shops{display:grid;gap:8px}
+.shopchip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.shopchip[aria-pressed="true"] .muted{color:inherit;opacity:.8}
+.shopnum{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--accent-ink);color:var(--accent);font-size:11px;font-weight:800}
+.shop{display:flex;align-items:center;gap:12px;padding:10px 10px;margin:0 -10px;border-radius:14px;color:inherit;text-decoration:none}
+.shop:hover{background:var(--sunk)}
+.shop .grow{flex:1;min-width:0;display:flex;flex-direction:column}
+.shoplogo{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:19px;flex:none}
+.shopgo{display:inline-flex;align-items:center;gap:2px;color:var(--accent);font-weight:700;font-size:13.5px;white-space:nowrap}
+
 .scanrow{display:flex;gap:8px;align-items:stretch}
 .scanrow .importbtn{flex:1}
 .scanrow .btn{flex:none;background:var(--sunk)}
@@ -412,6 +422,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="field"><label>Ausgaben privat</label><div class="chips" id="catEd-ausgabe"></div></div>
       <div class="field"><label>Ausgaben betrieblich</label><div class="chips" id="catEd-betrieb"></div></div>
       <div class="field"><label>Einnahmen</label><div id="catEd-einnahme"></div></div>
+      <div class="section-title">Angebote</div>
+      <div class="field"><span class="small muted" style="margin-top:-2px">Diese Läden zeigt die Startseite mit einem Link zum aktuellen Prospekt, in der Reihenfolge, in der du sie antippst.</span><div class="chips" id="shopEd"></div></div>
       <div class="section-title">Konten</div>
       <div class="field"><span class="small muted" style="margin-top:-2px">Trag einmal ein, was heute auf einem Konto ist. Die App rechnet den Stand für jeden Monat aus deinen importierten Kontoauszügen aus.</span><div id="acctEd"></div></div>
       <div class="section-title">Import</div>
@@ -867,6 +879,7 @@ function renderHome(){
       ${g.length ? g.map(x=>`<div class="catrow">${tile(x.kind,x.cat)}<div class="grow"><div class="top-l"><span>${esc(x.label||x.cat)}${x.kind==="betrieb"?` <span class="small muted">· Betrieb</span>`:""}</span><span>${esc(eur(x.v))}</span></div><div class="sub"><div class="track"><div class="fill" style="width:${Math.max(3,x.v/gMax*100)}%;background:${catColor(x.kind,x.cat)}"></div></div><span class="pct">${Math.round(x.v/gTot*100)} %</span></div></div></div>`).join("")
         : emptyState("basket","Noch nichts ausgegeben","Tipp auf das Plus, um deine erste Ausgabe einzutragen.")}
     </div>
+    ${offersCard()}
     <div class="card" style="order:8">
       <div class="card-head"><h2>Letzte Buchungen</h2>${c.tx.length?`<button class="link" data-go="list">Alle ${ic("right",16)}</button>`:""}</div>
       ${c.tx.length ? sortTx(c.tx).slice(0,UI.wide?8:5).map(t=>txRow(t,true)).join("") : emptyState("receipt","Noch keine Buchungen","Alles, was du einträgst, erscheint hier.", `<button class="btn primary" data-add="ausgabe">Erste Buchung eintragen</button>`)}
@@ -875,6 +888,60 @@ function renderHome(){
   const det = $("heroDetails"); if (det) det.addEventListener("toggle", ()=>{ UI.heroOpen = det.open; });
 }
 
+/* ---------- weekly offers of the shops you actually buy at ---------- */
+const SHOPS = [
+  {id:"penny",    name:"Penny",     re:/\bpenny\b/,                 color:"#CD1414", url:"https://www.penny.de/angebote"},
+  {id:"rewe",     name:"REWE",      re:/\brewe\b/,                  color:"#CC071E", url:"https://www.rewe.de/angebote/"},
+  {id:"edeka",    name:"EDEKA",     re:/\bedeka\b/,                 color:"#1F4B9C", url:"https://www.edeka.de/eh/angebote.jsp"},
+  {id:"aldinord", name:"Aldi Nord", re:/\baldi ?nord\b/,            color:"#00549F", url:"https://www.aldi-nord.de/angebote.html"},
+  {id:"aldi",     name:"Aldi Süd",  re:/\baldi\b/,                  color:"#00005F", url:"https://www.aldi-sued.de/de/angebote.html"},
+  {id:"lidl",     name:"Lidl",      re:/\blidl\b/,                  color:"#0050AA", url:"https://www.lidl.de/"},
+  {id:"kaufland", name:"Kaufland",  re:/\bkaufland\b/,              color:"#E10915", url:"https://filiale.kaufland.de/angebote/aktuelle-woche.html"},
+  {id:"netto",    name:"Netto",     re:/\bnetto marken|\bnetto\b/,  color:"#FFD400", ink:"#1A1A1A", url:"https://www.netto-online.de/filialangebote"},
+  {id:"rossmann", name:"Rossmann",  re:/\brossmann\b/,              color:"#C3002D", url:"https://www.rossmann.de/de/angebote"},
+  {id:"dm",       name:"dm",        re:/\bdm\b(?!\s*[0-9])|dm-drogerie|dm drogerie/, color:"#002878", url:"https://www.dm.de/"},
+  {id:"norma",    name:"Norma",     re:/\bnorma\b/,                 color:"#E3000F", url:"https://www.norma-online.de/de/angebote/"},
+  {id:"globus",   name:"Globus",    re:/\bglobus\b/,                color:"#00843D", url:"https://www.globus.de/angebote/"}
+];
+function shopStats(){
+  const from = shiftYm(ymOf(new Date()), -5), out={};
+  for (const t of S.tx){
+    if (t.kind!=="ausgabe" || (t.date||"").slice(0,7) < from) continue;
+    const n=nrm(t.note), sh=SHOPS.find(x=>x.re.test(n)); if (!sh) continue;
+    const o = out[sh.id] || (out[sh.id]={shop:sh, sum:0, count:0, last:""});
+    o.sum+=t.amount; o.count++; if (t.date>o.last) o.last=t.date;
+  }
+  return Object.values(out).sort((a,b)=>b.sum-a.sum);
+}
+function offersCard(){
+  const chosen = (S.settings.shops||[]).map(id=>SHOPS.find(x=>x.id===id)).filter(Boolean);
+  const stats = Object.fromEntries(shopStats().map(o=>[o.shop.id,o]));
+  if (!chosen.length) return `<div class="card" style="order:9"><div class="card-head"><h2>Angebote deiner Läden</h2></div>
+    <div class="notice info"><span>Wähl aus, von welchen Läden du die Wochenangebote hier sehen willst.</span><button class="btn primary" data-go="more" data-scroll="shopEd">Läden auswählen</button></div></div>`;
+  const st = chosen.map(sh=>stats[sh.id] || {shop:sh, sum:0, count:0});
+  const link = (o) => `<a class="shop" href="${esc(o.shop.url)}"${NATIVE?"":' target="_blank" rel="noopener"'}>
+      <span class="shoplogo" style="background:${o.shop.color};color:${o.shop.ink||"#fff"}">${esc(o.shop.name.replace(/ .*/,"").slice(0,1))}</span>
+      <span class="grow"><b>${esc(o.shop.name)}</b><span class="small muted">${o.count?`Ø ${esc(eur0(o.sum/6))} im Monat · ${o.count} Einkäufe`:"zuletzt nicht eingekauft"}</span></span>
+      <span class="shopgo">Prospekt ${ic("right",16)}</span></a>`;
+  return `<div class="card" style="order:9">
+    <div class="card-head"><h2>Angebote deiner Läden</h2><button class="link" data-go="more" data-scroll="shopEd">Auswahl ändern ${ic("right",16)}</button></div>
+    <div class="shops">${st.map(link).join("")}</div>
+  </div>`;
+}
+function renderShopEd(){
+  const sel=S.settings.shops||[], stats=Object.fromEntries(shopStats().map(o=>[o.shop.id,o]));
+  $("shopEd").innerHTML = SHOPS.map(sh=>{ const i=sel.indexOf(sh.id); return `<button class="chip shopchip" data-shop="${sh.id}" aria-pressed="${i>=0}">${i>=0?`<span class="shopnum">${i+1}</span>`:""}${esc(sh.name)}${stats[sh.id]?` <span class="small muted" title="Einkäufe in den letzten 6 Monaten">(${stats[sh.id].count})</span>`:""}</button>`; }).join("");
+}
+document.addEventListener("click", e=>{
+  const b=e.target.closest("[data-shop]"); if (!b) return;
+  const id=b.dataset.shop, sel=[...(S.settings.shops||[])], i=sel.indexOf(id);
+  if (i>=0) sel.splice(i,1); else sel.push(id);
+  S.settings.shops=sel; saveSettings(); renderShopEd();
+});
+document.addEventListener("click", e=>{
+  const b=e.target.closest("[data-scroll]"); if (!b) return;
+  setTimeout(()=>{ const el=$(b.dataset.scroll); if (el) el.scrollIntoView({block:"center", behavior:"smooth"}); }, 60);
+});
 function renderList(){
   const filters = [["alle","Alle"],["ausgabe","Ausgaben"],["einnahme","Einnahmen"],["betrieb","Betrieblich"],["vorauszahlung","Steuer"]];
   $("filters").innerHTML = filters.map(([k,l])=>`<button class="fchip" data-filter="${k}" aria-pressed="${UI.filter===k}">${l}</button>`).join("");
@@ -1008,6 +1075,7 @@ function renderMore(){
   renderSyncInfo();
   renderSpaces();
   renderAccounts();
+  renderShopEd();
   $("sKU").checked=!!st.kleinunternehmer; $("sSplit").checked=!!st.splitting; $("partnerField").hidden=!st.splitting;
   for (const k of ["ausgabe","betrieb"]) $("catEd-"+k).innerHTML = cats(k).map(n=>`<span class="chip">${esc(n)}<button class="x" data-catdel="${k}|${esc(n)}" aria-label="${esc(n)} entfernen">×</button></span>`).join("")+`<button class="chip" data-catadd="${k}">+ Neu</button>`;
   $("catEd-einnahme").innerHTML = incCats().map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:5px 0"><b style="flex:1">${esc(c.name)}</b><select class="in" style="width:auto" data-incart="${esc(c.name)}" aria-label="Art von ${esc(c.name)}"><option value="selbst" ${c.art==="selbst"?"selected":""}>Selbstständig</option><option value="lohnersatz" ${c.art==="lohnersatz"?"selected":""}>Lohnersatz (ALG1)</option><option value="sonstige" ${c.art==="sonstige"?"selected":""}>Sonstige</option></select><button class="icon-btn" data-catdel="einnahme|${esc(c.name)}" aria-label="${esc(c.name)} entfernen">×</button></div>`).join("")+`<button class="chip" data-catadd="einnahme" style="margin-top:6px">+ Neu</button>`;
