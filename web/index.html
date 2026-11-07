@@ -698,10 +698,56 @@ function brandFor(text){
   for (const [re,t,bg,domain,ink] of BRANDS) if (re.test(n)) return {t, bg, ink:ink||"#fff", domain};
   return null;
 }
-const logoUrl = d => "https://www.google.com/s2/favicons?sz=64&domain="+encodeURIComponent(d);
+const logoUrl = d => "https://www.google.com/s2/favicons?sz=128&domain="+encodeURIComponent(d);
+/* logo images are downloaded once and kept on the device (IndexedDB), so they also show without internet */
+const LOGO = { db:null, map:new Map(), busy:new Set(), queue:[], running:0, tRender:null };
+function logoDb(){
+  if (!LOGO.db) LOGO.db = new Promise((ok,bad)=>{ try { const r=indexedDB.open("haushaltsbuch-logos",1); r.onupgradeneeded=()=>r.result.createObjectStore("l"); r.onsuccess=()=>ok(r.result); r.onerror=()=>bad(r.error); } catch(e){ bad(e); } });
+  return LOGO.db;
+}
+async function logoStore(mode, fn){ const d=await logoDb(); return new Promise((ok,bad)=>{ const tx=d.transaction("l",mode); const q=fn(tx.objectStore("l")); tx.oncomplete=()=>ok(q?q.result:undefined); tx.onerror=()=>bad(tx.error); }); }
+const imgWaiting={};
+window.hbImgDone=(id, data)=>{ const f=imgWaiting[id]; if (f){ delete imgWaiting[id]; f(data||null); } };
+async function downloadImage(url){
+  const br=window.AndroidBridge;
+  if (br && br.fetchImage) return await new Promise(r=>{ const id=newId(); imgWaiting[id]=r; br.fetchImage(id, url); setTimeout(()=>{ if (imgWaiting[id]){ delete imgWaiting[id]; r(null); } }, 20000); });
+  try { const res=await fetch(url,{mode:"cors"}); if (!res.ok) return null; const bl=await res.blob(); return await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.onerror=()=>r(null); fr.readAsDataURL(bl); }); } catch(e){ return null; }
+}
+function imgSize(data){ return new Promise(r=>{ const im=new Image(); im.onload=()=>r(im.naturalWidth); im.onerror=()=>r(0); im.src=data; }); }
+async function fetchLogo(domain){
+  if (!domain || LOGO.map.has(domain) || LOGO.busy.has(domain)) return;
+  LOGO.busy.add(domain);
+  try {
+    const data = await downloadImage(logoUrl(domain));
+    if (!data){ return; }                                   // offline or blocked: try again later
+    const w = await imgSize(data);
+    const v = { data: w>16 ? data : null, ts: Date.now() }; // the 16 px globe means "no logo known"
+    await logoStore("readwrite", st=>st.put(v, domain)); LOGO.map.set(domain, v);
+    clearTimeout(LOGO.tRender); LOGO.tRender=setTimeout(()=>render(), 300);
+  } catch(e){} finally { LOGO.busy.delete(domain); }
+}
+function queueLogo(domain){ if (!domain || LOGO.map.has(domain) || LOGO.busy.has(domain) || LOGO.queue.includes(domain)) return; LOGO.queue.push(domain); pumpLogos(); }
+function pumpLogos(){ while (LOGO.running<3 && LOGO.queue.length){ const d=LOGO.queue.shift(); LOGO.running++; fetchLogo(d).finally(()=>{ LOGO.running--; pumpLogos(); }); } }
+// fetch the logos of every merchant in the data once, so they are there before you go offline
+function prefetchLogos(){
+  if (S.settings.logos===false) return;
+  const seen=new Set();
+  for (const t of S.tx){ const b=brandFor(t.note); if (b && b.domain) seen.add(b.domain); }
+  for (const f of S.fixed){ const b=brandFor(f.name); if (b && b.domain) seen.add(b.domain); }
+  for (const id of (S.settings.shops||[])) if (SHOP_DOMAINS[id]) seen.add(SHOP_DOMAINS[id]);
+  for (const d of seen){ const v=LOGO.map.get(d); if (!v || (!v.data && Date.now()-v.ts>30*864e5)){ LOGO.map.delete(d); queueLogo(d); } }
+}
+logoStore("readonly", st=>st.getAllKeys()).then(async keys=>{
+  const vals = await logoStore("readonly", st=>st.getAll());
+  (keys||[]).forEach((k,i)=>LOGO.map.set(k, vals[i]));
+  render(); setTimeout(prefetchLogos, 1500);
+}).catch(()=>{});
+window.addEventListener("online", ()=>setTimeout(prefetchLogos, 1000));
 function brandBadge(b){
-  const logo = b.domain && S.settings.logos!==false;
-  return `<span class="ictile bavatar${logo?" haslogo":""}" style="--bb:${b.bg};--bi:${b.ink}"><b>${esc(b.t)}</b>${logo?`<img src="${esc(logoUrl(b.domain))}" alt="" loading="lazy" referrerpolicy="no-referrer" onload="if(this.naturalWidth<=16){this.parentNode.classList.remove('haslogo');this.remove()}" onerror="this.parentNode.classList.remove('haslogo');this.remove()">`:""}</span>`;
+  const on = b.domain && S.settings.logos!==false, v = on ? LOGO.map.get(b.domain) : null;
+  if (on && !v) queueLogo(b.domain);
+  const img = v && v.data;
+  return `<span class="ictile bavatar${img?" haslogo":""}" style="--bb:${b.bg};--bi:${b.ink}"><b>${esc(b.t)}</b>${img?`<img src="${img}" alt="">`:""}</span>`;
 }
 function avatar(t){ const b=brandFor(t.note); return b ? brandBadge(b) : tile(t.kind,t.cat); }
 function hIc(name){ return `<span class="h2ic">${ic(name,15)}</span>`; }

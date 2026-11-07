@@ -383,6 +383,34 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> { scanId = id; startScan(source); });
         }
 
+        /** Downloads a small image (merchant logo) and hands it back as data URL via window.hbImgDone(id, data). */
+        @JavascriptInterface
+        public void fetchImage(final String id, final String url) {
+            new Thread(() -> {
+                String data = null;
+                HttpURLConnection c = null;
+                try {
+                    if (!url.startsWith("https://")) throw new IllegalArgumentException();
+                    c = (HttpURLConnection) new URL(url).openConnection();
+                    c.setConnectTimeout(8000);
+                    c.setReadTimeout(15000);
+                    c.setInstanceFollowRedirects(true);
+                    if (c.getResponseCode() == 200) {
+                        String ct = c.getContentType();
+                        byte[] b = readAll(c.getInputStream());
+                        if (b.length > 0 && b.length < 300000 && ct != null && ct.startsWith("image/"))
+                            data = "data:" + ct.split(";")[0] + ";base64," + Base64.encodeToString(b, Base64.NO_WRAP);
+                    }
+                } catch (Exception e) {
+                    data = null;
+                } finally {
+                    if (c != null) c.disconnect();
+                }
+                final String js = "window.hbImgDone && window.hbImgDone(" + JSONObject.quote(id) + "," + (data == null ? "null" : JSONObject.quote(data)) + ")";
+                runOnUiThread(() -> web.evaluateJavascript(js, null));
+            }).start();
+        }
+
         @JavascriptInterface
         public void reloadApp() {
             runOnUiThread(() -> web.loadUrl(APP_URL));

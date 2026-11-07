@@ -140,6 +140,19 @@ ipcMain.on("http", async (e, req) => {
   e.sender.executeJavaScript(`window.hbHttpDone && window.hbHttpDone(${JSON.stringify(req.id)}, ${status}, ${JSON.stringify(text)})`).catch(() => {});
 });
 
+// merchant logos: downloaded here and handed to the app as data URL (the app keeps them for offline use)
+ipcMain.on("fetchImage", async (e, req) => {
+  let data = null;
+  try {
+    if (!/^https:\/\//i.test(req.url)) throw new Error("bad url");
+    const r = await fetch(req.url, { signal: AbortSignal.timeout(15000) });
+    const ct = (r.headers.get("content-type") || "").split(";")[0];
+    if (r.ok && ct.startsWith("image/")) { const b = Buffer.from(await r.arrayBuffer()); if (b.length && b.length < 300000) data = "data:" + ct + ";base64," + b.toString("base64"); }
+  } catch (err) { data = null; }
+  if (e.sender.isDestroyed()) return;
+  e.sender.executeJavaScript(`window.hbImgDone && window.hbImgDone(${JSON.stringify(req.id)}, ${JSON.stringify(data)})`).catch(() => {});
+});
+
 /* ---------- automatic start test for the build (npm run smoke) ---------- */
 function runSmokeTest() {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
