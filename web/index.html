@@ -102,6 +102,13 @@ main{padding-block:6px 120px}
 
 .quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 /* account cards (swipe) */
+/* account cards as a stack: swipe left or right, the top card goes to the back */
+.astack{position:relative;height:196px;touch-action:pan-y;user-select:none;-webkit-user-select:none;outline:none}
+.astack .acard{position:absolute;left:0;right:0;top:0;max-width:none;transition:transform .32s cubic-bezier(.2,.8,.2,1),opacity .32s;will-change:transform;cursor:grab}
+.astack.one{height:176px}.astack.one .acard{cursor:default}
+.astack .acard.drag{transition:none;cursor:grabbing}
+.acard.tot{background:linear-gradient(135deg,#0F5E46,#0A3F30)}
+.adots{gap:4px!important}.adots button{border:0;background:none;padding:6px 2px;display:grid;place-items:center}.adots button i{display:block;width:6px;height:6px;border-radius:9px;background:var(--line);transition:width .2s,background .2s}.adots button.on i{width:20px;background:var(--accent)}
 .acards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:2px 16px 4px;scrollbar-width:none}
 .acards::-webkit-scrollbar{display:none}
 .acard{flex:0 0 calc(100% - 34px);max-width:440px;scroll-snap-align:start;border-radius:28px;padding:18px 20px 16px;color:#fff;position:relative;overflow:hidden;min-height:176px;display:flex;flex-direction:column;background:radial-gradient(120% 140% at 100% 0%,#3FBF8A 0%,#178060 45%,#0D5A44 100%);box-shadow:0 14px 30px -16px rgba(13,90,68,.7)}
@@ -1322,6 +1329,37 @@ function moneyFlowCard(ym){
         : emptyState("basket","Noch nichts ausgegeben","Tipp auf das Plus, um deine erste Ausgabe einzutragen.")}
     </div>`;
 }
+function initStack(){
+  const st=$("astack"); if (!st) return;
+  const cards=[...st.querySelectorAll(".acard")], n=cards.length, dots=$("adots");
+  if (!(UI.cardIdx>=0 && UI.cardIdx<n)) UI.cardIdx=0;
+  const place = () => {
+    cards.forEach((c,i)=>{ const d=(i-UI.cardIdx+n)%n; c.style.zIndex=String(10-d);
+      c.style.transform = d===0 ? "" : d===1 ? "translateY(10px) scale(.95)" : d===2 ? "translateY(20px) scale(.9)" : "translateY(20px) scale(.9)";
+      c.style.opacity = d<=1 ? "1" : d===2 ? ".55" : "0"; c.setAttribute("aria-hidden", String(d!==0)); });
+    if (dots) [...dots.children].forEach((b,i)=>b.classList.toggle("on", i===UI.cardIdx));
+  };
+  place();
+  if (n<2) return;
+  const go = dir => { UI.cardIdx=(UI.cardIdx+dir+n)%n; place(); };
+  // fly the top card out to the side it was pushed to, then it goes to the back
+  const flyOut = (dir) => { const top=cards[UI.cardIdx]; top.classList.remove("drag"); top.style.transform=`translateX(${dir<0?-115:115}%) rotate(${dir<0?-8:8}deg)`; top.style.opacity="0";
+    setTimeout(()=>{ top.style.transition="none"; go(dir<0?1:-1); top.style.opacity="0"; requestAnimationFrame(()=>{ top.style.transition=""; place(); }); }, 230); };
+  let x0=null, y0=0, dx=0, lock=null, t0=0;
+  st.addEventListener("pointerdown", e=>{ if (e.button>0) return; x0=e.clientX; y0=e.clientY; dx=0; lock=null; t0=Date.now(); });
+  st.addEventListener("pointermove", e=>{
+    if (x0===null) return; const mx=e.clientX-x0, my=e.clientY-y0;
+    if (lock===null && (Math.abs(mx)>6 || Math.abs(my)>6)){ lock = Math.abs(mx)>Math.abs(my) ? "x" : "y"; if (lock==="x"){ try{ st.setPointerCapture(e.pointerId); }catch(_){} cards[UI.cardIdx].classList.add("drag"); } }
+    if (lock!=="x") return; dx=mx; cards[UI.cardIdx].style.transform=`translateX(${dx}px) rotate(${dx/22}deg)`;
+  });
+  const end = () => { if (x0===null) return; const fast=Math.abs(dx)/Math.max(1,Date.now()-t0)>0.5;
+    if (lock==="x" && (Math.abs(dx)>70 || (fast && Math.abs(dx)>25))) flyOut(dx<0?-1:1);
+    else if (lock==="x"){ cards[UI.cardIdx].classList.remove("drag"); place(); }
+    x0=null; lock=null; };
+  st.addEventListener("pointerup", end); st.addEventListener("pointercancel", end);
+  st.addEventListener("keydown", e=>{ if (e.key==="ArrowRight"){ flyOut(-1); e.preventDefault(); } else if (e.key==="ArrowLeft"){ flyOut(1); e.preventDefault(); } });
+  if (dots) dots.addEventListener("click", e=>{ const b=e.target.closest("[data-cdot]"); if (b){ UI.cardIdx=Number(b.dataset.cdot); place(); } });
+}
 function renderHome(){
   if ($("v-home").contains(document.activeElement) && /^(INPUT|SELECT)$/.test(document.activeElement.tagName)) return; // don't wipe what is being typed
   const ym=UI.ym, c=monthCalc(ym), cum=yearCum(ym), cur=ymOf(new Date());
@@ -1364,11 +1402,20 @@ function renderHome(){
 
   // --- cards with the accounts (swipe): Hauptkonto big, every Space with a known balance next to it
   const accts=[{name:mainName||"Kontostand", bal:mainBal, main:true}, ...others.map(n=>({name:n, bal:accountBalance(n,asOf)}))];
+  if (mainName){
+    // Spaces without an entered balance: what is left of the total after the known accounts (exact if it is just one Space)
+    const open=[...known].filter(n=>n!==mainName && !others.includes(n) && !/paypal/i.test(n));
+    const rest=Math.round((cum.balance - mainBal - sum(others,n=>accountBalance(n,asOf)||0))*100)/100;
+    if (open.length===1) accts.push({name:open[0], bal:rest, guess:true});
+    else if (open.length>1 || Math.abs(rest)>=0.01) accts.push({name: open.length?"Weitere Spaces":"Spaces", bal:rest, guess:true, sub: open.length>1 ? open.join(", ") : ""});
+    accts.push({name:"Gesamt mit Spaces", bal:cum.balance, total:true});
+  }
   const spark = mainName && ym<=cur ? sparkPath(mainName, asOf) : "";
   const when = ym===cur?"heute":ym<cur?"Ende "+MONTHS[ymParts(ym)[1]-1]:"voraussichtlich Ende "+MONTHS[ymParts(ym)[1]-1];
-  const acardHtml = accts.map((a,i)=>`<div class="acard ${i?"alt":""} ${a.bal<0?"minus":""}"><div class="l">${esc(a.name)} · ${esc(when)}</div><div class="b">${esc(eur(a.bal))}</div>
+  const acardHtml = accts.map((a,i)=>`<div class="acard ${i?"alt":""} ${a.total?"tot":""} ${a.bal<0?"minus":""}" data-ci="${i}"><div class="l">${esc(a.name)} · ${esc(when)}</div><div class="b">${esc(eur(a.bal))}</div>
       ${a.main&&spark?`<svg class="spark" viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true"><path d="${spark}" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2.2" stroke-linejoin="round"/></svg>`:""}
-      <div class="m">${a.main?`<span>${c.net>=0?"↑":"↓"} ${esc(eur0(Math.abs(c.net)))} ${c.net>=0?"übrig":"mehr ausgegeben"} im ${esc(MONTHS[ymParts(ym)[1]-1])}</span>${mainName?`<span>Mit Spaces ${esc(eur(cum.balance))}</span>`:""}`:`<span>Space</span>`}</div></div>`).join("");
+      <div class="m">${a.main?`<span>${c.net>=0?"↑":"↓"} ${esc(eur0(Math.abs(c.net)))} ${c.net>=0?"übrig":"mehr ausgegeben"} im ${esc(MONTHS[ymParts(ym)[1]-1])}</span>${mainName?`<span>Mit Spaces ${esc(eur(cum.balance))}</span>`:""}`
+        : a.total ? `<span>Hauptkonto und alle Spaces</span>` : a.guess ? `<span>${a.sub?esc(a.sub)+" · ":""}aus Gesamt minus Hauptkonto</span>` : `<span>Space</span>`}</div></div>`).join("");
   // --- one sentence in plain words: the most important thing right now
   const over = budgetWarn.find(x=>x.v>x.budget), near = budgetWarn.find(x=>x.v<=x.budget);
   let tip, tipCls="";
@@ -1391,8 +1438,8 @@ function renderHome(){
     ${needStart?`<div class="notice info"><span>Trag einmal deinen Kontostand vom 1.1.${y} ein, dann stimmt die Rechnung.</span><button class="btn primary" data-go="more">Eintragen</button></div>`:""}
     <div class="cols"><div class="col">
     <div style="order:1;display:flex;flex-direction:column;gap:10px">
-      <div class="acards ${accts.length>1?"":"one"}" id="acards">${acardHtml}</div>
-      ${accts.length>1?`<div class="adots" id="adots">${accts.map((_,i)=>`<i class="${i?"":"on"}"></i>`).join("")}</div>`:""}
+      <div class="astack ${accts.length>1?"":"one"}" id="astack" ${accts.length>1?`tabindex="0" aria-label="Konten – wischen zum Blättern"`:""}>${acardHtml}</div>
+      ${accts.length>1?`<div class="adots" id="adots">${accts.map((_,i)=>`<button data-cdot="${i}" aria-label="Karte ${i+1}"><i></i></button>`).join("")}</div>`:""}
       <details class="calc" id="heroDetails" ${UI.heroOpen?"open":""}><summary>So berechnet ${ic("chevron",14)}</summary>
         <div class="eq"><span>${mainName?"Gesamt":"Kontostand"} 1.1.${esc(y)}</span><span>${esc(eur(startBal(y)))}</span><span>+ Einnahmen bis ${ym===cur?"heute":"Monatsende"}</span><span>${esc(eur(cum.balance-startBal(y)+cum.outSum))}</span><span>− Ausgaben bis ${ym===cur?"heute":"Monatsende"}</span><span>${esc(eur(cum.outSum))}</span><span>${mainName?"= Gesamt mit Spaces":"= Kontostand"}</span><span>${esc(eur(cum.balance))}</span>
         ${ym>=cur&&(c.fixOpen||cum.reserveBal)?`<span>− Fixkosten noch offen (${c.openCount})</span><span>${esc(eur(c.fixOpen))}</span>${cum.reserveBal?`<span>− Rücklage für Steuern</span><span>${esc(eur(cum.reserveBal))}</span>`:""}<span>= Frei verfügbar</span><span>${esc(eur(free))}</span>`:""}</div>
@@ -1427,7 +1474,7 @@ function renderHome(){
     </div>
     </div></div>`;
   const det = $("heroDetails"); if (det) det.addEventListener("toggle", ()=>{ UI.heroOpen = det.open; });
-  const ac=$("acards"), ad=$("adots"); if (ac && ad) ac.addEventListener("scroll", ()=>{ const w=ac.firstElementChild?ac.firstElementChild.offsetWidth+10:1, i=Math.round(ac.scrollLeft/w); [...ad.children].forEach((d,k)=>d.classList.toggle("on",k===i)); }, {passive:true});
+  initStack();
 }
 
 /* ---------- savings goals ---------- */
