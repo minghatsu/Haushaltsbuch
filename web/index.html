@@ -183,6 +183,28 @@ main{padding-block:6px 120px}
 .shoplogo{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:19px;flex:none}
 .shopgo{display:inline-flex;align-items:center;gap:2px;color:var(--accent);font-weight:700;font-size:13.5px;white-space:nowrap}
 
+.rcptrow .rcpthave{display:flex;align-items:center;gap:12px;padding:8px 10px;background:var(--sunk);border-radius:16px}
+.rcptrow img{width:46px;height:46px;object-fit:cover;border-radius:10px;background:var(--surface);cursor:zoom-in}
+.rcptrow .grow{flex:1;min-width:0}
+.rcptviewer{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px}
+.rcptviewer img{max-width:100%;max-height:calc(100% - 70px);object-fit:contain;border-radius:8px}
+.tx .clip{display:inline-block;vertical-align:-2px;margin-left:5px;color:var(--muted)}
+.lockbg{position:fixed;inset:0;z-index:200;background:var(--bg);display:grid;place-items:center;padding:24px}
+.lockbox{width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.lockbox h2{font-family:var(--f-display);margin:4px 0 0;font-size:22px}
+.lockbox p{margin:0}
+.pindots{display:flex;gap:14px;min-height:18px;margin:6px 0}
+.pindots span{width:14px;height:14px;border-radius:50%;border:2px solid var(--faint)}
+.pindots span.on{background:var(--accent);border-color:var(--accent)}
+.pindots.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-4px)}}
+#lockErr{color:var(--bad);min-height:18px}
+.keypad{display:grid;grid-template-columns:repeat(3,76px);gap:12px;margin-top:4px}
+.keypad button{height:64px;border-radius:20px;border:0;background:var(--surface);box-shadow:var(--shadow);font:700 24px var(--f-display);color:var(--fg);display:grid;place-items:center}
+.keypad button:active{background:var(--accent-soft)}
+.keypad button[data-k="bio"],.keypad button[data-k="del"]{background:none;box-shadow:none;color:var(--muted)}
+.keypad button[data-k="bio"].off{visibility:hidden}
+.keypad svg.i{width:26px;height:26px}
 .scanrow{display:flex;gap:8px;align-items:stretch}
 .scanrow .importbtn{flex:1}
 .scanrow .btn{flex:none;background:var(--sunk)}
@@ -420,8 +442,11 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="field" id="partnerField"><label for="sPartner">Zu versteuerndes Einkommen Partner/in (€ pro Jahr)</label><input class="in" id="sPartner" inputmode="decimal"></div>
       <div class="section-title">Kategorien</div>
       <div class="field"><label>Ausgaben privat</label><div class="chips" id="catEd-ausgabe"></div></div>
+      <div class="field"><label>Monatsbudgets</label><span class="small muted" style="margin-top:-2px">Wie viel du pro Monat höchstens ausgeben willst. Ab 80 % warnt die Startseite. Leer lassen = kein Budget.</span><div id="budgetEd"></div></div>
       <div class="field"><label>Ausgaben betrieblich</label><div class="chips" id="catEd-betrieb"></div></div>
       <div class="field"><label>Einnahmen</label><div id="catEd-einnahme"></div></div>
+      <div class="section-title">Sicherheit</div>
+      <div class="field" id="lockEd"></div>
       <div class="section-title">Angebote</div>
       <div class="field"><span class="small muted" style="margin-top:-2px">Diese Läden zeigt die Startseite mit einem Link zum aktuellen Prospekt, in der Reihenfolge, in der du sie antippst.</span><div class="chips" id="shopEd"></div></div>
       <div class="section-title">Konten</div>
@@ -456,12 +481,16 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <div class="grab"></div>
     <div class="sheet-head"><h2 id="sheetTitle">Neue Buchung</h2><button class="icon-btn" id="sheetClose" aria-label="Schließen" style="color:var(--muted)"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
-    <button class="importbtn" id="sheetImport" style="box-shadow:none;background:var(--sunk);padding:10px 12px"><span class="ictile" style="width:34px;height:34px;border-radius:11px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span style="flex:1;text-align:left"><b>Kontoauszug importieren</b><br><span class="small muted">CSV-Datei von N26 auswählen</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+    <button class="importbtn" id="sheetImport" style="box-shadow:none;background:var(--sunk);padding:10px 12px"><span class="ictile" style="width:34px;height:34px;border-radius:11px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span style="flex:1;text-align:left"><b>Kontoauszug importieren</b><br><span class="small muted">CSV-Datei deiner Bank auswählen</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
     <div class="scanrow" id="scanRow">
       <button class="importbtn" id="scanCam" style="box-shadow:none;background:var(--sunk);padding:10px 12px"><span class="ictile" style="width:34px;height:34px;border-radius:11px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span style="flex:1;text-align:left"><b id="scanTitle">Quittung fotografieren</b><br><span class="small muted" id="scanSub">Betrag, Datum und Geschäft werden ausgefüllt</span></span></button>
       <button class="btn" id="scanPick" hidden>Aus Galerie</button>
     </div>
     <input type="file" id="scanFile" accept="image/*" hidden>
+    <div class="rcptrow" id="rcptRow" hidden>
+      <div id="rcptHave" class="rcpthave"><img id="rcptThumb" alt="Beleg"><span class="grow"><b>Beleg</b><br><span class="small muted" id="rcptInfo"></span></span><button class="btn" id="rcptView">Ansehen</button><button class="icon-btn" id="rcptRemove" aria-label="Beleg entfernen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div id="rcptAddWrap" class="rcpthave"><span class="grow"><b>Beleg</b><br><span class="small muted">Noch kein Foto an dieser Buchung</span></span><button class="btn" id="rcptAdd">Foto hinzufügen</button><button class="btn" id="rcptGallery" hidden>Galerie</button></div>
+    </div>
     <div class="seg" id="kindSeg" role="group" aria-label="Art der Buchung">
       <button data-kind="ausgabe" aria-pressed="true">Ausgabe</button>
       <button data-kind="einnahme" aria-pressed="false">Einnahme</button>
@@ -492,6 +521,25 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
     <div class="small" id="loginErr" style="color:var(--bad)"></div>
     <button class="btn primary block" id="loginGo">Verbinden</button>
     <button class="btn" id="loginSkip">Erst einmal ohne Abgleich</button>
+  </div>
+</div>
+<div class="rcptviewer" id="rcptViewer" hidden role="dialog" aria-label="Beleg"><img id="rcptBig" alt="Beleg"><button class="btn" id="rcptViewerClose">Schließen</button></div>
+<div class="lockbg" id="lockBg" hidden role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <div class="lockbox">
+    <span class="ictile" style="width:56px;height:56px;border-radius:18px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24" style="width:28px;height:28px"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg></span>
+    <h2 id="lockTitle">Haushaltsbuch gesperrt</h2>
+    <p class="small muted" id="lockText">Gib deine PIN ein.</p>
+    <div class="pindots" id="pinDots" aria-hidden="true"></div>
+    <div class="small" id="lockErr" role="alert"></div>
+    <div class="keypad" id="keypad">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button data-k="bio" id="bioKey" aria-label="Mit Fingerabdruck entsperren"><svg class="i" viewBox="0 0 24 24"><path d="M12 11v3.5a6 6 0 0 1-1.5 4M8.5 19.5A9 9 0 0 0 9 14v-2a3 3 0 0 1 6 0v1M15 16.5c0 1.2-.2 2.4-.6 3.5M5.5 15.5A12 12 0 0 0 6 12a6 6 0 0 1 10.5-4M18 11.5V12a17 17 0 0 1-.3 3.5M7 5.5A8.5 8.5 0 0 1 19.5 9"/></svg></button><button data-k="0">0</button><button data-k="del" aria-label="Löschen"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h10.5A1.5 1.5 0 0 1 21 7.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-6-6z"/><path d="m12 10 4 4M16 10l-4 4"/></svg></button>
+    </div>
+    <button class="btn primary" id="lockNext" hidden>Weiter</button>
+    <button class="btn" id="lockCancel" hidden>Abbrechen</button>
+    <button class="link small" id="lockForgot">PIN vergessen?</button>
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastText"></span><button id="toastAct" hidden>Rückgängig</button></div>
@@ -600,6 +648,7 @@ function loadBackupObj(o, fromFile){
   if (fromFile && SYNC.token){ // push everything from the backup to the server
     for (const k of ["tx","txb","fixed","months","debts"]) for (const [id,d] of Object.entries(memStore[k])) SYNC.queue.push({col:k,id,data:d});
     for (const [id,d] of Object.entries(memStore.acct)) SYNC.queue.push({col:"app",id:"acct-"+id,data:d});
+    SYNC.rq=[...RCPT.ids];
     SYNC.queue.push({col:"app",id:"settings",data:clone(S.settings)}); saveSync(); flushSoon(0);
   }
 }
@@ -804,7 +853,7 @@ function txRow(t, showDate){
   const isIn = t.kind==="einnahme";
   const title = t.note || t.cat || KIND_LABEL[t.kind];
   const sub = [t.note ? t.cat : "", t.kind==="betrieb" ? "Betrieblich" : t.kind==="vorauszahlung" ? "aus Rücklage" : "", showDate ? shortDate(t.date) : ""].filter(Boolean).join(" · ");
-  return `<button class="tx" data-edit="${esc(t.id)}">${tile(t.kind,t.cat)}<span class="grow"><div class="t">${esc(title)}</div>${sub?`<div class="s">${esc(sub)}</div>`:""}</span><span class="amt ${isIn?"inc":""}">${isIn?"+":"−"} ${esc(eur(t.amount))}</span></button>`;
+  return `<button class="tx" data-edit="${esc(t.id)}">${tile(t.kind,t.cat)}<span class="grow"><div class="t">${esc(title)}${hasReceipt(t.id)?`<svg class="i clip" viewBox="0 0 24 24" style="width:14px;height:14px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3.5"/></svg>`:""}</div>${sub?`<div class="s">${esc(sub)}</div>`:""}</span><span class="amt ${isIn?"inc":""}">${isIn?"+":"−"} ${esc(eur(t.amount))}</span></button>`;
 }
 function sortTx(list){ return list.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"") || (b.ts||0)-(a.ts||0)); }
 function emptyState(iconName, title, text, btn){
@@ -824,8 +873,14 @@ function renderHome(){
   for (const t of c.tx){ if (t.kind==="ausgabe"||t.kind==="betrieb"){ const k=t.kind+"|"+(t.cat||"Sonstiges"); (groups[k]=groups[k]||{v:0,kind:t.kind,cat:t.cat||"Sonstiges"}).v+=t.amount; } }
   if (c.fixPaid) groups["fix"]={v:c.fixPaid,kind:"fix",cat:"Fixkosten",label:"Fixkosten"};
   if (c.vz) groups["vz"]={v:c.vz,kind:"vorauszahlung",cat:"Steuer",label:"Steuer-Vorauszahlung"};
-  const g = Object.values(groups).sort((a,b)=>b.v-a.v);
-  const gTot = sum(g,x=>x.v)||1, gMax = g.length?g[0].v:1;
+  // monthly budgets per private expense category: show them even before anything was spent
+  const budgets = S.settings.budgets||{};
+  for (const [cat,b] of Object.entries(budgets)) if (b>0 && cats("ausgabe").includes(cat) && !groups["ausgabe|"+cat]) groups["ausgabe|"+cat]={v:0,kind:"ausgabe",cat};
+  for (const x of Object.values(groups)) if (x.kind==="ausgabe" && budgets[x.cat]>0) x.budget=budgets[x.cat];
+  const g = Object.values(groups).sort((a,b)=>b.v-a.v || (b.budget||0)-(a.budget||0));
+  const gTot = sum(g,x=>x.v)||1, gMax = g.length&&g[0].v?g[0].v:1;
+  const budgetWarn = ym===cur ? g.filter(x=>x.budget && x.v>=x.budget*0.8).sort((a,b)=>b.v/b.budget-a.v/a.budget) : [];
+  const bColor = x => x.v>x.budget ? "var(--bad)" : x.v>=x.budget*0.8 ? "var(--warn)" : catColor(x.kind,x.cat);
   const fx = fixedForMonth(ym).length, fxDone = fx - c.openCount;
   const debtsTotal = sum(S.debts, d=>debtState(d).remaining);
   const incW = c.income+c.expenses>0 ? c.income/(c.income+c.expenses)*100 : 50;
@@ -840,6 +895,7 @@ function renderHome(){
 
   $("v-home").innerHTML = `
     ${needStart?`<div class="notice info"><span>Trag einmal deinen Kontostand vom 1.1.${y} ein, dann stimmt die Rechnung.</span><button class="btn primary" data-go="more">Eintragen</button></div>`:""}
+    ${budgetWarn.map(x=>`<div class="notice ${x.v>x.budget?"bad":"warn"}"><span><b>${esc(x.cat)}:</b> ${x.v>x.budget?`Budget um ${esc(eur(x.v-x.budget))} überschritten`:`${Math.round(x.v/x.budget*100)} % deines Budgets verbraucht – noch ${esc(eur(x.budget-x.v))} für ${days} ${days===1?"Tag":"Tage"}`}.</span></div>`).join("")}
     <div class="cols"><div class="col">
     <div class="hero ${mainBal<0?"minus":""}" style="order:1">
       <div class="eyebrow">${mainName?esc(mainName):"Kontostand"} · ${ym===cur?"heute":ym<cur?"Ende "+esc(MONTHS[ymParts(ym)[1]-1]):"voraussichtlich Ende "+esc(MONTHS[ymParts(ym)[1]-1])}</div>
@@ -876,7 +932,9 @@ function renderHome(){
     </div><div class="col">
     <div class="card" style="order:4">
       <div class="card-head"><h2>Wohin dein Geld fließt</h2></div>
-      ${g.length ? g.map(x=>`<div class="catrow">${tile(x.kind,x.cat)}<div class="grow"><div class="top-l"><span>${esc(x.label||x.cat)}${x.kind==="betrieb"?` <span class="small muted">· Betrieb</span>`:""}</span><span>${esc(eur(x.v))}</span></div><div class="sub"><div class="track"><div class="fill" style="width:${Math.max(3,x.v/gMax*100)}%;background:${catColor(x.kind,x.cat)}"></div></div><span class="pct">${Math.round(x.v/gTot*100)} %</span></div></div></div>`).join("")
+      ${g.length ? g.map(x=> x.budget
+        ? `<div class="catrow">${tile(x.kind,x.cat)}<div class="grow"><div class="top-l"><span>${esc(x.label||x.cat)}</span><span>${esc(eur(x.v))} <span class="small muted">von ${esc(eur0(x.budget))}</span></span></div><div class="sub"><div class="track"><div class="fill" style="width:${Math.max(x.v?3:0,Math.min(100,x.v/x.budget*100))}%;background:${bColor(x)}"></div></div><span class="pct" style="${x.v>=x.budget*0.8?`color:${bColor(x)};font-weight:800`:""}">${Math.round(x.v/x.budget*100)} %</span></div>${x.v>x.budget?`<div class="small" style="color:var(--bad);margin-top:3px">${esc(eur(x.v-x.budget))} über dem Budget</div>`:ym===cur&&days?`<div class="small muted" style="margin-top:3px">noch ${esc(eur(x.budget-x.v))} · ${esc(eur(Math.max(0,x.budget-x.v)/days))} pro Tag</div>`:""}</div></div>`
+        : `<div class="catrow">${tile(x.kind,x.cat)}<div class="grow"><div class="top-l"><span>${esc(x.label||x.cat)}${x.kind==="betrieb"?` <span class="small muted">· Betrieb</span>`:""}</span><span>${esc(eur(x.v))}</span></div><div class="sub"><div class="track"><div class="fill" style="width:${Math.max(3,x.v/gMax*100)}%;background:${catColor(x.kind,x.cat)}"></div></div><span class="pct">${Math.round(x.v/gTot*100)} %</span></div></div></div>`).join("")
         : emptyState("basket","Noch nichts ausgegeben","Tipp auf das Plus, um deine erste Ausgabe einzutragen.")}
     </div>
     ${offersCard()}
@@ -928,6 +986,17 @@ function offersCard(){
     <div class="shops">${st.map(link).join("")}</div>
   </div>`;
 }
+function renderBudgetEd(){
+  const el=$("budgetEd"); if (!el || el.contains(document.activeElement)) return; const b=S.settings.budgets||{};
+  el.innerHTML = cats("ausgabe").map(c=>`<div class="edit-row acct-row"><span>${tile("ausgabe",c)} <b style="vertical-align:middle">${esc(c)}</b></span><input class="in" data-budget="${esc(c)}" inputmode="decimal" placeholder="kein Budget" aria-label="Monatsbudget ${esc(c)}" value="${b[c]?esc(numStr(b[c])):""}"></div>`).join("");
+}
+document.addEventListener("change", e=>{
+  const el=e.target.closest("[data-budget]"); if (!el) return;
+  const raw=el.value.trim(), b={...(S.settings.budgets||{})};
+  if (raw===""){ delete b[el.dataset.budget]; }
+  else { const v=parseAmt(raw); if (!(v>0)){ toast("Bitte einen Betrag eingeben"); return; } b[el.dataset.budget]=Math.round(v*100)/100; }
+  S.settings.budgets=b; el.blur(); saveSettings(); toast("Budget gespeichert"); render();
+});
 function renderShopEd(){
   const sel=S.settings.shops||[], stats=Object.fromEntries(shopStats().map(o=>[o.shop.id,o]));
   $("shopEd").innerHTML = SHOPS.map(sh=>{ const i=sel.indexOf(sh.id); return `<button class="chip shopchip" data-shop="${sh.id}" aria-pressed="${i>=0}">${i>=0?`<span class="shopnum">${i+1}</span>`:""}${esc(sh.name)}${stats[sh.id]?` <span class="small muted" title="Einkäufe in den letzten 6 Monaten">(${stats[sh.id].count})</span>`:""}</button>`; }).join("");
@@ -1041,7 +1110,10 @@ function renderYear(){
         <span class="sum">Geschätzte Steuer für dich</span><span class="sum">${esc(eur(tax.tax))}</span>
         <span>Rücklage gebildet</span><span>${esc(eur(tax.resIn))}</span><span>Schon vorausgezahlt</span><span>${esc(eur(tax.vz))}</span></div>
       <div class="notice ${resCover>=0?"info":"bad"}" style="margin-top:14px"><span>${resCover>=0?`Deine Rücklage reicht. Puffer: <b>${esc(eur(resCover))}</b>`:`Es fehlen voraussichtlich <b>${esc(eur(-resCover))}</b>. Leg mehr zurück oder erhöhe die Rücklagenquote.`}</span></div>
-      <p class="small muted" style="margin:10px 0 0">Tarif 2026 nach §32a EStG, ohne Soli und Kirchensteuer. Ersetzt keine Steuerberatung.</p></div>`;
+      <p class="small muted" style="margin:10px 0 0">Tarif 2026 nach §32a EStG, ohne Soli und Kirchensteuer. Ersetzt keine Steuerberatung.</p></div>
+    <div class="card" style="grid-column:1/-1"><div class="card-head"><h2>Für die Steuer</h2></div>
+      <p class="small muted" style="margin:-6px 0 12px">Alle Einnahmen und Ausgaben deiner Selbstständigkeit ${y} als Liste für Steuerbüro oder ELSTER (Anlage EÜR) – mit Brutto, Umsatzsteuer und Netto, betrieblichen Fixkosten und Summen. Öffnet sich in Excel.</p>
+      <button class="btn primary" id="euerBtn" data-year="${y}">EÜR ${y} exportieren</button></div>`;
 }
 function niceMax(v){ if (v<=0) return 100; const p=Math.pow(10,Math.floor(Math.log10(v))), n=v/p; return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; }
 function shortK(v){ return v>=1000 ? (Math.round(v/100)/10).toString().replace(".",",")+"k" : String(Math.round(v)); }
@@ -1076,6 +1148,8 @@ function renderMore(){
   renderSpaces();
   renderAccounts();
   renderShopEd();
+  renderLockEd();
+  renderBudgetEd();
   $("sKU").checked=!!st.kleinunternehmer; $("sSplit").checked=!!st.splitting; $("partnerField").hidden=!st.splitting;
   for (const k of ["ausgabe","betrieb"]) $("catEd-"+k).innerHTML = cats(k).map(n=>`<span class="chip">${esc(n)}<button class="x" data-catdel="${k}|${esc(n)}" aria-label="${esc(n)} entfernen">×</button></span>`).join("")+`<button class="chip" data-catadd="${k}">+ Neu</button>`;
   $("catEd-einnahme").innerHTML = incCats().map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:5px 0"><b style="flex:1">${esc(c.name)}</b><select class="in" style="width:auto" data-incart="${esc(c.name)}" aria-label="Art von ${esc(c.name)}"><option value="selbst" ${c.art==="selbst"?"selected":""}>Selbstständig</option><option value="lohnersatz" ${c.art==="lohnersatz"?"selected":""}>Lohnersatz (ALG1)</option><option value="sonstige" ${c.art==="sonstige"?"selected":""}>Sonstige</option></select><button class="icon-btn" data-catdel="einnahme|${esc(c.name)}" aria-label="${esc(c.name)} entfernen">×</button></div>`).join("")+`<button class="chip" data-catadd="einnahme" style="margin-top:6px">+ Neu</button>`;
@@ -1138,7 +1212,7 @@ function openSheet(kind, tx){
   else { UI.editId=null; UI.kind=kind||"ausgabe"; UI.cat=null; $("fAmount").value=""; $("fNote").value=""; $("fDate").value = UI.ym===ymOf(new Date()) ? isoToday() : UI.ym+"-01"; }
   $("delBtn").textContent = "Löschen";
   const bg=$("sheetBg"); bg.hidden=false; document.body.classList.add("locked");
-  renderSheet();
+  renderSheet(); rcptSheetInit();
   requestAnimationFrame(()=>{ bg.classList.add("show"); if (!tx) setTimeout(()=>$("fAmount").focus({preventScroll:true}), 60); });
 }
 function closeSheet(){
@@ -1199,10 +1273,16 @@ async function saveTx(){
   const editing = UI.editId, id = editing || (mem ? newId() : db.collection("tx").doc().id);
   const old = editing ? S.tx.find(t=>t.id===id) : null;
   if (old){ if (old.ts) doc.ts=old.ts; if (old.importKey) doc.importKey=old.importKey; if (old.source) doc.source=old.source; }
+  // self-employed income: the amount is what came in (incl. VAT), taxes use the net amount
+  if (doc.kind==="einnahme" && incArt(doc.cat)==="selbst" && !S.settings.kleinunternehmer){
+    if (old && old.net!=null && Math.abs(old.amount-doc.amount)<0.005 && old.cat===doc.cat) doc.net=old.net;
+    else if (!old || old.net!=null) doc.net=Math.round(doc.amount/(1+(Number(S.settings.vatRate)||0)/100)*100)/100;
+  }
   const btn=$("saveBtn"); btn.disabled=true;
   const ok = await safe(()=>saveTxDoc(id, doc, old));
   btn.disabled=false;
   if (!ok) return;
+  await rcptSaveFor(id);
   closeSheet();
   if (date.slice(0,7)!==UI.ym){ UI.ym=date.slice(0,7); render(); }
   if (editing){ toast("Geändert", old ? ()=>safe(()=>saveTxDoc(id, plainTx(old), S.tx.find(t=>t.id===id))) : null); }
@@ -1214,7 +1294,8 @@ async function deleteTx(){
   if (btn.dataset.armed!=="1"){ btn.dataset.armed="1"; btn.textContent="Wirklich löschen?"; setTimeout(()=>{ btn.dataset.armed=""; btn.textContent="Löschen"; },3000); return; }
   btn.dataset.armed="";
   const old = S.tx.find(t=>t.id===id); if (!old) return;
-  if (await safe(()=>delTxDoc(old))){ closeSheet(); toast("Gelöscht", ()=>safe(()=>restoreTx(old))); }
+  const img = hasReceipt(id) ? await rcptGet(id) : null;
+  if (await safe(()=>delTxDoc(old))){ if (img) await rcptDel(id); closeSheet(); toast("Gelöscht", async ()=>{ await safe(()=>restoreTx(old)); if (img) await rcptPut(id, img); render(); }); }
 }
 
 /* ---------- events ---------- */
@@ -1253,6 +1334,155 @@ $("nextM").onclick = () => { UI.ym = UI.view==="year" ? (Number(UI.ym.slice(0,4)
 $("q").addEventListener("input", e => { UI.q=e.target.value; renderList(); });
 $("sheetClose").onclick = closeSheet;
 $("sheetImport").onclick = () => { $("csvFile").click(); closeSheet(); };
+
+/* ---------- app lock: PIN (stored only as a salted hash on this device) + fingerprint on Android ---------- */
+// small SHA-256 so it also works where crypto.subtle is missing (plain http)
+function sha256hex(str){
+  const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  const b=new TextEncoder().encode(str), l=b.length, n=((l+9+63)>>6)<<6, m=new Uint8Array(n); m.set(b); m[l]=0x80;
+  const dv=new DataView(m.buffer); dv.setUint32(n-4, l*8); dv.setUint32(n-8, Math.floor(l/0x20000000));
+  let h=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]; const w=new Array(64), r=(x,k)=>(x>>>k)|(x<<(32-k));
+  for (let o=0;o<n;o+=64){
+    for (let i=0;i<16;i++) w[i]=dv.getUint32(o+i*4);
+    for (let i=16;i<64;i++){ const s0=r(w[i-15],7)^r(w[i-15],18)^(w[i-15]>>>3), s1=r(w[i-2],17)^r(w[i-2],19)^(w[i-2]>>>10); w[i]=(w[i-16]+s0+w[i-7]+s1)|0; }
+    let [a,b2,c,d,e,f,g,hh]=h;
+    for (let i=0;i<64;i++){ const t1=(hh+(r(e,6)^r(e,11)^r(e,25))+((e&f)^(~e&g))+K[i]+w[i])|0, t2=((r(a,2)^r(a,13)^r(a,22))+((a&b2)^(a&c)^(b2&c)))|0; hh=g; g=f; f=e; e=(d+t1)|0; d=c; c=b2; b2=a; a=(t1+t2)|0; }
+    h=h.map((v,i)=>(v+[a,b2,c,d,e,f,g,hh][i])|0);
+  }
+  return h.map(v=>(v>>>0).toString(16).padStart(8,"0")).join("");
+}
+const LOCK_KEY="haushaltsbuch-lock";
+function lockCfg(){ try { return JSON.parse(localStorage.getItem(LOCK_KEY)||"null"); } catch(e){ return null; } }
+function pinHash(pin, salt){ let h=salt+":"+pin; for (let i=0;i<2000;i++) h=sha256hex(h+pin); return h; }
+const BIO = !!(window.AndroidBridge && window.AndroidBridge.biometricAvailable && window.AndroidBridge.biometricAvailable());
+const LOCK = { mode:null, pin:"", first:"", fails:0, until:0, hiddenAt:0, done:null };
+function lockShow(mode, done){
+  LOCK.mode=mode; LOCK.pin=""; LOCK.first=""; LOCK.done=done||null;
+  const cfg=lockCfg();
+  $("lockTitle").textContent = mode==="unlock" ? "Haushaltsbuch gesperrt" : mode==="check" ? "PIN bestätigen" : "Neue PIN festlegen";
+  $("lockText").textContent = mode==="set" ? "Wähl eine PIN mit 4 bis 6 Ziffern." : "Gib deine PIN ein.";
+  $("lockCancel").hidden = mode==="unlock";
+  $("lockNext").hidden = mode!=="set";
+  $("lockForgot").hidden = mode!=="unlock";
+  $("bioKey").classList.toggle("off", !(mode==="unlock" && BIO && cfg && cfg.bio));
+  $("lockErr").textContent=""; lockDots(); $("lockBg").hidden=false;
+  if (mode==="unlock" && BIO && cfg && cfg.bio) setTimeout(lockBio, 300);
+}
+function lockDots(){
+  const cfg=lockCfg(), len = LOCK.mode==="set" ? Math.max(4, LOCK.pin.length) : (cfg?cfg.len:4);
+  $("pinDots").innerHTML = Array.from({length: Math.min(6,len)}, (_,i)=>`<span class="${i<LOCK.pin.length?"on":""}"></span>`).join("");
+}
+function lockClose(ok){ $("lockBg").hidden=true; const d=LOCK.done; LOCK.mode=null; LOCK.pin=""; if (d) d(ok); }
+function lockWrong(msg){ LOCK.pin=""; lockDots(); $("lockErr").textContent=msg; const el=$("pinDots"); el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
+function lockKey(k){
+  if (!LOCK.mode) return;
+  if (k==="bio"){ lockBio(); return; }
+  if (k==="del"){ LOCK.pin=LOCK.pin.slice(0,-1); lockDots(); return; }
+  if (Date.now()<LOCK.until){ $("lockErr").textContent=`Zu viele Versuche – warte ${Math.ceil((LOCK.until-Date.now())/1000)} Sekunden.`; return; }
+  if (LOCK.pin.length>=6) return;
+  LOCK.pin+=k; lockDots(); $("lockErr").textContent="";
+  const cfg=lockCfg();
+  if (LOCK.mode==="set"){
+    if (!LOCK.first && LOCK.pin.length>=4 && LOCK.pin.length<6) $("lockText").textContent="Tipp auf „Weiter“ oder gib bis zu 6 Ziffern ein.";
+    if (LOCK.first && LOCK.pin.length===LOCK.first.length){
+      if (LOCK.pin!==LOCK.first){ LOCK.first=""; $("lockNext").hidden=false; $("lockText").textContent="Wähl eine PIN mit 4 bis 6 Ziffern."; lockWrong("Die PINs stimmen nicht überein. Nochmal von vorn."); return; }
+      const salt=newId(); const old=lockCfg();
+      try { localStorage.setItem(LOCK_KEY, JSON.stringify({salt, hash:pinHash(LOCK.pin,salt), len:LOCK.pin.length, bio: old? !!old.bio : BIO})); } catch(e){ lockWrong("PIN konnte nicht gespeichert werden."); return; }
+      lockClose(true); toast("App-Sperre ist an"); return;
+    }
+    if (!LOCK.first && LOCK.pin.length===6) lockSetNext();
+    return;
+  }
+  if (cfg && LOCK.pin.length===cfg.len){
+    if (pinHash(LOCK.pin,cfg.salt)===cfg.hash){ LOCK.fails=0; lockClose(true); }
+    else { LOCK.fails++; if (LOCK.fails>=5){ LOCK.until=Date.now()+30000; LOCK.fails=0; } lockWrong(LOCK.until>Date.now()?"Zu viele Versuche – warte 30 Sekunden.":"Falsche PIN"); }
+  }
+}
+function lockSetNext(){ if (LOCK.pin.length<4) { lockWrong("Mindestens 4 Ziffern"); return; } LOCK.first=LOCK.pin; LOCK.pin=""; $("lockText").textContent="Gib die PIN zur Bestätigung noch einmal ein."; $("lockNext").hidden=true; lockDots(); }
+$("lockNext").onclick=()=>lockSetNext();
+function lockBio(){
+  if (!BIO || LOCK.mode!=="unlock") return;
+  const id=newId(); bioWaiting[id]=ok=>{ if (ok && LOCK.mode==="unlock") lockClose(true); };
+  window.AndroidBridge.biometric(id);
+}
+const bioWaiting={};
+window.hbBioDone=(id, ok)=>{ const f=bioWaiting[id]; if (f){ delete bioWaiting[id]; f(!!ok); } };
+$("keypad").addEventListener("click", e=>{ const b=e.target.closest("[data-k]"); if (b) lockKey(b.dataset.k); });
+document.addEventListener("keydown", e=>{ if (!LOCK.mode) return; if (/^\d$/.test(e.key)) lockKey(e.key); else if (e.key==="Backspace") lockKey("del"); else if (e.key==="Enter" && LOCK.mode==="set" && !LOCK.first) lockSetNext(); else if (e.key==="Escape" && LOCK.mode!=="unlock") lockClose(false); });
+$("lockCancel").onclick=()=>lockClose(false);
+$("lockForgot").onclick=()=>{ $("lockErr").textContent="Die PIN lässt sich nicht zurückholen. Lösch in den Android-Einstellungen die App-Daten (bzw. installier das Programm am PC neu) und melde dich wieder mit deiner Synology an – dann sind alle Daten wieder da."; };
+// in set mode, 4 or 5 digits are confirmed with a tap on the PIN dots or Enter
+$("pinDots").addEventListener("click", ()=>{ if (LOCK.mode==="set" && !LOCK.first) lockSetNext(); });
+// lock when the app comes back after more than a minute in the background
+function lockIfNeeded(){ if (lockCfg() && !LOCK.mode && LOCK.hiddenAt && Date.now()-LOCK.hiddenAt>60000) lockShow("unlock"); LOCK.hiddenAt=0; }
+document.addEventListener("visibilitychange", ()=>{ if (document.visibilityState==="hidden") LOCK.hiddenAt=Date.now(); else lockIfNeeded(); });
+window.hbPaused=()=>{ LOCK.hiddenAt=Date.now(); };
+window.hbResumed=()=>lockIfNeeded();
+if (lockCfg()) lockShow("unlock");
+function renderLockEd(){
+  const el=$("lockEd"); if (!el) return; const cfg=lockCfg();
+  el.innerHTML = cfg
+    ? `<div class="meta-row"><span>App-Sperre ist <b>an</b> (PIN mit ${cfg.len} Ziffern)</span></div>
+       ${BIO?`<div class="switch"><label for="lockBioChk"><b>Fingerabdruck</b><br><span class="small muted">Statt PIN mit Fingerabdruck entsperren</span></label><input type="checkbox" id="lockBioChk" ${cfg.bio?"checked":""}></div>`:""}
+       <div class="row-btns"><button class="btn" id="lockChange">PIN ändern</button><button class="btn" id="lockOff">Sperre ausschalten</button></div>`
+    : `<div class="meta-row"><span>Schützt deine Finanzen mit einer PIN${BIO?" oder deinem Fingerabdruck":""}, wenn jemand anderes dein ${NATIVE&&!(window.AndroidBridge||{}).desktop?"Handy":"Gerät"} benutzt.</span></div><div class="row-btns"><button class="btn primary" id="lockOn">App-Sperre einrichten</button></div>`;
+}
+document.addEventListener("click", e=>{
+  if (e.target.closest("#lockOn")) lockShow("set", ok=>{ renderLockEd(); });
+  else if (e.target.closest("#lockChange")) lockShow("check", ok=>{ if (ok) lockShow("set", ()=>renderLockEd()); });
+  else if (e.target.closest("#lockOff")) lockShow("check", ok=>{ if (ok){ try { localStorage.removeItem(LOCK_KEY); } catch(err){} toast("App-Sperre ist aus"); } renderLockEd(); });
+});
+document.addEventListener("change", e=>{
+  if (e.target.id!=="lockBioChk") return; const cfg=lockCfg(); if (!cfg) return;
+  cfg.bio=e.target.checked; try { localStorage.setItem(LOCK_KEY, JSON.stringify(cfg)); } catch(err){}
+});
+
+/* ---------- receipt photos: kept in the device's picture store (IndexedDB), synced one by one ---------- */
+const RCPT = { db:null, ids:new Set() };
+function rcptDb(){
+  if (!RCPT.db) RCPT.db = new Promise((ok,bad)=>{ try { const r=indexedDB.open("haushaltsbuch-belege",1); r.onupgradeneeded=()=>r.result.createObjectStore("r"); r.onsuccess=()=>ok(r.result); r.onerror=()=>bad(r.error); } catch(e){ bad(e); } });
+  return RCPT.db;
+}
+async function rcptOp(mode, fn){ const d=await rcptDb(); return new Promise((ok,bad)=>{ const tx=d.transaction("r",mode); const req=fn(tx.objectStore("r")); tx.oncomplete=()=>ok(req?req.result:undefined); tx.onerror=()=>bad(tx.error); tx.onabort=()=>bad(tx.error); }); }
+async function rcptGet(id){ try { const v=await rcptOp("readonly", st=>st.get(id)); return v&&v.img||null; } catch(e){ return null; } }
+async function rcptPut(id, img, fromSync){ await rcptOp("readwrite", st=>st.put({img, ts:Date.now()}, id)); RCPT.ids.add(id); if (!fromSync) rqAdd(id); }
+async function rcptDel(id, fromSync){ await rcptOp("readwrite", st=>st.delete(id)); const had=RCPT.ids.delete(id); if (!fromSync && had) rqAdd(id); }
+function hasReceipt(id){ return RCPT.ids.has(id); }
+rcptOp("readonly", st=>st.getAllKeys()).then(k=>{ (k||[]).forEach(x=>RCPT.ids.add(x)); if ((k||[]).length) render(); }).catch(()=>{});
+// photo -> JPEG of at most 1600 px, about 150–300 KB
+async function shrinkImage(file){
+  const bmp = await createImageBitmap(file);
+  const k = Math.min(1, 1600/Math.max(bmp.width,bmp.height)), c=document.createElement("canvas");
+  c.width=Math.round(bmp.width*k); c.height=Math.round(bmp.height*k);
+  c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+  return c.toDataURL("image/jpeg",0.72);
+}
+// state of the photo in the open booking sheet: none | stored | new | removed
+UI.rcpt = {state:"none", img:null};
+async function rcptSheetInit(){
+  const id=UI.editId; UI.rcpt={state:"none", img:null};
+  if (id && hasReceipt(id)){ UI.rcpt.state="stored"; renderRcptRow(); const img=await rcptGet(id); if (UI.editId===id && UI.rcpt.state==="stored"){ UI.rcpt.img=img; renderRcptRow(); } }
+  else renderRcptRow();
+}
+function renderRcptRow(){
+  const r=UI.rcpt, has = (r.state==="stored"||r.state==="new");
+  $("rcptRow").hidden = !has && !UI.editId;
+  $("rcptHave").hidden = !has; $("rcptAddWrap").hidden = has;
+  $("rcptGallery").hidden = !NATIVE_SCAN;
+  if (has){ $("rcptThumb").src = r.img || ""; $("rcptInfo").textContent = r.state==="new" ? "wird mit der Buchung gespeichert" : "gespeichert"; }
+}
+async function rcptSaveFor(id){
+  const r=UI.rcpt;
+  try { if (r.state==="new" && r.img) await rcptPut(id, r.img); else if (r.state==="removed" && hasReceipt(id)) await rcptDel(id); }
+  catch(e){ toast("Beleg konnte nicht gespeichert werden"); }
+}
+function rcptView(img){ if (!img) return; $("rcptBig").src=img; $("rcptViewer").hidden=false; }
+$("rcptView").onclick = () => rcptView(UI.rcpt.img);
+$("rcptThumb").onclick = () => rcptView(UI.rcpt.img);
+$("rcptViewerClose").onclick = () => { $("rcptViewer").hidden=true; $("rcptBig").src=""; };
+$("rcptRemove").onclick = () => { UI.rcpt = {state:"removed", img:null}; renderRcptRow(); };
+$("rcptAdd").onclick = () => runScan("camera", true);
+$("rcptGallery").onclick = () => runScan("gallery", true);
 
 /* ---------- receipt scan: photo -> text recognition -> amount, date, shop ---------- */
 const NATIVE_SCAN = !!(window.AndroidBridge && window.AndroidBridge.scanReceipt); // Android: camera + on-device text recognition
@@ -1316,12 +1546,16 @@ function parseReceipt(lines){
   let cat=null; for (const [re,kind,word] of KW){ if (kind==="ausgabe" && re.test(all+" "+nrm(shop))){ cat=catByWord("ausgabe",word); if (cat) break; } }
   return { amount, date, shop, cat };
 }
-async function runScan(source){
+async function runScan(source, attachOnly){
   try {
-    let lines;
-    if (NATIVE_SCAN){ scanBusy(true); lines = await scanNative(source); if (!lines){ scanBusy(false); return; } }
-    else { const f = await new Promise(r=>{ const inp=$("scanFile"); inp.value=""; inp.onchange=()=>r(inp.files[0]||null); inp.click(); }); if (!f) return; lines = await scanImageFile(f); }
+    let lines, img=null;
+    if (NATIVE_SCAN){ scanBusy(true); const res = await scanNative(source); if (!res){ scanBusy(false); return; } if (Array.isArray(res)) lines=res; else { lines=res.lines||[]; img=res.img||null; } }
+    else { const f = await new Promise(r=>{ const inp=$("scanFile"); inp.value=""; inp.onchange=()=>r(inp.files[0]||null); inp.click(); }); if (!f) return;
+      try { img = await shrinkImage(f); } catch(e){}
+      if (attachOnly){ lines=[]; } else lines = await scanImageFile(f); }
     scanBusy(false);
+    if (img){ UI.rcpt={state:"new", img}; renderRcptRow(); }
+    if (attachOnly){ if (!img) toast("Das Foto konnte nicht übernommen werden"); return; }
     const r = parseReceipt(lines||[]);
     if (r.amount==null){ toast("Auf der Quittung wurde kein Betrag gefunden"); return; }
     UI.kind="ausgabe"; if (r.cat) UI.cat=r.cat;
@@ -1419,19 +1653,26 @@ $("sSplit").addEventListener("change",e=>{ S.settings.splitting=e.target.checked
 $("catEd-einnahme").addEventListener("change",e=>{ const el=e.target.closest("[data-incart]"); if (!el) return; const c=clone(S.settings.cats||DEFAULT_SETTINGS.cats); c.einnahme=c.einnahme.map(x=>{ const o=typeof x==="string"?{name:x,art:"sonstige"}:x; return o.name===el.dataset.incart?{...o,art:el.value}:o; }); S.settings.cats=c; render(); saveSettings(); });
 
 /* ---------- CSV import ---------- */
+// column names of the common German bank exports (N26, Sparkasse, Volksbank, ING, DKB, Commerzbank, comdirect, Postbank, PayPal …)
 const COLS = {
-  date:   ["booking date","buchungsdatum","date","datum","buchungstag","value date","wertstellung","wertstellungsdatum","valutadatum"],
-  payee:  ["partner name","payee","name des partners","partnername","empfänger","zahlungsempfänger","beguenstigter/zahlungspflichtiger","begünstigter/zahlungspflichtiger","auftraggeber/empfänger","name"],
-  ref:    ["payment reference","verwendungszweck","zahlungsreferenz","reference","referenz","buchungstext"],
-  amount: ["amount (eur)","betrag (eur)","amount","betrag","betrag (€)"],
-  type:   ["type","transaction type","transaktionstyp","umsatztyp","buchungsart","art"],
-  account:["account name","kontoname","konto name","space","konto"]
+  date:   ["booking date","buchungsdatum","buchungstag","buchung","date","datum","value date","wertstellung","wertstellungsdatum","valutadatum","wert"],
+  payee:  ["partner name","payee","name des partners","partnername","name zahlungsbeteiligter","zahlungsbeteiligter","zahlungsempfänger*in","zahlungsempfänger","empfänger","beguenstigter/zahlungspflichtiger","begünstigter/zahlungspflichtiger","begünstigter / auftraggeber","begünstigter/auftraggeber","auftraggeber/empfänger","auftraggeber / empfänger","name"],
+  payer:  ["zahlungspflichtige*r","zahlungspflichtiger","zahlungspflichtige"],
+  ref:    ["payment reference","verwendungszweck","zahlungsreferenz","reference","referenz","artikelbezeichnung","betreff","buchungstext","hinweis"],
+  amount: ["amount (eur)","betrag (eur)","betrag (€)","amount","betrag","umsatz in eur","umsatz","brutto"],
+  type:   ["type","transaction type","transaktionstyp","umsatztyp","umsatzart","buchungsart","vorgang","typ","art"],
+  account:["account name","kontoname","konto name","space","bezeichnung auftragskonto","auftragskonto","iban kontoinhaber","konto"],
+  status: ["status","info"],
+  sh:     ["s/h","soll/haben"],
+  soll:   ["soll"],
+  haben:  ["haben"]
 };
 const nrm = s => String(s||"").toLowerCase().replace(/["']/g,"").replace(/\s+/g," ").trim();
 function parseCSV(text){
   text = text.replace(/^﻿/,"");
-  const firstLine = text.split(/\r?\n/).find(l=>l.trim()) || "";
-  const delim = [",",";","\t"].map(d=>[d, firstLine.split(d).length]).sort((a,b)=>b[1]-a[1])[0][0];
+  // some banks put a few info lines before the table: pick the separator that splits the busiest of the first lines best
+  const head = text.split(/\r?\n/).filter(l=>l.trim()).slice(0,15);
+  const delim = [",",";","\t"].map(d=>[d, Math.max(...head.map(l=>l.split(d).length))]).sort((a,b)=>b[1]-a[1])[0][0];
   const rows=[]; let row=[], f="", q=false;
   for (let i=0;i<text.length;i++){
     const ch=text[i];
@@ -1532,11 +1773,21 @@ async function loadCsv(file){
   let rows;
   try { rows = parseCSV(await readFileText(file)); } catch(e){ toast("Die Datei konnte nicht gelesen werden"); return; }
   if (rows.length < 2){ toast("In der Datei sind keine Buchungen"); return; }
-  let hi = rows.findIndex(r => findCol(r, COLS.date)>=0 && findCol(r, COLS.amount)>=0);
+  // the header row: among the first lines, the one whose cells match the most known column names (exact names count double)
+  const score = r => { if (r.some(c=>String(c).length>60)) return -1; const h=r.map(nrm); let n=0;
+    for (const g of Object.values(COLS)){ if (g.some(c=>h.includes(c))) n+=2; else if (g.some(c=>h.some(x=>x.includes(c)))) n+=1; } return n; };
+  let hi=-1, best=0;
+  rows.slice(0,60).forEach((r,i)=>{ if (findCol(r,COLS.date)<0 || findCol(r,COLS.amount)<0) return; const sc=score(r); if (sc>best){ best=sc; hi=i; } });
   if (hi<0) hi = 0;
   const headers = rows[hi];
-  const map = { date:findCol(headers,COLS.date), payee:findCol(headers,COLS.payee), ref:findCol(headers,COLS.ref), amount:findCol(headers,COLS.amount), type:findCol(headers,COLS.type), account:findCol(headers,COLS.account) };
-  if (map.account===map.payee) map.account=-1;
+  const map = { date:findCol(headers,COLS.date), payee:findCol(headers,COLS.payee), payer:findCol(headers,COLS.payer), ref:findCol(headers,COLS.ref), amount:findCol(headers,COLS.amount), type:findCol(headers,COLS.type), account:findCol(headers,COLS.account), status:findCol(headers,COLS.status), sh:findCol(headers,COLS.sh) };
+  const hn = headers.map(nrm);
+  map.soll = hn.indexOf("soll"); map.haben = hn.indexOf("haben");
+  if (map.amount<0 && map.soll>=0 && map.haben>=0) map.amount = map.soll;           // amount from "Soll" / "Haben" columns
+  // the own account (or N26 space); a column with the other party's IBAN is not it
+  if ([map.payee, map.payer, map.ref, map.date].includes(map.account) || (/iban|kontonummer/.test(hn[map.account]||"") && !/inhaber|auftragskonto/.test(hn[map.account]||""))) map.account=-1;
+  if (map.payer===map.payee) map.payer=-1;
+  map.paypal = hn.includes("transaktionscode") || hn.includes("transaction id");
   UI.imp = { fileName:file.name, headers, raw: rows.slice(hi+1, hi+1+2000), map, items:null };
   buildItems();
   recordAccounts(UI.imp.items);
@@ -1572,7 +1823,7 @@ function lastDayOf(ym){ return ym+"-"+pad(daysIn(ym)); }
 function renderAccounts(){
   const el=$("acctEd"); if (!el || el.contains(document.activeElement)) return;
   const names=accountNames(), today=isoOf(new Date());
-  if (!names.length){ el.innerHTML=`<span class="small muted">Importier einmal deine Kontoauszüge von N26 (2025 und 2026). Dann erscheinen hier dein Hauptkonto und deine Spaces.</span>`; return; }
+  if (!names.length){ el.innerHTML=`<span class="small muted">Importier einmal deine Kontoauszüge. Dann erscheinen hier deine Konten (bei N26 auch Hauptkonto und Spaces).</span>`; return; }
   el.innerHTML = acctRows(names);
 }
 function acctRows(names){
@@ -1597,13 +1848,20 @@ function buildItems(){
   for (const n of (S.settings.spaces||[])) spaces.add(nrm(n));
   imp.spaces = spaces;
   for (const r of imp.raw){
-    const date=parseDate(r[m.date]), amount=parseBankAmt(r[m.amount]);
+    const date=parseDate(r[m.date]);
+    let amount=parseBankAmt(r[m.amount]);
+    if (m.soll>=0 && m.haben>=0 && m.amount===m.soll){ const so=parseBankAmt(r[m.soll]), ha=parseBankAmt(r[m.haben]); amount=(isFinite(ha)?Math.abs(ha):0)-(isFinite(so)?Math.abs(so):0); }
+    if (m.sh>=0 && isFinite(amount)){ const sh=nrm(r[m.sh]); if (sh==="s"||sh==="soll") amount=-Math.abs(amount); else if (sh==="h"||sh==="haben") amount=Math.abs(amount); }
     if (!date || !isFinite(amount) || amount===0) continue;
-    const it = { date, amount, payee:(m.payee>=0?r[m.payee]:"")||"", ref:(m.ref>=0?r[m.ref]:"")||"", type:(m.type>=0?r[m.type]:"")||"", acct:(m.account>=0?String(r[m.account]||"").trim():"") };
+    if (m.status>=0 && /vorgemerkt|pending|ausstehend|offen|storniert|abgelehnt/.test(nrm(r[m.status]))) continue; // only booked transactions
+    const payee = (amount>0 && m.payer>=0 && String(r[m.payer]||"").trim()) ? r[m.payer] : (m.payee>=0?r[m.payee]:"");
+    const it = { date, amount, payee:payee||"", ref:(m.ref>=0?r[m.ref]:"")||"", type:(m.type>=0?r[m.type]:"")||"", acct:(m.account>=0?String(r[m.account]||"").trim():"") };
     let key = hashKey(date+"|"+amount.toFixed(2)+"|"+nrm(it.payee)+"|"+nrm(it.ref).slice(0,60));
     while (seen.has(key)) key += "b"; seen.add(key);
     it.key=key; it.ignored = ignored.has(key) && !keys.has(key); it.dup = keys.has(key) || (it.ignored && !imp.showIgnored);
-    const s = spaces.has(nrm(it.payee)) ? {target:"skip|", sure:true, internal:true} : suggest(it); it.internal=!!s.internal; it.target=s.target; it.sure=s.sure; it.learned=!!s.learned; it.remember=false;
+    // PayPal: top-ups from / payouts to your bank account are already in the bank export
+    const ppInternal = m.paypal && /bankgutschrift|bankkonto|vom nutzer eingeleitete abbuchung|abbuchung auf bankkonto|einzahlung|währungsumrechnung|waehrungsumrechnung|currency conversion|bank deposit|withdrawal|general authorization|allgemeine autorisierung/.test(nrm(it.type+" "+it.ref));
+    const s = (spaces.has(nrm(it.payee)) || ppInternal) ? {target:"skip|", sure:true, internal:true} : suggest(it); it.internal=!!s.internal; it.target=s.target; it.sure=s.sure; it.learned=!!s.learned; it.remember=false;
     items.push(it);
   }
   items.sort((a,b)=>b.date.localeCompare(a.date));
@@ -1615,7 +1873,7 @@ function renderImport(){
     v.innerHTML = `
       <div class="drop" id="drop">
         <span class="ictile" style="width:56px;height:56px;border-radius:18px;background:var(--accent-soft);color:var(--accent)">${ic("arrowDown",26)}</span>
-        <div><b style="font-size:16px">CSV-Datei von N26 auswählen</b><br><span class="small muted">oder hierher ziehen</span></div>
+        <div><b style="font-size:16px">CSV-Datei deiner Bank auswählen</b><br><span class="small muted">oder hierher ziehen</span></div>
         <button class="btn primary" id="pickCsv">Datei auswählen</button>
       </div>
       <div class="card"><h2 style="margin-bottom:12px">So bekommst du die Datei</h2>
@@ -1626,6 +1884,10 @@ function renderImport(){
           <li>Lade die Datei hier hoch. Schon importierte Buchungen werden erkannt und übersprungen.</li>
         </ol>
         <p class="small muted" style="margin:12px 0 0">In der N26-App am Handy findest du den CSV-Export je nach Version unter Konto › Kontoauszüge. Die Datei wird nur in deiner App gespeichert.</p>
+      </div>
+      <div class="card"><h2 style="margin-bottom:10px">Andere Banken</h2>
+        <p class="small muted" style="margin:0 0 10px">Die App erkennt auch die CSV-Exporte von Sparkasse, Volksbank/Raiffeisenbank, ING, DKB, Commerzbank, comdirect, Postbank und PayPal. Den Export findest du meist im Online-Banking im Browser unter <b>Umsätze</b> › <b>Exportieren</b> bzw. <b>Download</b> › <b>CSV</b> (bei der Sparkasse „CSV-CAMT“).</p>
+        <p class="small muted" style="margin:0">PayPal: Aufladungen von deinem Bankkonto werden übersprungen, die stehen schon im Kontoauszug der Bank. Zahlst du per PayPal, steht die Zahlung dann aber in beiden Dateien – stell die PayPal-Abbuchungen im Bank-Import auf „Nicht übernehmen“, wenn du beide importierst.</p>
       </div>
       <button class="btn" data-go="list">Zurück zu den Buchungen</button>`;
     const dz=$("drop");
@@ -1763,6 +2025,56 @@ $("v-import").addEventListener("change", e => {
   const rm=e.target.closest("[data-impremember]"); if (rm){ imp.items[Number(rm.dataset.impremember)].remember=rm.checked; const a=$("impAll"); if (a) a.checked = imp.items.filter(i=>!i.dup&&i.payee).every(i=>i.remember); }
 });
 
+// saves a text file: Android/PC app -> Downloads folder, browser -> download
+async function saveTextFile(name, text, mime, okMsg){
+  if (NATIVE){ try { const r = window.AndroidBridge.saveFile(name, text); toast(r ? okMsg+" (Downloads)" : "Datei konnte nicht gespeichert werden"); } catch(e){ toast("Datei konnte nicht gespeichert werden"); } return; }
+  if (LOCAL || !window.claude){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([text],{type:mime})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000); toast(okMsg); return; }
+  let dl=null; try { dl = await window.claude.use("downloads"); } catch(e){}
+  if (!dl){ toast("Speichern ist in dieser Ansicht nicht möglich"); return; }
+  try { const r = await dl.save({filename:name, data:text}); if (r && r.status==="saved") toast(okMsg); } catch(e){ if (!(e && e.code==="declined")) toast("Datei konnte nicht gespeichert werden"); }
+}
+/* ---------- EÜR export: self-employed income and business expenses of one year ---------- */
+function euerCsv(y){
+  const vat=(Number(S.settings.vatRate)||0)/100, ku=!!S.settings.kleinunternehmer;
+  const n2 = v => (Math.round(v*100)/100).toFixed(2).replace(".",",");
+  const q = v => /[;"\n]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : String(v);
+  const de = d => d.slice(8,10)+"."+d.slice(5,7)+"."+d.slice(0,4);
+  const rows=[], inc=[], out=[];
+  for (const t of S.tx){
+    if ((t.date||"").slice(0,4)!==y) continue;
+    if (t.kind==="einnahme" && incArt(t.cat)==="selbst"){ const net = t.net!=null ? Number(t.net) : (ku ? t.amount : t.amount/(1+vat)); inc.push({d:t.date, cat:t.cat, note:t.note||"", brutto:t.amount, ust:t.amount-net, netto:net, beleg:hasReceipt(t.id)}); }
+    else if (t.kind==="betrieb") out.push({d:t.date, cat:t.cat||"Betriebsausgabe", note:t.note||"", brutto:t.amount, beleg:hasReceipt(t.id)});
+  }
+  for (const [ym,m] of Object.entries(S.months)){
+    if (ym.slice(0,4)!==y) continue;
+    for (const [fid,v] of Object.entries(m.paid||{})){ const f=S.fixed.find(x=>x.id===fid); if (f && f.kind==="betrieb") out.push({d:ym+"-"+pad(daysIn(ym)), cat:"Fixkosten", note:f.name+" ("+MONTHS[Number(ym.slice(5,7))-1]+")", brutto:Number(v)||0, beleg:false}); }
+  }
+  inc.sort((a,b)=>a.d.localeCompare(b.d)); out.sort((a,b)=>a.d.localeCompare(b.d));
+  rows.push(["Einnahmen-Überschuss-Rechnung "+y]);
+  rows.push(["Erstellt mit dem Haushaltsbuch am "+de(isoToday())+(ku?" · Kleinunternehmer (§19 UStG)":" · Umsatzsteuer "+(vat*100)+" %")]);
+  rows.push([]);
+  rows.push(["Betriebseinnahmen"]);
+  rows.push(["Datum","Kategorie","Beschreibung","Brutto (€)","Umsatzsteuer (€)","Netto (€)","Beleg"]);
+  for (const r of inc) rows.push([de(r.d), r.cat, r.note, n2(r.brutto), n2(r.ust), n2(r.netto), r.beleg?"ja":""]);
+  const si={b:sum(inc,r=>r.brutto), u:sum(inc,r=>r.ust), n:sum(inc,r=>r.netto)};
+  rows.push(["Summe Einnahmen","","",n2(si.b),n2(si.u),n2(si.n),""]);
+  rows.push([]);
+  rows.push(["Betriebsausgaben"]);
+  rows.push(["Datum","Kategorie","Beschreibung","Betrag brutto (€)","","","Beleg"]);
+  for (const r of out) rows.push([de(r.d), r.cat, r.note, n2(r.brutto), "", "", r.beleg?"ja":""]);
+  const so=sum(out,r=>r.brutto);
+  rows.push(["Summe Ausgaben","","",n2(so),"","",""]);
+  rows.push([]);
+  rows.push(["Überschuss (Einnahmen netto − Ausgaben brutto)","","",n2(si.n-so)]);
+  rows.push(["Hinweis: Die Ausgaben stehen brutto drin – die darin enthaltene Vorsteuer bitte aus den Belegen übernehmen. Keine Steuerberatung."]);
+  return { text: "\uFEFF"+rows.map(r=>r.map(q).join(";")).join("\r\n"), inc:inc.length, out:out.length };
+}
+document.addEventListener("click", e=>{
+  const b=e.target.closest("#euerBtn"); if (!b) return;
+  const r=euerCsv(b.dataset.year);
+  if (!r.inc && !r.out){ toast("In diesem Jahr gibt es keine Buchungen der Selbstständigkeit"); return; }
+  saveTextFile("EUeR-"+b.dataset.year+".csv", r.text, "text/csv", `EÜR mit ${r.inc} Einnahmen und ${r.out} Ausgaben gespeichert`);
+});
 async function saveBackup(){
   const name = "haushaltsbuch-backup-"+isoToday()+".json";
   const text = JSON.stringify(backupData());
@@ -1789,8 +2101,10 @@ window.hbBack = () => {
 
 /* ---------- sync with the Synology ---------- */
 const SYNC = { token:"", rev:0, queue:[], state:"off", last:0, busy:false, skipped:false, setup:false };
-function loadSync(){ try { Object.assign(SYNC, JSON.parse(localStorage.getItem(SYNC_KEY)||"{}")); } catch(e){} SYNC.busy=false; }
-function saveSync(){ try { localStorage.setItem(SYNC_KEY, JSON.stringify({token:SYNC.token, rev:SYNC.rev, queue:SYNC.queue, last:SYNC.last, skipped:SYNC.skipped})); } catch(e){} }
+function loadSync(){ try { Object.assign(SYNC, JSON.parse(localStorage.getItem(SYNC_KEY)||"{}")); } catch(e){} SYNC.busy=false; SYNC.rq=SYNC.rq||[]; }
+function saveSync(){ try { localStorage.setItem(SYNC_KEY, JSON.stringify({token:SYNC.token, rev:SYNC.rev, queue:SYNC.queue, rq:SYNC.rq||[], last:SYNC.last, skipped:SYNC.skipped})); } catch(e){} }
+// receipt photos are too big for the normal queue: only their ids wait here, the photo is read when it is sent
+function rqAdd(id){ if (!SERVER || !SYNC.token) return; SYNC.rq=(SYNC.rq||[]).filter(x=>x!==id); SYNC.rq.push(id); saveSync(); flushSoon(); }
 function enqueue(col,id,data){
   if (!SERVER || !SYNC.token) return;
   SYNC.queue = SYNC.queue.filter(o=>!(o.col===col && o.id===id));
@@ -1827,20 +2141,27 @@ async function syncNow(){
       await api("push", {body:{ops}});
       SYNC.queue = SYNC.queue.filter(o=>!ops.includes(o)); saveSync();
     }
+    if (SYNC.rq && SYNC.rq.length){
+      const ids=SYNC.rq.slice(0,4), ops=[];
+      for (const id of ids){ const img=await rcptGet(id); ops.push({col:"app", id:"rcpt-"+id, data: img?{img}:null}); }
+      await api("push", {body:{ops}});
+      SYNC.rq = SYNC.rq.filter(x=>!ids.includes(x)); saveSync();
+    }
     const res = await api("pull", {qs:"&since="+SYNC.rev});
-    const pending = new Set(SYNC.queue.map(o=>o.col+"/"+o.id));
+    const pending = new Set([...SYNC.queue.map(o=>o.col+"/"+o.id), ...(SYNC.rq||[]).map(id=>"app/rcpt-"+id)]);
     let changed=false;
     for (const d of res.docs||[]){
       if (pending.has(d.col+"/"+d.id)) continue;
       changed=true;
+      if (d.col==="app" && d.id.startsWith("rcpt-")){ const k=d.id.slice(5); try { if (d.data && d.data.img) await rcptPut(k, d.data.img, true); else await rcptDel(k, true); } catch(e){} continue; }
       if (d.col==="app" && d.id.startsWith("acct-")){ const k=d.id.slice(5); if (d.data===null) delete memStore.acct[k]; else memStore.acct[k]=d.data; continue; }
       if (d.col==="app"){ if (d.id==="settings" && d.data){ const m={...clone(DEFAULT_SETTINGS),...d.data}; m.cats={...clone(DEFAULT_SETTINGS.cats),...(d.data.cats||{})}; S.settings=m; } continue; }
       if (!memStore[d.col]) continue;
       if (d.data===null) delete memStore[d.col][d.id]; else memStore[d.col][d.id]=d.data;
     }
-    SYNC.rev = res.rev || SYNC.rev; SYNC.last = Date.now(); SYNC.state = SYNC.queue.length ? "pending" : "ok"; saveSync();
+    SYNC.rev = res.rev || SYNC.rev; SYNC.last = Date.now(); SYNC.state = SYNC.queue.length||(SYNC.rq||[]).length ? "pending" : "ok"; saveSync();
     if (changed){ persistLocal(); rebuildMem(); } else renderSyncDot();
-    if (SYNC.queue.length) flushSoon(200);
+    if (SYNC.queue.length || (SYNC.rq||[]).length) flushSoon(200);
     checkUpdate();
   } catch(e){
     if (e.status===401){ SYNC.token=""; SYNC.state="login"; saveSync(); showLogin(); }
@@ -1922,6 +2243,7 @@ async function doLogin(){
     if (firstSetup){ // new server: upload what this device has
       for (const k of ["tx","txb","fixed","months","debts"]) for (const [id,d] of Object.entries(memStore[k])) SYNC.queue.push({col:k,id,data:d});
       for (const [id,d] of Object.entries(memStore.acct)) SYNC.queue.push({col:"app",id:"acct-"+id,data:d});
+      SYNC.rq=[...RCPT.ids];
       SYNC.queue.push({col:"app",id:"settings",data:clone(S.settings)});
     } else { // existing server: this device takes over the server's data
       for (const k of ["tx","txb","fixed","months","debts","acct"]) memStore[k]={};

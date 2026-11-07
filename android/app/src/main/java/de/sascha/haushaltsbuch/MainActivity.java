@@ -26,7 +26,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.media.ExifInterface;
+import android.util.Base64;
+import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricPrompt;
+import android.os.CancellationSignal;
 import androidx.core.content.FileProvider;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.Text;
@@ -205,7 +213,7 @@ public class MainActivity extends Activity {
         try {
             InputImage img = InputImage.fromFilePath(this, uri);
             TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS).process(img)
-                .addOnSuccessListener(text -> {
+                .addOnSuccessListener(text -> new Thread(() -> {
                     try {
                         JSONArray arr = new JSONArray();
                         for (Text.TextBlock b : text.getTextBlocks()) {
@@ -217,21 +225,73 @@ public class MainActivity extends Activity {
                                 arr.put(o);
                             }
                         }
-                        scanDone(arr.toString(), null);
+                        JSONObject res = new JSONObject();
+                        res.put("lines", arr);
+                        String img = jpegDataUrl(uri);
+                        if (img != null) res.put("img", img);
+                        scanDone(res.toString(), null);
                     } catch (Exception e) {
                         scanDone(null, "Text konnte nicht erkannt werden");
                     }
-                })
+                }).start())
                 .addOnFailureListener(e -> scanDone(null, "Text konnte nicht erkannt werden"));
         } catch (Exception e) {
             scanDone(null, "Bild konnte nicht gelesen werden");
         }
     }
 
+    /** The receipt photo, at most 1600 px, upright, as JPEG data URL (kept with the booking). */
+    private String jpegDataUrl(Uri uri) {
+        try {
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            try (InputStream is = getContentResolver().openInputStream(uri)) { BitmapFactory.decodeStream(is, null, o); }
+            int max = Math.max(o.outWidth, o.outHeight), sample = 1;
+            while (max / (sample * 2) >= 1600) sample *= 2;
+            BitmapFactory.Options o2 = new BitmapFactory.Options();
+            o2.inSampleSize = sample;
+            Bitmap bm;
+            try (InputStream is = getContentResolver().openInputStream(uri)) { bm = BitmapFactory.decodeStream(is, null, o2); }
+            if (bm == null) return null;
+            int rot = 0;
+            try (InputStream is = getContentResolver().openInputStream(uri)) {
+                int or = new ExifInterface(is).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                rot = or == ExifInterface.ORIENTATION_ROTATE_90 ? 90 : or == ExifInterface.ORIENTATION_ROTATE_180 ? 180 : or == ExifInterface.ORIENTATION_ROTATE_270 ? 270 : 0;
+            } catch (Exception ignored) {}
+            float k = Math.min(1f, 1600f / Math.max(bm.getWidth(), bm.getHeight()));
+            Matrix mx = new Matrix();
+            mx.postScale(k, k);
+            mx.postRotate(rot);
+            Bitmap out = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), mx, true);
+            ByteArrayOutputStream bo = new ByteArrayOutputStream();
+            out.compress(Bitmap.CompressFormat.JPEG, 72, bo);
+            return "data:image/jpeg;base64," + Base64.encodeToString(bo.toByteArray(), Base64.NO_WRAP);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void bioDone(String id, boolean ok) {
+        final String js = "window.hbBioDone && window.hbBioDone(" + JSONObject.quote(id) + "," + ok + ")";
+        runOnUiThread(() -> web.evaluateJavascript(js, null));
+    }
+
     private void scanDone(String json, String err) {
         final String js = "window.hbScanDone && window.hbScanDone(" + JSONObject.quote(scanId == null ? "" : scanId) + ","
             + (json == null ? "null" : JSONObject.quote(json)) + "," + (err == null ? "null" : JSONObject.quote(err)) + ")";
         runOnUiThread(() -> web.evaluateJavascript(js, null));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (web != null) web.evaluateJavascript("window.hbPaused && window.hbPaused()", null);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (web != null) web.evaluateJavascript("window.hbResumed && window.hbResumed()", null);
     }
 
     /** Called from JavaScript as window.AndroidBridge */
@@ -285,6 +345,37 @@ public class MainActivity extends Activity {
                 final String js = "window.hbHttpDone&&window.hbHttpDone(" + JSONObject.quote(id) + "," + code + "," + JSONObject.quote(text) + ")";
                 runOnUiThread(() -> web.evaluateJavascript(js, null));
             }).start();
+        }
+
+        /* ---- app lock: fingerprint / face via the system dialog ---- */
+        @JavascriptInterface
+        @SuppressWarnings("deprecation")
+        public boolean biometricAvailable() {
+            try {
+                BiometricManager bm = getSystemService(BiometricManager.class);
+                return bm != null && bm.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public void biometric(final String id) {
+            runOnUiThread(() -> {
+                final java.util.concurrent.Executor ex = getMainExecutor();
+                try {
+                    BiometricPrompt p = new BiometricPrompt.Builder(MainActivity.this)
+                        .setTitle("Haushaltsbuch entsperren")
+                        .setNegativeButton("PIN eingeben", ex, (d, w) -> bioDone(id, false))
+                        .build();
+                    p.authenticate(new CancellationSignal(), ex, new BiometricPrompt.AuthenticationCallback() {
+                        @Override public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult r) { bioDone(id, true); }
+                        @Override public void onAuthenticationError(int code, CharSequence msg) { bioDone(id, false); }
+                    });
+                } catch (Exception e) {
+                    bioDone(id, false);
+                }
+            });
         }
 
         @JavascriptInterface
