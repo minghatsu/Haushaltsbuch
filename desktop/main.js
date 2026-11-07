@@ -117,6 +117,20 @@ ipcMain.on("saveFileB64", (e, name, b64) => {
   }
 });
 
+ipcMain.on("autoBackup", (e, name, text, keep) => {
+  try {
+    const dir = path.join(app.getPath("documents"), "Haushaltsbuch-Backups");
+    fs.mkdirSync(dir, { recursive: true });
+    const safe = String(name).replace(/[\\/:*?"<>|]/g, "_");
+    fs.writeFileSync(path.join(dir, safe), String(text), "utf8");
+    const old = fs.readdirSync(dir).filter(f => /^haushaltsbuch-auto-.*\.json$/.test(f)).sort().reverse().slice(Math.max(1, keep || 8));
+    for (const f of old) { try { fs.unlinkSync(path.join(dir, f)); } catch (err) {} }
+    e.returnValue = dir;
+  } catch (err) {
+    e.returnValue = false;
+  }
+});
+
 ipcMain.on("saveApp", (e, html) => {
   try {
     html = String(html);

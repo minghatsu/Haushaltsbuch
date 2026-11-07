@@ -754,7 +754,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
     <div class="card sp bk" data-sp="backup" hidden>
       <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span class="n"><b>Backup</b><span id="backupInfo">Alle Buchungen, Fixkosten, Schulden und Einstellungen in einer Datei.</span></span></div>
       <div class="bkb"><button class="btn primary" id="backupSave">Speichern</button><span id="backupLoadRow" style="display:contents"><button class="btn" id="backupLoad">Laden</button></span></div>
-      <span class="small muted">„Laden“ ersetzt alle Daten in dieser App durch die Datei.</span>
+      <span class="small muted">„Laden“ ersetzt alle Daten in dieser App durch die Datei. Fotos von Belegen sind nicht im Backup.</span>
+      <div id="autoBk"></div>
       <input type="file" id="backupFile" accept=".json,application/json,text/plain" hidden>
     </div>
     <div class="card sp bk" data-sp="backup" hidden>
@@ -1251,6 +1252,7 @@ function rebuildMem(){
   S.debts = Object.entries(memStore.debts).map(([id,d])=>({id,...d}));
   render();
   setTimeout(runMigrations, 0);
+  clearTimeout(window.__abT); window.__abT=setTimeout(autoBackupCheck, 15000);
 }
 function reportErr(e){
   const c = e && e.code;
@@ -2745,6 +2747,30 @@ document.addEventListener("change", async e=>{
   if (e.target.id==="slipFile" && e.target.files[0]) slipFromPdf(e.target.files[0]);
 });
 
+
+/* ---------- automatisches Backup: einmal pro Woche eine Datei, die letzten 8 bleiben ---------- */
+const CAN_AUTOBK = !!(window.AndroidBridge && window.AndroidBridge.autoBackup);
+function abCfg(){ let c={}; try{ c=JSON.parse(localStorage.getItem("hb-autobk")||"{}"); }catch(e){} return {on:true, keep:8, ...c}; }
+function abSave(c){ try{ localStorage.setItem("hb-autobk", JSON.stringify(c)); }catch(e){} }
+function autoBackupRun(manual){
+  const c=abCfg(); if (!CAN_AUTOBK) return false;
+  if (!S.tx.length && !S.fixed.length) return false;          // nothing loaded yet – never overwrite with an empty backup
+  const d=new Date(), name=`haushaltsbuch-auto-${isoOf(d)}_${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+  let r=false; try{ r=AndroidBridge.autoBackup(name, JSON.stringify(backupData()), c.keep); }catch(e){}
+  if (r){ c.last=Date.now(); c.where = typeof r==="string" ? r : "Downloads/Haushaltsbuch-Backups"; abSave(c); if (manual) toast("Backup gespeichert"); }
+  else if (manual) toast("Backup konnte nicht gespeichert werden");
+  if (UI.view==="more") renderAutoBk();
+  return r;
+}
+function autoBackupCheck(){ const c=abCfg(); if (c.on && CAN_AUTOBK && (!c.last || Date.now()-c.last > 7*864e5)) autoBackupRun(false); }
+function renderAutoBk(){
+  const el=$("autoBk"); if (!el) return;
+  if (!CAN_AUTOBK){ el.innerHTML=`<span class="small muted">Automatische Backups gibt es in der Handy- und PC-App.</span>`; return; }
+  const c=abCfg();
+  el.innerHTML=`<div class="switch"><label for="abOn"><b>Jede Woche automatisch</b><br><span class="small muted">${c.last?`Zuletzt am ${esc(new Date(c.last).toLocaleDateString("de-DE"))} · `:""}die letzten ${c.keep} bleiben in ${esc(c.where||(NATIVE&&!(window.AndroidBridge||{}).desktop?"Downloads/Haushaltsbuch-Backups":"Dokumente/Haushaltsbuch-Backups"))}</span></label><input type="checkbox" id="abOn" ${c.on?"checked":""}></div>`;
+}
+document.addEventListener("change", e=>{ if (e.target.id==="abOn"){ const c=abCfg(); c.on=e.target.checked; abSave(c); if (c.on) autoBackupCheck(); renderAutoBk(); } });
+
 const SP_PAGES = {
   konten:["Konten & Spaces","wallet"], budgets:["Monatsbudgets","target"], schulden:["Schulden","bank"], backup:["Abgleich & Backup","cloud"],
   notify:["Benachrichtigungen","bell"], steuer:["Steuer & Einkommen","receipt"], start:["Startseite & Läden","home"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"]
@@ -2864,7 +2890,7 @@ function renderMore(){
   if (document.activeElement!==$("sWork")) $("sWork").innerHTML = WORK.map(([k,t])=>`<option value="${k}" ${k===w?"selected":""}>${t}</option>`).join("");
   $("sWorkInfo").textContent = (WORK.find(x=>x[0]===w)||WORK[2])[2] + (w==="angestellt"?" – Rücklage, Betrieb, Umsatzsteuer und EÜR sind ausgeblendet.":w==="selbst"?" – die Felder für Gehalt sind ausgeblendet.":"");
   $("sJobBox").hidden = !hasJob(); $("sSelfBox").hidden = !hasSelf(); $("catBetField").hidden = !hasSelf();
-  renderNotifyEd();
+  renderNotifyEd(); renderAutoBk();
   renderSpPages();
 }
 function txPayee(t){ return String(t.note||"").replace(/ · brutto.*$/,""); }

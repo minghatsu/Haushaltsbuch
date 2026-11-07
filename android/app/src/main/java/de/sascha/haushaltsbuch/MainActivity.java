@@ -538,5 +538,37 @@ public class MainActivity extends Activity {
                 return false;
             }
         }
+        /** Weekly automatic backup: Downloads/Haushaltsbuch-Backups, only the newest `keep` files stay. */
+        @JavascriptInterface
+        public boolean autoBackup(String name, String content, int keep) {
+            try {
+                String rel = Environment.DIRECTORY_DOWNLOADS + "/Haushaltsbuch-Backups/";
+                ContentValues cv = new ContentValues();
+                cv.put(MediaStore.Downloads.DISPLAY_NAME, name);
+                cv.put(MediaStore.Downloads.MIME_TYPE, "application/json");
+                cv.put(MediaStore.Downloads.RELATIVE_PATH, rel);
+                Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, cv);
+                if (uri == null) return false;
+                try (OutputStream os = getContentResolver().openOutputStream(uri)) {
+                    if (os == null) return false;
+                    os.write(content.getBytes(StandardCharsets.UTF_8));
+                }
+                // remove older backups of this app beyond `keep`
+                try (android.database.Cursor c = getContentResolver().query(MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                        new String[]{MediaStore.Downloads._ID, MediaStore.Downloads.DISPLAY_NAME},
+                        MediaStore.Downloads.RELATIVE_PATH + "=? AND " + MediaStore.Downloads.DISPLAY_NAME + " LIKE 'haushaltsbuch-auto-%'",
+                        new String[]{rel}, MediaStore.Downloads.DISPLAY_NAME + " DESC")) {
+                    int n = 0;
+                    while (c != null && c.moveToNext()) {
+                        if (++n <= Math.max(1, keep)) continue;
+                        Uri old = android.content.ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI, c.getLong(0));
+                        try { getContentResolver().delete(old, null, null); } catch (Exception ignored) {}
+                    }
+                }
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
     }
 }
