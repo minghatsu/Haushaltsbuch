@@ -68,6 +68,8 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stro
 .tab{border:0;background:none;padding:7px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--faint);border-radius:18px}
 .tab svg.i{width:22px;height:22px}
 .tab[aria-selected="true"]{color:var(--accent)}
+.tab:not(.plus) svg.i{box-sizing:content-box;padding:3px 14px;border-radius:999px;transition:background .2s}
+.tab[aria-selected="true"]:not(.plus) svg.i{background:var(--accent-soft)}
 .tab.plus{justify-self:center;width:54px;height:54px;border-radius:18px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;padding:0;box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 45%,transparent);transition:transform .15s}
 .tab.plus:active{transform:scale(.94)}
 .tab.plus svg.i{width:26px;height:26px;stroke-width:2.4}
@@ -100,7 +102,7 @@ main{padding-block:6px 120px}
 
 .quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .qa{border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:18px;padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:700;font-size:13px;position:relative}
-.qa .ic{width:40px;height:40px;border-radius:13px;display:grid;place-items:center}
+.qa .ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center}
 .qa:active{transform:scale(.97)}
 .badge{position:absolute;top:8px;right:10px;background:var(--bad);color:#fff;font-size:11px;font-weight:800;border-radius:99px;min-width:20px;height:20px;padding:0 6px;display:grid;place-items:center}
 
@@ -111,7 +113,29 @@ main{padding-block:6px 120px}
 .splitbar i{display:block;height:100%;border-radius:99px}
 .saldo{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-weight:700}
 
-.ictile{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;flex:none}
+.ictile{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ictile.bavatar{position:relative;overflow:hidden;background:var(--bb);color:var(--bi);font-family:var(--f-display);font-weight:800;font-size:16px;letter-spacing:-.02em;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.ictile.bavatar.haslogo{background:#fff;box-shadow:inset 0 0 0 1px var(--line)}
+.ictile.bavatar.haslogo b{visibility:hidden}
+.ictile.bavatar img{position:absolute;inset:0;margin:auto;width:24px;height:24px;object-fit:contain}
+.card h2:has(.h2ic){display:flex;align-items:center;gap:10px}
+.h2ic{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);flex:none}
+.heroio{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;font-size:13.5px;position:relative;z-index:1}
+.heroio > span{display:inline-flex;align-items:center;gap:6px}
+.heroio > span > span{opacity:.85}
+.heroio svg.i{background:rgba(255,255,255,.2);border-radius:50%;padding:3px;width:21px;height:21px}
+.insights{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ins{background:var(--sunk);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.ins b{font-family:var(--f-display);font-size:20px;font-weight:700;letter-spacing:-.02em}
+.donutwrap{display:flex;align-items:center;gap:18px;margin:-4px 0 12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.donut{width:136px;height:136px;flex:none}
+.dn-v{font-family:var(--f-display);font-weight:800;font-size:17px;fill:var(--fg)}
+.dn-l{font-size:10.5px;font-weight:600;fill:var(--muted)}
+.dnlegend{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1;font-size:13px;font-weight:600}
+.dnlegend span{display:flex;align-items:center;gap:8px;min-width:0;line-height:1.25}
+.dnlegend b{white-space:nowrap}
+.dnlegend i{width:10px;height:10px;border-radius:50%;flex:none}
+.dnlegend b{margin-left:auto;font-weight:700;color:var(--muted)}
 .ictile svg.i{width:20px;height:20px}
 .catrow{display:flex;align-items:center;gap:12px;padding:8px 0}
 .catrow .grow{flex:1;min-width:0}
@@ -361,6 +385,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   .tab.plus{order:-1;width:100%;height:auto;border-radius:14px;padding:12px 14px;display:flex;justify-content:flex-start;gap:12px;margin-bottom:14px;font-size:15px}
   .tab.plus svg.i{width:22px;height:22px}
   .tab .tlabel{display:inline}
+  .tab:not(.plus) svg.i{padding:0;background:none!important}
   .deskonly{display:flex}
   .tabs .spacer{flex:1}
   #settingsBtn{display:none}
@@ -423,7 +448,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   <section class="view" id="v-import" data-view="import" hidden></section>
   <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" hidden>
   <section class="view" id="v-list" data-view="list" hidden>
-    <button class="importbtn" data-go="import"><span class="ictile" style="background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span style="flex:1;text-align:left"><b>Kontoauszug importieren</b><br><span class="small muted">CSV-Datei aus N26 hochladen</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+    <button class="importbtn" data-go="import"><span class="ictile" style="background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span style="flex:1;text-align:left"><b>Kontoauszug importieren</b><br><span class="small muted">CSV-Datei deiner Bank hochladen</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
     <label class="search"><svg class="i muted" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="q" type="search" placeholder="Suchen, z. B. Rewe oder Tanken" autocomplete="off" aria-label="Buchungen durchsuchen"></label>
     <div class="filters" id="filters"></div>
     <div class="card" id="listCard"></div>
@@ -475,6 +500,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="field"><label>Einnahmen</label><div id="catEd-einnahme"></div></div>
       <div class="section-title">Sicherheit</div>
       <div class="field" id="lockEd"></div>
+      <div class="switch"><label for="sLogos"><b>Händler-Logos</b><br><span class="small muted">Lädt das Website-Symbol bekannter Händler (über Google). Aus: farbiger Anfangsbuchstabe.</span></label><input type="checkbox" id="sLogos"></div>
       <div class="section-title">Angebote</div>
       <div class="field"><span class="small muted" style="margin-top:-2px">Diese Läden zeigt die Startseite mit einem Link zum aktuellen Prospekt, in der Reihenfolge, in der du sie antippst.</span><div class="chips" id="shopEd"></div></div>
       <div class="section-title">Konten</div>
@@ -623,16 +649,62 @@ const P = {
   cloud:'<path d="M7 18.5a4 4 0 0 1-.6-8 5.5 5.5 0 0 1 10.6-1.3A4.3 4.3 0 0 1 17.5 18.5z"/>',
   doc:'<path d="M7 3.5h7l4.5 4.5v12.5h-11.5z"/><path d="M14 3.5V8h4.5M9.5 13h5M9.5 16.5h5"/>',
   tv:'<rect x="3" y="5" width="18" height="12" rx="2.5"/><path d="M8 20.5h8"/>',
+  food:'<path d="M7 3.5v7.5M4.5 3.5V8a2.5 2.5 0 0 0 5 0V3.5M7 11v9.5M16.5 20.5V3.5c-2 1-3 3.5-3 7v2.5h3"/>',
+  health:'<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8.5v7M8.5 12h7"/>',
+  plane:'<path d="M3.5 13.5 21 7l-2 3-6.5 3 1 6.5-2.5 1-2.5-5.5L5 16.5z"/>',
+  gift:'<rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M3.5 9h17v3.5h-17zM12 9v11M12 9c-1-3-4.5-4-5-2s2.5 2 5 2c2.5 0 5.5 0 5-2s-4-1-5 2"/>',
+  shirt:'<path d="M8.5 4 4 6.5 5.5 11l2-.8V20h9v-9.8l2 .8L20 6.5 15.5 4a3.5 3.5 0 0 1-7 0z"/>',
+  book:'<path d="M5 4.5h10.5A2.5 2.5 0 0 1 18 7v13H7.5A2.5 2.5 0 0 1 5 17.5z"/><path d="M5 17.5A2.5 2.5 0 0 1 7.5 15H18"/>',
+  bolt:'<path d="M13 3 5.5 13.5H12L11 21l7.5-10.5H12z"/>',
+  dumbbell:'<path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/>',
+  paw:'<circle cx="7" cy="9.5" r="1.8"/><circle cx="17" cy="9.5" r="1.8"/><circle cx="10" cy="5.5" r="1.8"/><circle cx="14" cy="5.5" r="1.8"/><path d="M12 12c-3 0-5.5 3.5-5.5 5.5 0 2 2 2.5 5.5 2.5s5.5-.5 5.5-2.5c0-2-2.5-5.5-5.5-5.5z"/>',
+  target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>',
+  insight:'<path d="M12 3.5a6 6 0 0 0-3.5 10.9V17h7v-2.6A6 6 0 0 0 12 3.5zM9.5 20.5h5"/>',
+  wallet:'<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11v3.5"/><rect x="4" y="7.5" width="16.5" height="12" rx="2.5"/><path d="M16 13.5h2"/>',
   piggy:'<path d="M5 11.5a6.5 5.5 0 0 1 11.6-3.3L19 7.5v3.2l1.5.8v3l-2 .5a6.5 5.5 0 0 1-2.5 2.2V20h-3v-2.2h-3V20H7v-3.2A5.5 5.5 0 0 1 5 11.5z"/><circle cx="14.5" cy="11" r=".7"/>'
 };
 function ic(name, size){ return `<svg class="i" viewBox="0 0 24 24"${size?` style="width:${size}px;height:${size}px"`:""}>${P[name]||P.tag}</svg>`; }
 function iconFor(kind, name){
   const n = (name||"").toLowerCase();
   if (kind==="vorauszahlung") return "receipt";
-  const map = [["ratenzahlung","repeat"],["fixkosten","repeat"],["haushalt","basket"],["einkauf","cart"],["spaß","spark"],["freizeit","spark"],["tank","fuel"],["park","fuel"],["bargeld","cash"],["büro","case"],["alg","shield"],["arbeitsamt","shield"],["produktion","film"],["steuer","receipt"],["miete","home"],["auto","car"],["garage","garage"],["spotify","music"],["netflix","tv"],["prime","tv"],["handy","phone"],["internet","wifi"],["ionos","cloud"],["sevdesk","doc"],["adobe","doc"],["etf","chart"],["bank","bank"],["ksk","shield"],["nintendo","game"],["pokémon","game"],["joyclub","heart"],["kredit","bank"],["schulden","piggy"],["sonstig","dots"]];
+  const map = [["essen","food"],["restaurant","food"],["lieferando","food"],["gesund","health"],["apotheke","health"],["arzt","health"],["urlaub","plane"],["reise","plane"],["geschenk","gift"],["kleid","shirt"],["mode","shirt"],["bildung","book"],["kurs","book"],["strom","bolt"],["energie","bolt"],["sport","dumbbell"],["fitness","dumbbell"],["versicherung","shield"],["haustier","paw"],["erstattung","repeat"],["lohn","wallet"],["gehalt","wallet"],["ratenzahlung","repeat"],["fixkosten","repeat"],["haushalt","basket"],["einkauf","cart"],["spaß","spark"],["freizeit","spark"],["tank","fuel"],["park","fuel"],["bargeld","cash"],["büro","case"],["alg","shield"],["arbeitsamt","shield"],["produktion","film"],["steuer","receipt"],["miete","home"],["auto","car"],["garage","garage"],["spotify","music"],["netflix","tv"],["prime","tv"],["handy","phone"],["internet","wifi"],["ionos","cloud"],["sevdesk","doc"],["adobe","doc"],["etf","chart"],["bank","bank"],["ksk","shield"],["nintendo","game"],["pokémon","game"],["joyclub","heart"],["kredit","bank"],["schulden","piggy"],["sonstig","dots"]];
   for (const [k,v] of map) if (n.includes(k)) return v;
   return kind==="einnahme" ? "arrowDown" : "tag";
 }
+// known merchants: their own website icon (loaded from the web), or a coloured initial when it can't be loaded
+const BRANDS = [
+  [/\bnetflix\b/,"N","#E50914","netflix.com"],[/\bspotify\b/,"S","#1DB954","spotify.com"],[/\bamazon|amzn\b/,"a","#FF9900","amazon.de","#111"],[/\bpaypal\b/,"P","#003087","paypal.com"],
+  [/\bapple\b/,"A","#1D1D1F","apple.com"],[/\bgoogle\b/,"G","#4285F4","google.com"],[/\byoutube\b/,"Y","#FF0000","youtube.com"],[/\bdisney/,"D","#113CCF","disneyplus.com"],[/\bdazn\b/,"D","#0C161C","dazn.com"],[/\baudible\b/,"A","#F7991C","audible.de"],
+  [/\btelekom\b/,"T","#E20074","telekom.de"],[/\bvodafone\b/,"V","#E60000","vodafone.de"],[/\bo2\b|telefonica/,"O2","#0019A5","o2online.de"],[/\b1&1\b|1und1/,"1","#003D8F","1und1.de"],[/\bionos\b/,"I","#003D8F","ionos.de"],
+  [/\badobe\b/,"A","#FA0F00","adobe.com"],[/\bsevdesk\b/,"s","#1474E4","sevdesk.de"],[/\banthropic\b/,"A","#C9643F","anthropic.com"],[/\bopenai|chatgpt\b/,"O","#10A37F","openai.com"],[/\bmicrosoft\b/,"M","#00A4EF","microsoft.com"],
+  [/deutsche bahn|\bdb vertrieb|\bdb fernverkehr|\bdb regio/,"DB","#EC0016","bahn.de"],[/\bflixbus|flixtrain/,"F","#73D700","flixbus.de"],[/\bikea\b/,"I","#0058A3","ikea.com","#FFDA1A"],
+  [/mcdonald/,"M","#DA291C","mcdonalds.com","#FFC72C"],[/burger king/,"B","#D62300","burgerking.de"],[/\bkfc\b/,"K","#A3080C","kfc.de"],[/\bsubway\b/,"S","#008C15","subway.com"],[/\bstarbucks\b/,"S","#00704A","starbucks.de"],
+  [/\blieferando\b/,"L","#FF8000","lieferando.de"],[/\bwolt\b/,"W","#009DE0","wolt.com"],[/\buber\b/,"U","#000000","uber.com"],
+  [/\bsteam|valve\b/,"S","#1B2838","steampowered.com"],[/\bnintendo\b/,"N","#E60012","nintendo.com"],[/playstation|\bsony\b/,"P","#003791","playstation.com"],[/\bxbox\b/,"X","#107C10","xbox.com"],
+  [/\bn26\b/,"N","#3A8F7E","n26.com"],[/\bsparkasse\b/,"S","#FF0000","sparkasse.de"],[/\bvolksbank|raiffeisen/,"V","#0066B3","vr.de"],[/\bing\b|ing-diba/,"I","#FF6200","ing.de"],[/\bdkb\b/,"D","#148DEA","dkb.de"],
+  [/commerzbank/,"C","#FFCC00","commerzbank.de","#111"],[/comdirect/,"c","#FFF500","comdirect.de","#111"],[/postbank/,"P","#FFCC00","postbank.de","#111"],[/deutsche bank/,"D","#0018A8","deutsche-bank.de"],[/trade republic/,"T","#111","traderepublic.com"],[/\bbitpanda\b/,"B","#1E1E1E","bitpanda.com"],
+  [/\bshell\b/,"S","#FBCE07","shell.de","#DD1D21"],[/\baral\b/,"A","#0063AF","aral.de"],[/\besso\b/,"E","#1A3B8F","esso.de"],[/\bjet\b/,"J","#FFD100","jet-tankstellen.de","#111"],[/totalenergies/,"T","#ED0000","totalenergies.de"],
+  [/\bkfw\b/,"K","#005A8C","kfw.de"],[/finanzamt/,"F","#4E5D6C",""],[/\bklarna\b/,"K","#FFA8CD","klarna.com","#111"],[/\bzalando\b/,"Z","#FF6900","zalando.de"],[/\bebay\b/,"e","#0064D2","ebay.de"],[/\botto\b/,"O","#D52B1E","otto.de"],
+  [/media ?markt/,"M","#DF0000","mediamarkt.de"],[/\bsaturn\b/,"S","#F26D00","saturn.de"],[/\bobi\b/,"O","#FF7E21","obi.de"],[/\bhornbach\b/,"H","#F7A600","hornbach.de","#111"],[/\bbauhaus\b/,"B","#E30613","bauhaus.info"],[/\btoom\b/,"t","#E2001A","toom.de"],
+  [/\btedi\b/,"T","#0B2F7A","tedi.com"],[/\baction\b/,"A","#0083CA","action.com"],[/\bh&m\b|\bh & m\b|hennes/,"H","#E50010","hm.com"],[/\bprimark\b/,"P","#0DAADD","primark.com"],[/\bdouglas\b/,"D","#000","douglas.de"],
+  [/\bcheck24\b/,"C","#063773","check24.de"],[/\ballianz\b/,"A","#003781","allianz.de"],[/\bhuk\b/,"H","#003F7D","huk.de"],[/\badac\b/,"A","#FFCC00","adac.de","#111"],[/\baok\b/,"A","#005E3F","aok.de"],[/\btk\b|techniker krankenkasse/,"T","#00A3AD","tk.de"],[/\bbarmer\b/,"B","#00A0E3","barmer.de"],
+  [/\bapcoa\b/,"A","#0B4B8F","apcoa.de"],[/\beasypark\b/,"E","#E0004D","easypark.de"],[/\bjoyclub\b/,"J","#C2185B","joyclub.de"],[/pok[eé]mon/,"P","#FFCB05","pokemon.com","#2A75BB"],[/künstlersozialkasse|kuenstlersozialkasse|\bksk\b/,"K","#00518E","kuenstlersozialkasse.de"]
+];
+const SHOP_DOMAINS = {penny:"penny.de", rewe:"rewe.de", edeka:"edeka.de", aldinord:"aldi-nord.de", aldi:"aldi-sued.de", lidl:"lidl.de", kaufland:"kaufland.de", netto:"netto-online.de", rossmann:"rossmann.de", dm:"dm.de", norma:"norma-online.de", globus:"globus.de"};
+function brandFor(text){
+  const n=nrm(text); if (!n) return null;
+  const sh = (typeof SHOPS!=="undefined") ? SHOPS.find(x=>x.re.test(n)) : null;
+  if (sh) return {t:sh.name.replace(/ .*/,"").slice(0,1), bg:sh.color, ink:sh.ink||"#fff", domain:SHOP_DOMAINS[sh.id]||""};
+  for (const [re,t,bg,domain,ink] of BRANDS) if (re.test(n)) return {t, bg, ink:ink||"#fff", domain};
+  return null;
+}
+const logoUrl = d => "https://www.google.com/s2/favicons?sz=64&domain="+encodeURIComponent(d);
+function brandBadge(b){
+  const logo = b.domain && S.settings.logos!==false;
+  return `<span class="ictile bavatar${logo?" haslogo":""}" style="--bb:${b.bg};--bi:${b.ink}"><b>${esc(b.t)}</b>${logo?`<img src="${esc(logoUrl(b.domain))}" alt="" loading="lazy" referrerpolicy="no-referrer" onload="if(this.naturalWidth<=16){this.parentNode.classList.remove('haslogo');this.remove()}" onerror="this.parentNode.classList.remove('haslogo');this.remove()">`:""}</span>`;
+}
+function avatar(t){ const b=brandFor(t.note); return b ? brandBadge(b) : tile(t.kind,t.cat); }
+function hIc(name){ return `<span class="h2ic">${ic(name,15)}</span>`; }
 function tile(kind, name, color){
   const c = color || catColor(kind, name);
   return `<span class="ictile" style="background:color-mix(in srgb, ${c} 16%, transparent);color:${c}">${ic(iconFor(kind,name))}</span>`;
@@ -926,7 +998,7 @@ function txRow(t, showDate){
   const isIn = t.kind==="einnahme";
   const title = t.note || t.cat || KIND_LABEL[t.kind];
   const sub = [t.note ? t.cat : "", t.kind==="betrieb" ? "Betrieblich" : t.kind==="vorauszahlung" ? "aus Rücklage" : "", showDate ? shortDate(t.date) : ""].filter(Boolean).join(" · ");
-  return `<button class="tx" data-edit="${esc(t.id)}">${tile(t.kind,t.cat)}<span class="grow"><div class="t">${esc(title)}${hasReceipt(t.id)?`<svg class="i clip" viewBox="0 0 24 24" style="width:14px;height:14px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3.5"/></svg>`:""}</div>${sub?`<div class="s">${esc(sub)}</div>`:""}</span><span class="amt ${isIn?"inc":""}">${isIn?"+":"−"} ${esc(eur(t.amount))}</span></button>`;
+  return `<button class="tx" data-edit="${esc(t.id)}">${avatar(t)}<span class="grow"><div class="t">${esc(title)}${hasReceipt(t.id)?`<svg class="i clip" viewBox="0 0 24 24" style="width:14px;height:14px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3.5"/></svg>`:""}</div>${sub?`<div class="s">${esc(sub)}</div>`:""}</span><span class="amt ${isIn?"inc":""}">${isIn?"+":"−"} ${esc(eur(t.amount))}</span></button>`;
 }
 function sortTx(list){ return list.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"") || (b.ts||0)-(a.ts||0)); }
 function emptyState(iconName, title, text, btn){
@@ -958,6 +1030,12 @@ function renderHome(){
   const fx = fixedForMonth(ym).length, fxDone = fx - c.openCount;
   const debtsTotal = sum(S.debts, d=>debtState(d).remaining);
   const incW = c.income+c.expenses>0 ? c.income/(c.income+c.expenses)*100 : 50;
+  // comparison with the previous month (same number of days when it is the running month)
+  const prevYm = shiftYm(ym,-1), dayNow = new Date().getDate();
+  const prevExp = sum(monthCalc(prevYm).tx.filter(t=>(t.kind==="ausgabe"||t.kind==="betrieb") && (ym!==cur || Number(t.date.slice(8,10))<=dayNow)),t=>t.amount) + (ym!==cur ? monthCalc(prevYm).fixPaid : 0);
+  const curExp = ym===cur ? sum(c.tx.filter(t=>t.kind==="ausgabe"||t.kind==="betrieb"),t=>t.amount) : c.expenses;
+  const expDelta = prevExp>0 ? (curExp/prevExp-1)*100 : 0;
+  const topTx = c.tx.filter(t=>t.kind==="ausgabe"||t.kind==="betrieb").sort((a,b)=>b.amount-a.amount)[0];
   const asOf = ym===cur ? isoOf(new Date()) : lastDayOf(ym);
   const known = new Set(accountNames());
   const anchored = ym<=cur ? Object.keys(S.settings.accountAnchors||{}).filter(n=>known.has(n) || ym===cur).sort((a,b)=>(b==="Hauptkonto")-(a==="Hauptkonto")||a.localeCompare(b,"de")) : [];
@@ -976,6 +1054,7 @@ function renderHome(){
       <div class="big">${esc(eur(mainBal))}</div>
       ${(c.fixOpen||cum.reserveBal) && ym>=cur ? `<span class="chip-day">${ic("spark",16)} Frei nach offenen Fixkosten${cum.reserveBal?" und Rücklage":""}: ${esc(eur(free))}${days&&free>0?` · ${esc(eur(free/days))} pro Tag`:""}</span>` : (days&&mainBal>0?`<span class="chip-day">${ic("spark",16)} ${esc(eur(mainBal/days))} pro Tag · ${esc(dayNote)}</span>`:"")}
       ${acctLine}
+      <div class="heroio"><span>${ic("arrowDown",15)} <span>Einnahmen</span> <b>${esc(eur(c.income))}</b></span><span>${ic("arrowUp",15)} <span>Ausgaben</span> <b>${esc(eur(c.expenses))}</b></span></div>
       <details id="heroDetails" ${UI.heroOpen?"open":""}><summary>So berechnet ${ic("chevron",16)}</summary>
         <div class="eq"><span>${mainName?"Gesamt":"Kontostand"} 1.1.${esc(y)}</span><span>${esc(eur(startBal(y)))}</span><span>+ Einnahmen bis ${ym===cur?"heute":"Monatsende"}</span><span>${esc(eur(cum.balance-startBal(y)+cum.outSum))}</span><span>− Ausgaben bis ${ym===cur?"heute":"Monatsende"}</span><span>${esc(eur(cum.outSum))}</span><span>${mainName?"= Gesamt mit Spaces":"= Kontostand"}</span><span>${esc(eur(cum.balance))}</span>
         ${ym>=cur&&(c.fixOpen||cum.reserveBal)?`<span>− Fixkosten noch offen (${c.openCount})</span><span>${esc(eur(c.fixOpen))}</span>${cum.reserveBal?`<span>− Rücklage für Steuern</span><span>${esc(eur(cum.reserveBal))}</span>`:""}<span>= Frei verfügbar</span><span>${esc(eur(free))}</span>`:""}</div>
@@ -987,26 +1066,27 @@ function renderHome(){
       <button class="qa" data-go="fix">${c.openCount&&fx?`<span class="badge">${c.openCount}</span>`:""}<span class="ic" style="background:var(--accent-soft);color:var(--accent)">${ic("check",22)}</span>Fixkosten</button>
     </div>
     <div class="card" style="order:3">
-      <div class="card-head"><h2>${esc(MONTHS[ymParts(ym)[1]-1])} im Überblick</h2></div>
-      <div class="duo">
-        <div><div class="k"><span class="ictile" style="background:var(--good-soft);color:var(--good);width:30px;height:30px;border-radius:10px">${ic("arrowDown",16)}</span><span class="eyebrow">Einnahmen</span></div><div class="v pos">${esc(eur(c.income))}</div></div>
-        <div><div class="k"><span class="ictile" style="background:var(--warn-soft);color:var(--warn);width:30px;height:30px;border-radius:10px">${ic("arrowUp",16)}</span><span class="eyebrow">Ausgaben</span></div><div class="v">${esc(eur(c.expenses))}</div></div>
+      <div class="card-head"><h2>${hIc("insight")}Auf einen Blick</h2><span class="small muted">${esc(MONTHS[ymParts(ym)[1]-1])}</span></div>
+      <div class="insights">
+        <div class="ins"><span class="eyebrow">Saldo</span><b class="${c.net<0?"neg":"pos"}">${c.net>=0?"+":"−"} ${esc(eur0(Math.abs(c.net)))}</b><span class="small muted">${c.income?`${Math.round(Math.max(0,c.net)/c.income*100)} % gespart`:"Einnahmen − Ausgaben"}</span></div>
+        <div class="ins"><span class="eyebrow">Ø pro Tag</span><b>${esc(eur0(c.expenses/Math.max(1, ym===cur?new Date().getDate():daysIn(ym))))}</b><span class="small muted">ausgegeben</span></div>
+        <div class="ins"><span class="eyebrow">Vormonat</span>${prevExp>0?`<b class="${expDelta>0?"neg":"pos"}">${expDelta>0?"+":"−"} ${Math.abs(Math.round(expDelta))} %</b><span class="small muted">${ym===cur?"bis heute ":""}${expDelta>0?"mehr":"weniger"} als ${esc(MSHORT[ymParts(prevYm)[1]-1])}</span>`:`<b>–</b><span class="small muted">keine Daten</span>`}</div>
+        <div class="ins"><span class="eyebrow">Größte Ausgabe</span>${topTx?`<b>${esc(eur0(topTx.amount))}</b><span class="small muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(topTx.note||topTx.cat||"")}</span>`:`<b>–</b><span class="small muted">noch keine</span>`}</div>
       </div>
-      <div class="splitbar">${c.income+c.expenses>0?`<i style="width:${incW}%;background:var(--good)"></i><i style="flex:1;background:var(--c2)"></i>`:""}</div>
-      <div class="saldo"><span>Saldo</span><span class="${c.net<0?"neg":"pos"}">${c.net>=0?"+":""}${esc(eur(c.net))}</span></div>
     </div>
     <div class="card" style="order:5">
-      <div class="card-head"><h2>Fixkosten</h2><button class="link" data-go="fix">Ansehen ${ic("right",16)}</button></div>
+      <div class="card-head"><h2>${hIc("repeat")}Fixkosten</h2><button class="link" data-go="fix">Ansehen ${ic("right",16)}</button></div>
       <div class="meta-row"><span><b>${fxDone}</b> Posten bezahlt</span><b>${esc(eur(c.fixPaid))}</b></div>
     </div>
-    ${c.selfInc?`<div class="card" style="order:6"><div class="card-head"><h2>Steuer-Rücklage</h2><span class="pill ok">${esc(S.settings.reserveRate)} %</span></div><div class="kv"><span>Selbstständige Einnahmen</span><span>${esc(eur(c.selfInc))}</span><span>Diesen Monat zurücklegen</span><span class="pos">${esc(eur(c.reserve))}</span><span>Rücklage insgesamt</span><span>${esc(eur(cum.reserveBal))}</span></div></div>`:""}
-    ${S.debts.length?`<div class="card" style="order:7"><div class="card-head"><h2>Schulden</h2><button class="link" data-go="more">Details ${ic("right",16)}</button></div>
+    ${c.selfInc?`<div class="card" style="order:6"><div class="card-head"><h2>${hIc("receipt")}Steuer-Rücklage</h2><span class="pill ok">${esc(S.settings.reserveRate)} %</span></div><div class="kv"><span>Selbstständige Einnahmen</span><span>${esc(eur(c.selfInc))}</span><span>Diesen Monat zurücklegen</span><span class="pos">${esc(eur(c.reserve))}</span><span>Rücklage insgesamt</span><span>${esc(eur(cum.reserveBal))}</span></div></div>`:""}
+    ${S.debts.length?`<div class="card" style="order:7"><div class="card-head"><h2>${hIc("bank")}Schulden</h2><button class="link" data-go="more">Details ${ic("right",16)}</button></div>
       <div class="meta-row" style="margin-bottom:10px"><span>Insgesamt offen</span><b>${esc(eur(debtsTotal))}</b></div>
       ${S.debts.map(d=>{const s=debtState(d); return `<div style="margin-top:10px"><div class="meta-row"><span>${esc(d.name)}</span><span>${esc(eur(s.remaining))}</span></div><div class="track" style="margin-top:6px"><div class="fill" style="width:${s.pct*100}%;background:var(--accent)"></div></div></div>`;}).join("")}</div>`:""}
     ${goalsCard()}
     </div><div class="col">
     <div class="card" style="order:4">
-      <div class="card-head"><h2>Wohin dein Geld fließt</h2></div>
+      <div class="card-head"><h2>${hIc("chart")}Wohin dein Geld fließt</h2></div>
+      ${g.some(x=>x.v>0) ? donut(g.filter(x=>x.v>0), gTot) : ""}
       ${g.length ? g.map(x=> x.budget
         ? `<div class="catrow">${tile(x.kind,x.cat)}<div class="grow"><div class="top-l"><span>${esc(x.label||x.cat)}</span><span>${esc(eur(x.v))} <span class="small muted">von ${esc(eur0(x.budget))}</span></span></div><div class="sub"><div class="track"><div class="fill" style="width:${Math.max(x.v?3:0,Math.min(100,x.v/x.budget*100))}%;background:${bColor(x)}"></div></div><span class="pct" style="${x.v>=x.budget*0.8?`color:${bColor(x)};font-weight:800`:""}">${Math.round(x.v/x.budget*100)} %</span></div>${x.v>x.budget?`<div class="small" style="color:var(--bad);margin-top:3px">${esc(eur(x.v-x.budget))} über dem Budget</div>`:ym===cur&&days?`<div class="small muted" style="margin-top:3px">noch ${esc(eur(x.budget-x.v))} · ${esc(eur(Math.max(0,x.budget-x.v)/days))} pro Tag</div>`:""}</div></div>`
         : `<div class="catrow">${tile(x.kind,x.cat)}<div class="grow"><div class="top-l"><span>${esc(x.label||x.cat)}${x.kind==="betrieb"?` <span class="small muted">· Betrieb</span>`:""}</span><span>${esc(eur(x.v))}</span></div><div class="sub"><div class="track"><div class="fill" style="width:${Math.max(3,x.v/gMax*100)}%;background:${catColor(x.kind,x.cat)}"></div></div><span class="pct">${Math.round(x.v/gTot*100)} %</span></div></div></div>`).join("")
@@ -1014,7 +1094,7 @@ function renderHome(){
     </div>
     ${offersCard()}
     <div class="card" style="order:8">
-      <div class="card-head"><h2>Letzte Buchungen</h2>${c.tx.length?`<button class="link" data-go="list">Alle ${ic("right",16)}</button>`:""}</div>
+      <div class="card-head"><h2>${hIc("receipt")}Letzte Buchungen</h2>${c.tx.length?`<button class="link" data-go="list">Alle ${ic("right",16)}</button>`:""}</div>
       ${c.tx.length ? sortTx(c.tx).slice(0,UI.wide?8:5).map(t=>txRow(t,true)).join("") : emptyState("receipt","Noch keine Buchungen","Alles, was du einträgst, erscheint hier.", `<button class="btn primary" data-add="ausgabe">Erste Buchung eintragen</button>`)}
     </div>
     </div></div>`;
@@ -1040,9 +1120,9 @@ function goalsCard(){
       <div><button class="btn danger" data-gdel="${esc(g.id)}">Löschen</button></div></div>`).join("")}
     <button class="btn" id="goalAdd" style="margin-top:12px">+ Sparziel hinzufügen</button>
     <p class="small muted" style="margin:10px 0 0">Mit „Stand aus Konto“ zählt der Kontostand eines Kontos oder N26-Space automatisch als gespart – dafür muss der Stand unter Einstellungen › Konten eingetragen sein.</p></div>`;
-  if (!goals.length) return `<div class="card" style="order:7"><div class="card-head"><h2>Sparziele</h2></div>
+  if (!goals.length) return `<div class="card" style="order:7"><div class="card-head"><h2>${hIc("piggy")}Sparziele</h2></div>
     <div class="notice info"><span>Spar auf etwas hin – Urlaub, Hochzeit, Notgroschen – und sieh, wie viel du jeden Monat zurücklegen musst.</span><button class="btn primary" id="goalFirst">Sparziel anlegen</button></div></div>`;
-  return `<div class="card" style="order:7"><div class="card-head"><h2>Sparziele</h2><button class="link" id="goalEditBtn">Bearbeiten ${ic("right",16)}</button></div>
+  return `<div class="card" style="order:7"><div class="card-head"><h2>${hIc("piggy")}Sparziele</h2><button class="link" id="goalEditBtn">Bearbeiten ${ic("right",16)}</button></div>
     ${goals.map((g,i)=>{ const sv=goalSaved(g), t=Number(g.target)||0, pct=t?Math.min(100,Math.max(0,sv.v/t*100)):0, rest=Math.max(0,t-sv.v), ml=monthsLeft(g.due), col=GOAL_COLORS[i%GOAL_COLORS.length];
       const sub = rest<=0 ? `<b style="color:var(--good)">Ziel erreicht!</b>` : g.due ? `noch ${esc(eur(rest))} · <b>${esc(eur(rest/ml))} im Monat</b> bis ${esc(MSHORT[Number(g.due.slice(5,7))-1])} ${esc(g.due.slice(0,4))}` : `noch ${esc(eur(rest))}`;
       return `<div class="goal"><div class="meta-row"><span><b>${esc(g.name)}</b>${sv.linked?` <span class="small muted">· ${esc(g.account)}</span>`:""}</span><span>${esc(eur(sv.v))} <span class="small muted">von ${esc(eur0(t))}</span></span></div>
@@ -1113,15 +1193,15 @@ function shopStats(){
 function offersCard(){
   const chosen = (S.settings.shops||[]).map(id=>SHOPS.find(x=>x.id===id)).filter(Boolean);
   const stats = Object.fromEntries(shopStats().map(o=>[o.shop.id,o]));
-  if (!chosen.length) return `<div class="card" style="order:9"><div class="card-head"><h2>Angebote deiner Läden</h2></div>
+  if (!chosen.length) return `<div class="card" style="order:9"><div class="card-head"><h2>${hIc("cart")}Angebote deiner Läden</h2></div>
     <div class="notice info"><span>Wähl aus, von welchen Läden du die Wochenangebote hier sehen willst.</span><button class="btn primary" data-go="more" data-scroll="shopEd">Läden auswählen</button></div></div>`;
   const st = chosen.map(sh=>stats[sh.id] || {shop:sh, sum:0, count:0});
   const link = (o) => `<a class="shop" href="${esc(o.shop.url)}"${NATIVE?"":' target="_blank" rel="noopener"'}>
-      <span class="shoplogo" style="background:${o.shop.color};color:${o.shop.ink||"#fff"}">${esc(o.shop.name.replace(/ .*/,"").slice(0,1))}</span>
+      ${brandBadge({t:o.shop.name.replace(/ .*/,"").slice(0,1), bg:o.shop.color, ink:o.shop.ink||"#fff", domain:SHOP_DOMAINS[o.shop.id]||""})}
       <span class="grow"><b>${esc(o.shop.name)}</b><span class="small muted">${o.count?`Ø ${esc(eur0(o.sum/6))} im Monat · ${o.count} Einkäufe`:"zuletzt nicht eingekauft"}</span></span>
       <span class="shopgo">Prospekt ${ic("right",16)}</span></a>`;
   return `<div class="card" style="order:9">
-    <div class="card-head"><h2>Angebote deiner Läden</h2><button class="link" data-go="more" data-scroll="shopEd">Auswahl ändern ${ic("right",16)}</button></div>
+    <div class="card-head"><h2>${hIc("cart")}Angebote deiner Läden</h2><button class="link" data-go="more" data-scroll="shopEd">Auswahl ändern ${ic("right",16)}</button></div>
     <div class="shops">${st.map(link).join("")}</div>
   </div>`;
 }
@@ -1186,7 +1266,7 @@ function renderFix(){
     const subs = [debtFor(f.id)?`Rate ${esc(debtFor(f.id).name)}`:"", rhythmText(f)?esc(rhythmText(f)):"",
       (f.id in ov && !isPaid) || (isPaid && Math.abs(amt-(f.amount||0))>0.004) ? `nur im ${esc(mName)} · sonst ${esc(eur(f.amount||0))}${!isPaid?` · <span class="link small" role="button" tabindex="0" data-fxreset="${esc(f.id)}">zurücksetzen</span>`:""}` : ""].filter(Boolean);
     const editing = UI.amtEdit===f.id;
-    return `<div class="fx" aria-checked="${isPaid}"><button class="fxhit" data-pay="${esc(f.id)}" tabindex="-1">${tile(f.kind==="betrieb"?"betrieb":"fix", f.name, f.kind==="betrieb"?"var(--c3)":"var(--c1)")}<span class="grow"><div class="t">${esc(f.name)}</div>${subs.length?`<div class="s">${subs.join(" · ")}</div>`:""}</span></button>`
+    return `<div class="fx" aria-checked="${isPaid}"><button class="fxhit" data-pay="${esc(f.id)}" tabindex="-1">${brandFor(f.name)?brandBadge(brandFor(f.name)):tile(f.kind==="betrieb"?"betrieb":"fix", f.name, f.kind==="betrieb"?"var(--c3)":"var(--c1)")}<span class="grow"><div class="t">${esc(f.name)}</div>${subs.length?`<div class="s">${subs.join(" · ")}</div>`:""}</span></button>`
       + (editing ? `<input class="in fxamt-in" id="fxAmtIn" data-fxamtin="${esc(f.id)}" inputmode="decimal" value="${esc(numStr(amt))}" aria-label="Betrag für ${esc(f.name)} im ${esc(mName)}">`
                  : `<button class="amt fxamt" data-fxamt="${esc(f.id)}" title="Betrag nur für ${esc(mName)} ändern" aria-label="${esc(f.name)}: ${esc(eur(amt))}, Betrag für ${esc(mName)} ändern">${esc(eur(amt))}</button>`)
       + `<button class="check" role="checkbox" aria-checked="${isPaid}" data-pay="${esc(f.id)}" aria-label="${esc(f.name)} ${isPaid?"bezahlt":"als bezahlt abhaken"}"></button></div>`;
@@ -1305,6 +1385,7 @@ function renderMore(){
   if (document.activeElement!==$("sKlasse")) $("sKlasse").value=String(st.steuerklasse||1);
   if (document.activeElement!==$("sKinder")) $("sKinder").value=String(st.kinder||0);
   if (document.activeElement!==$("sLand")) $("sLand").value=st.land||"NW";
+  $("sLogos").checked = st.logos!==false;
   $("sKirche").checked=!!st.kirche; $("sGew").checked=!!st.gewerbe; $("hebeField").hidden=!st.gewerbe;
   $("rulesInfo").textContent = rulesInfoText();
   $("backupLoadRow").hidden = !LOCAL;
@@ -1818,6 +1899,7 @@ bindNum("sLohn",(v,raw)=>{ const y=UI.ym.slice(0,4), l={...(S.settings.lohn||{})
 bindNum("sLSt",(v,raw)=>{ const y=UI.ym.slice(0,4), l={...(S.settings.lohn||{})}; l[y]={...(l[y]||{})}; if (raw==="") delete l[y].lst; else l[y].lst=Math.round(v*100)/100; S.settings.lohn=l; });
 for (const [id,key,num] of [["sKlasse","steuerklasse",true],["sKinder","kinder",true],["sLand","land",false]])
   $(id).addEventListener("change",e=>{ S.settings[key]= num ? Number(e.target.value) : e.target.value; render(); saveSettings(); toast("Gespeichert"); });
+$("sLogos").addEventListener("change",e=>{ S.settings.logos=e.target.checked; render(); saveSettings(); });
 $("sKirche").addEventListener("change",e=>{ S.settings.kirche=e.target.checked; render(); saveSettings(); });
 $("sGew").addEventListener("change",e=>{ S.settings.gewerbe=e.target.checked; render(); saveSettings(); });
 $("sKU").addEventListener("change",e=>{ S.settings.kleinunternehmer=e.target.checked; render(); saveSettings(); });
