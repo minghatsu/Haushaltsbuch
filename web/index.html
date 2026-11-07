@@ -607,8 +607,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   #v-year .chart svg{max-height:320px}
   .table-wrap table{min-width:0}
 
-  /* Einstellungen */
-  #v-more{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:18px;align-items:start}
+
 
   /* Import */
   #v-import{max-width:920px}
@@ -617,6 +616,33 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   #v-list{grid-template-columns:340px minmax(0,1fr)}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Einstellungen: Profil + Unterseiten */
+#v-more{max-width:760px}
+.sprof{display:flex;gap:14px;align-items:center;width:100%;text-align:left;border:0;cursor:pointer;color:#fff;border-radius:24px;padding:18px;background:radial-gradient(120% 140% at 100% 0%,#3FBF8A 0%,#178060 45%,#0D5A44 100%);box-shadow:var(--shadow);font:inherit}
+.sprof .av{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;font:800 22px var(--f-display);flex:none}
+.sprof b{display:block;font:800 19px var(--f-display);letter-spacing:-.01em}.sprof small{font-size:12.5px;opacity:.9}
+.sprof .pchip{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.2);border-radius:99px;padding:4px 10px;font-weight:700;font-size:11.5px;margin-top:7px}
+.sprof .pchip i{width:7px;height:7px;border-radius:50%;background:#9AF0C7}.sprof .pchip i.w{background:#F5C46B}.sprof .pchip i.b{background:#F59A87}.sprof .pchip i.o{background:rgba(255,255,255,.5)}
+.sprof .ch{margin-left:auto;opacity:.8}
+.sprof .pt{display:flex;flex-direction:column;align-items:flex-start;min-width:0;gap:1px}
+#debtCard>.card-head{justify-content:flex-end}#debtCard>.card-head>h2{display:none}
+.sqk{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sqk button{background:var(--surface);box-shadow:var(--shadow);border:0;border-radius:18px;padding:12px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:7px;font:600 12px var(--f-body);color:var(--fg);cursor:pointer;min-width:0}
+.sqk button span{width:40px;height:40px;border-radius:13px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.sqk button small{color:var(--muted);font-size:10.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;padding:0 4px;margin-top:-4px}
+.sgl{font-weight:700;font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:6px 4px -6px}
+.sgrp{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.sgrp button{display:flex;align-items:center;gap:12px;width:100%;padding:13px 16px;border:0;background:none;font:inherit;color:var(--fg);text-align:left;cursor:pointer}
+.sgrp button+button{border-top:1px solid var(--line)}
+.sgrp .ic{width:36px;height:36px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.sgrp .n{flex:1;min-width:0}.sgrp .n b{display:block;font-weight:600;font-size:15px}.sgrp .n small{color:var(--muted);font-size:12.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgrp .ch,.sprof .ch{color:var(--faint);flex:none}
+.sphead{display:flex;align-items:center;gap:12px}.sphead h2{margin:0;font-size:22px}
+.spback{width:40px;height:40px;border-radius:50%;border:0;background:var(--surface);box-shadow:var(--shadow);color:var(--fg);font-size:22px;line-height:1;cursor:pointer;flex:none}
+.card.sp{display:flex;flex-direction:column;gap:14px}
+.card.sp>.section-title:first-child{margin-top:0}
+#setHome{display:flex;flex-direction:column;gap:14px}
 </style>
 
 <div class="backdrop" id="addBg" hidden><div class="sheet addsheet" role="dialog" aria-label="Was möchtest du hinzufügen?"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><h2>Was möchtest du hinzufügen?</h2><button class="icon-btn" data-addclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -654,19 +680,30 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   <section class="view" id="v-fix" data-view="fix" hidden></section>
   <section class="view" id="v-year" data-view="year" hidden></section>
   <section class="view" id="v-more" data-view="more" hidden>
-    <div class="card" id="debtCard"></div>
-    <div class="card" style="display:flex;flex-direction:column;gap:14px">
-      <h2>Einstellungen</h2>
-      <div class="grid2 stack">
-        <div class="field"><label for="sStart">Kontostand Jahresanfang <span id="sStartYear"></span></label><input class="in" id="sStart" inputmode="decimal" placeholder="0,00"></div>
-        <div class="field"><label for="sRate">Rücklage auf selbstständige Einnahmen (%)</label><input class="in" id="sRate" inputmode="decimal"></div>
+    <div id="setHome"></div>
+    <div class="sphead" id="spHead" hidden><button class="spback" id="spBack" aria-label="Zurück zu den Einstellungen">‹</button><h2 id="spTitle"></h2></div>
+    <div class="card sp" id="debtCard" data-sp="schulden" hidden></div>
+    <div class="card sp" data-sp="konten" hidden>
+      <div class="field"><span class="small muted" style="margin-top:-2px">Trag einmal ein, was heute auf einem Konto ist. Die App rechnet den Stand für jeden Monat aus deinen importierten Kontoauszügen aus.</span><div id="acctEd"></div></div>
+      <div class="field"><label for="sStart">Kontostand Jahresanfang <span id="sStartYear"></span></label><input class="in" id="sStart" inputmode="decimal" placeholder="0,00"></div>
+      <div class="field"><label>Meine Spaces und eigenen Konten</label><span class="small muted" style="margin-top:-2px">Geld zwischen diesen Konten ist eine Umbuchung, keine Einnahme oder Ausgabe.</span><div class="chips" id="spaceEd"></div><div id="spaceClean"></div></div>
+    </div>
+    <div class="card sp" data-sp="budgets" hidden>
+      <div class="field"><label>Monatsbudgets</label><span class="small muted" style="margin-top:-2px">Wie viel du pro Monat höchstens ausgeben willst. Ab 80 % warnt die Startseite. Leer lassen = kein Budget.</span><div id="budgetEd"></div></div>
+    </div>
+    <div class="card sp" data-sp="backup" hidden>
+      <div id="syncBox" hidden>
+        <div class="section-title">Abgleich mit der Synology</div>
+        <div class="switch"><span><b id="syncState">–</b><br><span class="small muted" id="syncDetail"></span></span><span class="row-btns" style="flex:0 0 auto"><button class="btn" id="syncNow">Jetzt abgleichen</button><button class="btn" id="syncLogout">Abmelden</button></span></div>
       </div>
-      <div class="switch"><label for="sKU"><b>Kleinunternehmer</b><br><span class="small muted">Keine Umsatzsteuer auf deine Rechnungen</span></label><input type="checkbox" id="sKU"></div>
-      <div class="grid2 stack">
-        <div class="field"><label for="sKUlimit">Umsatzgrenze Kleinunternehmer (€)</label><input class="in" id="sKUlimit" inputmode="decimal"></div>
-        <div class="field"><label for="sVat">Umsatzsteuersatz (%)</label><input class="in" id="sVat" inputmode="decimal"></div>
-      </div>
-      <div class="section-title">Steuer</div>
+      <div class="section-title">Backup</div>
+      <div class="switch"><span><b>Alle Daten sichern</b><br><span class="small muted" id="backupInfo">Speichert Buchungen, Fixkosten, Schulden und Einstellungen in einer Datei.</span></span><button class="btn" id="backupSave">Backup speichern</button></div>
+      <div class="switch" id="backupLoadRow"><span><b>Backup laden</b><br><span class="small muted">Ersetzt alle Daten in dieser App durch die Datei.</span></span><button class="btn" id="backupLoad">Laden</button></div>
+      <input type="file" id="backupFile" accept=".json,application/json,text/plain" hidden>
+      <div class="switch"><span><b>Gemerkte Zuordnungen</b><br><span class="small muted" id="rulesInfo"></span></span><button class="btn" id="rulesReset">Zurücksetzen</button></div>
+    </div>
+    <div class="card sp" data-sp="steuer" hidden>
+      <div class="section-title" style="font-size:14px;margin-top:0">Allgemein</div>
       <div class="grid2 stack">
         <div class="field"><label for="sKlasse">Steuerklasse</label><select class="in" id="sKlasse">
           <option value="1">I – ledig, geschieden</option><option value="2">II – alleinerziehend</option><option value="3">III – verheiratet, mehr Einkommen</option>
@@ -689,6 +726,12 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="notice info" id="sLohnSum" hidden style="margin:-2px 0 12px"></div>
       <div class="field"><label for="sWK">Werbungskosten aus dem Job (€ pro Jahr)</label><input class="in" id="sWK" inputmode="decimal" placeholder="1.230 (Pauschale)"></div>
       <div class="section-title" style="font-size:14px">Selbstständig</div>
+      <div class="field"><label for="sRate">Rücklage auf selbstständige Einnahmen (%)</label><input class="in" id="sRate" inputmode="decimal"></div>
+      <div class="switch"><label for="sKU"><b>Kleinunternehmer</b><br><span class="small muted">Keine Umsatzsteuer auf deine Rechnungen</span></label><input type="checkbox" id="sKU"></div>
+      <div class="grid2 stack">
+        <div class="field"><label for="sKUlimit">Umsatzgrenze Kleinunternehmer (€)</label><input class="in" id="sKUlimit" inputmode="decimal"></div>
+        <div class="field"><label for="sVat">Umsatzsteuersatz (%)</label><input class="in" id="sVat" inputmode="decimal"></div>
+      </div>
       <div class="switch"><label for="sGew"><b>Gewerbe</b><br><span class="small muted">Aus: Freiberufler (keine Gewerbesteuer)</span></label><input type="checkbox" id="sGew"></div>
       <div class="field" id="hebeField"><label for="sHebe">Gewerbesteuer-Hebesatz deiner Gemeinde (%)</label><input class="in" id="sHebe" inputmode="decimal" placeholder="z. B. 400"></div>
       <div class="section-title" style="font-size:14px">Abzüge</div>
@@ -696,32 +739,21 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
         <div class="field"><label for="sVors">Vorsorge pro Jahr (€)</label><input class="in" id="sVors" inputmode="decimal" placeholder="Kranken-, Pflege-, Rentenversicherung"></div>
         <div class="field"><label for="sAbz">Sonstige Abzüge pro Jahr (€)</label><input class="in" id="sAbz" inputmode="decimal" placeholder="Spenden, Kinderbetreuung …"></div>
       </div>
-      <div class="section-title">Startseite</div>
+    </div>
+    <div class="card sp" data-sp="start" hidden>
       <div class="field"><label for="sName">Dein Name</label><input class="in" id="sName" autocomplete="given-name" placeholder="z. B. Sascha" maxlength="30"><span class="small muted">Für die Begrüßung oben links.</span></div>
       <div class="field"><label>Reihenfolge der Blöcke</label><span class="small muted" style="margin-top:-2px">Mit den Pfeilen verschieben, mit dem Schalter aus- oder einblenden. Die Konten-Karten bleiben immer oben.</span><div id="homeEd"></div></div>
-      <div class="section-title">Kategorien</div>
+      <div class="section-title">Läden für Angebote</div>
+      <div class="field"><span class="small muted" style="margin-top:-2px">Diese Läden zeigt die Startseite mit einem Link zum aktuellen Prospekt, in der Reihenfolge, in der du sie antippst.</span><div class="chips" id="shopEd"></div></div>
+      <div class="switch"><label for="sLogos"><b>Händler-Logos</b><br><span class="small muted">Lädt das Website-Symbol bekannter Händler (über Google). Aus: farbiger Anfangsbuchstabe.</span></label><input type="checkbox" id="sLogos"></div>
+    </div>
+    <div class="card sp" data-sp="sicherheit" hidden>
+      <div class="field" id="lockEd"></div>
+    </div>
+    <div class="card sp" data-sp="kategorien" hidden>
       <div class="field"><label>Ausgaben privat</label><div class="chips" id="catEd-ausgabe"></div></div>
-      <div class="field"><label>Monatsbudgets</label><span class="small muted" style="margin-top:-2px">Wie viel du pro Monat höchstens ausgeben willst. Ab 80 % warnt die Startseite. Leer lassen = kein Budget.</span><div id="budgetEd"></div></div>
       <div class="field"><label>Ausgaben betrieblich</label><div class="chips" id="catEd-betrieb"></div></div>
       <div class="field"><label>Einnahmen</label><div id="catEd-einnahme"></div></div>
-      <div class="section-title">Sicherheit</div>
-      <div class="field" id="lockEd"></div>
-      <div class="switch"><label for="sLogos"><b>Händler-Logos</b><br><span class="small muted">Lädt das Website-Symbol bekannter Händler (über Google). Aus: farbiger Anfangsbuchstabe.</span></label><input type="checkbox" id="sLogos"></div>
-      <div class="section-title">Angebote</div>
-      <div class="field"><span class="small muted" style="margin-top:-2px">Diese Läden zeigt die Startseite mit einem Link zum aktuellen Prospekt, in der Reihenfolge, in der du sie antippst.</span><div class="chips" id="shopEd"></div></div>
-      <div class="section-title">Konten</div>
-      <div class="field"><span class="small muted" style="margin-top:-2px">Trag einmal ein, was heute auf einem Konto ist. Die App rechnet den Stand für jeden Monat aus deinen importierten Kontoauszügen aus.</span><div id="acctEd"></div></div>
-      <div class="section-title">Import</div>
-      <div class="field"><label>Meine Spaces und eigenen Konten</label><span class="small muted" style="margin-top:-2px">Geld zwischen diesen Konten ist eine Umbuchung, keine Einnahme oder Ausgabe.</span><div class="chips" id="spaceEd"></div><div id="spaceClean"></div></div>
-      <div id="syncBox" hidden>
-        <div class="section-title">Abgleich mit der Synology</div>
-        <div class="switch"><span><b id="syncState">–</b><br><span class="small muted" id="syncDetail"></span></span><span class="row-btns" style="flex:0 0 auto"><button class="btn" id="syncNow">Jetzt abgleichen</button><button class="btn" id="syncLogout">Abmelden</button></span></div>
-      </div>
-      <div class="section-title">Backup</div>
-      <div class="switch"><span><b>Alle Daten sichern</b><br><span class="small muted" id="backupInfo">Speichert Buchungen, Fixkosten, Schulden und Einstellungen in einer Datei.</span></span><button class="btn" id="backupSave">Backup speichern</button></div>
-      <div class="switch" id="backupLoadRow"><span><b>Backup laden</b><br><span class="small muted">Ersetzt alle Daten in dieser App durch die Datei.</span></span><button class="btn" id="backupLoad">Laden</button></div>
-      <input type="file" id="backupFile" accept=".json,application/json,text/plain" hidden>
-      <div class="switch"><span><b>Gemerkte Zuordnungen</b><br><span class="small muted" id="rulesInfo"></span></span><button class="btn" id="rulesReset">Zurücksetzen</button></div>
     </div>
   </section>
 </main>
@@ -820,7 +852,7 @@ const DEFAULT_SETTINGS = {
   }
 };
 const KIND_LABEL = {ausgabe:"Ausgabe", betrieb:"Betrieblich", einnahme:"Einnahme", vorauszahlung:"Steuer-Vorauszahlung"};
-const TITLES = {home:"Übersicht", list:"Buchungen", fix:"Fixkosten", year:"Analyse", more:"Schulden & Einstellungen", import:"Import"};
+const TITLES = {home:"Übersicht", list:"Buchungen", fix:"Fixkosten", year:"Analyse", more:"Einstellungen", import:"Import"};
 
 /* ---------- icons ---------- */
 const P = {
@@ -1608,7 +1640,7 @@ function renderHome(){
   const openFx = [];
 
   $("v-home").innerHTML = `
-    ${needStart?`<div class="notice info"><span>Trag einmal deinen Kontostand vom 1.1.${y} ein, dann stimmt die Rechnung.</span><button class="btn primary" data-go="more">Eintragen</button></div>`:""}
+    ${needStart?`<div class="notice info"><span>Trag einmal deinen Kontostand vom 1.1.${y} ein, dann stimmt die Rechnung.</span><button class="btn primary" data-go="more" data-scroll="sStart">Eintragen</button></div>`:""}
     <div class="homeTop" style="display:flex;flex-direction:column;gap:10px">
       <div class="astack ${accts.length>1?"":"one"}" id="astack" ${accts.length>1?`tabindex="0" aria-label="Konten – wischen zum Blättern"`:""}>${acardHtml}</div>
       ${accts.length>1?`<div class="adots" id="adots">${accts.map((_,i)=>`<button data-cdot="${i}" aria-label="Karte ${i+1}"><i></i></button>`).join("")}</div>`:""}
@@ -1785,9 +1817,9 @@ function goalsRings(){
 function debtRings(){
   if (!S.debts.length) return "";
   const st=S.debts.map(d=>[d,debtState(d)]), total=sum(st,x=>x[1].remaining);
-  return `<div class="card rcard" style="order:7"><div class="card-head"><h2>${hIc("bank")}Schulden</h2><button class="link" data-go="more">Alle anzeigen ${ic("right",16)}</button></div>
+  return `<div class="card rcard" style="order:7"><div class="card-head"><h2>${hIc("bank")}Schulden</h2><button class="link" data-go="more" data-sp="schulden">Alle anzeigen ${ic("right",16)}</button></div>
     <div class="small muted" style="margin:-4px 0 10px">Noch offen: <b style="color:var(--fg)">${esc(eur(total))}</b></div>
-    <div class="rings">${st.map(([d,s])=>`<button class="rbtn" data-go="more" aria-label="${esc(d.name)}: noch ${esc(eur(s.remaining))} offen, ${Math.round(s.pct*100)} % getilgt">${ring(s.pct, s.remaining<=0.005?"check":"bank", s.remaining<=0.005?"done":"")}<b>${esc(d.name)}</b><small>${s.remaining<=0.005?"abbezahlt ✓":esc(eur0(s.remaining))}</small></button>`).join("")}
+    <div class="rings">${st.map(([d,s])=>`<button class="rbtn" data-go="more" data-sp="schulden" aria-label="${esc(d.name)}: noch ${esc(eur(s.remaining))} offen, ${Math.round(s.pct*100)} % getilgt">${ring(s.pct, s.remaining<=0.005?"check":"bank", s.remaining<=0.005?"done":"")}<b>${esc(d.name)}</b><small>${s.remaining<=0.005?"abbezahlt ✓":esc(eur0(s.remaining))}</small></button>`).join("")}
       <button class="rbtn" data-debtnew="1" aria-label="Schuld hinzufügen"><span class="ring add">${ic("plusIn",22)}</span><b>Neu</b><small>&nbsp;</small></button>
     </div></div>`;
 }
@@ -1829,7 +1861,7 @@ document.addEventListener("click", e=>{
   if (t.closest("#goalDone")){ UI.goalEdit=false; render(); return; }
   if (t.closest("[data-goalsopen]")){ if (UI.goalEdit){ UI.goalEdit=false; UI.goalsOpen=false; } else UI.goalsOpen=!UI.goalsOpen; render(); return; }
   if (t.closest("#goalAddRing")){ UI.goalEdit=true; UI.goalsOpen=true; saveGoals([...(S.settings.goals||[]), {id:newId(), name:"Neues Ziel", target:500, start:0, log:[]}]); return; }
-  if (t.closest("[data-debtnew]")){ UI.debtEdit=true; UI.view="more"; render(); setTimeout(()=>{ const b=$("debtAdd"); if (b){ b.click(); b.scrollIntoView({block:"center"}); } },60); return; }
+  if (t.closest("[data-debtnew]")){ UI.debtEdit=true; UI.view="more"; UI.sp="schulden"; render(); setTimeout(()=>{ const b=$("debtAdd"); if (b){ b.click(); b.scrollIntoView({block:"center"}); } },60); return; }
   if (t.closest("#goalAdd")){ saveGoals([...(S.settings.goals||[]), {id:newId(), name:"Neues Ziel", target:500, start:0, log:[]}]); return; }
   const d=t.closest("[data-gdel]"); if (d){ const g=(S.settings.goals||[]).find(x=>x.id===d.dataset.gdel); if (d.dataset.armed!=="1"){ d.dataset.armed="1"; d.textContent="Wirklich löschen?"; return; } const old=S.settings.goals; saveGoals(old.filter(x=>x.id!==d.dataset.gdel)); toast(`„${g?g.name:"Ziel"}“ gelöscht`, ()=>saveGoals(old)); return; }
   const p=t.closest("[data-gpay]"); if (p){ UI.goalPay=p.dataset.gpay; render(); setTimeout(()=>{ const el=$("goalPayIn"); if (el) el.focus(); },30); return; }
@@ -2259,6 +2291,51 @@ function planEditor(d, plan){
     ${rows.map(([r,i])=>`<tr data-prow="${i}" style="${r.ym===cur?"background:var(--accent-soft)":""}"><td><input class="in" data-pf="ym" value="${esc(r.ym.slice(5)+"/"+r.ym.slice(0,4))}" style="text-align:left;min-width:86px" aria-label="Monat"></td><td><input class="in" data-pf="rate" inputmode="decimal" value="${n(r.rate)}"></td><td><input class="in" data-pf="zins" inputmode="decimal" value="${n(r.zins)}"></td><td><input class="in" data-pf="tilg" inputmode="decimal" value="${n(r.tilg)}"></td><td><input class="in" data-pf="rest" inputmode="decimal" value="${n(r.rest)}"></td><td><button class="icon-btn" data-prdel="${i}" aria-label="Zeile löschen">×</button></td></tr>`).join("")}
     </tbody></table></div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="chip" data-pradd="${esc(d.id)}">+ Zeile</button>${plan.length>14?`<button class="chip" data-prall="1">${UI.planAll?"Nur Ausschnitt zeigen":`Alle ${plan.length} Raten zeigen`}</button>`:""}</div>`;
 }
+
+const SP_PAGES = {
+  konten:["Konten & Spaces","wallet"], budgets:["Monatsbudgets","target"], schulden:["Schulden","bank"], backup:["Abgleich & Backup","cloud"],
+  steuer:["Steuer & Einkommen","receipt"], start:["Startseite & Läden","home"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"]
+};
+function spSummary(k){
+  const st=S.settings, y=UI.ym.slice(0,4);
+  if (k==="konten"){ const n=(st.spaces||[]).length; return n?`${n} Spaces`:"Stand"; }
+  if (k==="budgets"){ const n=Object.values(st.budgets||{}).filter(v=>+v>0).length; return n?`${n} aktiv`:"keine"; }
+  if (k==="schulden"){ return S.debts.length?eur0(sum(S.debts,d=>debtState(d).remaining)):"keine"; }
+  if (k==="backup"){ if (!SYNCABLE) return "Datei"; return !SYNC.token?"aus":SYNC.state==="ok"?"aktuell":"wartet"; }
+  if (k==="steuer"){ const L=(LAENDER.find(x=>x[0]===(st.land||"NW"))||[,""])[1]; return `Klasse ${["I","II","III","IV","V","VI"][(st.steuerklasse||1)-1]} · ${L}${st.reserveRate?` · ${numStr(st.reserveRate)} % Rücklage`:""}`; }
+  if (k==="start"){ const n=(st.shops||[]).length; return `Reihenfolge der Blöcke${n?` · ${n} Läden`:""}`; }
+  if (k==="sicherheit"){ return lockCfg() ? "App-Sperre an" : "App-Sperre aus"; }
+  if (k==="kategorien"){ return `${cats("ausgabe").length+cats("betrieb").length+incCats().length} Kategorien`; }
+  return "";
+}
+function renderSetHome(){
+  const name=S.settings.name||"";
+  let dot="o", line="Nur auf diesem Gerät gespeichert";
+  if (SYNCABLE){
+    if (!SYNC.token){ line="Abgleich aus"; }
+    else if (SYNC.state==="ok"){ dot=""; line="Abgeglichen"+(SYNC.last?" · "+new Date(SYNC.last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}):""); }
+    else if (SYNC.state==="pending"){ dot="w"; line=`${SYNC.queue.length} Änderungen warten`; }
+    else { dot="b"; line=SYNC.state==="offline"?"Offline – wird nachgeholt":"Synology nicht erreichbar"; }
+  }
+  const quick=["konten","budgets","schulden","backup"], rest=["steuer","start","sicherheit","kategorien"];
+  const short={konten:"Konten",budgets:"Budgets",schulden:"Schulden",backup:"Backup"};
+  $("setHome").innerHTML = `
+    <button class="sprof" data-spgo="start" aria-label="Name und Startseite ändern"><span class="av">${esc((name.trim()[0]||"?").toUpperCase())}</span>
+      <span class="pt"><b>${esc(name||"Dein Name")}</b><small>${name?"Name & Startseite":"Tippen, um ihn einzutragen"}</small><span class="pchip"><i class="${dot}"></i>${esc(line)}</span></span><span class="ch">${ic("right",18)}</span></button>
+    <div class="sqk">${quick.map(k=>`<button data-spgo="${k}"><span>${ic(SP_PAGES[k][1],20)}</span>${short[k]}<small>${esc(spSummary(k))}</small></button>`).join("")}</div>
+    <div class="sgl">Weitere Einstellungen</div>
+    <div class="sgrp">${rest.map(k=>`<button data-spgo="${k}"><span class="ic">${ic(SP_PAGES[k][1],19)}</span><span class="n"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span><span class="ch">${ic("right",18)}</span></button>`).join("")}</div>`;
+}
+function renderSpPages(){
+  const k = SP_PAGES[UI.sp] ? UI.sp : null;
+  $("setHome").hidden = !!k; $("spHead").hidden = !k;
+  document.querySelectorAll("#v-more [data-sp]").forEach(el=>el.hidden = el.dataset.sp!==k);
+  if (k) $("spTitle").textContent = SP_PAGES[k][0]; else renderSetHome();
+}
+document.addEventListener("click", e=>{
+  const b=e.target.closest("[data-spgo]"); if (b){ UI.sp=b.dataset.spgo; renderSpPages(); window.scrollTo({top:0}); return; }
+  if (e.target.closest("#spBack")){ UI.sp=null; renderSpPages(); window.scrollTo({top:0}); }
+});
 function renderMore(){
   if (!(UI.debtEdit && $("debtCard").contains(document.activeElement) && document.activeElement.tagName!=="BUTTON")){
     const total = sum(S.debts,d=>debtState(d).remaining);
@@ -2322,6 +2399,7 @@ function renderMore(){
   $("sKU").checked=!!st.kleinunternehmer; $("sSplit").checked=!!st.splitting; $("partnerField").hidden=!st.splitting;
   for (const k of ["ausgabe","betrieb"]) $("catEd-"+k).innerHTML = cats(k).map(n=>`<span class="chip">${esc(n)}<button class="x" data-catdel="${k}|${esc(n)}" aria-label="${esc(n)} entfernen">×</button></span>`).join("")+`<button class="chip" data-catadd="${k}">+ Neu</button>`;
   $("catEd-einnahme").innerHTML = incCats().map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:5px 0"><b style="flex:1">${esc(c.name)}</b><select class="in" style="width:auto" data-incart="${esc(c.name)}" aria-label="Art von ${esc(c.name)}"><option value="selbst" ${c.art==="selbst"?"selected":""}>Selbstständig</option><option value="lohn" ${c.art==="lohn"?"selected":""}>Gehalt (angestellt)</option><option value="sonderzahlung" ${c.art==="sonderzahlung"?"selected":""}>Sonderzahlung (13. Gehalt …)</option><option value="lohnersatz" ${c.art==="lohnersatz"?"selected":""}>Lohnersatz (ALG1)</option><option value="sonstige" ${c.art==="sonstige"?"selected":""}>Sonstige</option></select><button class="icon-btn" data-catdel="einnahme|${esc(c.name)}" aria-label="${esc(c.name)} entfernen">×</button></div>`).join("")+`<button class="chip" data-catadd="einnahme" style="margin-top:6px">+ Neu</button>`;
+  renderSpPages();
 }
 function txPayee(t){ return String(t.note||"").replace(/ · brutto.*$/,""); }
 function spaceMatches(){ const sp=new Set((S.settings.spaces||[]).map(nrm)); return sp.size ? S.tx.filter(t=>t.source==="n26" && sp.has(nrm(txPayee(t)))) : []; }
@@ -2475,7 +2553,7 @@ document.addEventListener("click", async e => {
   const lm=t.closest("[data-lmode]"); if (lm){ UI.listMode=lm.dataset.lmode; UI.calDay=null; renderList(); return; }
   const cd=t.closest("[data-calday]"); if (cd){ UI.calDay = UI.calDay===cd.dataset.calday ? null : cd.dataset.calday; renderList(); return; }
   if (t.closest("[data-scanquick]")){ openSheet("ausgabe"); setTimeout(()=>runScan("camera"), 250); return; }
-  const go = t.closest("[data-go]"); if (go){ UI.view=go.dataset.go; render(); window.scrollTo({top:0}); return; }
+  const go = t.closest("[data-go]"); if (go){ UI.view=go.dataset.go; if (UI.view==="more"){ const tg=go.dataset.scroll&&$(go.dataset.scroll); UI.sp = go.dataset.sp || (tg&&tg.closest("[data-sp]")?tg.closest("[data-sp]").dataset.sp:null); } render(); window.scrollTo({top:0}); return; }
   const open = t.closest("[data-open]"); if (open){ UI.ym=open.dataset.open; UI.view="home"; render(); window.scrollTo({top:0}); return; }
   const ed = t.closest("[data-edit]"); if (ed){ const tx=S.tx.find(x=>x.id===ed.dataset.edit); if (tx) openSheet(null, tx); return; }
   const kb = t.closest("#kindSeg button"); if (kb){ UI.kind=kb.dataset.kind; UI.cat=null; renderSheet(); return; }
@@ -2525,7 +2603,7 @@ document.addEventListener("click", async e => {
     const commit=()=>{ const n=inp.value.trim(); if (n){ const c=clone(S.settings.cats||DEFAULT_SETTINGS.cats); const names=c[k].map(x=>typeof x==="string"?x:x.name); if (!names.includes(n)) c[k].push(k==="einnahme"?{name:n,art:"sonstige"}:n); S.settings.cats=c; saveSettings(); } renderMore(); };
     inp.addEventListener("keydown",ev=>{ if (ev.key==="Enter") inp.blur(); if (ev.key==="Escape"){ inp.value=""; inp.blur(); } }); inp.addEventListener("blur",commit,{once:true}); return; }
 });
-$("settingsBtn").onclick = () => { UI.view = UI.view==="more" ? "home" : "more"; render(); window.scrollTo({top:0}); };
+$("settingsBtn").onclick = () => { UI.view = UI.view==="more" ? "home" : "more"; UI.sp=null; render(); window.scrollTo({top:0}); };
 $("prevM").onclick = () => { UI.ym = shiftYm(UI.ym,-1); render(); };
 $("nextM").onclick = () => { UI.ym = shiftYm(UI.ym, 1); render(); };
 $("q").addEventListener("input", e => { UI.q=e.target.value; renderList(); });
@@ -3673,7 +3751,7 @@ function renderSyncDot(){
   const b=$("settingsBtn"); if (!SYNCABLE){ return; }
   const col = !SYNC.token ? "var(--faint)" : SYNC.state==="ok" ? "var(--good)" : SYNC.state==="pending" ? "var(--warn)" : "var(--bad)";
   b.style.boxShadow = `var(--shadow), inset 0 0 0 2px ${col}`;
-  if (UI.view==="more") renderSyncInfo();
+  if (UI.view==="more"){ renderSyncInfo(); if (!UI.sp) renderSetHome(); }
 }
 function renderSyncInfo(){
   $("syncBox").hidden = !SYNCABLE; if (!SYNCABLE) return;
