@@ -635,6 +635,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .sgrp{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
 .sgrp button{display:flex;align-items:center;gap:12px;width:100%;padding:13px 16px;border:0;background:none;font:inherit;color:var(--fg);text-align:left;cursor:pointer}
 .sgrp button+button{border-top:1px solid var(--line)}
+.sgrp .sdark{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;border:0;margin:0}
 .sgrp .ic{width:36px;height:36px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
 .sgrp .n{flex:1;min-width:0}.sgrp .n b{display:block;font-weight:600;font-size:15px}.sgrp .n small{color:var(--muted);font-size:12.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sgrp .ch,.sprof .ch{color:var(--faint);flex:none}
@@ -838,6 +839,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastText"></span><button id="toastAct" hidden>Rückgängig</button></div>
 
 <script>
+(function(){ let t="light"; try{ t=localStorage.getItem("hb-theme")==="dark"?"dark":"light"; }catch(e){} document.documentElement.dataset.theme=t; })();
+
 (() => {
 "use strict";
 const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
@@ -2324,6 +2327,7 @@ function renderSetHome(){
       <span class="pt"><b>${esc(name||"Dein Name")}</b><small>${name?"Name & Startseite":"Tippen, um ihn einzutragen"}</small><span class="pchip"><i class="${dot}"></i>${esc(line)}</span></span><span class="ch">${ic("right",18)}</span></button>
     <div class="sqk">${quick.map(k=>`<button data-spgo="${k}"><span>${ic(SP_PAGES[k][1],20)}</span>${short[k]}<small>${esc(spSummary(k))}</small></button>`).join("")}</div>
     <div class="sgl">Weitere Einstellungen</div>
+    <div class="sgrp"><label class="sdark switch"><span class="ic">${ic("spark",19)}</span><span class="n"><b>Dunkles Design</b><small>${document.documentElement.dataset.theme==="dark"?"an":"aus – helles Design"}</small></span><input type="checkbox" id="sDark" ${document.documentElement.dataset.theme==="dark"?"checked":""}></label></div>
     <div class="sgrp">${rest.map(k=>`<button data-spgo="${k}"><span class="ic">${ic(SP_PAGES[k][1],19)}</span><span class="n"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span><span class="ch">${ic("right",18)}</span></button>`).join("")}</div>`;
 }
 function renderSpPages(){
@@ -2332,6 +2336,12 @@ function renderSpPages(){
   document.querySelectorAll("#v-more [data-sp]").forEach(el=>el.hidden = el.dataset.sp!==k);
   if (k) $("spTitle").textContent = SP_PAGES[k][0]; else renderSetHome();
 }
+document.addEventListener("change", e=>{
+  if (e.target.id!=="sDark") return;
+  const t=e.target.checked?"dark":"light"; document.documentElement.dataset.theme=t;
+  try{ localStorage.setItem("hb-theme",t); }catch(_){}
+  renderSetHome(); if (typeof renderHome==="function") try{ render(); }catch(_){}
+});
 document.addEventListener("click", e=>{
   const b=e.target.closest("[data-spgo]"); if (b){ UI.sp=b.dataset.spgo; renderSpPages(); window.scrollTo({top:0}); return; }
   if (e.target.closest("#spBack")){ UI.sp=null; renderSpPages(); window.scrollTo({top:0}); }
