@@ -668,6 +668,12 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .belg b{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.belg small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rcptrow #rcptHave{flex-wrap:wrap}.rcptrow #rcptHave .grow{flex:1 1 calc(100% - 70px)}
 .rbtns{display:flex;flex-wrap:wrap;gap:6px;width:100%}.rbtns .btn{flex:1 1 auto;padding:9px 10px;font-size:13px;background:var(--surface);border-radius:12px}
+
+.workq{display:flex;flex-direction:column;gap:4px;border:2px solid var(--accent)}.workq>b{font-size:17px;font-weight:800}
+.workbtns{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.workbtns button{border:0;background:var(--sunk);border-radius:14px;padding:12px 14px;text-align:left;font:inherit;color:var(--fg);cursor:pointer;display:flex;flex-direction:column}
+.workbtns button b{font-weight:700;font-size:14.5px}.workbtns button small{color:var(--muted);font-size:12.5px}
+@media (min-width:700px){.workbtns{flex-direction:row}.workbtns button{flex:1}}
 </style>
 
 <div class="backdrop" id="addBg" hidden><div class="sheet addsheet" role="dialog" aria-label="Was möchtest du hinzufügen?"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><h2>Was möchtest du hinzufügen?</h2><button class="icon-btn" data-addclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -729,7 +735,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="switch"><span><b>Gemerkte Zuordnungen</b><br><span class="small muted" id="rulesInfo"></span></span><button class="btn" id="rulesReset">Zurücksetzen</button></div>
     </div>
     <div class="card sp" data-sp="steuer" hidden>
-      <div class="section-title" style="font-size:14px;margin-top:0">Allgemein</div>
+      <div class="field"><label for="sWork">Wie verdienst du dein Geld?</label><select class="in" id="sWork"></select><span class="small muted" id="sWorkInfo"></span></div>
+      <div class="section-title" style="font-size:14px">Allgemein</div>
       <div class="grid2 stack">
         <div class="field"><label for="sKlasse">Steuerklasse</label><select class="in" id="sKlasse">
           <option value="1">I – ledig, geschieden</option><option value="2">II – alleinerziehend</option><option value="3">III – verheiratet, mehr Einkommen</option>
@@ -740,6 +747,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="field" id="partnerField"><label for="sPartner">Zu versteuerndes Einkommen Partner/in (€ pro Jahr)</label><input class="in" id="sPartner" inputmode="decimal"></div>
       <div class="switch"><label for="sKirche"><b>Kirchensteuer</b><br><span class="small muted">Mitglied einer Kirche, die Kirchensteuer erhebt</span></label><input type="checkbox" id="sKirche"></div>
       <div class="field"><label for="sLand">Bundesland</label><select class="in" id="sLand"></select></div>
+      <div id="sJobBox" style="display:contents">
       <div class="section-title" style="font-size:14px">Angestellt <span class="small muted" id="sLohnYear"></span></div>
       <div class="grid2 stack">
         <div class="field"><label for="sLohnM">Bruttogehalt pro Monat (€)</label><input class="in" id="sLohnM" inputmode="decimal" placeholder="leer = nicht angestellt"></div>
@@ -751,6 +759,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       </div>
       <div class="notice info" id="sLohnSum" hidden style="margin:-2px 0 12px"></div>
       <div class="field"><label for="sWK">Werbungskosten aus dem Job (€ pro Jahr)</label><input class="in" id="sWK" inputmode="decimal" placeholder="1.230 (Pauschale)"></div>
+      </div>
+      <div id="sSelfBox" style="display:contents">
       <div class="section-title" style="font-size:14px">Selbstständig</div>
       <div class="field"><label for="sRate">Rücklage auf selbstständige Einnahmen (%)</label><input class="in" id="sRate" inputmode="decimal"></div>
       <div class="switch"><label for="sKU"><b>Kleinunternehmer</b><br><span class="small muted">Keine Umsatzsteuer auf deine Rechnungen</span></label><input type="checkbox" id="sKU"></div>
@@ -760,6 +770,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       </div>
       <div class="switch"><label for="sGew"><b>Gewerbe</b><br><span class="small muted">Aus: Freiberufler (keine Gewerbesteuer)</span></label><input type="checkbox" id="sGew"></div>
       <div class="field" id="hebeField"><label for="sHebe">Gewerbesteuer-Hebesatz deiner Gemeinde (%)</label><input class="in" id="sHebe" inputmode="decimal" placeholder="z. B. 400"></div>
+      </div>
       <div class="section-title" style="font-size:14px">Abzüge</div>
       <div class="grid2 stack">
         <div class="field"><label for="sVors">Vorsorge pro Jahr (€)</label><input class="in" id="sVors" inputmode="decimal" placeholder="Kranken-, Pflege-, Rentenversicherung"></div>
@@ -779,7 +790,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
     </div>
     <div class="card sp" data-sp="kategorien" hidden>
       <div class="field"><label>Ausgaben privat</label><div class="chips" id="catEd-ausgabe"></div></div>
-      <div class="field"><label>Ausgaben betrieblich</label><div class="chips" id="catEd-betrieb"></div></div>
+      <div class="field" id="catBetField"><label>Ausgaben betrieblich</label><div class="chips" id="catEd-betrieb"></div></div>
       <div class="field"><label>Einnahmen</label><div id="catEd-einnahme"></div></div>
     </div>
   </section>
@@ -1140,7 +1151,12 @@ const INC_ARTS = [
   ["Vermögen", [["kapital","Zinsen & Dividenden"],["miete","Mieteinnahmen"]]],
   ["Sonstiges", [["unterhalt","Unterhalt"],["erstattung","Erstattung / Rückzahlung"],["verkauf","Verkauf (z. B. Kleinanzeigen)"],["geschenk","Geschenk"],["sonstige","Sonstige"]]]
 ];
-function incArtOptions(sel){ return INC_ARTS.map(([g,os])=>`<optgroup label="${g}">${os.map(([v,l])=>`<option value="${v}" ${v===sel?"selected":""}>${l}</option>`).join("")}</optgroup>`).join(""); }
+function incArtOptions(sel){ const hide=v=>v!==sel && ((v==="selbst"&&!hasSelf()) || ((v==="lohn"||v==="sonderzahlung")&&!hasJob())); return INC_ARTS.map(([g,os])=>`<optgroup label="${g}">${os.filter(([v])=>!hide(v)).map(([v,l])=>`<option value="${v}" ${v===sel?"selected":""}>${l}</option>`).join("")}</optgroup>`).join(""); }
+const WORK = [["angestellt","Ohne Selbstständigkeit","Gehalt, Minijob, Rente, Bürgergeld …"],["selbst","Nur selbstständig","Eigene Rechnungen, kein Job daneben"],["beides","Angestellt und selbstständig","Job plus Selbstständigkeit nebenbei"]];
+const hasSelf = () => S.settings.work!=="angestellt";   // show Rücklage, Betrieb, Umsatzsteuer, EÜR …
+const hasJob  = () => S.settings.work!=="selbst";       // show salary fields
+async function setWork(w){ S.settings.work=w; await saveSettings(); render(); }
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-setwork]"); if (b){ setWork(b.dataset.setwork); toast("Gespeichert – änderbar unter Steuer & Einkommen"); } });
 function incCats(){ return cats("einnahme").map(c => typeof c==="string" ? {name:c, art:"sonstige"} : c); }
 function incArt(name){ const c=incCats().find(c=>c.name===name); return c?c.art:"sonstige"; }
 const PALETTE = ["--c1","--c2","--c3","--c4","--c5","--c6"];
@@ -1266,7 +1282,7 @@ function monthCalc(ym){
   for (const f of fixedForMonth(ym)){ const a = f.id in paid ? (Number(paid[f.id])||0) : planAmt(f,ym); fixTotal+=a; if (!(f.id in paid)){ fixOpen+=planAmt(f,ym); openCount++; } }
   const fixPaid = fixPaidPriv+fixPaidBet;
   const expenses = aus+bet+vz+fixPaid;
-  const rate = (Number(S.settings.reserveRate)||0)/100;
+  const rate = hasSelf() ? (Number(S.settings.reserveRate)||0)/100 : 0;
   return { tx, income, selfInc, ersatz, aus, bet, vz, fixPaidPriv, fixPaidBet, fixPaid, fixOpen, fixTotal, openCount, expenses, reserve:selfInc*rate, net:income-expenses, paid };
 }
 function startBal(y){ const v=S.settings.startBalance && S.settings.startBalance[String(y)]; return Number(v)||0; }
@@ -1693,6 +1709,7 @@ function renderHome(){
   const openFx = [];
 
   $("v-home").innerHTML = `
+    ${S.settings.work===undefined?`<div class="card workq"><b>Wie verdienst du dein Geld?</b><span class="small muted">Dann zeigt die App nur, was zu dir passt.</span><div class="workbtns">${WORK.map(([k,t,d])=>`<button data-setwork="${k}"><b>${t}</b><small>${d}</small></button>`).join("")}</div></div>`:""}
     ${needStart?`<div class="notice info"><span>Trag einmal deinen Kontostand vom 1.1.${y} ein, dann stimmt die Rechnung.</span><button class="btn primary" data-go="more" data-scroll="sStart">Eintragen</button></div>`:""}
     <div class="homeTop" style="display:flex;flex-direction:column;gap:10px">
       <div class="astack ${accts.length>1?"":"one"}" id="astack" ${accts.length>1?`tabindex="0" aria-label="Konten – wischen zum Blättern"`:""}>${acardHtml}</div>
@@ -1783,14 +1800,14 @@ document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("hintBg").h
 const HOME_BLOCKS = [["quick","Schnellknöpfe"],["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["debts","Schulden"],["recent","Letzte Buchungen"],["offers","Angebote & Läden"]];
 function homeOrder(){ const o=(S.settings.homeOrder||[]).filter(k=>HOME_BLOCKS.some(b=>b[0]===k)); for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; }
 function homeBlocks(html){
-  const hid=new Set(S.settings.homeHidden||[]), list=homeOrder().filter(k=>!hid.has(k) && html[k]).map(k=>`<div class="hblock" data-hb="${k}">${html[k]}</div>`);
+  const hid=new Set(S.settings.homeHidden||[]), list=homeOrder().filter(k=>!hid.has(k) && html[k] && !(k==="tax"&&!hasSelf())).map(k=>`<div class="hblock" data-hb="${k}">${html[k]}</div>`);
   if (!matchMedia("(min-width:1000px)").matches) return `<div class="hlist">${list.join("")}</div>`;
   // wide screen: two columns, filled in your order (left, right, left, …)
   return `<div class="hcols"><div class="hcol">${list.filter((_,i)=>i%2===0).join("")}</div><div class="hcol">${list.filter((_,i)=>i%2===1).join("")}</div></div>`;
 }
 function renderHomeEd(){
   const el=$("homeEd"); if (!el) return; const hid=new Set(S.settings.homeHidden||[]), o=homeOrder();
-  el.innerHTML = o.map((k,i)=>{ const name=(HOME_BLOCKS.find(b=>b[0]===k)||[k,k])[1], off=hid.has(k);
+  el.innerHTML = o.filter(k=>k!=="tax"||hasSelf()).map((k,i)=>{ const name=(HOME_BLOCKS.find(b=>b[0]===k)||[k,k])[1], off=hid.has(k);
     return `<div class="hrow ${off?"off":""}"><span class="hn">${esc(name)}</span>
       <button class="icon-btn" data-hmove="${k}|-1" ${i===0?"disabled":""} aria-label="${esc(name)} nach oben">${ic("up",18)}</button>
       <button class="icon-btn" data-hmove="${k}|1" ${i===o.length-1?"disabled":""} aria-label="${esc(name)} nach unten">${ic("down",18)}</button>
@@ -2111,7 +2128,7 @@ document.addEventListener("click", e=>{
   setTimeout(()=>{ const el=$(b.dataset.scroll); if (el) el.scrollIntoView({block:"center", behavior:"smooth"}); }, 60);
 });
 function renderList(){
-  const filters = [["alle","Alle"],["ausgabe","Ausgaben"],["einnahme","Einnahmen"],["betrieb","Betrieblich"],["vorauszahlung","Steuer"]];
+  const filters = [["alle","Alle"],["ausgabe","Ausgaben"],["einnahme","Einnahmen"],["betrieb","Betrieblich"],["vorauszahlung","Steuer"]].filter(([k])=>hasSelf()||(k!=="betrieb"&&k!=="vorauszahlung")||UI.filter===k);
   $("filters").innerHTML = filters.map(([k,l])=>`<button class="fchip" data-filter="${k}" aria-pressed="${UI.filter===k}">${l}</button>`).join("") + `<button class="fchip" data-go="belege" style="display:inline-flex;align-items:center;gap:5px">${ic("clip",14)} Belege</button>`;
   let list = monthCalc(UI.ym).tx;
   const cal = true;   // the calendar is always shown above the list
@@ -2290,23 +2307,23 @@ function renderYear(){
       <div class="kpi"><small>${mc.net>=0?"Übrig":"Mehr ausgegeben"}</small><b class="${mc.net<0?"neg":"pos"}">${mc.net>=0?"+":"−"} ${esc(eur0(Math.abs(mc.net)))}</b><span>${mc.income?`${Math.round(Math.max(0,mc.net)/mc.income*100)} % gespart`:esc(MONTHS[ymParts(ym)[1]-1])}</span></div>
       <div class="kpi"><small>Ø pro Tag</small><b>${esc(eur0(perDay))}</b><span>ausgegeben</span></div>
       <div class="kpi"><small>vs. ${esc(MONTHS[ymParts(prevYm)[1]-1])}</small>${delta===null?`<b>–</b><span>keine Daten</span>`:`<b class="${delta>0?"neg":"pos"}">${delta>0?"+":"−"} ${Math.abs(Math.round(delta))} %</b><span>${ym===cur?"bis heute ":""}${delta>0?"mehr":"weniger"} ausgegeben</span>`}</div>
-      <div class="kpi"><small>Steuer ${y}</small>${need<=0&&!tax.resBal?`<b>–</b><span>keine Nachzahlung</span>`:resCover>=0?`<b class="pos">✓ reicht</b><span>Rücklage ${esc(eur0(tax.resBal))}</span>`:`<b class="neg">− ${esc(eur0(-resCover))}</b><span>fehlen noch</span>`}</div>
+      <div class="kpi"><small>Steuer ${y}</small>${!hasSelf()?(Math.abs(tax.due)<1?`<b>–</b><span>ausgeglichen</span>`:tax.due<0?`<b class="pos">+ ${esc(eur0(-tax.due))}</b><span>Erstattung (Schätzung)</span>`:`<b class="neg">− ${esc(eur0(tax.due))}</b><span>Nachzahlung (Schätzung)</span>`):need<=0&&!tax.resBal?`<b>–</b><span>keine Nachzahlung</span>`:resCover>=0?`<b class="pos">✓ reicht</b><span>Rücklage ${esc(eur0(tax.resBal))}</span>`:`<b class="neg">− ${esc(eur0(-resCover))}</b><span>fehlen noch</span>`}</div>
     </div>
     <div class="card anachart">
       <div class="tlchips" role="group" aria-label="Diagramm">${[["cat","Kategorien"],["trend","Verlauf"],["io","Ein / Aus"]].map(([k,l])=>`<button class="fchip" data-anachart="${k}" aria-pressed="${mode===k}">${l}</button>`).join("")}</div>
       ${chartBody}
     </div>
     ${accRow("plan","cal","Jahresplan", `${esc(eur0(inc))} rein · ${esc(eur0(exp))} raus`, planQuarters(rows,cur))}
-    ${accRow("tax","receipt","Steuer &amp; Selbstständig", `Gewinn ${esc(eur0(tax.gewinn))} · ${tax.due>=0?`Nachzahlung ca. ${esc(eur0(tax.due))}`:`Erstattung ca. ${esc(eur0(-tax.due))}`}`, `<div class="anagrid"><div class="card half"><div class="card-head"><h2>Selbstständig</h2><span class="pill ${st.kleinunternehmer?(kuOver?"bad":"ok"):""}">${st.kleinunternehmer?"Kleinunternehmer":"Mit Umsatzsteuer"}</span></div>
+    ${accRow("tax","receipt",hasSelf()?"Steuer &amp; Selbstständig":"Steuer", `${hasSelf()?`Gewinn ${esc(eur0(tax.gewinn))} · `:""}${tax.due>=0?`Nachzahlung ca. ${esc(eur0(tax.due))}`:`Erstattung ca. ${esc(eur0(-tax.due))}`}`, `<div class="anagrid">${hasSelf()?`<div class="card half"><div class="card-head"><h2>Selbstständig</h2><span class="pill ${st.kleinunternehmer?(kuOver?"bad":"ok"):""}">${st.kleinunternehmer?"Kleinunternehmer":"Mit Umsatzsteuer"}</span></div>
       <div class="kv"><span>Einnahmen netto</span><span>${esc(eur(self))}</span>
         ${st.kleinunternehmer?"":`<span>Umsatzsteuer ${esc(st.vatRate)} %</span><span>${esc(eur(self*vat))}</span><span>Brutto</span><span>${esc(eur(self*(1+vat)))}</span>`}
         <span>Betriebsausgaben</span><span>− ${esc(eur(tax.betr))}</span><span class="sum">Gewinn</span><span class="sum">${esc(eur(tax.gewinn))}</span></div>
       ${st.kleinunternehmer?`<div style="margin-top:16px"><div class="meta-row"><span>Umsatzgrenze</span><span><b>${esc(eur0(self))}</b> von ${esc(eur0(st.kuLimit))}</span></div><div class="progress-big"><div class="fill" style="width:${Math.min(100,self/(st.kuLimit||1)*100)}%;background:${kuOver?"var(--bad)":self/(st.kuLimit||1)>.8?"var(--warn)":"var(--accent)"}"></div></div>${kuOver?`<div class="notice bad">Grenze überschritten. Klär mit deinem Steuerbüro, ab wann du Umsatzsteuer berechnen musst.</div>`:""}</div>`
         :`<div class="notice warn" style="margin-top:14px"><span>Ans Finanzamt abzuführen: <b>${esc(eur(self*vat))}</b> Umsatzsteuer (ohne Vorsteuer gerechnet).</span></div>`}
-    </div>
-    <div class="card half"><div class="card-head"><h2>Steuern ${y}</h2><span class="pill">Schätzung</span></div>
+    </div>`:""}
+    <div class="card ${hasSelf()?"half":""}"><div class="card-head"><h2>Steuern ${y}</h2><span class="pill">Schätzung</span></div>
       <div class="kv">
-        <span>Gewinn Selbstständigkeit</span><span>${esc(eur(tax.gewinn))}</span>
+        ${hasSelf()?`<span>Gewinn Selbstständigkeit</span><span>${esc(eur(tax.gewinn))}</span>`:""}
         ${tax.brutto?`<span>Lohn ${esc(eur0(tax.brutto))}${lohnYear(y).sonderzahl>0?` <span class="small muted">(inkl. ${esc(eur0(lohnYear(y).sonderzahl))} Sonderzahlungen)</span>`:""} − Werbungskosten ${esc(eur0(tax.wk))}</span><span>${esc(eur(tax.lohnEink))}</span>`:""}
         <span>− Vorsorge &amp; Sonderausgaben</span><span>− ${esc(eur(tax.vorsorge+tax.sonder))}</span>
         ${tax.entl?`<span>− Entlastungsbetrag Alleinerziehende</span><span>− ${esc(eur(tax.entl))}</span>`:""}
@@ -2321,15 +2338,15 @@ function renderYear(){
         ${st.gewerbe?`<span>Gewerbesteuer (Hebesatz ${esc(st.hebesatz||400)} %)</span><span>${esc(eur(tax.gewst))}</span>`:""}
         <span class="sum">Steuern gesamt</span><span class="sum">${esc(eur(tax.mine.total+tax.gewst))}</span>
         ${tax.brutto?`<span>− Lohnsteuer${tax.soliL||tax.kistL?" inkl. Soli/KiSt":""}${tax.lstEst?` <span class="small muted">(geschätzt, Klasse ${["","I","II","III","IV","V","VI"][tax.kl]})</span>`:""}</span><span>− ${esc(eur(tax.lst+tax.soliL+tax.kistL))}</span>`:""}
-        <span>− Schon vorausgezahlt</span><span>− ${esc(eur(tax.vz))}</span>
+        ${hasSelf()||tax.vz?`<span>− Schon vorausgezahlt</span><span>− ${esc(eur(tax.vz))}</span>`:""}
         <span class="sum">${tax.due>=0?"Voraussichtliche Nachzahlung":"Voraussichtliche Erstattung"}</span><span class="sum ${tax.due>=0?"":"pos"}">${esc(eur(Math.abs(tax.due)))}</span>
         ${st.gewerbe&&tax.gewst?`<span class="small muted">+ Gewerbesteuer an die Gemeinde</span><span class="small muted">${esc(eur(tax.gewst))}</span>`:""}
       </div>
-      <div class="notice ${resCover>=0?"info":"bad"}" style="margin-top:14px"><span>${resCover>=0?`Deine Rücklage (${esc(eur(tax.resBal))}) reicht. Puffer: <b>${esc(eur(resCover))}</b>`:`Deine Rücklage (${esc(eur(tax.resBal))}) reicht voraussichtlich nicht – es fehlen <b>${esc(eur(-resCover))}</b>.`}</span></div>
+      <div class="notice ${resCover>=0?"info":"bad"}" style="margin-top:14px" ${hasSelf()?"":"hidden"}><span>${resCover>=0?`Deine Rücklage (${esc(eur(tax.resBal))}) reicht. Puffer: <b>${esc(eur(resCover))}</b>`:`Deine Rücklage (${esc(eur(tax.resBal))}) reicht voraussichtlich nicht – es fehlen <b>${esc(eur(-resCover))}</b>.`}</span></div>
       ${[3,4,5].includes(tax.kl)&&!tax.joint?`<div class="notice warn" style="margin-top:10px"><span>Steuerklasse ${["","I","II","III","IV","V","VI"][tax.kl]} gibt es nur für Verheiratete – schalte unter Einstellungen „Zusammenveranlagung“ ein und trag das Einkommen deines Partners ein.</span></div>`:""}
       ${tax.lstEst?`<div class="notice info" style="margin-top:10px"><span>Die Lohnsteuer ist aus Bruttolohn und Steuerklasse grob geschätzt. Genauer wird es mit dem Wert aus deiner Lohnabrechnung (Einstellungen › Steuer).</span></div>`:""}
       <p class="small muted" style="margin:10px 0 0">Tarif 2026 nach §32a EStG mit Soli, Kirchensteuer, Kinderfreibetrag und Gewerbesteuer-Anrechnung. Grobe Schätzung ohne Vorsteuer und Sonderfälle – ersetzt keine Steuerberatung.</p></div></div>`)}
-    ${accRow("euer","arrowDown","EÜR exportieren", "Für Steuerbüro oder ELSTER (Anlage EÜR)", `<div class="card flat"><div class="card-head"><h2>Für die Steuer</h2></div>
+    ${!hasSelf()?"":accRow("euer","arrowDown","EÜR exportieren", "Für Steuerbüro oder ELSTER (Anlage EÜR)", `<div class="card flat"><div class="card-head"><h2>Für die Steuer</h2></div>
       <p class="small muted" style="margin:-6px 0 12px">Alle Einnahmen und Ausgaben deiner Selbstständigkeit ${y} als Liste für Steuerbüro oder ELSTER (Anlage EÜR) – mit Brutto, Umsatzsteuer und Netto, betrieblichen Fixkosten und Summen. Öffnet sich in Excel.</p>
       <button class="btn primary" id="euerBtn" data-year="${y}">EÜR ${y} exportieren</button></div>`)}`;
 }
@@ -2405,7 +2422,7 @@ function notifyPlan(){
       const days=Math.round((t-new Date(last+"T12:00:00").getTime())/864e5);
       add("imp:"+last, t, "Kontoauszug importieren", `Seit ${days} Tagen kein neuer Auszug – importieren hält Kontostand und Budgets aktuell.`); } }
     // tax dates (self-employed): VAT return on the 10th, income tax prepayment 10.3./6./9./12.
-    if (c.tax && incCats().some(x=>x.art==="selbst")){ for (const ym of [cur,nxt,shiftYm(cur,2)]){ const [y,m]=ymParts(ym);
+    if (c.tax && hasSelf() && incCats().some(x=>x.art==="selbst")){ for (const ym of [cur,nxt,shiftYm(cur,2)]){ const [y,m]=ymParts(ym);
       const vz=[3,6,9,12].includes(m), ust=!S.settings.kleinunternehmer;
       if (vz||ust) add("tax:"+ym, at(new Date(y,m-1,8),H), "Steuertermin am 10.", [ust?"Umsatzsteuer-Voranmeldung":"", vz?"Einkommensteuer-Vorauszahlung":""].filter(Boolean).join(" und ")+` fällig am 10. ${MONTHS[m-1]}.`);
     } }
@@ -2431,14 +2448,14 @@ function renderNotifyEd(){
     <span class="small muted" style="margin-top:-8px">Kommen sofort, sobald die App es bemerkt – jede nur einmal.</span>
     ${sw("budget","Budget","Bei 80 % verbraucht und wenn es überschritten ist")}
     ${sw("minus","Konto im Minus","Höchstens einmal am Tag")}
-    ${sw("reserve","Steuer-Rücklage","Wenn die Rücklage dein Guthaben übersteigt")}
+    ${hasSelf()?sw("reserve","Steuer-Rücklage","Wenn die Rücklage dein Guthaben übersteigt"):""}
     ${sw("debt","Schulden","Wenn eine Rate die Zinsen nicht deckt")}
     ${sw("goal","Sparziele","Wenn ein Sparziel erreicht ist")}
     <div class="section-title">Erinnerungen</div>
     ${sel("fix","Offene Fixkosten","Nur wenn noch etwas nicht abgehakt ist.",[["","Aus"],["3","Am 3. des Monats"],["25","Am 25. des Monats"],["3,25","Am 3. und am 25."]])}
     ${sel("daily","Ausgaben eintragen","Jeden Tag eine kurze Erinnerung.",[["","Aus"],["18:00","Täglich um 18 Uhr"],["19:00","Täglich um 19 Uhr"],["20:00","Täglich um 20 Uhr"],["21:00","Täglich um 21 Uhr"],["22:00","Täglich um 22 Uhr"]])}
     ${sel("imp","Kontoauszug importieren","Wenn so lange kein neuer Auszug importiert wurde.",[["","Aus"],["7","Nach 7 Tagen"],["14","Nach 14 Tagen"],["30","Nach 30 Tagen"]])}
-    ${sw("tax","Steuertermine","Umsatzsteuer-Voranmeldung und Vorauszahlungen, 2 Tage vorher")}
+    ${!hasSelf()?"":sw("tax","Steuertermine","Umsatzsteuer-Voranmeldung und Vorauszahlungen, 2 Tage vorher")}
     ${sw("month","Monatsrückblick","Am 1. für den vergangenen Monat")}
     ${sw("week","Wochenrückblick","Sonntags um 18 Uhr")}
     ${sel("hour","Uhrzeit für Erinnerungen","Gilt für Fixkosten, Kontoauszug, Steuer und Monatsrückblick.",[["8","8 Uhr"],["9","9 Uhr"],["10","10 Uhr"],["12","12 Uhr"],["17","17 Uhr"],["19","19 Uhr"]])}
@@ -2513,16 +2530,16 @@ function renderBelege(){
   const f=UI.belegF;
   const shown = f==="ohne" ? betNo : withR.filter(t=>f!=="betrieb"||t.kind==="betrieb");
   const yearN=S.tx.filter(t=>t.date&&t.date.startsWith(y)&&hasReceipt(t.id)).length;
-  const chips=[["alle","Alle"],["betrieb","Betrieblich"],["ohne",betNo.length?`Ohne Beleg (${betNo.length})`:"Ohne Beleg"]];
+  const chips=hasSelf()?[["alle","Alle"],["betrieb","Betrieblich"],["ohne",betNo.length?`Ohne Beleg (${betNo.length})`:"Ohne Beleg"]]:[];
   $("v-belege").innerHTML = `
     <div class="belhead"><button class="spback" data-go="list" aria-label="Zurück zu den Buchungen">‹</button><span class="small muted">${esc(MONTHS[Number(ym.slice(5,7))-1])} ${y} · ${withR.length} ${withR.length===1?"Beleg":"Belege"}</span></div>
-    <div class="filters">${chips.map(([k,l])=>`<button class="fchip" data-belf="${k}" aria-pressed="${f===k}">${l}</button>`).join("")}</div>
+    ${chips.length?"":`<span></span>`}<div class="filters" ${chips.length?"":"hidden"}>${chips.map(([k,l])=>`<button class="fchip" data-belf="${k}" aria-pressed="${f===k}">${l}</button>`).join("")}</div>
     ${f==="ohne"
       ? (betNo.length ? `<div class="card">${betNo.map(t=>tlRow(t, shortDate(t.date))).join("")}</div><p class="small muted" style="margin:0 4px">Antippen und unter „Beleg“ ein Foto hinzufügen.</p>` : emptyState("check","Alles belegt","Jede betriebliche Ausgabe in diesem Monat hat einen Beleg."))
       : shown.length ? `<div class="belgal">${shown.map(t=>`<button class="belg" data-edit="${esc(t.id)}"><span class="bimg"><img data-rimg="${esc(t.id)}" alt=""></span><b>${esc(txPayee(t)||t.cat||"Beleg")}</b><small>${esc(eur(t.amount))} · ${esc(shortDate(t.date))}${t.kind==="betrieb"?" · betriebl.":""}</small></button>`).join("")}</div>`
       : emptyState("camera", f==="betrieb"?"Keine betrieblichen Belege":"Noch keine Belege", "Fotografiere eine Quittung über den Plus-Knopf – das Foto bleibt an der Buchung.")}
-    ${betNo.length&&f!=="ohne"?`<div class="notice warn"><span>${betNo.length} betriebliche ${betNo.length===1?"Ausgabe hat":"Ausgaben haben"} noch keinen Beleg – für die Steuer am besten nachfotografieren.</span><button class="btn" data-belf="ohne">Anzeigen</button></div>`:""}
-    <div class="card"><div class="card-head"><h2>${ic("doc")} Belege ${y} sichern</h2></div><p class="small muted" style="margin:-4px 0 10px">Alle ${yearN} Belege des Jahres als ZIP, sortiert nach privat und betrieblich, mit einer Liste für den Steuerberater.</p><button class="btn primary" id="belZip" ${yearN?"":"disabled"}>Als ZIP speichern</button></div>`;
+    ${hasSelf()&&betNo.length&&f!=="ohne"?`<div class="notice warn"><span>${betNo.length} betriebliche ${betNo.length===1?"Ausgabe hat":"Ausgaben haben"} noch keinen Beleg – für die Steuer am besten nachfotografieren.</span><button class="btn" data-belf="ohne">Anzeigen</button></div>`:""}
+    <div class="card"><div class="card-head"><h2>${ic("doc")} Belege ${y} sichern</h2></div><p class="small muted" style="margin:-4px 0 10px">Alle ${yearN} Belege des Jahres als ZIP${hasSelf()?", sortiert nach privat und betrieblich,":""} mit einer Liste${hasSelf()?" für den Steuerberater":""}.</p><button class="btn primary" id="belZip" ${yearN?"":"disabled"}>Als ZIP speichern</button></div>`;
   // load the pictures one after the other
   (async()=>{ for (const im of document.querySelectorAll("#v-belege img[data-rimg]")){ const src=await rcptGet(im.dataset.rimg); if (src && im.isConnected) im.src=src; } })();
 }
@@ -2541,7 +2558,7 @@ function spSummary(k){
   if (k==="budgets"){ const n=Object.values(st.budgets||{}).filter(v=>+v>0).length; return n?`${n} aktiv`:"keine"; }
   if (k==="schulden"){ return S.debts.length?eur0(sum(S.debts,d=>debtState(d).remaining)):"keine"; }
   if (k==="backup"){ if (!SYNCABLE) return "Datei"; return !SYNC.token?"aus":SYNC.state==="ok"?"aktuell":"wartet"; }
-  if (k==="steuer"){ const L=(LAENDER.find(x=>x[0]===(st.land||"NW"))||[,""])[1]; return `Klasse ${["I","II","III","IV","V","VI"][(st.steuerklasse||1)-1]} · ${L}${st.reserveRate?` · ${numStr(st.reserveRate)} % Rücklage`:""}`; }
+  if (k==="steuer"){ const L=(LAENDER.find(x=>x[0]===(st.land||"NW"))||[,""])[1]; return `${({angestellt:"Angestellt",selbst:"Selbstständig",beides:"Job + selbstständig"})[st.work||"beides"]} · Klasse ${["I","II","III","IV","V","VI"][(st.steuerklasse||1)-1]} · ${L}${st.reserveRate&&hasSelf()?` · ${numStr(st.reserveRate)} % Rücklage`:""}`; }
   if (k==="start"){ const n=(st.shops||[]).length; return `Reihenfolge der Blöcke${n?` · ${n} Läden`:""}`; }
   if (k==="sicherheit"){ return lockCfg() ? "App-Sperre an" : "App-Sperre aus"; }
   if (k==="notify"){ const c=notifyCfg(); return !CAN_NOTIFY ? "nur in der Handy-App" : c.on&&notifyPerm()==="granted" ? "an" : "aus"; }
@@ -2646,6 +2663,10 @@ function renderMore(){
   $("sKU").checked=!!st.kleinunternehmer; $("sSplit").checked=!!st.splitting; $("partnerField").hidden=!st.splitting;
   for (const k of ["ausgabe","betrieb"]) $("catEd-"+k).innerHTML = cats(k).map(n=>`<span class="chip">${esc(n)}<button class="x" data-catdel="${k}|${esc(n)}" aria-label="${esc(n)} entfernen">×</button></span>`).join("")+`<button class="chip" data-catadd="${k}">+ Neu</button>`;
   $("catEd-einnahme").innerHTML = incCats().map(c=>`<div class="incrow"><div style="display:flex;align-items:center;gap:10px"><b style="flex:1">${esc(c.name)}</b><button class="icon-btn" data-catdel="einnahme|${esc(c.name)}" aria-label="${esc(c.name)} entfernen">×</button></div><select class="in" data-incart="${esc(c.name)}" aria-label="Art von ${esc(c.name)}">${incArtOptions(c.art)}</select></div>`).join("")+`<button class="chip" data-catadd="einnahme" style="margin-top:6px">+ Neu</button>`;
+  const w=S.settings.work||"beides";
+  if (document.activeElement!==$("sWork")) $("sWork").innerHTML = WORK.map(([k,t])=>`<option value="${k}" ${k===w?"selected":""}>${t}</option>`).join("");
+  $("sWorkInfo").textContent = (WORK.find(x=>x[0]===w)||WORK[2])[2] + (w==="angestellt"?" – Rücklage, Betrieb, Umsatzsteuer und EÜR sind ausgeblendet.":w==="selbst"?" – die Felder für Gehalt sind ausgeblendet.":"");
+  $("sJobBox").hidden = !hasJob(); $("sSelfBox").hidden = !hasSelf(); $("catBetField").hidden = !hasSelf();
   renderNotifyEd();
   renderSpPages();
 }
@@ -2715,7 +2736,7 @@ function closeSheet(){
   setTimeout(()=>{ bg.hidden=true; }, 220); UI.editId=null;
 }
 function renderSheet(){
-  document.querySelectorAll("#kindSeg button").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.kind===UI.kind)));
+  document.querySelectorAll("#kindSeg button").forEach(b=>{ b.setAttribute("aria-pressed", String(b.dataset.kind===UI.kind)); b.hidden = !hasSelf() && (b.dataset.kind==="betrieb"||b.dataset.kind==="vorauszahlung") && UI.kind!==b.dataset.kind; });
   const list = UI.kind==="einnahme" ? incCats().map(c=>c.name) : UI.kind==="vorauszahlung" ? [] : cats(UI.kind);
   if (UI.cat && !list.includes(UI.cat)) UI.cat=null;
   if (!UI.cat && list.length) UI.cat=list[0];
@@ -3254,6 +3275,7 @@ $("sKirche").addEventListener("change",e=>{ S.settings.kirche=e.target.checked; 
 $("sGew").addEventListener("change",e=>{ S.settings.gewerbe=e.target.checked; render(); saveSettings(); });
 $("sKU").addEventListener("change",e=>{ S.settings.kleinunternehmer=e.target.checked; render(); saveSettings(); });
 $("sSplit").addEventListener("change",e=>{ S.settings.splitting=e.target.checked; render(); saveSettings(); });
+$("sWork").addEventListener("change", e=>setWork(e.target.value));
 $("catEd-einnahme").addEventListener("change",e=>{ const el=e.target.closest("[data-incart]"); if (!el) return; const c=clone(S.settings.cats||DEFAULT_SETTINGS.cats); c.einnahme=c.einnahme.map(x=>{ const o=typeof x==="string"?{name:x,art:"sonstige"}:x; return o.name===el.dataset.incart?{...o,art:el.value}:o; }); S.settings.cats=c; render(); saveSettings(); });
 
 /* ---------- CSV import ---------- */
