@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("AndroidBridge", {
   saveFile: (name, text) => ipcRenderer.sendSync("saveFile", String(name), String(text)),
+  saveFileB64: (name, mime, b64) => ipcRenderer.sendSync("saveFileB64", String(name), String(b64)),
   saveApp: (html) => ipcRenderer.sendSync("saveApp", String(html)),
   reloadApp: () => ipcRenderer.send("reloadApp"),
   fetchImage: (id, url) => ipcRenderer.send("fetchImage", { id: String(id), url: String(url) }),

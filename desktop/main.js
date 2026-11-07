@@ -107,6 +107,16 @@ ipcMain.on("saveFile", (e, name, text) => {
   }
 });
 
+ipcMain.on("saveFileB64", (e, name, b64) => {
+  try {
+    const safe = String(name).replace(/[\\/:*?"<>|]/g, "_") || "datei.bin";
+    fs.writeFileSync(path.join(app.getPath("downloads"), safe), Buffer.from(String(b64), "base64"));
+    e.returnValue = true;
+  } catch (err) {
+    e.returnValue = false;
+  }
+});
+
 ipcMain.on("saveApp", (e, html) => {
   try {
     html = String(html);

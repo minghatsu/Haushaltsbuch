@@ -658,6 +658,16 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .pqd{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:13px;padding:8px 6px 0}
 .pqd span:nth-child(even){text-align:right;font-weight:600;white-space:nowrap}
 .incrow{display:flex;flex-direction:column;gap:6px;padding:8px 0}.incrow+.incrow{border-top:1px solid var(--line)}
+
+.belhead{display:flex;align-items:center;gap:12px}
+.belgal{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (min-width:700px){.belgal{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}}
+.belg{border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:7px;text-align:left;font:inherit;color:var(--fg);cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
+.belg .bimg{display:block;aspect-ratio:3/4;border-radius:11px;background:var(--sunk);overflow:hidden;margin-bottom:5px}
+.belg img{width:100%;height:100%;object-fit:cover;display:block}.belg img:not([src]){visibility:hidden}
+.belg b{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.belg small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rcptrow #rcptHave{flex-wrap:wrap}.rcptrow #rcptHave .grow{flex:1 1 calc(100% - 70px)}
+.rbtns{display:flex;flex-wrap:wrap;gap:6px;width:100%}.rbtns .btn{flex:1 1 auto;padding:9px 10px;font-size:13px;background:var(--surface);border-radius:12px}
 </style>
 
 <div class="backdrop" id="addBg" hidden><div class="sheet addsheet" role="dialog" aria-label="Was möchtest du hinzufügen?"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><h2>Was möchtest du hinzufügen?</h2><button class="icon-btn" data-addclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -693,6 +703,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
     <div class="card" id="listCard"></div>
   </section>
   <section class="view" id="v-fix" data-view="fix" hidden></section>
+  <section class="view" id="v-belege" data-view="belege" hidden></section>
   <section class="view" id="v-year" data-view="year" hidden></section>
   <section class="view" id="v-more" data-view="more" hidden>
     <div id="setHome"></div>
@@ -796,7 +807,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
     </div>
     <input type="file" id="scanFile" accept="image/*" hidden>
     <div class="rcptrow" id="rcptRow" hidden>
-      <div id="rcptHave" class="rcpthave"><img id="rcptThumb" alt="Beleg"><span class="grow"><b>Beleg</b><br><span class="small muted" id="rcptInfo"></span></span><button class="btn" id="rcptView">Ansehen</button><button class="icon-btn" id="rcptRemove" aria-label="Beleg entfernen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div id="rcptHave" class="rcpthave"><img id="rcptThumb" alt="Beleg"><span class="grow"><b>Beleg</b><br><span class="small muted" id="rcptInfo"></span></span><span class="rbtns"><button class="btn" id="rcptView">Ansehen</button><button class="btn" id="rcptShare" hidden>Teilen</button><button class="btn" id="rcptReplace">Ersetzen</button><button class="btn" id="rcptRemove" aria-label="Beleg entfernen" style="color:var(--bad)">Entfernen</button></span></div>
       <div id="rcptAddWrap" class="rcpthave"><span class="grow"><b>Beleg</b><br><span class="small muted">Noch kein Foto an dieser Buchung</span></span><button class="btn" id="rcptAdd">Foto hinzufügen</button><button class="btn" id="rcptGallery" hidden>Galerie</button></div>
     </div>
     <div class="seg" id="kindSeg" role="group" aria-label="Art der Buchung">
@@ -870,7 +881,7 @@ const DEFAULT_SETTINGS = {
   }
 };
 const KIND_LABEL = {ausgabe:"Ausgabe", betrieb:"Betrieblich", einnahme:"Einnahme", vorauszahlung:"Steuer-Vorauszahlung"};
-const TITLES = {home:"Übersicht", list:"Buchungen", fix:"Fixkosten", year:"Analyse", more:"Einstellungen", import:"Import"};
+const TITLES = {home:"Übersicht", list:"Buchungen", fix:"Fixkosten", year:"Analyse", more:"Einstellungen", import:"Import", belege:"Belege"};
 
 /* ---------- icons ---------- */
 const P = {
@@ -891,6 +902,7 @@ const P = {
   arrowUp:'<path d="M12 19V5M6 11l6-6 6 6"/>',
   check:'<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="m9 13.5 2 2 4-4"/>',
   chevron:'<path d="m6 9 6 6 6-6"/>',
+  clip:'<path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3.5"/>',
   bell:'<path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9M10 20.5h4"/>',
   right:'<path d="m9 6 6 6-6 6"/>',
   home:'<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
@@ -1460,10 +1472,10 @@ function render(){
   fillMonthPill();
   $("monthpill").style.visibility = (UI.view==="more"||UI.view==="import") ? "hidden" : "visible";
   $("settingsBtn").setAttribute("aria-pressed", String(UI.view==="more"));
-  document.querySelectorAll(".tab[data-go]").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.go===(UI.view==="import"?"list":UI.view))));
+  document.querySelectorAll(".tab[data-go]").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.go===(UI.view==="import"||UI.view==="belege"?"list":UI.view))));
   document.querySelectorAll("[data-view]").forEach(s=>s.hidden = s.dataset.view!==UI.view);
   $("banner").innerHTML = (mem && !LOCAL) ? `<div class="notice warn" style="margin-bottom:14px"><span>Speichern ist hier gerade nicht möglich. Öffne die App über deinen Link in Claude, während du angemeldet bist.</span></div>` : "";
-  ({home:renderHome, list:renderList, fix:renderFix, year:renderYear, more:renderMore, import:renderImport})[UI.view]();
+  ({home:renderHome, list:renderList, fix:renderFix, year:renderYear, more:renderMore, import:renderImport, belege:renderBelege})[UI.view]();
   if (!$("sheetBg").hidden) renderSheet();
   notifyPlanSoon();
 }
@@ -2100,7 +2112,7 @@ document.addEventListener("click", e=>{
 });
 function renderList(){
   const filters = [["alle","Alle"],["ausgabe","Ausgaben"],["einnahme","Einnahmen"],["betrieb","Betrieblich"],["vorauszahlung","Steuer"]];
-  $("filters").innerHTML = filters.map(([k,l])=>`<button class="fchip" data-filter="${k}" aria-pressed="${UI.filter===k}">${l}</button>`).join("");
+  $("filters").innerHTML = filters.map(([k,l])=>`<button class="fchip" data-filter="${k}" aria-pressed="${UI.filter===k}">${l}</button>`).join("") + `<button class="fchip" data-go="belege" style="display:inline-flex;align-items:center;gap:5px">${ic("clip",14)} Belege</button>`;
   let list = monthCalc(UI.ym).tx;
   const cal = true;   // the calendar is always shown above the list
   document.querySelectorAll("[data-lmode]").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.lmode===(cal?"cal":"list"))));
@@ -2440,6 +2452,83 @@ document.addEventListener("change", e=>{
 document.addEventListener("click", e=>{
   if (e.target.closest("#nfTest")){ try{ AndroidBridge.notifyNow(nid("test"+Date.now()), "So sieht eine Benachrichtigung aus", "Das Haushaltsbuch meldet sich hier, auch wenn die App geschlossen ist.", "hinweise"); }catch(_){} }
   if (e.target.closest("#nfSys,#nfSys2")){ try{ AndroidBridge.notifySettings(); }catch(_){} }
+});
+
+
+/* ---------- Belege-Ordner ---------- */
+function rcptName(t){ if (!t) return "beleg.jpg"; const n=String(txPayee(t)||t.cat||"beleg").replace(/[^A-Za-z0-9ÄÖÜäöüß]+/g,"-").replace(/^-|-$/g,"").slice(0,30)||"beleg"; return `${t.date}_${n}_${String(Number(t.amount).toFixed(2)).replace(".",",")}.jpg`; }
+function rcptCanShare(){ return !!((window.AndroidBridge && window.AndroidBridge.shareImage) || (navigator.canShare && !NATIVE)); }
+async function rcptShare(img, name){
+  if (!img) return;
+  const b64=img.split(",")[1]||"";
+  if (window.AndroidBridge && window.AndroidBridge.shareImage){ try{ AndroidBridge.shareImage(b64, name); }catch(e){ toast("Teilen hat nicht geklappt"); } return; }
+  try { const bl=await (await fetch(img)).blob(); const f=new File([bl], name, {type:"image/jpeg"}); if (navigator.canShare && navigator.canShare({files:[f]})) await navigator.share({files:[f], title:"Beleg"}); } catch(e){}
+}
+const CRC_T=(()=>{ const t=new Uint32Array(256); for (let n=0;n<256;n++){ let c=n; for (let k=0;k<8;k++) c = c&1 ? 0xEDB88320^(c>>>1) : c>>>1; t[n]=c>>>0; } return t; })();
+function crc32(b){ let c=0xFFFFFFFF; for (let i=0;i<b.length;i++) c=CRC_T[(c^b[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+// a plain ZIP (stored, no compression – JPEGs are compressed already)
+function makeZip(files){
+  const enc=new TextEncoder(), parts=[], central=[]; let off=0;
+  const u16=v=>[v&255,(v>>>8)&255], u32=v=>[v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255];
+  const d=new Date(), dt=((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1)), dd=(((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate());
+  for (const f of files){
+    const name=enc.encode(f.name), data=f.data, crc=crc32(data);
+    const head=new Uint8Array([...u32(0x04034b50),...u16(20),...u16(0x0800),...u16(0),...u16(dt),...u16(dd),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0)]);
+    parts.push(head,name,data);
+    central.push(new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0x0800),...u16(0),...u16(dt),...u16(dd),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(off)]), name);
+    off+=head.length+name.length+data.length;
+  }
+  const csize=central.reduce((a,b)=>a+b.length,0);
+  const end=new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(files.length),...u16(files.length),...u32(csize),...u32(off),...u16(0)]);
+  return new Blob([...parts,...central,end],{type:"application/zip"});
+}
+function b64bytes(dataUrl){ const s=atob(dataUrl.split(",")[1]||""); const b=new Uint8Array(s.length); for (let i=0;i<s.length;i++) b[i]=s.charCodeAt(i); return b; }
+async function saveBinary(name, blob, okMsg){
+  const br=window.AndroidBridge;
+  if (br && br.saveFileB64){ const b64=await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(String(fr.result).split(",")[1]||""); fr.readAsDataURL(blob); }); const ok=br.saveFileB64(name, blob.type, b64); toast(ok?okMsg+" (Downloads)":"Datei konnte nicht gespeichert werden"); return; }
+  if (NATIVE){ toast("Bitte die App aktualisieren, um ZIP-Dateien zu speichern"); return; }
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1500); toast(okMsg);
+}
+async function belegeZip(year){
+  const txs=S.tx.filter(t=>t.date&&t.date.startsWith(year)&&hasReceipt(t.id)).sort((a,b)=>a.date.localeCompare(b.date));
+  if (!txs.length){ toast(`Für ${year} sind keine Belege gespeichert`); return; }
+  toast(`${txs.length} Belege werden gepackt …`);
+  const files=[], used=new Set(), rows=[["Datum","Art","Kategorie","Beschreibung","Betrag (€)","Datei"]];
+  for (const t of txs){
+    const img=await rcptGet(t.id); if (!img) continue;
+    let nm=rcptName(t), k=2; while (used.has(nm)) nm=nm.replace(/(\(\d+\))?\.jpg$/,`(${k++}).jpg`); used.add(nm);
+    const folder = t.kind==="betrieb" ? "betrieblich/" : "privat/";
+    files.push({name:folder+nm, data:b64bytes(img)});
+    rows.push([t.date.split("-").reverse().join("."), t.kind==="betrieb"?"betrieblich":t.kind==="einnahme"?"Einnahme":"privat", t.cat||"", txPayee(t)||"", Number(t.amount).toFixed(2).replace(".",","), folder+nm]);
+  }
+  const csv="﻿"+rows.map(r=>r.map(v=>/[";\n]/.test(v)?`"${String(v).replace(/"/g,'""')}"`:v).join(";")).join("\r\n");
+  files.unshift({name:"Belege-Liste.csv", data:new TextEncoder().encode(csv)});
+  await saveBinary(`Belege-${year}.zip`, makeZip(files), `${files.length-1} Belege gespeichert`);
+}
+UI.belegF = UI.belegF || "alle";
+function renderBelege(){
+  const ym=UI.ym, y=ym.slice(0,4);
+  const tx=monthCalc(ym).tx.filter(t=>t.kind!=="vorauszahlung");
+  const withR=tx.filter(t=>hasReceipt(t.id)), betNo=tx.filter(t=>t.kind==="betrieb"&&!hasReceipt(t.id));
+  const f=UI.belegF;
+  const shown = f==="ohne" ? betNo : withR.filter(t=>f!=="betrieb"||t.kind==="betrieb");
+  const yearN=S.tx.filter(t=>t.date&&t.date.startsWith(y)&&hasReceipt(t.id)).length;
+  const chips=[["alle","Alle"],["betrieb","Betrieblich"],["ohne",betNo.length?`Ohne Beleg (${betNo.length})`:"Ohne Beleg"]];
+  $("v-belege").innerHTML = `
+    <div class="belhead"><button class="spback" data-go="list" aria-label="Zurück zu den Buchungen">‹</button><span class="small muted">${esc(MONTHS[Number(ym.slice(5,7))-1])} ${y} · ${withR.length} ${withR.length===1?"Beleg":"Belege"}</span></div>
+    <div class="filters">${chips.map(([k,l])=>`<button class="fchip" data-belf="${k}" aria-pressed="${f===k}">${l}</button>`).join("")}</div>
+    ${f==="ohne"
+      ? (betNo.length ? `<div class="card">${betNo.map(t=>tlRow(t, shortDate(t.date))).join("")}</div><p class="small muted" style="margin:0 4px">Antippen und unter „Beleg“ ein Foto hinzufügen.</p>` : emptyState("check","Alles belegt","Jede betriebliche Ausgabe in diesem Monat hat einen Beleg."))
+      : shown.length ? `<div class="belgal">${shown.map(t=>`<button class="belg" data-edit="${esc(t.id)}"><span class="bimg"><img data-rimg="${esc(t.id)}" alt=""></span><b>${esc(txPayee(t)||t.cat||"Beleg")}</b><small>${esc(eur(t.amount))} · ${esc(shortDate(t.date))}${t.kind==="betrieb"?" · betriebl.":""}</small></button>`).join("")}</div>`
+      : emptyState("camera", f==="betrieb"?"Keine betrieblichen Belege":"Noch keine Belege", "Fotografiere eine Quittung über den Plus-Knopf – das Foto bleibt an der Buchung.")}
+    ${betNo.length&&f!=="ohne"?`<div class="notice warn"><span>${betNo.length} betriebliche ${betNo.length===1?"Ausgabe hat":"Ausgaben haben"} noch keinen Beleg – für die Steuer am besten nachfotografieren.</span><button class="btn" data-belf="ohne">Anzeigen</button></div>`:""}
+    <div class="card"><div class="card-head"><h2>${ic("doc")} Belege ${y} sichern</h2></div><p class="small muted" style="margin:-4px 0 10px">Alle ${yearN} Belege des Jahres als ZIP, sortiert nach privat und betrieblich, mit einer Liste für den Steuerberater.</p><button class="btn primary" id="belZip" ${yearN?"":"disabled"}>Als ZIP speichern</button></div>`;
+  // load the pictures one after the other
+  (async()=>{ for (const im of document.querySelectorAll("#v-belege img[data-rimg]")){ const src=await rcptGet(im.dataset.rimg); if (src && im.isConnected) im.src=src; } })();
+}
+document.addEventListener("click", e=>{
+  const b=e.target.closest("[data-belf]"); if (b){ UI.belegF=b.dataset.belf; renderBelege(); return; }
+  if (e.target.closest("#belZip")) belegeZip(UI.ym.slice(0,4));
 });
 
 const SP_PAGES = {
@@ -2904,6 +2993,7 @@ function renderRcptRow(){
   $("rcptRow").hidden = !has && !UI.editId;
   $("rcptHave").hidden = !has; $("rcptAddWrap").hidden = has;
   $("rcptGallery").hidden = !NATIVE_SCAN;
+  $("rcptShare").hidden = !(has && r.img && rcptCanShare());
   if (has){ $("rcptThumb").src = r.img || ""; $("rcptInfo").textContent = r.state==="new" ? "wird mit der Buchung gespeichert" : "gespeichert"; }
 }
 async function rcptSaveFor(id){
@@ -2916,6 +3006,8 @@ $("rcptView").onclick = () => rcptView(UI.rcpt.img);
 $("rcptThumb").onclick = () => rcptView(UI.rcpt.img);
 $("rcptViewerClose").onclick = () => { $("rcptViewer").hidden=true; $("rcptBig").src=""; };
 $("rcptRemove").onclick = () => { UI.rcpt = {state:"removed", img:null}; renderRcptRow(); };
+$("rcptReplace").onclick = () => runScan("camera", true);
+$("rcptShare").onclick = () => rcptShare(UI.rcpt.img, rcptName(S.tx.find(x=>x.id===UI.editId)));
 $("rcptAdd").onclick = () => runScan("camera", true);
 $("rcptGallery").onclick = () => runScan("gallery", true);
 

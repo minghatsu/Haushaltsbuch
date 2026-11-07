@@ -497,5 +497,46 @@ public class MainActivity extends Activity {
                 return false;
             }
         }
+        /** Saves a binary file (base64) in the Downloads folder, e.g. the receipts as ZIP. */
+        @JavascriptInterface
+        public boolean saveFileB64(String name, String mime, String b64) {
+            try {
+                byte[] bytes = Base64.decode(b64, Base64.DEFAULT);
+                ContentValues cv = new ContentValues();
+                cv.put(MediaStore.Downloads.DISPLAY_NAME, name);
+                cv.put(MediaStore.Downloads.MIME_TYPE, mime == null || mime.isEmpty() ? "application/octet-stream" : mime);
+                cv.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+                Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, cv);
+                if (uri == null) return false;
+                try (OutputStream os = getContentResolver().openOutputStream(uri)) {
+                    if (os == null) return false;
+                    os.write(bytes);
+                }
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        /** Opens the Android share menu for an image (base64 JPEG), e.g. to send a receipt. */
+        @JavascriptInterface
+        public boolean shareImage(String b64, String name) {
+            try {
+                byte[] bytes = Base64.decode(b64, Base64.DEFAULT);
+                File dir = new File(getCacheDir(), "share");
+                if (!dir.exists()) dir.mkdirs();
+                File[] old = dir.listFiles(); if (old != null) for (File o : old) o.delete();
+                String safe = (name == null || name.isEmpty() ? "beleg" : name).replaceAll("[^A-Za-z0-9._-]", "_");
+                if (!safe.endsWith(".jpg")) safe += ".jpg";
+                File f = new File(dir, safe);
+                try (FileOutputStream os = new FileOutputStream(f)) { os.write(bytes); }
+                Uri uri = FileProvider.getUriForFile(MainActivity.this, "de.sascha.haushaltsbuch.files", f);
+                Intent send = new Intent(Intent.ACTION_SEND).setType("image/jpeg").putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                runOnUiThread(() -> { try { startActivity(Intent.createChooser(send, "Beleg teilen")); } catch (Exception ignored) {} });
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
     }
 }
