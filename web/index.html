@@ -243,6 +243,7 @@ main{padding-block:6px 120px}
 .scanrow .importbtn{flex:1}
 .scanrow .btn{flex:none;background:var(--sunk)}
 .scanrow.busy .importbtn{opacity:.7;pointer-events:none}
+.plantbl th{font-size:11.5px;color:var(--muted);font-weight:700;text-align:right;padding:4px}.plantbl td{padding:2px}.plantbl .in{padding:7px 8px;font-size:13px;min-width:66px;text-align:right}
 .mchips{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;padding:2px 0 8px}
 .mchip{border:0;background:var(--sunk);border-radius:999px;padding:6px 11px;font-weight:700;font-size:12.5px;color:var(--muted)}
 .mchip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
@@ -446,6 +447,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   <div id="banner"></div>
   <section class="view" id="v-home" data-view="home"></section>
   <section class="view" id="v-import" data-view="import" hidden></section>
+  <input type="file" id="planFile" accept=".csv,.pdf,.txt,text/csv,text/plain,application/pdf" hidden>
   <input type="file" id="csvFile" accept=".csv,.pdf,text/csv,text/plain,application/pdf" hidden>
   <section class="view" id="v-list" data-view="list" hidden>
     <button class="importbtn" data-go="import"><span class="ictile" style="background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span style="flex:1;text-align:left"><b>Kontoauszug importieren</b><br><span class="small muted">CSV- oder PDF-Datei deiner Bank hochladen</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
@@ -982,13 +984,119 @@ function yearCum(ym){
   for (let i=1;i<=m;i++){ const c=monthCalc(y+"-"+pad(i)); bal+=c.net; rin+=c.reserve; rout+=c.vz; out+=c.expenses; }
   return { balance:bal, outSum:out, reserveIn:rin, reserveOut:rout, reserveBal:Math.max(0,rin-rout) };
 }
+/* ---------- debts: interest, extra repayments, repayment plan ---------- */
+const r2 = v => Math.round(v*100)/100;
+function debtExtras(d){ return (Array.isArray(d.extra)?d.extra:[]).filter(x=>x && Number(x.a)>0); }
+function debtPlan(d){ return (Array.isArray(d.plan)?d.plan:[]).filter(r=>r && /^\d{4}-\d{2}$/.test(r.ym)).sort((a,b)=>a.ym.localeCompare(b.ym)); }
+// what was paid on the debt in a month: the ticked rate, or (if switched on) the planned rate even without a tick
+function debtPayment(d, f, ym, cur){
+  const m=S.months[ym];
+  if (m && m.paid && d.fixedId in m.paid) return Number(m.paid[d.fixedId])||0;
+  if (d.auto && f && ym<=cur && dueIn(f, ym)) return planAmt(f, ym);
+  return 0;
+}
 function debtState(d){
-  let paid=0;
-  if (d.fixedId){ for (const [ym,m] of Object.entries(S.months)){ if (ym>=(d.since||"0000-00") && m.paid && d.fixedId in m.paid) paid+=Number(m.paid[d.fixedId])||0; } }
-  const remaining=Math.max(0,(Number(d.start)||0)-paid);
-  const f=S.fixed.find(x=>x.id===d.fixedId); const rate=f?f.amount:0;
-  let freeAt=null; if (rate>0 && remaining>0) freeAt=shiftYm(ymOf(new Date()), Math.ceil(remaining/rate));
-  return { paid, remaining, rate, freeAt, pct: d.start>0 ? Math.min(1,paid/d.start) : 0 };
+  const cur=ymOf(new Date()), f=S.fixed.find(x=>x.id===d.fixedId), start=Number(d.start)||0;
+  const extras=debtExtras(d), extraSum=sum(extras,x=>Number(x.a)||0), plan=debtPlan(d), z=(Number(d.zins)||0)/100/12;
+  let bal, zinsSum=0, tilgSum=0, rate=f?listAmt(f,cur):0, zinsNow=0, freeAt=null, noCover=false, fromPlan=false;
+  if (plan.length){
+    // repayment plan (entered or uploaded): it says how much is left after each month
+    fromPlan=true;
+    const done=plan.filter(r=>r.ym<=cur), last=done[done.length-1];
+    const first=plan[0], startBal = first.rest!=null && first.tilg!=null ? Number(first.rest)+Number(first.tilg) : start;
+    zinsSum=sum(done,r=>Number(r.zins)||0);
+    if (last && last.rest!=null) bal=Number(last.rest); else bal=startBal-sum(done,r=>Number(r.tilg)||0);
+    bal=Math.max(0, bal-extraSum);
+    tilgSum=Math.max(0,startBal-bal);
+    const next=plan.find(r=>r.ym>cur) || last; if (next){ if (next.rate) rate=Number(next.rate); zinsNow=Number(next.zins)||0; }
+    const end=plan.find(r=>r.rest!=null && Number(r.rest)<=0.005) || plan[plan.length-1];
+    if (bal>0.005) freeAt=end.ym;
+    return { paid:r2(tilgSum), remaining:r2(bal), rate, zinsNow:r2(zinsNow), zinsSum:r2(zinsSum), extraSum:r2(extraSum), freeAt, end:d.end||"", fromPlan, noCover,
+      pct: (bal+tilgSum)>0 ? Math.min(1,tilgSum/(bal+tilgSum)) : 0 };
+  }
+  // no plan: the app counts month by month from the entered balance (interest on what is left, the rest of each rate repays)
+  bal=start; const since=d.since||cur;
+  let until=cur; if (d.fixedId) for (const [ym,m] of Object.entries(S.months)) if (ym>until && m.paid && d.fixedId in m.paid) until=ym;   // rates ticked ahead count too
+  const exBy={}; for (const x of extras){ const k=String(x.d||"").slice(0,7)||since; exBy[k]=(exBy[k]||0)+Number(x.a); }
+  for (let ym=since, n=0; ym<=until && n<600; ym=shiftYm(ym,1), n++){
+    const pay = d.fixedId ? debtPayment(d,f,ym,cur) : 0;
+    const zi = bal*z; zinsSum+=zi;
+    bal = bal + zi - pay - (exBy[ym]||0);
+    if (bal<=0){ bal=0; break; }
+  }
+  for (const [k,v] of Object.entries(exBy)) if (k<since || k>until) bal=Math.max(0,bal-v);   // extra repayments outside the counted months
+  tilgSum = Math.max(0, start-bal);
+  zinsNow = bal*z;
+  if (bal>0.005 && f){
+    // look ahead with the rate (incl. later price changes) until nothing is left
+    let b=bal, ym=cur, ok=false;
+    for (let n=0;n<600;n++){ ym=shiftYm(ym,1); if (!dueIn(f,ym)) { b+=b*z; continue; } const pay=listAmt(f,ym); const zi=b*z; if (pay<=zi+0.004){ noCover=true; break; } b=b+zi-pay; if (b<=0.005){ ok=true; break; } }
+    if (ok) freeAt=ym;
+  }
+  return { paid:r2(tilgSum), remaining:r2(bal), rate, zinsNow:r2(zinsNow), zinsSum:r2(zinsSum), extraSum:r2(extraSum), freeAt, end:d.end||"", fromPlan, noCover,
+    pct: start>0 ? Math.min(1,tilgSum/start) : 0 };
+}
+// repayment plan the app works out itself (to start from and then correct by hand)
+function makePlan(d){
+  const f=S.fixed.find(x=>x.id===d.fixedId), z=(Number(d.zins)||0)/100/12, out=[];
+  let b=Number(d.start)||0, ym=d.since||ymOf(new Date());
+  for (let n=0; n<480 && b>0.005; n++, ym=shiftYm(ym,1)){
+    const rate=f ? (dueIn(f,ym) ? listAmt(f,ym) : 0) : 0; if (!f || (rate<=b*z+0.004 && rate>0)) break;
+    const zi=r2(b*z); let pay=rate; if (pay>b+zi) pay=r2(b+zi);
+    const tilg=r2(pay-zi); b=r2(b-tilg);
+    out.push({ym, rate:r2(pay), zins:zi, tilg, rest:Math.max(0,b)});
+  }
+  return out;
+}
+/* reading a repayment plan from a file: CSV (also from Excel) or PDF from the bank */
+const PLAN_COLS = { ym:["datum","fälligkeit","faelligkeit","fällig","termin","monat","zahltag","zahlungsdatum","periode"], rate:["rate","monatsrate","annuität","annuitaet","zahlung","zahlbetrag","leistung","betrag"], zins:["zinsen","zins","zinsanteil","zinsbetrag"], tilg:["tilgung","tilgungsanteil","tilgungsbetrag"], rest:["restschuld","rest","restkapital","darlehensrest","saldo","restbetrag","offen","kapital"] };
+const MON_DE = {jan:1,feb:2,"mär":3,mar:3,apr:4,mai:5,jun:6,jul:7,aug:8,sep:9,okt:10,oct:10,nov:11,dez:12,dec:12};
+function planYm(s){
+  s=String(s||"").trim().toLowerCase(); let m;
+  if ((m=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})/))) return (m[3].length===2?"20"+m[3]:m[3])+"-"+pad(m[2]);
+  if ((m=s.match(/^(\d{4})-(\d{1,2})/))) return m[1]+"-"+pad(m[2]);
+  if ((m=s.match(/^(\d{1,2})[./](\d{4})$/))) return m[2]+"-"+pad(m[1]);
+  if ((m=s.match(/^([a-zäö]{3})[a-zäö]*\.?\s*(\d{2,4})$/)) && MON_DE[m[1]]) return (m[2].length===2?"20"+m[2]:m[2])+"-"+pad(MON_DE[m[1]]);
+  return null;
+}
+function planNum(s){ s=String(s||"").replace(/[€\s]|EUR/g,""); if (!/\d/.test(s)) return null; const v=parseBankAmt(s); return isFinite(v)?Math.abs(v):null; }
+function planFromTable(rows, startYm){
+  // rows: arrays of cells; the head row tells which column is what
+  let hi=-1, map=null;
+  for (let i=0;i<Math.min(rows.length,40);i++){ const h=rows[i].map(nrm); const mp={}; for (const [k,c] of Object.entries(PLAN_COLS)){ let j=-1; for (const w of c){ j=h.findIndex(x=>x===w); if (j>=0) break; } if (j<0) for (const w of c){ j=h.findIndex(x=>x.includes(w)); if (j>=0) break; } mp[k]=j; }
+    const idx=["rate","zins","tilg","rest"].map(k=>mp[k]).filter(j=>j>=0); const n=new Set(idx).size;
+    if (rows[i].length>=3 && n>=2 && n===idx.length){ hi=i; map=mp; break; } }
+  const out=[]; let idx=0;
+  for (const r of rows.slice(hi+1)){
+    let ym = map && map.ym>=0 ? planYm(r[map.ym]) : null; if (!ym) ym = r.map(planYm).find(Boolean) || null;
+    const nums = map ? null : r.map(planNum).filter(v=>v!=null);
+    let row;
+    if (map){ const g=k=> map[k]>=0 ? planNum(r[map[k]]) : null; row={rate:g("rate"), zins:g("zins"), tilg:g("tilg"), rest:g("rest")}; }
+    else row=planGuess(nums);
+    if (!row || [row.rate,row.zins,row.tilg,row.rest].filter(v=>v!=null).length<2) continue;
+    if (!ym){ if (!startYm) continue; ym=shiftYm(startYm, idx); }
+    idx++;
+    if (row.rate==null && row.zins!=null && row.tilg!=null) row.rate=r2(row.zins+row.tilg);
+    if (row.tilg==null && row.rate!=null && row.zins!=null) row.tilg=r2(row.rate-row.zins);
+    if (row.zins==null && row.rate!=null && row.tilg!=null) row.zins=r2(row.rate-row.tilg);
+    out.push({ym, ...row});
+  }
+  return out;
+}
+// without a head row: amounts in a line are usually  rate, interest, repayment, rest  (the app checks which two add up)
+function planGuess(a){
+  if (!a || a.length<3) return null;
+  a=a.slice(-4);
+  if (a.length===4){ const [p,q,r,t]=a; if (Math.abs(q+r-p)<0.02) return {rate:p,zins:q,tilg:r,rest:t}; if (Math.abs(p+q-r)<0.02) return {rate:r,zins:p,tilg:q,rest:t}; if (Math.abs(p+r-q)<0.02) return {rate:q,zins:p,tilg:r,rest:t}; return {rate:p,zins:q,tilg:r,rest:t}; }
+  const [p,q,r]=a; if (Math.abs(p+q-r)<0.02) return {zins:p,tilg:q,rate:r,rest:null}; return {zins:p,tilg:q,rest:r,rate:r2(p+q)};
+}
+async function loadPlanFile(file, d){
+  let rows;
+  if (/\.pdf$/i.test(file.name||"") || file.type==="application/pdf"){
+    const lines=await pdfLines(await file.arrayBuffer());
+    rows=lines.map(l=>l.cells.map(c=>c.s));
+  } else rows=parseCSV(await readFileText(file));
+  return planFromTable(rows, d.since||ymOf(new Date()));
 }
 function est(x){
   x=Math.floor(Math.max(0,x));
@@ -1440,22 +1548,56 @@ function renderYear(){
 function niceMax(v){ if (v<=0) return 100; const p=Math.pow(10,Math.floor(Math.log10(v))), n=v/p; return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; }
 function shortK(v){ return v>=1000 ? (Math.round(v/100)/10).toString().replace(".",",")+"k" : String(Math.round(v)); }
 
+function debtLine(d,s){
+  if (s.remaining<=0.005) return `<b class="pos">Abbezahlt</b>`;
+  const a=[];
+  a.push(s.rate?`${eur(s.rate)} pro Monat${s.zinsNow>0?` (davon ${eur(s.zinsNow)} Zinsen)`:""}`:"Keine Rate verknüpft");
+  if (s.noCover) a.push(`⚠ Die Rate deckt nicht einmal die Zinsen`);
+  else if (s.freeAt) a.push(`schuldenfrei ${s.fromPlan?"laut Plan":"ca."} ${monthName(s.freeAt)}`);
+  if (s.end){ a.push(`Vertrag bis ${monthName(s.end)}`); if (s.freeAt && !s.fromPlan && s.freeAt>s.end) a.push(`⚠ mit der Rate später fertig als im Vertrag`); }
+  if (s.paid) a.push(`${eur(s.paid)} getilgt`);
+  if (s.zinsSum>0) a.push(`${eur(s.zinsSum)} Zinsen bisher`);
+  if (s.extraSum>0) a.push(`davon ${eur(s.extraSum)} Sondertilgung`);
+  return esc(a.join(" · "));
+}
+function planEditor(d, plan){
+  const n=v=>v==null?"":esc(numStr(v)), cur=ymOf(new Date());
+  let from=0, to=plan.length;
+  if (!UI.planAll && plan.length>14){ const i=plan.findIndex(r=>r.ym>=cur); from=Math.max(0, (i<0?plan.length:i)-2); to=Math.min(plan.length, from+12); }
+  const rows=plan.map((r,i)=>[r,i]).slice(from,to);
+  return `<div style="overflow-x:auto;margin-top:10px"><table class="plantbl" style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr><th style="text-align:left">Monat</th><th>Rate</th><th>Zinsen</th><th>Tilgung</th><th>Restschuld</th><th></th></tr></thead><tbody>
+    ${rows.map(([r,i])=>`<tr data-prow="${i}" style="${r.ym===cur?"background:var(--accent-soft)":""}"><td><input class="in" data-pf="ym" value="${esc(r.ym.slice(5)+"/"+r.ym.slice(0,4))}" style="text-align:left;min-width:86px" aria-label="Monat"></td><td><input class="in" data-pf="rate" inputmode="decimal" value="${n(r.rate)}"></td><td><input class="in" data-pf="zins" inputmode="decimal" value="${n(r.zins)}"></td><td><input class="in" data-pf="tilg" inputmode="decimal" value="${n(r.tilg)}"></td><td><input class="in" data-pf="rest" inputmode="decimal" value="${n(r.rest)}"></td><td><button class="icon-btn" data-prdel="${i}" aria-label="Zeile löschen">×</button></td></tr>`).join("")}
+    </tbody></table></div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="chip" data-pradd="${esc(d.id)}">+ Zeile</button>${plan.length>14?`<button class="chip" data-prall="1">${UI.planAll?"Nur Ausschnitt zeigen":`Alle ${plan.length} Raten zeigen`}</button>`:""}</div>`;
+}
 function renderMore(){
   if (!(UI.debtEdit && $("debtCard").contains(document.activeElement) && document.activeElement.tagName!=="BUTTON")){
     const total = sum(S.debts,d=>debtState(d).remaining);
     const fxOpts = sel => `<option value="">– keine –</option>`+fixedSorted().map(f=>`<option value="${esc(f.id)}" ${f.id===sel?"selected":""}>${esc(f.name)} (${esc(eur(f.amount))})</option>`).join("");
     if (UI.debtEdit){
       $("debtCard").innerHTML = `<div class="card-head"><h2>Schulden bearbeiten</h2><button class="btn primary" id="debtDone">Fertig</button></div>
-        <p class="small muted" style="margin:-4px 0 6px">„Stand“ ist der Betrag zum angegebenen Monat. Jede abgehakte Rate der verknüpften Fixkosten wird ab dann abgezogen.</p>
-        ${S.debts.map(d=>`<div class="debt" data-did="${esc(d.id)}" style="display:flex;flex-direction:column;gap:10px">
+        <p class="small muted" style="margin:-4px 0 6px">„Stand“ ist der Betrag zum angegebenen Monat. Jede Rate der verknüpften Fixkosten wird ab dann abgezogen – mit Zinssatz teilt die App sie in Zinsen und Tilgung auf. Hast du einen Tilgungsplan der Bank, lade ihn hoch oder trag ihn ein: dann rechnet die App genau damit.</p>
+        ${S.debts.map(d=>{ const s=debtState(d), plan=debtPlan(d), ex=debtExtras(d); return `<div class="debt" data-did="${esc(d.id)}" style="display:flex;flex-direction:column;gap:10px">
           <div class="grid2"><div class="field"><label for="dn-${esc(d.id)}">Name</label><input class="in" id="dn-${esc(d.id)}" data-df="name" value="${esc(d.name)}"></div><div class="field"><label for="ds-${esc(d.id)}">Stand (€)</label><input class="in" id="ds-${esc(d.id)}" data-df="start" inputmode="decimal" value="${esc(numStr(d.start))}"></div></div>
           <div class="grid2"><div class="field"><label for="dm-${esc(d.id)}">Stand vom Monat</label><input class="in" type="month" id="dm-${esc(d.id)}" data-df="since" value="${esc(d.since||"")}"></div><div class="field"><label for="df-${esc(d.id)}">Rate aus Fixkosten</label><select class="in" id="df-${esc(d.id)}" data-df="fixedId">${fxOpts(d.fixedId)}</select></div></div>
-          <div><button class="btn danger" data-ddel="${esc(d.id)}">Löschen</button></div></div>`).join("")}
+          <div class="grid2"><div class="field"><label for="dz-${esc(d.id)}">Zinssatz (% im Jahr)</label><input class="in" id="dz-${esc(d.id)}" data-df="zins" inputmode="decimal" placeholder="0 = zinslos" value="${d.zins?esc(numStr(d.zins)):""}"></div><div class="field"><label for="de-${esc(d.id)}">Laufzeit laut Vertrag bis</label><input class="in" type="month" id="de-${esc(d.id)}" data-df="end" value="${esc(d.end||"")}"></div></div>
+          <div class="switch" style="padding:4px 0"><label for="da-${esc(d.id)}"><b>Raten auch ohne Abhaken zählen</b><br><span class="small muted">Für Raten, die sicher jeden Monat abgebucht werden</span></label><input type="checkbox" id="da-${esc(d.id)}" data-df="auto" ${d.auto?"checked":""}></div>
+          <div class="field"><label>Sondertilgungen</label>
+            ${ex.length?ex.map((x,i)=>`<div class="meta-row" style="padding:4px 0"><span>${esc(x.d?shortDate(x.d):"")}${x.note?" · "+esc(x.note):""}</span><span style="display:flex;gap:8px;align-items:center"><b>${esc(eur(x.a))}</b><button class="icon-btn" data-dexdel="${esc(d.id)}|${i}" aria-label="Sondertilgung löschen">×</button></span></div>`).join(""):`<span class="small muted">Noch keine</span>`}
+            ${UI.extraAdd===d.id?`<div class="grid2" style="margin-top:6px"><input class="in" type="date" id="dxd-${esc(d.id)}" value="${esc(isoOf(new Date()))}" aria-label="Datum"><input class="in" id="dxa-${esc(d.id)}" inputmode="decimal" placeholder="Betrag €" aria-label="Betrag"></div><div class="row-btns" style="margin-top:6px"><button class="btn" data-dexcancel="1">Abbrechen</button><button class="btn primary" data-dexsave="${esc(d.id)}">Speichern</button></div>`
+              :`<div><button class="chip" data-dexadd="${esc(d.id)}" style="margin-top:6px">+ Sondertilgung</button></div>`}
+          </div>
+          <div class="field"><label>Tilgungsplan</label>
+            <span class="small muted">${plan.length?`${plan.length} Raten von ${esc(monthName(plan[0].ym))} bis ${esc(monthName(plan[plan.length-1].ym))} – die App rechnet mit diesem Plan.`:"Kein Plan – die App rechnet selbst mit Rate und Zinssatz."}</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="chip" data-dplanload="${esc(d.id)}">Plan hochladen (CSV/PDF)</button>${plan.length?`<button class="chip" data-dplanedit="${esc(d.id)}">${UI.planEdit===d.id?"Plan zuklappen":"Plan ansehen & ändern"}</button><button class="chip" data-dplandel="${esc(d.id)}">Plan löschen</button>`:`<button class="chip" data-dplanmake="${esc(d.id)}">Plan selbst eintragen</button>`}</div>
+            ${UI.planEdit===d.id&&plan.length?planEditor(d,plan):""}
+          </div>
+          <div><button class="btn danger" data-ddel="${esc(d.id)}">Löschen</button></div></div>`; }).join("")}
         <button class="btn" id="debtAdd" style="margin-top:12px">+ Schuld hinzufügen</button>`;
     } else {
       $("debtCard").innerHTML = `<div class="card-head"><h2>Schulden</h2><button class="link" id="debtEditBtn">Bearbeiten</button></div>
         ${S.debts.length?`<div class="eyebrow">Insgesamt offen</div><div style="font-family:var(--f-display);font-weight:800;font-size:30px;letter-spacing:-.03em;margin:2px 0 14px">${esc(eur(total))}</div>
-        ${S.debts.map(d=>{const s=debtState(d); return `<div class="debt"><div class="debt-top"><span>${esc(d.name)}</span><span>${esc(eur(s.remaining))}</span></div><div class="track" style="margin:8px 0 6px;height:9px"><div class="fill" style="width:${s.pct*100}%;background:var(--accent)"></div></div><div class="small muted">${s.remaining===0?`<b class="pos">Abbezahlt</b>`:`${s.rate?`${esc(eur(s.rate))} pro Monat`:"Keine Rate verknüpft"}${s.freeAt?` · schuldenfrei ca. ${esc(monthName(s.freeAt))}`:""}`}${s.paid?` · ${esc(eur(s.paid))} getilgt`:""}</div></div>`;}).join("")}`
+        ${S.debts.map(d=>{const s=debtState(d); return `<div class="debt"><div class="debt-top"><span>${esc(d.name)}</span><span>${esc(eur(s.remaining))}</span></div><div class="track" style="margin:8px 0 6px;height:9px"><div class="fill" style="width:${s.pct*100}%;background:var(--accent)"></div></div><div class="small muted">${debtLine(d,s)}</div></div>`;}).join("")}`
         : emptyState("piggy","Keine Schulden eingetragen","")}`;
     }
   }
@@ -1658,6 +1800,28 @@ document.addEventListener("click", async e => {
   const fxd = t.closest("[data-fxdel]"); if (fxd){ const f=S.fixed.find(x=>x.id===fxd.dataset.fxdel); const prev=f?(({id:_,...r})=>r)(f):null; if (await safe(()=>del("fixed", fxd.dataset.fxdel))) toast("Gelöscht", prev?()=>safe(()=>put("fixed", f.id, prev)):null); return; }
   if (t.closest("#debtEditBtn")){ UI.debtEdit=true; renderMore(); return; }
   if (t.closest("#debtDone")){ UI.debtEdit=false; renderMore(); return; }
+  const dx=t.closest("[data-dexadd]"); if (dx){ UI.extraAdd=dx.dataset.dexadd; renderMore(); const a=$("dxa-"+UI.extraAdd); if (a) a.focus(); return; }
+  if (t.closest("[data-dexcancel]")){ UI.extraAdd=null; renderMore(); return; }
+  const dxs=t.closest("[data-dexsave]"); if (dxs){ const id=dxs.dataset.dexsave, o=S.debts.find(x=>x.id===id); if (!o) return;
+    const v=parseAmt(($("dxa-"+id)||{}).value||""), dt=($("dxd-"+id)||{}).value||isoOf(new Date()); if (!(v>0)){ toast("Bitte einen Betrag eingeben"); return; }
+    const d={...o}; delete d.id; d.extra=[...debtExtras(o), {d:dt, a:r2(v)}].sort((a,b)=>String(a.d).localeCompare(String(b.d))); UI.extraAdd=null;
+    if (await safe(()=>put("debts", id, d))) toast(`Sondertilgung ${eur(v)} eingetragen`); return; }
+  const dxd=t.closest("[data-dexdel]"); if (dxd){ const [id,i]=dxd.dataset.dexdel.split("|"), o=S.debts.find(x=>x.id===id); if (!o) return;
+    const d={...o}; delete d.id; const prev=clone(d); d.extra=debtExtras(o).filter((_,j)=>j!==Number(i)); if (await safe(()=>put("debts", id, d))) toast("Gelöscht", ()=>safe(()=>put("debts", id, prev))); return; }
+  const pl=t.closest("[data-dplanload]"); if (pl){ UI.planFor=pl.dataset.dplanload; $("planFile").click(); return; }
+  if (t.closest("[data-prall]")){ UI.planAll=!UI.planAll; renderMore(); return; }
+  const pe=t.closest("[data-dplanedit]"); if (pe){ UI.planEdit = UI.planEdit===pe.dataset.dplanedit ? null : pe.dataset.dplanedit; renderMore(); return; }
+  const pm=t.closest("[data-dplanmake]"); if (pm){ const id=pm.dataset.dplanmake, o=S.debts.find(x=>x.id===id); if (!o) return;
+    let plan=makePlan(o); if (!plan.length) plan=[{ym:o.since||ymOf(new Date()), rate:null, zins:null, tilg:null, rest:Number(o.start)||null}];
+    const d={...o}; delete d.id; d.plan=plan; UI.planEdit=id; if (await safe(()=>put("debts", id, d))) toast(plan.length>1?`Plan mit ${plan.length} Raten vorgerechnet – jetzt nach Bedarf anpassen`:"Trag die Raten aus deinem Vertrag ein"); return; }
+  const pdl=t.closest("[data-dplandel]"); if (pdl){ const id=pdl.dataset.dplandel, o=S.debts.find(x=>x.id===id); if (!o) return;
+    const d={...o}; delete d.id; const prev=clone(d); delete d.plan; UI.planEdit=null; if (await safe(()=>put("debts", id, d))) toast("Plan gelöscht", ()=>safe(()=>put("debts", id, prev))); return; }
+  const pa=t.closest("[data-pradd]"); if (pa){ const id=pa.dataset.pradd, o=S.debts.find(x=>x.id===id); if (!o) return;
+    const plan=debtPlan(o), last=plan[plan.length-1]; const z=(Number(o.zins)||0)/100/12;
+    const row = last ? (()=>{ const rate=last.rate||0, zi=r2((Number(last.rest)||0)*z), tilg=r2(Math.min(rate-zi, Number(last.rest)||0)); return {ym:shiftYm(last.ym,1), rate, zins:zi, tilg, rest:r2(Math.max(0,(Number(last.rest)||0)-tilg))}; })() : {ym:ymOf(new Date()), rate:null, zins:null, tilg:null, rest:null};
+    const d={...o}; delete d.id; d.plan=[...plan,row]; await safe(()=>put("debts", id, d)); return; }
+  const prd=t.closest("[data-prdel]"); if (prd){ const id=prd.closest("[data-did]").dataset.did, o=S.debts.find(x=>x.id===id); if (!o) return;
+    const d={...o}; delete d.id; d.plan=debtPlan(o).filter((_,j)=>j!==Number(prd.dataset.prdel)); if (!d.plan.length) delete d.plan; await safe(()=>put("debts", id, d)); return; }
   if (t.closest("#debtAdd")){ await safe(()=>put("debts", newId(), {name:"Neue Schuld", start:0, since:ymOf(new Date()), fixedId:""})); return; }
   const dd = t.closest("[data-ddel]"); if (dd){ const d=S.debts.find(x=>x.id===dd.dataset.ddel); const prev=d?(({id:_,...r})=>r)(d):null; if (await safe(()=>del("debts", dd.dataset.ddel))) toast("Gelöscht", prev?()=>safe(()=>put("debts", d.id, prev)):null); return; }
   const cdel = t.closest("[data-catdel]"); if (cdel){ const [k,n]=cdel.dataset.catdel.split("|"); const c=clone(S.settings.cats||DEFAULT_SETTINGS.cats); c[k]=c[k].filter(x=>(typeof x==="string"?x:x.name)!==n); S.settings.cats=c; render(); saveSettings(); return; }
@@ -1987,10 +2151,19 @@ $("v-fix").addEventListener("change", async e => {
   await safe(()=>put("fixed", id, d));
 });
 $("debtCard").addEventListener("change", async e => {
+  const pc=e.target.closest("[data-pf]");
+  if (pc){ const id=pc.closest("[data-did]").dataset.did, o=S.debts.find(x=>x.id===id); if (!o) return;
+    const plan=debtPlan(o).map(r=>({...r})), i=Number(pc.closest("[data-prow]").dataset.prow), k=pc.dataset.pf;
+    if (k==="ym"){ const ym=planYm(pc.value); if (!ym){ toast("Monat bitte als MM/JJJJ, z. B. 03/2027"); return; } plan[i].ym=ym; }
+    else { const raw=pc.value.trim(); if (raw===""){ plan[i][k]=null; } else { const v=parseAmt(raw); if (!(v>=0)){ toast("Betrag ungültig"); return; } plan[i][k]=r2(v); } }
+    const d={...o}; delete d.id; d.plan=plan; await safe(()=>put("debts", id, d)); return; }
   const el=e.target.closest("[data-df]"); if (!el) return;
   const id=el.closest("[data-did]").dataset.did, o=S.debts.find(x=>x.id===id); if (!o) return;
   const d={...o}; delete d.id; const k=el.dataset.df;
-  if (k==="start"){ const v=parseAmt(el.value); if (!(v>=0)){ toast("Betrag ungültig"); return; } d.start=Math.round(v*100)/100; } else d[k]=el.value.trim();
+  if (k==="start"){ const v=parseAmt(el.value); if (!(v>=0)){ toast("Betrag ungültig"); return; } d.start=Math.round(v*100)/100; }
+  else if (k==="zins"){ const raw=el.value.trim(); const v=raw===""?0:parseAmt(raw); if (!(v>=0 && v<100)){ toast("Zinssatz ungültig"); return; } d.zins=v; }
+  else if (k==="auto") d.auto=el.checked;
+  else d[k]=el.value.trim();
   await safe(()=>put("debts", id, d));
 });
 function bindNum(id, apply){
@@ -2038,7 +2211,10 @@ function parseCSV(text){
   text = text.replace(/^﻿/,"");
   // some banks put a few info lines before the table: pick the separator that splits the busiest of the first lines best
   const head = text.split(/\r?\n/).filter(l=>l.trim()).slice(0,15);
-  const delim = [",",";","\t"].map(d=>[d, Math.max(...head.map(l=>l.split(d).length))]).sort((a,b)=>b[1]-a[1])[0][0];
+  // count fields outside quotes; the separator that gives the most lines with the same number of fields wins (";" before tab before ",": German files use "," inside amounts)
+  const fields=(l,d)=>{ let n=1,q=false; for (const ch of l){ if (ch==='"') q=!q; else if (ch===d && !q) n++; } return n; };
+  const delim = [";","\t",","].map((d,i)=>{ const cnt={}; for (const l of head){ const n=fields(l,d); if (n>1) cnt[n]=(cnt[n]||0)+1; } const best=Object.entries(cnt).sort((x,y)=>y[1]-x[1]||y[0]-x[0])[0]; return [d, best?best[1]:0, best?Number(best[0]):0, -i]; })
+    .sort((x,y)=>y[1]-x[1] || y[2]-x[2] || y[3]-x[3])[0][0];
   const rows=[]; let row=[], f="", q=false;
   for (let i=0;i<text.length;i++){
     const ch=text[i];
@@ -2506,6 +2682,17 @@ document.addEventListener("click", e => {
   if (e.target.closest("#rulesReset")){ const b=e.target.closest("#rulesReset"); if (b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Wirklich zurücksetzen?"; setTimeout(()=>{ b.dataset.armed=""; b.textContent="Zurücksetzen"; },3000); return; } S.settings.rules=[]; S.settings.ignoredKeys=[]; saveSettings(); renderMore(); toast("Gemerkte Zuordnungen gelöscht"); }
 });
 $("csvFile").addEventListener("change", e => { const f=e.target.files[0]; e.target.value=""; loadCsv(f); });
+$("planFile").addEventListener("change", async e => {
+  const file=e.target.files[0]; e.target.value=""; const o=S.debts.find(x=>x.id===UI.planFor); if (!file || !o) return;
+  if (file.size>15*1024*1024){ toast("Die Datei ist zu groß"); return; }
+  toast("Tilgungsplan wird gelesen …");
+  let plan; try { plan=await loadPlanFile(file, o); } catch(err){ toast(err && /PDF-Leser/.test(err.message) ? err.message : "Die Datei konnte nicht gelesen werden"); return; }
+  if (!plan.length){ toast("Im Plan wurden keine Raten erkannt. Du kannst ihn auch selbst eintragen."); return; }
+  const d={...o}; delete d.id; const prev=clone(d); d.plan=plan;
+  if (plan[0].rest!=null) { d.start=r2(Number(plan[0].rest)+(Number(plan[0].tilg)||0)); d.since=plan[0].ym; }   // the plan knows the starting balance
+  UI.planEdit=o.id;
+  if (await safe(()=>put("debts", o.id, d))) toast(`${plan.length} Raten übernommen`, ()=>safe(()=>put("debts", o.id, prev)));
+});
 $("v-import").addEventListener("change", e => {
   const imp=UI.imp; if (!imp) return;
   const mp=e.target.closest("[data-map]"); if (mp){ imp.map[mp.dataset.map]=Number(mp.value); buildItems(); renderImport(); return; }
