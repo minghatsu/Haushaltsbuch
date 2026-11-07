@@ -433,13 +433,31 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
         <div class="field"><label for="sKUlimit">Umsatzgrenze Kleinunternehmer (€)</label><input class="in" id="sKUlimit" inputmode="decimal"></div>
         <div class="field"><label for="sVat">Umsatzsteuersatz (%)</label><input class="in" id="sVat" inputmode="decimal"></div>
       </div>
-      <div class="section-title">Steuerschätzung</div>
+      <div class="section-title">Steuer</div>
       <div class="grid2 stack">
-        <div class="field"><label for="sVors">Vorsorgeaufwendungen pro Jahr (€)</label><input class="in" id="sVors" inputmode="decimal"></div>
-        <div class="field"><label for="sAbz">Sonstige Abzüge pro Jahr (€)</label><input class="in" id="sAbz" inputmode="decimal"></div>
+        <div class="field"><label for="sKlasse">Steuerklasse</label><select class="in" id="sKlasse">
+          <option value="1">I – ledig, geschieden</option><option value="2">II – alleinerziehend</option><option value="3">III – verheiratet, mehr Einkommen</option>
+          <option value="4">IV – verheiratet, ähnliches Einkommen</option><option value="5">V – verheiratet, weniger Einkommen</option><option value="6">VI – Zweitjob</option></select></div>
+        <div class="field"><label for="sKinder">Kinderfreibeträge</label><select class="in" id="sKinder"><option value="0">keine</option><option value="0.5">0,5</option><option value="1">1</option><option value="1.5">1,5</option><option value="2">2</option><option value="2.5">2,5</option><option value="3">3</option><option value="3.5">3,5</option><option value="4">4</option><option value="5">5</option></select></div>
       </div>
-      <div class="switch"><label for="sSplit"><b>Zusammenveranlagung</b><br><span class="small muted">Splittingtarif mit Partner/in</span></label><input type="checkbox" id="sSplit"></div>
+      <div class="switch"><label for="sSplit"><b>Zusammenveranlagung</b><br><span class="small muted">Verheiratet, gemeinsame Steuererklärung (Splitting)</span></label><input type="checkbox" id="sSplit"></div>
       <div class="field" id="partnerField"><label for="sPartner">Zu versteuerndes Einkommen Partner/in (€ pro Jahr)</label><input class="in" id="sPartner" inputmode="decimal"></div>
+      <div class="switch"><label for="sKirche"><b>Kirchensteuer</b><br><span class="small muted">Mitglied einer Kirche, die Kirchensteuer erhebt</span></label><input type="checkbox" id="sKirche"></div>
+      <div class="field"><label for="sLand">Bundesland</label><select class="in" id="sLand"></select></div>
+      <div class="section-title" style="font-size:14px">Angestellt <span class="small muted" id="sLohnYear"></span></div>
+      <div class="grid2 stack">
+        <div class="field"><label for="sLohn">Bruttolohn im Jahr (€)</label><input class="in" id="sLohn" inputmode="decimal" placeholder="0 = nicht angestellt"></div>
+        <div class="field"><label for="sLSt">Lohnsteuer im Jahr laut Abrechnung (€)</label><input class="in" id="sLSt" inputmode="decimal" placeholder="leer = schätzen"></div>
+      </div>
+      <div class="field"><label for="sWK">Werbungskosten aus dem Job (€ pro Jahr)</label><input class="in" id="sWK" inputmode="decimal" placeholder="1.230 (Pauschale)"></div>
+      <div class="section-title" style="font-size:14px">Selbstständig</div>
+      <div class="switch"><label for="sGew"><b>Gewerbe</b><br><span class="small muted">Aus: Freiberufler (keine Gewerbesteuer)</span></label><input type="checkbox" id="sGew"></div>
+      <div class="field" id="hebeField"><label for="sHebe">Gewerbesteuer-Hebesatz deiner Gemeinde (%)</label><input class="in" id="sHebe" inputmode="decimal" placeholder="z. B. 400"></div>
+      <div class="section-title" style="font-size:14px">Abzüge</div>
+      <div class="grid2 stack">
+        <div class="field"><label for="sVors">Vorsorge pro Jahr (€)</label><input class="in" id="sVors" inputmode="decimal" placeholder="Kranken-, Pflege-, Rentenversicherung"></div>
+        <div class="field"><label for="sAbz">Sonstige Abzüge pro Jahr (€)</label><input class="in" id="sAbz" inputmode="decimal" placeholder="Spenden, Kinderbetreuung …"></div>
+      </div>
       <div class="section-title">Kategorien</div>
       <div class="field"><label>Ausgaben privat</label><div class="chips" id="catEd-ausgabe"></div></div>
       <div class="field"><label>Monatsbudgets</label><span class="small muted" style="margin-top:-2px">Wie viel du pro Monat höchstens ausgeben willst. Ab 80 % warnt die Startseite. Leer lassen = kein Budget.</span><div id="budgetEd"></div></div>
@@ -823,15 +841,60 @@ function est(x){
   return Math.floor(0.45*x-19470.38);
 }
 const estSplit = x => 2*est(x/2);
+/* ---------- income tax estimate 2026 (ESt, Soli, Kirchensteuer, Gewerbesteuer) ---------- */
+const TAX26 = { kinderFB:9756, kindergeld:3108, soliFG:20350, anPausch:1230, sonderPausch:36, entlastung:4260, entlastungKind:240, gewFB:24500, bbgKV:69750, bbgRV:101400 };
+const LAENDER = [["BW","Baden-Württemberg"],["BY","Bayern"],["BE","Berlin"],["BB","Brandenburg"],["HB","Bremen"],["HH","Hamburg"],["HE","Hessen"],["MV","Mecklenburg-Vorpommern"],["NI","Niedersachsen"],["NW","Nordrhein-Westfalen"],["RP","Rheinland-Pfalz"],["SL","Saarland"],["SN","Sachsen"],["ST","Sachsen-Anhalt"],["SH","Schleswig-Holstein"],["TH","Thüringen"]];
+const kistRate = () => ["BY","BW"].includes(S.settings.land||"NW") ? 0.08 : 0.09;
+function soliOf(t, joint){ const fg=TAX26.soliFG*(joint?2:1); return t<=fg ? 0 : Math.min(t*0.055, (t-fg)*0.119); }
+// Steuerklasse V/VI (§39b): twice the difference of the tariff at 125 % and 75 %, at least 14 %
+function est56(x){ x=Math.max(0,x); return Math.max(Math.floor(2*(est(1.25*x)-est(0.75*x))), Math.floor(x*0.14)); }
+// rough yearly Lohnsteuer from gross pay and tax class (only used when nothing from the payslip is entered)
+function lstEstimate(brutto, kl){
+  if (!(brutto>0)) return 0;
+  const vp = Math.min(brutto,TAX26.bbgRV)*0.093 + Math.min(brutto,TAX26.bbgKV)*0.1055;   // Vorsorgepauschale (RV, KV, PV)
+  const zv = Math.max(0, brutto - vp - (kl===6 ? 0 : TAX26.anPausch + TAX26.sonderPausch));
+  if (kl===3) return estSplit(zv);
+  if (kl===2) return est(zv-TAX26.entlastung);
+  if (kl===5 || kl===6) return est56(zv);
+  return est(zv);
+}
+// tariff incl. Progressionsvorbehalt, children (allowance vs. Kindergeld), Gewerbesteuer credit, Soli and church tax
+function estFull(zve, joint, z, ersatz, anrMax){
+  const T = x => joint ? estSplit(x) : est(x);
+  const tarif = x => { const b=x+ersatz; return (x>0 && b>0) ? Math.floor(x*(T(b)/b)) : 0; };
+  const kfb=z*TAX26.kinderFB, kg=z*TAX26.kindergeld;
+  const t0=tarif(zve), t1=tarif(Math.max(0,zve-kfb)), useFB = z>0 && t0-t1>kg;
+  let e = useFB ? t1+Math.round(kg) : t0;
+  const anr = Math.min(anrMax||0, e); e -= anr;
+  const base = Math.max(0, t1-anr);                        // Soli and church tax are always based on the tax with child allowances
+  const soli = Math.round(soliOf(base, joint)*100)/100, kist = S.settings.kirche ? Math.round(base*kistRate()*100)/100 : 0;
+  return { est:e, soli, kist, total:e+soli+kist, useFB, anr, kg };
+}
 function taxCalc(year){
   let self=0,betr=0,ersatz=0,vz=0,resIn=0;
   for (let i=1;i<=12;i++){ const c=monthCalc(year+"-"+pad(i)); self+=c.selfInc; betr+=c.bet+c.fixPaidBet; ersatz+=c.ersatz; vz+=c.vz; resIn+=c.reserve; }
-  const st=S.settings, gewinn=self-betr;
-  const zve=Math.max(0,gewinn-(Number(st.vorsorge)||0)-(Number(st.abzuege)||0));
-  let tax, partnerAlone=0, joint=null;
-  if (st.splitting){ const p=Number(st.partnerZvE)||0, tot=zve+p, base=tot+ersatz; joint=Math.floor(base>0?tot*(estSplit(base)/base):0); partnerAlone=est(p); tax=Math.max(0,joint-partnerAlone); }
-  else { const base=zve+ersatz; tax=base>0?Math.floor(zve*(est(base)/base)):0; }
-  return { self, betr, gewinn, zve, ersatz, tax, joint, partnerAlone, vz, resIn, resBal:Math.max(0,resIn-vz) };
+  const st=S.settings, joint=!!st.splitting, kl=Number(st.steuerklasse)||1, z=Number(st.kinder)||0, ly=(st.lohn||{})[year]||{};
+  const gewinn=self-betr;
+  const brutto=Number(ly.brutto)||0, wk=Math.max(TAX26.anPausch, Number(st.werbungskosten)||0), lohnEink=brutto>0?Math.max(0,brutto-wk):0;
+  const vorsorge=Number(st.vorsorge)||0, sonder=Math.max(TAX26.sonderPausch, Number(st.abzuege)||0);
+  const entl = kl===2 ? TAX26.entlastung + Math.max(0,Math.ceil(z)-1)*TAX26.entlastungKind : 0;
+  const zve = Math.max(0, gewinn + lohnEink - vorsorge - sonder - entl);
+  // Gewerbesteuer (only for a Gewerbe, not for Freiberufler) and its credit against the income tax (§35 EStG)
+  let gewst=0, anrMax=0;
+  if (st.gewerbe && gewinn>TAX26.gewFB){ const mb=Math.floor((gewinn-TAX26.gewFB)/100)*100*0.035; gewst=Math.round(mb*(Number(st.hebesatz)||400)/100*100)/100; anrMax=Math.min(4*mb, gewst); }
+  const partner = joint ? Math.max(0, Number(st.partnerZvE)||0) : 0;
+  const all = estFull(zve+partner, joint, z, ersatz, anrMax);
+  const pAlone = joint ? estFull(partner, false, 0, 0, 0) : {est:0,soli:0,kist:0,total:0};
+  const mine = { est:Math.max(0,all.est-pAlone.est), soli:Math.max(0,all.soli-pAlone.soli), kist:Math.max(0,all.kist-pAlone.kist) };
+  mine.total = mine.est+mine.soli+mine.kist;
+  // already paid: Lohnsteuer (+ Soli and church tax on it) and Vorauszahlungen
+  const lstEst = brutto>0 && !(ly.lst>=0 && ly.lst!=="" && ly.lst!=null);
+  const lst = brutto>0 ? (lstEst ? lstEstimate(brutto, kl) : Number(ly.lst)||0) : 0;
+  const soliL = Math.round(soliOf(lst, kl===3)*100)/100, kistL = st.kirche ? Math.round(lst*kistRate()*100)/100 : 0;
+  const paid = lst+soliL+kistL+vz;
+  const due = Math.round((mine.total-paid)*100)/100;        // > 0: Nachzahlung, < 0: Erstattung
+  return { self, betr, gewinn, brutto, wk, lohnEink, vorsorge, sonder, entl, zve, partner, ersatz, z, kl, joint,
+    all, pAlone, mine, tax:mine.total, gewst, anr:all.anr, lst, lstEst, soliL, kistL, vz, paid, due, resIn, resBal:Math.max(0,resIn-vz) };
 }
 
 /* ---------- render ---------- */
@@ -1080,7 +1143,7 @@ function renderYear(){
     svg+=`<rect x="${cx+1.5}" y="${sy(r.c.expenses)}" width="${bw}" height="${Math.max(0,H-pb-sy(r.c.expenses))}" fill="var(--c2)" rx="3"/>`;
     svg+=`<text x="${cx}" y="${H-6}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--muted)" font-family="Manrope, sans-serif">${MSHORT[idx]}</text>`; });
   svg+=`</svg>`;
-  const kuOver = self>(Number(st.kuLimit)||0), resCover = tax.resBal+tax.vz-tax.tax;
+  const kuOver = self>(Number(st.kuLimit)||0), resCover = tax.resBal-Math.max(0,tax.due)-tax.gewst;
   const incSum = name => sum(S.tx.filter(t=>t.kind==="einnahme"&&t.cat===name&&(t.date||"").startsWith(String(y))),t=>t.amount);
   $("v-year").innerHTML = `
     <div class="stat3">
@@ -1103,14 +1166,31 @@ function renderYear(){
       ${st.kleinunternehmer?`<div style="margin-top:16px"><div class="meta-row"><span>Umsatzgrenze</span><span><b>${esc(eur0(self))}</b> von ${esc(eur0(st.kuLimit))}</span></div><div class="progress-big"><div class="fill" style="width:${Math.min(100,self/(st.kuLimit||1)*100)}%;background:${kuOver?"var(--bad)":self/(st.kuLimit||1)>.8?"var(--warn)":"var(--accent)"}"></div></div>${kuOver?`<div class="notice bad">Grenze überschritten. Klär mit deinem Steuerbüro, ab wann du Umsatzsteuer berechnen musst.</div>`:""}</div>`
         :`<div class="notice warn" style="margin-top:14px"><span>Ans Finanzamt abzuführen: <b>${esc(eur(self*vat))}</b> Umsatzsteuer (ohne Vorsteuer gerechnet).</span></div>`}
     </div>
-    <div class="card half"><div class="card-head"><h2>Einkommensteuer ${y}</h2><span class="pill">Schätzung</span></div>
-      <div class="kv"><span>Gewinn</span><span>${esc(eur(tax.gewinn))}</span><span>− Vorsorge &amp; Abzüge</span><span>${esc(eur((Number(st.vorsorge)||0)+(Number(st.abzuege)||0)))}</span><span>Zu versteuerndes Einkommen</span><span>${esc(eur(tax.zve))}</span>
+    <div class="card half"><div class="card-head"><h2>Steuern ${y}</h2><span class="pill">Schätzung</span></div>
+      <div class="kv">
+        <span>Gewinn Selbstständigkeit</span><span>${esc(eur(tax.gewinn))}</span>
+        ${tax.brutto?`<span>Lohn ${esc(eur0(tax.brutto))} − Werbungskosten ${esc(eur0(tax.wk))}</span><span>${esc(eur(tax.lohnEink))}</span>`:""}
+        <span>− Vorsorge &amp; Sonderausgaben</span><span>− ${esc(eur(tax.vorsorge+tax.sonder))}</span>
+        ${tax.entl?`<span>− Entlastungsbetrag Alleinerziehende</span><span>− ${esc(eur(tax.entl))}</span>`:""}
+        <span class="sum">Zu versteuerndes Einkommen</span><span class="sum">${esc(eur(tax.zve))}</span>
         ${tax.ersatz?`<span>Lohnersatz (Progressionsvorbehalt)</span><span>${esc(eur(tax.ersatz))}</span>`:""}
-        ${st.splitting?`<span>Gemeinsame Steuer (Splitting)</span><span>${esc(eur(tax.joint))}</span><span>Steuer Partner/in allein</span><span>− ${esc(eur(tax.partnerAlone))}</span>`:""}
-        <span class="sum">Geschätzte Steuer für dich</span><span class="sum">${esc(eur(tax.tax))}</span>
-        <span>Rücklage gebildet</span><span>${esc(eur(tax.resIn))}</span><span>Schon vorausgezahlt</span><span>${esc(eur(tax.vz))}</span></div>
-      <div class="notice ${resCover>=0?"info":"bad"}" style="margin-top:14px"><span>${resCover>=0?`Deine Rücklage reicht. Puffer: <b>${esc(eur(resCover))}</b>`:`Es fehlen voraussichtlich <b>${esc(eur(-resCover))}</b>. Leg mehr zurück oder erhöhe die Rücklagenquote.`}</span></div>
-      <p class="small muted" style="margin:10px 0 0">Tarif 2026 nach §32a EStG, ohne Soli und Kirchensteuer. Ersetzt keine Steuerberatung.</p></div>
+        ${tax.joint?`<span>+ Partner/in (Splitting)</span><span>${esc(eur(tax.partner))}</span>`:""}
+        <span>Einkommensteuer${tax.joint?" (dein Anteil)":""}</span><span>${esc(eur(tax.mine.est))}</span>
+        ${tax.z?`<span class="small muted">Kinder: ${tax.all.useFB?"Freibetrag günstiger als Kindergeld":"Kindergeld günstiger"}</span><span></span>`:""}
+        ${tax.anr?`<span class="small muted">davon Gewerbesteuer angerechnet</span><span class="small muted">− ${esc(eur(tax.anr))}</span>`:""}
+        <span>Solidaritätszuschlag</span><span>${esc(eur(tax.mine.soli))}</span>
+        <span>Kirchensteuer${st.kirche?` (${Math.round(kistRate()*100)} %)`:""}</span><span>${esc(eur(tax.mine.kist))}</span>
+        ${st.gewerbe?`<span>Gewerbesteuer (Hebesatz ${esc(st.hebesatz||400)} %)</span><span>${esc(eur(tax.gewst))}</span>`:""}
+        <span class="sum">Steuern gesamt</span><span class="sum">${esc(eur(tax.mine.total+tax.gewst))}</span>
+        ${tax.brutto?`<span>− Lohnsteuer${tax.soliL||tax.kistL?" inkl. Soli/KiSt":""}${tax.lstEst?` <span class="small muted">(geschätzt, Klasse ${["","I","II","III","IV","V","VI"][tax.kl]})</span>`:""}</span><span>− ${esc(eur(tax.lst+tax.soliL+tax.kistL))}</span>`:""}
+        <span>− Schon vorausgezahlt</span><span>− ${esc(eur(tax.vz))}</span>
+        <span class="sum">${tax.due>=0?"Voraussichtliche Nachzahlung":"Voraussichtliche Erstattung"}</span><span class="sum ${tax.due>=0?"":"pos"}">${esc(eur(Math.abs(tax.due)))}</span>
+        ${st.gewerbe&&tax.gewst?`<span class="small muted">+ Gewerbesteuer an die Gemeinde</span><span class="small muted">${esc(eur(tax.gewst))}</span>`:""}
+      </div>
+      <div class="notice ${resCover>=0?"info":"bad"}" style="margin-top:14px"><span>${resCover>=0?`Deine Rücklage (${esc(eur(tax.resBal))}) reicht. Puffer: <b>${esc(eur(resCover))}</b>`:`Deine Rücklage (${esc(eur(tax.resBal))}) reicht voraussichtlich nicht – es fehlen <b>${esc(eur(-resCover))}</b>.`}</span></div>
+      ${[3,4,5].includes(tax.kl)&&!tax.joint?`<div class="notice warn" style="margin-top:10px"><span>Steuerklasse ${["","I","II","III","IV","V","VI"][tax.kl]} gibt es nur für Verheiratete – schalte unter Einstellungen „Zusammenveranlagung“ ein und trag das Einkommen deines Partners ein.</span></div>`:""}
+      ${tax.lstEst?`<div class="notice info" style="margin-top:10px"><span>Die Lohnsteuer ist aus Bruttolohn und Steuerklasse grob geschätzt. Genauer wird es mit dem Wert aus deiner Lohnabrechnung (Einstellungen › Steuer).</span></div>`:""}
+      <p class="small muted" style="margin:10px 0 0">Tarif 2026 nach §32a EStG mit Soli, Kirchensteuer, Kinderfreibetrag und Gewerbesteuer-Anrechnung. Grobe Schätzung ohne Vorsteuer und Sonderfälle – ersetzt keine Steuerberatung.</p></div>
     <div class="card" style="grid-column:1/-1"><div class="card-head"><h2>Für die Steuer</h2></div>
       <p class="small muted" style="margin:-6px 0 12px">Alle Einnahmen und Ausgaben deiner Selbstständigkeit ${y} als Liste für Steuerbüro oder ELSTER (Anlage EÜR) – mit Brutto, Umsatzsteuer und Netto, betrieblichen Fixkosten und Summen. Öffnet sich in Excel.</p>
       <button class="btn primary" id="euerBtn" data-year="${y}">EÜR ${y} exportieren</button></div>`;
@@ -1142,6 +1222,14 @@ function renderMore(){
   setVal("sStart", st.startBalance && y in st.startBalance ? numStr(st.startBalance[y]) : "");
   setVal("sRate",numStr(st.reserveRate)); setVal("sKUlimit",numStr(st.kuLimit)); setVal("sVat",numStr(st.vatRate));
   setVal("sVors",numStr(st.vorsorge)); setVal("sAbz",numStr(st.abzuege)); setVal("sPartner",numStr(st.partnerZvE));
+  if (!$("sLand").options.length) $("sLand").innerHTML = LAENDER.map(([k,n])=>`<option value="${k}">${n}</option>`).join("");
+  const ly=(st.lohn||{})[y]||{};
+  $("sLohnYear").textContent = "· "+y;
+  setVal("sLohn", ly.brutto?numStr(ly.brutto):""); setVal("sLSt", ly.lst!=null&&ly.lst!==""?numStr(ly.lst):""); setVal("sWK", st.werbungskosten?numStr(st.werbungskosten):""); setVal("sHebe", st.hebesatz?numStr(st.hebesatz):"");
+  if (document.activeElement!==$("sKlasse")) $("sKlasse").value=String(st.steuerklasse||1);
+  if (document.activeElement!==$("sKinder")) $("sKinder").value=String(st.kinder||0);
+  if (document.activeElement!==$("sLand")) $("sLand").value=st.land||"NW";
+  $("sKirche").checked=!!st.kirche; $("sGew").checked=!!st.gewerbe; $("hebeField").hidden=!st.gewerbe;
   $("rulesInfo").textContent = rulesInfoText();
   $("backupLoadRow").hidden = !LOCAL;
   renderSyncInfo();
@@ -1648,6 +1736,14 @@ bindNum("sStart",(v,raw)=>{ const y=UI.ym.slice(0,4); S.settings.startBalance={.
 bindNum("sRate",v=>S.settings.reserveRate=Math.min(100,Math.max(0,v)));
 bindNum("sKUlimit",v=>S.settings.kuLimit=v); bindNum("sVat",v=>S.settings.vatRate=v);
 bindNum("sVors",v=>S.settings.vorsorge=v); bindNum("sAbz",v=>S.settings.abzuege=v); bindNum("sPartner",v=>S.settings.partnerZvE=v);
+bindNum("sWK",v=>S.settings.werbungskosten=v);
+bindNum("sHebe",v=>S.settings.hebesatz=v);
+bindNum("sLohn",(v,raw)=>{ const y=UI.ym.slice(0,4), l={...(S.settings.lohn||{})}; l[y]={...(l[y]||{})}; if (raw==="") delete l[y].brutto; else l[y].brutto=Math.round(v*100)/100; S.settings.lohn=l; });
+bindNum("sLSt",(v,raw)=>{ const y=UI.ym.slice(0,4), l={...(S.settings.lohn||{})}; l[y]={...(l[y]||{})}; if (raw==="") delete l[y].lst; else l[y].lst=Math.round(v*100)/100; S.settings.lohn=l; });
+for (const [id,key,num] of [["sKlasse","steuerklasse",true],["sKinder","kinder",true],["sLand","land",false]])
+  $(id).addEventListener("change",e=>{ S.settings[key]= num ? Number(e.target.value) : e.target.value; render(); saveSettings(); toast("Gespeichert"); });
+$("sKirche").addEventListener("change",e=>{ S.settings.kirche=e.target.checked; render(); saveSettings(); });
+$("sGew").addEventListener("change",e=>{ S.settings.gewerbe=e.target.checked; render(); saveSettings(); });
 $("sKU").addEventListener("change",e=>{ S.settings.kleinunternehmer=e.target.checked; render(); saveSettings(); });
 $("sSplit").addEventListener("change",e=>{ S.settings.splitting=e.target.checked; render(); saveSettings(); });
 $("catEd-einnahme").addEventListener("change",e=>{ const el=e.target.closest("[data-incart]"); if (!el) return; const c=clone(S.settings.cats||DEFAULT_SETTINGS.cats); c.einnahme=c.einnahme.map(x=>{ const o=typeof x==="string"?{name:x,art:"sonstige"}:x; return o.name===el.dataset.incart?{...o,art:el.value}:o; }); S.settings.cats=c; render(); saveSettings(); });
