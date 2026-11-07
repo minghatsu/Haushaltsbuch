@@ -950,6 +950,13 @@ function brandFor(text){
   return null;
 }
 const logoUrl = d => "https://www.google.com/s2/favicons?sz=128&domain="+encodeURIComponent(d);
+/* some shops only give Google a logo under another host – try those, then DuckDuckGo */
+const LOGO_ALT = { "kaufland.de":["filiale.kaufland.de","www.kaufland.de","kaufland.com"], "rossmann.de":["www.rossmann.de","rossmann.com"] };
+const LOGO_VER = 2;
+function logoUrls(d){
+  const hosts=[d, ...(LOGO_ALT[d]||[]), ...(d.startsWith("www.")?[]:["www."+d])].filter((h,i,a)=>a.indexOf(h)===i);
+  return [...hosts.map(logoUrl), ...hosts.slice(0,2).map(h=>"https://icons.duckduckgo.com/ip3/"+encodeURIComponent(h)+".ico")];
+}
 /* logo images are downloaded once and kept on the device (IndexedDB), so they also show without internet */
 const LOGO = { db:null, map:new Map(), busy:new Set(), queue:[], running:0, tRender:null };
 function logoDb(){
@@ -969,10 +976,14 @@ async function fetchLogo(domain){
   if (!domain || LOGO.map.has(domain) || LOGO.busy.has(domain)) return;
   LOGO.busy.add(domain);
   try {
-    const data = await downloadImage(logoUrl(domain));
-    if (!data){ return; }                                   // offline or blocked: try again later
-    const w = await imgSize(data);
-    const v = { data: w>16 ? data : null, ts: Date.now() }; // the 16 px globe means "no logo known"
+    let got=null, any=false;
+    for (const u of logoUrls(domain)){
+      const data = await downloadImage(u); if (!data) continue; any=true;
+      const w=await imgSize(data);
+      if (w > 16 || (w > 0 && u.includes("duckduckgo"))){ got=data; break; }   // Google's 16 px globe means "no logo known"
+    }
+    if (!any){ return; }                                    // offline or blocked: try again later
+    const v = { data: got, ts: Date.now(), v: LOGO_VER };
     await logoStore("readwrite", st=>st.put(v, domain)); LOGO.map.set(domain, v);
     clearTimeout(LOGO.tRender); LOGO.tRender=setTimeout(()=>render(), 300);
   } catch(e){} finally { LOGO.busy.delete(domain); }
@@ -986,7 +997,7 @@ function prefetchLogos(){
   for (const t of S.tx){ const b=brandFor(t.note); if (b && b.domain) seen.add(b.domain); }
   for (const f of S.fixed){ const b=brandFor(f.name); if (b && b.domain) seen.add(b.domain); }
   for (const id of (S.settings.shops||[])) if (SHOP_DOMAINS[id]) seen.add(SHOP_DOMAINS[id]);
-  for (const d of seen){ const v=LOGO.map.get(d); if (!v || (!v.data && Date.now()-v.ts>30*864e5)){ LOGO.map.delete(d); queueLogo(d); } }
+  for (const d of seen){ const v=LOGO.map.get(d); if (!v || (!v.data && (v.v!==LOGO_VER || Date.now()-v.ts>30*864e5))){ LOGO.map.delete(d); queueLogo(d); } }
 }
 logoStore("readonly", st=>st.getAllKeys()).then(async keys=>{
   const vals = await logoStore("readonly", st=>st.getAll());
