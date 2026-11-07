@@ -166,6 +166,14 @@ main{padding-block:6px 120px}
 .deal2{display:flex;align-items:center;gap:10px;padding:7px 0}.deal2+.deal2{border-top:1px solid var(--line)}.deal2 .grow{flex:1;min-width:0;display:flex;flex-direction:column}.deal2 b{font-weight:600}
 .dealform{display:flex;flex-direction:column;gap:8px;margin-top:6px}.dealform .in{background:var(--surface)}
 .spt{display:flex;align-items:center;gap:12px}.spt .grow{flex:1;min-width:0;display:flex;flex-direction:column}.spt b{font-weight:800;font-size:15px}.spt .btn{white-space:nowrap;text-decoration:none}
+.hlist,.hcol{display:flex;flex-direction:column;gap:14px}.hlist{margin-top:14px}
+.hcols{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:18px;align-items:start;margin-top:18px}
+.hblock>*{order:0!important}.hblock>.card+.card{margin-top:14px}
+.hrow{display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--line)}.hrow .hn{flex:1;font-weight:600}.hrow.off .hn{color:var(--faint)}
+.hrow .icon-btn:disabled{opacity:.3}
+.tog{position:relative;width:44px;height:26px;flex:none;margin-left:6px}.tog input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer;z-index:1}
+.tog span{position:absolute;inset:0;border-radius:99px;background:var(--line);transition:background .2s}.tog span:after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.tog input:checked+span{background:var(--accent)}.tog input:checked+span:after{transform:translateX(18px)}
 .rings{display:flex;gap:6px;overflow-x:auto;margin:0 -6px;padding:2px 6px 2px;scrollbar-width:none}.rings::-webkit-scrollbar{display:none}
 .rbtn{border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:72px;max-width:84px;flex:0 0 auto}
 .rbtn b{font-weight:700;font-size:12px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px}
@@ -607,6 +615,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
         <div class="field"><label for="sVors">Vorsorge pro Jahr (€)</label><input class="in" id="sVors" inputmode="decimal" placeholder="Kranken-, Pflege-, Rentenversicherung"></div>
         <div class="field"><label for="sAbz">Sonstige Abzüge pro Jahr (€)</label><input class="in" id="sAbz" inputmode="decimal" placeholder="Spenden, Kinderbetreuung …"></div>
       </div>
+      <div class="section-title">Startseite</div>
+      <div class="field"><label>Reihenfolge der Blöcke</label><span class="small muted" style="margin-top:-2px">Mit den Pfeilen verschieben, mit dem Schalter aus- oder einblenden. Die Konten-Karten bleiben immer oben.</span><div id="homeEd"></div></div>
       <div class="section-title">Kategorien</div>
       <div class="field"><label>Ausgaben privat</label><div class="chips" id="catEd-ausgabe"></div></div>
       <div class="field"><label>Monatsbudgets</label><span class="small muted" style="margin-top:-2px">Wie viel du pro Monat höchstens ausgeben willst. Ab 80 % warnt die Startseite. Leer lassen = kein Budget.</span><div id="budgetEd"></div></div>
@@ -774,6 +784,9 @@ const P = {
   dumbbell:'<path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/>',
   paw:'<circle cx="7" cy="9.5" r="1.8"/><circle cx="17" cy="9.5" r="1.8"/><circle cx="10" cy="5.5" r="1.8"/><circle cx="14" cy="5.5" r="1.8"/><path d="M12 12c-3 0-5.5 3.5-5.5 5.5 0 2 2 2.5 5.5 2.5s5.5-.5 5.5-2.5c0-2-2.5-5.5-5.5-5.5z"/>',
   target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>',
+  up:'<path d="M6 14.5 12 8.5l6 6"/>',
+  down:'<path d="M6 9.5l6 6 6-6"/>',
+  sliders:'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
   camera:'<path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/>',
   flame:'<path d="M12 3c1 3 4.5 4.5 4.5 9.5a4.5 4.5 0 0 1-9 0c0-2 1-3.4 2.2-4.4 0 2 1 3.2 2.3 3.2 0-3.3-1-5.3 0-8.3z"/>',
   spark:'<path d="M12 3.5v4M12 16.5v4M3.5 12h4M16.5 12h4M6 6l2.6 2.6M15.4 15.4 18 18M6 18l2.6-2.6M15.4 8.6 18 6"/>',
@@ -1451,16 +1464,24 @@ function renderHome(){
     // Spaces without an entered balance: what is left of the total after the known accounts (exact if it is just one Space)
     const open=[...known].filter(n=>n!==mainName && !others.includes(n) && !/paypal/i.test(n));
     const rest=Math.round((cum.balance - mainBal - sum(others,n=>accountBalance(n,asOf)||0))*100)/100;
-    if (open.length===1) accts.push({name:open[0], bal:rest, guess:true});
-    else if (open.length>1 || Math.abs(rest)>=0.01) accts.push({name: open.length?"Weitere Spaces":"Spaces", bal:rest, guess:true, sub: open.length>1 ? open.join(", ") : ""});
-    accts.push({name:"Gesamt mit Spaces", bal:cum.balance, total:true});
+    if (open.length===1) accts.push({name:open[0], bal:rest, guess:true, how:"Gesamt minus Hauptkonto"});
+    else if (open.length>1){
+      // each Space on its own card: its money in and out from the imported statements (a Space starts at 0 €);
+      // what is still missing to the known total goes to the Space with the most movement, so the cards add up
+      const est=open.map(n=>({name:n, bal:Math.round(sum(ledgerRows(n).filter(r=>r.date<=asOf),r=>r.v)*100)/100, moves:ledgerRows(n).length}));
+      const diff=Math.round((rest-sum(est,x=>x.bal))*100)/100;
+      if (Math.abs(diff)>=0.01){ const big=est.slice().sort((a,b)=>b.moves-a.moves)[0]; big.bal=Math.round((big.bal+diff)*100)/100; big.adj=true; }
+      for (const x of est) accts.push({name:x.name, bal:x.bal, guess:true, how: x.adj?"aus Umsätzen, abgeglichen mit Gesamt":"aus deinen Umsätzen"});
+    }
+    else if (Math.abs(rest)>=0.01 && others.length===0) accts.push({name:"Spaces", bal:rest, guess:true, how:"Gesamt minus Hauptkonto"});
+    if (accts.length>1) accts.push({name:"Gesamt mit Spaces", bal:cum.balance, total:true});
   }
   const spark = mainName && ym<=cur ? sparkPath(mainName, asOf) : "";
   const when = ym===cur?"heute":ym<cur?"Ende "+MONTHS[ymParts(ym)[1]-1]:"voraussichtlich Ende "+MONTHS[ymParts(ym)[1]-1];
   const acardHtml = accts.map((a,i)=>`<div class="acard ${i?"alt":""} ${a.total?"tot":""} ${a.bal<0?"minus":""}" data-ci="${i}"><div class="l">${esc(a.name)} · ${esc(when)}</div><div class="b">${esc(eur(a.bal))}</div>
       ${a.main&&spark?`<svg class="spark" viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true"><path d="${spark}" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2.2" stroke-linejoin="round"/></svg>`:""}
       <div class="m">${a.main?`<span>${c.net>=0?"↑":"↓"} ${esc(eur0(Math.abs(c.net)))} ${c.net>=0?"übrig":"mehr ausgegeben"} im ${esc(MONTHS[ymParts(ym)[1]-1])}</span>${mainName?`<span>Mit Spaces ${esc(eur(cum.balance))}</span>`:""}`
-        : a.total ? `<span>Hauptkonto und alle Spaces</span>` : a.guess ? `<span>${a.sub?esc(a.sub)+" · ":""}aus Gesamt minus Hauptkonto</span>` : `<span>Space</span>`}</div></div>`).join("");
+        : a.total ? `<span>Hauptkonto und alle Spaces</span>` : a.guess ? `<span>Space · ${esc(a.how||"")}</span>` : `<span>Space</span>`}</div></div>`).join("");
   // --- one sentence in plain words: the most important thing right now
   const over = budgetWarn.find(x=>x.v>x.budget), near = budgetWarn.find(x=>x.v<=x.budget);
   let tip, tipCls="";
@@ -1481,8 +1502,7 @@ function renderHome(){
 
   $("v-home").innerHTML = `
     ${needStart?`<div class="notice info"><span>Trag einmal deinen Kontostand vom 1.1.${y} ein, dann stimmt die Rechnung.</span><button class="btn primary" data-go="more">Eintragen</button></div>`:""}
-    <div class="cols"><div class="col">
-    <div style="order:1;display:flex;flex-direction:column;gap:10px">
+    <div class="homeTop" style="display:flex;flex-direction:column;gap:10px">
       <div class="astack ${accts.length>1?"":"one"}" id="astack" ${accts.length>1?`tabindex="0" aria-label="Konten – wischen zum Blättern"`:""}>${acardHtml}</div>
       ${accts.length>1?`<div class="adots" id="adots">${accts.map((_,i)=>`<button data-cdot="${i}" aria-label="Karte ${i+1}"><i></i></button>`).join("")}</div>`:""}
       <details class="calc" id="heroDetails" ${UI.heroOpen?"open":""}><summary>So berechnet ${ic("chevron",14)}</summary>
@@ -1490,36 +1510,54 @@ function renderHome(){
         ${ym>=cur&&(c.fixOpen||cum.reserveBal)?`<span>− Fixkosten noch offen (${c.openCount})</span><span>${esc(eur(c.fixOpen))}</span>${cum.reserveBal?`<span>− Rücklage für Steuern</span><span>${esc(eur(cum.reserveBal))}</span>`:""}<span>= Frei verfügbar</span><span>${esc(eur(free))}</span>`:""}</div>
       </details>
     </div>
-    <div class="tipline ${tipCls}" style="order:2"><span class="e">${ic(tipCls?"alert":"check",19)}</span><span>${tip}</span></div>
-    <div class="quick4" style="order:2">
+    ${homeBlocks({
+      tip: `<div class="tipline ${tipCls}"><span class="e">${ic(tipCls?"alert":"check",19)}</span><span>${tip}</span></div>`,
+      quick: `<div class="quick4">
       <button data-add="ausgabe"><span class="ic">${ic("minus",22)}</span>Ausgabe</button>
       <button data-add="einnahme"><span class="ic">${ic("plusIn",22)}</span>Einnahme</button>
       <button data-scanquick="1"><span class="ic">${ic("camera",22)}</span>Beleg</button>
       <button data-go="import"><span class="ic">${ic("arrowDown",22)}</span>Import</button>
-    </div>
-    ${bt.length?`<div class="card" style="order:3"><div class="card-head"><h2>Budgets</h2><button class="link" data-go="year">Alle ${ic("right",16)}</button></div>
+    </div>`,
+      budgets: (bt.length?`<div class="card" style="order:3"><div class="card-head"><h2>Budgets</h2><button class="link" data-go="year">Alle ${ic("right",16)}</button></div>
       <div class="btiles">${bt.map(x=>{ const ov=x.v>x.budget, nr=!ov&&x.v>=x.budget*0.8; return `<button class="btile ${ov?"over":nr?"near":""}" data-go="year"><span class="ti">${ic(iconFor("ausgabe",x.cat),19)}</span><b>${ov?`${esc(eur0(x.v-x.budget))} drüber`:`${esc(eur0(x.budget-x.v))} frei`}</b><small>${esc(x.cat)}</small><s><i style="width:${Math.min(100,Math.max(x.v?4:0,x.v/x.budget*100))}%"></i></s></button>`; }).join("")}</div>
       ${streak?`<div class="streak" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)"><span class="f">${ic("flame",19)}</span><div class="grow" style="min-width:0;flex:1"><b>${streak.n} ${streak.n===1?"Tag":"Tage"} im Budget</b> <span class="small muted">· Rekord ${streak.best}</span><div class="bars">${Array.from({length:Math.min(14,streak.today)},(_,k)=>{ const d=streak.today-Math.min(14,streak.today)+1+k; return `<i class="${streak.ok[d]?"on":""}"></i>`; }).join("")}</div></div></div>`:""}
-    </div>`:""}
-    ${fixedAreas(ym)}
-    <div class="card" style="order:5" hidden>
-      <div class="card-head"><h2>${hIc("repeat")}${openFx.length?`Noch offen im ${esc(MONTHS[ymParts(ym)[1]-1])}`:"Fixkosten"}</h2><button class="link" data-go="fix">${openFx.length?"Abhaken":"Ansehen"} ${ic("right",16)}</button></div>
-      ${openFx.length ? openFx.slice(0,4).map(f=>`<div class="duerow">${brandFor(f.name)?brandBadge(brandFor(f.name)):tile(f.kind==="betrieb"?"betrieb":"fix", f.name)}<span class="grow" style="flex:1"><b>${esc(f.name)}</b>${debtFor(f.id)?`<br><span class="small muted">noch ${esc(eur0(debtState(debtFor(f.id)).remaining))} offen</span>`:""}</span><span class="a">${esc(eur(planAmt(f,ym)))}</span></div>`).join("")+(openFx.length>4?`<div class="small muted" style="margin-top:6px">und ${openFx.length-4} weitere · zusammen ${esc(eur(c.fixOpen))}</div>`:"")
-        : `<div class="meta-row"><span><b>${fxDone}</b> Posten bezahlt</span><b>${esc(eur(c.fixPaid))}</b></div>`}
-    </div>
-    ${taxGauge(ym)}
-    ${false?`<div class="card" style="order:6"><div class="card-head"><h2>${hIc("receipt")}Steuer-Rücklage</h2><span class="pill ok">${esc(S.settings.reserveRate)} %</span></div><div class="kv"><span>Selbstständige Einnahmen</span><span>${esc(eur(c.selfInc))}</span><span>Diesen Monat zurücklegen</span><span class="pos">${esc(eur(c.reserve))}</span><span>Rücklage insgesamt</span><span>${esc(eur(cum.reserveBal))}</span></div></div>`:""}
-    ${goalsRings()}
-    ${UI.goalsOpen||UI.goalEdit?goalsCard():""}
-    ${debtRings()}
-    </div><div class="col">
-    ${offersCard()}
-    ${recentTimeline(c)}
-    </div></div>`;
+    </div>`:""),
+      fix: fixedAreas(ym),
+      tax: taxGauge(ym),
+      goals: goalsRings() + (UI.goalsOpen||UI.goalEdit?goalsCard():""),
+      debts: debtRings(),
+      recent: recentTimeline(c),
+      offers: offersCard(),
+    })}
+    <div style="text-align:center;margin:4px 0 8px"><button class="link small" data-go="more" data-scroll="homeEd">${ic("sliders",15)} Startseite anpassen</button></div>`;
   const det = $("heroDetails"); if (det) det.addEventListener("toggle", ()=>{ UI.heroOpen = det.open; });
   initStack(); initShopRail();
 }
 
+/* ---------- start page blocks: your own order, each can be hidden ---------- */
+const HOME_BLOCKS = [["tip","Hinweis (Klartext)"],["quick","Schnellknöpfe"],["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["debts","Schulden"],["recent","Letzte Buchungen"],["offers","Angebote & Läden"]];
+function homeOrder(){ const o=(S.settings.homeOrder||[]).filter(k=>HOME_BLOCKS.some(b=>b[0]===k)); for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; }
+function homeBlocks(html){
+  const hid=new Set(S.settings.homeHidden||[]), list=homeOrder().filter(k=>!hid.has(k) && html[k]).map(k=>`<div class="hblock" data-hb="${k}">${html[k]}</div>`);
+  if (!matchMedia("(min-width:1000px)").matches) return `<div class="hlist">${list.join("")}</div>`;
+  // wide screen: two columns, filled in your order (left, right, left, …)
+  return `<div class="hcols"><div class="hcol">${list.filter((_,i)=>i%2===0).join("")}</div><div class="hcol">${list.filter((_,i)=>i%2===1).join("")}</div></div>`;
+}
+function renderHomeEd(){
+  const el=$("homeEd"); if (!el) return; const hid=new Set(S.settings.homeHidden||[]), o=homeOrder();
+  el.innerHTML = o.map((k,i)=>{ const name=(HOME_BLOCKS.find(b=>b[0]===k)||[k,k])[1], off=hid.has(k);
+    return `<div class="hrow ${off?"off":""}"><span class="hn">${esc(name)}</span>
+      <button class="icon-btn" data-hmove="${k}|-1" ${i===0?"disabled":""} aria-label="${esc(name)} nach oben">${ic("up",18)}</button>
+      <button class="icon-btn" data-hmove="${k}|1" ${i===o.length-1?"disabled":""} aria-label="${esc(name)} nach unten">${ic("down",18)}</button>
+      <label class="tog" aria-label="${esc(name)} anzeigen"><input type="checkbox" data-hshow="${k}" ${off?"":"checked"}><span></span></label></div>`; }).join("")
+    + `<button class="link small" data-hreset="1" style="margin-top:8px">Standard-Reihenfolge</button>`;
+}
+document.addEventListener("click", e=>{
+  const m=e.target.closest("[data-hmove]"); if (m){ const [k,d]=m.dataset.hmove.split("|"), o=homeOrder(), i=o.indexOf(k), j=i+Number(d); if (j<0||j>=o.length) return; [o[i],o[j]]=[o[j],o[i]]; S.settings.homeOrder=o; saveSettings(); renderHomeEd(); return; }
+  if (e.target.closest("[data-hreset]")){ S.settings.homeOrder=[]; S.settings.homeHidden=[]; saveSettings(); renderHomeEd(); toast("Startseite zurückgesetzt"); }
+});
+document.addEventListener("change", e=>{ const t=e.target.closest("[data-hshow]"); if (!t) return; const h=new Set(S.settings.homeHidden||[]); if (t.checked) h.delete(t.dataset.hshow); else h.add(t.dataset.hshow); S.settings.homeHidden=[...h]; saveSettings(); renderHomeEd(); });
+matchMedia("(min-width:1000px)").addEventListener("change", ()=>{ if (UI.view==="home") renderHome(); });
 /* ---------- tax reserve as a gauge ---------- */
 function taxGauge(ym){
   const y=ym.slice(0,4), tax=taxCalc(y);
@@ -2036,6 +2074,7 @@ function renderMore(){
   renderShopEd();
   renderLockEd();
   renderBudgetEd();
+  renderHomeEd();
   $("sKU").checked=!!st.kleinunternehmer; $("sSplit").checked=!!st.splitting; $("partnerField").hidden=!st.splitting;
   for (const k of ["ausgabe","betrieb"]) $("catEd-"+k).innerHTML = cats(k).map(n=>`<span class="chip">${esc(n)}<button class="x" data-catdel="${k}|${esc(n)}" aria-label="${esc(n)} entfernen">×</button></span>`).join("")+`<button class="chip" data-catadd="${k}">+ Neu</button>`;
   $("catEd-einnahme").innerHTML = incCats().map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:5px 0"><b style="flex:1">${esc(c.name)}</b><select class="in" style="width:auto" data-incart="${esc(c.name)}" aria-label="Art von ${esc(c.name)}"><option value="selbst" ${c.art==="selbst"?"selected":""}>Selbstständig</option><option value="lohn" ${c.art==="lohn"?"selected":""}>Gehalt (angestellt)</option><option value="sonderzahlung" ${c.art==="sonderzahlung"?"selected":""}>Sonderzahlung (13. Gehalt …)</option><option value="lohnersatz" ${c.art==="lohnersatz"?"selected":""}>Lohnersatz (ALG1)</option><option value="sonstige" ${c.art==="sonstige"?"selected":""}>Sonstige</option></select><button class="icon-btn" data-catdel="einnahme|${esc(c.name)}" aria-label="${esc(c.name)} entfernen">×</button></div>`).join("")+`<button class="chip" data-catadd="einnahme" style="margin-top:6px">+ Neu</button>`;
@@ -2914,6 +2953,7 @@ function recordAccounts(items){
   }
   persistLocal();
 }
+function ledgerRows(name){ const out=[]; for (const d of Object.values(memStore.acct)) for (const [acc,v,date] of Object.values(d.rows||{})) if (acc===name) out.push({v,date}); return out; }
 function accountNames(){
   const n=new Set(); for (const d of Object.values(memStore.acct)) for (const r of Object.values(d.rows||{})) n.add(r[0]);
   return [...n].sort((a,b)=>(b==="Hauptkonto")-(a==="Hauptkonto") || a.localeCompare(b,"de"));
