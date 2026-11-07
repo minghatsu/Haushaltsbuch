@@ -934,7 +934,24 @@ function rhythmText(f){
 }
 // amount planned for this month: a one-month change wins over the list amount
 function monthAmounts(ym){ return (S.months[ym]&&S.months[ym].amounts)||{}; }
-function planAmt(f, ym){ const o=monthAmounts(ym); return f.id in o ? (Number(o[f.id])||0) : (f.amount||0); }
+function planAmt(f, ym){ const o=monthAmounts(ym); return f.id in o ? (Number(o[f.id])||0) : listAmt(f, ym); }
+// list amount of a fixed cost in a month: price changes apply from their month on, earlier months keep the old price
+function listAmt(f, ym){
+  const p=Array.isArray(f.prices)?f.prices:[]; if (!p.length) return f.amount||0;
+  let a=p[0].amount; for (const e of p){ if (e.from<=ym) a=e.amount; else break; } return Number(a)||0;
+}
+function withPrice(f, from, v){
+  // new price from month "from": later months get it too, earlier months keep what they had
+  let p=(Array.isArray(f.prices)&&f.prices.length ? f.prices : [{from:"0000-00", amount:f.amount||0}]).filter(e=>e.from<from);
+  if (!p.length) p=[{from:"0000-00", amount:v}];
+  else if (Math.abs(p[p.length-1].amount-v)>0.004) p.push({from, amount:v});
+  return { prices: p.length>1 ? p : undefined, amount: p[p.length-1].amount };
+}
+function priceNote(f){
+  const p=Array.isArray(f.prices)?f.prices:[]; if (p.length<2) return "";
+  const last=p[p.length-1], prev=p[p.length-2], [y,m]=ymParts(last.from);
+  return `seit ${MSHORT[m-1]} ${y}: ${eur(last.amount)} · vorher ${eur(prev.amount)}`;
+}
 // every month only shows (and counts) the fixed costs that were ticked; "all" adds the ones due, to tick them
 function fixedForMonth(ym, all){
   const paid=(S.months[ym]&&S.months[ym].paid)||{};
@@ -1322,8 +1339,9 @@ function renderFix(){
   const done=fx.filter(f=>f.id in paid).length;
   if (UI.fixEdit){
     $("v-fix").innerHTML = `<div class="card"><div class="card-head"><h2>Liste bearbeiten</h2><button class="btn primary" id="fixDone">Fertig</button></div>
-      <p class="small muted" style="margin:-4px 0 10px">Änderungen gelten ab jetzt für alle Monate. Schon abgehakte Beträge bleiben, wie sie waren. Bei „Vierteljährlich“, „Halbjährlich“, „Jährlich“ oder „Bestimmte Monate“ tippst du an, in welchen Monaten der Posten fällig ist.</p>
-      ${fx.map(f=>`<div class="edit-row" data-fid="${esc(f.id)}"><input class="in" id="fxn-${esc(f.id)}" data-fxf="name" value="${esc(f.name)}" aria-label="Name"><input class="in" id="fxa-${esc(f.id)}" data-fxf="amount" inputmode="decimal" value="${esc(numStr(f.amount))}" aria-label="Betrag"><select class="in" id="fxr-${esc(f.id)}" data-fxf="rhythm" aria-label="Rhythmus">${RHYTHMS.map(([k,l])=>`<option value="${k}" ${(f.rhythm||"monatlich")===k?"selected":""}>${l}</option>`).join("")}</select><select class="in" id="fxk-${esc(f.id)}" data-fxf="kind" aria-label="Art"><option value="privat" ${f.kind!=="betrieb"?"selected":""}>Privat</option><option value="betrieb" ${f.kind==="betrieb"?"selected":""}>Betrieblich</option></select><button class="icon-btn" data-fxdel="${esc(f.id)}" aria-label="${esc(f.name)} löschen"><svg class="i" viewBox="0 0 24 24"><path d="M5 7h14M10 11v6M14 11v6M6.5 7l1 12.5h9L17.5 7M9.5 7V4.5h5V7"/></svg></button>
+      <p class="small muted" style="margin:-4px 0 10px">Trag am besten am Jahresanfang alle Fixkosten ein. Ändert sich ein Preis, gilt der neue Betrag <b>ab ${esc(monthName(UI.ym))}</b> für alle folgenden Monate – frühere Monate und schon abgehakte Beträge bleiben, wie sie waren. Ab einem anderen Monat ändern: oben erst den Monat wechseln. Bei „Vierteljährlich“, „Halbjährlich“, „Jährlich“ oder „Bestimmte Monate“ tippst du an, in welchen Monaten der Posten fällig ist.</p>
+      ${fx.map(f=>`<div class="edit-row" data-fid="${esc(f.id)}"><input class="in" id="fxn-${esc(f.id)}" data-fxf="name" value="${esc(f.name)}" aria-label="Name"><input class="in" id="fxa-${esc(f.id)}" data-fxf="amount" inputmode="decimal" value="${esc(numStr(listAmt(f,UI.ym)))}" aria-label="Betrag ab ${esc(monthName(UI.ym))}"><select class="in" id="fxr-${esc(f.id)}" data-fxf="rhythm" aria-label="Rhythmus">${RHYTHMS.map(([k,l])=>`<option value="${k}" ${(f.rhythm||"monatlich")===k?"selected":""}>${l}</option>`).join("")}</select><select class="in" id="fxk-${esc(f.id)}" data-fxf="kind" aria-label="Art"><option value="privat" ${f.kind!=="betrieb"?"selected":""}>Privat</option><option value="betrieb" ${f.kind==="betrieb"?"selected":""}>Betrieblich</option></select><button class="icon-btn" data-fxdel="${esc(f.id)}" aria-label="${esc(f.name)} löschen"><svg class="i" viewBox="0 0 24 24"><path d="M5 7h14M10 11v6M14 11v6M6.5 7l1 12.5h9L17.5 7M9.5 7V4.5h5V7"/></svg></button>
+        ${priceNote(f)?`<div class="small muted" style="grid-column:1/-1;margin:-2px 0 6px">${esc(priceNote(f))}</div>`:""}
         ${(f.rhythm||"monatlich")!=="monatlich"?`<div class="mchips" role="group" aria-label="Monate für ${esc(f.name)}">${MSHORT.map((n,i)=>`<button class="mchip" data-fxmon="${esc(f.id)}|${i+1}" aria-pressed="${(f.months||[]).includes(i+1)}">${n}</button>`).join("")}</div>`:""}</div>`).join("")}
       <button class="btn" id="fixAdd" style="margin-top:12px">+ Fixkosten hinzufügen</button></div>`;
     return;
@@ -1332,7 +1350,7 @@ function renderFix(){
   const row = f => {
     const isPaid = f.id in paid, amt = isPaid ? Number(paid[f.id])||0 : planAmt(f,UI.ym);
     const subs = [debtFor(f.id)?`Rate ${esc(debtFor(f.id).name)}`:"", rhythmText(f)?esc(rhythmText(f)):"",
-      (f.id in ov && !isPaid) || (isPaid && Math.abs(amt-(f.amount||0))>0.004) ? `nur im ${esc(mName)} · sonst ${esc(eur(f.amount||0))}${!isPaid?` · <span class="link small" role="button" tabindex="0" data-fxreset="${esc(f.id)}">zurücksetzen</span>`:""}` : ""].filter(Boolean);
+      (f.id in ov && !isPaid) || (isPaid && Math.abs(amt-listAmt(f,UI.ym))>0.004) ? `nur im ${esc(mName)} · sonst ${esc(eur(listAmt(f,UI.ym)))}${!isPaid?` · <span class="link small" role="button" tabindex="0" data-fxreset="${esc(f.id)}">zurücksetzen</span>`:""}` : ""].filter(Boolean);
     const editing = UI.amtEdit===f.id;
     return `<div class="fx" aria-checked="${isPaid}"><button class="fxhit" data-pay="${esc(f.id)}" tabindex="-1">${brandFor(f.name)?brandBadge(brandFor(f.name)):tile(f.kind==="betrieb"?"betrieb":"fix", f.name, f.kind==="betrieb"?"var(--c3)":"var(--c1)")}<span class="grow"><div class="t">${esc(f.name)}</div>${subs.length?`<div class="s">${subs.join(" · ")}</div>`:""}</span></button>`
       + (editing ? `<input class="in fxamt-in" id="fxAmtIn" data-fxamtin="${esc(f.id)}" inputmode="decimal" value="${esc(numStr(amt))}" aria-label="Betrag für ${esc(f.name)} im ${esc(mName)}">`
@@ -1628,7 +1646,7 @@ document.addEventListener("click", async e => {
   const cb = t.closest("#catGrid [data-cat]"); if (cb){ UI.cat=cb.dataset.cat; renderSheet(); return; }
   const dc = t.closest("#dateChips .dchip"); if (dc){ $("fDate").value=isoDaysAgo(Number(dc.dataset.day)); renderSheet(); return; }
   const fl = t.closest("[data-filter]"); if (fl){ UI.filter=fl.dataset.filter; renderList(); return; }
-  const fr = t.closest("[data-fxreset]"); if (fr){ const f=S.fixed.find(x=>x.id===fr.dataset.fxreset); if (f) await setMonthAmount(f.id, f.amount||0); return; }
+  const fr = t.closest("[data-fxreset]"); if (fr){ const f=S.fixed.find(x=>x.id===fr.dataset.fxreset); if (f) await setMonthAmount(f.id, listAmt(f,UI.ym)); return; }
   const fa = t.closest("[data-fxamt]"); if (fa){ UI.amtEdit=fa.dataset.fxamt; renderFix(); const el=$("fxAmtIn"); if (el){ el.focus(); el.select(); } return; }
   const mc = t.closest("[data-fxmon]"); if (mc){ await toggleFixMonth(...mc.dataset.fxmon.split("|")); return; }
   const pay = t.closest("[data-pay]"); if (pay){ await togglePaid(pay.dataset.pay); return; }
@@ -1910,10 +1928,22 @@ async function setMonthAmount(fid, v){
   const before=clone(S.months[ym]||{paid:{}}), m=clone(before); m.paid=m.paid||{};
   v=Math.round(v*100)/100;
   if (fid in m.paid) m.paid[fid]=v;
-  else { m.amounts=m.amounts||{}; if (Math.abs(v-(f.amount||0))<0.005) delete m.amounts[fid]; else m.amounts[fid]=v; }
+  else { m.amounts=m.amounts||{}; if (Math.abs(v-listAmt(f,ym))<0.005) delete m.amounts[fid]; else m.amounts[fid]=v; }
   UI.amtEdit=null;
-  if (await safe(()=>put("months", ym, m))) toast(`${f.name}: ${eur(v)} im ${MONTHS[Number(ym.slice(5,7))-1]}`, ()=>safe(()=>put("months", ym, before)));
+  const changed = Math.abs(v-listAmt(f,ym))>0.004;
+  if (await safe(()=>put("months", ym, m))){
+    if (changed) toast(`${f.name}: ${eur(v)} im ${MONTHS[Number(ym.slice(5,7))-1]}`, ()=>priceFrom(fid, ym, v), "Ab jetzt immer", 7000);
+    else toast(`${f.name}: ${eur(v)} im ${MONTHS[Number(ym.slice(5,7))-1]}`, ()=>safe(()=>put("months", ym, before)));
+  }
   renderFix();
+}
+// the price changed for good: from this month on (later months too), earlier months keep the old price
+async function priceFrom(fid, ym, v){
+  const f=S.fixed.find(x=>x.id===fid); if (!f) return;
+  const d={...f}; delete d.id; const np=withPrice(f, ym, v); d.amount=np.amount; if (np.prices) d.prices=np.prices; else delete d.prices;
+  if (!(await safe(()=>put("fixed", fid, d)))) return;
+  const m=S.months[ym]; if (m && m.amounts && fid in m.amounts){ const c=clone(m); delete c.amounts[fid]; await safe(()=>put("months", ym, c)); }
+  toast(`${f.name}: ${eur(v)} ab ${monthName(ym)}`); renderFix();
 }
 async function toggleFixMonth(fid, mo){
   const f=S.fixed.find(x=>x.id===fid); if (!f) return;
@@ -1940,7 +1970,10 @@ $("v-fix").addEventListener("change", async e => {
   const el=e.target.closest("[data-fxf]"); if (!el) return;
   const id=el.closest("[data-fid]").dataset.fid, f=S.fixed.find(x=>x.id===id); if (!f) return;
   const d={...f}; delete d.id; const k=el.dataset.fxf;
-  if (k==="amount"){ const v=parseAmt(el.value); if (!(v>=0)){ toast("Betrag ungültig"); return; } d.amount=Math.round(v*100)/100; }
+  if (k==="amount"){ const v=parseAmt(el.value); if (!(v>=0)){ toast("Betrag ungültig"); return; }
+    const nv=Math.round(v*100)/100, old=listAmt(f,UI.ym); if (Math.abs(nv-old)<0.005) return;
+    const np=withPrice(f, UI.ym, nv); d.amount=np.amount; if (np.prices) d.prices=np.prices; else delete d.prices;
+    if (await safe(()=>put("fixed", id, d))) toast(`${f.name}: ${eur(nv)} ab ${monthName(UI.ym)}`); return; }
   else if (k==="name"){ const v=el.value.trim(); if (!v) return; d.name=v; }
   else if (k==="rhythm"){
     const cur=Number(UI.ym.slice(5,7)), had=Array.isArray(f.months)&&f.months.length;
