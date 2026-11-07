@@ -1,7 +1,7 @@
 // Haushaltsbuch für Windows.
 // Zeigt dieselbe App wie auf dem Handy. Die Daten liegen auf dem PC und werden mit der Synology abgeglichen.
 // Neue App-Versionen holt sich die App selbst von der Synology (wie die Handy-App).
-const { app, BrowserWindow, protocol, ipcMain, shell, Menu } = require("electron");
+const { app, BrowserWindow, protocol, ipcMain, shell, Menu, Tray, Notification, nativeImage } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
@@ -32,6 +32,48 @@ function newestApp() {
 }
 
 let win = null;
+let tray = null, quitting = false;
+const HIDDEN = process.argv.includes("--hidden");
+const prefsFile = () => path.join(app.getPath("userData"), "pc.json");
+function prefs() { try { return { tray: true, autostart: false, ...JSON.parse(fs.readFileSync(prefsFile(), "utf8")) }; } catch (e) { return { tray: true, autostart: false }; } }
+function savePrefs(p) { try { fs.writeFileSync(prefsFile(), JSON.stringify(p)); } catch (e) {} applyPrefs(p); }
+function applyPrefs(p) {
+  if (SMOKE) return;
+  try { app.setLoginItemSettings({ openAtLogin: !!p.autostart, args: ["--hidden"] }); } catch (e) {}
+  if (p.tray && !tray) makeTray();
+  if (!p.tray && tray) { tray.destroy(); tray = null; }
+}
+function showWin() { if (!win) createWindow(); else { if (win.isMinimized()) win.restore(); win.show(); win.focus(); } }
+function makeTray() {
+  try {
+    tray = new Tray(nativeImage.createFromPath(path.join(__dirname, "icon.png")).resize({ width: 16, height: 16 }));
+    tray.setToolTip("Haushaltsbuch");
+    tray.setContextMenu(Menu.buildFromTemplate([
+      { label: "Haushaltsbuch öffnen", click: showWin },
+      { type: "separator" },
+      { label: "Beenden", click: () => { quitting = true; app.quit(); } },
+    ]));
+    tray.on("click", showWin);
+  } catch (e) { tray = null; }
+}
+
+/* ---------- notifications (Windows): the app hands over the planned reminders, the PC shows them while the program runs (also in the background) ---------- */
+const notifyFile = () => path.join(app.getPath("userData"), "erinnerungen.json");
+let planned = [];
+function loadPlanned() { try { planned = JSON.parse(fs.readFileSync(notifyFile(), "utf8")) || []; } catch (e) { planned = []; } }
+function savePlanned() { try { fs.writeFileSync(notifyFile(), JSON.stringify(planned)); } catch (e) {} }
+function showNote(title, text) {
+  if (!Notification.isSupported()) return;
+  const n = new Notification({ title: String(title || "Haushaltsbuch"), body: String(text || ""), icon: path.join(__dirname, "icon.png") });
+  n.on("click", showWin);
+  n.show();
+}
+function checkPlanned() {
+  const now = Date.now(), due = planned.filter((x) => x.at <= now);
+  if (!due.length) return;
+  planned = planned.filter((x) => x.at > now); savePlanned();
+  for (const x of due.slice(-3)) if (now - x.at < 6 * 3600e3) showNote(x.title, x.text);   // older than 6 h (PC was off): skip
+}
 
 function loadBounds() {
   try {
@@ -55,7 +97,7 @@ function createWindow() {
     title: "Haushaltsbuch",
     backgroundColor: "#F2F5F3",
     icon: path.join(__dirname, "icon.png"),
-    show: !SMOKE,
+    show: !SMOKE && !HIDDEN,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -65,7 +107,11 @@ function createWindow() {
     },
   });
   if (b.maximized) win.maximize();
-  win.on("close", saveBounds);
+  win.on("close", (e) => {
+    saveBounds();
+    if (!quitting && !SMOKE && prefs().tray) { e.preventDefault(); win.hide(); }   // keep running in the tray for reminders
+  });
+  win.on("closed", () => { win = null; });
 
   // links in the app open in the normal browser
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -129,6 +175,14 @@ ipcMain.on("autoBackup", (e, name, text, keep) => {
   } catch (err) {
     e.returnValue = false;
   }
+});
+
+ipcMain.on("notifyNow", (e, title, text) => { showNote(title, text); });
+ipcMain.on("notifySchedule", (e, json) => { try { const l = JSON.parse(String(json)); planned = Array.isArray(l) ? l.slice(0, 60) : []; savePlanned(); } catch (err) {} });
+ipcMain.on("notifySettings", () => { shell.openExternal("ms-settings:notifications").catch(() => {}); });
+ipcMain.on("pcPrefs", (e, json) => {
+  if (json) { try { savePrefs({ ...prefs(), ...JSON.parse(String(json)) }); } catch (err) {} }
+  e.returnValue = JSON.stringify(prefs());
 });
 
 ipcMain.on("saveApp", (e, html) => {
@@ -223,7 +277,7 @@ function runSmokeTest() {
 if (!SMOKE && !app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.on("second-instance", () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
+  app.on("second-instance", () => showWin());
   app.whenReady().then(() => {
     Menu.setApplicationMenu(null);
     protocol.handle("app", (request) => {
@@ -233,7 +287,12 @@ if (!SMOKE && !app.requestSingleInstanceLock()) {
       }
       return new Response("", { status: 404 });
     });
+    if (process.platform === "win32") app.setAppUserModelId("de.sascha.haushaltsbuch");
+    loadPlanned();
+    applyPrefs(prefs());
     createWindow();
+    if (!SMOKE) setInterval(checkPlanned, 30000);
   });
-  app.on("window-all-closed", () => app.quit());
+  app.on("before-quit", () => { quitting = true; });
+  app.on("window-all-closed", () => { if (!prefs().tray || SMOKE) app.quit(); });
 }

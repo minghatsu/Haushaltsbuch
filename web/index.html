@@ -712,6 +712,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .wsum{display:flex;justify-content:space-between;margin-top:14px;padding:12px 14px;background:var(--surface);border-radius:14px;box-shadow:var(--shadow)}
 .wfoot{position:fixed;left:0;right:0;bottom:0;padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 16px);background:linear-gradient(to top,var(--bg) 70%,transparent);display:flex;gap:10px;justify-content:center}
 .wfoot .btn{flex:1;max-width:240px;padding:14px}
+@media (min-width:1000px){.astack{margin:0}.astack .acard{left:28%;right:28%}}
 </style>
 
 <div class="backdrop" id="addBg" hidden><div class="sheet addsheet" role="dialog" aria-label="Was möchtest du hinzufügen?"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><h2>Was möchtest du hinzufügen?</h2><button class="icon-btn" data-addclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -1660,7 +1661,7 @@ function initStack(){
   const rel = i => { let d=(i-UI.cardIdx+n)%n; if (d>n/2) d-=n; if (n===2 && d===-1) d=1; return d; };
   let last = cards.map((_,i)=>rel(i));
   const place = (dx=0, anim=true) => {
-    const w=st.clientWidth*0.8;
+    const fc=st.querySelector(".acard"), w=(fc&&fc.offsetWidth)||st.clientWidth*0.8;
     cards.forEach((c,i)=>{ const d=rel(i), jump=Math.abs(d-last[i])>1, side=Math.abs(d);
       c.style.transition = (!anim || jump) ? "none" : "";
       const x = d*w*0.6 + dx, sc = side===0 ? 1-Math.min(0.14,Math.abs(dx)/w*0.14) : 0.86+Math.min(0.14,(d*dx<0?Math.abs(dx):0)/w*0.14);
@@ -2459,6 +2460,8 @@ function planEditor(d, plan){
 /* ---------- Benachrichtigungen (Android: auch bei geschlossener App) ---------- */
 const NOTIFY_DEF = { on:false, budget:true, minus:true, reserve:true, debt:true, goal:true, fix:"3,25", daily:"", imp:"14", tax:true, week:false, month:true, hour:"9" };
 const CAN_NOTIFY = !!(window.AndroidBridge && window.AndroidBridge.notifySchedule);
+const IS_PC = !!(window.AndroidBridge && window.AndroidBridge.desktop);
+document.addEventListener("change", e=>{ if ((e.target.id==="pcTray"||e.target.id==="pcAuto") && IS_PC){ try{ AndroidBridge.pcPrefs(JSON.stringify(e.target.id==="pcTray"?{tray:e.target.checked}:{autostart:e.target.checked})); }catch(_){} toast("Gespeichert"); } });
 function notifyCfg(){ let c={}; try{ c=JSON.parse(localStorage.getItem("hb-notify")||"{}"); }catch(e){} return {...NOTIFY_DEF, ...c}; }
 function notifySave(c){ try{ localStorage.setItem("hb-notify", JSON.stringify(c)); }catch(e){} notifyPlanSoon(); }
 function notifyPerm(){ try{ return CAN_NOTIFY ? AndroidBridge.notifyState() : "denied"; }catch(e){ return "denied"; } }
@@ -2516,13 +2519,13 @@ let notifyT=null; function notifyPlanSoon(){ clearTimeout(notifyT); notifyT=setT
 window.hbNotifyPerm = ok => { const c=notifyCfg(); c.on=!!ok; notifySave(c); if (!ok) toast("Ohne Erlaubnis kann die App keine Benachrichtigungen zeigen"); if (UI.view==="more") renderMore(); };
 function renderNotifyEd(){
   const el=$("notifyEd"); if (!el) return;
-  if (!CAN_NOTIFY){ el.innerHTML=`<div class="notice info"><span>Benachrichtigungen gibt es in der Handy-App. Dort kannst du hier einstellen, worüber sie dich informiert – auch wenn die App geschlossen ist.</span></div>`; return; }
+  if (!CAN_NOTIFY){ el.innerHTML=`<div class="notice info"><span>Benachrichtigungen gibt es in der Handy- und PC-App. Dort kannst du hier einstellen, worüber sie dich informiert – auch wenn die App geschlossen ist.</span></div>`; return; }
   const c=notifyCfg(), perm=notifyPerm(), on=c.on&&perm==="granted";
   const sw=(k,t,d)=>`<div class="switch"><label for="nf-${k}"><b>${t}</b><br><span class="small muted">${d}</span></label><input type="checkbox" id="nf-${k}" data-nf="${k}" ${c[k]?"checked":""} ${on?"":"disabled"}></div>`;
   const sel=(k,t,d,opts)=>`<div class="field"><label for="nf-${k}">${t}</label><select class="in" id="nf-${k}" data-nf="${k}" ${on?"":"disabled"}>${opts.map(([v,l])=>`<option value="${v}" ${String(c[k])===v?"selected":""}>${l}</option>`).join("")}</select>${d?`<span class="small muted">${d}</span>`:""}</div>`;
   el.innerHTML = `
-    <div class="switch"><label for="nf-on"><b>Benachrichtigungen</b><br><span class="small muted">${perm==="granted"?"Kommen als Popup aufs Handy, auch wenn die App geschlossen ist.":"Die App fragt einmal nach der Erlaubnis von Android."}</span></label><input type="checkbox" id="nf-on" ${on?"checked":""}></div>
-    ${c.on&&perm!=="granted"?`<div class="notice warn"><span>Android blockiert die Benachrichtigungen gerade.</span><button class="btn" id="nfSys">Erlauben</button></div>`:""}
+    <div class="switch"><label for="nf-on"><b>Benachrichtigungen</b><br><span class="small muted">${IS_PC?"Kommen als Windows-Meldung unten rechts – auch wenn das Fenster zu ist, solange das Haushaltsbuch unten in der Taskleiste läuft.":perm==="granted"?"Kommen als Popup aufs Handy, auch wenn die App geschlossen ist.":"Die App fragt einmal nach der Erlaubnis von Android."}</span></label><input type="checkbox" id="nf-on" ${on?"checked":""}></div>
+    ${c.on&&perm!=="granted"?`<div class="notice warn"><span>${IS_PC?"Windows":"Android"} blockiert die Benachrichtigungen gerade.</span><button class="btn" id="nfSys">Erlauben</button></div>`:""}
     <div class="section-title">Warnungen</div>
     <span class="small muted" style="margin-top:-8px">Kommen sofort, sobald die App es bemerkt – jede nur einmal.</span>
     ${sw("budget","Budget","Bei 80 % verbraucht und wenn es überschritten ist")}
@@ -2538,10 +2541,13 @@ function renderNotifyEd(){
     ${sw("month","Monatsrückblick","Am 1. für den vergangenen Monat")}
     ${sw("week","Wochenrückblick","Sonntags um 18 Uhr")}
     ${sel("hour","Uhrzeit für Erinnerungen","Gilt für Fixkosten, Kontoauszug, Steuer und Monatsrückblick.",[["8","8 Uhr"],["9","9 Uhr"],["10","10 Uhr"],["12","12 Uhr"],["17","17 Uhr"],["19","19 Uhr"]])}
-    <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="nfTest" ${on?"":"disabled"}>Test-Benachrichtigung</button><button class="btn" id="nfSys2">Android-Einstellungen</button></div>`;
+    <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="nfTest" ${on?"":"disabled"}>Test-Benachrichtigung</button><button class="btn" id="nfSys2">${IS_PC?"Windows-Einstellungen":"Android-Einstellungen"}</button></div>
+    ${IS_PC&&AndroidBridge.pcPrefs?(()=>{ let p={}; try{ p=JSON.parse(AndroidBridge.pcPrefs("")); }catch(_){} return `<div class="section-title">PC</div>
+    <div class="switch"><label for="pcTray"><b>Im Hintergrund weiterlaufen</b><br><span class="small muted">Schließen legt das Haushaltsbuch unten rechts in die Taskleiste – nötig für Erinnerungen. Ganz beenden: Rechtsklick aufs Symbol › Beenden.</span></label><input type="checkbox" id="pcTray" ${p.tray!==false?"checked":""}></div>
+    <div class="switch"><label for="pcAuto"><b>Mit Windows starten</b><br><span class="small muted">Startet unsichtbar im Hintergrund, damit Erinnerungen auch nach einem Neustart kommen.</span></label><input type="checkbox" id="pcAuto" ${p.autostart?"checked":""}></div>`; })():""}`;
 }
 document.addEventListener("change", e=>{
-  if (e.target.id==="nf-on"){ const c=notifyCfg(); if (e.target.checked){ c.on=true; notifySave(c); try{ AndroidBridge.notifyAsk(); }catch(_){} } else { c.on=false; notifySave(c); renderNotifyEd(); } return; }
+  if (e.target.id==="nf-on"){ const c=notifyCfg(); if (e.target.checked){ c.on=true; notifySave(c); try{ AndroidBridge.notifyAsk(); if (AndroidBridge.desktop) window.hbNotifyPerm(true); }catch(_){} } else { c.on=false; notifySave(c); renderNotifyEd(); } return; }
   const k=e.target.dataset&&e.target.dataset.nf; if (!k) return;
   const c=notifyCfg(); c[k]= e.target.type==="checkbox" ? e.target.checked : e.target.value; notifySave(c);
 });
@@ -2553,11 +2559,12 @@ document.addEventListener("click", e=>{
 
 /* ---------- Belege-Ordner ---------- */
 function rcptName(t){ if (!t) return "beleg.jpg"; const n=String(txPayee(t)||t.cat||"beleg").replace(/[^A-Za-z0-9ÄÖÜäöüß]+/g,"-").replace(/^-|-$/g,"").slice(0,30)||"beleg"; return `${t.date}_${n}_${String(Number(t.amount).toFixed(2)).replace(".",",")}.jpg`; }
-function rcptCanShare(){ return !!((window.AndroidBridge && window.AndroidBridge.shareImage) || (navigator.canShare && !NATIVE)); }
+function rcptCanShare(){ return !!((window.AndroidBridge && (window.AndroidBridge.shareImage || window.AndroidBridge.saveFileB64)) || (navigator.canShare && !NATIVE)); }
 async function rcptShare(img, name){
   if (!img) return;
   const b64=img.split(",")[1]||"";
   if (window.AndroidBridge && window.AndroidBridge.shareImage){ try{ AndroidBridge.shareImage(b64, name); }catch(e){ toast("Teilen hat nicht geklappt"); } return; }
+  if (window.AndroidBridge && window.AndroidBridge.saveFileB64){ try{ toast(AndroidBridge.saveFileB64(name, "image/jpeg", b64) ? "Beleg in Downloads gespeichert" : "Speichern hat nicht geklappt"); }catch(e){ toast("Speichern hat nicht geklappt"); } return; }
   try { const bl=await (await fetch(img)).blob(); const f=new File([bl], name, {type:"image/jpeg"}); if (navigator.canShare && navigator.canShare({files:[f]})) await navigator.share({files:[f], title:"Beleg"}); } catch(e){}
 }
 const CRC_T=(()=>{ const t=new Uint32Array(256); for (let n=0;n<256;n++){ let c=n; for (let k=0;k<8;k++) c = c&1 ? 0xEDB88320^(c>>>1) : c>>>1; t[n]=c>>>0; } return t; })();
@@ -2882,7 +2889,7 @@ function spSummary(k){
   if (k==="steuer"){ const L=(LAENDER.find(x=>x[0]===(st.land||"NW"))||[,""])[1]; return `${({angestellt:"Angestellt",selbst:"Selbstständig",beides:"Job + selbstständig"})[st.work||"beides"]} · Klasse ${["I","II","III","IV","V","VI"][(st.steuerklasse||1)-1]} · ${L}${st.reserveRate&&hasSelf()?` · ${numStr(st.reserveRate)} % Rücklage`:""}`; }
   if (k==="start"){ const n=(st.shops||[]).length; return `Reihenfolge der Blöcke${n?` · ${n} Läden`:""}`; }
   if (k==="sicherheit"){ return lockCfg() ? "App-Sperre an" : "App-Sperre aus"; }
-  if (k==="notify"){ const c=notifyCfg(); return !CAN_NOTIFY ? "nur in der Handy-App" : c.on&&notifyPerm()==="granted" ? "an" : "aus"; }
+  if (k==="notify"){ const c=notifyCfg(); return !CAN_NOTIFY ? "nur in der App" : c.on&&notifyPerm()==="granted" ? "an" : "aus"; }
   if (k==="kategorien"){ return `${cats("ausgabe").length+cats("betrieb").length+incCats().length} Kategorien`; }
   return "";
 }
@@ -3339,6 +3346,7 @@ function renderRcptRow(){
   $("rcptHave").hidden = !has; $("rcptAddWrap").hidden = has;
   $("rcptGallery").hidden = !NATIVE_SCAN;
   $("rcptShare").hidden = !(has && r.img && rcptCanShare());
+  $("rcptShare").textContent = window.AndroidBridge && !window.AndroidBridge.shareImage && window.AndroidBridge.saveFileB64 ? "Speichern" : "Teilen";
   if (has){ $("rcptThumb").src = r.img || ""; $("rcptInfo").textContent = r.state==="new" ? "wird mit der Buchung gespeichert" : "gespeichert"; }
 }
 async function rcptSaveFor(id){

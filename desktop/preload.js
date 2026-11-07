@@ -11,5 +11,11 @@ contextBridge.exposeInMainWorld("AndroidBridge", {
   http: (id, method, url, auth, body) =>
     ipcRenderer.send("http", { id: String(id), method: String(method), url: String(url), auth: String(auth || ""), body: String(body || "") }),
   openInApp: (url) => ipcRenderer.send("openInApp", String(url)),
+  notifyState: () => "granted",
+  notifyAsk: () => true,
+  notifyNow: (id, title, text) => ipcRenderer.send("notifyNow", String(title), String(text)),
+  notifySchedule: (json) => ipcRenderer.send("notifySchedule", String(json)),
+  notifySettings: () => ipcRenderer.send("notifySettings"),
+  pcPrefs: (json) => ipcRenderer.sendSync("pcPrefs", json ? String(json) : ""),
   desktop: true,
 });
