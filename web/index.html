@@ -149,6 +149,8 @@ main{padding-block:6px 120px}
 .tlrow{position:relative;display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:8px 0;color:inherit}
 .tlrow:before{content:"";position:absolute;left:-21px;top:50%;margin-top:-6px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2.5px solid var(--faint);box-sizing:border-box}
 .tlrow.inc:before{border-color:var(--accent);background:var(--accent)}
+.tlrow.k-betrieb:before{border-color:var(--c3)}.tlrow.k-vorauszahlung:before{border-color:var(--warn)}
+#listCard .tline{margin:2px 0 6px}#listCard .tline:before{top:16px;bottom:16px}
 .tlrow .grow{flex:1;min-width:0;display:flex;flex-direction:column}.tlrow b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tlrow .amt{font-weight:700;white-space:nowrap}
 .jars{display:flex;gap:10px;overflow-x:auto;margin:0 -6px;padding:2px 6px;scrollbar-width:none}.jars::-webkit-scrollbar{display:none}
 .jarb{border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 auto;width:92px}
@@ -580,7 +582,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   <section class="view" id="v-list" data-view="list" hidden>
     <button class="importbtn" data-go="import"><span class="ictile" style="background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span style="flex:1;text-align:left"><b>Kontoauszug importieren</b><br><span class="small muted">CSV- oder PDF-Datei deiner Bank hochladen</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
     <label class="search"><svg class="i muted" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="q" type="search" placeholder="Suchen, z. B. Rewe oder Tanken" autocomplete="off" aria-label="Buchungen durchsuchen"></label>
-    <div class="lseg" id="lseg" role="group" aria-label="Ansicht"><button data-lmode="list" aria-pressed="true"><svg class="i" viewBox="0 0 24 24" style="width:17px;height:17px"><path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/></svg>Liste</button><button data-lmode="cal" aria-pressed="false"><svg class="i" viewBox="0 0 24 24" style="width:17px;height:17px"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M8 3.5v4M16 3.5v4M4 10h16"/></svg>Kalender</button></div>
+    <div class="lseg" id="lseg" role="group" aria-label="Ansicht" hidden><button data-lmode="list" aria-pressed="true"><svg class="i" viewBox="0 0 24 24" style="width:17px;height:17px"><path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/></svg>Liste</button><button data-lmode="cal" aria-pressed="false"><svg class="i" viewBox="0 0 24 24" style="width:17px;height:17px"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M8 3.5v4M16 3.5v4M4 10h16"/></svg>Kalender</button></div>
     <div class="card" id="calCard" hidden></div>
     <div class="filters" id="filters"></div>
     <div class="card" id="listCard"></div>
@@ -1336,6 +1338,12 @@ function txRow(t, showDate){
   const sub = [t.note ? t.cat : "", t.kind==="betrieb" ? "Betrieblich" : t.kind==="vorauszahlung" ? "aus Rücklage" : "", showDate ? shortDate(t.date) : ""].filter(Boolean).join(" · ");
   return `<button class="tx" data-edit="${esc(t.id)}">${avatar(t)}<span class="grow"><div class="t">${esc(title)}${hasReceipt(t.id)?`<svg class="i clip" viewBox="0 0 24 24" style="width:14px;height:14px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3.5"/></svg>`:""}</div>${sub?`<div class="s">${esc(sub)}</div>`:""}</span><span class="amt ${isIn?"inc":""}">${isIn?"+":"−"} ${esc(eur(t.amount))}</span></button>`;
 }
+// one booking on the time line (same look as on the start page), with all details
+function tlRow(t, when){
+  const isIn=t.kind==="einnahme", title=t.note||t.cat||KIND_LABEL[t.kind];
+  const sub=[when||"", t.note?t.cat:"", t.kind==="betrieb"?"Betrieblich":t.kind==="vorauszahlung"?"aus Rücklage":"", isIn&&t.net!=null&&Math.abs(t.net-t.amount)>0.004?`netto ${eur(t.net)}`:"", t.acct&&t.acct!=="Hauptkonto"?t.acct:""].filter(Boolean).join(" · ");
+  return `<button class="tlrow ${isIn?"inc":""} k-${esc(t.kind)}" data-edit="${esc(t.id)}"><span class="grow"><b>${esc(title)}${hasReceipt(t.id)?` <svg class="i clip" viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-1px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3.5"/></svg>`:""}</b>${sub?`<span class="small muted">${esc(sub)}</span>`:""}</span><span class="amt ${isIn?"pos":""}">${isIn?"+":"−"} ${esc(eur(t.amount))}</span></button>`;
+}
 function sortTx(list){ return list.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"") || (b.ts||0)-(a.ts||0)); }
 function emptyState(iconName, title, text, btn){
   return `<div class="empty"><span class="ictile">${ic(iconName,24)}</span><div><b>${title}</b><br><span class="small">${text}</span></div>${btn||""}</div>`;
@@ -1641,7 +1649,7 @@ function recentTimeline(c){
   const when=d=> d===today?"Heute":d===yest?"Gestern":shortDate(d);
   return `<div class="card" style="order:8"><div class="card-head"><h2>${hIc("receipt")}Letzte Buchungen</h2>${c.tx.length?`<button class="link" data-go="list">Alle ${ic("right",16)}</button>`:""}</div>
     ${c.tx.length?`<div class="tlchips">${[["alle","Alle"],["aus","Ausgaben"],["ein","Einnahmen"]].map(([k,l])=>`<button class="fchip" data-recentf="${k}" aria-pressed="${f===k}">${l}</button>`).join("")}</div>`:""}
-    ${c.tx.length ? (tx.length?`<div class="tline">${tx.map(t=>{ const inc=t.kind==="einnahme"; return `<button class="tlrow ${inc?"inc":""}" data-edit="${esc(t.id)}"><span class="grow"><b>${esc(t.note||t.cat||"")}</b><span class="small muted">${esc(when(t.date))} · ${esc(t.cat||"")}${hasReceipt(t.id)?" · Beleg":""}</span></span><span class="amt ${inc?"pos":""}">${inc?"+":"−"} ${esc(eur(t.amount))}</span></button>`; }).join("")}</div>`:`<span class="small muted">Keine ${f==="ein"?"Einnahmen":"Ausgaben"} in diesem Monat.</span>`)
+    ${c.tx.length ? (tx.length?`<div class="tline">${tx.map(t=>tlRow(t, when(t.date))).join("")}</div>`:`<span class="small muted">Keine ${f==="ein"?"Einnahmen":"Ausgaben"} in diesem Monat.</span>`)
       : emptyState("receipt","Noch keine Buchungen","Alles, was du einträgst, erscheint hier.", `<button class="btn primary" data-add="ausgabe">Erste Buchung eintragen</button>`)}
   </div>`;
 }
@@ -1873,7 +1881,7 @@ function renderList(){
   const filters = [["alle","Alle"],["ausgabe","Ausgaben"],["einnahme","Einnahmen"],["betrieb","Betrieblich"],["vorauszahlung","Steuer"]];
   $("filters").innerHTML = filters.map(([k,l])=>`<button class="fchip" data-filter="${k}" aria-pressed="${UI.filter===k}">${l}</button>`).join("");
   let list = monthCalc(UI.ym).tx;
-  const cal = UI.listMode==="cal";
+  const cal = true;   // the calendar is always shown above the list
   document.querySelectorAll("[data-lmode]").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.lmode===(cal?"cal":"list"))));
   $("calCard").hidden = !cal;
   if (cal){
@@ -1895,7 +1903,7 @@ function renderList(){
   const days = {}; for (const t of sortTx(list)) (days[t.date]=days[t.date]||[]).push(t);
   $("listCard").innerHTML = Object.entries(days).map(([d,ts])=>{
     const net = sum(ts,t=>t.kind==="einnahme"?t.amount:-t.amount);
-    return `<div class="dayhead"><span>${esc(dayLabel(d))}</span><span class="${net>=0?"pos":""}">${net>=0?"+":"−"} ${esc(eur(Math.abs(net)))}</span></div>${ts.map(t=>txRow(t,false)).join("")}`;
+    return `<div class="dayhead"><span>${esc(dayLabel(d))}</span><span class="${net>=0?"pos":""}">${net>=0?"+":"−"} ${esc(eur(Math.abs(net)))}</span></div><div class="tline">${ts.map(t=>tlRow(t)).join("")}</div>`;
   }).join("");
 }
 
