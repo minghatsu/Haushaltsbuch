@@ -123,6 +123,15 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stro
 .tab.plus{justify-self:center;width:54px;height:54px;border-radius:18px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;padding:0;box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 45%,transparent);transition:transform .15s}
 .tab.plus:active{transform:scale(.94)}
 .tab.plus svg.i{width:26px;height:26px;stroke-width:2.4}
+/* phone: icons only, a small line under the active one, the round "+" sits higher in the middle */
+.tab .tname{display:none}
+.tabs{border-radius:30px;padding:4px 6px;overflow:visible}
+.tab{position:relative;height:58px;justify-content:center}
+.tab:not(.plus) svg.i{padding:0;background:none!important;width:24px;height:24px}
+.tab:not(.plus)::after{content:"";position:absolute;left:50%;bottom:9px;width:18px;height:3px;border-radius:9px;background:var(--accent);transform:translateX(-50%) scaleX(0);transition:transform .2s}
+.tab[aria-selected="true"]:not(.plus)::after{transform:translateX(-50%) scaleX(1)}
+.tab:not(.plus){color:var(--muted)}.tab[aria-selected="true"]:not(.plus){color:var(--accent)}
+.tab.plus{width:62px;height:62px;border-radius:50%;margin-top:-34px;box-shadow:0 10px 22px -6px color-mix(in srgb,var(--accent) 60%,transparent)}
 main{padding-block:6px 120px}
 
 /* building blocks */
@@ -563,7 +572,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   .tab[aria-selected="true"]{background:var(--accent-soft);color:var(--accent)}
   .tab.plus{order:-1;width:100%;height:auto;border-radius:14px;padding:12px 14px;display:flex;justify-content:flex-start;gap:12px;margin-bottom:14px;font-size:15px}
   .tab.plus svg.i{width:22px;height:22px}
-  .tab .tlabel{display:inline}
+  .tab .tlabel,.tab .tname{display:inline}
+  .tab{height:auto}.tab:not(.plus)::after{display:none}.tab.plus{margin-top:0;box-shadow:none}.tabs{overflow:auto}
   .tab:not(.plus) svg.i{padding:0;background:none!important}
   .deskonly{display:flex}
   .tabs .spacer{flex:1}
@@ -718,11 +728,11 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 
 <nav class="tabs" aria-label="Bereiche" role="tablist">
   <div class="brand"><span class="ictile"><svg class="i" viewBox="0 0 24 24"><path d="M6 4.5h11a1.5 1.5 0 0 1 1.5 1.5v13.5H7.5A1.5 1.5 0 0 1 6 18z"/><path d="M15 9.2a3 3 0 1 0 0 4.6M10 10.6h4M10 12.4h4"/></svg></span>Haushaltsbuch</div>
-  <button class="tab" role="tab" data-go="home" aria-selected="true"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>Start</button>
-  <button class="tab" role="tab" data-go="list" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".6"/><circle cx="4" cy="12" r=".6"/><circle cx="4" cy="18" r=".6"/></svg>Buchungen</button>
+  <button class="tab" role="tab" data-go="home" aria-selected="true" aria-label="Start"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span class="tname">Start</span></button>
+  <button class="tab" role="tab" data-go="list" aria-selected="false" aria-label="Buchungen"><svg class="i" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".6"/><circle cx="4" cy="12" r=".6"/><circle cx="4" cy="18" r=".6"/></svg><span class="tname">Buchungen</span></button>
   <button class="tab plus" data-addmenu="1" aria-label="Neue Buchung"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="tlabel">Neue Buchung</span></button>
-  <button class="tab" role="tab" data-go="fix" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M17 3v4M7 3v4"/><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="m9 13.5 2 2 4-4"/></svg>Fixkosten</button>
-  <button class="tab" role="tab" data-go="year" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M5 20v-7M10 20V6M15 20v-9M20 20V9"/></svg>Analyse</button>
+  <button class="tab" role="tab" data-go="fix" aria-selected="false" aria-label="Fixkosten"><svg class="i" viewBox="0 0 24 24"><path d="M17 3v4M7 3v4"/><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="m9 13.5 2 2 4-4"/></svg><span class="tname">Fixkosten</span></button>
+  <button class="tab" role="tab" data-go="year" aria-selected="false" aria-label="Analyse"><svg class="i" viewBox="0 0 24 24"><path d="M5 20v-7M10 20V6M15 20v-9M20 20V9"/></svg><span class="tname">Analyse</span></button>
   <span class="spacer deskonly"></span>
   <button class="tab deskonly" role="tab" data-go="more" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Einstellungen</button>
 </nav>
