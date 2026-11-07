@@ -446,9 +446,9 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   <div id="banner"></div>
   <section class="view" id="v-home" data-view="home"></section>
   <section class="view" id="v-import" data-view="import" hidden></section>
-  <input type="file" id="csvFile" accept=".csv,text/csv,text/plain" hidden>
+  <input type="file" id="csvFile" accept=".csv,.pdf,text/csv,text/plain,application/pdf" hidden>
   <section class="view" id="v-list" data-view="list" hidden>
-    <button class="importbtn" data-go="import"><span class="ictile" style="background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span style="flex:1;text-align:left"><b>Kontoauszug importieren</b><br><span class="small muted">CSV-Datei deiner Bank hochladen</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+    <button class="importbtn" data-go="import"><span class="ictile" style="background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span style="flex:1;text-align:left"><b>Kontoauszug importieren</b><br><span class="small muted">CSV- oder PDF-Datei deiner Bank hochladen</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
     <label class="search"><svg class="i muted" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="q" type="search" placeholder="Suchen, z. B. Rewe oder Tanken" autocomplete="off" aria-label="Buchungen durchsuchen"></label>
     <div class="filters" id="filters"></div>
     <div class="card" id="listCard"></div>
@@ -535,7 +535,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <div class="grab"></div>
     <div class="sheet-head"><h2 id="sheetTitle">Neue Buchung</h2><button class="icon-btn" id="sheetClose" aria-label="Schließen" style="color:var(--muted)"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
-    <button class="importbtn" id="sheetImport" style="box-shadow:none;background:var(--sunk);padding:10px 12px"><span class="ictile" style="width:34px;height:34px;border-radius:11px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span style="flex:1;text-align:left"><b>Kontoauszug importieren</b><br><span class="small muted">CSV-Datei deiner Bank auswählen</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+    <button class="importbtn" id="sheetImport" style="box-shadow:none;background:var(--sunk);padding:10px 12px"><span class="ictile" style="width:34px;height:34px;border-radius:11px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span style="flex:1;text-align:left"><b>Kontoauszug importieren</b><br><span class="small muted">CSV- oder PDF-Datei deiner Bank auswählen</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
     <div class="scanrow" id="scanRow">
       <button class="importbtn" id="scanCam" style="box-shadow:none;background:var(--sunk);padding:10px 12px"><span class="ictile" style="width:34px;height:34px;border-radius:11px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span style="flex:1;text-align:left"><b id="scanTitle">Quittung fotografieren</b><br><span class="small muted" id="scanSub">Betrag, Datum und Geschäft werden ausgefüllt</span></span></button>
       <button class="btn" id="scanPick" hidden>Aus Galerie</button>
@@ -2033,7 +2033,7 @@ function suggest(r){
     for (const [re,kind,word] of KW){ if (re.test(text)){ const c=catByWord(kind,word); if (c) return {target:kind+"|"+c, sure:true}; } }
     return {target:"ausgabe|"+(cats("ausgabe")[0]||""), sure:false};
   }
-  if (/(^|\D)\d{2,4}\s?[\/\-]\s?20\d\d(\D|$)|(^|\D)\d{3} 20\d\d(\D|$)/.test(nrm(r.ref))){ const c=incCats().find(c=>c.art==="selbst"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
+  if (/(^|\D)\d{2,4}\s?[\/\-]\s?20\d\d(\D|$)|(^|\D)\d{3} 20\d\d(\D|$)/.test(nrm(r.ref)) && !/\b(lohn|gehalt|rente|bezüge|bezuege|entgelt)\b/.test(text)){ const c=incCats().find(c=>c.art==="selbst"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
   if (/bundesagentur|arbeitsagentur|agentur für arbeit|agentur fuer arbeit/.test(text)){ const c=incCats().find(c=>c.art==="lohnersatz"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
   if (/\bspaces?\b/.test(text)) return {target:"skip|", sure:false};
   // money that really comes in, but is no earned income: refunds, cashback, N26 instalment credits, sold shares/crypto, cash deposits
@@ -2067,11 +2067,127 @@ async function readFileText(file){
   if (t.includes("\uFFFD")) { try { t = new TextDecoder("windows-1252").decode(buf); } catch(e){} }
   return t;
 }
+/* ---------- PDF bank statements ---------- */
+let pdfLoad=null;
+function loadPdfJs(){
+  // pdf.js from Mozilla, loaded only when a PDF is opened; the "worker" part runs in the page (works the same on Android and PC)
+  const add = src => new Promise((ok,bad)=>{ const sc=document.createElement("script"); sc.src=src; sc.onload=ok; sc.onerror=bad; document.head.appendChild(sc); });
+  const base="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.2.146/build/";
+  return pdfLoad || (pdfLoad = add(base+"pdf.min.js").then(()=>add(base+"pdf.worker.min.js")).then(()=>{ window.pdfjsLib.GlobalWorkerOptions.workerSrc=base+"pdf.worker.min.js"; return window.pdfjsLib; })
+    .catch(()=>{ pdfLoad=null; throw new Error("Der PDF-Leser konnte nicht geladen werden – bist du online?"); }));
+}
+// text of every page as lines; each line is a list of cells {x, x2, s} (pieces of text close together form one cell)
+async function pdfLines(buf){
+  const lib=await loadPdfJs();
+  const doc=await lib.getDocument({data:new Uint8Array(buf), isEvalSupported:false}).promise;
+  const out=[];
+  for (let p=1; p<=Math.min(doc.numPages,60); p++){
+    const page=await doc.getPage(p), vp=page.getViewport({scale:1}), tc=await page.getTextContent();
+    const its=tc.items.filter(i=>i.str && i.str.trim()).map(i=>({x:i.transform[4], y:i.transform[5], w:i.width||0, h:Math.abs(i.transform[3])||8, s:i.str}));
+    its.sort((a,b)=>b.y-a.y || a.x-b.x);
+    const lines=[];
+    for (const it of its){
+      const ln=lines.find(l=>Math.abs(l.y-it.y)<=Math.max(2, it.h*0.35));
+      if (ln) ln.items.push(it); else lines.push({y:it.y, items:[it]});
+    }
+    lines.sort((a,b)=>b.y-a.y);
+    for (const l of lines){
+      l.items.sort((a,b)=>a.x-b.x);
+      const cells=[];
+      for (const it of l.items){
+        const c=cells[cells.length-1], gap=c ? it.x-c.x2 : 99;
+        if (c && gap < it.h*0.9){ c.s += (gap > it.h*0.15 && !/\s$/.test(c.s) && !/^\s/.test(it.s) ? " " : "") + it.s; c.x2=Math.max(c.x2, it.x+it.w); }
+        else cells.push({x:it.x, x2:it.x+it.w, s:it.s});
+      }
+      cells.forEach(c=>c.s=c.s.replace(/\s+/g," ").trim());
+      out.push({page:p, y:l.y, w:vp.width, cells:cells.filter(c=>c.s), text:cells.map(c=>c.s).join("  ").trim()});
+    }
+  }
+  return out;
+}
+const PDF_AMT = /^([+\-−–]\s?)?(?:EUR\s?|€\s?)?(\d{1,3}(?:[.\s]\d{3})*|\d+),(\d{2})(?:\s?(?:€|EUR))?(\s?[+\-−–]|\s?[SH])?$/;
+function pdfAmount(s){
+  const m=PDF_AMT.exec(String(s).trim()); if (!m) return null;
+  const v=Number(m[2].replace(/[.\s]/g,"")+"."+m[3]);
+  const lead=(m[1]||"").trim(), trail=(m[4]||"").trim();
+  const sign = /[\-−–]/.test(lead)||/^[\-−–]$/.test(trail)||trail==="S" ? -1 : (lead==="+"||trail==="+"||trail==="H") ? 1 : 0;
+  return {v, sign};
+}
+const PDF_SKIP = /saldo|kontostand|übertrag|uebertrag|zwischensumme|summe\b|gesamtbetrag|gesamtumsatz|alter stand|neuer stand|kreditrahmen|dispo|verfügungsrahmen|seite \d+ (von|\/) \d+|^\s*(eingänge|ausgänge|umsätze)\s*$/i;
+const PDF_TYPES = /^(sepa[- ])?(basis[- ])?(folge)?(lastschrift|überweisung|ueberweisung|echtzeitüberweisung|echtzeit-überweisung|dauerauftrag|gutschrift|kartenzahlung|kartenumsatz|kartenverfügung|debitkarte|visa|mastercard|girocard|lohn\/gehalt|gehalt\/rente|gehalt|rente|entgelt|abschluss|zinsen|bargeldauszahlung|bargeldeinzahlung|auszahlung|einzahlung|gutschr\.?|lastschr\.?|überw\.?|ueberw\.?|retoure|rücklastschrift|online-überweisung|onlineüberweisung|zahlungseingang|zahlungsausgang|eingang|ausgang|abbuchung|buchung|lastschrifteinzug)\b\.?\s*/i;
+const PDF_JUNK = /^(iban|bic|mandat|mandatsref|mandatsreferenz|gläubiger|glaeubiger|creditor|end-to-end|e2e|kundenreferenz|referenz|ref\.|wertstellung|valuta|wert|buchungstag|buchungsdatum)\b[:.]?/i;
+function pdfStatementRows(lines){
+  // year for dates without one ("01.10."): taken from the nearest full date before (or anywhere in the file)
+  const fullDate=/(\d{1,2})\.(\d{1,2})\.(\d{4}|\d{2})(?!\d)/, shortDate=/(?:^|\s)(\d{1,2})\.(\d{1,2})\.(?!\d)/;
+  let lastFull=null; for (const l of lines){ const m=fullDate.exec(l.text); if (m){ lastFull={y:m[3].length===2?2000+Number(m[3]):Number(m[3]), m:Number(m[2])}; break; } }
+  if (!lastFull) lastFull={y:new Date().getFullYear(), m:new Date().getMonth()+1};
+  // columns of the table head (repeated on every page, or taken over from the page before)
+  const heads={};
+  let cols=null;
+  const headWords=[["neg",/^(soll|belastung|belastungen|ausgang|ausgänge|lastschriften|abgang|zu ihren lasten|-|minus)$/i],["pos",/^(haben|gutschrift|gutschriften|eingang|eingänge|zugang|zu ihren gunsten|\+|plus)$/i],["amt",/^(betrag|betrag \(eur\)|betrag in eur|betrag eur|umsatz|umsatz in eur|betrag €)$/i],["bal",/^(saldo|kontostand|stand)$/i]];
+  const dateAt = l => { for (const c of l.cells){ let m=fullDate.exec(c.s); if (m && m.index<=2) return {d:Number(m[1]), m:Number(m[2]), y:m[3].length===2?2000+Number(m[3]):Number(m[3]), cell:c, full:true}; m=/^(\d{1,2})\.(\d{1,2})\.(?!\d)/.exec(c.s); if (m) return {d:Number(m[1]), m:Number(m[2]), y:null, cell:c}; } return null; };
+  const txs=[]; let cur=null;
+  for (let i=0;i<lines.length;i++){
+    const l=lines[i];
+    const fm=fullDate.exec(l.text); if (fm){ const y=fm[3].length===2?2000+Number(fm[3]):Number(fm[3]); if (y>1990 && y<2100) lastFull={y, m:Number(fm[2])}; }
+    // a table head?
+    const hits=[]; for (const c of l.cells){ for (const [k,re] of headWords) if (re.test(c.s.trim())) hits.push([k,(c.x+c.x2)/2]); }
+    if (hits.length && l.cells.length>=2 && l.cells.length<=8 && hits.some(h=>h[0]!=="bal") && !l.cells.some(c=>pdfAmount(c.s)) && !fullDate.test(l.text) && !/^\d{1,2}\.\d{1,2}\./.test(l.text)){ cols={}; for (const [k,x] of hits) (cols[k]=cols[k]||[]).push(x); heads[l.page]=cols; cur=null; continue; }
+    // amounts on the right side of the line
+    const amts=[]; l.cells.forEach((c,ci)=>{ if (c.x < l.w*0.42) return; let a=pdfAmount(c.s), x=(c.x+c.x2)/2;
+      if (!a && l.cells[ci+1] && /^(€|EUR|S|H|-|\+)$/.test(l.cells[ci+1].s)) a=pdfAmount(c.s+" "+l.cells[ci+1].s);
+      if (a) amts.push({...a, x, cell:c}); });
+    const skip=PDF_SKIP.test(l.text);
+    const dt=dateAt(l);
+    if (amts.length && !skip){
+      // which amount is the booking (not the running balance)
+      let a=amts[0];
+      if (amts.length>1){ if (cols && (cols.amt||cols.neg||cols.pos)){ const xs=[...(cols.amt||[]),...(cols.neg||[]),...(cols.pos||[])]; a=amts.slice().sort((p,q)=>Math.min(...xs.map(x=>Math.abs(x-p.x)))-Math.min(...xs.map(x=>Math.abs(x-q.x))))[0]; } else if (cols && cols.bal) a=amts[0]; else a=amts[amts.length-1]; }
+      let sign=a.sign;
+      if (!sign && cols && (cols.neg||cols.pos)){ const dn=Math.min(...(cols.neg||[1e9]).map(x=>Math.abs(x-a.x))), dp=Math.min(...(cols.pos||[1e9]).map(x=>Math.abs(x-a.x))); sign = dn<dp ? -1 : 1; }
+      let date=dt;
+      if (!date){ for (const k of [-1,1,-2,2]){ const o=lines[i+k]; if (!o || o.page!==l.page) continue; const d=dateAt(o); if (d && !(txs.length && txs[txs.length-1].li===i+k)){ date=d; break; } } }
+      if (!date){ cur=null; continue; }
+      let y=date.y; if (!y){ y=lastFull.y; if (date.m===12 && lastFull.m<=2) y--; else if (date.m<=2 && lastFull.m===12) y++; }
+      const text=l.cells.filter(c=>c!==a.cell && !(dt && c===dt.cell) && !/^(€|EUR|S|H|-|\+)$/.test(c.s) && !pdfAmount(c.s)).map(c=>c.s.replace(/(\d{1,2})\.(\d{1,2})\.(\d{4}|\d{2})(?!\d)/g,"").replace(/(^|\s)\d{1,2}\.\d{1,2}\.(?!\d)/g," ").trim()).filter(Boolean);
+      cur={li:i, page:l.page, date:y+"-"+pad(date.m)+"-"+pad(date.d), v:a.v, sign, first:text.join(" "), cont:[]};
+      txs.push(cur); continue;
+    }
+    if (skip || !cur || l.page!==cur.page || cur.cont.length>=6) { if (skip) cur=null; continue; }
+    if (dt && dt.full && l.cells.length>2) { cur=null; continue; } // new block without an amount
+    cur.cont.push(l.cells.map(c=>c.s).join(" "));
+  }
+  // turn into rows like a CSV: Datum, Empfänger, Verwendungszweck, Betrag, Buchungsart
+  return txs.map(t=>{
+    let first=t.first.replace(/\s+/g," ").trim(), type="";
+    const tm=PDF_TYPES.exec(first); if (tm){ type=tm[0].trim().replace(/\.$/,""); first=first.slice(tm[0].length).trim(); }
+    const rest=t.cont.map(s=>s.replace(/^(\d{1,2}\.\d{1,2}\.(\d{4}|\d{2})?\s*)+/,"").replace(/\s+/g," ").trim()).filter(s=>s && !PDF_JUNK.test(s));
+    let payee=first; if (!payee || /^[\d\s.\/:-]+$/.test(payee)){ payee=rest.shift()||""; const tm2=!type && PDF_TYPES.exec(payee); if (tm2){ type=tm2[0].trim(); payee=payee.slice(tm2[0].length).trim()||rest.shift()||""; } }
+    let sign=t.sign;
+    if (!sign) sign = /gutschrift|eingang|gehalt|lohn|rente|einzahlung|erstattung|zinsen haben/i.test(type+" "+t.first) ? 1 : -1;
+    const amount=(sign<0?"-":"")+t.v.toFixed(2);
+    return [t.date, payee.replace(/\s+/g," ").slice(0,90), rest.join(" ").slice(0,160), amount, type];
+  });
+}
+async function loadPdf(file){
+  toast("PDF wird gelesen …");
+  let rows;
+  try { rows = pdfStatementRows(await pdfLines(await file.arrayBuffer())); }
+  catch(e){ toast(e && /PDF-Leser/.test(e.message) ? e.message : (e && e.name==="PasswordException" ? "Die PDF ist mit Passwort geschützt" : "Die PDF konnte nicht gelesen werden")); return; }
+  if (!rows.length){ toast("In der PDF wurden keine Buchungen gefunden. Am sichersten ist der CSV-Export deiner Bank."); return; }
+  const headers=["Datum","Empfänger","Verwendungszweck","Betrag","Buchungsart"];
+  UI.imp = { fileName:file.name, headers, raw:rows.slice(0,2000), map:{date:0, payee:1, payer:-1, ref:2, amount:3, type:4, account:-1, status:-1, sh:-1, soll:-1, haben:-1, paypal:false}, items:null, pdf:true };
+  buildItems();
+  UI.view="import"; render(); window.scrollTo({top:0});
+}
 async function loadCsv(file){
   if (!file) return;
+  if (file.size > 15*1024*1024){ toast("Die Datei ist zu groß"); return; }
+  if (/\.pdf$/i.test(file.name||"") || file.type==="application/pdf") return loadPdf(file);
   if (file.size > 5*1024*1024){ toast("Die Datei ist zu groß"); return; }
   let rows;
   try { rows = parseCSV(await readFileText(file)); } catch(e){ toast("Die Datei konnte nicht gelesen werden"); return; }
+  if (/^%PDF/.test(String(rows[0]&&rows[0][0]||""))) return loadPdf(file);
   if (rows.length < 2){ toast("In der Datei sind keine Buchungen"); return; }
   // the header row: among the first lines, the one whose cells match the most known column names (exact names count double)
   const score = r => { if (r.some(c=>String(c).length>60)) return -1; const h=r.map(nrm); let n=0;
@@ -2147,6 +2263,7 @@ function buildItems(){
   const spaces = new Set(); if (m.account>=0) for (const r of imp.raw){ const a=nrm(r[m.account]); if (a) spaces.add(a); }
   for (const n of (S.settings.spaces||[])) spaces.add(nrm(n));
   imp.spaces = spaces;
+  const soft={}; if (imp.pdf) for (const t of S.tx){ const sk=t.date+"|"+Number(t.amount).toFixed(2); soft[sk]=(soft[sk]||0)+1; }
   for (const r of imp.raw){
     const date=parseDate(r[m.date]);
     let amount=parseBankAmt(r[m.amount]);
@@ -2159,9 +2276,12 @@ function buildItems(){
     let key = hashKey(date+"|"+amount.toFixed(2)+"|"+nrm(it.payee)+"|"+nrm(it.ref).slice(0,60));
     while (seen.has(key)) key += "b"; seen.add(key);
     it.key=key; it.ignored = ignored.has(key) && !keys.has(key); it.dup = keys.has(key) || (it.ignored && !imp.showIgnored);
+    // PDF: the same booking may already be there from a CSV import (other wording) -> same day and amount: suggest to skip
+    if (imp.pdf && !it.dup){ const sk=date+"|"+Math.abs(amount).toFixed(2); if ((soft[sk]||0)>0){ soft[sk]--; it.maybeDup=true; } }
     // PayPal: top-ups from / payouts to your bank account are already in the bank export
     const ppInternal = m.paypal && /bankgutschrift|bankkonto|vom nutzer eingeleitete abbuchung|abbuchung auf bankkonto|einzahlung|währungsumrechnung|waehrungsumrechnung|currency conversion|bank deposit|withdrawal|general authorization|allgemeine autorisierung/.test(nrm(it.type+" "+it.ref));
     const s = (spaces.has(nrm(it.payee)) || ppInternal) ? {target:"skip|", sure:true, internal:true} : suggest(it); it.internal=!!s.internal; it.target=s.target; it.sure=s.sure; it.learned=!!s.learned; it.remember=false;
+    if (it.maybeDup){ it.target="skip|"; it.sure=true; }
     items.push(it);
   }
   items.sort((a,b)=>b.date.localeCompare(a.date));
@@ -2173,7 +2293,7 @@ function renderImport(){
     v.innerHTML = `
       <div class="drop" id="drop">
         <span class="ictile" style="width:56px;height:56px;border-radius:18px;background:var(--accent-soft);color:var(--accent)">${ic("arrowDown",26)}</span>
-        <div><b style="font-size:16px">CSV-Datei deiner Bank auswählen</b><br><span class="small muted">oder hierher ziehen</span></div>
+        <div><b style="font-size:16px">Kontoauszug auswählen (CSV oder PDF)</b><br><span class="small muted">oder hierher ziehen</span></div>
         <button class="btn primary" id="pickCsv">Datei auswählen</button>
       </div>
       <div class="card"><h2 style="margin-bottom:12px">So bekommst du die Datei</h2>
@@ -2187,6 +2307,7 @@ function renderImport(){
       </div>
       <div class="card"><h2 style="margin-bottom:10px">Andere Banken</h2>
         <p class="small muted" style="margin:0 0 10px">Die App erkennt auch die CSV-Exporte von Sparkasse, Volksbank/Raiffeisenbank, ING, DKB, Commerzbank, comdirect, Postbank und PayPal. Den Export findest du meist im Online-Banking im Browser unter <b>Umsätze</b> › <b>Exportieren</b> bzw. <b>Download</b> › <b>CSV</b> (bei der Sparkasse „CSV-CAMT“).</p>
+        <p class="small muted" style="margin:0 0 10px"><b>PDF-Kontoauszüge</b> gehen auch. Die App liest Datum, Empfänger und Betrag aus dem Auszug. Weil jede Bank ihre PDFs anders gestaltet, kurz drüberschauen. Am genauesten bleibt die CSV-Datei. Buchungen, die mit gleichem Tag und Betrag schon drin sind, werden als „schon vorhanden?“ übersprungen.</p>
         <p class="small muted" style="margin:0">PayPal: Aufladungen von deinem Bankkonto werden übersprungen, die stehen schon im Kontoauszug der Bank. Zahlst du per PayPal, steht die Zahlung dann aber in beiden Dateien – stell die PayPal-Abbuchungen im Bank-Import auf „Nicht übernehmen“, wenn du beide importierst.</p>
       </div>
       <button class="btn" data-go="list">Zurück zu den Buchungen</button>`;
@@ -2221,6 +2342,7 @@ function renderImport(){
       <div class="small muted" style="margin-bottom:12px">${esc(imp.fileName)}</div>
       <div class="sumgrid"><div><b>${take.length-nFix}</b><span class="small muted">neue Buchungen</span></div><div><b>${nFix}</b><span class="small muted">Fixkosten abhaken</span></div><div><b>${dups}</b><span class="small muted">schon importiert</span></div></div>
       ${nIgn&&!imp.showIgnored?`<div class="notice info" style="margin-top:14px"><span>${nIgn} davon hast du früher bewusst übersprungen.</span><button class="btn" id="impShowIgn">Wieder anzeigen</button></div>`:""}
+      ${imp.pdf?`<div class="notice info" style="margin-top:14px"><span>Aus einer PDF gelesen. Prüf kurz Beträge und Vorzeichen.${imp.items.some(i=>i.maybeDup&&!i.dup)?` <b>${imp.items.filter(i=>i.maybeDup&&!i.dup).length}</b> mit gleichem Tag und Betrag gibt es schon – die werden übersprungen, außer du stellst sie um.`:""}</span></div>`:""}
       ${unsure?`<div class="notice warn" style="margin-top:14px"><span><b>${unsure}</b> ${unsure===1?"Buchung ist":"Buchungen sind"} unsicher zugeordnet und gelb markiert. Kurz prüfen, dann importieren.</span></div>`:""}
     </div>
     ${(()=>{ const names=[...new Set(imp.items.map(i=>i.acct).filter(Boolean))].sort((a,b)=>(b==="Hauptkonto")-(a==="Hauptkonto")||a.localeCompare(b,"de")); return names.length&&mem ? `<div class="card"><div class="card-head"><h2>Kontostände</h2><span class="small muted">aus dieser Datei</span></div><p class="small muted" style="margin:-6px 0 8px">Trag ein, was heute auf dem Konto ist. Den Rest rechnet die App aus.</p>${acctRows(names)}</div>` : ""; })()}
@@ -2232,11 +2354,11 @@ function renderImport(){
         return `<div class="imp" data-imp="${idx}"><div style="min-width:0"><div class="who">${esc(it.payee||it.ref||"Ohne Namen")}</div><div class="ref">${esc(shortDate(it.date))}${it.ref&&it.payee?" · "+esc(it.ref):""}</div></div>
           <div class="amt ${pos?"inc":""}" style="text-align:right">${pos?"+":"−"} ${esc(eur(Math.abs(it.amount)))}</div>
           <div class="ctl"><select class="in" id="imp-${idx}" data-imptarget="${idx}" aria-label="Zuordnung" style="${it.sure?"":"border-color:var(--warn)"}">${targetOptions(it.target,pos)}</select>
-          ${it.internal?`<span class="pill">Umbuchung Space</span>`:it.learned?`<span class="pill ok">gemerkt</span>`:!it.sure?`<span class="pill warn">prüfen</span>`:""}
+          ${it.maybeDup&&it.target==="skip|"?`<span class="pill warn">schon vorhanden?</span>`:it.internal?`<span class="pill">Umbuchung Space</span>`:it.learned?`<span class="pill ok">gemerkt</span>`:!it.sure?`<span class="pill warn">prüfen</span>`:""}
           ${it.payee?`<label class="rem"><input type="checkbox" data-impremember="${idx}" ${it.remember?"checked":""}>${esc(it.payee.length>22?it.payee.slice(0,22)+"…":it.payee)} merken</label>`:""}${selfNote}</div></div>`; }).join("")
         : emptyState("check","Alles schon importiert","In dieser Datei sind keine neuen Buchungen.")}
     </div>
-    ${mapping}
+    ${imp.pdf?"":mapping}
     <div class="row-btns stickybar"><button class="btn" id="impCancel" style="background:var(--surface);box-shadow:var(--shadow)">Abbrechen</button>${take.length?`<button class="btn primary" id="impGo" style="flex:2;box-shadow:var(--shadow)">${take.length} übernehmen</button>`:`<button class="btn primary" id="impDone" style="flex:2;box-shadow:var(--shadow)">Fertig</button>`}</div>`;
 }
 async function runLimited(tasks, n, onDone){
