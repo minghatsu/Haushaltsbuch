@@ -166,6 +166,14 @@ main{padding-block:6px 120px}
 .deal2{display:flex;align-items:center;gap:10px;padding:7px 0}.deal2+.deal2{border-top:1px solid var(--line)}.deal2 .grow{flex:1;min-width:0;display:flex;flex-direction:column}.deal2 b{font-weight:600}
 .dealform{display:flex;flex-direction:column;gap:8px;margin-top:6px}.dealform .in{background:var(--surface)}
 .spt{display:flex;align-items:center;gap:12px}.spt .grow{flex:1;min-width:0;display:flex;flex-direction:column}.spt b{font-weight:800;font-size:15px}.spt .btn{white-space:nowrap;text-decoration:none}
+.wfall{margin-top:8px;background:var(--surface);border-radius:20px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:7px;color:var(--fg)}
+.wseg{display:flex;gap:6px;margin-bottom:6px}.wseg button{border:0;border-radius:99px;padding:6px 11px;font-weight:700;font-size:12px;background:var(--sunk);color:var(--muted)}.wseg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.wrow{display:grid;grid-template-columns:minmax(0,9.5em) 1fr auto;align-items:center;gap:10px;font-size:12.5px}
+.wrow .wl{font-weight:600;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wrow .wv{font-weight:800;white-space:nowrap;text-align:right;min-width:62px}
+.wrow .wt{position:relative;height:20px}.wrow .wt i{position:absolute;top:0;bottom:0;border-radius:6px}.wrow .wt i.zero{width:1.5px;background:var(--line);border-radius:0}
+.wrow.k-sum .wl{color:var(--fg);font-weight:800}.wrow.sep{border-top:1px dashed var(--line);padding-top:7px}
+.wrow .neg{color:var(--bad)}
+:root{--bad-soft-strong:#E7A39C}
 .hlist,.hcol{display:flex;flex-direction:column;gap:14px}.hlist{margin-top:14px}
 .hcols{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:18px;align-items:start;margin-top:18px}
 .hblock>*{order:0!important}.hblock>.card+.card{margin-top:14px}
@@ -1505,10 +1513,7 @@ function renderHome(){
     <div class="homeTop" style="display:flex;flex-direction:column;gap:10px">
       <div class="astack ${accts.length>1?"":"one"}" id="astack" ${accts.length>1?`tabindex="0" aria-label="Konten – wischen zum Blättern"`:""}>${acardHtml}</div>
       ${accts.length>1?`<div class="adots" id="adots">${accts.map((_,i)=>`<button data-cdot="${i}" aria-label="Karte ${i+1}"><i></i></button>`).join("")}</div>`:""}
-      <details class="calc" id="heroDetails" ${UI.heroOpen?"open":""}><summary>So berechnet ${ic("chevron",14)}</summary>
-        <div class="eq"><span>${mainName?"Gesamt":"Kontostand"} 1.1.${esc(y)}</span><span>${esc(eur(startBal(y)))}</span><span>+ Einnahmen bis ${ym===cur?"heute":"Monatsende"}</span><span>${esc(eur(cum.balance-startBal(y)+cum.outSum))}</span><span>− Ausgaben bis ${ym===cur?"heute":"Monatsende"}</span><span>${esc(eur(cum.outSum))}</span><span>${mainName?"= Gesamt mit Spaces":"= Kontostand"}</span><span>${esc(eur(cum.balance))}</span>
-        ${ym>=cur&&(c.fixOpen||cum.reserveBal)?`<span>− Fixkosten noch offen (${c.openCount})</span><span>${esc(eur(c.fixOpen))}</span>${cum.reserveBal?`<span>− Rücklage für Steuern</span><span>${esc(eur(cum.reserveBal))}</span>`:""}<span>= Frei verfügbar</span><span>${esc(eur(free))}</span>`:""}</div>
-      </details>
+      <details class="calc" id="heroDetails" ${UI.heroOpen?"open":""}><summary>So berechnet ${ic("chevron",14)}</summary>${waterfall(ym, cum, c, mainName)}</details>
     </div>
     ${homeBlocks({
       tip: `<div class="tipline ${tipCls}"><span class="e">${ic(tipCls?"alert":"check",19)}</span><span>${tip}</span></div>`,
@@ -1534,6 +1539,31 @@ function renderHome(){
   initStack(); initShopRail();
 }
 
+/* ---------- "So berechnet" as a stair of bars: each step starts where the last one ended ---------- */
+function waterfall(ym, cum, c, mainName){
+  const y=ym.slice(0,4), cur=ymOf(new Date()), mon=UI.calcMode==="month";
+  let start, label;
+  if (mon){ const m=ymParts(ym)[1]; const pc = m>1 ? yearCum(shiftYm(ym,-1)) : null; start = pc ? pc.balance : startBal(y); label=`Stand 1. ${MONTHS[m-1]}`;
+    var outV = cum.outSum - (pc?pc.outSum:0); }
+  else { start=startBal(y); label=`Stand 1.1.${y}`; var outV=cum.outSum; }
+  const inV = cum.balance - start + outV, total=cum.balance;
+  const steps=[{l:label, from:0, to:start, kind:"base", v:start},
+    {l:"+ Einnahmen", from:start, to:start+inV, kind:"in", v:inV},
+    {l:"− Ausgaben", from:start+inV, to:total, kind:"out", v:-outV},
+    {l:`= ${mainName?"Gesamt":"Kontostand"} ${ym===cur?"heute":ym<cur?"Monatsende":"voraussichtlich"}`, from:0, to:total, kind:"sum", v:total, sep:true}];
+  let run=total;
+  if (ym>=cur && c.fixOpen){ steps.push({l:`− Fixkosten offen (${c.openCount})`, from:run, to:run-c.fixOpen, kind:"out", v:-c.fixOpen}); run-=c.fixOpen; }
+  if (cum.reserveBal){ steps.push({l:"− Steuer-Rücklage", from:run, to:run-cum.reserveBal, kind:"out", v:-cum.reserveBal}); run-=cum.reserveBal; }
+  if (run!==total) steps.push({l:"= Frei verfügbar", from:0, to:run, kind:"sum", v:run, sep:true});
+  const vals=steps.flatMap(s=>[s.from,s.to]), lo=Math.min(0,...vals), hi=Math.max(1,...vals), sc=v=>(v-lo)/(hi-lo)*100;
+  const col={base:"var(--faint)", in:"var(--accent)", out:"var(--bad-soft-strong)", sum:"var(--fg)"};
+  return `<div class="wfall">
+    <div class="wseg" role="group" aria-label="Zeitraum"><button data-calcmode="year" aria-pressed="${!mon}">Seit 1. Januar</button><button data-calcmode="month" aria-pressed="${mon}">Nur ${esc(MONTHS[ymParts(ym)[1]-1])}</button></div>
+    ${steps.map(s=>{ const a=sc(Math.min(s.from,s.to)), w=Math.max(0.8, Math.abs(sc(s.to)-sc(s.from)));
+      return `<div class="wrow k-${s.kind} ${s.sep?"sep":""}"><span class="wl">${esc(s.l)}</span><span class="wt">${lo<0?`<i class="zero" style="left:${sc(0)}%"></i>`:""}<i style="left:${a}%;width:${w}%;background:${s.v<0&&s.kind==="sum"?"var(--bad)":col[s.kind]}"></i></span><span class="wv ${s.kind==="in"?"pos":s.kind==="out"||s.v<0?"neg":""}">${s.kind==="in"?"+ ":s.kind==="out"?"− ":s.v<0?"− ":""}${esc(eur0(Math.abs(s.v)))}</span></div>`; }).join("")}
+  </div>`;
+}
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-calcmode]"); if (!b) return; e.preventDefault(); UI.calcMode=b.dataset.calcmode; UI.heroOpen=true; renderHome(); });
 /* ---------- start page blocks: your own order, each can be hidden ---------- */
 const HOME_BLOCKS = [["tip","Hinweis (Klartext)"],["quick","Schnellknöpfe"],["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["debts","Schulden"],["recent","Letzte Buchungen"],["offers","Angebote & Läden"]];
 function homeOrder(){ const o=(S.settings.homeOrder||[]).filter(k=>HOME_BLOCKS.some(b=>b[0]===k)); for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; }
