@@ -110,8 +110,10 @@ main{padding-block:6px 120px}
 .quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 /* account cards (swipe) */
 /* account cards as a stack: swipe left or right, the top card goes to the back */
-.astack{position:relative;height:196px;touch-action:pan-y;user-select:none;-webkit-user-select:none;outline:none}
-.astack .acard{position:absolute;left:0;right:0;top:0;max-width:none;transition:transform .32s cubic-bezier(.2,.8,.2,1),opacity .32s;will-change:transform;cursor:grab}
+.astack{position:relative;height:186px;touch-action:pan-y;user-select:none;-webkit-user-select:none;outline:none;margin:0 -16px;overflow:hidden}
+.astack.one{margin:0}
+.astack .acard{position:absolute;left:11%;right:11%;top:0;max-width:none;transition:transform .38s cubic-bezier(.2,.8,.2,1),opacity .3s,filter .3s;will-change:transform;cursor:grab;transform-origin:center}
+.astack.one .acard{left:0;right:0}
 .astack.one{height:176px}.astack.one .acard{cursor:default}
 .astack .acard.drag{transition:none;cursor:grabbing}
 .acard.tot{background:linear-gradient(135deg,#0F5E46,#0A3F30)}
@@ -1412,34 +1414,42 @@ function moneyFlowCard(ym){
     </div>`;
 }
 function initStack(){
+  // account cards as an endless carousel: the card in the middle is big, the ones before and after sit smaller and darker beside it
   const st=$("astack"); if (!st) return;
   const cards=[...st.querySelectorAll(".acard")], n=cards.length, dots=$("adots");
   if (!(UI.cardIdx>=0 && UI.cardIdx<n)) UI.cardIdx=0;
-  const place = () => {
-    cards.forEach((c,i)=>{ const d=(i-UI.cardIdx+n)%n; c.style.zIndex=String(10-d);
-      c.style.transform = d===0 ? "" : d===1 ? "translateY(10px) scale(.95)" : d===2 ? "translateY(20px) scale(.9)" : "translateY(20px) scale(.9)";
-      c.style.opacity = d<=1 ? "1" : d===2 ? ".55" : "0"; c.setAttribute("aria-hidden", String(d!==0)); });
+  const rel = i => { let d=(i-UI.cardIdx+n)%n; if (d>n/2) d-=n; if (n===2 && d===-1) d=1; return d; };
+  let last = cards.map((_,i)=>rel(i));
+  const place = (dx=0, anim=true) => {
+    const w=st.clientWidth*0.8;
+    cards.forEach((c,i)=>{ const d=rel(i), jump=Math.abs(d-last[i])>1, side=Math.abs(d);
+      c.style.transition = (!anim || jump) ? "none" : "";
+      const x = d*w*0.92 + dx, sc = side===0 ? 1-Math.min(0.14,Math.abs(dx)/w*0.14) : 0.86+Math.min(0.14,(d*dx<0?Math.abs(dx):0)/w*0.14);
+      c.style.transform = `translateX(${x}px) scale(${sc})`;
+      c.style.opacity = side<=1 ? "1" : "0";
+      c.style.filter = side===0 ? "" : "brightness(.55) saturate(.8)";
+      c.style.zIndex = String(10-side); c.setAttribute("aria-hidden", String(d!==0)); });
+    last = cards.map((_,i)=>rel(i));
     if (dots) [...dots.children].forEach((b,i)=>b.classList.toggle("on", i===UI.cardIdx));
   };
-  place();
+  place(0,false);
+  st.style.height = (Math.max(...cards.map(c=>c.offsetHeight))+16)+"px";
   if (n<2) return;
   const go = dir => { UI.cardIdx=(UI.cardIdx+dir+n)%n; place(); };
-  // fly the top card out to the side it was pushed to, then it goes to the back
-  const flyOut = (dir) => { const top=cards[UI.cardIdx]; top.classList.remove("drag"); top.style.transform=`translateX(${dir<0?-115:115}%) rotate(${dir<0?-8:8}deg)`; top.style.opacity="0";
-    setTimeout(()=>{ top.style.transition="none"; go(dir<0?1:-1); top.style.opacity="0"; requestAnimationFrame(()=>{ top.style.transition=""; place(); }); }, 230); };
   let x0=null, y0=0, dx=0, lock=null, t0=0;
   st.addEventListener("pointerdown", e=>{ if (e.button>0) return; x0=e.clientX; y0=e.clientY; dx=0; lock=null; t0=Date.now(); });
   st.addEventListener("pointermove", e=>{
     if (x0===null) return; const mx=e.clientX-x0, my=e.clientY-y0;
-    if (lock===null && (Math.abs(mx)>6 || Math.abs(my)>6)){ lock = Math.abs(mx)>Math.abs(my) ? "x" : "y"; if (lock==="x"){ try{ st.setPointerCapture(e.pointerId); }catch(_){} cards[UI.cardIdx].classList.add("drag"); } }
-    if (lock!=="x") return; dx=mx; cards[UI.cardIdx].style.transform=`translateX(${dx}px) rotate(${dx/22}deg)`;
+    if (lock===null && (Math.abs(mx)>6 || Math.abs(my)>6)){ lock = Math.abs(mx)>Math.abs(my) ? "x" : "y"; if (lock==="x"){ try{ st.setPointerCapture(e.pointerId); }catch(_){} } }
+    if (lock!=="x") return; dx=mx; place(dx,false);
   });
-  const end = () => { if (x0===null) return; const fast=Math.abs(dx)/Math.max(1,Date.now()-t0)>0.5;
-    if (lock==="x" && (Math.abs(dx)>70 || (fast && Math.abs(dx)>25))) flyOut(dx<0?-1:1);
-    else if (lock==="x"){ cards[UI.cardIdx].classList.remove("drag"); place(); }
+  const end = () => { if (x0===null) return; const fast=Math.abs(dx)/Math.max(1,Date.now()-t0)>0.45;
+    if (lock==="x" && (Math.abs(dx)>st.clientWidth*0.18 || (fast && Math.abs(dx)>25))) go(dx<0?1:-1); else if (lock==="x") place();
     x0=null; lock=null; };
   st.addEventListener("pointerup", end); st.addEventListener("pointercancel", end);
-  st.addEventListener("keydown", e=>{ if (e.key==="ArrowRight"){ flyOut(-1); e.preventDefault(); } else if (e.key==="ArrowLeft"){ flyOut(1); e.preventDefault(); } });
+  // tapping a side card brings it to the middle
+  st.addEventListener("click", e=>{ const c=e.target.closest(".acard"); if (!c || lock) return; const d=rel(cards.indexOf(c)); if (d) go(d>0?1:-1); });
+  st.addEventListener("keydown", e=>{ if (e.key==="ArrowRight"){ go(1); e.preventDefault(); } else if (e.key==="ArrowLeft"){ go(-1); e.preventDefault(); } });
   if (dots) dots.addEventListener("click", e=>{ const b=e.target.closest("[data-cdot]"); if (b){ UI.cardIdx=Number(b.dataset.cdot); place(); } });
 }
 function renderHome(){
