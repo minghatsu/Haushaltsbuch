@@ -295,8 +295,56 @@ public class MainActivity extends Activity {
         if (web != null) web.evaluateJavascript("window.hbResumed && window.hbResumed()", null);
     }
 
+    private static final int NOTIFY_REQUEST = 7;
+
+    @Override
+    public void onRequestPermissionsResult(int code, String[] perms, int[] res) {
+        super.onRequestPermissionsResult(code, perms, res);
+        if (code == NOTIFY_REQUEST && web != null)
+            web.evaluateJavascript("window.hbNotifyPerm && window.hbNotifyPerm(" + (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) + ")", null);
+    }
+
     /** Called from JavaScript as window.AndroidBridge */
     private class Bridge {
+        /** "granted" or "denied" – whether the app may show notifications */
+        @JavascriptInterface
+        public String notifyState() {
+            if (android.os.Build.VERSION.SDK_INT < 33) {
+                android.app.NotificationManager nm = getSystemService(android.app.NotificationManager.class);
+                return nm != null && nm.areNotificationsEnabled() ? "granted" : "denied";
+            }
+            return checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED ? "granted" : "denied";
+        }
+
+        /** Asks the user for permission (Android 13+); the answer comes back through window.hbNotifyPerm(ok). */
+        @JavascriptInterface
+        public void notifyAsk() {
+            runOnUiThread(() -> {
+                if (android.os.Build.VERSION.SDK_INT >= 33 && !"granted".equals(notifyState()))
+                    requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, NOTIFY_REQUEST);
+                else if (web != null) web.evaluateJavascript("window.hbNotifyPerm && window.hbNotifyPerm(" + "granted".equals(notifyState()) + ")", null);
+            });
+        }
+
+        /** Opens the Android settings for this app's notifications. */
+        @JavascriptInterface
+        public void notifySettings() {
+            Intent i = new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, getPackageName());
+            runOnUiThread(() -> { try { startActivity(i); } catch (Exception ignored) {} });
+        }
+
+        @JavascriptInterface
+        public void notifyNow(int id, String title, String text, String ch) {
+            Notifier.show(MainActivity.this, id, title, text, ch);
+        }
+
+        /** Replaces all planned notifications: JSON array of {id, at (ms), title, text, ch}. */
+        @JavascriptInterface
+        public void notifySchedule(String json) {
+            Notifier.schedule(MainActivity.this, json);
+        }
+
         /** Stores a newer app version (downloaded from the Synology); it is used from the next (re)load on. */
         /** Opens a web page (e.g. a shop's weekly offers) inside the app as a "custom tab"; back returns to the app. */
         @JavascriptInterface

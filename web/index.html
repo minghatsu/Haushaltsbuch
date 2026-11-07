@@ -762,6 +762,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="field"><span class="small muted" style="margin-top:-2px">Diese Läden zeigt die Startseite mit einem Link zum aktuellen Prospekt, in der Reihenfolge, in der du sie antippst.</span><div class="chips" id="shopEd"></div></div>
       <div class="switch"><label for="sLogos"><b>Händler-Logos</b><br><span class="small muted">Lädt das Website-Symbol bekannter Händler (über Google). Aus: farbiger Anfangsbuchstabe.</span></label><input type="checkbox" id="sLogos"></div>
     </div>
+    <div class="card sp" data-sp="notify" hidden><div id="notifyEd" style="display:flex;flex-direction:column;gap:14px"></div></div>
     <div class="card sp" data-sp="sicherheit" hidden>
       <div class="field" id="lockEd"></div>
     </div>
@@ -890,6 +891,7 @@ const P = {
   arrowUp:'<path d="M12 19V5M6 11l6-6 6 6"/>',
   check:'<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="m9 13.5 2 2 4-4"/>',
   chevron:'<path d="m6 9 6 6 6-6"/>',
+  bell:'<path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9M10 20.5h4"/>',
   right:'<path d="m9 6 6 6-6 6"/>',
   home:'<path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
   car:'<path d="M5 16V11l2-5h10l2 5v5M3.5 16h17v2.5h-3V16M6.5 16v2.5h-3"/><circle cx="7.5" cy="13" r=".8"/><circle cx="16.5" cy="13" r=".8"/>',
@@ -1463,6 +1465,7 @@ function render(){
   $("banner").innerHTML = (mem && !LOCAL) ? `<div class="notice warn" style="margin-bottom:14px"><span>Speichern ist hier gerade nicht möglich. Öffne die App über deinen Link in Claude, während du angemeldet bist.</span></div>` : "";
   ({home:renderHome, list:renderList, fix:renderFix, year:renderYear, more:renderMore, import:renderImport})[UI.view]();
   if (!$("sheetBg").hidden) renderSheet();
+  notifyPlanSoon();
 }
 
 function txRow(t, showDate){
@@ -1662,13 +1665,14 @@ function renderHome(){
   else { tip=`<b>${esc(MONTHS[ymParts(ym)[1]-1])}: ${c.net>=0?"+":"−"} ${esc(eur(Math.abs(c.net)))}</b> ${c.net>=0?"mehr eingenommen als ausgegeben.":"mehr ausgegeben als eingenommen."}`; if (c.net<0) tipCls="warn"; }
   // --- all hints for the bell (the start page itself stays free)
   const hints=[];
-  if (mainBal<0 && ym<=cur) hints.push({lvl:"bad", t:"Dein Konto ist im Minus", s:`${mainName||"Kontostand"}: ${eur(mainBal)}`});
-  for (const x of budgetWarn) hints.push(x.v>x.budget ? {lvl:"bad", t:`${x.cat}: ${eur0(x.v-x.budget)} über dem Budget`, s:days?`Noch ${days} ${days===1?"Tag":"Tage"} bis Monatsende.`:""} : {lvl:"warn", t:`${x.cat}: ${Math.round(x.v/x.budget*100)} % vom Budget verbraucht`, s:`Noch ${eur(x.budget-x.v)} für ${days} ${days===1?"Tag":"Tage"}.`});
-  if (ym>=cur && free<0) hints.push(cum.reserveBal>0 && cum.balance>=0 ? {lvl:"warn", t:"Steuer-Rücklage größer als dein Guthaben", s:`${eur0(cum.reserveBal)} Rücklage, ${eur0(cum.balance)} auf den Konten. Plane für die Steuer etwas mehr ein.`} : {lvl:"warn", t:"Es wird knapp", s:`Nach allen offenen Posten fehlen ${eur(-free)}.`});
-  for (const d of S.debts){ const st=debtState(d); if (st.noCover) hints.push({lvl:"warn", t:`${d.name}: Rate deckt die Zinsen nicht`, s:"Die Schuld wird so nicht kleiner."}); }
-  for (const gl of (S.settings.goals||[])){ const sv=goalSaved(gl); if (gl.target>0 && sv.v>=gl.target) hints.push({lvl:"good", t:`Sparziel „${gl.name}“ erreicht`, s:eur(sv.v)}); }
+  if (mainBal<0 && ym<=cur) hints.push({k:"minus", lvl:"bad", t:"Dein Konto ist im Minus", s:`${mainName||"Kontostand"}: ${eur(mainBal)}`});
+  for (const x of budgetWarn) hints.push(x.v>x.budget ? {k:"budget", lvl:"bad", t:`${x.cat}: ${eur0(x.v-x.budget)} über dem Budget`, s:days?`Noch ${days} ${days===1?"Tag":"Tage"} bis Monatsende.`:""} : {k:"budget", lvl:"warn", t:`${x.cat}: ${Math.round(x.v/x.budget*100)} % vom Budget verbraucht`, s:`Noch ${eur(x.budget-x.v)} für ${days} ${days===1?"Tag":"Tage"}.`});
+  if (ym>=cur && free<0) hints.push(cum.reserveBal>0 && cum.balance>=0 ? {k:"reserve", lvl:"warn", t:"Steuer-Rücklage größer als dein Guthaben", s:`${eur0(cum.reserveBal)} Rücklage, ${eur0(cum.balance)} auf den Konten. Plane für die Steuer etwas mehr ein.`} : {k:"reserve", lvl:"warn", t:"Es wird knapp", s:`Nach allen offenen Posten fehlen ${eur(-free)}.`});
+  for (const d of S.debts){ const st=debtState(d); if (st.noCover) hints.push({k:"debt", lvl:"warn", t:`${d.name}: Rate deckt die Zinsen nicht`, s:"Die Schuld wird so nicht kleiner."}); }
+  for (const gl of (S.settings.goals||[])){ const sv=goalSaved(gl); if (gl.target>0 && sv.v>=gl.target) hints.push({k:"goal", lvl:"good", t:`Sparziel „${gl.name}“ erreicht`, s:eur(sv.v)}); }
   if (!hints.some(h=>h.lvl!=="good")) hints.unshift({lvl:"good", t: ym>=cur ? "Du liegst im Plan" : `${MONTHS[ymParts(ym)[1]-1]}: ${c.net>=0?"+":"−"} ${eur(Math.abs(c.net))}`, s: ym>=cur ? (days&&free>0?`Noch ${eur(free/days)} pro Tag frei.`:"") : (c.net>=0?"mehr eingenommen als ausgegeben":"mehr ausgegeben als eingenommen")});
   UI.hints=hints; updateBell();
+  if (ym===cur) notifyAlerts(hints);
   // --- budgets as tiles (the 3 that are used up most)
   const bt = g.filter(x=>x.budget).sort((a,b)=>b.v/b.budget-a.v/a.budget).slice(0,3);
   let streak = ym===cur ? budgetStreak(ym) : null; if (streak && !streak.best) streak=null;
@@ -2343,9 +2347,104 @@ function planEditor(d, plan){
     </tbody></table></div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button class="chip" data-pradd="${esc(d.id)}">+ Zeile</button>${plan.length>14?`<button class="chip" data-prall="1">${UI.planAll?"Nur Ausschnitt zeigen":`Alle ${plan.length} Raten zeigen`}</button>`:""}</div>`;
 }
 
+
+/* ---------- Benachrichtigungen (Android: auch bei geschlossener App) ---------- */
+const NOTIFY_DEF = { on:false, budget:true, minus:true, reserve:true, debt:true, goal:true, fix:"3,25", daily:"", imp:"14", tax:true, week:false, month:true, hour:"9" };
+const CAN_NOTIFY = !!(window.AndroidBridge && window.AndroidBridge.notifySchedule);
+function notifyCfg(){ let c={}; try{ c=JSON.parse(localStorage.getItem("hb-notify")||"{}"); }catch(e){} return {...NOTIFY_DEF, ...c}; }
+function notifySave(c){ try{ localStorage.setItem("hb-notify", JSON.stringify(c)); }catch(e){} notifyPlanSoon(); }
+function notifyPerm(){ try{ return CAN_NOTIFY ? AndroidBridge.notifyState() : "denied"; }catch(e){ return "denied"; } }
+function nid(key){ let h=7; for (const ch of key) h=(h*31+ch.charCodeAt(0))|0; return Math.abs(h)%2000000000+1; }
+function notifySent(){ try{ return JSON.parse(localStorage.getItem("hb-notified")||"{}"); }catch(e){ return {}; } }
+// warnings: sent once (per month, "Konto im Minus" once per day) when the app notices them
+function notifyAlerts(hints){
+  const c=notifyCfg(); if (!CAN_NOTIFY || !c.on || notifyPerm()!=="granted") return;
+  const sent=notifySent(), ym=ymOf(new Date()), day=isoOf(new Date());
+  for (const h of hints){
+    if (!h.k || !c[h.k]) continue;
+    const key = h.k==="minus" ? "minus:"+day : h.k+":"+h.t.replace(/\d[\d.,]*\s?€?|%/g,"#")+":"+ym+(h.lvl==="bad"?":bad":"");
+    if (sent[key]) continue;
+    sent[key]=Date.now();
+    try{ AndroidBridge.notifyNow(nid(key), h.t, h.s||"Tippe, um das Haushaltsbuch zu öffnen.", "hinweise"); }catch(e){}
+  }
+  const old=Date.now()-120*864e5; for (const k in sent) if (sent[k]<old) delete sent[k];
+  try{ localStorage.setItem("hb-notified", JSON.stringify(sent)); }catch(e){}
+}
+// reminders: planned ahead, the phone shows them at the time even when the app is closed
+function notifyPlan(){
+  if (!CAN_NOTIFY) return;
+  const c=notifyCfg(), list=[];
+  if (c.on && notifyPerm()==="granted"){
+    const now=new Date(), H=Number(c.hour)||9;
+    const at=(d,h,m)=>{ const x=new Date(d); x.setHours(h,m||0,0,0); return x.getTime(); };
+    const add=(key,t,title,text)=>{ if (t>Date.now()+30000) list.push({id:nid(key), at:t, title, text, ch:"erinnerungen"}); };
+    const cur=ymOf(now), nxt=shiftYm(cur,1);
+    // open fixed costs
+    if (c.fix){ for (const ym of [cur,nxt]){ const [y,m]=ymParts(ym); for (const dd of c.fix.split(",").map(Number)){
+      const due=fixedForMonth(ym,true), paid=(S.months[ym]&&S.months[ym].paid)||{}, open=due.filter(f=>!(f.id in paid));
+      if (!open.length) continue;
+      const sumO=sum(open,f=>listAmt(f,ym));
+      add("fix:"+ym+":"+dd, at(new Date(y,m-1,dd),H), dd>20?`Noch ${open.length} Fixkosten offen`:`Fixkosten im ${MONTHS[m-1]}`, `${open.length} Posten über ${eur0(sumO)} noch nicht abgehakt${open.length<=3?": "+open.map(f=>f.name).join(", "):""}.`);
+    } } }
+    // daily: enter expenses
+    if (c.daily){ const [hh,mm]=c.daily.split(":").map(Number); for (let k=0;k<14;k++){ const d=new Date(now); d.setDate(d.getDate()+k); add("daily:"+isoOf(d), at(d,hh,mm), "Schon alles eingetragen?", "Kurz die Ausgaben von heute nachtragen – dann stimmen deine Budgets."); } }
+    // statement import
+    if (c.imp){ const last=S.tx.filter(t=>t.source||t._b).reduce((a,t)=>t.date>a?t.date:a,""); if (last){ const d=new Date(last+"T12:00:00"); d.setDate(d.getDate()+Number(c.imp)); let t=at(d,H); if (t<Date.now()){ const tm=new Date(now); tm.setDate(tm.getDate()+1); t=at(tm,H); }
+      const days=Math.round((t-new Date(last+"T12:00:00").getTime())/864e5);
+      add("imp:"+last, t, "Kontoauszug importieren", `Seit ${days} Tagen kein neuer Auszug – importieren hält Kontostand und Budgets aktuell.`); } }
+    // tax dates (self-employed): VAT return on the 10th, income tax prepayment 10.3./6./9./12.
+    if (c.tax && incCats().some(x=>x.art==="selbst")){ for (const ym of [cur,nxt,shiftYm(cur,2)]){ const [y,m]=ymParts(ym);
+      const vz=[3,6,9,12].includes(m), ust=!S.settings.kleinunternehmer;
+      if (vz||ust) add("tax:"+ym, at(new Date(y,m-1,8),H), "Steuertermin am 10.", [ust?"Umsatzsteuer-Voranmeldung":"", vz?"Einkommensteuer-Vorauszahlung":""].filter(Boolean).join(" und ")+` fällig am 10. ${MONTHS[m-1]}.`);
+    } }
+    // weekly / monthly review
+    if (c.week){ for (let k=0;k<3;k++){ const d=new Date(now); d.setDate(d.getDate()+((7-d.getDay())%7)+7*k); add("week:"+isoOf(d), at(d,18), "Dein Wochenrückblick", "Schau dir an, wie deine Woche gelaufen ist."); } }
+    if (c.month){ const [y,m]=ymParts(nxt); add("month:"+nxt, at(new Date(y,m-1,1),H), `Dein ${MONTHS[(m+10)%12]} ist abgeschlossen`, "Sieh dir an, wie viel übrig geblieben ist."); }
+  }
+  list.sort((a,b)=>a.at-b.at);
+  try{ AndroidBridge.notifySchedule(JSON.stringify(list.slice(0,60))); }catch(e){}
+}
+let notifyT=null; function notifyPlanSoon(){ clearTimeout(notifyT); notifyT=setTimeout(notifyPlan, 1500); }
+window.hbNotifyPerm = ok => { const c=notifyCfg(); c.on=!!ok; notifySave(c); if (!ok) toast("Ohne Erlaubnis kann die App keine Benachrichtigungen zeigen"); if (UI.view==="more") renderMore(); };
+function renderNotifyEd(){
+  const el=$("notifyEd"); if (!el) return;
+  if (!CAN_NOTIFY){ el.innerHTML=`<div class="notice info"><span>Benachrichtigungen gibt es in der Handy-App. Dort kannst du hier einstellen, worüber sie dich informiert – auch wenn die App geschlossen ist.</span></div>`; return; }
+  const c=notifyCfg(), perm=notifyPerm(), on=c.on&&perm==="granted";
+  const sw=(k,t,d)=>`<div class="switch"><label for="nf-${k}"><b>${t}</b><br><span class="small muted">${d}</span></label><input type="checkbox" id="nf-${k}" data-nf="${k}" ${c[k]?"checked":""} ${on?"":"disabled"}></div>`;
+  const sel=(k,t,d,opts)=>`<div class="field"><label for="nf-${k}">${t}</label><select class="in" id="nf-${k}" data-nf="${k}" ${on?"":"disabled"}>${opts.map(([v,l])=>`<option value="${v}" ${String(c[k])===v?"selected":""}>${l}</option>`).join("")}</select>${d?`<span class="small muted">${d}</span>`:""}</div>`;
+  el.innerHTML = `
+    <div class="switch"><label for="nf-on"><b>Benachrichtigungen</b><br><span class="small muted">${perm==="granted"?"Kommen als Popup aufs Handy, auch wenn die App geschlossen ist.":"Die App fragt einmal nach der Erlaubnis von Android."}</span></label><input type="checkbox" id="nf-on" ${on?"checked":""}></div>
+    ${c.on&&perm!=="granted"?`<div class="notice warn"><span>Android blockiert die Benachrichtigungen gerade.</span><button class="btn" id="nfSys">Erlauben</button></div>`:""}
+    <div class="section-title">Warnungen</div>
+    <span class="small muted" style="margin-top:-8px">Kommen sofort, sobald die App es bemerkt – jede nur einmal.</span>
+    ${sw("budget","Budget","Bei 80 % verbraucht und wenn es überschritten ist")}
+    ${sw("minus","Konto im Minus","Höchstens einmal am Tag")}
+    ${sw("reserve","Steuer-Rücklage","Wenn die Rücklage dein Guthaben übersteigt")}
+    ${sw("debt","Schulden","Wenn eine Rate die Zinsen nicht deckt")}
+    ${sw("goal","Sparziele","Wenn ein Sparziel erreicht ist")}
+    <div class="section-title">Erinnerungen</div>
+    ${sel("fix","Offene Fixkosten","Nur wenn noch etwas nicht abgehakt ist.",[["","Aus"],["3","Am 3. des Monats"],["25","Am 25. des Monats"],["3,25","Am 3. und am 25."]])}
+    ${sel("daily","Ausgaben eintragen","Jeden Tag eine kurze Erinnerung.",[["","Aus"],["18:00","Täglich um 18 Uhr"],["19:00","Täglich um 19 Uhr"],["20:00","Täglich um 20 Uhr"],["21:00","Täglich um 21 Uhr"],["22:00","Täglich um 22 Uhr"]])}
+    ${sel("imp","Kontoauszug importieren","Wenn so lange kein neuer Auszug importiert wurde.",[["","Aus"],["7","Nach 7 Tagen"],["14","Nach 14 Tagen"],["30","Nach 30 Tagen"]])}
+    ${sw("tax","Steuertermine","Umsatzsteuer-Voranmeldung und Vorauszahlungen, 2 Tage vorher")}
+    ${sw("month","Monatsrückblick","Am 1. für den vergangenen Monat")}
+    ${sw("week","Wochenrückblick","Sonntags um 18 Uhr")}
+    ${sel("hour","Uhrzeit für Erinnerungen","Gilt für Fixkosten, Kontoauszug, Steuer und Monatsrückblick.",[["8","8 Uhr"],["9","9 Uhr"],["10","10 Uhr"],["12","12 Uhr"],["17","17 Uhr"],["19","19 Uhr"]])}
+    <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="nfTest" ${on?"":"disabled"}>Test-Benachrichtigung</button><button class="btn" id="nfSys2">Android-Einstellungen</button></div>`;
+}
+document.addEventListener("change", e=>{
+  if (e.target.id==="nf-on"){ const c=notifyCfg(); if (e.target.checked){ c.on=true; notifySave(c); try{ AndroidBridge.notifyAsk(); }catch(_){} } else { c.on=false; notifySave(c); renderNotifyEd(); } return; }
+  const k=e.target.dataset&&e.target.dataset.nf; if (!k) return;
+  const c=notifyCfg(); c[k]= e.target.type==="checkbox" ? e.target.checked : e.target.value; notifySave(c);
+});
+document.addEventListener("click", e=>{
+  if (e.target.closest("#nfTest")){ try{ AndroidBridge.notifyNow(nid("test"+Date.now()), "So sieht eine Benachrichtigung aus", "Das Haushaltsbuch meldet sich hier, auch wenn die App geschlossen ist.", "hinweise"); }catch(_){} }
+  if (e.target.closest("#nfSys,#nfSys2")){ try{ AndroidBridge.notifySettings(); }catch(_){} }
+});
+
 const SP_PAGES = {
   konten:["Konten & Spaces","wallet"], budgets:["Monatsbudgets","target"], schulden:["Schulden","bank"], backup:["Abgleich & Backup","cloud"],
-  steuer:["Steuer & Einkommen","receipt"], start:["Startseite & Läden","home"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"]
+  notify:["Benachrichtigungen","bell"], steuer:["Steuer & Einkommen","receipt"], start:["Startseite & Läden","home"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"]
 };
 function spSummary(k){
   const st=S.settings, y=UI.ym.slice(0,4);
@@ -2356,6 +2455,7 @@ function spSummary(k){
   if (k==="steuer"){ const L=(LAENDER.find(x=>x[0]===(st.land||"NW"))||[,""])[1]; return `Klasse ${["I","II","III","IV","V","VI"][(st.steuerklasse||1)-1]} · ${L}${st.reserveRate?` · ${numStr(st.reserveRate)} % Rücklage`:""}`; }
   if (k==="start"){ const n=(st.shops||[]).length; return `Reihenfolge der Blöcke${n?` · ${n} Läden`:""}`; }
   if (k==="sicherheit"){ return lockCfg() ? "App-Sperre an" : "App-Sperre aus"; }
+  if (k==="notify"){ const c=notifyCfg(); return !CAN_NOTIFY ? "nur in der Handy-App" : c.on&&notifyPerm()==="granted" ? "an" : "aus"; }
   if (k==="kategorien"){ return `${cats("ausgabe").length+cats("betrieb").length+incCats().length} Kategorien`; }
   return "";
 }
@@ -2368,7 +2468,7 @@ function renderSetHome(){
     else if (SYNC.state==="pending"){ dot="w"; line=`${SYNC.queue.length} Änderungen warten`; }
     else { dot="b"; line=SYNC.state==="offline"?"Offline – wird nachgeholt":"Synology nicht erreichbar"; }
   }
-  const quick=["konten","budgets","schulden","backup"], rest=["steuer","start","sicherheit","kategorien"];
+  const quick=["konten","budgets","schulden","backup"], rest=["notify","steuer","start","sicherheit","kategorien"];
   const short={konten:"Konten",budgets:"Budgets",schulden:"Schulden",backup:"Backup"};
   $("setHome").innerHTML = `
     <button class="sprof" data-spgo="start" aria-label="Name und Startseite ändern"><span class="av">${esc((name.trim()[0]||"?").toUpperCase())}</span>
@@ -2457,6 +2557,7 @@ function renderMore(){
   $("sKU").checked=!!st.kleinunternehmer; $("sSplit").checked=!!st.splitting; $("partnerField").hidden=!st.splitting;
   for (const k of ["ausgabe","betrieb"]) $("catEd-"+k).innerHTML = cats(k).map(n=>`<span class="chip">${esc(n)}<button class="x" data-catdel="${k}|${esc(n)}" aria-label="${esc(n)} entfernen">×</button></span>`).join("")+`<button class="chip" data-catadd="${k}">+ Neu</button>`;
   $("catEd-einnahme").innerHTML = incCats().map(c=>`<div class="incrow"><div style="display:flex;align-items:center;gap:10px"><b style="flex:1">${esc(c.name)}</b><button class="icon-btn" data-catdel="einnahme|${esc(c.name)}" aria-label="${esc(c.name)} entfernen">×</button></div><select class="in" data-incart="${esc(c.name)}" aria-label="Art von ${esc(c.name)}">${incArtOptions(c.art)}</select></div>`).join("")+`<button class="chip" data-catadd="einnahme" style="margin-top:6px">+ Neu</button>`;
+  renderNotifyEd();
   renderSpPages();
 }
 function txPayee(t){ return String(t.note||"").replace(/ · brutto.*$/,""); }
@@ -2750,7 +2851,7 @@ $("pinDots").addEventListener("click", ()=>{ if (LOCK.mode==="set" && !LOCK.firs
 // lock when the app comes back after more than a minute in the background
 function lockIfNeeded(){ if (lockCfg() && !LOCK.mode && LOCK.hiddenAt && Date.now()-LOCK.hiddenAt>60000) lockShow("unlock"); LOCK.hiddenAt=0; }
 document.addEventListener("visibilitychange", ()=>{ if (document.visibilityState==="hidden") LOCK.hiddenAt=Date.now(); else lockIfNeeded(); });
-window.hbPaused=()=>{ LOCK.hiddenAt=Date.now(); };
+window.hbPaused=()=>{ LOCK.hiddenAt=Date.now(); try{ notifyPlan(); }catch(e){} };
 window.hbResumed=()=>lockIfNeeded();
 if (lockCfg()) lockShow("unlock");
 function renderLockEd(){
