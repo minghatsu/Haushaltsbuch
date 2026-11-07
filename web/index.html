@@ -131,6 +131,38 @@ main{padding-block:6px 120px}
 .quick4 button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:600;font-size:12px;color:var(--muted);padding:0}
 .quick4 .ic{width:56px;height:56px;border-radius:20px;display:grid;place-items:center;background:var(--surface);color:var(--accent);box-shadow:var(--shadow)}
 .quick4 button:active .ic{transform:scale(.95)}
+.gauge{position:relative;width:250px;max-width:100%;height:142px;margin:0 auto}.gauge svg{width:100%;height:140px}
+.gauge .gv{position:absolute;left:0;right:0;top:74px;text-align:center}.gauge .gv b{font-family:var(--f-display);font-size:32px;font-weight:800;letter-spacing:-.03em}
+.gsub{text-align:center;font-size:12.5px;color:var(--muted);margin-top:-4px}
+.kv3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.kv3 div{background:var(--sunk);border-radius:14px;padding:9px 10px;min-width:0}.kv3 small{display:block;font-size:11px;color:var(--muted);font-weight:600}.kv3 b{font-weight:800;font-size:14.5px}
+.fstack{display:flex;height:34px;border-radius:12px;overflow:hidden;gap:2px;margin-bottom:12px}.fstack div{display:grid;place-items:center;color:#fff;font-weight:700;font-size:11.5px;min-width:6px;white-space:nowrap;overflow:hidden}
+.fleg{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px}.fleg div{display:flex;align-items:center;gap:8px;font-size:13px;min-width:0}.fleg i{width:10px;height:10px;border-radius:3px;flex:none}.fleg span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fleg b{font-weight:700}
+.tlchips{display:flex;gap:6px;margin:-2px 0 8px}.tlchips .fchip{padding:6px 11px;font-size:12.5px}
+.tline{position:relative;padding-left:22px}.tline:before{content:"";position:absolute;left:6px;top:14px;bottom:14px;width:2px;background:var(--line)}
+.tlrow{position:relative;display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;text-align:left;padding:8px 0;color:inherit}
+.tlrow:before{content:"";position:absolute;left:-21px;top:50%;margin-top:-6px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2.5px solid var(--faint);box-sizing:border-box}
+.tlrow.inc:before{border-color:var(--accent);background:var(--accent)}
+.tlrow .grow{flex:1;min-width:0;display:flex;flex-direction:column}.tlrow b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tlrow .amt{font-weight:700;white-space:nowrap}
+.jars{display:flex;gap:10px;overflow-x:auto;margin:0 -6px;padding:2px 6px;scrollbar-width:none}.jars::-webkit-scrollbar{display:none}
+.jarb{border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 auto;width:92px}
+.jarb b{font-weight:700;font-size:12px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:6px}.jarb small{font-size:10.5px;color:var(--muted);font-weight:600;white-space:nowrap}
+.jar{width:64px;height:84px;border-radius:16px 16px 22px 22px;border:2.5px solid var(--line);position:relative;overflow:hidden;background:var(--surface);display:block}
+.jar:before{content:"";position:absolute;left:14px;right:14px;top:-2px;height:8px;border-radius:0 0 6px 6px;background:var(--line);z-index:2}
+.jar .w{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(var(--c2),var(--c1));transition:height .5s}
+.jar .w:before{content:"";position:absolute;left:-10%;right:-10%;top:-5px;height:10px;border-radius:50%;background:var(--c2)}
+.jar .goal{position:absolute;left:0;right:0;top:18%;border-top:2px dashed var(--bad);opacity:.7}
+.jar.done .goal{display:none}
+.jar .jp.low{color:var(--fg);text-shadow:none;bottom:auto;top:46px}
+.jar .ji{position:absolute;left:0;right:0;top:24px;display:grid;place-items:center;color:var(--muted);z-index:1}
+.jar .jp{position:absolute;left:0;right:0;bottom:7px;text-align:center;font-weight:800;font-size:13px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);z-index:1}
+.jar.add{display:grid;place-items:center;color:var(--accent);background:var(--sunk);border-style:dashed}.jar.add:before{display:none}
+.srail{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px 12px;padding:4px 16px;scrollbar-width:none}.srail::-webkit-scrollbar{display:none}
+.sbtn{border:0;background:none;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;flex:0 0 auto;width:72px;scroll-snap-align:center;font-weight:600;font-size:11.5px;color:var(--muted);border-radius:18px;transition:background .2s}
+.sbtn .bavatar,.sbtn .sadd{width:52px;height:52px;border-radius:18px;font-size:18px;transition:transform .2s}
+.sbtn .sadd{display:grid;place-items:center;background:var(--sunk);color:var(--accent)}
+.sbtn.on{background:var(--accent-soft);color:var(--fg)}.sbtn.on .bavatar{transform:scale(1.06)}
+.spanel{background:var(--sunk);border-radius:18px;padding:12px 14px}
+.spt{display:flex;align-items:center;gap:12px}.spt .grow{flex:1;min-width:0;display:flex;flex-direction:column}.spt b{font-weight:800;font-size:15px}.spt .btn{white-space:nowrap;text-decoration:none}
 .rings{display:flex;gap:6px;overflow-x:auto;margin:0 -6px;padding:2px 6px 2px;scrollbar-width:none}.rings::-webkit-scrollbar{display:none}
 .rbtn{border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:72px;max-width:84px;flex:0 0 auto}
 .rbtn b{font-weight:700;font-size:12px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px}
@@ -1466,26 +1498,73 @@ function renderHome(){
       <div class="btiles">${bt.map(x=>{ const ov=x.v>x.budget, nr=!ov&&x.v>=x.budget*0.8; return `<button class="btile ${ov?"over":nr?"near":""}" data-go="year"><span class="ti">${ic(iconFor("ausgabe",x.cat),19)}</span><b>${ov?`${esc(eur0(x.v-x.budget))} drüber`:`${esc(eur0(x.budget-x.v))} frei`}</b><small>${esc(x.cat)}</small><s><i style="width:${Math.min(100,Math.max(x.v?4:0,x.v/x.budget*100))}%"></i></s></button>`; }).join("")}</div>
       ${streak?`<div class="streak" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)"><span class="f">${ic("flame",19)}</span><div class="grow" style="min-width:0;flex:1"><b>${streak.n} ${streak.n===1?"Tag":"Tage"} im Budget</b> <span class="small muted">· Rekord ${streak.best}</span><div class="bars">${Array.from({length:Math.min(14,streak.today)},(_,k)=>{ const d=streak.today-Math.min(14,streak.today)+1+k; return `<i class="${streak.ok[d]?"on":""}"></i>`; }).join("")}</div></div></div>`:""}
     </div>`:""}
-    <div class="card" style="order:5">
+    ${fixedAreas(ym)}
+    <div class="card" style="order:5" hidden>
       <div class="card-head"><h2>${hIc("repeat")}${openFx.length?`Noch offen im ${esc(MONTHS[ymParts(ym)[1]-1])}`:"Fixkosten"}</h2><button class="link" data-go="fix">${openFx.length?"Abhaken":"Ansehen"} ${ic("right",16)}</button></div>
       ${openFx.length ? openFx.slice(0,4).map(f=>`<div class="duerow">${brandFor(f.name)?brandBadge(brandFor(f.name)):tile(f.kind==="betrieb"?"betrieb":"fix", f.name)}<span class="grow" style="flex:1"><b>${esc(f.name)}</b>${debtFor(f.id)?`<br><span class="small muted">noch ${esc(eur0(debtState(debtFor(f.id)).remaining))} offen</span>`:""}</span><span class="a">${esc(eur(planAmt(f,ym)))}</span></div>`).join("")+(openFx.length>4?`<div class="small muted" style="margin-top:6px">und ${openFx.length-4} weitere · zusammen ${esc(eur(c.fixOpen))}</div>`:"")
         : `<div class="meta-row"><span><b>${fxDone}</b> Posten bezahlt</span><b>${esc(eur(c.fixPaid))}</b></div>`}
     </div>
-    ${c.selfInc?`<div class="card" style="order:6"><div class="card-head"><h2>${hIc("receipt")}Steuer-Rücklage</h2><span class="pill ok">${esc(S.settings.reserveRate)} %</span></div><div class="kv"><span>Selbstständige Einnahmen</span><span>${esc(eur(c.selfInc))}</span><span>Diesen Monat zurücklegen</span><span class="pos">${esc(eur(c.reserve))}</span><span>Rücklage insgesamt</span><span>${esc(eur(cum.reserveBal))}</span></div></div>`:""}
+    ${taxGauge(ym)}
+    ${false?`<div class="card" style="order:6"><div class="card-head"><h2>${hIc("receipt")}Steuer-Rücklage</h2><span class="pill ok">${esc(S.settings.reserveRate)} %</span></div><div class="kv"><span>Selbstständige Einnahmen</span><span>${esc(eur(c.selfInc))}</span><span>Diesen Monat zurücklegen</span><span class="pos">${esc(eur(c.reserve))}</span><span>Rücklage insgesamt</span><span>${esc(eur(cum.reserveBal))}</span></div></div>`:""}
     ${goalsRings()}
     ${UI.goalsOpen||UI.goalEdit?goalsCard():""}
     ${debtRings()}
     </div><div class="col">
     ${offersCard()}
-    <div class="card" style="order:8">
-      <div class="card-head"><h2>${hIc("receipt")}Letzte Buchungen</h2>${c.tx.length?`<button class="link" data-go="list">Alle ${ic("right",16)}</button>`:""}</div>
-      ${c.tx.length ? sortTx(c.tx).slice(0,UI.wide?8:5).map(t=>txRow(t,true)).join("") : emptyState("receipt","Noch keine Buchungen","Alles, was du einträgst, erscheint hier.", `<button class="btn primary" data-add="ausgabe">Erste Buchung eintragen</button>`)}
-    </div>
+    ${recentTimeline(c)}
     </div></div>`;
   const det = $("heroDetails"); if (det) det.addEventListener("toggle", ()=>{ UI.heroOpen = det.open; });
-  initStack();
+  initStack(); initShopRail();
 }
 
+/* ---------- tax reserve as a gauge ---------- */
+function taxGauge(ym){
+  const y=ym.slice(0,4), tax=taxCalc(y);
+  const need=Math.max(0,tax.due)+(tax.gewst||0), have=tax.resBal;
+  if (!(need>0 || have>0 || tax.self>0)) return "";
+  const pct = need>0 ? Math.min(1, have/need) : 1;
+  const nowY=ymOf(new Date()).slice(0,4), monthsLeft = y===nowY ? 12-new Date().getMonth() : y>nowY ? 12 : 0;
+  const perM = need>have && monthsLeft ? (need-have)/monthsLeft : 0;
+  // half circle: 180° from left to right
+  const R=100, cx=125, cy=128, a=Math.PI*(1-pct), ex=cx+R*Math.cos(a), ey=cy-R*Math.sin(a), large=0;
+  const col = pct>=1 ? "var(--good)" : pct>=0.6 ? "var(--accent)" : "var(--warn)";
+  return `<div class="card" style="order:6"><div class="card-head"><h2>${hIc("receipt")}Steuer-Rücklage ${esc(y)}</h2><button class="link" data-go="year">Details ${ic("right",16)}</button></div>
+    <div class="gauge"><svg viewBox="0 0 250 140" aria-hidden="true"><path d="M25 128 A100 100 0 0 1 225 128" fill="none" stroke="var(--line)" stroke-width="18" stroke-linecap="round"/>${pct>0.005?`<path d="M25 128 A100 100 0 ${large} 1 ${ex.toFixed(1)} ${ey.toFixed(1)}" fill="none" stroke="${col}" stroke-width="18" stroke-linecap="round"/>`:""}</svg>
+      <div class="gv"><b>${need>0?Math.round(pct*100)+" %":"✓"}</b></div></div>
+    <div class="gsub">${need>0 ? (pct>=1?"Die Rücklage reicht für die geschätzte Steuer":"der geschätzten Steuer schon zurückgelegt") : "Laut Schätzung keine Nachzahlung"}</div>
+    <div class="kv3"><div><small>Zurückgelegt</small><b>${esc(eur0(have))}</b></div><div><small>Steuer ca.</small><b>${esc(eur0(need))}</b></div><div><small>${perM?"Pro Monat noch":"Übrig"}</small><b class="pos">${esc(eur0(perM||Math.max(0,have-need)))}</b></div></div>
+  </div>`;
+}
+/* ---------- fixed costs: where the fixed money goes ---------- */
+const FIX_AREAS = [["Wohnen",/miete|wohnung|nebenkosten|strom|gas\b|wasser|heiz|rundfunk|gez|grundsteuer|müll|hausgeld|garage|stellplatz/],["Schulden",null],["Auto",/auto|kfz|tank|leasing|werkstatt|tüv|parken|stellplatz|adac|car/],["Versicherung",/versicher|haftpflicht|allianz|huk|ergo|axa|debeka|signal|devk|r\+v|kranken|bu\b/],["Abos & Handy",/handy|mobil|telekom|vodafone|o2|1&1|internet|dsl|netflix|spotify|disney|prime|amazon|apple|google|youtube|abo|zeitung|fitness|gym|icloud|dazn|sky/]];
+function fixArea(f){ if (debtFor(f.id)) return "Schulden"; const n=nrm(f.name); for (const [a,re] of FIX_AREAS) if (re && re.test(n)) return a; return f.kind==="betrieb"?"Betrieb":"Sonstiges"; }
+function fixedAreas(ym){
+  if (!S.fixed.length) return `<div class="card" style="order:5"><div class="card-head"><h2>${hIc("repeat")}Fixkosten</h2><button class="link" data-go="fix">Eintragen ${ic("right",16)}</button></div><span class="small muted">Trag Miete, Versicherungen und Abos einmal ein – dann siehst du hier, wohin dein festes Geld geht.</span></div>`;
+  const c=monthCalc(ym), list=S.fixed.filter(f=>dueIn(f,ym)), total=sum(list,f=>planAmt(f,ym));
+  const by={}; for (const f of list) by[fixArea(f)]=(by[fixArea(f)]||0)+planAmt(f,ym);
+  const areas=Object.entries(by).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+  const cols=["var(--c5)","var(--c1)","var(--c2)","var(--c4)","var(--c3)","var(--c6)","var(--line)"];
+  const paidN=list.filter(f=>f.id in c.paid).length, inc=c.income;
+  return `<div class="card" style="order:5"><div class="card-head"><h2>${hIc("repeat")}Fixkosten</h2><button class="link" data-go="fix">Abhaken ${ic("right",16)}</button></div>
+    <div class="meta-row" style="margin-bottom:8px"><span class="small muted">Im ${esc(MONTHS[ymParts(ym)[1]-1])} fest verplant</span><b style="font-family:var(--f-display);font-size:22px;font-weight:800;letter-spacing:-.02em">${esc(eur0(total))}</b></div>
+    <div class="fstack">${areas.map(([a,v],i)=>`<div style="flex:${v};background:${cols[i%cols.length]}" title="${esc(a)}: ${esc(eur(v))}">${v/total>0.16?esc(a):""}</div>`).join("")}</div>
+    <div class="fleg">${areas.map(([a,v],i)=>`<div><i style="background:${cols[i%cols.length]}"></i><span>${esc(a)}</span><b>${esc(eur0(v))}</b></div>`).join("")}</div>
+    <div class="tipline" style="margin-top:12px;padding:10px 12px"><span class="e" style="width:30px;height:30px">${ic("spark",17)}</span><span>${inc>0?`<b>${Math.round(total/inc*100)} % deiner Einnahmen</b> sind fest verplant – `:""}${paidN} von ${list.length} ${list.length===1?"ist":"sind"} abgehakt.</span></div>
+  </div>`;
+}
+/* ---------- latest bookings as a time line ---------- */
+function recentTimeline(c){
+  const f=UI.recentF||"alle";
+  let tx=sortTx(c.tx); if (f==="aus") tx=tx.filter(t=>t.kind!=="einnahme"); else if (f==="ein") tx=tx.filter(t=>t.kind==="einnahme");
+  tx=tx.slice(0, UI.wide?8:6);
+  const today=isoToday(), yest=isoOf(new Date(Date.now()-864e5));
+  const when=d=> d===today?"Heute":d===yest?"Gestern":shortDate(d);
+  return `<div class="card" style="order:8"><div class="card-head"><h2>${hIc("receipt")}Letzte Buchungen</h2>${c.tx.length?`<button class="link" data-go="list">Alle ${ic("right",16)}</button>`:""}</div>
+    ${c.tx.length?`<div class="tlchips">${[["alle","Alle"],["aus","Ausgaben"],["ein","Einnahmen"]].map(([k,l])=>`<button class="fchip" data-recentf="${k}" aria-pressed="${f===k}">${l}</button>`).join("")}</div>`:""}
+    ${c.tx.length ? (tx.length?`<div class="tline">${tx.map(t=>{ const inc=t.kind==="einnahme"; return `<button class="tlrow ${inc?"inc":""}" data-edit="${esc(t.id)}"><span class="grow"><b>${esc(t.note||t.cat||"")}</b><span class="small muted">${esc(when(t.date))} · ${esc(t.cat||"")}${hasReceipt(t.id)?" · Beleg":""}</span></span><span class="amt ${inc?"pos":""}">${inc?"+":"−"} ${esc(eur(t.amount))}</span></button>`; }).join("")}</div>`:`<span class="small muted">Keine ${f==="ein"?"Einnahmen":"Ausgaben"} in diesem Monat.</span>`)
+      : emptyState("receipt","Noch keine Buchungen","Alles, was du einträgst, erscheint hier.", `<button class="btn primary" data-add="ausgabe">Erste Buchung eintragen</button>`)}
+  </div>`;
+}
 /* ---------- overview with rings (savings goals, debts) ---------- */
 function ring(pct, icon, cls){
   const R=25, C=2*Math.PI*R, p=Math.max(0,Math.min(1,pct));
@@ -1496,9 +1575,9 @@ function goalIcon(n){ n=nrm(n);
 function goalsRings(){
   const goals=S.settings.goals||[];
   return `<div class="card rcard" style="order:7"><div class="card-head"><h2>${hIc("piggy")}Sparziele</h2>${goals.length?`<button class="link" data-goalsopen="1">${UI.goalsOpen||UI.goalEdit?"Weniger":"Alle anzeigen"} ${ic(UI.goalsOpen||UI.goalEdit?"chevron":"right",16)}</button>`:""}</div>
-    <div class="rings">${goals.map(g=>{ const sv=goalSaved(g), t=Number(g.target)||0, pct=t?sv.v/t:0, done=t>0&&sv.v>=t;
-      return `<button class="rbtn" data-goalsopen="1" aria-label="${esc(g.name)}: ${esc(eur(sv.v))} von ${esc(eur(t))}">${ring(pct, goalIcon(g.name), done?"done":"")}<b>${esc(g.name)}</b><small>${done?"erreicht ✓":Math.round(pct*100)+" %"}</small></button>`; }).join("")}
-      <button class="rbtn" id="${goals.length?"goalAddRing":"goalFirst"}" aria-label="Sparziel hinzufügen"><span class="ring add">${ic("plusIn",22)}</span><b>${goals.length?"Neu":"Sparziel anlegen"}</b><small>&nbsp;</small></button>
+    <div class="jars">${goals.map(g=>{ const sv=goalSaved(g), t=Number(g.target)||0, pct=t?Math.max(0,Math.min(1,sv.v/t)):0, done=t>0&&sv.v>=t;
+      return `<button class="jarb" data-goalsopen="1" aria-label="${esc(g.name)}: ${esc(eur(sv.v))} von ${esc(eur(t))}"><span class="jar ${done?"done":""}"><span class="w" style="height:${Math.round(pct*82)}%"></span><span class="goal"></span><span class="ji">${ic(goalIcon(g.name),18)}</span><span class="jp ${pct<0.3?"low":""}">${done?"✓":Math.round(pct*100)+" %"}</span></span><b>${esc(g.name)}</b><small>${esc(eur0(sv.v).replace(/\s?€/,""))} / ${esc(eur0(t))}</small></button>`; }).join("")}
+      <button class="jarb" id="${goals.length?"goalAddRing":"goalFirst"}" aria-label="Sparziel hinzufügen"><span class="jar add">${ic("plusIn",24)}</span><b>${goals.length?"Neu":"Sparziel anlegen"}</b><small>&nbsp;</small></button>
     </div></div>`;
 }
 function debtRings(){
@@ -1607,16 +1686,42 @@ function offersCard(){
   const stats = Object.fromEntries(shopStats().map(o=>[o.shop.id,o]));
   if (!chosen.length) return `<div class="card" style="order:9"><div class="card-head"><h2>${hIc("cart")}Angebote deiner Läden</h2></div>
     <div class="notice info"><span>Wähl aus, von welchen Läden du die Wochenangebote hier sehen willst.</span><button class="btn primary" data-go="more" data-scroll="shopEd">Läden auswählen</button></div></div>`;
-  const st = chosen.map(sh=>stats[sh.id] || {shop:sh, sum:0, count:0});
-  const link = (o) => `<a class="shop" href="${esc(o.shop.url)}"${NATIVE?"":' target="_blank" rel="noopener"'}>
-      ${brandBadge({t:o.shop.name.replace(/ .*/,"").slice(0,1), bg:o.shop.color, ink:o.shop.ink||"#fff", domain:SHOP_DOMAINS[o.shop.id]||""})}
-      <span class="grow"><b>${esc(o.shop.name)}</b><span class="small muted">${o.count?`Ø ${esc(eur0(o.sum/6))} im Monat · ${o.count} Einkäufe`:"zuletzt nicht eingekauft"}</span></span>
-      <span class="shopgo">Prospekt ${ic("right",16)}</span></a>`;
+  if (!chosen.some(sh=>sh.id===UI.shopSel)) UI.shopSel=chosen[0].id;
   return `<div class="card" style="order:9">
-    <div class="card-head"><h2>${hIc("cart")}Angebote deiner Läden</h2><button class="link" data-go="more" data-scroll="shopEd">Auswahl ändern ${ic("right",16)}</button></div>
-    <div class="shops">${st.map(link).join("")}</div>
+    <div class="card-head"><h2>${hIc("cart")}Angebote deiner Läden</h2><button class="link" data-go="more" data-scroll="shopEd">Läden ${ic("right",16)}</button></div>
+    <div class="srail" id="srail">${chosen.map(sh=>`<button class="sbtn ${sh.id===UI.shopSel?"on":""}" data-shopsel="${sh.id}" aria-pressed="${sh.id===UI.shopSel}">${brandBadge({t:sh.name.replace(/ .*/,"").slice(0,1), bg:sh.color, ink:sh.ink||"#fff", domain:SHOP_DOMAINS[sh.id]||""})}<span>${esc(sh.name)}</span></button>`).join("")}
+      <button class="sbtn" data-go="more" data-scroll="shopEd"><span class="sadd">${ic("plusIn",20)}</span><span>Laden</span></button></div>
+    <div id="shopPanel">${shopPanel(chosen.find(x=>x.id===UI.shopSel), stats)}</div>
   </div>`;
 }
+// what the app knows about one shop: your purchases there, and its current leaflet
+function shopPanel(sh, stats){
+  if (!sh) return "";
+  const o=stats[sh.id]||{sum:0,count:0,last:""};
+  const recent=S.tx.filter(t=>t.kind==="ausgabe" && sh.re.test(nrm(t.note))).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
+  return `<div class="spanel">
+    <div class="spt"><div class="grow"><b>${esc(sh.name)}</b><span class="small muted">${o.count?`Ø ${esc(eur0(o.sum/6))} im Monat · ${o.count} Einkäufe in 6 Monaten`:"zuletzt nicht eingekauft"}</span></div>
+      <a class="btn primary" href="${esc(sh.url)}"${NATIVE?"":' target="_blank" rel="noopener"'}>Angebote ansehen</a></div>
+    ${recent.length?`<div class="small muted" style="margin:12px 0 2px;font-weight:700">Zuletzt bei ${esc(sh.name)}</div>${recent.map(t=>`<div class="meta-row" style="padding:5px 0"><span>${esc(shortDate(t.date))}${hasReceipt(t.id)?" · Beleg":""}</span><b>${esc(eur(t.amount))}</b></div>`).join("")}`:""}
+  </div>`;
+}
+function initShopRail(){
+  const r=$("srail"); if (!r) return;
+  const sel=r.querySelector(".sbtn.on"); if (sel) r.scrollLeft = sel.offsetLeft - (r.clientWidth-sel.offsetWidth)/2;
+  let tm=null;
+  r.addEventListener("scroll", ()=>{ clearTimeout(tm); tm=setTimeout(()=>{
+    // the shop in the middle becomes the selected one, its offers show underneath
+    const mid=r.scrollLeft+r.clientWidth/2; let best=null, bd=1e9;
+    for (const b of r.querySelectorAll("[data-shopsel]")){ const d=Math.abs(b.offsetLeft+b.offsetWidth/2-mid); if (d<bd){ bd=d; best=b; } }
+    if (best && best.dataset.shopsel!==UI.shopSel) selectShop(best.dataset.shopsel, false);
+  }, 90); }, {passive:true});
+}
+function selectShop(id, center){
+  UI.shopSel=id; const r=$("srail"); if (!r) return;
+  r.querySelectorAll("[data-shopsel]").forEach(b=>{ const on=b.dataset.shopsel===id; b.classList.toggle("on",on); b.setAttribute("aria-pressed",String(on)); if (on && center) r.scrollTo({left:b.offsetLeft-(r.clientWidth-b.offsetWidth)/2, behavior:"smooth"}); });
+  const stats=Object.fromEntries(shopStats().map(o=>[o.shop.id,o])); $("shopPanel").innerHTML=shopPanel(SHOPS.find(x=>x.id===id), stats);
+}
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-shopsel]"); if (b) selectShop(b.dataset.shopsel, true); const f=e.target.closest("[data-recentf]"); if (f){ UI.recentF=f.dataset.recentf; renderHome(); } });
 function renderBudgetEd(){
   const el=$("budgetEd"); if (!el || el.contains(document.activeElement)) return; const b=S.settings.budgets||{};
   el.innerHTML = cats("ausgabe").map(c=>`<div class="edit-row acct-row"><span>${tile("ausgabe",c)} <b style="vertical-align:middle">${esc(c)}</b></span><input class="in" data-budget="${esc(c)}" inputmode="decimal" placeholder="kein Budget" aria-label="Monatsbudget ${esc(c)}" value="${b[c]?esc(numStr(b[c])):""}"></div>`).join("");
