@@ -88,6 +88,18 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stro
 .ftile.on .fc{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 .ftile:not(.on) b,.ftile:not(.on) .famt{color:var(--muted)}
 .ftile:active{transform:scale(.97)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (min-width:1000px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:var(--surface);border-radius:20px;padding:13px 14px;box-shadow:var(--shadow);min-width:0}
+.kpi small{display:block;color:var(--muted);font-weight:600;font-size:12px}.kpi b{display:block;font-family:var(--f-display);font-weight:800;font-size:22px;letter-spacing:-.02em;margin:3px 0 1px;white-space:nowrap}.kpi span{font-size:12px;color:var(--muted)}
+.kpi .pos{color:var(--good)}.kpi .neg{color:var(--bad)}
+.card.flat{background:none;box-shadow:none;padding:0;margin:0;border-radius:0}
+.anachart .tlchips{margin:0 0 12px}
+.anarow{padding:13px 16px}.anah{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:0;text-align:left;color:inherit}
+.anah .ic{width:36px;height:36px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.anah .n{flex:1;min-width:0;display:flex;flex-direction:column}.anah b{font-weight:700;font-size:15px}.anah>svg{color:var(--muted)}
+.anab{margin-top:14px}.anab>.card.flat>.card-head h2{display:none}.anab>.card.flat>.card-head{justify-content:flex-end;margin-bottom:4px}.anagrid{display:grid;gap:14px}@media (min-width:1000px){.anagrid{grid-template-columns:1fr 1fr}}
+.anagrid>.card{margin:0;box-shadow:none;background:var(--sunk)}
 .addsheet .addopt{display:flex;align-items:center;gap:14px;width:100%;border:0;text-align:left;background:var(--sunk);border-radius:18px;padding:14px;margin-bottom:10px;color:inherit}
 .addsheet .addopt .ic{width:46px;height:46px;border-radius:15px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
 .addsheet .addopt .grow{flex:1;min-width:0;display:flex;flex-direction:column}.addsheet .addopt b{font-weight:800;font-size:15px}
@@ -1976,6 +1988,7 @@ function selectShop(id, center){
   r.querySelectorAll("[data-shopsel]").forEach(b=>{ const on=b.dataset.shopsel===id; b.classList.toggle("on",on); b.setAttribute("aria-pressed",String(on)); if (on && center) r.scrollTo({left:b.offsetLeft-(r.clientWidth-b.offsetWidth)/2, behavior:"smooth"}); });
   const stats=Object.fromEntries(shopStats().map(o=>[o.shop.id,o])); $("shopPanel").innerHTML=shopPanel(SHOPS.find(x=>x.id===id), stats);
 }
+document.addEventListener("click", e=>{ const c=e.target.closest("[data-anachart]"); if (c){ UI.anaChart=c.dataset.anachart; renderYear(); return; } const o=e.target.closest("[data-anaopen]"); if (o){ UI.anaOpen=UI.anaOpen||{}; UI.anaOpen[o.dataset.anaopen]=!UI.anaOpen[o.dataset.anaopen]; renderYear(); return; } });
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-shopsel]"); if (b) selectShop(b.dataset.shopsel, true); const f=e.target.closest("[data-recentf]"); if (f){ UI.recentF=f.dataset.recentf; renderHome(); } });
 function renderBudgetEd(){
   const el=$("budgetEd"); if (!el || el.contains(document.activeElement)) return; const b=S.settings.budgets||{};
@@ -2138,21 +2151,44 @@ function renderYear(){
   svg+=`</svg>`;
   const kuOver = self>(Number(st.kuLimit)||0), resCover = tax.resBal-Math.max(0,tax.due)-tax.gewst;
   const incSum = name => sum(S.tx.filter(t=>t.kind==="einnahme"&&t.cat===name&&(t.date||"").startsWith(String(y))),t=>t.amount);
-  $("v-year").innerHTML = analyseTop(UI.ym) + `
-    <div class="stat3">
-      <div class="card"><div class="eyebrow">Einnahmen</div><div class="v pos">${esc(eur0(inc))}</div></div>
-      <div class="card"><div class="eyebrow">Ausgaben</div><div class="v">${esc(eur0(exp))}</div></div>
-      <div class="card"><div class="eyebrow">Kontostand 31.12.</div><div class="v ${endBal<0?"neg":""}">${esc(eur0(endBal))}</div></div>
+  // --- Analyse: four key figures, one chart to switch, the rest behind rows that open
+  const ym=UI.ym, mc=monthCalc(ym), prevYm=shiftYm(ym,-1), dayNow=new Date().getDate();
+  const prevExp = sum(monthCalc(prevYm).tx.filter(t=>(t.kind==="ausgabe"||t.kind==="betrieb") && (ym!==cur || Number(t.date.slice(8,10))<=dayNow)),t=>t.amount) + (ym!==cur ? monthCalc(prevYm).fixPaid : 0);
+  const curExp = ym===cur ? sum(mc.tx.filter(t=>t.kind==="ausgabe"||t.kind==="betrieb"),t=>t.amount) : mc.expenses;
+  const delta = prevExp>0 ? (curExp/prevExp-1)*100 : null, perDay = mc.expenses/Math.max(1, ym===cur?dayNow:daysIn(ym));
+  const mode = UI.anaChart||"cat", open=UI.anaOpen||(UI.anaOpen={});
+  // expenses per month of the year
+  const nice2=niceMax(Math.max(1,...rows.map(r=>r.c.expenses))), sy2=v=>pt+(H-pt-pb)*(1-v/nice2), avgExp=exp/Math.max(1,rows.filter(r=>r.c.expenses>0).length);
+  let svg2=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ausgaben pro Monat ${y}">`;
+  for (let g=0; g<=4; g++){ const v=nice2*g/4, yy=sy2(v); svg2+=`<line x1="${pl}" x2="${W-4}" y1="${yy}" y2="${yy}" stroke="var(--line)"/><text x="${pl-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="var(--faint)">${v>=1000?(v/1000).toLocaleString("de-DE",{maximumFractionDigits:1})+"k":Math.round(v)}</text>`; }
+  rows.forEach(r=>{ const x=pl+(r.i-1)*cw, bw=Math.min(28,cw*0.6), on=r.ym===ym; svg2+=`<rect x="${x+(cw-bw)/2}" y="${sy2(r.c.expenses)}" width="${bw}" height="${Math.max(0,H-pb-sy2(r.c.expenses))}" rx="5" fill="${on?"var(--accent)":"var(--c5)"}" data-open="${r.ym}" style="cursor:pointer"/><text x="${x+cw/2}" y="${H-6}" text-anchor="middle" font-size="11" font-weight="${on?800:500}" fill="${on?"var(--fg)":"var(--faint)"}">${MSHORT[r.i-1].slice(0,1)}</text>`; });
+  svg2+=`</svg>`;
+  const ins = insightLine(ym);
+  const chartBody = mode==="cat" ? `${ins?`<div class="small" style="margin:-2px 0 12px;line-height:1.45">${ins}</div>`:""}${moneyFlowCard(ym).replace('<div class="card">','<div class="card flat">')}`
+    : mode==="trend" ? `<div class="card-head" style="margin-bottom:6px"><h2>Ausgaben ${y}</h2><span class="small muted">Ø ${esc(eur0(avgExp))} / Monat</span></div>${svg2}`
+    : `<div class="card-head" style="margin-bottom:6px"><h2>Ein &amp; Aus ${y}</h2><div class="legend"><span><i style="background:var(--good)"></i>Ein</span><span><i style="background:var(--c6)"></i>Aus</span></div></div>${svg}
+       <div class="meta-row small" style="margin-top:8px"><span class="muted">Jahr: ein <b class="pos">${esc(eur0(inc))}</b> · aus <b>${esc(eur0(exp))}</b></span><span class="muted">31.12.: <b>${esc(eur0(endBal))}</b></span></div>`;
+  const need=Math.max(0,tax.due)+(tax.gewst||0);
+  const accRow=(k,icon,title,sub,body)=>`<div class="card anarow ${open[k]?"open":""}"><button class="anah" data-anaopen="${k}" aria-expanded="${!!open[k]}"><span class="ic">${ic(icon,18)}</span><span class="n"><b>${title}</b><span class="small muted">${sub}</span></span>${ic(open[k]?"up":"down",18)}</button>${open[k]?`<div class="anab">${body}</div>`:""}</div>`;
+  $("v-year").innerHTML = `
+    <div class="kpis">
+      <div class="kpi"><small>${mc.net>=0?"Übrig":"Mehr ausgegeben"}</small><b class="${mc.net<0?"neg":"pos"}">${mc.net>=0?"+":"−"} ${esc(eur0(Math.abs(mc.net)))}</b><span>${mc.income?`${Math.round(Math.max(0,mc.net)/mc.income*100)} % gespart`:esc(MONTHS[ymParts(ym)[1]-1])}</span></div>
+      <div class="kpi"><small>Ø pro Tag</small><b>${esc(eur0(perDay))}</b><span>ausgegeben</span></div>
+      <div class="kpi"><small>vs. ${esc(MONTHS[ymParts(prevYm)[1]-1])}</small>${delta===null?`<b>–</b><span>keine Daten</span>`:`<b class="${delta>0?"neg":"pos"}">${delta>0?"+":"−"} ${Math.abs(Math.round(delta))} %</b><span>${ym===cur?"bis heute ":""}${delta>0?"mehr":"weniger"} ausgegeben</span>`}</div>
+      <div class="kpi"><small>Steuer ${y}</small>${need<=0&&!tax.resBal?`<b>–</b><span>keine Nachzahlung</span>`:resCover>=0?`<b class="pos">✓ reicht</b><span>Rücklage ${esc(eur0(tax.resBal))}</span>`:`<b class="neg">− ${esc(eur0(-resCover))}</b><span>fehlen noch</span>`}</div>
     </div>
-    <div class="card chart"><div class="card-head"><h2>Monat für Monat</h2><div class="legend"><span><i style="background:var(--good)"></i>Ein</span><span><i style="background:var(--c6)"></i>Aus</span></div></div>${svg}</div>
-    <div class="card"><div class="card-head"><h2>Jahresplan</h2><span class="small muted">${UI.wide?"Monat anklicken":"Monat antippen"}</span></div>
+    <div class="card anachart">
+      <div class="tlchips" role="group" aria-label="Diagramm">${[["cat","Kategorien"],["trend","Verlauf"],["io","Ein / Aus"]].map(([k,l])=>`<button class="fchip" data-anachart="${k}" aria-pressed="${mode===k}">${l}</button>`).join("")}</div>
+      ${chartBody}
+    </div>
+    ${accRow("plan","cal","Jahresplan", "Einnahmen je Monat und Kategorie", `<div class="card flat"><div class="card-head"><h2>Jahresplan</h2><span class="small muted">${UI.wide?"Monat anklicken":"Monat antippen"}</span></div>
       <div class="table-wrap"><table>
         <thead><tr><th>Monat</th>${incCats().map(c=>`<th>${esc(c.name)}</th>`).join("")}<th>Privat</th><th>Betrieb</th><th>Saldo</th></tr></thead>
         <tbody>${rows.map(r=>{ const per=incCats().map(ic=>sum(r.c.tx.filter(t=>t.kind==="einnahme"&&t.cat===ic.name),t=>t.amount));
           return `<tr class="${r.ym===cur?"cur":""}" data-open="${r.ym}"><td>${MONTHS[r.i-1]}</td>${per.map(v=>`<td>${v?esc(eur(v)):"–"}</td>`).join("")}<td>${esc(eur(r.c.aus+r.c.fixPaidPriv))}</td><td>${esc(eur(r.c.bet+r.c.fixPaidBet))}</td><td class="${r.c.net<0?"neg":r.c.net>0?"pos":""}">${esc(eur(r.c.net))}</td></tr>`; }).join("")}</tbody>
         <tfoot><tr><td>Gesamt</td>${incCats().map(c=>`<td>${esc(eur(incSum(c.name)))}</td>`).join("")}<td>${esc(eur(T("aus")+T("fixPaidPriv")))}</td><td>${esc(eur(T("bet")+T("fixPaidBet")))}</td><td class="${inc-exp<0?"neg":"pos"}">${esc(eur(inc-exp))}</td></tr></tfoot>
-      </table></div></div>
-    <div class="card half"><div class="card-head"><h2>Selbstständig</h2><span class="pill ${st.kleinunternehmer?(kuOver?"bad":"ok"):""}">${st.kleinunternehmer?"Kleinunternehmer":"Mit Umsatzsteuer"}</span></div>
+      </table></div></div>`)}
+    ${accRow("tax","receipt","Steuer &amp; Selbstständig", `Gewinn ${esc(eur0(tax.gewinn))} · ${tax.due>=0?`Nachzahlung ca. ${esc(eur0(tax.due))}`:`Erstattung ca. ${esc(eur0(-tax.due))}`}`, `<div class="anagrid"><div class="card half"><div class="card-head"><h2>Selbstständig</h2><span class="pill ${st.kleinunternehmer?(kuOver?"bad":"ok"):""}">${st.kleinunternehmer?"Kleinunternehmer":"Mit Umsatzsteuer"}</span></div>
       <div class="kv"><span>Einnahmen netto</span><span>${esc(eur(self))}</span>
         ${st.kleinunternehmer?"":`<span>Umsatzsteuer ${esc(st.vatRate)} %</span><span>${esc(eur(self*vat))}</span><span>Brutto</span><span>${esc(eur(self*(1+vat)))}</span>`}
         <span>Betriebsausgaben</span><span>− ${esc(eur(tax.betr))}</span><span class="sum">Gewinn</span><span class="sum">${esc(eur(tax.gewinn))}</span></div>
@@ -2183,10 +2219,10 @@ function renderYear(){
       <div class="notice ${resCover>=0?"info":"bad"}" style="margin-top:14px"><span>${resCover>=0?`Deine Rücklage (${esc(eur(tax.resBal))}) reicht. Puffer: <b>${esc(eur(resCover))}</b>`:`Deine Rücklage (${esc(eur(tax.resBal))}) reicht voraussichtlich nicht – es fehlen <b>${esc(eur(-resCover))}</b>.`}</span></div>
       ${[3,4,5].includes(tax.kl)&&!tax.joint?`<div class="notice warn" style="margin-top:10px"><span>Steuerklasse ${["","I","II","III","IV","V","VI"][tax.kl]} gibt es nur für Verheiratete – schalte unter Einstellungen „Zusammenveranlagung“ ein und trag das Einkommen deines Partners ein.</span></div>`:""}
       ${tax.lstEst?`<div class="notice info" style="margin-top:10px"><span>Die Lohnsteuer ist aus Bruttolohn und Steuerklasse grob geschätzt. Genauer wird es mit dem Wert aus deiner Lohnabrechnung (Einstellungen › Steuer).</span></div>`:""}
-      <p class="small muted" style="margin:10px 0 0">Tarif 2026 nach §32a EStG mit Soli, Kirchensteuer, Kinderfreibetrag und Gewerbesteuer-Anrechnung. Grobe Schätzung ohne Vorsteuer und Sonderfälle – ersetzt keine Steuerberatung.</p></div>
-    <div class="card" style="grid-column:1/-1"><div class="card-head"><h2>Für die Steuer</h2></div>
+      <p class="small muted" style="margin:10px 0 0">Tarif 2026 nach §32a EStG mit Soli, Kirchensteuer, Kinderfreibetrag und Gewerbesteuer-Anrechnung. Grobe Schätzung ohne Vorsteuer und Sonderfälle – ersetzt keine Steuerberatung.</p></div></div>`)}
+    ${accRow("euer","arrowDown","EÜR exportieren", "Für Steuerbüro oder ELSTER (Anlage EÜR)", `<div class="card flat"><div class="card-head"><h2>Für die Steuer</h2></div>
       <p class="small muted" style="margin:-6px 0 12px">Alle Einnahmen und Ausgaben deiner Selbstständigkeit ${y} als Liste für Steuerbüro oder ELSTER (Anlage EÜR) – mit Brutto, Umsatzsteuer und Netto, betrieblichen Fixkosten und Summen. Öffnet sich in Excel.</p>
-      <button class="btn primary" id="euerBtn" data-year="${y}">EÜR ${y} exportieren</button></div>`;
+      <button class="btn primary" id="euerBtn" data-year="${y}">EÜR ${y} exportieren</button></div>`)}`;
 }
 function niceMax(v){ if (v<=0) return 100; const p=Math.pow(10,Math.floor(Math.log10(v))), n=v/p; return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; }
 function shortK(v){ return v>=1000 ? (Math.round(v/100)/10).toString().replace(".",",")+"k" : String(Math.round(v)); }
