@@ -644,6 +644,20 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .card.sp{display:flex;flex-direction:column;gap:14px}
 .card.sp>.section-title:first-child{margin-top:0}
 #setHome{display:flex;flex-direction:column;gap:14px}
+
+.pq{display:flex;flex-direction:column;gap:10px}
+.pqc{background:var(--sunk);border-radius:18px;overflow:hidden}
+.pqh{display:grid;grid-template-columns:1fr auto auto;align-items:center;column-gap:8px;row-gap:2px;width:100%;border:0;background:none;font:inherit;color:var(--fg);text-align:left;padding:13px 12px 13px 14px;cursor:pointer}
+.pqh b{font-weight:800;font-size:16px}.pqh small{grid-column:1/-1;color:var(--muted);font-size:12.5px}
+.pqs{font-weight:800;font-size:16px;white-space:nowrap}
+.pqch{color:var(--faint);transition:transform .15s;display:grid}.pqc.open .pqch{transform:rotate(180deg)}
+.pqb{padding:0 8px 10px;display:flex;flex-direction:column;gap:6px}
+.pqm{display:grid;grid-template-columns:1fr auto;row-gap:1px;align-items:center;border:0;background:var(--surface);border-radius:14px;padding:9px 12px;font:inherit;color:var(--fg);text-align:left;cursor:pointer}
+.pqm span{font-weight:700}.pqm b{font-weight:800}.pqm small{grid-column:1/-1;color:var(--muted);font-size:12px}
+.pqm.cur{box-shadow:inset 0 0 0 2px var(--accent)}
+.pqd{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:13px;padding:8px 6px 0}
+.pqd span:nth-child(even){text-align:right;font-weight:600;white-space:nowrap}
+.incrow{display:flex;flex-direction:column;gap:6px;padding:8px 0}.incrow+.incrow{border-top:1px solid var(--line)}
 </style>
 
 <div class="backdrop" id="addBg" hidden><div class="sheet addsheet" role="dialog" aria-label="Was möchtest du hinzufügen?"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><h2>Was möchtest du hinzufügen?</h2><button class="icon-btn" data-addclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -1104,6 +1118,15 @@ function greeting(){ const h=new Date().getHours(), n=String((S.settings&&S.sett
 
 /* ---------- categories ---------- */
 function cats(kind){ const c=S.settings.cats||DEFAULT_SETTINGS.cats; return c[kind]||[]; }
+
+/* Arten von Einnahmen. Nur selbst, lohn, sonderzahlung und lohnersatz fließen in die Steuerrechnung ein, alle anderen zählen wie "Sonstige". */
+const INC_ARTS = [
+  ["Arbeit", [["selbst","Selbstständigkeit"],["lohn","Gehalt / Lohn (angestellt)"],["sonderzahlung","13. Gehalt, Urlaubsgeld, Bonus"],["minijob","Minijob"]]],
+  ["Vom Staat", [["lohnersatz","Arbeitslosengeld (ALG 1)"],["buergergeld","Bürgergeld"],["kindergeld","Kindergeld"],["elterngeld","Elterngeld"],["rente","Rente / Pension"],["wohngeld","Wohngeld"],["bafoeg","BAföG"]]],
+  ["Vermögen", [["kapital","Zinsen & Dividenden"],["miete","Mieteinnahmen"]]],
+  ["Sonstiges", [["unterhalt","Unterhalt"],["erstattung","Erstattung / Rückzahlung"],["verkauf","Verkauf (z. B. Kleinanzeigen)"],["geschenk","Geschenk"],["sonstige","Sonstige"]]]
+];
+function incArtOptions(sel){ return INC_ARTS.map(([g,os])=>`<optgroup label="${g}">${os.map(([v,l])=>`<option value="${v}" ${v===sel?"selected":""}>${l}</option>`).join("")}</optgroup>`).join(""); }
 function incCats(){ return cats("einnahme").map(c => typeof c==="string" ? {name:c, art:"sonstige"} : c); }
 function incArt(name){ const c=incCats().find(c=>c.name===name); return c?c.art:"sonstige"; }
 const PALETTE = ["--c1","--c2","--c3","--c4","--c5","--c6"];
@@ -2188,6 +2211,26 @@ function analyseTop(ym){
     </div></div>
     <h2 class="section-h">Jahr ${esc(ym.slice(0,4))}</h2>`;
 }
+
+/* Jahresplan: vier Quartale zum Aufklappen */
+function planQuarters(rows, cur){
+  const curQ = rows.findIndex(r=>r.ym===cur)>=0 ? Math.floor(rows.findIndex(r=>r.ym===cur)/3) : -1;
+  UI.planQ = UI.planQ || {};
+  const sg = v => (v>0.005?"+":"")+eur0(v), cl = v => v<-0.005?"neg":v>0.005?"pos":"muted";
+  return `<div class="pq">${[0,1,2,3].map(q=>{
+    const ms=rows.slice(q*3,q*3+3), has=ms.some(r=>r.c.income||r.c.expenses);
+    const ii=sum(ms,r=>r.c.income), aa=sum(ms,r=>r.c.expenses), nn=sum(ms,r=>r.c.net);
+    const open = q in UI.planQ ? UI.planQ[q] : q===curQ;
+    const cats = incCats().map(c=>[c.name, sum(ms,r=>sum(r.c.tx.filter(t=>t.kind==="einnahme"&&t.cat===c.name),t=>t.amount))]).filter(x=>x[1]>0.005);
+    const priv=sum(ms,r=>r.c.aus+r.c.fixPaidPriv), bet=sum(ms,r=>r.c.bet+r.c.fixPaidBet);
+    return `<div class="pqc ${open?"open":""}">
+      <button class="pqh" data-planq="${q}" aria-expanded="${open}"><b>${q+1}. Quartal</b><span class="pqs ${has?cl(nn):"muted"}">${has?esc(sg(nn)):"–"}</span><span class="pqch">${ic("chevron",18)}</span><small>${MONTHS[q*3]} bis ${MONTHS[q*3+2]}${has?` · ${esc(eur0(ii))} rein · ${esc(eur0(aa))} raus`:" · noch keine Buchungen"}</small></button>
+      ${open?`<div class="pqb">
+        ${ms.map(r=>{ const e=r.c.income||r.c.expenses; return `<button class="pqm ${r.ym===cur?"cur":""}" data-open="${r.ym}"><span>${MONTHS[r.i-1]}</span><b class="${e?cl(r.c.net):"muted"}">${e?esc(sg(r.c.net)):"–"}</b><small>${e?`${esc(eur0(r.c.income))} rein · ${esc(eur0(r.c.expenses))} raus`:"noch offen"}</small></button>`; }).join("")}
+        ${has?`<div class="pqd">${cats.map(([n,v])=>`<span>${esc(n)}</span><span>${esc(eur(v))}</span>`).join("")}<span class="muted">Ausgaben privat</span><span class="muted">− ${esc(eur(priv))}</span><span class="muted">Ausgaben betrieblich</span><span class="muted">− ${esc(eur(bet))}</span></div>`:""}
+      </div>`:""}
+    </div>`; }).join("")}</div>`;
+}
 function renderYear(){
   const y=Number(UI.ym.slice(0,4)), cur=ymOf(new Date());
   const rows=[]; let maxV=1;
@@ -2237,13 +2280,7 @@ function renderYear(){
       <div class="tlchips" role="group" aria-label="Diagramm">${[["cat","Kategorien"],["trend","Verlauf"],["io","Ein / Aus"]].map(([k,l])=>`<button class="fchip" data-anachart="${k}" aria-pressed="${mode===k}">${l}</button>`).join("")}</div>
       ${chartBody}
     </div>
-    ${accRow("plan","cal","Jahresplan", "Einnahmen je Monat und Kategorie", `<div class="card flat"><div class="card-head"><h2>Jahresplan</h2><span class="small muted">${UI.wide?"Monat anklicken":"Monat antippen"}</span></div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Monat</th>${incCats().map(c=>`<th>${esc(c.name)}</th>`).join("")}<th>Privat</th><th>Betrieb</th><th>Saldo</th></tr></thead>
-        <tbody>${rows.map(r=>{ const per=incCats().map(ic=>sum(r.c.tx.filter(t=>t.kind==="einnahme"&&t.cat===ic.name),t=>t.amount));
-          return `<tr class="${r.ym===cur?"cur":""}" data-open="${r.ym}"><td>${MONTHS[r.i-1]}</td>${per.map(v=>`<td>${v?esc(eur(v)):"–"}</td>`).join("")}<td>${esc(eur(r.c.aus+r.c.fixPaidPriv))}</td><td>${esc(eur(r.c.bet+r.c.fixPaidBet))}</td><td class="${r.c.net<0?"neg":r.c.net>0?"pos":""}">${esc(eur(r.c.net))}</td></tr>`; }).join("")}</tbody>
-        <tfoot><tr><td>Gesamt</td>${incCats().map(c=>`<td>${esc(eur(incSum(c.name)))}</td>`).join("")}<td>${esc(eur(T("aus")+T("fixPaidPriv")))}</td><td>${esc(eur(T("bet")+T("fixPaidBet")))}</td><td class="${inc-exp<0?"neg":"pos"}">${esc(eur(inc-exp))}</td></tr></tfoot>
-      </table></div></div>`)}
+    ${accRow("plan","cal","Jahresplan", `${esc(eur0(inc))} rein · ${esc(eur0(exp))} raus`, planQuarters(rows,cur))}
     ${accRow("tax","receipt","Steuer &amp; Selbstständig", `Gewinn ${esc(eur0(tax.gewinn))} · ${tax.due>=0?`Nachzahlung ca. ${esc(eur0(tax.due))}`:`Erstattung ca. ${esc(eur0(-tax.due))}`}`, `<div class="anagrid"><div class="card half"><div class="card-head"><h2>Selbstständig</h2><span class="pill ${st.kleinunternehmer?(kuOver?"bad":"ok"):""}">${st.kleinunternehmer?"Kleinunternehmer":"Mit Umsatzsteuer"}</span></div>
       <div class="kv"><span>Einnahmen netto</span><span>${esc(eur(self))}</span>
         ${st.kleinunternehmer?"":`<span>Umsatzsteuer ${esc(st.vatRate)} %</span><span>${esc(eur(self*vat))}</span><span>Brutto</span><span>${esc(eur(self*(1+vat)))}</span>`}
@@ -2419,7 +2456,7 @@ function renderMore(){
   if (document.activeElement!==$("sName")) $("sName").value=S.settings.name||"";
   $("sKU").checked=!!st.kleinunternehmer; $("sSplit").checked=!!st.splitting; $("partnerField").hidden=!st.splitting;
   for (const k of ["ausgabe","betrieb"]) $("catEd-"+k).innerHTML = cats(k).map(n=>`<span class="chip">${esc(n)}<button class="x" data-catdel="${k}|${esc(n)}" aria-label="${esc(n)} entfernen">×</button></span>`).join("")+`<button class="chip" data-catadd="${k}">+ Neu</button>`;
-  $("catEd-einnahme").innerHTML = incCats().map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:5px 0"><b style="flex:1">${esc(c.name)}</b><select class="in" style="width:auto" data-incart="${esc(c.name)}" aria-label="Art von ${esc(c.name)}"><option value="selbst" ${c.art==="selbst"?"selected":""}>Selbstständig</option><option value="lohn" ${c.art==="lohn"?"selected":""}>Gehalt (angestellt)</option><option value="sonderzahlung" ${c.art==="sonderzahlung"?"selected":""}>Sonderzahlung (13. Gehalt …)</option><option value="lohnersatz" ${c.art==="lohnersatz"?"selected":""}>Lohnersatz (ALG1)</option><option value="sonstige" ${c.art==="sonstige"?"selected":""}>Sonstige</option></select><button class="icon-btn" data-catdel="einnahme|${esc(c.name)}" aria-label="${esc(c.name)} entfernen">×</button></div>`).join("")+`<button class="chip" data-catadd="einnahme" style="margin-top:6px">+ Neu</button>`;
+  $("catEd-einnahme").innerHTML = incCats().map(c=>`<div class="incrow"><div style="display:flex;align-items:center;gap:10px"><b style="flex:1">${esc(c.name)}</b><button class="icon-btn" data-catdel="einnahme|${esc(c.name)}" aria-label="${esc(c.name)} entfernen">×</button></div><select class="in" data-incart="${esc(c.name)}" aria-label="Art von ${esc(c.name)}">${incArtOptions(c.art)}</select></div>`).join("")+`<button class="chip" data-catadd="einnahme" style="margin-top:6px">+ Neu</button>`;
   renderSpPages();
 }
 function txPayee(t){ return String(t.note||"").replace(/ · brutto.*$/,""); }
@@ -2584,6 +2621,7 @@ document.addEventListener("click", async e => {
   const fr = t.closest("[data-fxreset]"); if (fr){ const f=S.fixed.find(x=>x.id===fr.dataset.fxreset); if (f) await setMonthAmount(f.id, listAmt(f,UI.ym)); return; }
   const fa = t.closest("[data-fxamt]"); if (fa){ UI.amtEdit=fa.dataset.fxamt; renderFix(); const el=$("fxAmtIn"); if (el){ el.focus(); el.select(); } return; }
   const mc = t.closest("[data-fxmon]"); if (mc){ await toggleFixMonth(...mc.dataset.fxmon.split("|")); return; }
+  const pq = t.closest("[data-planq]"); if (pq){ const q=pq.dataset.planq, el=pq.parentElement; UI.planQ=UI.planQ||{}; UI.planQ[q]=!el.classList.contains("open"); renderYear(); return; }
   const fg = t.closest("[data-fxgroup]"); if (fg){ const a=fg.dataset.fxgroup; UI.fxOpen=UI.fxOpen||{}; UI.fxOpen[a]=fg.getAttribute("aria-expanded")!=="true"; renderFix(); return; }
   if (t.closest("#fxAmtIn")) return;
   const pay = t.closest("[data-pay]"); if (pay){ await togglePaid(pay.dataset.pay); return; }
