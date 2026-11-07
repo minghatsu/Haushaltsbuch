@@ -153,6 +153,20 @@ ipcMain.on("fetchImage", async (e, req) => {
   e.sender.executeJavaScript(`window.hbImgDone && window.hbImgDone(${JSON.stringify(req.id)}, ${JSON.stringify(data)})`).catch(() => {});
 });
 
+// shop offers etc.: a window of its own on top of the app (closes with Esc), instead of the normal browser
+let pageWin = null;
+ipcMain.on("openInApp", (e, url) => {
+  if (!/^https:\/\//i.test(url)) return;
+  if (pageWin && !pageWin.isDestroyed()) { pageWin.loadURL(url); pageWin.focus(); return; }
+  const b = win ? win.getBounds() : { x: undefined, y: undefined, width: 1100, height: 800 };
+  pageWin = new BrowserWindow({ parent: win, x: b.x + 40, y: b.y + 40, width: Math.max(800, b.width - 80), height: Math.max(600, b.height - 80),
+    title: "Angebote", autoHideMenuBar: true, backgroundColor: "#ffffff", webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false } });
+  pageWin.webContents.setWindowOpenHandler(({ url: u }) => { if (/^https?:\/\//i.test(u)) pageWin.loadURL(u); return { action: "deny" }; });
+  pageWin.webContents.on("before-input-event", (ev, input) => { if (input.type === "keyDown" && input.key === "Escape") pageWin.close(); });
+  pageWin.on("closed", () => { pageWin = null; });
+  pageWin.loadURL(url);
+});
+
 /* ---------- automatic start test for the build (npm run smoke) ---------- */
 function runSmokeTest() {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));

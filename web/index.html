@@ -162,6 +162,9 @@ main{padding-block:6px 120px}
 .sbtn .sadd{display:grid;place-items:center;background:var(--sunk);color:var(--accent)}
 .sbtn.on{background:var(--accent-soft);color:var(--fg)}.sbtn.on .bavatar{transform:scale(1.06)}
 .spanel{background:var(--sunk);border-radius:18px;padding:12px 14px}
+.ssec{display:flex;justify-content:space-between;align-items:baseline;margin:14px 0 4px;font-weight:700;font-size:12.5px;color:var(--muted)}
+.deal2{display:flex;align-items:center;gap:10px;padding:7px 0}.deal2+.deal2{border-top:1px solid var(--line)}.deal2 .grow{flex:1;min-width:0;display:flex;flex-direction:column}.deal2 b{font-weight:600}
+.dealform{display:flex;flex-direction:column;gap:8px;margin-top:6px}.dealform .in{background:var(--surface)}
 .spt{display:flex;align-items:center;gap:12px}.spt .grow{flex:1;min-width:0;display:flex;flex-direction:column}.spt b{font-weight:800;font-size:15px}.spt .btn{white-space:nowrap;text-decoration:none}
 .rings{display:flex;gap:6px;overflow-x:auto;margin:0 -6px;padding:2px 6px 2px;scrollbar-width:none}.rings::-webkit-scrollbar{display:none}
 .rbtn{border:0;background:none;padding:0;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:72px;max-width:84px;flex:0 0 auto}
@@ -1694,17 +1697,59 @@ function offersCard(){
     <div id="shopPanel">${shopPanel(chosen.find(x=>x.id===UI.shopSel), stats)}</div>
   </div>`;
 }
-// what the app knows about one shop: your purchases there, and its current leaflet
+// what the app knows about one shop: its leaflet, offers you noted, prices from your receipts, your purchases there
+function nextSat(){ const d=new Date(); d.setDate(d.getDate()+((6-d.getDay()+7)%7)); return isoOf(d); }
+function shopDeals(id){ const t=isoToday(); return (S.settings.deals||[]).filter(x=>x.shop===id && (!x.until || x.until>=t)).sort((a,b)=>String(a.until).localeCompare(String(b.until))); }
+function priceToks(name){ return nrm(name).replace(/[^a-zäöüß ]/g," ").split(/\s+/).filter(x=>x.length>=4 && !/^(stück|stck|gramm|liter|packung|frisch|deutsche|beutel|dose|flasche|klasse|natur|extra|super|classic)$/.test(x)); }
+function sameProduct(a,b){ for (const x of a) for (const y of b){ if (x===y) return x; if (x.length>=5 && y.length>=5 && (x.includes(y)||y.includes(x))) return x.length<y.length?x:y; } return ""; }
+function shopPrices(id){
+  // latest price per product at this shop, compared with the latest price of the same thing at other shops
+  const book=S.settings.pricebook||[], here={};
+  for (const e of book) if (e.s===id){ const k=nrm(e.n); if (!here[k] || here[k].d<=e.d) here[k]=e; }
+  return Object.values(here).sort((a,b)=>b.d.localeCompare(a.d)).slice(0,5).map(e=>{
+    const te=priceToks(e.n), other={}; let label="";
+    for (const o of book){ if (o.s===id) continue; const w=sameProduct(te, priceToks(o.n)); if (!w) continue; if (!other[o.s] || other[o.s].d<=o.d) other[o.s]=o; label=label||w; }
+    const os=Object.values(other).sort((a,b)=>a.p-b.p), best=os[0];
+    return { w: label || (te.sort((a,b)=>b.length-a.length)[0]) || nrm(e.n), e, best: best && best.p<e.p-0.004 ? best : null, cheapest: os.length>0 && os.every(o=>o.p>=e.p) };
+  });
+}
 function shopPanel(sh, stats){
   if (!sh) return "";
   const o=stats[sh.id]||{sum:0,count:0,last:""};
   const recent=S.tx.filter(t=>t.kind==="ausgabe" && sh.re.test(nrm(t.note))).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
+  const deals=shopDeals(sh.id), prices=shopPrices(sh.id), name=n=>n.charAt(0).toUpperCase()+n.slice(1);
+  const shopName=id=>(SHOPS.find(x=>x.id===id)||{name:id}).name;
   return `<div class="spanel">
     <div class="spt"><div class="grow"><b>${esc(sh.name)}</b><span class="small muted">${o.count?`Ø ${esc(eur0(o.sum/6))} im Monat · ${o.count} Einkäufe in 6 Monaten`:"zuletzt nicht eingekauft"}</span></div>
-      <a class="btn primary" href="${esc(sh.url)}"${NATIVE?"":' target="_blank" rel="noopener"'}>Angebote ansehen</a></div>
-    ${recent.length?`<div class="small muted" style="margin:12px 0 2px;font-weight:700">Zuletzt bei ${esc(sh.name)}</div>${recent.map(t=>`<div class="meta-row" style="padding:5px 0"><span>${esc(shortDate(t.date))}${hasReceipt(t.id)?" · Beleg":""}</span><b>${esc(eur(t.amount))}</b></div>`).join("")}`:""}
+      <button class="btn primary" data-openshop="${esc(sh.url)}">${ic("cart",16)} Prospekt</button></div>
+    <div class="ssec"><span>Gemerkte Angebote</span></div>
+    ${deals.map(d=>`<div class="deal2"><span class="grow"><b>${esc(d.text)}</b><span class="small muted">${d.until?`bis ${esc(shortDate(d.until))}`:"ohne Datum"}</span></span>${d.price?`<b class="pos">${esc(eur(d.price))}</b>`:""}<button class="icon-btn" data-dealdel="${esc(d.id)}" aria-label="Angebot löschen">×</button></div>`).join("") || (UI.dealAdd===sh.id?"":`<div class="small muted" style="padding:4px 0 2px">Im Prospekt etwas Gutes gesehen? Merk es dir hier – es verschwindet nach Ablauf von selbst.</div>`)}
+    ${UI.dealAdd===sh.id?`<div class="dealform"><input class="in" id="dealText" placeholder="Was? z. B. Kaffee 500 g" aria-label="Was"><div class="grid2"><input class="in" id="dealPrice" inputmode="decimal" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="dealUntil" value="${esc(nextSat())}" aria-label="Gültig bis"></div><div class="row-btns"><button class="btn" data-dealcancel="1">Abbrechen</button><button class="btn primary" data-dealsave="${esc(sh.id)}">Merken</button></div></div>`
+      :`<button class="chip" data-dealadd="${esc(sh.id)}" style="margin-top:6px">+ Angebot merken</button>`}
+    ${prices.length?`<div class="ssec"><span>Deine Preise hier</span><span class="small muted">aus Quittungen</span></div>
+      ${prices.map(x=>`<div class="meta-row" style="padding:5px 0"><span>${esc(name(x.w))}${x.best?`<br><span class="small" style="color:var(--warn)">bei ${esc(shopName(x.best.s))} ${esc(eur(x.best.p))}</span>`:x.cheapest?`<br><span class="small pos">hier am günstigsten</span>`:""}</span><b>${esc(eur(x.e.p))}</b></div>`).join("")}`:""}
+    ${recent.length?`<div class="ssec"><span>Zuletzt bei ${esc(sh.name)}</span></div>${recent.map(t=>`<div class="meta-row" style="padding:5px 0"><span>${esc(shortDate(t.date))}${hasReceipt(t.id)?" · Beleg":""}</span><b>${esc(eur(t.amount))}</b></div>`).join("")}`:""}
   </div>`;
 }
+function rerenderShopPanel(){ const el=$("shopPanel"); if (!el || !UI.shopSel) return; const stats=Object.fromEntries(shopStats().map(o=>[o.shop.id,o])); el.innerHTML=shopPanel(SHOPS.find(x=>x.id===UI.shopSel), stats); }
+function openPage(url){
+  if (window.AndroidBridge && window.AndroidBridge.openInApp) { try { window.AndroidBridge.openInApp(url); return; } catch(e){} }
+  window.open(url, "_blank", "noopener");
+}
+document.addEventListener("click", e=>{
+  const t=e.target;
+  const op=t.closest("[data-openshop]"); if (op){ openPage(op.dataset.openshop); return; }
+  const da=t.closest("[data-dealadd]"); if (da){ UI.dealAdd=da.dataset.dealadd; rerenderShopPanel(); setTimeout(()=>{ const el=$("dealText"); if (el) el.focus(); },30); return; }
+  if (t.closest("[data-dealcancel]")){ UI.dealAdd=null; rerenderShopPanel(); return; }
+  const ds=t.closest("[data-dealsave]"); if (ds){
+    const text=($("dealText")||{}).value.trim(), pr=parseAmt(($("dealPrice")||{}).value||""), until=($("dealUntil")||{}).value||"";
+    if (!text){ toast("Was ist im Angebot?"); return; }
+    const keep=(S.settings.deals||[]).filter(x=>!x.until || x.until>=isoOf(new Date(Date.now()-14*864e5)));
+    S.settings.deals=[...keep, {id:newId(), shop:ds.dataset.dealsave, text:text.slice(0,60), price:pr>0?Math.round(pr*100)/100:null, until}];
+    UI.dealAdd=null; if (document.activeElement) document.activeElement.blur(); saveSettings(); rerenderShopPanel(); toast("Angebot gemerkt"); return; }
+  const dd=t.closest("[data-dealdel]"); if (dd){ const old=S.settings.deals||[]; S.settings.deals=old.filter(x=>x.id!==dd.dataset.dealdel); saveSettings(); rerenderShopPanel(); toast("Gelöscht", ()=>{ S.settings.deals=old; saveSettings(); rerenderShopPanel(); }); return; }
+});
+document.addEventListener("keydown", e=>{ if (e.key==="Enter" && (e.target.id==="dealText"||e.target.id==="dealPrice")){ const b=document.querySelector("[data-dealsave]"); if (b) b.click(); } });
 function initShopRail(){
   const r=$("srail"); if (!r) return;
   const sel=r.querySelector(".sbtn.on"); if (sel) r.scrollLeft = sel.offsetLeft - (r.clientWidth-sel.offsetWidth)/2;
@@ -2381,6 +2426,32 @@ async function scanImageFile(file){
 const AMT_RE = /(^|[^\d,.])(\d{1,4}(?:\.\d{3})*|\d{1,6})\s?[,.]\s?(\d{2})(?!\d)/g;
 function amountsIn(t){ const out=[]; let m; AMT_RE.lastIndex=0; while ((m=AMT_RE.exec(t))){ const v=Number(m[2].replace(/\./g,"")+"."+m[3]); if (v>0 && v<100000) out.push(v); } return out; }
 // reads the paid total, the date and the shop from the recognised lines of a receipt
+// single items with their price from a receipt ("BUTTER 250G   1,99 A"), for the price memory
+function receiptItems(lines){
+  const rows=[]; const L=lines.map(l=>({...l}));
+  if (L.some(l=>l.y!=null)){
+    L.sort((a,b)=>(a.y||0)-(b.y||0));
+    for (const l of L){ const r=rows.find(r=>Math.abs(((r.y+r.h/2))-((l.y||0)+(l.h||0)/2)) < Math.max(r.h,l.h||0)*0.6); if (r){ r.parts.push(l); } else rows.push({y:l.y||0, h:l.h||10, parts:[l]}); }
+    rows.forEach(r=>{ r.parts.sort((a,b)=>(a.x||0)-(b.x||0)); r.t=r.parts.map(p=>p.t).join("  "); });
+  } else L.forEach(l=>rows.push({t:l.t}));
+  const out=[], STOP=/summe|gesamt|zu zahlen|total|zahlbetrag|bar\b|karte|girocard|ec-|mwst|ust|netto|brutto|rückgeld|rueckgeld|pfand|leergut|rabatt|coupon|bonus|punkte|payback|steuer|datum|uhrzeit|kasse|bon|beleg|tse|signatur|vielen dank|www|tel\.|filiale/;
+  for (const r of rows){
+    const t=r.t.replace(/\s+/g," ").trim(), n=nrm(t);
+    if (STOP.test(n)) { if (/summe|zu zahlen|total|gesamt/.test(n)) break; continue; }
+    const m=t.match(/^(.*?[A-Za-zÄÖÜäöüß]{3,}.*?)\s+(-?\d{1,3},\d{2})\s*(?:[A-D*]|\d)?\s*$/); if (!m) continue;
+    const name=m[1].replace(/\b\d+\s*[xX]\s*\d+,\d{2}\b/,"").replace(/\s{2,}/g," ").trim(), p=Number(m[2].replace(",","."));
+    if (!(p>0 && p<200) || name.length<3) continue;
+    out.push({n:name.slice(0,40), p});
+  }
+  return out.slice(0,60);
+}
+function rememberPrices(shopText, date, items){
+  const sh=SHOPS.find(x=>x.re.test(nrm(shopText||""))); if (!sh || !items.length) return 0;
+  const d=date||isoToday(), book=(S.settings.pricebook||[]).filter(e=>!(e.s===sh.id && e.d===d));   // the same receipt scanned twice counts once
+  for (const it of items) book.push({n:it.n, p:it.p, s:sh.id, d});
+  S.settings.pricebook=book.sort((a,b)=>a.d.localeCompare(b.d)).slice(-400); saveSettings();
+  return items.length;
+}
 function parseReceipt(lines){
   lines = lines.map((l,i)=>({...l, i, n:nrm(l.t)}));
   const TOTAL = [/zu zahlen|zahlbetrag|gesamtbetrag|endbetrag|gesamtsumme|summe|gesamt|total|betrag eur|\beur\b.*summe/, /ec[- ]?karte|girocard|kartenzahlung|karte|visa|mastercard|maestro|bar\b|zahlung/];
@@ -2430,7 +2501,8 @@ async function runScan(source, attachOnly){
     if (r.date) $("fDate").value=r.date;
     if (r.shop && !$("fNote").value.trim()) $("fNote").value=r.shop;
     renderSheet();
-    toast(`Erkannt: ${eur(r.amount)}${r.date?" am "+shortDate(r.date):""} – bitte kurz prüfen`, null, null, 4000);
+    let nItems=0; try { nItems=rememberPrices(r.shop, r.date, receiptItems(lines||[])); } catch(e){}
+    toast(`Erkannt: ${eur(r.amount)}${r.date?" am "+shortDate(r.date):""}${nItems?` · ${nItems} Preise gemerkt`:""} – bitte kurz prüfen`, null, null, 4000);
   } catch(e){ scanBusy(false); toast(e.message||"Quittung konnte nicht gelesen werden"); }
 }
 $("scanCam").onclick = () => runScan("camera");

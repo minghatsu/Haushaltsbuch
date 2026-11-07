@@ -36,6 +36,7 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.CancellationSignal;
 import androidx.core.content.FileProvider;
+import androidx.browser.customtabs.CustomTabsIntent;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.Text;
 import com.google.mlkit.vision.text.TextRecognition;
@@ -297,6 +298,20 @@ public class MainActivity extends Activity {
     /** Called from JavaScript as window.AndroidBridge */
     private class Bridge {
         /** Stores a newer app version (downloaded from the Synology); it is used from the next (re)load on. */
+        /** Opens a web page (e.g. a shop's weekly offers) inside the app as a "custom tab"; back returns to the app. */
+        @JavascriptInterface
+        public void openInApp(final String url) {
+            runOnUiThread(() -> {
+                Uri u = Uri.parse(url);
+                if (!"https".equals(u.getScheme())) return;
+                try {
+                    new CustomTabsIntent.Builder().setShowTitle(true).setUrlBarHidingEnabled(true).build().launchUrl(MainActivity.this, u);
+                } catch (Exception e) {
+                    try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) { }
+                }
+            });
+        }
+
         @JavascriptInterface
         public boolean saveApp(String html) {
             try {

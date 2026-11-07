@@ -8,5 +8,6 @@ contextBridge.exposeInMainWorld("AndroidBridge", {
   fetchImage: (id, url) => ipcRenderer.send("fetchImage", { id: String(id), url: String(url) }),
   http: (id, method, url, auth, body) =>
     ipcRenderer.send("http", { id: String(id), method: String(method), url: String(url), auth: String(auth || ""), body: String(body || "") }),
+  openInApp: (url) => ipcRenderer.send("openInApp", String(url)),
   desktop: true,
 });
