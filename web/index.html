@@ -2036,9 +2036,9 @@ function suggest(r){
   if (/(^|\D)\d{2,4}\s?[\/\-]\s?20\d\d(\D|$)|(^|\D)\d{3} 20\d\d(\D|$)/.test(nrm(r.ref)) && !/\b(lohn|gehalt|rente|bezüge|bezuege|entgelt)\b/.test(text)){ const c=incCats().find(c=>c.art==="selbst"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
   if (/bundesagentur|arbeitsagentur|agentur für arbeit|agentur fuer arbeit/.test(text)){ const c=incCats().find(c=>c.art==="lohnersatz"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
   if (/\bspaces?\b/.test(text)) return {target:"skip|", sure:false};
+  if (/\b(lohn|gehalt|salary|entgelt|bezüge|bezuege)\b/.test(text)){ const c=incCats().find(c=>c.art!=="selbst"&&c.art!=="lohnersatz")||incCats()[0]; if (c) return {target:"einnahme|"+c.name, sure:false}; }
   // money that really comes in, but is no earned income: refunds, cashback, N26 instalment credits, sold shares/crypto, cash deposits
   if (/erstattung|rückerstattung|rueckerstattung|refund|gutschrift|storno|rückbuchung|rueckbuchung|cashback|reward|ratenzahlung|equities|bitpanda|crypto|cash26|bareinzahlung|\bn26\b/.test(text)){ const c=refundCat(); if (c) return {target:"einnahme|"+c.name, sure:true}; }
-  if (/\b(lohn|gehalt|salary|entgelt|bezüge|bezuege)\b/.test(text)){ const c=incCats().find(c=>c.art!=="selbst"&&c.art!=="lohnersatz")||incCats()[0]; if (c) return {target:"einnahme|"+c.name, sure:false}; }
   const other = incCats().find(c=>/sonstig/i.test(c.name)) || incCats().find(c=>c.art==="selbst") || incCats()[0];
   return other ? {target:"einnahme|"+other.name, sure:false} : {target:"skip|", sure:false};
 }
