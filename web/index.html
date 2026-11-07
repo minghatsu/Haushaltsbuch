@@ -67,6 +67,12 @@ svg.i{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stro
 .msel:focus-visible{outline:2px solid var(--accent)}
 .datesel{display:grid;grid-template-columns:72px minmax(0,1fr) 96px;gap:8px;margin-top:10px}
 .datesel .in{padding:11px 10px;font-weight:700}
+.roundbtn.bell{position:relative}.roundbtn.bell.warn{color:var(--warn)}
+.roundbtn .badge{position:absolute;right:-4px;top:-4px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:var(--warn);color:#1A1306;font-weight:800;font-size:11px;display:grid;place-items:center;border:2px solid var(--bg)}
+.hintsheet .hn{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line);line-height:1.4}.hintsheet .hn:first-child{border-top:0}
+.hintsheet .hn .e{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--warn-soft);color:var(--warn)}
+.hintsheet .hn.bad .e{background:var(--bad-soft);color:var(--bad)}.hintsheet .hn.good .e{background:var(--accent-soft);color:var(--accent)}
+.hintsheet .hn b{display:block;font-weight:700}.hintsheet .hn .small{display:block}
 .roundbtn{border:0;background:var(--surface);box-shadow:var(--shadow);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--muted);flex:none}
 .roundbtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 
@@ -123,6 +129,7 @@ main{padding-block:6px 120px}
 .acard{flex:0 0 calc(100% - 34px);max-width:440px;scroll-snap-align:start;border-radius:28px;padding:18px 20px 16px;color:#fff;position:relative;overflow:hidden;min-height:176px;display:flex;flex-direction:column;background:radial-gradient(120% 140% at 100% 0%,#3FBF8A 0%,#178060 45%,#0D5A44 100%);box-shadow:0 14px 30px -16px rgba(13,90,68,.7)}
 .acard::after{content:"";position:absolute;right:-50px;top:-60px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.08)}
 .acards.one .acard{flex-basis:100%;max-width:none}
+.acard>*{transition:opacity .25s}.astack .acard.side>*{opacity:.12!important}
 .acard.alt{background:linear-gradient(135deg,#34413B,#1E2723);box-shadow:0 14px 30px -18px rgba(0,0,0,.6)}
 .acard.minus{background:linear-gradient(150deg,#C2412D,#93301F)}
 .acard .l{font-weight:600;font-size:13px;opacity:.85;position:relative;z-index:1}
@@ -563,6 +570,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
+<div class="backdrop" id="hintBg" hidden><div class="sheet hintsheet" role="dialog" aria-label="Hinweise"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 6px"><h2>Hinweise</h2><button class="icon-btn" data-hintclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="hintList"></div></div></div>
 <header class="top">
   <div class="wrap">
     <div class="hello"><small id="greet">Hallo</small><b id="viewTitle">Übersicht</b></div>
@@ -571,6 +579,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <select id="selM" class="msel" aria-label="Monat"></select><select id="selY" class="msel" aria-label="Jahr"></select>
       <button id="nextM" aria-label="Nächster Monat"><svg class="i" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
     </div>
+    <button class="roundbtn bell" id="bellBtn" aria-label="Hinweise"><svg class="i" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9M10 20.5h4"/></svg><span class="badge" hidden>0</span></button>
     <button class="roundbtn" id="settingsBtn" aria-label="Schulden und Einstellungen" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
   </div>
 </header>
@@ -1424,10 +1433,12 @@ function initStack(){
     const w=st.clientWidth*0.8;
     cards.forEach((c,i)=>{ const d=rel(i), jump=Math.abs(d-last[i])>1, side=Math.abs(d);
       c.style.transition = (!anim || jump) ? "none" : "";
-      const x = d*w*0.92 + dx, sc = side===0 ? 1-Math.min(0.14,Math.abs(dx)/w*0.14) : 0.86+Math.min(0.14,(d*dx<0?Math.abs(dx):0)/w*0.14);
+      const x = d*w*0.6 + dx, sc = side===0 ? 1-Math.min(0.14,Math.abs(dx)/w*0.14) : 0.86+Math.min(0.14,(d*dx<0?Math.abs(dx):0)/w*0.14);
       c.style.transform = `translateX(${x}px) scale(${sc})`;
       c.style.opacity = side<=1 ? "1" : "0";
-      c.style.filter = side===0 ? "" : "brightness(.55) saturate(.8)";
+      c.style.filter = side===0 ? "" : "brightness(.5) saturate(.75)";
+      c.style.boxShadow = side===0 ? "0 18px 34px -14px rgba(0,0,0,.55)" : "";
+      c.classList.toggle("side", side!==0);
       c.style.zIndex = String(10-side); c.setAttribute("aria-hidden", String(d!==0)); });
     last = cards.map((_,i)=>rel(i));
     if (dots) [...dots.children].forEach((b,i)=>b.classList.toggle("on", i===UI.cardIdx));
@@ -1527,6 +1538,15 @@ function renderHome(){
     else { tipCls="warn"; tip = cum.reserveBal>0 && cum.balance>=0 ? `<b>Deine Steuer-Rücklage (${esc(eur0(cum.reserveBal))}) ist größer als dein Guthaben.</b> Plane für die Steuer etwas mehr ein.` : `<b>Es wird knapp.</b> Nach allen offenen Posten fehlen ${esc(eur(-free))}.`; }
   }
   else { tip=`<b>${esc(MONTHS[ymParts(ym)[1]-1])}: ${c.net>=0?"+":"−"} ${esc(eur(Math.abs(c.net)))}</b> ${c.net>=0?"mehr eingenommen als ausgegeben.":"mehr ausgegeben als eingenommen."}`; if (c.net<0) tipCls="warn"; }
+  // --- all hints for the bell (the start page itself stays free)
+  const hints=[];
+  if (mainBal<0 && ym<=cur) hints.push({lvl:"bad", t:"Dein Konto ist im Minus", s:`${mainName||"Kontostand"}: ${eur(mainBal)}`});
+  for (const x of budgetWarn) hints.push(x.v>x.budget ? {lvl:"bad", t:`${x.cat}: ${eur0(x.v-x.budget)} über dem Budget`, s:days?`Noch ${days} ${days===1?"Tag":"Tage"} bis Monatsende.`:""} : {lvl:"warn", t:`${x.cat}: ${Math.round(x.v/x.budget*100)} % vom Budget verbraucht`, s:`Noch ${eur(x.budget-x.v)} für ${days} ${days===1?"Tag":"Tage"}.`});
+  if (ym>=cur && free<0) hints.push(cum.reserveBal>0 && cum.balance>=0 ? {lvl:"warn", t:"Steuer-Rücklage größer als dein Guthaben", s:`${eur0(cum.reserveBal)} Rücklage, ${eur0(cum.balance)} auf den Konten. Plane für die Steuer etwas mehr ein.`} : {lvl:"warn", t:"Es wird knapp", s:`Nach allen offenen Posten fehlen ${eur(-free)}.`});
+  for (const d of S.debts){ const st=debtState(d); if (st.noCover) hints.push({lvl:"warn", t:`${d.name}: Rate deckt die Zinsen nicht`, s:"Die Schuld wird so nicht kleiner."}); }
+  for (const gl of (S.settings.goals||[])){ const sv=goalSaved(gl); if (gl.target>0 && sv.v>=gl.target) hints.push({lvl:"good", t:`Sparziel „${gl.name}“ erreicht`, s:eur(sv.v)}); }
+  if (!hints.some(h=>h.lvl!=="good")) hints.unshift({lvl:"good", t: ym>=cur ? "Du liegst im Plan" : `${MONTHS[ymParts(ym)[1]-1]}: ${c.net>=0?"+":"−"} ${eur(Math.abs(c.net))}`, s: ym>=cur ? (days&&free>0?`Noch ${eur(free/days)} pro Tag frei.`:"") : (c.net>=0?"mehr eingenommen als ausgegeben":"mehr ausgegeben als eingenommen")});
+  UI.hints=hints; updateBell();
   // --- budgets as tiles (the 3 that are used up most)
   const bt = g.filter(x=>x.budget).sort((a,b)=>b.v/b.budget-a.v/a.budget).slice(0,3);
   let streak = ym===cur ? budgetStreak(ym) : null; if (streak && !streak.best) streak=null;
@@ -1590,8 +1610,28 @@ function waterfall(ym, cum, c, mainName){
   </div>`;
 }
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-calcmode]"); if (!b) return; e.preventDefault(); UI.calcMode=b.dataset.calcmode; UI.heroOpen=true; renderHome(); });
+/* ---------- bell with hints (instead of the info box on the start page) ---------- */
+function hintKey(h){ return h.lvl+"|"+h.t; }
+function seenHints(){ try { return new Set(JSON.parse(localStorage.getItem("hb-hints-seen")||"[]")); } catch(e){ return new Set(); } }
+function updateBell(){
+  const b=$("bellBtn"); if (!b) return; const hs=UI.hints||[], seen=seenHints();
+  const n=hs.filter(h=>h.lvl!=="good" && !seen.has(hintKey(h))).length, warn=hs.some(h=>h.lvl!=="good");
+  b.querySelector(".badge").textContent = n; b.querySelector(".badge").hidden = !n;
+  b.classList.toggle("warn", warn); b.setAttribute("aria-label", n ? `Hinweise, ${n} neu` : "Hinweise");
+}
+function openHints(){
+  const hs=UI.hints||[];
+  $("hintList").innerHTML = hs.map(h=>`<div class="hn ${h.lvl}"><span class="e">${ic(h.lvl==="good"?"check":"alert",17)}</span><div><b>${esc(h.t)}</b>${h.s?`<span class="small muted">${esc(h.s)}</span>`:""}</div></div>`).join("") || `<span class="small muted">Gerade gibt es nichts zu beachten.</span>`;
+  $("hintBg").hidden=false; requestAnimationFrame(()=>$("hintBg").classList.add("show"));
+  try { localStorage.setItem("hb-hints-seen", JSON.stringify(hs.map(hintKey))); } catch(e){}
+  updateBell();
+}
+$("bellBtn").addEventListener("click", openHints);
+function closeHints(){ $("hintBg").classList.remove("show"); setTimeout(()=>{ $("hintBg").hidden=true; },200); }
+$("hintBg").addEventListener("click", e=>{ if (e.target===$("hintBg") || e.target.closest("[data-hintclose]")) closeHints(); });
+document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("hintBg").hidden) closeHints(); });
 /* ---------- start page blocks: your own order, each can be hidden ---------- */
-const HOME_BLOCKS = [["tip","Hinweis (Klartext)"],["quick","Schnellknöpfe"],["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["debts","Schulden"],["recent","Letzte Buchungen"],["offers","Angebote & Läden"]];
+const HOME_BLOCKS = [["quick","Schnellknöpfe"],["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["debts","Schulden"],["recent","Letzte Buchungen"],["offers","Angebote & Läden"]];
 function homeOrder(){ const o=(S.settings.homeOrder||[]).filter(k=>HOME_BLOCKS.some(b=>b[0]===k)); for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; }
 function homeBlocks(html){
   const hid=new Set(S.settings.homeHidden||[]), list=homeOrder().filter(k=>!hid.has(k) && html[k]).map(k=>`<div class="hblock" data-hb="${k}">${html[k]}</div>`);
