@@ -173,6 +173,16 @@ main{padding-block:6px 120px}
 .fx .check{padding:0;background:none}
 .fx .fxamt-in{width:110px;padding:7px 10px;text-align:right;font-weight:800}
 .edit-row.acct-row{grid-template-columns:minmax(0,1fr) 150px}
+.goal{padding:10px 0;border-top:1px solid var(--line)}
+.card-head + .goal{border-top:0;padding-top:2px}
+.goal .meta-row > span:last-child{white-space:nowrap;padding-left:10px}
+.goalpaybtn{margin-top:6px;padding:0}
+.goalpay{display:flex;gap:8px;margin-top:8px}
+.goalpay .in{flex:1;min-width:0}
+.goaled{display:flex;flex-direction:column;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.card-head + .goaled{border-top:0}
+.toast{max-width:calc(100vw - 24px);box-sizing:border-box}
+.toast #toastText{min-width:0}
 .shops{display:grid;gap:8px}
 .shopchip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .shopchip[aria-pressed="true"] .muted{color:inherit;opacity:.8}
@@ -924,6 +934,7 @@ function emptyState(iconName, title, text, btn){
 }
 
 function renderHome(){
+  if ($("v-home").contains(document.activeElement) && /^(INPUT|SELECT)$/.test(document.activeElement.tagName)) return; // don't wipe what is being typed
   const ym=UI.ym, c=monthCalc(ym), cum=yearCum(ym), cur=ymOf(new Date());
   const free = cum.balance - cum.reserveBal - c.fixOpen;
   let days=0, dayNote="";
@@ -992,6 +1003,7 @@ function renderHome(){
     ${S.debts.length?`<div class="card" style="order:7"><div class="card-head"><h2>Schulden</h2><button class="link" data-go="more">Details ${ic("right",16)}</button></div>
       <div class="meta-row" style="margin-bottom:10px"><span>Insgesamt offen</span><b>${esc(eur(debtsTotal))}</b></div>
       ${S.debts.map(d=>{const s=debtState(d); return `<div style="margin-top:10px"><div class="meta-row"><span>${esc(d.name)}</span><span>${esc(eur(s.remaining))}</span></div><div class="track" style="margin-top:6px"><div class="fill" style="width:${s.pct*100}%;background:var(--accent)"></div></div></div>`;}).join("")}</div>`:""}
+    ${goalsCard()}
     </div><div class="col">
     <div class="card" style="order:4">
       <div class="card-head"><h2>Wohin dein Geld fließt</h2></div>
@@ -1008,6 +1020,70 @@ function renderHome(){
     </div></div>`;
   const det = $("heroDetails"); if (det) det.addEventListener("toggle", ()=>{ UI.heroOpen = det.open; });
 }
+
+/* ---------- savings goals ---------- */
+const GOAL_COLORS = ["#1F8A70","#3B6FD8","#C2573A","#8A4FD1","#C9921B","#2A9DB0"];
+function goalSaved(g){
+  if (g.account){ const b=accountBalance(g.account, isoToday()); if (b!==null) return {v:b, linked:true}; }
+  return {v:(Number(g.start)||0)+sum(g.log||[],x=>Number(x.v)||0), linked:false};
+}
+function monthsLeft(due){ if (!due) return 0; const [y,m]=due.split("-").map(Number), n=new Date(); return Math.max(1,(y-n.getFullYear())*12+(m-(n.getMonth()+1))+1); }
+function goalsCard(){
+  const goals=S.settings.goals||[];
+  if (UI.goalEdit) return `<div class="card" style="order:7"><div class="card-head"><h2>Sparziele bearbeiten</h2><button class="btn primary" id="goalDone">Fertig</button></div>
+    ${goals.map((g,i)=>`<div class="goaled" data-gid="${esc(g.id)}">
+      <div class="grid2"><div class="field"><label for="gn-${esc(g.id)}">Name</label><input class="in" id="gn-${esc(g.id)}" data-gf="name" value="${esc(g.name)}"></div>
+        <div class="field"><label for="gt-${esc(g.id)}">Ziel (€)</label><input class="in" id="gt-${esc(g.id)}" data-gf="target" inputmode="decimal" value="${esc(numStr(g.target||0))}"></div></div>
+      <div class="grid2"><div class="field"><label for="gd-${esc(g.id)}">Bis wann (optional)</label><input class="in" type="month" id="gd-${esc(g.id)}" data-gf="due" value="${esc(g.due||"")}"></div>
+        <div class="field"><label for="ga-${esc(g.id)}">Stand aus Konto</label><select class="in" id="ga-${esc(g.id)}" data-gf="account"><option value="">– selbst eintragen –</option>${accountNames().map(n=>`<option ${g.account===n?"selected":""} value="${esc(n)}">${esc(n)}${(S.settings.accountAnchors||{})[n]?"":" (Stand fehlt)"}</option>`).join("")}</select></div></div>
+      ${g.account?"":`<div class="field"><label for="gs-${esc(g.id)}">Schon gespart (Startwert, €)</label><input class="in" id="gs-${esc(g.id)}" data-gf="start" inputmode="decimal" value="${esc(numStr(g.start||0))}"></div>`}
+      <div><button class="btn danger" data-gdel="${esc(g.id)}">Löschen</button></div></div>`).join("")}
+    <button class="btn" id="goalAdd" style="margin-top:12px">+ Sparziel hinzufügen</button>
+    <p class="small muted" style="margin:10px 0 0">Mit „Stand aus Konto“ zählt der Kontostand eines Kontos oder N26-Space automatisch als gespart – dafür muss der Stand unter Einstellungen › Konten eingetragen sein.</p></div>`;
+  if (!goals.length) return `<div class="card" style="order:7"><div class="card-head"><h2>Sparziele</h2></div>
+    <div class="notice info"><span>Spar auf etwas hin – Urlaub, Hochzeit, Notgroschen – und sieh, wie viel du jeden Monat zurücklegen musst.</span><button class="btn primary" id="goalFirst">Sparziel anlegen</button></div></div>`;
+  return `<div class="card" style="order:7"><div class="card-head"><h2>Sparziele</h2><button class="link" id="goalEditBtn">Bearbeiten ${ic("right",16)}</button></div>
+    ${goals.map((g,i)=>{ const sv=goalSaved(g), t=Number(g.target)||0, pct=t?Math.min(100,Math.max(0,sv.v/t*100)):0, rest=Math.max(0,t-sv.v), ml=monthsLeft(g.due), col=GOAL_COLORS[i%GOAL_COLORS.length];
+      const sub = rest<=0 ? `<b style="color:var(--good)">Ziel erreicht!</b>` : g.due ? `noch ${esc(eur(rest))} · <b>${esc(eur(rest/ml))} im Monat</b> bis ${esc(MSHORT[Number(g.due.slice(5,7))-1])} ${esc(g.due.slice(0,4))}` : `noch ${esc(eur(rest))}`;
+      return `<div class="goal"><div class="meta-row"><span><b>${esc(g.name)}</b>${sv.linked?` <span class="small muted">· ${esc(g.account)}</span>`:""}</span><span>${esc(eur(sv.v))} <span class="small muted">von ${esc(eur0(t))}</span></span></div>
+        <div class="track" style="height:10px;margin:7px 0 6px"><div class="fill" style="width:${pct}%;background:${col}"></div></div>
+        <div class="meta-row small"><span class="muted">${sub}</span><span class="muted">${Math.round(pct)} %</span></div>
+        ${sv.linked?"":(UI.goalPay===g.id?`<div class="goalpay"><input class="in" id="goalPayIn" inputmode="decimal" placeholder="Betrag, z. B. 50 (minus = entnehmen)" aria-label="Betrag für ${esc(g.name)}"><button class="btn primary" data-gpaygo="${esc(g.id)}">OK</button><button class="btn" data-gpaycancel="1">Abbrechen</button></div>`:`<button class="link small goalpaybtn" data-gpay="${esc(g.id)}">+ Einzahlen</button>`)}</div>`; }).join("")}
+  </div>`;
+}
+function saveGoals(goals){ S.settings.goals=goals; saveSettings(); render(); }
+document.addEventListener("click", e=>{
+  const t=e.target;
+  if (t.closest("#goalFirst")){ UI.goalEdit=true; saveGoals([{id:newId(), name:"Notgroschen", target:1000, start:0, log:[]}]); return; }
+  if (t.closest("#goalEditBtn")){ UI.goalEdit=true; render(); return; }
+  if (t.closest("#goalDone")){ UI.goalEdit=false; render(); return; }
+  if (t.closest("#goalAdd")){ saveGoals([...(S.settings.goals||[]), {id:newId(), name:"Neues Ziel", target:500, start:0, log:[]}]); return; }
+  const d=t.closest("[data-gdel]"); if (d){ const g=(S.settings.goals||[]).find(x=>x.id===d.dataset.gdel); if (d.dataset.armed!=="1"){ d.dataset.armed="1"; d.textContent="Wirklich löschen?"; return; } const old=S.settings.goals; saveGoals(old.filter(x=>x.id!==d.dataset.gdel)); toast(`„${g?g.name:"Ziel"}“ gelöscht`, ()=>saveGoals(old)); return; }
+  const p=t.closest("[data-gpay]"); if (p){ UI.goalPay=p.dataset.gpay; render(); setTimeout(()=>{ const el=$("goalPayIn"); if (el) el.focus(); },30); return; }
+  if (t.closest("[data-gpaycancel]")){ UI.goalPay=null; if (document.activeElement) document.activeElement.blur(); render(); return; }
+  const go=t.closest("[data-gpaygo]"); if (go) goalPay(go.dataset.gpaygo);
+});
+document.addEventListener("keydown", e=>{ if (e.target.id==="goalPayIn"){ if (e.key==="Enter") goalPay(UI.goalPay); if (e.key==="Escape"){ UI.goalPay=null; e.target.blur(); render(); } } });
+function goalPay(id){
+  const raw=($("goalPayIn")||{}).value||"", v=parseAmt(raw.replace(/^\+/,""));
+  if (!isFinite(v) || v===0){ toast("Bitte einen Betrag eingeben"); return; }
+  const goals=clone(S.settings.goals||[]), g=goals.find(x=>x.id===id); if (!g) return;
+  g.log=[...(g.log||[]), {d:isoToday(), v:Math.round(v*100)/100}]; UI.goalPay=null;
+  if (document.activeElement) document.activeElement.blur();
+  const before=S.settings.goals; saveGoals(goals);
+  const sv=goalSaved(g), done=sv.v>=(Number(g.target)||0);
+  toast(done?`Geschafft – „${g.name}“ ist erreicht!`:`${eur(Math.abs(v))} ${v>0?"für":"aus"} „${g.name}“ ${v>0?"zurückgelegt":"entnommen"}`, ()=>saveGoals(before));
+}
+document.addEventListener("change", e=>{
+  const el=e.target.closest("[data-gf]"); if (!el) return;
+  const id=el.closest("[data-gid]").dataset.gid, goals=clone(S.settings.goals||[]), g=goals.find(x=>x.id===id); if (!g) return;
+  const k=el.dataset.gf;
+  if (k==="target"||k==="start"){ const v=parseAmt(el.value); if (!(v>=0)){ toast("Betrag ungültig"); return; } g[k]=Math.round(v*100)/100; }
+  else if (k==="name"){ const v=el.value.trim(); if (!v) return; g.name=v; }
+  else if (k==="account"){ if (el.value) g.account=el.value; else delete g.account; }
+  else if (k==="due"){ if (el.value) g.due=el.value; else delete g.due; }
+  el.blur(); saveGoals(goals);
+});
 
 /* ---------- weekly offers of the shops you actually buy at ---------- */
 const SHOPS = [
