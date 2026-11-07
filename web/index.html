@@ -688,6 +688,14 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .ckl{display:flex;flex-direction:column}.ckr{display:flex;align-items:center;gap:12px;padding:10px 0}.ckr+.ckr{border-top:1px solid var(--line)}
 .cdot{width:24px;height:24px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;flex:none;font:800 13px var(--f-body)}.cdot.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .pill.ok{background:var(--good-soft);color:var(--good)}
+
+.card.bk{gap:12px}
+.bkh{display:flex;align-items:center;gap:12px}.bkh .n{flex:1;min-width:0;display:flex;flex-direction:column}.bkh .n b{font-size:15.5px}.bkh .n span{color:var(--muted);font-size:13px}
+.bki{position:relative;width:42px;height:42px;border-radius:13px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.bki i{position:absolute;right:-3px;top:-3px;width:13px;height:13px;border-radius:50%;border:2.5px solid var(--surface);background:var(--faint)}
+.bki i.ok{background:var(--good)}.bki i.warn{background:var(--warn)}.bki i.bad{background:var(--bad)}
+.bkb{display:flex;gap:8px}.bkb .btn{flex:1 1 0;min-width:0;width:auto;padding:12px 10px}
+@media (max-width:559px){body.nomonth #monthpill{display:none}}
 </style>
 
 <div class="backdrop" id="addBg" hidden><div class="sheet addsheet" role="dialog" aria-label="Was möchtest du hinzufügen?"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><h2>Was möchtest du hinzufügen?</h2><button class="icon-btn" data-addclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -738,16 +746,21 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
     <div class="card sp" data-sp="budgets" hidden>
       <div class="field"><label>Monatsbudgets</label><span class="small muted" style="margin-top:-2px">Wie viel du pro Monat höchstens ausgeben willst. Ab 80 % warnt die Startseite. Leer lassen = kein Budget.</span><div id="budgetEd"></div></div>
     </div>
-    <div class="card sp" data-sp="backup" hidden>
-      <div id="syncBox" hidden>
-        <div class="section-title">Abgleich mit der Synology</div>
-        <div class="switch"><span><b id="syncState">–</b><br><span class="small muted" id="syncDetail"></span></span><span class="row-btns" style="flex:0 0 auto"><button class="btn" id="syncNow">Jetzt abgleichen</button><button class="btn" id="syncLogout">Abmelden</button></span></div>
-      </div>
-      <div class="section-title">Backup</div>
-      <div class="switch"><span><b>Alle Daten sichern</b><br><span class="small muted" id="backupInfo">Speichert Buchungen, Fixkosten, Schulden und Einstellungen in einer Datei.</span></span><button class="btn" id="backupSave">Backup speichern</button></div>
-      <div class="switch" id="backupLoadRow"><span><b>Backup laden</b><br><span class="small muted">Ersetzt alle Daten in dieser App durch die Datei.</span></span><button class="btn" id="backupLoad">Laden</button></div>
+    <div class="card sp bk" data-sp="backup" id="syncBox" hidden>
+      <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.5 1.6A3.8 3.8 0 0 1 17 18z"/></svg><i id="syncDot"></i></span><span class="n"><b>Synology-Abgleich</b><span id="syncState">–</span></span></div>
+      <span class="small muted" id="syncDetail"></span>
+      <div class="bkb"><button class="btn primary" id="syncNow">Jetzt abgleichen</button><button class="btn" id="syncLogout">Abmelden</button></div>
+    </div>
+    <div class="card sp bk" data-sp="backup" hidden>
+      <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span class="n"><b>Backup</b><span id="backupInfo">Alle Buchungen, Fixkosten, Schulden und Einstellungen in einer Datei.</span></span></div>
+      <div class="bkb"><button class="btn primary" id="backupSave">Speichern</button><span id="backupLoadRow" style="display:contents"><button class="btn" id="backupLoad">Laden</button></span></div>
+      <span class="small muted">„Laden“ ersetzt alle Daten in dieser App durch die Datei.</span>
       <input type="file" id="backupFile" accept=".json,application/json,text/plain" hidden>
-      <div class="switch"><span><b>Gemerkte Zuordnungen</b><br><span class="small muted" id="rulesInfo"></span></span><button class="btn" id="rulesReset">Zurücksetzen</button></div>
+    </div>
+    <div class="card sp bk" data-sp="backup" hidden>
+      <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M5 12a7 7 0 1 1 2 5M5 18v-4h4"/></svg></span><span class="n"><b>Gemerkte Zuordnungen</b><span id="rulesInfo"></span></span></div>
+      <span class="small muted">Beim Kontoauszug-Import merkt sich die App, welcher Empfänger in welche Kategorie gehört. Zurücksetzen löscht nur diese Merkliste.</span>
+      <div class="bkb"><button class="btn" id="rulesReset">Zurücksetzen</button></div>
     </div>
     <div class="card sp" data-sp="steuer" hidden>
       <div class="field"><label for="sWork">Wie verdienst du dein Geld?</label><select class="in" id="sWork"></select><span class="small muted" id="sWorkInfo"></span></div>
@@ -1530,6 +1543,7 @@ function render(){
   $("viewTitle").textContent = TITLES[UI.view];
   fillMonthPill();
   $("monthpill").style.visibility = (UI.view==="more"||UI.view==="import") ? "hidden" : "visible";
+  document.body.classList.toggle("nomonth", UI.view==="more"||UI.view==="import");
   $("settingsBtn").setAttribute("aria-pressed", String(UI.view==="more"));
   document.querySelectorAll(".tab[data-go]").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.go===(UI.view==="import"||UI.view==="belege"?"list":UI.view))));
   document.querySelectorAll("[data-view]").forEach(s=>s.hidden = s.dataset.view!==UI.view);
@@ -2770,7 +2784,7 @@ function renderSetHome(){
 function renderSpPages(){
   const k = SP_PAGES[UI.sp] ? UI.sp : null;
   $("setHome").hidden = !!k; $("spHead").hidden = !k;
-  document.querySelectorAll("#v-more [data-sp]").forEach(el=>el.hidden = el.dataset.sp!==k);
+  document.querySelectorAll("#v-more [data-sp]").forEach(el=>el.hidden = el.dataset.sp!==k || (el.id==="syncBox" && !SYNCABLE));
   if (k) $("spTitle").textContent = SP_PAGES[k][0]; else renderSetHome();
 }
 document.addEventListener("change", e=>{
@@ -4218,8 +4232,10 @@ function renderSyncInfo(){
   const t = SYNC.last ? new Date(SYNC.last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "noch nie";
   const st = !SYNC.token ? "Nicht angemeldet" : SYNC.state==="ok" ? "Abgeglichen" : SYNC.state==="pending" ? `${SYNC.queue.length} Änderungen warten` : SYNC.state==="offline" ? "Offline – wird nachgeholt" : "Synology nicht erreichbar";
   $("syncState").textContent = st;
-  $("syncDetail").textContent = SYNC.token ? `Zuletzt abgeglichen: ${t}` : "Melde dich an, um Handy und PC abzugleichen.";
+  { const d=$("syncDot"); if (d) d.className = !SYNC.token ? "off" : SYNC.state==="ok" ? "ok" : SYNC.state==="pending"||SYNC.state==="offline" ? "warn" : "bad"; }
+  $("syncDetail").textContent = SYNC.token ? `Zuletzt abgeglichen um ${t.slice(0,5)} Uhr. Handy und PC gleichen sich von selbst ab.` : "Melde dich an, um Handy und PC abzugleichen.";
   $("syncLogout").textContent = SYNC.token ? "Abmelden" : "Anmelden";
+  $("syncNow").hidden = !SYNC.token; $("syncLogout").classList.toggle("primary", !SYNC.token);
 }
 document.addEventListener("click", e=>{
   if (e.target.closest("#syncNow")){ syncNow().then(()=>{ renderSyncInfo(); toast(SYNC.state==="ok"?"Abgeglichen":"Abgleich gerade nicht möglich"); }); }
