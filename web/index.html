@@ -696,6 +696,22 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .bki i.ok{background:var(--good)}.bki i.warn{background:var(--warn)}.bki i.bad{background:var(--bad)}
 .bkb{display:flex;gap:8px}.bkb .btn{flex:1 1 0;min-width:0;width:auto;padding:12px 10px}
 @media (max-width:559px){body.nomonth #monthpill{display:none}}
+
+.wizbg{position:fixed;inset:0;z-index:120;background:var(--bg);overflow-y:auto;display:flex;justify-content:center}
+.wiz{width:100%;max-width:520px;padding:calc(env(safe-area-inset-top,0px) + 24px) 20px calc(env(safe-area-inset-bottom,0px) + 110px);display:flex;flex-direction:column}
+.wsteps{display:flex;gap:6px;margin-bottom:18px}.wsteps i{flex:1;height:5px;border-radius:4px;background:var(--line)}.wsteps i.on{background:var(--accent)}
+.wk{font-weight:700;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.wt{font-family:var(--f-display);font-size:27px;font-weight:800;letter-spacing:-.02em;margin:6px 0 6px;line-height:1.15}
+.ws{color:var(--muted);margin:0 0 18px}
+.wbig{font-size:22px;font-weight:700;height:58px}
+.wamt{display:flex;align-items:center;gap:10px}.wamt span{font:800 22px var(--f-display);color:var(--muted)}
+.wopts{display:flex;flex-direction:column;gap:10px}.wopt{border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:18px;padding:15px 16px;text-align:left;font:inherit;color:var(--fg);cursor:pointer;display:flex;flex-direction:column}
+.wopt b{font-size:16px}.wopt small{color:var(--muted);font-size:13px}.wopt.on{box-shadow:inset 0 0 0 2.5px var(--accent),var(--shadow)}
+.wchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.wchip{border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:99px;padding:9px 14px;font:600 14px var(--f-body);color:var(--fg);cursor:pointer}.wchip.on{background:var(--accent);color:var(--accent-ink)}
+.wfix{display:flex;flex-direction:column;gap:8px}.wrow{display:grid;grid-template-columns:minmax(0,1fr) 130px;align-items:center;gap:10px}.wrow span{font-weight:600}
+.wsum{display:flex;justify-content:space-between;margin-top:14px;padding:12px 14px;background:var(--surface);border-radius:14px;box-shadow:var(--shadow)}
+.wfoot{position:fixed;left:0;right:0;bottom:0;padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 16px);background:linear-gradient(to top,var(--bg) 70%,transparent);display:flex;gap:10px;justify-content:center}
+.wfoot .btn{flex:1;max-width:240px;padding:14px}
 </style>
 
 <div class="backdrop" id="addBg" hidden><div class="sheet addsheet" role="dialog" aria-label="Was möchtest du hinzufügen?"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><h2>Was möchtest du hinzufügen?</h2><button class="icon-btn" data-addclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -809,6 +825,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
     <div class="card sp" data-sp="start" hidden>
       <div class="field"><label for="sName">Dein Name</label><input class="in" id="sName" autocomplete="given-name" placeholder="z. B. Sascha" maxlength="30"><span class="small muted">Für die Begrüßung oben links.</span></div>
       <div class="field"><label>Reihenfolge der Blöcke</label><span class="small muted" style="margin-top:-2px">Mit den Pfeilen verschieben, mit dem Schalter aus- oder einblenden. Die Konten-Karten bleiben immer oben.</span><div id="homeEd"></div></div>
+      <div class="field"><label>Einrichtung</label><span class="small muted" style="margin-top:-2px">Name, Verdienstart, Kontostand, Fixkosten und Budgets in fünf kurzen Schritten. Vorhandene Daten bleiben erhalten.</span><div><button class="btn" id="wizAgain">Einrichtung starten</button></div></div>
       <div class="section-title">Läden für Angebote</div>
       <div class="field"><span class="small muted" style="margin-top:-2px">Diese Läden zeigt die Startseite mit einem Link zum aktuellen Prospekt, in der Reihenfolge, in der du sie antippst.</span><div class="chips" id="shopEd"></div></div>
       <div class="switch"><label for="sLogos"><b>Händler-Logos</b><br><span class="small muted">Lädt das Website-Symbol bekannter Händler (über Google). Aus: farbiger Anfangsbuchstabe.</span></label><input type="checkbox" id="sLogos"></div>
@@ -914,11 +931,11 @@ const MONTHS = ["Januar","Februar","März","April","Mai","Juni","Juli","August",
 const MSHORT = ["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
 const DEFAULT_SETTINGS = {
   startBalance: {}, reserveRate: 30, kleinunternehmer: false, kuLimit: 25000, vatRate: 19,
-  vorsorge: 930, abzuege: 0, splitting: false, partnerZvE: 0, spaces: [],
+  vorsorge: 0, abzuege: 0, splitting: false, partnerZvE: 0, spaces: [],
   cats: {
     ausgabe: ["Haushalt & Pflichten","Spaß & Freizeit","Tanken & Parken","Bargeldabhebung"],
-    betrieb: ["Bürostuff","Sonstiges"],
-    einnahme: [{name:"Gehalt", art:"lohn"},{name:"Sonderzahlung", art:"sonderzahlung"},{name:"ALG1", art:"lohnersatz"},{name:"Produktion", art:"selbst"},{name:"Sonstige Einnahme", art:"sonstige"},{name:"Erstattungen & Sonstiges", art:"sonstige"}]
+    betrieb: ["Büro & Material","Sonstiges"],
+    einnahme: [{name:"Gehalt", art:"lohn"},{name:"Sonderzahlung", art:"sonderzahlung"},{name:"Selbstständigkeit", art:"selbst"},{name:"Sonstige Einnahme", art:"sonstige"},{name:"Erstattungen & Sonstiges", art:"sonstige"}]
   }
 };
 const KIND_LABEL = {ausgabe:"Ausgabe", betrieb:"Betrieblich", einnahme:"Einnahme", vorauszahlung:"Steuer-Vorauszahlung"};
@@ -1553,6 +1570,7 @@ function render(){
   ({home:renderHome, list:renderList, fix:renderFix, year:renderYear, more:renderMore, import:renderImport, belege:renderBelege})[UI.view]();
   if (!$("sheetBg").hidden) renderSheet();
   notifyPlanSoon();
+  if (wizShould()) setTimeout(()=>{ if (wizShould()) wizOpen(); }, 400);
 }
 
 function txRow(t, showDate){
@@ -2770,6 +2788,86 @@ function renderAutoBk(){
   el.innerHTML=`<div class="switch"><label for="abOn"><b>Jede Woche automatisch</b><br><span class="small muted">${c.last?`Zuletzt am ${esc(new Date(c.last).toLocaleDateString("de-DE"))} · `:""}die letzten ${c.keep} bleiben in ${esc(c.where||(NATIVE&&!(window.AndroidBridge||{}).desktop?"Downloads/Haushaltsbuch-Backups":"Dokumente/Haushaltsbuch-Backups"))}</span></label><input type="checkbox" id="abOn" ${c.on?"checked":""}></div>`;
 }
 document.addEventListener("change", e=>{ if (e.target.id==="abOn"){ const c=abCfg(); c.on=e.target.checked; abSave(c); if (c.on) autoBackupCheck(); renderAutoBk(); } });
+
+
+/* ---------- Einrichtungs-Assistent beim ersten Start ---------- */
+const WIZ_FIX=[["Miete",""],["Strom",""],["Internet",""],["Handy",""],["Versicherungen",""],["Rundfunkbeitrag","18,36"],["Streaming",""],["Fitnessstudio",""],["Auto",""],["Deutschlandticket","63"],["Kredit",""],["Sparen / ETF",""]];
+function wizShould(){
+  if (S.settings.wizDone || UI.wiz) return false;
+  try{ if (localStorage.getItem("hb-wiz-skip")) return false; }catch(e){}
+  if (S.tx.length || S.fixed.length) return false;
+  if ($("loginBg") && !$("loginBg").hidden) return false;       // first the Synology question
+  if (typeof SYNC!=="undefined" && SYNC.token && !SYNC.last) return false;   // wait for the first download
+  return true;
+}
+function wizOpen(){
+  UI.wiz={step:0, name:S.settings.name||"", work:S.settings.work||"", bal:"", fix:{}, own:[], bud:{}};
+  let el=$("wizBg"); if (!el){ el=document.createElement("div"); el.id="wizBg"; el.className="wizbg"; document.body.appendChild(el); }
+  el.hidden=false; document.body.classList.add("locked"); wizRender();
+}
+function wizClose(){ UI.wiz=null; const el=$("wizBg"); if (el) el.hidden=true; document.body.classList.remove("locked"); }
+function wizRender(){
+  const w=UI.wiz, el=$("wizBg"); if (!w||!el) return;
+  const N=5, st=w.step, y=ymOf(new Date()).slice(0,4);
+  const head=(t,sub)=>`<div class="wsteps">${Array.from({length:N},(_,i)=>`<i class="${i<=st?"on":""}"></i>`).join("")}</div><small class="wk">Schritt ${st+1} von ${N}</small><h2 class="wt">${t}</h2><p class="ws">${sub}</p>`;
+  let body="";
+  if (st===0) body=head("Willkommen! Wie heißt du?","Für die Begrüßung oben links – du kannst es auch leer lassen.")+`<input class="in wbig" id="wzName" value="${esc(w.name)}" placeholder="Dein Vorname" maxlength="30" autocomplete="given-name">`;
+  if (st===1) body=head("Wie verdienst du dein Geld?","Dann zeigt die App nur, was zu dir passt.")+`<div class="wopts">${WORK.map(([k,t,d])=>`<button class="wopt ${w.work===k?"on":""}" data-wzwork="${k}"><b>${t}</b><small>${d}</small></button>`).join("")}</div>`;
+  if (st===2) body=head("Wie viel ist heute auf deinem Konto?","Der aktuelle Stand deines Girokontos. Ab hier rechnet die App weiter.")+`<div class="wamt"><input class="in wbig" id="wzBal" inputmode="decimal" value="${esc(w.bal)}" placeholder="0,00"><span>€</span></div>`;
+  if (st===3){ const tot=sum(Object.values(w.fix),v=>parseAmt(v)||0)+sum(w.own,x=>parseAmt(x.a)||0);
+    body=head("Was zahlst du jeden Monat?","Antippen und Betrag eintragen – ändern kannst du alles später.")+`<div class="wchips">${WIZ_FIX.map(([n,def])=>{ const on=n in w.fix; return `<button class="wchip ${on?"on":""}" data-wzfix="${esc(n)}" data-def="${esc(def)}">${on?"✓ ":"+ "}${esc(n)}</button>`; }).join("")}</div>
+      <div class="wfix">${Object.keys(w.fix).map(n=>`<label class="wrow"><span>${esc(n)}</span><input class="in" data-wzfixamt="${esc(n)}" inputmode="decimal" value="${esc(w.fix[n])}" placeholder="Betrag €"></label>`).join("")}
+      ${w.own.map((x,i)=>`<div class="wrow"><input class="in" data-wzownn="${i}" value="${esc(x.n)}" placeholder="Name"><input class="in" data-wzowna="${i}" inputmode="decimal" value="${esc(x.a)}" placeholder="Betrag €"></div>`).join("")}
+      <button class="chip" id="wzOwn">+ Eigene Fixkosten</button></div>
+      ${tot>0?`<div class="wsum"><span>${Object.keys(w.fix).length+w.own.filter(x=>x.n).length} Fixkosten</span><b>${esc(eur(tot))} im Monat</b></div>`:""}`; }
+  if (st===4) body=head("Fast fertig: Budgets","Wie viel willst du im Monat höchstens ausgeben? Leer lassen = kein Budget.")+`<div class="wfix">${cats("ausgabe").filter(c=>!/bargeld/i.test(c)).map(c=>`<label class="wrow"><span>${esc(c)}</span><input class="in" data-wzbud="${esc(c)}" inputmode="decimal" value="${esc(w.bud[c]||"")}" placeholder="kein Budget"></label>`).join("")}</div>
+      ${SYNCABLE&&!(SYNC&&SYNC.token)?`<div class="notice info" style="margin-top:14px"><span>Handy und PC abgleichen? Das geht jederzeit unter Einstellungen › Abgleich & Backup.</span></div>`:""}`;
+  el.innerHTML=`<div class="wiz" role="dialog" aria-label="Einrichtung">${body}
+    <div class="wfoot">${st?`<button class="btn" id="wzBack">Zurück</button>`:`<button class="btn" id="wzSkipAll">Später</button>`}<button class="btn primary" id="wzNext">${st===N-1?"Fertig":st===3&&!Object.keys(w.fix).length&&!w.own.length?"Überspringen":"Weiter"}</button></div></div>`;
+  const f=el.querySelector("input"); if (f && st!==3 && st!==4) setTimeout(()=>f.focus({preventScroll:true}),50);
+}
+function wizRead(){
+  const w=UI.wiz; if (!w) return;
+  if ($("wzName")) w.name=$("wzName").value.trim();
+  if ($("wzBal")) w.bal=$("wzBal").value.trim();
+  document.querySelectorAll("[data-wzfixamt]").forEach(i=>w.fix[i.dataset.wzfixamt]=i.value.trim());
+  document.querySelectorAll("[data-wzownn]").forEach(i=>w.own[Number(i.dataset.wzownn)].n=i.value.trim());
+  document.querySelectorAll("[data-wzowna]").forEach(i=>w.own[Number(i.dataset.wzowna)].a=i.value.trim());
+  document.querySelectorAll("[data-wzbud]").forEach(i=>{ if (i.value.trim()) w.bud[i.dataset.wzbud]=i.value.trim(); else delete w.bud[i.dataset.wzbud]; });
+}
+async function wizFinish(){
+  const w=UI.wiz; wizRead();
+  const st=S.settings, y=ymOf(new Date()).slice(0,4), today=isoToday();
+  if (w.name) st.name=w.name;
+  st.work=w.work||st.work||"beides";
+  const bal=parseAmt(w.bal);
+  if (w.bal!=="" && isFinite(bal)){ st.accountAnchors={...(st.accountAnchors||{}), Hauptkonto:{date:today, balance:Math.round(bal*100)/100}}; st.startBalance={...(st.startBalance||{}), [y]:Math.round(bal*100)/100}; }
+  const bud={...(st.budgets||{})}; for (const [c,v] of Object.entries(w.bud)){ const a=parseAmt(v); if (a>0) bud[c]=Math.round(a*100)/100; } st.budgets=bud;
+  // income categories that do not fit the chosen way of earning money (only if nothing is booked on them)
+  const used=new Set(S.tx.map(t=>t.cat)), c2=clone(st.cats||DEFAULT_SETTINGS.cats);
+  c2.einnahme=c2.einnahme.filter(x=>{ const o=typeof x==="string"?{name:x,art:"sonstige"}:x; if (used.has(o.name)) return true; if (st.work==="angestellt"&&o.art==="selbst") return false; if (st.work==="selbst"&&(o.art==="lohn"||o.art==="sonderzahlung")) return false; return true; });
+  st.cats=c2; st.wizDone=1;
+  await saveSettings();
+  let k=S.fixed.length;
+  const items=[...Object.entries(w.fix).map(([n,v])=>[n,v]), ...w.own.map(x=>[x.n,x.a])].filter(([n,v])=>n && parseAmt(v)>0);
+  for (const [n,v] of items) await safe(()=>put("fixed", newId(), {name:n, amount:Math.round(parseAmt(v)*100)/100, kind:"privat", order:k++}));
+  wizClose(); UI.view="home"; render(); toast(w.name?`Fertig, ${w.name}! Viel Spaß.`:"Fertig! Viel Spaß.");
+}
+document.addEventListener("click", e=>{ if (e.target.closest("#wizAgain")) wizOpen(); });
+document.addEventListener("click", async e=>{
+  const w=UI.wiz; if (!w || !e.target.closest("#wizBg")) return;
+  const t=e.target;
+  const wk=t.closest("[data-wzwork]"); if (wk){ w.work=wk.dataset.wzwork; wizRender(); return; }
+  const fx=t.closest("[data-wzfix]"); if (fx){ wizRead(); const n=fx.dataset.wzfix; if (n in w.fix) delete w.fix[n]; else w.fix[n]=fx.dataset.def||""; wizRender(); const i=document.querySelector(`[data-wzfixamt="${CSS.escape(n)}"]`); if (i&&!i.value) i.focus(); return; }
+  if (t.closest("#wzOwn")){ wizRead(); w.own.push({n:"",a:""}); wizRender(); const i=document.querySelector(`[data-wzownn="${w.own.length-1}"]`); if (i) i.focus(); return; }
+  if (t.closest("#wzBack")){ wizRead(); w.step=Math.max(0,w.step-1); wizRender(); return; }
+  if (t.closest("#wzSkipAll")){ try{ localStorage.setItem("hb-wiz-skip","1"); }catch(_){} wizClose(); toast("Die Einrichtung findest du unter Einstellungen › Startseite"); return; }
+  if (t.closest("#wzNext")){ wizRead();
+    if (w.step===1 && !w.work){ toast("Bitte eine Möglichkeit wählen"); return; }
+    if (w.step===2 && w.bal!=="" && !isFinite(parseAmt(w.bal))){ toast("Bitte eine Zahl eingeben"); return; }
+    if (w.step<4){ w.step++; wizRender(); $("wizBg").scrollTop=0; } else await wizFinish(); }
+});
+document.addEventListener("keydown", e=>{ if (UI.wiz && e.key==="Enter" && e.target.closest && e.target.closest("#wizBg") && e.target.tagName==="INPUT" && UI.wiz.step!==3 && UI.wiz.step!==4){ e.preventDefault(); $("wzNext").click(); } });
 
 const SP_PAGES = {
   konten:["Konten & Spaces","wallet"], budgets:["Monatsbudgets","target"], schulden:["Schulden","bank"], backup:["Abgleich & Backup","cloud"],
@@ -4246,7 +4344,7 @@ async function doLogin(){
 }
 $("loginGo").onclick = doLogin;
 ["loginPw","loginPw2"].forEach(id=>$(id).addEventListener("keydown", e=>{ if (e.key==="Enter") doLogin(); }));
-$("loginSkip").onclick = ()=>{ SYNC.skipped=true; saveSync(); $("loginBg").hidden=true; renderSyncDot(); toast("Ohne Abgleich – anmelden kannst du dich unter Einstellungen"); };
+$("loginSkip").onclick = ()=>{ SYNC.skipped=true; saveSync(); $("loginBg").hidden=true; renderSyncDot(); if (wizShould()) setTimeout(()=>{ if (wizShould()) wizOpen(); }, 300); toast("Ohne Abgleich – anmelden kannst du dich unter Einstellungen"); };
 function renderSyncDot(){
   const b=$("settingsBtn"); if (!SYNCABLE){ return; }
   const col = !SYNC.token ? "var(--faint)" : SYNC.state==="ok" ? "var(--good)" : SYNC.state==="pending" ? "var(--warn)" : "var(--bad)";
@@ -4273,15 +4371,6 @@ document.addEventListener("click", e=>{
 });
 
 /* ---------- boot ---------- */
-const DEMO_FIXED = [
-  ["steuerschulden","Steuerschulden",432,"privat"],["miete","Miete",400,"privat"],["auto","Auto",150,"privat"],["einkauf","Einkauf",150,"privat"],
-  ["schatzi-schulden","Schatzi Schulden",132,"privat"],["studienkredit","Studienkredit",124.02,"privat"],["etf","ETF",100,"privat"],["ksk","KSK",77.5,"privat"],
-  ["garage","Garage",55,"privat"],["handy","Handy Prepaid",17,"privat"],["netflix","Netflix",14,"privat"],["spotify","Spotify",11,"privat"],
-  ["mobiles-internet","Mobiles Internet",10,"privat"],["amazon-prime","Amazon Prime",9,"privat"],["nintendo-online","Nintendo Online",6,"privat"],
-  ["joyclub","Joyclub",5,"privat"],["bankgebuehren","Bankgebühren",5,"privat"],["pokemon-home","Pokémon Home",2,"privat"],
-  ["adobe","Adobe",34,"betrieb"],["sevdesk","sevDesk",31,"betrieb"],["ionos","IONOS",22,"betrieb"]
-];
-const DEMO_DEBTS = [["steuerschulden","Steuerschulden",30000,"steuerschulden"],["schatzi","Schatzi Schulden",15420.54,"schatzi-schulden"],["studienkredit","Studienkredit",14618.91,"studienkredit"]];
 render();
 (async () => {
   try { db = window.claude && window.claude.use ? await window.claude.use("db") : null; } catch(e){ db=null; }
@@ -4291,17 +4380,13 @@ render();
     let ok=false;
     if (saved){ try { loadBackupObj(saved); ok=true; } catch(e){} }
     if (!ok){
-      DEMO_FIXED.forEach(([id,name,amount,kind],i)=>memStore.fixed[id]={name,amount,kind,order:i});
-      DEMO_DEBTS.forEach(([id,name,start,fixedId])=>memStore.debts[id]={name,start,since:"2026-01",fixedId});
-      persistLocal(); rebuildMem();
+      persistLocal(); rebuildMem();     // a new installation starts empty – the setup assistant helps
     }
     if (SYNCABLE){ loadSync(); startSync(); }
     return;
   }
   if (!db){
     mem = true;
-    DEMO_FIXED.forEach(([id,name,amount,kind],i)=>memStore.fixed[id]={name,amount,kind,order:i});
-    DEMO_DEBTS.forEach(([id,name,start,fixedId])=>memStore.debts[id]={name,start,since:"2026-01",fixedId});
     rebuildMem(); return;
   }
   const onErr = e => { console.error(e); if (e && e.code==="revoked"){ mem=true; render(); } };
