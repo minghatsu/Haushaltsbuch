@@ -481,9 +481,14 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="field"><label for="sLand">Bundesland</label><select class="in" id="sLand"></select></div>
       <div class="section-title" style="font-size:14px">Angestellt <span class="small muted" id="sLohnYear"></span></div>
       <div class="grid2 stack">
-        <div class="field"><label for="sLohn">Bruttolohn im Jahr (€)</label><input class="in" id="sLohn" inputmode="decimal" placeholder="0 = nicht angestellt"></div>
+        <div class="field"><label for="sLohnM">Bruttogehalt pro Monat (€)</label><input class="in" id="sLohnM" inputmode="decimal" placeholder="leer = nicht angestellt"></div>
+        <div class="field"><label for="sLohnN">Gehälter im Jahr</label><select class="in" id="sLohnN"><option value="12">12 (normal)</option><option value="12.5">12,5</option><option value="13">13 – mit 13. Gehalt</option><option value="13.5">13,5</option><option value="14">14 – 13. und 14. Gehalt</option></select></div>
+        <div class="field"><label for="sUrlaub">Urlaubsgeld im Jahr (€)</label><input class="in" id="sUrlaub" inputmode="decimal" placeholder="0"></div>
+        <div class="field"><label for="sWeih">Weihnachtsgeld im Jahr (€)</label><input class="in" id="sWeih" inputmode="decimal" placeholder="0"></div>
+        <div class="field"><label for="sBonus">Bonus, Prämie, Sonstiges (€)</label><input class="in" id="sBonus" inputmode="decimal" placeholder="0"></div>
         <div class="field"><label for="sLSt">Lohnsteuer im Jahr laut Abrechnung (€)</label><input class="in" id="sLSt" inputmode="decimal" placeholder="leer = schätzen"></div>
       </div>
+      <div class="notice info" id="sLohnSum" hidden style="margin:-2px 0 12px"></div>
       <div class="field"><label for="sWK">Werbungskosten aus dem Job (€ pro Jahr)</label><input class="in" id="sWK" inputmode="decimal" placeholder="1.230 (Pauschale)"></div>
       <div class="section-title" style="font-size:14px">Selbstständig</div>
       <div class="switch"><label for="sGew"><b>Gewerbe</b><br><span class="small muted">Aus: Freiberufler (keine Gewerbesteuer)</span></label><input type="checkbox" id="sGew"></div>
@@ -609,7 +614,7 @@ const DEFAULT_SETTINGS = {
   cats: {
     ausgabe: ["Haushalt & Pflichten","Spaß & Freizeit","Tanken & Parken","Bargeldabhebung"],
     betrieb: ["Bürostuff","Sonstiges"],
-    einnahme: [{name:"ALG1", art:"lohnersatz"},{name:"Produktion", art:"selbst"},{name:"Sonstige Einnahme", art:"sonstige"},{name:"Erstattungen & Sonstiges", art:"sonstige"}]
+    einnahme: [{name:"Gehalt", art:"lohn"},{name:"Sonderzahlung", art:"sonderzahlung"},{name:"ALG1", art:"lohnersatz"},{name:"Produktion", art:"selbst"},{name:"Sonstige Einnahme", art:"sonstige"},{name:"Erstattungen & Sonstiges", art:"sonstige"}]
   }
 };
 const KIND_LABEL = {ausgabe:"Ausgabe", betrieb:"Betrieblich", einnahme:"Einnahme", vorauszahlung:"Steuer-Vorauszahlung"};
@@ -667,7 +672,7 @@ function ic(name, size){ return `<svg class="i" viewBox="0 0 24 24"${size?` styl
 function iconFor(kind, name){
   const n = (name||"").toLowerCase();
   if (kind==="vorauszahlung") return "receipt";
-  const map = [["essen","food"],["restaurant","food"],["lieferando","food"],["gesund","health"],["apotheke","health"],["arzt","health"],["urlaub","plane"],["reise","plane"],["geschenk","gift"],["kleid","shirt"],["mode","shirt"],["bildung","book"],["kurs","book"],["strom","bolt"],["energie","bolt"],["sport","dumbbell"],["fitness","dumbbell"],["versicherung","shield"],["haustier","paw"],["erstattung","repeat"],["lohn","wallet"],["gehalt","wallet"],["ratenzahlung","repeat"],["fixkosten","repeat"],["haushalt","basket"],["einkauf","cart"],["spaß","spark"],["freizeit","spark"],["tank","fuel"],["park","fuel"],["bargeld","cash"],["büro","case"],["alg","shield"],["arbeitsamt","shield"],["produktion","film"],["steuer","receipt"],["miete","home"],["auto","car"],["garage","garage"],["spotify","music"],["netflix","tv"],["prime","tv"],["handy","phone"],["internet","wifi"],["ionos","cloud"],["sevdesk","doc"],["adobe","doc"],["etf","chart"],["bank","bank"],["ksk","shield"],["nintendo","game"],["pokémon","game"],["joyclub","heart"],["kredit","bank"],["schulden","piggy"],["sonstig","dots"]];
+  const map = [["essen","food"],["restaurant","food"],["lieferando","food"],["gesund","health"],["apotheke","health"],["arzt","health"],["urlaub","plane"],["reise","plane"],["geschenk","gift"],["kleid","shirt"],["mode","shirt"],["bildung","book"],["kurs","book"],["strom","bolt"],["energie","bolt"],["sport","dumbbell"],["fitness","dumbbell"],["versicherung","shield"],["haustier","paw"],["erstattung","repeat"],["lohn","wallet"],["sonderzahlung","gift"],["gehalt","wallet"],["ratenzahlung","repeat"],["fixkosten","repeat"],["haushalt","basket"],["einkauf","cart"],["spaß","spark"],["freizeit","spark"],["tank","fuel"],["park","fuel"],["bargeld","cash"],["büro","case"],["alg","shield"],["arbeitsamt","shield"],["produktion","film"],["steuer","receipt"],["miete","home"],["auto","car"],["garage","garage"],["spotify","music"],["netflix","tv"],["prime","tv"],["handy","phone"],["internet","wifi"],["ionos","cloud"],["sevdesk","doc"],["adobe","doc"],["etf","chart"],["bank","bank"],["ksk","shield"],["nintendo","game"],["pokémon","game"],["joyclub","heart"],["kredit","bank"],["schulden","piggy"],["sonstig","dots"]];
   for (const [k,v] of map) if (n.includes(k)) return v;
   return kind==="einnahme" ? "arrowDown" : "tag";
 }
@@ -867,6 +872,14 @@ async function runMigrations(){
     if (!(S.settings.accountAnchors||{}).Hauptkonto) S.settings.accountAnchors={...(S.settings.accountAnchors||{}), Hauptkonto:{date:"2026-10-29", balance:123}};
     await saveSettings();
   }
+  if (!S.settings.migLohn){
+    // categories for salary and one-off payments (13. Gehalt, Urlaubsgeld, Weihnachtsgeld, Bonus)
+    S.settings.migLohn=1;
+    const c=clone(S.settings.cats||DEFAULT_SETTINGS.cats), names=c.einnahme.map(x=>typeof x==="string"?x:x.name);
+    if (!names.includes("Gehalt")) c.einnahme.push({name:"Gehalt", art:"lohn"});
+    if (!names.includes("Sonderzahlung")) c.einnahme.push({name:"Sonderzahlung", art:"sonderzahlung"});
+    S.settings.cats=c; await saveSettings();
+  }
   if (!S.settings.migSelbst){
     const keys=new Set(SELF_KEYS), sc=incCats().find(c=>c.art==="selbst"), vat=(Number(S.settings.vatRate)||0)/100;
     const hits=S.tx.filter(x=>x.kind==="einnahme" && keys.has(x.importKey) && sc && x.cat!==sc.name);
@@ -998,12 +1011,21 @@ function estFull(zve, joint, z, ersatz, anrMax){
   const soli = Math.round(soliOf(base, joint)*100)/100, kist = S.settings.kirche ? Math.round(base*kistRate()*100)/100 : 0;
   return { est:e, soli, kist, total:e+soli+kist, useFB, anr, kg };
 }
+// salary of one year: monthly gross × number of salaries + one-off payments, each counted in full (never spread)
+function lohnYear(year){
+  const ly=(S.settings.lohn||{})[year]||{};
+  const n=Number(ly.n)||12, extra=["urlaub","weihnacht","bonus"].reduce((a,k)=>a+(Number(ly[k])||0),0);
+  const monat = ly.monat!=null && ly.monat!=="" ? Number(ly.monat)||0 : (Number(ly.brutto)>0 ? Math.round((Number(ly.brutto)/12)*100)/100 : 0);
+  const legacy = ly.monat==null && Number(ly.brutto)>0;   // older version: only the yearly sum was entered
+  const brutto = legacy ? Number(ly.brutto) : Math.round((monat*n+extra)*100)/100;
+  return { monat, n, urlaub:Number(ly.urlaub)||0, weihnacht:Number(ly.weihnacht)||0, bonus:Number(ly.bonus)||0, extra, brutto, sonderzahl: legacy?0:Math.round((monat*(n-12)+extra)*100)/100, lst:ly.lst };
+}
 function taxCalc(year){
   let self=0,betr=0,ersatz=0,vz=0,resIn=0;
   for (let i=1;i<=12;i++){ const c=monthCalc(year+"-"+pad(i)); self+=c.selfInc; betr+=c.bet+c.fixPaidBet; ersatz+=c.ersatz; vz+=c.vz; resIn+=c.reserve; }
   const st=S.settings, joint=!!st.splitting, kl=Number(st.steuerklasse)||1, z=Number(st.kinder)||0, ly=(st.lohn||{})[year]||{};
   const gewinn=self-betr;
-  const brutto=Number(ly.brutto)||0, wk=Math.max(TAX26.anPausch, Number(st.werbungskosten)||0), lohnEink=brutto>0?Math.max(0,brutto-wk):0;
+  const brutto=lohnYear(year).brutto, wk=Math.max(TAX26.anPausch, Number(st.werbungskosten)||0), lohnEink=brutto>0?Math.max(0,brutto-wk):0;
   const vorsorge=Number(st.vorsorge)||0, sonder=Math.max(TAX26.sonderPausch, Number(st.abzuege)||0);
   const entl = kl===2 ? TAX26.entlastung + Math.max(0,Math.ceil(z)-1)*TAX26.entlastungKind : 0;
   const zve = Math.max(0, gewinn + lohnEink - vorsorge - sonder - entl);
@@ -1371,7 +1393,7 @@ function renderYear(){
     <div class="card half"><div class="card-head"><h2>Steuern ${y}</h2><span class="pill">Schätzung</span></div>
       <div class="kv">
         <span>Gewinn Selbstständigkeit</span><span>${esc(eur(tax.gewinn))}</span>
-        ${tax.brutto?`<span>Lohn ${esc(eur0(tax.brutto))} − Werbungskosten ${esc(eur0(tax.wk))}</span><span>${esc(eur(tax.lohnEink))}</span>`:""}
+        ${tax.brutto?`<span>Lohn ${esc(eur0(tax.brutto))}${lohnYear(y).sonderzahl>0?` <span class="small muted">(inkl. ${esc(eur0(lohnYear(y).sonderzahl))} Sonderzahlungen)</span>`:""} − Werbungskosten ${esc(eur0(tax.wk))}</span><span>${esc(eur(tax.lohnEink))}</span>`:""}
         <span>− Vorsorge &amp; Sonderausgaben</span><span>− ${esc(eur(tax.vorsorge+tax.sonder))}</span>
         ${tax.entl?`<span>− Entlastungsbetrag Alleinerziehende</span><span>− ${esc(eur(tax.entl))}</span>`:""}
         <span class="sum">Zu versteuerndes Einkommen</span><span class="sum">${esc(eur(tax.zve))}</span>
@@ -1427,7 +1449,12 @@ function renderMore(){
   if (!$("sLand").options.length) $("sLand").innerHTML = LAENDER.map(([k,n])=>`<option value="${k}">${n}</option>`).join("");
   const ly=(st.lohn||{})[y]||{};
   $("sLohnYear").textContent = "· "+y;
-  setVal("sLohn", ly.brutto?numStr(ly.brutto):""); setVal("sLSt", ly.lst!=null&&ly.lst!==""?numStr(ly.lst):""); setVal("sWK", st.werbungskosten?numStr(st.werbungskosten):""); setVal("sHebe", st.hebesatz?numStr(st.hebesatz):"");
+  const lj=lohnYear(y);
+  setVal("sLohnM", lj.monat?numStr(lj.monat):""); setVal("sUrlaub", lj.urlaub?numStr(lj.urlaub):""); setVal("sWeih", lj.weihnacht?numStr(lj.weihnacht):""); setVal("sBonus", lj.bonus?numStr(lj.bonus):"");
+  if (document.activeElement!==$("sLohnN")) $("sLohnN").value=String(lj.n);
+  $("sLohnSum").hidden = !(lj.brutto>0);
+  $("sLohnSum").innerHTML = lj.brutto>0 ? `<span>Bruttolohn ${esc(y)}: <b>${esc(eur(lj.brutto))}</b>${lj.sonderzahl>0?` – davon ${esc(eur(lj.sonderzahl))} Sonderzahlungen (13. Gehalt, Urlaubsgeld …). Die zählen in voller Höhe in dem Jahr, in dem sie kommen, und werden nicht auf die Monate verteilt.`:""}</span>` : "";
+  setVal("sLSt", ly.lst!=null&&ly.lst!==""?numStr(ly.lst):""); setVal("sWK", st.werbungskosten?numStr(st.werbungskosten):""); setVal("sHebe", st.hebesatz?numStr(st.hebesatz):"");
   if (document.activeElement!==$("sKlasse")) $("sKlasse").value=String(st.steuerklasse||1);
   if (document.activeElement!==$("sKinder")) $("sKinder").value=String(st.kinder||0);
   if (document.activeElement!==$("sLand")) $("sLand").value=st.land||"NW";
@@ -1443,7 +1470,7 @@ function renderMore(){
   renderBudgetEd();
   $("sKU").checked=!!st.kleinunternehmer; $("sSplit").checked=!!st.splitting; $("partnerField").hidden=!st.splitting;
   for (const k of ["ausgabe","betrieb"]) $("catEd-"+k).innerHTML = cats(k).map(n=>`<span class="chip">${esc(n)}<button class="x" data-catdel="${k}|${esc(n)}" aria-label="${esc(n)} entfernen">×</button></span>`).join("")+`<button class="chip" data-catadd="${k}">+ Neu</button>`;
-  $("catEd-einnahme").innerHTML = incCats().map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:5px 0"><b style="flex:1">${esc(c.name)}</b><select class="in" style="width:auto" data-incart="${esc(c.name)}" aria-label="Art von ${esc(c.name)}"><option value="selbst" ${c.art==="selbst"?"selected":""}>Selbstständig</option><option value="lohnersatz" ${c.art==="lohnersatz"?"selected":""}>Lohnersatz (ALG1)</option><option value="sonstige" ${c.art==="sonstige"?"selected":""}>Sonstige</option></select><button class="icon-btn" data-catdel="einnahme|${esc(c.name)}" aria-label="${esc(c.name)} entfernen">×</button></div>`).join("")+`<button class="chip" data-catadd="einnahme" style="margin-top:6px">+ Neu</button>`;
+  $("catEd-einnahme").innerHTML = incCats().map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:5px 0"><b style="flex:1">${esc(c.name)}</b><select class="in" style="width:auto" data-incart="${esc(c.name)}" aria-label="Art von ${esc(c.name)}"><option value="selbst" ${c.art==="selbst"?"selected":""}>Selbstständig</option><option value="lohn" ${c.art==="lohn"?"selected":""}>Gehalt (angestellt)</option><option value="sonderzahlung" ${c.art==="sonderzahlung"?"selected":""}>Sonderzahlung (13. Gehalt …)</option><option value="lohnersatz" ${c.art==="lohnersatz"?"selected":""}>Lohnersatz (ALG1)</option><option value="sonstige" ${c.art==="sonstige"?"selected":""}>Sonstige</option></select><button class="icon-btn" data-catdel="einnahme|${esc(c.name)}" aria-label="${esc(c.name)} entfernen">×</button></div>`).join("")+`<button class="chip" data-catadd="einnahme" style="margin-top:6px">+ Neu</button>`;
 }
 function txPayee(t){ return String(t.note||"").replace(/ · brutto.*$/,""); }
 function spaceMatches(){ const sp=new Set((S.settings.spaces||[]).map(nrm)); return sp.size ? S.tx.filter(t=>t.source==="n26" && sp.has(nrm(txPayee(t)))) : []; }
@@ -1519,6 +1546,7 @@ function renderSheet(){
   $("catGrid").innerHTML = list.map(n=>`<button class="cat" data-cat="${esc(n)}" aria-pressed="${n===UI.cat}">${tile(UI.kind,n)}${esc(n)}</button>`).join("");
   let hint="";
   if (UI.kind==="einnahme" && incArt(UI.cat)==="selbst") hint = (S.settings.kleinunternehmer?"":"Betrag ohne Umsatzsteuer. ")+`${S.settings.reserveRate} % davon legst du für Steuern zurück.`;
+  if (UI.kind==="einnahme" && incArt(UI.cat)==="sonderzahlung") hint = "Zählt in voller Höhe in diesem Monat – wird nicht aufs Jahr verteilt.";
   if (UI.kind==="vorauszahlung") hint = "Wird aus deiner Steuer-Rücklage bezahlt.";
   $("amountHint").textContent = hint; $("amountHint").hidden = !hint;
   $("sheetTitle").textContent = UI.editId ? "Buchung ändern" : "Neue Buchung";
@@ -1941,7 +1969,12 @@ bindNum("sKUlimit",v=>S.settings.kuLimit=v); bindNum("sVat",v=>S.settings.vatRat
 bindNum("sVors",v=>S.settings.vorsorge=v); bindNum("sAbz",v=>S.settings.abzuege=v); bindNum("sPartner",v=>S.settings.partnerZvE=v);
 bindNum("sWK",v=>S.settings.werbungskosten=v);
 bindNum("sHebe",v=>S.settings.hebesatz=v);
-bindNum("sLohn",(v,raw)=>{ const y=UI.ym.slice(0,4), l={...(S.settings.lohn||{})}; l[y]={...(l[y]||{})}; if (raw==="") delete l[y].brutto; else l[y].brutto=Math.round(v*100)/100; S.settings.lohn=l; });
+function setLohn(field, v){ const y=UI.ym.slice(0,4), l={...(S.settings.lohn||{})}, cur=lohnYear(y); const o={...(l[y]||{})};
+  if (o.monat==null) o.monat=cur.monat;                     // switch older entries over to "per month"
+  o[field]=v; l[y]=o; S.settings.lohn=l; o.brutto=lohnYear(y).brutto; }
+bindNum("sLohnM",(v,raw)=>setLohn("monat", raw===""?0:Math.round(v*100)/100));
+bindNum("sUrlaub",v=>setLohn("urlaub", Math.round(v*100)/100)); bindNum("sWeih",v=>setLohn("weihnacht", Math.round(v*100)/100)); bindNum("sBonus",v=>setLohn("bonus", Math.round(v*100)/100));
+$("sLohnN").addEventListener("change",()=>{ setLohn("n", Number($("sLohnN").value)||12); render(); saveSettings(); toast("Gespeichert"); });
 bindNum("sLSt",(v,raw)=>{ const y=UI.ym.slice(0,4), l={...(S.settings.lohn||{})}; l[y]={...(l[y]||{})}; if (raw==="") delete l[y].lst; else l[y].lst=Math.round(v*100)/100; S.settings.lohn=l; });
 for (const [id,key,num] of [["sKlasse","steuerklasse",true],["sKinder","kinder",true],["sLand","land",false]])
   $(id).addEventListener("change",e=>{ S.settings[key]= num ? Number(e.target.value) : e.target.value; render(); saveSettings(); toast("Gespeichert"); });
@@ -2036,7 +2069,8 @@ function suggest(r){
   if (/(^|\D)\d{2,4}\s?[\/\-]\s?20\d\d(\D|$)|(^|\D)\d{3} 20\d\d(\D|$)/.test(nrm(r.ref)) && !/\b(lohn|gehalt|rente|bezüge|bezuege|entgelt)\b/.test(text)){ const c=incCats().find(c=>c.art==="selbst"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
   if (/bundesagentur|arbeitsagentur|agentur für arbeit|agentur fuer arbeit/.test(text)){ const c=incCats().find(c=>c.art==="lohnersatz"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
   if (/\bspaces?\b/.test(text)) return {target:"skip|", sure:false};
-  if (/\b(lohn|gehalt|salary|entgelt|bezüge|bezuege)\b/.test(text)){ const c=incCats().find(c=>c.art!=="selbst"&&c.art!=="lohnersatz")||incCats()[0]; if (c) return {target:"einnahme|"+c.name, sure:false}; }
+  if (/weihnachtsgeld|urlaubsgeld|13\.? ?(monats)?gehalt|14\.? ?(monats)?gehalt|sonderzahlung|einmalzahlung|jahressonderzahlung|inflationsausgleich|prämie|praemie|\bbonus\b|tantieme|gratifikation/.test(text)){ const c=incCats().find(c=>c.art==="sonderzahlung"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
+  if (/\b(lohn|gehalt|salary|entgelt|bezüge|bezuege)\b/.test(text)){ const c=incCats().find(c=>c.art==="lohn")||incCats().find(c=>c.art!=="selbst"&&c.art!=="lohnersatz"&&c.art!=="sonderzahlung")||incCats()[0]; if (c) return {target:"einnahme|"+c.name, sure:!!incCats().find(c=>c.art==="lohn")}; }
   // money that really comes in, but is no earned income: refunds, cashback, N26 instalment credits, sold shares/crypto, cash deposits
   if (/erstattung|rückerstattung|rueckerstattung|refund|gutschrift|storno|rückbuchung|rueckbuchung|cashback|reward|ratenzahlung|equities|bitpanda|crypto|cash26|bareinzahlung|\bn26\b/.test(text)){ const c=refundCat(); if (c) return {target:"einnahme|"+c.name, sure:true}; }
   const other = incCats().find(c=>/sonstig/i.test(c.name)) || incCats().find(c=>c.art==="selbst") || incCats()[0];
