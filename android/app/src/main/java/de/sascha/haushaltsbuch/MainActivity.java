@@ -227,8 +227,8 @@ public class MainActivity extends Activity {
                         }
                         JSONObject res = new JSONObject();
                         res.put("lines", arr);
-                        String img = jpegDataUrl(uri);
-                        if (img != null) res.put("img", img);
+                        String photo = jpegDataUrl(uri);
+                        if (photo != null) res.put("img", photo);
                         scanDone(res.toString(), null);
                     } catch (Exception e) {
                         scanDone(null, "Text konnte nicht erkannt werden");
