@@ -659,6 +659,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .sgrp{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
 .sgrp button{display:flex;align-items:center;gap:12px;width:100%;padding:13px 16px;border:0;background:none;font:inherit;color:var(--fg);text-align:left;cursor:pointer}
 .sgrp button+button{border-top:1px solid var(--line)}
+.sgrp .sdark+button{border-top:1px solid var(--line)}
 .sgrp .sdark{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;border:0;margin:0}
 .sgrp .ic{width:36px;height:36px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
 .sgrp .n{flex:1;min-width:0}.sgrp .n b{display:block;font-weight:600;font-size:15px}.sgrp .n small{color:var(--muted);font-size:12.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -804,7 +805,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
     <div class="card sp" data-sp="budgets" hidden>
       <div class="field"><label>Monatsbudgets</label><span class="small muted" style="margin-top:-2px">Wie viel du pro Monat höchstens ausgeben willst. Ab 80 % warnt die Startseite. Leer lassen = kein Budget.</span><div id="budgetEd"></div></div>
     </div>
-    <div class="card sp bk" data-sp="backup" id="syncBox" hidden>
+    <div class="card sp bk" data-sp="sync" id="syncBox" hidden>
       <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.5 1.6A3.8 3.8 0 0 1 17 18z"/></svg><i id="syncDot"></i></span><span class="n"><b id="syncTitle">Synology-Abgleich</b><span id="syncState">–</span></span></div>
       <span class="small muted" id="syncDetail"></span>
       <div class="bkb"><button class="btn primary" id="syncNow">Jetzt abgleichen</button><button class="btn" id="syncLogout">Abmelden</button></div>
@@ -817,14 +818,9 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div id="autoBk"></div>
       <input type="file" id="backupFile" accept=".json,application/json,text/plain" hidden>
     </div>
-    <div class="card sp bk" data-sp="backup" id="updCard" hidden>
+    <div class="card sp bk" data-sp="sync" id="updCard" hidden>
       <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg></span><span class="n"><b>Automatische Updates</b><span id="updState">Die App holt neue Versionen selbst.</span></span></div>
       <div id="updBody"></div>
-    </div>
-    <div class="card sp bk" data-sp="backup" hidden>
-      <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M5 12a7 7 0 1 1 2 5M5 18v-4h4"/></svg></span><span class="n"><b>Gemerkte Zuordnungen</b><span id="rulesInfo"></span></span></div>
-      <span class="small muted">Beim Kontoauszug-Import merkt sich die App, welcher Empfänger in welche Kategorie gehört. Zurücksetzen löscht nur diese Merkliste.</span>
-      <div class="bkb"><button class="btn" id="rulesReset">Zurücksetzen</button></div>
     </div>
     <div class="card sp" data-sp="steuer" hidden>
       <div class="field"><label for="sWork">Wie verdienst du dein Geld?</label><select class="in" id="sWork"></select><span class="small muted" id="sWorkInfo"></span></div>
@@ -869,12 +865,14 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
         <div class="field"><label for="sAbz">Sonstige Abzüge pro Jahr (€)</label><input class="in" id="sAbz" inputmode="decimal" placeholder="Spenden, Kinderbetreuung …"></div>
       </div>
     </div>
-    <div class="card sp" data-sp="start" hidden>
+    <div class="card sp" data-sp="profil" hidden>
       <div class="pfrow"><button class="pfav" id="pfAv" aria-label="Foto zuschneiden" style="border:0;padding:0;cursor:pointer"></button><div class="pfbtns"><button class="btn" id="pfPick">Foto wählen</button><button class="btn" id="pfCam" hidden>Foto aufnehmen</button><button class="btn" id="pfEdit" hidden>Zuschnitt ändern</button><button class="btn" id="pfDel" hidden>Entfernen</button></div></div>
       <input type="file" id="pfFile" accept="image/*" hidden>
       <div class="field"><label for="sName">Dein Name</label><input class="in" id="sName" autocomplete="given-name" placeholder="z. B. Sascha" maxlength="30"><span class="small muted">Für die Begrüßung oben links.</span></div>
-      <div class="field"><label>Reihenfolge der Blöcke</label><span class="small muted" style="margin-top:-2px">Mit den Pfeilen verschieben, mit dem Schalter aus- oder einblenden. Die Konten-Karten bleiben immer oben.</span><div id="homeEd"></div></div>
       <div class="field"><label>Einrichtung</label><span class="small muted" style="margin-top:-2px">Name, Verdienstart, Kontostand, Fixkosten und Budgets in fünf kurzen Schritten. Vorhandene Daten bleiben erhalten.</span><div><button class="btn" id="wizAgain">Einrichtung starten</button></div></div>
+    </div>
+    <div class="card sp" data-sp="start" hidden>
+      <div class="field"><label>Reihenfolge der Blöcke</label><span class="small muted" style="margin-top:-2px">Mit den Pfeilen verschieben, mit dem Schalter aus- oder einblenden. Die Konten-Karten bleiben immer oben.</span><div id="homeEd"></div></div>
       <div class="section-title">Läden für Angebote</div>
       <div class="field"><span class="small muted" style="margin-top:-2px">Diese Läden zeigt die Startseite mit einem Link zum aktuellen Prospekt, in der Reihenfolge, in der du sie antippst.</span><div class="chips" id="shopEd"></div></div>
       <div class="switch"><label for="sLogos"><b>Händler-Logos</b><br><span class="small muted">Lädt das Website-Symbol bekannter Händler (über Google). Aus: farbiger Anfangsbuchstabe.</span></label><input type="checkbox" id="sLogos"></div>
@@ -887,6 +885,11 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="field"><label>Ausgaben privat</label><div class="chips" id="catEd-ausgabe"></div></div>
       <div class="field" id="catBetField"><label>Ausgaben betrieblich</label><div class="chips" id="catEd-betrieb"></div></div>
       <div class="field"><label>Einnahmen</label><div id="catEd-einnahme"></div></div>
+    </div>
+    <div class="card sp bk" data-sp="kategorien" hidden>
+      <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M5 12a7 7 0 1 1 2 5M5 18v-4h4"/></svg></span><span class="n"><b>Gemerkte Zuordnungen</b><span id="rulesInfo"></span></span></div>
+      <span class="small muted">Beim Kontoauszug-Import merkt sich die App, welcher Empfänger in welche Kategorie gehört. Zurücksetzen löscht nur diese Merkliste.</span>
+      <div class="bkb"><button class="btn" id="rulesReset">Zurücksetzen</button></div>
     </div>
   </section>
 </main>
@@ -999,6 +1002,8 @@ const TITLES = {home:"Übersicht", list:"Buchungen", fix:"Fixkosten", year:"Anal
 
 /* ---------- icons ---------- */
 const P = {
+  user:`<circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5a7 7 0 0 1 14 0"/>`,
+  save:`<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>`,
   basket:'<path d="M5 9h14l-1.4 9.2a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8z"/><path d="M9 9l3-5 3 5"/>',
   spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
   fuel:'<path d="M5 20V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v14M4 20h12M7.5 9h5"/><path d="M15 10h2a1.5 1.5 0 0 1 1.5 1.5V16a1.5 1.5 0 0 0 3 0V9l-3-3"/>',
@@ -2041,7 +2046,7 @@ $("pfCam").onclick = ()=>avatarNative("camera");
 $("pfAv").onclick = ()=>{ if (S.settings.photoSrc) pfeOpen(S.settings.photoSrc, S.settings.photoCrop); else $("pfPick").click(); };
 $("pfEdit").onclick = ()=>{ const s0=S.settings.photoSrc; if (s0) pfeOpen(s0, S.settings.photoCrop); };
 $("pfDel").onclick = async ()=>{ delete S.settings.photo; delete S.settings.photoSrc; delete S.settings.photoCrop; await saveSettings(); renderAvatar(); renderSetHome(); toast("Profilfoto entfernt"); };
-$("topAv").onclick = ()=>{ UI.view="more"; UI.sp="start"; render(); renderSpPages(); window.scrollTo({top:0}); };
+$("topAv").onclick = ()=>{ UI.view="more"; UI.sp="profil"; render(); renderSpPages(); window.scrollTo({top:0}); };
 $("sName").addEventListener("change", ()=>{ S.settings.name=$("sName").value.trim().slice(0,30); saveSettings(); $("greet").textContent=greeting(); toast("Gespeichert"); });
 /* ---------- tax reserve as a gauge ---------- */
 function taxGauge(ym){
@@ -3180,17 +3185,20 @@ function qrSvg(text, px){
 }
 
 const SP_PAGES = {
-  konten:["Konten & Spaces","wallet"], budgets:["Monatsbudgets","target"], schulden:["Schulden","bank"], backup:["Abgleich & Backup","cloud"],
-  notify:["Benachrichtigungen","bell"], steuer:["Steuer & Einkommen","receipt"], start:["Profil & Startseite","home"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"]
+  konten:["Konten & Spaces","wallet"], budgets:["Monatsbudgets","target"], schulden:["Schulden","bank"], backup:["Backup","save"],
+  profil:["Profil","user"], sync:["Abgleich & Updates","cloud"], notify:["Benachrichtigungen","bell"], steuer:["Steuer & Einkommen","receipt"],
+  start:["Startseite & Läden","home"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"]
 };
 function spSummary(k){
   const st=S.settings, y=UI.ym.slice(0,4);
   if (k==="konten"){ const n=(st.spaces||[]).length; return n?`${n} Spaces`:"Stand"; }
   if (k==="budgets"){ const n=Object.values(st.budgets||{}).filter(v=>+v>0).length; return n?`${n} aktiv`:"keine"; }
   if (k==="schulden"){ return S.debts.length?eur0(sum(S.debts,d=>debtState(d).remaining)):"keine"; }
-  if (k==="backup"){ if (!SYNCABLE) return "Datei"; return !SYNC.token?"aus":SYNC.state==="ok"?"aktuell":"wartet"; }
+  if (k==="backup"){ return "Datei"; }
+  if (k==="sync"){ const a = !SYNCABLE ? "" : !SYNC.token ? "Abgleich aus" : SYNC.state==="ok" ? "abgeglichen" : "wartet"; const u = updKey() ? "Updates an" : "Updates aus"; return [a,u].filter(Boolean).join(" · "); }
+  if (k==="profil"){ return (st.name ? st.name : "Name") + (st.photo ? " · mit Foto" : " & Foto"); }
   if (k==="steuer"){ const L=(LAENDER.find(x=>x[0]===(st.land||"NW"))||[,""])[1]; return `${({angestellt:"Angestellt",selbst:"Selbstständig",beides:"Job + selbstständig"})[st.work||"beides"]} · Klasse ${["I","II","III","IV","V","VI"][(st.steuerklasse||1)-1]} · ${L}${st.reserveRate&&hasSelf()?` · ${numStr(st.reserveRate)} % Rücklage`:""}`; }
-  if (k==="start"){ const n=(st.shops||[]).length; return `Reihenfolge der Blöcke${n?` · ${n} Läden`:""}`; }
+  if (k==="start"){ const n=(st.shops||[]).length; return `Blöcke${n?` · ${n} Läden`:" · keine Läden"}`; }
   if (k==="sicherheit"){ return lockCfg() ? "App-Sperre an" : "App-Sperre aus"; }
   if (k==="notify"){ const c=notifyCfg(); return !CAN_NOTIFY ? "nur in der App" : c.on&&notifyPerm()==="granted" ? "an" : "aus"; }
   if (k==="kategorien"){ return `${cats("ausgabe").length+cats("betrieb").length+incCats().length} Kategorien`; }
@@ -3205,15 +3213,17 @@ function renderSetHome(){
     else if (SYNC.state==="pending"){ dot="w"; line=`${SYNC.queue.length} Änderungen warten`; }
     else { dot="b"; line=SYNC.state==="offline"?"Offline – wird nachgeholt":"Synology nicht erreichbar"; }
   }
-  const quick=["konten","budgets","schulden","backup"], rest=["notify","steuer","start","sicherheit","kategorien"];
+  const quick=["konten","budgets","schulden","backup"];
+  const groups=[["Finanzen",["steuer","kategorien"]],["App",[...(SYNCABLE||window.AndroidBridge?["sync"]:[]),"notify","sicherheit"]]];
+  const row = k => `<button data-spgo="${k}"><span class="ic">${ic(SP_PAGES[k][1],19)}</span><span class="n"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span><span class="ch">${ic("right",18)}</span></button>`;
   const short={konten:"Konten",budgets:"Budgets",schulden:"Schulden",backup:"Backup"};
   $("setHome").innerHTML = `
-    <button class="sprof" data-spgo="start" aria-label="Profil und Startseite ändern"><span class="av">${S.settings.photo?`<img src="${esc(S.settings.photo)}" alt="">`:esc((name.trim()[0]||"?").toUpperCase())}</span>
-      <span class="pt"><b>${esc(name||"Dein Name")}</b><small>${name?"Profil & Startseite":"Tippen, um Name und Foto einzutragen"}</small><span class="pchip"><i class="${dot}"></i>${esc(line)}</span></span><span class="ch">${ic("right",18)}</span></button>
+    <button class="sprof" data-spgo="profil" aria-label="Profil ändern"><span class="av">${S.settings.photo?`<img src="${esc(S.settings.photo)}" alt="">`:esc((name.trim()[0]||"?").toUpperCase())}</span>
+      <span class="pt"><b>${esc(name||"Dein Name")}</b><small>${name?"Profil bearbeiten":"Tippen, um Name und Foto einzutragen"}</small><span class="pchip"><i class="${dot}"></i>${esc(line)}</span></span><span class="ch">${ic("right",18)}</span></button>
     <div class="sqk">${quick.map(k=>`<button data-spgo="${k}"><span>${ic(SP_PAGES[k][1],20)}</span>${short[k]}<small>${esc(spSummary(k))}</small></button>`).join("")}</div>
-    <div class="sgl">Weitere Einstellungen</div>
-    <div class="sgrp"><label class="sdark switch"><span class="ic">${ic("spark",19)}</span><span class="n"><b>Dunkles Design</b><small>${document.documentElement.dataset.theme==="dark"?"an":"aus – helles Design"}</small></span><input type="checkbox" id="sDark" ${document.documentElement.dataset.theme==="dark"?"checked":""}></label></div>
-    <div class="sgrp">${rest.map(k=>`<button data-spgo="${k}"><span class="ic">${ic(SP_PAGES[k][1],19)}</span><span class="n"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span><span class="ch">${ic("right",18)}</span></button>`).join("")}</div>
+    <div class="sgl">Aussehen</div>
+    <div class="sgrp"><label class="sdark switch"><span class="ic">${ic("spark",19)}</span><span class="n"><b>Dunkles Design</b><small>${document.documentElement.dataset.theme==="dark"?"an":"aus – helles Design"}</small></span><input type="checkbox" id="sDark" ${document.documentElement.dataset.theme==="dark"?"checked":""}></label>${row("start")}</div>
+    ${groups.map(([t,ks])=>`<div class="sgl">${t}</div><div class="sgrp">${ks.map(row).join("")}</div>`).join("")}
     <div class="small muted" style="text-align:center;margin:18px 0 4px">Finanz MAMI · ${verName(+((document.querySelector('meta[name="hb-version"]')||{}).content||0))}</div>`;
 }
 function renderSpPages(){
@@ -3221,7 +3231,7 @@ function renderSpPages(){
   $("setHome").hidden = !!k; $("spHead").hidden = !k;
   document.querySelectorAll("#v-more [data-sp]").forEach(el=>el.hidden = el.dataset.sp!==k || (el.id==="syncBox" && !SYNCABLE));
   if (k) $("spTitle").textContent = SP_PAGES[k][0]; else renderSetHome();
-  if (k==="backup") renderUpd();
+  if (k==="sync") renderUpd();
 }
 document.addEventListener("change", e=>{
   if (e.target.id!=="sDark") return;
