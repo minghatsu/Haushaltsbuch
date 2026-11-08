@@ -1,8 +1,8 @@
 {
   "name": "haushaltsbuch",
-  "productName": "Haushaltsbuch",
+  "productName": "Finanz MAMI",
   "version": "1.0.0",
-  "description": "Haushaltsbuch für Windows",
+  "description": "Finanz MAMI für Windows",
   "author": "Sascha",
   "main": "main.js",
   "private": true,
@@ -17,7 +17,7 @@
   },
   "build": {
     "appId": "de.sascha.haushaltsbuch",
-    "productName": "Haushaltsbuch",
+    "productName": "Finanz MAMI",
     "files": ["main.js", "preload.js", "app.html", "icon.png"],
     "directories": { "output": "dist" },
     "win": { "target": "nsis", "icon": "icon.png" },
@@ -26,7 +26,7 @@
       "perMachine": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Haushaltsbuch",
+      "shortcutName": "Finanz MAMI",
       "artifactName": "Haushaltsbuch-Setup.exe"
     }
   }

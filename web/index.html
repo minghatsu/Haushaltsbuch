@@ -1,4 +1,4 @@
-<title>Haushaltsbuch Sascha</title>
+<title>Finanz MAMI</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap">
@@ -860,7 +860,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 </main>
 
 <nav class="tabs" aria-label="Bereiche" role="tablist">
-  <div class="brand"><span class="ictile"><svg class="i" viewBox="0 0 24 24"><path d="M6 4.5h11a1.5 1.5 0 0 1 1.5 1.5v13.5H7.5A1.5 1.5 0 0 1 6 18z"/><path d="M15 9.2a3 3 0 1 0 0 4.6M10 10.6h4M10 12.4h4"/></svg></span>Haushaltsbuch</div>
+  <div class="brand"><svg viewBox="0 0 120 120" style="width:36px;height:36px;flex:none" aria-hidden="true"><rect width="120" height="120" rx="28" fill="#1a7a5c"/><circle cx="60" cy="51" r="21" fill="#fff"/><circle cx="60" cy="23" r="10" fill="#fff" stroke="#1a7a5c" stroke-width="4"/><path d="M24 102c0-14 10-24 22-26 4 4 9 6 14 6s10-2 14-6c12 2 22 12 22 26z" fill="#fff"/><path d="M66.7 43.5A10.5 10.5 0 1 0 66.7 58.5M48 48.6h13M48 53.4h12" fill="none" stroke="#1a7a5c" stroke-width="4.2" stroke-linecap="round"/></svg>Finanz MAMI</div>
   <button class="tab" role="tab" data-go="home" aria-selected="true" aria-label="Start"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span class="tname">Start</span></button>
   <button class="tab" role="tab" data-go="list" aria-selected="false" aria-label="Buchungen"><svg class="i" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".6"/><circle cx="4" cy="12" r=".6"/><circle cx="4" cy="18" r=".6"/></svg><span class="tname">Buchungen</span></button>
   <button class="tab plus" data-addmenu="1" aria-label="Neue Buchung"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="tlabel">Neue Buchung</span></button>
@@ -928,7 +928,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 <div class="lockbg" id="lockBg" hidden role="dialog" aria-modal="true" aria-labelledby="lockTitle">
   <div class="lockbox">
     <span class="ictile" style="width:56px;height:56px;border-radius:18px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24" style="width:28px;height:28px"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg></span>
-    <h2 id="lockTitle">Haushaltsbuch gesperrt</h2>
+    <h2 id="lockTitle">Finanz MAMI gesperrt</h2>
     <p class="small muted" id="lockText">Gib deine PIN ein.</p>
     <div class="pindots" id="pinDots" aria-hidden="true"></div>
     <div class="small" id="lockErr" role="alert"></div>
@@ -2511,7 +2511,7 @@ function notifyAlerts(hints){
     const key = h.k==="minus" ? "minus:"+day : h.k+":"+h.t.replace(/\d[\d.,]*\s?€?|%/g,"#")+":"+ym+(h.lvl==="bad"?":bad":"");
     if (sent[key]) continue;
     sent[key]=Date.now();
-    try{ AndroidBridge.notifyNow(nid(key), h.t, h.s||"Tippe, um das Haushaltsbuch zu öffnen.", "hinweise"); }catch(e){}
+    try{ AndroidBridge.notifyNow(nid(key), h.t, h.s||"Tippe, um Finanz MAMI zu öffnen.", "hinweise"); }catch(e){}
   }
   const old=Date.now()-120*864e5; for (const k in sent) if (sent[k]<old) delete sent[k];
   try{ localStorage.setItem("hb-notified", JSON.stringify(sent)); }catch(e){}
@@ -2559,7 +2559,7 @@ function renderNotifyEd(){
   const sw=(k,t,d)=>`<div class="switch"><label for="nf-${k}"><b>${t}</b><br><span class="small muted">${d}</span></label><input type="checkbox" id="nf-${k}" data-nf="${k}" ${c[k]?"checked":""} ${on?"":"disabled"}></div>`;
   const sel=(k,t,d,opts)=>`<div class="field"><label for="nf-${k}">${t}</label><select class="in" id="nf-${k}" data-nf="${k}" ${on?"":"disabled"}>${opts.map(([v,l])=>`<option value="${v}" ${String(c[k])===v?"selected":""}>${l}</option>`).join("")}</select>${d?`<span class="small muted">${d}</span>`:""}</div>`;
   el.innerHTML = `
-    <div class="switch"><label for="nf-on"><b>Benachrichtigungen</b><br><span class="small muted">${IS_PC?"Kommen als Windows-Meldung unten rechts – auch wenn das Fenster zu ist, solange das Haushaltsbuch unten in der Taskleiste läuft.":perm==="granted"?"Kommen als Popup aufs Handy, auch wenn die App geschlossen ist.":"Die App fragt einmal nach der Erlaubnis von Android."}</span></label><input type="checkbox" id="nf-on" ${on?"checked":""}></div>
+    <div class="switch"><label for="nf-on"><b>Benachrichtigungen</b><br><span class="small muted">${IS_PC?"Kommen als Windows-Meldung unten rechts – auch wenn das Fenster zu ist, solange Finanz MAMI unten in der Taskleiste läuft.":perm==="granted"?"Kommen als Popup aufs Handy, auch wenn die App geschlossen ist.":"Die App fragt einmal nach der Erlaubnis von Android."}</span></label><input type="checkbox" id="nf-on" ${on?"checked":""}></div>
     ${c.on&&perm!=="granted"?`<div class="notice warn"><span>${IS_PC?"Windows":"Android"} blockiert die Benachrichtigungen gerade.</span><button class="btn" id="nfSys">Erlauben</button></div>`:""}
     <div class="section-title">Warnungen</div>
     <span class="small muted" style="margin-top:-8px">Kommen sofort, sobald die App es bemerkt – jede nur einmal.</span>
@@ -2578,7 +2578,7 @@ function renderNotifyEd(){
     ${sel("hour","Uhrzeit für Erinnerungen","Gilt für Fixkosten, Kontoauszug, Steuer und Monatsrückblick.",[["8","8 Uhr"],["9","9 Uhr"],["10","10 Uhr"],["12","12 Uhr"],["17","17 Uhr"],["19","19 Uhr"]])}
     <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="nfTest" ${on?"":"disabled"}>Test-Benachrichtigung</button><button class="btn" id="nfSys2">${IS_PC?"Windows-Einstellungen":"Android-Einstellungen"}</button></div>
     ${IS_PC&&AndroidBridge.pcPrefs?(()=>{ let p={}; try{ p=JSON.parse(AndroidBridge.pcPrefs("")); }catch(_){} return `<div class="section-title">PC</div>
-    <div class="switch"><label for="pcTray"><b>Im Hintergrund weiterlaufen</b><br><span class="small muted">Schließen legt das Haushaltsbuch unten rechts in die Taskleiste – nötig für Erinnerungen. Ganz beenden: Rechtsklick aufs Symbol › Beenden.</span></label><input type="checkbox" id="pcTray" ${p.tray!==false?"checked":""}></div>
+    <div class="switch"><label for="pcTray"><b>Im Hintergrund weiterlaufen</b><br><span class="small muted">Schließen legt Finanz MAMI unten rechts in die Taskleiste – nötig für Erinnerungen. Ganz beenden: Rechtsklick aufs Symbol › Beenden.</span></label><input type="checkbox" id="pcTray" ${p.tray!==false?"checked":""}></div>
     <div class="switch"><label for="pcAuto"><b>Mit Windows starten</b><br><span class="small muted">Startet unsichtbar im Hintergrund, damit Erinnerungen auch nach einem Neustart kommen.</span></label><input type="checkbox" id="pcAuto" ${p.autostart?"checked":""}></div>`; })():""}`;
 }
 document.addEventListener("change", e=>{
@@ -2587,7 +2587,7 @@ document.addEventListener("change", e=>{
   const c=notifyCfg(); c[k]= e.target.type==="checkbox" ? e.target.checked : e.target.value; notifySave(c);
 });
 document.addEventListener("click", e=>{
-  if (e.target.closest("#nfTest")){ try{ AndroidBridge.notifyNow(nid("test"+Date.now()), "So sieht eine Benachrichtigung aus", "Das Haushaltsbuch meldet sich hier, auch wenn die App geschlossen ist.", "hinweise"); }catch(_){} }
+  if (e.target.closest("#nfTest")){ try{ AndroidBridge.notifyNow(nid("test"+Date.now()), "So sieht eine Benachrichtigung aus", "Finanz MAMI meldet sich hier, auch wenn die App geschlossen ist.", "hinweise"); }catch(_){} }
   if (e.target.closest("#nfSys,#nfSys2")){ try{ AndroidBridge.notifySettings(); }catch(_){} }
 });
 
@@ -2958,7 +2958,7 @@ function tfaHtml(){
   const head=`<div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10 18h4M9.5 10.5l2 2 3.5-4"/></svg></span><span class="n"><b>Zwei-Faktor-Anmeldung</b><span>${!t?"wird geprüft …":t.old?"braucht die neue api.php auf der Synology":t.on?`an · ${t.recovery} Wiederherstellungscodes übrig`:"aus"}</span></span></div>`;
   if (!t||t.old) return head;
   if (st==="pw") return head+`<span class="small muted">Beim Anmelden eines Geräts brauchst du dann zusätzlich einen 6-stelligen Code aus einer App wie Google Authenticator oder Microsoft Authenticator.</span>
-    <div class="field"><label for="tfaPw">Dein Haushaltsbuch-Passwort</label><input class="in" type="password" id="tfaPw" autocomplete="current-password"></div><span class="small" id="tfaErr" style="color:var(--bad)"></span>
+    <div class="field"><label for="tfaPw">Dein Passwort für den Abgleich</label><input class="in" type="password" id="tfaPw" autocomplete="current-password"></div><span class="small" id="tfaErr" style="color:var(--bad)"></span>
     <div class="bkb"><button class="btn primary" id="tfaGo">Weiter</button><button class="btn" id="tfaCancel">Abbrechen</button></div>`;
   if (st==="scan") return head+`<span class="small">1. Öffne deine Authenticator-App und scanne diesen Code${IS_PC?" mit dem Handy":""}:</span>
     <div class="tfaqr">${qrSvg(UI.tfaUri,200)}</div>
@@ -3464,7 +3464,7 @@ document.addEventListener("click", async e=>{
   const t=e.target; if (!t.closest("#lockAlt")) return;
   if (t.closest("#lfBack")){ lockPanel(""); $("lockText").textContent="Gib deine PIN ein."; return; }
   if (t.closest("#lfDevice")){ const id=newId(); bioWaiting[id]=ok=>{ if (ok) { LOCK.recUsed=false; lockForgotOk(); } else $("lockErr").textContent="Nicht entsperrt."; }; try{ AndroidBridge.deviceCredential(id); }catch(_){} return; }
-  if (t.closest("#lfPw")){ lockPanel(`<input class="in" type="password" id="lfPwIn" placeholder="Synology-Passwort fürs Haushaltsbuch" autocomplete="current-password"><button class="btn primary block" id="lfPwGo">Entsperren</button><button class="link small" id="lfBack">Zurück zur PIN</button>`); setTimeout(()=>$("lfPwIn").focus(),30); return; }
+  if (t.closest("#lfPw")){ lockPanel(`<input class="in" type="password" id="lfPwIn" placeholder="Passwort für den Abgleich" autocomplete="current-password"><button class="btn primary block" id="lfPwGo">Entsperren</button><button class="link small" id="lfBack">Zurück zur PIN</button>`); setTimeout(()=>$("lfPwIn").focus(),30); return; }
   if (t.closest("#lfPwGo")){
     const pw=$("lfPwIn").value; if (!pw) return; $("lfPwGo").disabled=true; $("lockErr").textContent="";
     try { await api("verify",{body:{password:pw}}); LOCK.recUsed=false; lockForgotOk(); }
@@ -3484,7 +3484,7 @@ document.addEventListener("click", async e=>{
 function lockShow(mode, done){
   LOCK.mode=mode; LOCK.pin=""; LOCK.first=""; LOCK.done=done||null;
   const cfg=lockCfg();
-  $("lockTitle").textContent = mode==="unlock" ? "Haushaltsbuch gesperrt" : mode==="check" ? "PIN bestätigen" : "Neue PIN festlegen";
+  $("lockTitle").textContent = mode==="unlock" ? "Finanz MAMI gesperrt" : mode==="check" ? "PIN bestätigen" : "Neue PIN festlegen";
   $("lockText").textContent = mode==="set" ? "Wähl eine PIN mit 4 bis 6 Ziffern." : "Gib deine PIN ein.";
   $("lockCancel").hidden = mode==="unlock";
   $("lockNext").hidden = mode!=="set";
@@ -4409,7 +4409,7 @@ function euerCsv(y){
   }
   inc.sort((a,b)=>a.d.localeCompare(b.d)); out.sort((a,b)=>a.d.localeCompare(b.d));
   rows.push(["Einnahmen-Überschuss-Rechnung "+y]);
-  rows.push(["Erstellt mit dem Haushaltsbuch am "+de(isoToday())+(ku?" · Kleinunternehmer (§19 UStG)":" · Umsatzsteuer "+(vat*100)+" %")]);
+  rows.push(["Erstellt mit Finanz MAMI am "+de(isoToday())+(ku?" · Kleinunternehmer (§19 UStG)":" · Umsatzsteuer "+(vat*100)+" %")]);
   rows.push([]);
   rows.push(["Betriebseinnahmen"]);
   rows.push(["Datum","Kategorie","Beschreibung","Brutto (€)","Umsatzsteuer (€)","Netto (€)","Beleg"]);
@@ -4602,8 +4602,8 @@ async function showLogin(){
   $("loginText").textContent = SYNC.reset
     ? "Auf der Synology liegt die Datei passwort-zuruecksetzen.txt. Leg jetzt ein neues Passwort fest – deine Daten bleiben erhalten, alle anderen Geräte melden sich neu an, die Zwei-Faktor-Anmeldung ist danach aus."
     : SYNC.setup
-    ? "Lege ein Passwort für dein Haushaltsbuch fest (mindestens 8 Zeichen). Damit meldest du dich auf jedem Gerät einmal an."
-    : "Gib dein Haushaltsbuch-Passwort ein. Danach siehst du auf diesem Gerät dieselben Daten wie überall.";
+    ? "Lege ein Passwort für deine Synology fest (mindestens 8 Zeichen). Damit meldest du dich auf jedem Gerät einmal an."
+    : "Gib dein Passwort für die Synology ein. Danach siehst du auf diesem Gerät dieselben Daten wie überall.";
   setTimeout(()=>$("loginPw").focus(), 50);
 }
 async function doLogin(){

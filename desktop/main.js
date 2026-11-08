@@ -12,7 +12,9 @@ protocol.registerSchemesAsPrivileged([
 const APP_URL = "app://haushaltsbuch/index.html";
 const BUNDLED = path.join(__dirname, "app.html");
 const SMOKE = process.argv.includes("--smoke");
+// keep the data folder of earlier versions (named "Haushaltsbuch") although the app is now called Finanz MAMI
 if (SMOKE) app.setPath("userData", path.join(app.getPath("temp"), "haushaltsbuch-smoke-" + process.pid));
+else app.setPath("userData", path.join(app.getPath("appData"), "Haushaltsbuch"));
 
 const cachedFile = () => path.join(app.getPath("userData"), "app.html");
 const windowFile = () => path.join(app.getPath("userData"), "fenster.json");
@@ -60,9 +62,9 @@ function showWin() { if (!win) createWindow(); else { if (win.isMinimized()) win
 function makeTray() {
   try {
     tray = new Tray(nativeImage.createFromPath(path.join(__dirname, "icon.png")).resize({ width: 16, height: 16 }));
-    tray.setToolTip("Haushaltsbuch");
+    tray.setToolTip("Finanz MAMI");
     tray.setContextMenu(Menu.buildFromTemplate([
-      { label: "Haushaltsbuch öffnen", click: showWin },
+      { label: "Finanz MAMI öffnen", click: showWin },
       { type: "separator" },
       { label: "Beenden", click: () => { quitting = true; app.quit(); } },
     ]));
@@ -77,7 +79,7 @@ function loadPlanned() { try { planned = JSON.parse(fs.readFileSync(notifyFile()
 function savePlanned() { try { fs.writeFileSync(notifyFile(), JSON.stringify(planned)); } catch (e) {} }
 function showNote(title, text) {
   if (!Notification.isSupported()) return;
-  const n = new Notification({ title: String(title || "Haushaltsbuch"), body: String(text || ""), icon: path.join(__dirname, "icon.png") });
+  const n = new Notification({ title: String(title || "Finanz MAMI"), body: String(text || ""), icon: path.join(__dirname, "icon.png") });
   n.on("click", showWin);
   n.show();
 }
@@ -107,7 +109,7 @@ function createWindow() {
   win = new BrowserWindow({
     x: b.x, y: b.y, width: b.width, height: b.height,
     minWidth: 360, minHeight: 520,
-    title: "Haushaltsbuch",
+    title: "Finanz MAMI",
     backgroundColor: "#F2F5F3",
     icon: path.join(__dirname, "icon.png"),
     show: !SMOKE && !HIDDEN,

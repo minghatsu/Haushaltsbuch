@@ -29,7 +29,7 @@ header('X-Frame-Options: DENY');
 header('Strict-Transport-Security: max-age=31536000');
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
-$CFG = ['mail_from' => 'Haushaltsbuch <noreply@localhost>', 'app_name' => 'Haushaltsbuch', 'signup' => true, 'max_accounts' => 1000, 'data_dir' => ''];
+$CFG = ['mail_from' => 'Finanz MAMI <noreply@localhost>', 'app_name' => 'Finanz MAMI', 'signup' => true, 'max_accounts' => 1000, 'data_dir' => ''];
 if (is_file(__DIR__ . '/config.php')) $CFG = array_merge($CFG, (array)(include __DIR__ . '/config.php'));
 // Datenordner mit zufälligem Namen (cloud-…), damit die Datenbank nicht erraten und heruntergeladen werden kann.
 // Getrennt vom Ordner der api.php (data-…), beide können im selben Verzeichnis liegen.
@@ -269,9 +269,9 @@ try {
         if (userByEmail($email)) { ipFail(); sleep(1); fail('Für diese E-Mail gibt es schon ein Konto – bitte anmelden', 409); }
         q('INSERT INTO users (email, pw, created) VALUES (?, ?, ?)', [$email, password_hash($pw, PASSWORD_DEFAULT), time()]);
         $uid = (int)db()->lastInsertId();
-        sendMail($email, 'Willkommen beim ' . $CFG['app_name'], "Hallo,
+        sendMail($email, 'Willkommen bei ' . $CFG['app_name'], "Hallo,
 
-dein Konto für das {$CFG['app_name']} ist angelegt. Melde dich auf Handy und PC mit dieser E-Mail-Adresse an – deine Daten gleichen sich dann automatisch ab.
+dein Konto für {$CFG['app_name']} ist angelegt. Melde dich auf Handy und PC mit dieser E-Mail-Adresse an – deine Daten gleichen sich dann automatisch ab.
 
 Warst du das nicht? Dann antworte bitte auf diese E-Mail.
 ");
@@ -321,7 +321,7 @@ Er gilt 15 Minuten. Hast du das nicht angefordert, kannst du diese E-Mail ignori
         q('DELETE FROM tokens WHERE user_id = ?', [$u['id']]);
         sendMail((string)$u['email'], 'Dein Passwort wurde geändert', "Hallo,
 
-das Passwort deines {$CFG['app_name']}-Kontos wurde gerade zurückgesetzt. Alle Geräte wurden abgemeldet, die Zwei-Faktor-Anmeldung ist aus.
+das Passwort deines Kontos bei {$CFG['app_name']} wurde gerade zurückgesetzt. Alle Geräte wurden abgemeldet, die Zwei-Faktor-Anmeldung ist aus.
 
 Warst du das nicht? Dann antworte bitte sofort auf diese E-Mail.
 ");
