@@ -273,7 +273,7 @@ function runSmokeTest() {
       result.page = await js(`({login: !!document.getElementById("loginBg"), bridge: typeof window.AndroidBridge, version: (document.querySelector('meta[name="hb-version"]')||{}).content, urlField: !document.getElementById("loginUrlRow").hidden})`);
       const server = process.env.SMOKE_SERVER;
       if (server) {
-        await js(`localStorage.setItem("haushaltsbuch-server", ${JSON.stringify(server)})`);
+        await js(`localStorage.setItem("haushaltsbuch-server", ${JSON.stringify(server)}); localStorage.removeItem("haushaltsbuch-sync-v1")`);   // like a first start: the sign-in window opens
         win.webContents.reload();
         await new Promise((r) => win.webContents.once("did-finish-load", r));
         await wait(3000);
