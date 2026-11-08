@@ -220,7 +220,7 @@ main{padding-block:6px 120px}
 .jar .ji{position:absolute;left:0;right:0;top:24px;display:grid;place-items:center;color:var(--muted);z-index:1}
 .jar .jp{position:absolute;left:0;right:0;bottom:7px;text-align:center;font-weight:800;font-size:13px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);z-index:1}
 .jar.add{display:grid;place-items:center;color:var(--accent);background:var(--sunk);border-style:dashed}.jar.add:before{display:none}
-.srail{position:relative;height:104px;margin:0 -16px 10px;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;outline:none}
+.srail{position:relative;isolation:isolate;z-index:0;height:104px;margin:0 -16px 10px;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;outline:none}
 .srail img{pointer-events:none;-webkit-user-drag:none}
 .srail .sbtn{position:absolute;left:50%;top:8px;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .3s,filter .3s;will-change:transform;background:none!important}.srail::-webkit-scrollbar{display:none}
 .sbtn{border:0;background:none;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;flex:0 0 auto;width:72px;scroll-snap-align:center;font-weight:600;font-size:11.5px;color:var(--muted);border-radius:18px;transition:background .2s}
