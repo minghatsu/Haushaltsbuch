@@ -445,7 +445,11 @@ public class MainActivity extends Activity {
         public boolean biometricAvailable() {
             try {
                 BiometricManager bm = getSystemService(BiometricManager.class);
-                return bm != null && bm.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS;
+                if (bm == null) return false;
+                // fingerprint or face (also the "weak" kind many phones use)
+                if (android.os.Build.VERSION.SDK_INT >= 30)
+                    return bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS;
+                return bm.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS;
             } catch (Exception e) {
                 return false;
             }
@@ -456,10 +460,11 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> {
                 final java.util.concurrent.Executor ex = getMainExecutor();
                 try {
-                    BiometricPrompt p = new BiometricPrompt.Builder(MainActivity.this)
+                    BiometricPrompt.Builder pb = new BiometricPrompt.Builder(MainActivity.this)
                         .setTitle("Haushaltsbuch entsperren")
-                        .setNegativeButton("PIN eingeben", ex, (d, w) -> bioDone(id, false))
-                        .build();
+                        .setNegativeButton("PIN eingeben", ex, (d, w) -> bioDone(id, false));
+                    if (android.os.Build.VERSION.SDK_INT >= 30) pb.setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK);
+                    BiometricPrompt p = pb.build();
                     p.authenticate(new CancellationSignal(), ex, new BiometricPrompt.AuthenticationCallback() {
                         @Override public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult r) { bioDone(id, true); }
                         @Override public void onAuthenticationError(int code, CharSequence msg) { bioDone(id, false); }

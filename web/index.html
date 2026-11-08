@@ -1571,7 +1571,12 @@ function taxCalc(year){
 
 /* ---------- render ---------- */
 WIDE.addEventListener("change", ()=>render());
+/* background updates (sync every few seconds) must not rebuild a form while someone is typing in it – on the phone the keyboard would close */
+let BG_RENDER=false;
+function typingNow(){ const a=document.activeElement; return !!a && (a.tagName==="TEXTAREA" || a.tagName==="SELECT" || (a.tagName==="INPUT" && !/^(checkbox|radio|button|submit|file)$/i.test(a.type))); }
+document.addEventListener("focusout", ()=>{ if (UI.renderPending) setTimeout(()=>{ if (UI.renderPending && !typingNow()){ UI.renderPending=false; render(); } }, 150); });
 function render(){
+  if (BG_RENDER && typingNow()){ UI.renderPending=true; return; }
   $("greet").textContent = greeting();
   $("viewTitle").textContent = TITLES[UI.view];
   fillMonthPill();
@@ -2898,6 +2903,7 @@ function serverInsecure(){
 }
 function renderSyncSec(){
   const el=$("syncSec"); if (!el) return;
+  if (el.contains(document.activeElement) && typingNow()) return;   // never rebuild while someone types here (the keyboard would close)
   if (!SYNC.token){ el.innerHTML=""; return; }
   el.innerHTML = `${serverInsecure()?`<div class="notice bad"><span>Die Verbindung zur Synology ist <b>unverschlüsselt</b> (http) und geht übers Internet. Bitte eine Adresse mit https verwenden.</span></div>`:""}
     ${UI.pwForm?`<div class="pwform"><div class="field"><label for="pwOld">Bisheriges Passwort</label><input class="in" type="password" id="pwOld" autocomplete="current-password"></div>
@@ -3386,6 +3392,14 @@ lockTriesLoad();
 function recoveryCode(){ const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r=crypto.getRandomValues(new Uint8Array(12)); let c=""; for (let i=0;i<12;i++){ c+=A[r[i]%A.length]; if (i===3||i===7) c+="-"; } return c; }
 function recNorm(c){ return String(c||"").toUpperCase().replace(/[^A-Z0-9]/g,"").replace(/O/g,"0").replace(/I/g,"1"); }
 function lockPanel(html){ const on=!!html; $("lockAlt").innerHTML=html||""; $("lockAlt").hidden=!on; ["pinDots","keypad","lockForgot"].forEach(id=>$(id).hidden=on); if (!on) $("lockForgot").hidden = LOCK.mode!=="unlock"; }
+/* after the PIN: offer to unlock with the fingerprint as well (confirmed once with the finger) */
+function bioOffer(done){
+  $("lockTitle").textContent="Auch mit Fingerabdruck entsperren?"; $("lockText").textContent="Dann reicht zum Öffnen dein Finger – die PIN bleibt als Ersatz.";
+  lockPanel(`<button class="btn primary block" id="bioYes">Ja, Fingerabdruck verwenden</button><button class="btn block" id="bioNo">Nein, nur PIN</button>`);
+  $("lockNext").hidden=true; $("lockCancel").hidden=true;
+  $("bioNo").onclick=()=>{ lockPanel(""); done(); };
+  $("bioYes").onclick=()=>{ const id=newId(); bioWaiting[id]=ok=>{ if (!ok){ $("lockErr").textContent="Fingerabdruck nicht erkannt – du kannst es später unter Sicherheit einschalten."; return; } const c=lockCfg(); if (c){ c.bio=true; try{ localStorage.setItem(LOCK_KEY, JSON.stringify(c)); }catch(_){} } lockPanel(""); done(); toast("Fingerabdruck ist eingerichtet"); }; try{ window.AndroidBridge.biometric(id); }catch(_){ lockPanel(""); done(); } };
+}
 function showRecovery(code, done){
   $("lockTitle").textContent="Dein Wiederherstellungscode"; $("lockText").textContent="Schreib ihn auf und bewahr ihn sicher auf. Damit entsperrst du die App, falls du die PIN vergisst.";
   lockPanel(`<div class="reccode">${esc(code)}</div><span class="small muted">Er wird nur dieses eine Mal angezeigt.</span><button class="btn primary" id="recDone">Ich habe ihn aufgeschrieben</button>`);
@@ -3457,10 +3471,12 @@ function lockKey(k){
       const salt=newId(); const old=lockCfg();
       const keepRec = old && old.rec && !LOCK.recUsed, code = keepRec ? null : recoveryCode();
       const rec = keepRec ? old.rec : (()=>{ const s2=newId(); return {salt:s2, hash:pinHash(recNorm(code), s2)}; })();
-      try { localStorage.setItem(LOCK_KEY, JSON.stringify({salt, hash:pinHash(LOCK.pin,salt), len:LOCK.pin.length, bio: old? !!old.bio : BIO, rec})); } catch(e){ lockWrong("PIN konnte nicht gespeichert werden."); return; }
+      try { localStorage.setItem(LOCK_KEY, JSON.stringify({salt, hash:pinHash(LOCK.pin,salt), len:LOCK.pin.length, bio: old? !!old.bio : false, rec})); } catch(e){ lockWrong("PIN konnte nicht gespeichert werden."); return; }
       LOCK.recUsed=false;
-      if (code){ showRecovery(code, ()=>{ lockClose(true); toast("App-Sperre ist an"); }); return; }
-      lockClose(true); toast("App-Sperre ist an"); return;
+      const finish=()=>{ lockClose(true); toast("App-Sperre ist an"); };
+      const askBio=()=>{ if (BIO && !(old && old.bio)) bioOffer(finish); else finish(); };
+      if (code){ showRecovery(code, askBio); return; }
+      askBio(); return;
     }
     if (!LOCK.first && LOCK.pin.length===6) lockSetNext();
     return;
@@ -4459,7 +4475,7 @@ async function syncNow(){
       if (d.data===null) delete memStore[d.col][d.id]; else memStore[d.col][d.id]=d.data;
     }
     SYNC.rev = res.rev || SYNC.rev; SYNC.last = Date.now(); SYNC.state = SYNC.queue.length||(SYNC.rq||[]).length ? "pending" : "ok"; saveSync();
-    if (changed){ persistLocal(); rebuildMem(); } else renderSyncDot();
+    if (changed){ persistLocal(); BG_RENDER=true; try { rebuildMem(); } finally { BG_RENDER=false; } } else renderSyncDot();
     if (SYNC.queue.length || (SYNC.rq||[]).length) flushSoon(200);
     checkUpdate();
   } catch(e){
