@@ -456,6 +456,11 @@ html.touch .kpad{display:grid}
 .seg{display:grid;grid-template-columns:repeat(4,1fr);background:var(--sunk);border-radius:15px;padding:4px;gap:3px}
 .seg button{border:0;background:none;border-radius:12px;padding:9px 2px;font-weight:700;font-size:13px;color:var(--muted)}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.lseg{grid-template-columns:1fr 1fr}
+.llinks{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:-4px}
+.lnk{border:0;background:none;padding:6px 2px;color:var(--accent);font-weight:700;font-size:13.5px;cursor:pointer}
+.acct{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--sunk);font-size:14px;overflow:hidden}
+.acct .acn{display:flex;flex-direction:column;min-width:0}.acct b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .amount{display:flex;align-items:baseline;justify-content:center;gap:6px;padding:4px 0}
 .amount input{width:100%;max-width:300px;border:0;background:none;outline:none;text-align:right;font-family:var(--f-display);font-weight:800;font-size:52px;letter-spacing:-.04em;padding:0;min-width:0}
 .amount input::placeholder{color:var(--faint)}
@@ -774,7 +779,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="field"><label>Monatsbudgets</label><span class="small muted" style="margin-top:-2px">Wie viel du pro Monat höchstens ausgeben willst. Ab 80 % warnt die Startseite. Leer lassen = kein Budget.</span><div id="budgetEd"></div></div>
     </div>
     <div class="card sp bk" data-sp="backup" id="syncBox" hidden>
-      <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.5 1.6A3.8 3.8 0 0 1 17 18z"/></svg><i id="syncDot"></i></span><span class="n"><b>Synology-Abgleich</b><span id="syncState">–</span></span></div>
+      <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.5 1.6A3.8 3.8 0 0 1 17 18z"/></svg><i id="syncDot"></i></span><span class="n"><b id="syncTitle">Synology-Abgleich</b><span id="syncState">–</span></span></div>
       <span class="small muted" id="syncDetail"></span>
       <div class="bkb"><button class="btn primary" id="syncNow">Jetzt abgleichen</button><button class="btn" id="syncLogout">Abmelden</button></div>
       <div id="syncSec"></div>
@@ -904,13 +909,18 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   <div class="sheet" style="transform:none;border-radius:28px;max-width:420px;gap:14px" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
     <span class="ictile" style="width:52px;height:52px;border-radius:17px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24" style="width:26px;height:26px"><path d="M7 18.5a4 4 0 0 1-.6-8 5.5 5.5 0 0 1 10.6-1.3A4.3 4.3 0 0 1 17.5 18.5z"/></svg></span>
     <h2 id="loginTitle" style="font-family:var(--f-display);margin:0">Mit deiner Synology verbinden</h2>
+    <div class="seg lseg" id="loginSeg" role="group" aria-label="Art des Abgleichs" hidden><button data-lm="cloud" aria-pressed="true">Konto</button><button data-lm="nas" aria-pressed="false">Eigener Server</button></div>
     <p class="small muted" id="loginText" style="margin:0"></p>
+    <div class="field" id="loginCloudRow" hidden><label for="loginCloud">Adresse des Abgleich-Servers</label><input class="in" id="loginCloud" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="z. B. 192.168.178.32/haushaltsbuch/cloud.php"><span class="small muted">Nur in der Testphase nötig – später ist die Adresse fest eingebaut.</span></div>
+    <div class="field" id="loginEmailRow" hidden><label for="loginEmail">E-Mail-Adresse</label><input class="in" type="email" id="loginEmail" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="name@beispiel.de"></div>
+    <div class="field" id="loginRCodeRow" hidden><label for="loginRCode">Code aus der E-Mail</label><input class="in" id="loginRCode" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="ABCD-EFGH" style="letter-spacing:.12em;text-align:center"></div>
     <div class="field" id="loginUrlRow" hidden><label for="loginUrl">Adresse der Synology</label><input class="in" id="loginUrl" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="z. B. 192.168.178.32"></div>
-    <div class="field"><label for="loginPw">Passwort</label><input class="in" type="password" id="loginPw" autocomplete="current-password"></div>
+    <div class="field" id="loginPwRow"><label for="loginPw" id="loginPwLbl">Passwort</label><input class="in" type="password" id="loginPw" autocomplete="current-password"></div>
     <div class="field" id="loginCodeRow" hidden><label for="loginCode">Code aus der Authenticator-App</label><input class="in" id="loginCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" style="letter-spacing:.12em;text-align:center"></div>
     <div class="field" id="loginPw2Row" hidden><label for="loginPw2">Passwort wiederholen</label><input class="in" type="password" id="loginPw2" autocomplete="new-password"></div>
     <div class="small" id="loginErr" style="color:var(--bad)"></div>
     <button class="btn primary block" id="loginGo">Verbinden</button>
+    <div class="llinks" id="loginLinks" hidden><button class="lnk" id="loginToggle">Neu hier? Konto erstellen</button><button class="lnk" id="loginForgot">Passwort vergessen?</button></div>
     <button class="btn" id="loginSkip">Erst einmal ohne Abgleich</button>
   </div>
 </div>
@@ -1128,8 +1138,15 @@ const NATIVE = !!window.AndroidBridge;   // running inside the Android APK
 const META_SERVER = (document.querySelector('meta[name="hb-server"]')||{}).content || "";
 const SERVER_KEY = "haushaltsbuch-server";
 // the APK lets the user change the Synology address (home WLAN vs. internet); the web copy on the NAS uses its own api.php
-let SERVER = (NATIVE && (()=>{ try { return localStorage.getItem(SERVER_KEY)||""; } catch(e){ return ""; } })()) || META_SERVER;
-const SYNCABLE = NATIVE || !!META_SERVER;
+// Konto-Abgleich (E-Mail + Passwort) über den gemeinsamen Server; <meta name="hb-cloud"> trägt später die feste Adresse
+const META_CLOUD = (document.querySelector('meta[name="hb-cloud"]')||{}).content || "";
+const MODE_KEY = "haushaltsbuch-mode", CLOUD_KEY = "haushaltsbuch-cloud";
+const lsGet = k => { try { return localStorage.getItem(k)||""; } catch(e){ return ""; } };
+let MODE = lsGet(MODE_KEY) || (META_CLOUD && !lsGet(SERVER_KEY) ? "cloud" : "nas");
+const cloudUrl = () => META_CLOUD || lsGet(CLOUD_KEY);
+const nasUrl = () => (NATIVE && lsGet(SERVER_KEY)) || META_SERVER;
+let SERVER = MODE==="cloud" ? cloudUrl() : nasUrl();
+const SYNCABLE = NATIVE || !!META_SERVER || !!META_CLOUD;
 const LOCAL = SYNCABLE;                   // data kept on the device (and synced with the Synology)
 const LS_KEY = "haushaltsbuch-v1";
 const SYNC_KEY = "haushaltsbuch-sync-v1";
@@ -2918,8 +2935,9 @@ function renderSyncSec(){
   const el=$("syncSec"); if (!el) return;
   if (el.contains(document.activeElement) && typingNow()) return;   // never rebuild while someone types here (the keyboard would close)
   if (!SYNC.token){ el.innerHTML=""; return; }
-  el.innerHTML = `${NATIVE?`<div class="field"><label for="srvAlt">Adresse für unterwegs (z. B. Tailscale)</label><input class="in" id="srvAlt" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="z. B. 100.101.102.103" value="${esc(serverAlt())}"><span class="small muted">${serverAlt()?(VIA_ALT?"Gerade verbunden über die Adresse für unterwegs.":"Gerade verbunden über das Heimnetz."):"Zu Hause nutzt die App die normale Adresse. Ist sie nicht erreichbar, nimmt sie diese hier."}</span></div>`:""}
-    ${serverInsecure()?`<div class="notice bad"><span>Die Verbindung zur Synology ist <b>unverschlüsselt</b> (http) und geht übers Internet. Bitte eine Adresse mit https verwenden.</span></div>`:""}
+  const cloud = MODE==="cloud";
+  el.innerHTML = `${cloud&&SYNC.email?`<div class="acct"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5a7 7 0 0 1 14 0"/></svg><span class="acn"><span class="small muted">Angemeldet als</span><b>${esc(SYNC.email)}</b></span></div>`:""}${NATIVE&&!cloud?`<div class="field"><label for="srvAlt">Adresse für unterwegs (z. B. Tailscale)</label><input class="in" id="srvAlt" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="z. B. 100.101.102.103" value="${esc(serverAlt())}"><span class="small muted">${serverAlt()?(VIA_ALT?"Gerade verbunden über die Adresse für unterwegs.":"Gerade verbunden über das Heimnetz."):"Zu Hause nutzt die App die normale Adresse. Ist sie nicht erreichbar, nimmt sie diese hier."}</span></div>`:""}
+    ${serverInsecure()?`<div class="notice bad"><span>Die Verbindung zu${MODE==="cloud"?"m Server":"r Synology"} ist <b>unverschlüsselt</b> (http) und geht übers Internet. Bitte eine Adresse mit https verwenden.</span></div>`:""}
     ${UI.pwForm?`<div class="pwform"><div class="field"><label for="pwOld">Bisheriges Passwort</label><input class="in" type="password" id="pwOld" autocomplete="current-password"></div>
       <div class="field"><label for="pwNew">Neues Passwort (mind. 10 Zeichen)</label><input class="in" type="password" id="pwNew" autocomplete="new-password"></div>
       <div class="field"><label for="pwNew2">Neues Passwort wiederholen</label><input class="in" type="password" id="pwNew2" autocomplete="new-password"></div>
@@ -2927,7 +2945,11 @@ function renderSyncSec(){
       <div class="bkb"><button class="btn primary" id="pwSave">Passwort ändern</button><button class="btn" id="pwCancel">Abbrechen</button></div></div>`
     :`<div class="bkb"><button class="btn" id="pwOpen">Passwort ändern</button><button class="btn" id="logoutAll">Alle Geräte abmelden</button></div>
       <span class="small muted">Handy verloren? „Alle Geräte abmelden“ – danach muss sich jedes Gerät neu mit dem Passwort anmelden.</span>`}
-    <div class="tfa" id="tfaBox">${tfaHtml()}</div>`;
+    <div class="tfa" id="tfaBox">${tfaHtml()}</div>
+    ${cloud?(UI.delForm?`<div class="pwform"><div class="notice bad"><span><b>Konto endgültig löschen?</b> Alle Daten auf dem Server werden sofort gelöscht und lassen sich nicht wiederherstellen. Auf diesem Gerät bleibt alles erhalten.</span></div>
+      <div class="field"><label for="delPw">Passwort zur Bestätigung</label><input class="in" type="password" id="delPw" autocomplete="current-password"></div><span class="small" id="delErr" style="color:var(--bad)"></span>
+      <div class="bkb"><button class="btn danger" id="delGo">Konto löschen</button><button class="btn" id="delCancel">Abbrechen</button></div></div>`
+      :`<div class="bkb"><button class="btn danger" id="delOpen">Konto löschen</button></div>`):""}`;
   if (UI.tfa===undefined){ UI.tfa=null; api("twofa").then(r=>{ UI.tfa=r; const b=$("tfaBox"); if (b) b.innerHTML=tfaHtml(); }).catch(x=>{ UI.tfa = x.status===404 ? {old:true} : null; const b=$("tfaBox"); if (b) b.innerHTML=tfaHtml(); }); }
 }
 /* Zwei-Faktor-Anmeldung (Authenticator-App) */
@@ -2967,6 +2989,13 @@ document.addEventListener("click", async e=>{
 });
 document.addEventListener("click", async e=>{
   const t=e.target;
+  if (t.closest("#delOpen")){ UI.delForm=true; renderSyncSec(); setTimeout(()=>$("delPw")&&$("delPw").focus(),30); return; }
+  if (t.closest("#delCancel")){ UI.delForm=false; renderSyncSec(); return; }
+  if (t.closest("#delGo")){
+    try { await api("deleteAccount",{body:{password:$("delPw").value}}); UI.delForm=false; SYNC.token=""; SYNC.queue=[]; SYNC.rq=[]; SYNC.state="off"; SYNC.email=""; saveSync(); renderSyncInfo(); renderSyncDot(); toast("Konto gelöscht – deine Daten sind nur noch auf diesem Gerät"); }
+    catch(x){ const e2=$("delErr"); if (e2) e2.textContent=x.message||"Hat nicht geklappt"; }
+    return;
+  }
   if (t.closest("#pwOpen")){ UI.pwForm=true; renderSyncSec(); setTimeout(()=>$("pwOld")&&$("pwOld").focus(),30); return; }
   if (t.closest("#pwCancel")){ UI.pwForm=false; renderSyncSec(); return; }
   if (t.closest("#pwSave")){
@@ -4431,7 +4460,7 @@ window.hbBack = () => {
 /* ---------- sync with the Synology ---------- */
 const SYNC = { token:"", rev:0, queue:[], state:"off", last:0, busy:false, skipped:false, setup:false };
 function loadSync(){ try { Object.assign(SYNC, JSON.parse(localStorage.getItem(SYNC_KEY)||"{}")); } catch(e){} SYNC.busy=false; SYNC.rq=SYNC.rq||[]; }
-function saveSync(){ try { localStorage.setItem(SYNC_KEY, JSON.stringify({token:SYNC.token, rev:SYNC.rev, queue:SYNC.queue, rq:SYNC.rq||[], last:SYNC.last, skipped:SYNC.skipped})); } catch(e){} }
+function saveSync(){ try { localStorage.setItem(SYNC_KEY, JSON.stringify({token:SYNC.token, rev:SYNC.rev, queue:SYNC.queue, rq:SYNC.rq||[], last:SYNC.last, skipped:SYNC.skipped, email:SYNC.email||""})); } catch(e){} }
 // receipt photos are too big for the normal queue: only their ids wait here, the photo is read when it is sent
 function rqAdd(id){ if (!SERVER || !SYNC.token) return; SYNC.rq=(SYNC.rq||[]).filter(x=>x!==id); SYNC.rq.push(id); saveSync(); flushSoon(); }
 function enqueue(col,id,data){
@@ -4456,7 +4485,7 @@ async function request(url, body){
 }
 /* second address for on the way (e.g. Tailscale): at home the normal one is used, away the app switches by itself */
 const SERVER_ALT_KEY="haushaltsbuch-server-alt";
-function serverAlt(){ try { return NATIVE ? (localStorage.getItem(SERVER_ALT_KEY)||"") : ""; } catch(e){ return ""; } }
+function serverAlt(){ try { return NATIVE && MODE!=="cloud" ? (localStorage.getItem(SERVER_ALT_KEY)||"") : ""; } catch(e){ return ""; } }
 let VIA_ALT=false;
 const apiUrl=(base,action,qs)=>base + (base.includes("?")?"&":"?") + "a=" + action + (qs||"");
 async function requestAny(action, qs, body){
@@ -4548,8 +4577,18 @@ function normServer(v){
     return u.origin + p; } catch(e){ return ""; }
 }
 let loginChecked="";
+function loginModeUi(){
+  const cloud = MODE==="cloud";
+  $("loginSeg").hidden = !(NATIVE || META_CLOUD);
+  $("loginSeg").querySelectorAll("[data-lm]").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.lm===MODE)));
+  $("loginCloudRow").hidden = !cloud || !!META_CLOUD;
+  $("loginEmailRow").hidden = !cloud; $("loginLinks").hidden = !cloud;
+  if (!cloud){ $("loginRCodeRow").hidden=true; $("loginPwRow").hidden=false; $("loginPwLbl").textContent="Passwort"; $("loginGo").textContent="Verbinden"; }
+}
 async function showLogin(){
   const bg=$("loginBg"); bg.hidden=false; $("loginErr").textContent="";
+  loginModeUi();
+  if (MODE==="cloud") return cloudShow();
   $("loginUrlRow").hidden = !NATIVE;
   if (NATIVE && document.activeElement!==$("loginUrl")) $("loginUrl").value = SERVER;
   loginChecked="";
@@ -4568,6 +4607,7 @@ async function showLogin(){
   setTimeout(()=>$("loginPw").focus(), 50);
 }
 async function doLogin(){
+  if (MODE==="cloud") return cloudGo();
   if (NATIVE){
     const u=normServer($("loginUrl").value);
     if (!u){ $("loginErr").textContent="Bitte gib die Adresse deiner Synology ein."; return; }
@@ -4584,8 +4624,20 @@ async function doLogin(){
     const code=$("loginCode").value.trim();
     const r = await api(SYNC.setup ? "setup" : "login", {body: SYNC.setup ? {password:pw} : (code ? {password:pw, code} : {password:pw})});
     const firstSetup = SYNC.setup && !SYNC.reset;   // after a password reset the server keeps its data
-    SYNC.reset=false; $("loginCodeRow").hidden=true; $("loginCode").value="";
-    SYNC.token=r.token; SYNC.rev=0; SYNC.skipped=false; SYNC.queue=[];
+    SYNC.reset=false;
+    loginDone(r.token, firstSetup);
+  } catch(e){
+    if (e.status===401 && e.data && e.data.need2fa){ $("loginCodeRow").hidden=false; $("loginErr").textContent=""; $("loginText").textContent="Zwei-Faktor-Anmeldung ist an: Gib den 6-stelligen Code aus deiner Authenticator-App ein."; setTimeout(()=>$("loginCode").focus(),30); }
+    else $("loginErr").textContent = e.status===403 ? (e.message||"Falsches Passwort.") : (e.message||"Verbindung fehlgeschlagen.");
+  }
+  finally { $("loginGo").disabled=false; }
+}
+/* after a successful login: upload = this device fills a new, empty account; otherwise the device takes over the server's data */
+function loginDone(token, firstSetup, msg){
+    $("loginCodeRow").hidden=true; $("loginCode").value="";
+    try { localStorage.setItem(MODE_KEY, MODE); if (MODE==="cloud" && !META_CLOUD) localStorage.setItem(CLOUD_KEY, SERVER); } catch(e){}
+    UI.tfa=undefined;
+    SYNC.token=token; SYNC.rev=0; SYNC.skipped=false; SYNC.queue=[];
     if (firstSetup){ // new server: upload what this device has
       for (const k of ["tx","txb","fixed","months","debts"]) for (const [id,d] of Object.entries(memStore[k])) SYNC.queue.push({col:k,id,data:d});
       for (const [id,d] of Object.entries(memStore.acct)) SYNC.queue.push({col:"app",id:"acct-"+id,data:d});
@@ -4594,17 +4646,93 @@ async function doLogin(){
     } else { // existing server: this device takes over the server's data
       for (const k of ["tx","txb","fixed","months","debts","acct"]) memStore[k]={};
     }
-    saveSync(); $("loginBg").hidden=true; $("loginPw").value=""; $("loginPw2").value="";
-    toast(firstSetup ? "Passwort gespeichert, Daten werden hochgeladen" : "Verbunden");
+    saveSync(); $("loginBg").hidden=true; $("loginPw").value=""; $("loginPw2").value=""; $("loginRCode").value="";
+    toast(msg || (firstSetup ? "Passwort gespeichert, Daten werden hochgeladen" : "Verbunden"));
     startSync();
-  } catch(e){
-    if (e.status===401 && e.data && e.data.need2fa){ $("loginCodeRow").hidden=false; $("loginErr").textContent=""; $("loginText").textContent="Zwei-Faktor-Anmeldung ist an: Gib den 6-stelligen Code aus deiner Authenticator-App ein."; setTimeout(()=>$("loginCode").focus(),30); }
-    else $("loginErr").textContent = e.status===403 ? (e.message||"Falsches Passwort.") : (e.message||"Verbindung fehlgeschlagen.");
-  }
-  finally { $("loginGo").disabled=false; }
 }
+/* ---------- Konto (E-Mail) beim gemeinsamen Abgleich-Server ---------- */
+function normCloud(v){
+  v=(v||"").trim(); if (!v) return "";
+  if (!/^https?:\/\//i.test(v)) v="http://"+v;
+  try { const u=new URL(v); let p=u.pathname.replace(/\/+$/,"");
+    if (!/\.php$/i.test(p)) p = (p ? p : "/haushaltsbuch") + "/cloud.php";
+    return u.origin + p; } catch(e){ return ""; }
+}
+let cloudChecked="";
+const CLOUD_TXT = {
+  login:   ["Anmelden", "Melde dich mit deinem Konto an. Danach siehst du auf diesem Gerät dieselben Daten wie auf deinen anderen Geräten.", "Anmelden"],
+  register:["Konto erstellen", "Mit einem Konto gleichen sich Handy und PC automatisch ab. Was du schon eingetragen hast, wird mitgenommen.", "Konto erstellen"],
+  forgot:  ["Passwort vergessen", "Gib deine E-Mail-Adresse ein. Wir schicken dir einen Code, mit dem du ein neues Passwort festlegst.", "Code schicken"],
+  reset:   ["Neues Passwort", "", "Passwort speichern"]
+};
+function cloudUi(){
+  const st=UI.lstep||"login", t=CLOUD_TXT[st];
+  $("loginTitle").textContent=t[0];
+  if (st!=="reset") $("loginText").textContent=t[1];
+  $("loginGo").textContent=t[2];
+  $("loginPwRow").hidden = st==="forgot";
+  $("loginPwLbl").textContent = st==="register" ? "Passwort (mind. 10 Zeichen)" : st==="reset" ? "Neues Passwort (mind. 10 Zeichen)" : "Passwort";
+  $("loginPw").autocomplete = st==="login" ? "current-password" : "new-password";
+  $("loginPw2Row").hidden = !(st==="register"||st==="reset");
+  $("loginRCodeRow").hidden = st!=="reset";
+  $("loginEmail").disabled = st==="reset";
+  if (st!=="login"){ $("loginCodeRow").hidden=true; $("loginCode").value=""; }
+  $("loginToggle").textContent = st==="login" ? "Neu hier? Konto erstellen" : "Zurück zur Anmeldung";
+  $("loginForgot").hidden = st!=="login";
+}
+function cloudShow(){
+  $("loginUrlRow").hidden=true; $("loginGo").disabled=false;
+  if (!META_CLOUD && document.activeElement!==$("loginCloud")) $("loginCloud").value = lsGet(CLOUD_KEY);
+  if (SYNC.email && !$("loginEmail").value) $("loginEmail").value=SYNC.email;
+  cloudUi();
+  setTimeout(()=>{ const f = !META_CLOUD && !$("loginCloud").value ? "loginCloud" : !$("loginEmail").value ? "loginEmail" : UI.lstep==="reset" ? "loginRCode" : "loginPw"; $(f) && $(f).focus(); }, 50);
+}
+async function cloudCheck(){
+  const u = META_CLOUD || normCloud($("loginCloud").value);
+  if (!u){ $("loginErr").textContent="Bitte gib die Adresse des Abgleich-Servers ein."; return false; }
+  if (u===SERVER && cloudChecked===u) return true;
+  SERVER=u; if (!META_CLOUD) $("loginCloud").value=u;
+  try { const st=await api("status"); if (!st.cloud){ $("loginErr").textContent="Unter dieser Adresse läuft kein Konto-Server (cloud.php)."; return false; } }
+  catch(e){ $("loginErr").textContent="Der Abgleich-Server ist gerade nicht erreichbar. Prüfe die Internetverbindung oder mach erst einmal ohne Abgleich weiter."; return false; }
+  cloudChecked=u; return true;
+}
+async function cloudGo(){
+  const st=UI.lstep||"login", email=$("loginEmail").value.trim(), pw=$("loginPw").value, err=m=>$("loginErr").textContent=m;
+  err("");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err("Bitte gib deine E-Mail-Adresse ein.");
+  if (st!=="forgot" && !pw) return err("Bitte gib dein Passwort ein.");
+  if ((st==="register"||st==="reset") && pw.length<10) return err("Das Passwort braucht mindestens 10 Zeichen.");
+  if ((st==="register"||st==="reset") && pw!==$("loginPw2").value) return err("Die beiden Passwörter sind nicht gleich.");
+  if (st==="reset" && !$("loginRCode").value.trim()) return err("Bitte gib den Code aus der E-Mail ein.");
+  $("loginGo").disabled=true;
+  try {
+    if (!(await cloudCheck())) return;
+    if (st==="forgot"){
+      await api("forgot",{body:{email}});
+      UI.lstep="reset"; cloudUi();
+      $("loginText").textContent=`Falls es für ${email} ein Konto gibt, ist jetzt ein Code unterwegs (gilt 15 Minuten). Schau auch im Spam-Ordner nach.`;
+      setTimeout(()=>$("loginRCode").focus(),30); return;
+    }
+    if (st==="register"){ const r=await api("register",{body:{email,password:pw}}); SYNC.email=email.toLowerCase(); UI.lstep="login"; loginDone(r.token, true, "Konto erstellt – deine Daten werden hochgeladen"); return; }
+    if (st==="reset"){ const r=await api("reset",{body:{email,code:$("loginRCode").value.trim(),password:pw}}); SYNC.email=email.toLowerCase(); UI.lstep="login"; loginDone(r.token, false, "Neues Passwort gespeichert"); return; }
+    const code=$("loginCode").value.trim();
+    const r=await api("login",{body: code ? {email,password:pw,code} : {email,password:pw}});
+    SYNC.email=email.toLowerCase(); loginDone(r.token, false);
+  } catch(e){
+    if (e.status===401 && e.data && e.data.need2fa){ $("loginCodeRow").hidden=false; $("loginText").textContent="Zwei-Faktor-Anmeldung ist an: Gib den 6-stelligen Code aus deiner Authenticator-App ein (oder einen Wiederherstellungscode)."; setTimeout(()=>$("loginCode").focus(),30); }
+    else if (e.status===409){ err(e.message); UI.lstep="login"; cloudUi(); }
+    else err(e.message && !/^HTTP /.test(e.message) ? e.message : "Verbindung fehlgeschlagen.");
+  } finally { $("loginGo").disabled=false; }
+}
+$("loginToggle").onclick = ()=>{ UI.lstep = (UI.lstep||"login")==="login" ? "register" : "login"; $("loginErr").textContent=""; cloudUi(); };
+$("loginForgot").onclick = ()=>{ UI.lstep="forgot"; $("loginErr").textContent=""; cloudUi(); setTimeout(()=>$("loginEmail").focus(),30); };
+$("loginSeg").addEventListener("click", e=>{
+  const b=e.target.closest("[data-lm]"); if (!b || b.dataset.lm===MODE) return;
+  MODE=b.dataset.lm; SERVER = MODE==="cloud" ? (META_CLOUD || normCloud($("loginCloud").value) || lsGet(CLOUD_KEY)) : nasUrl();
+  loginChecked=""; cloudChecked=""; UI.lstep="login"; $("loginCodeRow").hidden=true; $("loginPw2Row").hidden=true; showLogin();
+});
 $("loginGo").onclick = doLogin;
-["loginPw","loginPw2"].forEach(id=>$(id).addEventListener("keydown", e=>{ if (e.key==="Enter") doLogin(); }));
+["loginPw","loginPw2","loginEmail","loginRCode","loginCode","loginCloud"].forEach(id=>$(id).addEventListener("keydown", e=>{ if (e.key==="Enter") doLogin(); }));
 $("loginSkip").onclick = ()=>{ SYNC.skipped=true; saveSync(); $("loginBg").hidden=true; renderSyncDot(); if (wizShould()) setTimeout(()=>{ if (wizShould()) wizOpen(); }, 300); toast("Ohne Abgleich – anmelden kannst du dich unter Einstellungen"); };
 function renderSyncDot(){
   const b=$("settingsBtn"); if (!SYNCABLE){ return; }
@@ -4615,8 +4743,8 @@ function renderSyncDot(){
 function renderSyncInfo(){
   $("syncBox").hidden = !SYNCABLE; if (!SYNCABLE) return;
   const t = SYNC.last ? new Date(SYNC.last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "noch nie";
-  const st = !SYNC.token ? "Nicht angemeldet" : SYNC.state==="ok" ? "Abgeglichen" : SYNC.state==="pending" ? `${SYNC.queue.length} Änderungen warten` : SYNC.state==="offline" ? "Offline – wird nachgeholt" : "Synology nicht erreichbar";
-  $("syncState").textContent = st;
+  const st = !SYNC.token ? "Nicht angemeldet" : SYNC.state==="ok" ? "Abgeglichen" : SYNC.state==="pending" ? `${SYNC.queue.length} Änderungen warten` : SYNC.state==="offline" ? "Offline – wird nachgeholt" : MODE==="cloud" ? "Server nicht erreichbar" : "Synology nicht erreichbar";
+  $("syncState").textContent = st; $("syncTitle").textContent = MODE==="cloud" ? "Konto-Abgleich" : "Synology-Abgleich";
   { const d=$("syncDot"); if (d) d.className = !SYNC.token ? "off" : SYNC.state==="ok" ? "ok" : SYNC.state==="pending"||SYNC.state==="offline" ? "warn" : "bad"; }
   $("syncDetail").textContent = SYNC.token ? `Zuletzt abgeglichen um ${t.slice(0,5)} Uhr. Handy und PC gleichen sich von selbst ab.` : "Melde dich an, um Handy und PC abzugleichen.";
   $("syncLogout").textContent = SYNC.token ? "Abmelden" : "Anmelden";
