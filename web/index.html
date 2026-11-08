@@ -713,6 +713,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .wfoot{position:fixed;left:0;right:0;bottom:0;padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 16px);background:linear-gradient(to top,var(--bg) 70%,transparent);display:flex;gap:10px;justify-content:center}
 .wfoot .btn{flex:1;max-width:240px;padding:14px}
 @media (min-width:1000px){.astack{margin:0}.astack .acard{left:28%;right:28%}}
+.pwform{display:flex;flex-direction:column;gap:10px}
+#syncSec{display:flex;flex-direction:column;gap:10px}#syncSec:empty{display:none}
 </style>
 
 <div class="backdrop" id="addBg" hidden><div class="sheet addsheet" role="dialog" aria-label="Was möchtest du hinzufügen?"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><h2>Was möchtest du hinzufügen?</h2><button class="icon-btn" data-addclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -767,6 +769,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.5 1.6A3.8 3.8 0 0 1 17 18z"/></svg><i id="syncDot"></i></span><span class="n"><b>Synology-Abgleich</b><span id="syncState">–</span></span></div>
       <span class="small muted" id="syncDetail"></span>
       <div class="bkb"><button class="btn primary" id="syncNow">Jetzt abgleichen</button><button class="btn" id="syncLogout">Abmelden</button></div>
+      <div id="syncSec"></div>
     </div>
     <div class="card sp bk" data-sp="backup" hidden>
       <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span class="n"><b>Backup</b><span id="backupInfo">Alle Buchungen, Fixkosten, Schulden und Einstellungen in einer Datei.</span></span></div>
@@ -1096,7 +1099,7 @@ function brandBadge(b){
   const on = b.domain && S.settings.logos!==false, v = on ? LOGO.map.get(b.domain) : null;
   if (on && !v) queueLogo(b.domain);
   const img = v && v.data;
-  return `<span class="ictile bavatar${img?" haslogo":""}" style="--bb:${b.bg};--bi:${b.ink}"><b>${esc(b.t)}</b>${img?`<img src="${img}" alt="">`:""}</span>`;
+  return `<span class="ictile bavatar${img?" haslogo":""}" style="--bb:${b.bg};--bi:${b.ink}"><b>${esc(b.t)}</b>${img?`<img src="${esc(img)}" alt="">`:""}</span>`;
 }
 function avatar(t){ const b=brandFor(t.note); return b ? brandBadge(b) : tile(t.kind,t.cat); }
 function hIc(name){ return `<span class="h2ic">${ic(name,15)}</span>`; }
@@ -2604,7 +2607,7 @@ async function belegeZip(year){
     files.push({name:folder+nm, data:b64bytes(img)});
     rows.push([t.date.split("-").reverse().join("."), t.kind==="betrieb"?"betrieblich":t.kind==="einnahme"?"Einnahme":"privat", t.cat||"", txPayee(t)||"", Number(t.amount).toFixed(2).replace(".",","), folder+nm]);
   }
-  const csv="﻿"+rows.map(r=>r.map(v=>/[";\n]/.test(v)?`"${String(v).replace(/"/g,'""')}"`:v).join(";")).join("\r\n");
+  const csv="﻿"+rows.map(r=>r.map(v=>{ v=csvSafe(v); return /[";\n]/.test(v)?`"${String(v).replace(/"/g,'""')}"`:v; }).join(";")).join("\r\n");
   files.unshift({name:"Belege-Liste.csv", data:new TextEncoder().encode(csv)});
   await saveBinary(`Belege-${year}.zip`, makeZip(files), `${files.length-1} Belege gespeichert`);
 }
@@ -2792,7 +2795,7 @@ function renderAutoBk(){
   const el=$("autoBk"); if (!el) return;
   if (!CAN_AUTOBK){ el.innerHTML=`<span class="small muted">Automatische Backups gibt es in der Handy- und PC-App.</span>`; return; }
   const c=abCfg();
-  el.innerHTML=`<div class="switch"><label for="abOn"><b>Jede Woche automatisch</b><br><span class="small muted">${c.last?`Zuletzt am ${esc(new Date(c.last).toLocaleDateString("de-DE"))} · `:""}die letzten ${c.keep} bleiben in ${esc(c.where||(NATIVE&&!(window.AndroidBridge||{}).desktop?"Downloads/Haushaltsbuch-Backups":"Dokumente/Haushaltsbuch-Backups"))}</span></label><input type="checkbox" id="abOn" ${c.on?"checked":""}></div>`;
+  el.innerHTML=`<div class="switch"><label for="abOn"><b>Jede Woche automatisch</b><br><span class="small muted">${c.last?`Zuletzt am ${esc(new Date(c.last).toLocaleDateString("de-DE"))} · `:""}die letzten ${Number(c.keep)||8} bleiben in ${esc(c.where||(NATIVE&&!(window.AndroidBridge||{}).desktop?"Downloads/Haushaltsbuch-Backups":"Dokumente/Haushaltsbuch-Backups"))}</span></label><input type="checkbox" id="abOn" ${c.on?"checked":""}></div>`;
 }
 document.addEventListener("change", e=>{ if (e.target.id==="abOn"){ const c=abCfg(); c.on=e.target.checked; abSave(c); if (c.on) autoBackupCheck(); renderAutoBk(); } });
 
@@ -2875,6 +2878,45 @@ document.addEventListener("click", async e=>{
     if (w.step<4){ w.step++; wizRender(); $("wizBg").scrollTop=0; } else await wizFinish(); }
 });
 document.addEventListener("keydown", e=>{ if (UI.wiz && e.key==="Enter" && e.target.closest && e.target.closest("#wizBg") && e.target.tagName==="INPUT" && UI.wiz.step!==3 && UI.wiz.step!==4){ e.preventDefault(); $("wzNext").click(); } });
+
+
+/* ---------- Sicherheit des Abgleichs: Passwort ändern, alle Geräte abmelden, Warnung bei unverschlüsselter Verbindung ---------- */
+function serverInsecure(){
+  if (!SERVER || !/^http:\/\//i.test(SERVER)) return false;
+  const h=(SERVER.match(/^http:\/\/([^/:]+)/i)||[])[1]||"";
+  return !/^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|127\.|localhost$)|\.local$|\.fritz\.box$/i.test(h);
+}
+function renderSyncSec(){
+  const el=$("syncSec"); if (!el) return;
+  if (!SYNC.token){ el.innerHTML=""; return; }
+  el.innerHTML = `${serverInsecure()?`<div class="notice bad"><span>Die Verbindung zur Synology ist <b>unverschlüsselt</b> (http) und geht übers Internet. Bitte eine Adresse mit https verwenden.</span></div>`:""}
+    ${UI.pwForm?`<div class="pwform"><div class="field"><label for="pwOld">Bisheriges Passwort</label><input class="in" type="password" id="pwOld" autocomplete="current-password"></div>
+      <div class="field"><label for="pwNew">Neues Passwort (mind. 10 Zeichen)</label><input class="in" type="password" id="pwNew" autocomplete="new-password"></div>
+      <div class="field"><label for="pwNew2">Neues Passwort wiederholen</label><input class="in" type="password" id="pwNew2" autocomplete="new-password"></div>
+      <span class="small muted" id="pwErr" role="alert"></span>
+      <div class="bkb"><button class="btn primary" id="pwSave">Passwort ändern</button><button class="btn" id="pwCancel">Abbrechen</button></div></div>`
+    :`<div class="bkb"><button class="btn" id="pwOpen">Passwort ändern</button><button class="btn" id="logoutAll">Alle Geräte abmelden</button></div>
+      <span class="small muted">Handy verloren? „Alle Geräte abmelden“ – danach muss sich jedes Gerät neu mit dem Passwort anmelden.</span>`}`;
+}
+document.addEventListener("click", async e=>{
+  const t=e.target;
+  if (t.closest("#pwOpen")){ UI.pwForm=true; renderSyncSec(); setTimeout(()=>$("pwOld")&&$("pwOld").focus(),30); return; }
+  if (t.closest("#pwCancel")){ UI.pwForm=false; renderSyncSec(); return; }
+  if (t.closest("#pwSave")){
+    const o=$("pwOld").value, n=$("pwNew").value, n2=$("pwNew2").value, err=$("pwErr");
+    if (n.length<10){ err.textContent="Das neue Passwort braucht mindestens 10 Zeichen."; return; }
+    if (n!==n2){ err.textContent="Die beiden neuen Passwörter sind nicht gleich."; return; }
+    try { const r=await api("password",{body:{old:o,new:n}}); SYNC.token=r.token; saveSync(); UI.pwForm=false; renderSyncSec(); toast("Passwort geändert – andere Geräte müssen sich neu anmelden"); }
+    catch(x){ err.textContent = x.status===404 ? "Dafür braucht die Synology die neue api.php." : (x.message||"Hat nicht geklappt"); }
+    return;
+  }
+  if (t.closest("#logoutAll")){
+    if (!UI.logoutAllAsk){ UI.logoutAllAsk=true; t.closest("#logoutAll").textContent="Wirklich? Nochmal tippen"; setTimeout(()=>{ UI.logoutAllAsk=false; renderSyncSec(); },4000); return; }
+    UI.logoutAllAsk=false;
+    try { await api("logoutAll",{body:{}}); toast("Alle Geräte abgemeldet – bitte hier neu anmelden"); SYNC.token=null; saveSync(); renderSyncInfo(); showLogin(); }
+    catch(x){ toast(x.status===404 ? "Dafür braucht die Synology die neue api.php" : "Hat nicht geklappt"); }
+  }
+});
 
 const SP_PAGES = {
   konten:["Konten & Spaces","wallet"], budgets:["Monatsbudgets","target"], schulden:["Schulden","bank"], backup:["Abgleich & Backup","cloud"],
@@ -3228,10 +3270,14 @@ function sha256hex(str){
   return h.map(v=>(v>>>0).toString(16).padStart(8,"0")).join("");
 }
 const LOCK_KEY="haushaltsbuch-lock";
+// wrong PIN attempts survive a restart of the app; every further round of 5 wrong tries waits longer (30 s, 2 min, 10 min, 1 h)
+function lockTriesSave(){ try{ localStorage.setItem("hb-lock-tries", JSON.stringify({f:LOCK.fails||0, u:LOCK.until||0, r:LOCK.rounds||0})); }catch(e){} }
+function lockTriesLoad(){ try{ const t=JSON.parse(localStorage.getItem("hb-lock-tries")||"{}"); LOCK.fails=Number(t.f)||0; LOCK.until=Number(t.u)||0; LOCK.rounds=Number(t.r)||0; }catch(e){} }
 function lockCfg(){ try { return JSON.parse(localStorage.getItem(LOCK_KEY)||"null"); } catch(e){ return null; } }
 function pinHash(pin, salt){ let h=salt+":"+pin; for (let i=0;i<2000;i++) h=sha256hex(h+pin); return h; }
 const BIO = !!(window.AndroidBridge && window.AndroidBridge.biometricAvailable && window.AndroidBridge.biometricAvailable());
 const LOCK = { mode:null, pin:"", first:"", fails:0, until:0, hiddenAt:0, done:null };
+lockTriesLoad();
 function lockShow(mode, done){
   LOCK.mode=mode; LOCK.pin=""; LOCK.first=""; LOCK.done=done||null;
   const cfg=lockCfg();
@@ -3270,8 +3316,8 @@ function lockKey(k){
     return;
   }
   if (cfg && LOCK.pin.length===cfg.len){
-    if (pinHash(LOCK.pin,cfg.salt)===cfg.hash){ LOCK.fails=0; lockClose(true); }
-    else { LOCK.fails++; if (LOCK.fails>=5){ LOCK.until=Date.now()+30000; LOCK.fails=0; } lockWrong(LOCK.until>Date.now()?"Zu viele Versuche – warte 30 Sekunden.":"Falsche PIN"); }
+    if (pinHash(LOCK.pin,cfg.salt)===cfg.hash){ LOCK.fails=0; LOCK.rounds=0; LOCK.until=0; lockTriesSave(); lockClose(true); }
+    else { LOCK.fails++; if (LOCK.fails>=5){ LOCK.rounds=(LOCK.rounds||0)+1; const w=[30,120,600,3600][Math.min(3,LOCK.rounds-1)]; LOCK.until=Date.now()+w*1000; LOCK.fails=0; } lockTriesSave(); lockWrong(LOCK.until>Date.now()?`Zu viele Versuche – warte ${Math.ceil((LOCK.until-Date.now())/1000)} Sekunden.`:"Falsche PIN"); }
   }
 }
 function lockSetNext(){ if (LOCK.pin.length<4) { lockWrong("Mindestens 4 Ziffern"); return; } LOCK.first=LOCK.pin; LOCK.pin=""; $("lockText").textContent="Gib die PIN zur Bestätigung noch einmal ein."; $("lockNext").hidden=true; lockDots(); }
@@ -3298,7 +3344,7 @@ if (lockCfg()) lockShow("unlock");
 function renderLockEd(){
   const el=$("lockEd"); if (!el) return; const cfg=lockCfg();
   el.innerHTML = cfg
-    ? `<div class="meta-row"><span>App-Sperre ist <b>an</b> (PIN mit ${cfg.len} Ziffern)</span></div>
+    ? `<div class="meta-row"><span>App-Sperre ist <b>an</b> (PIN mit ${Number(cfg.len)||0} Ziffern)</span></div>
        ${BIO?`<div class="switch"><label for="lockBioChk"><b>Fingerabdruck</b><br><span class="small muted">Statt PIN mit Fingerabdruck entsperren</span></label><input type="checkbox" id="lockBioChk" ${cfg.bio?"checked":""}></div>`:""}
        <div class="row-btns"><button class="btn" id="lockChange">PIN ändern</button><button class="btn" id="lockOff">Sperre ausschalten</button></div>`
     : `<div class="meta-row"><span>Schützt deine Finanzen mit einer PIN${BIO?" oder deinem Fingerabdruck":""}, wenn jemand anderes dein ${NATIVE&&!(window.AndroidBridge||{}).desktop?"Handy":"Gerät"} benutzt.</span></div><div class="row-btns"><button class="btn primary" id="lockOn">App-Sperre einrichten</button></div>`;
@@ -3733,7 +3779,9 @@ async function readFileText(file){
 let pdfLoad=null;
 function loadPdfJs(){
   // pdf.js from Mozilla, loaded only when a PDF is opened; the "worker" part runs in the page (works the same on Android and PC)
-  const add = src => new Promise((ok,bad)=>{ const sc=document.createElement("script"); sc.src=src; sc.onload=ok; sc.onerror=bad; document.head.appendChild(sc); });
+  // the build fills in checksums: the browser refuses the file if a single byte differs from the real pdf.js
+  const SRI={"pdf.min.js":"__PDFJS_SRI__","pdf.worker.min.js":"__PDFJS_WORKER_SRI__"};
+  const add = src => new Promise((ok,bad)=>{ const sc=document.createElement("script"), h=SRI[src.split("/").pop()]; if (h && h.startsWith("sha384-")){ sc.integrity=h; sc.crossOrigin="anonymous"; } sc.src=src; sc.onload=ok; sc.onerror=bad; document.head.appendChild(sc); });
   const base="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.2.146/build/";
   return pdfLoad || (pdfLoad = add(base+"pdf.min.js").then(()=>add(base+"pdf.worker.min.js")).then(()=>{ window.pdfjsLib.GlobalWorkerOptions.workerSrc=base+"pdf.worker.min.js"; return window.pdfjsLib; })
     .catch(()=>{ pdfLoad=null; throw new Error("Der PDF-Leser konnte nicht geladen werden – bist du online?"); }));
@@ -4130,10 +4178,12 @@ async function saveTextFile(name, text, mime, okMsg){
   try { const r = await dl.save({filename:name, data:text}); if (r && r.status==="saved") toast(okMsg); } catch(e){ if (!(e && e.code==="declined")) toast("Datei konnte nicht gespeichert werden"); }
 }
 /* ---------- EÜR export: self-employed income and business expenses of one year ---------- */
+// texts from bank statements could start with = + - @ and would then run as a formula in Excel: put a ' in front
+function csvSafe(v){ v=String(v==null?"":v); return /^[=+\-@\t\r]/.test(v) && !/^-?\d+([.,]\d+)?$/.test(v) ? "'"+v : v; }
 function euerCsv(y){
   const vat=(Number(S.settings.vatRate)||0)/100, ku=!!S.settings.kleinunternehmer;
   const n2 = v => (Math.round(v*100)/100).toFixed(2).replace(".",",");
-  const q = v => /[;"\n]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : String(v);
+  const q = v => { v=csvSafe(v); return /[;"\n]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : String(v); };
   const de = d => d.slice(8,10)+"."+d.slice(5,7)+"."+d.slice(0,4);
   const rows=[], inc=[], out=[];
   for (const t of S.tx){
@@ -4367,7 +4417,7 @@ function renderSyncInfo(){
   { const d=$("syncDot"); if (d) d.className = !SYNC.token ? "off" : SYNC.state==="ok" ? "ok" : SYNC.state==="pending"||SYNC.state==="offline" ? "warn" : "bad"; }
   $("syncDetail").textContent = SYNC.token ? `Zuletzt abgeglichen um ${t.slice(0,5)} Uhr. Handy und PC gleichen sich von selbst ab.` : "Melde dich an, um Handy und PC abzugleichen.";
   $("syncLogout").textContent = SYNC.token ? "Abmelden" : "Anmelden";
-  $("syncNow").hidden = !SYNC.token; $("syncLogout").classList.toggle("primary", !SYNC.token);
+  $("syncNow").hidden = !SYNC.token; renderSyncSec(); $("syncLogout").classList.toggle("primary", !SYNC.token);
 }
 document.addEventListener("click", e=>{
   if (e.target.closest("#syncNow")){ syncNow().then(()=>{ renderSyncInfo(); toast(SYNC.state==="ok"?"Abgeglichen":"Abgleich gerade nicht möglich"); }); }

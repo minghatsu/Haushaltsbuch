@@ -58,6 +58,34 @@ public class MainActivity extends Activity {
     private Uri scanUri;
     private static final String APP_URL = "file:///android_asset/index.html";
     private static final Pattern VERSION = Pattern.compile("name=\"hb-version\" content=\"(\\d+)\"");
+    /** Public key of the GitHub build. Updates from the Synology are only used if the build signed them. */
+    private static final String UPDATE_KEY = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWc6eJAgFbzrfP4Smmawd8Iv5ApsSFtZXDcZ4odJm/NDemZmJ1c6KQt4h+Jn6e+5KhGaXm6EIuf0jWIHZUtHptQ==";
+    private static final byte[] SIG_MARK = "\n<!--hb-sig:".getBytes(StandardCharsets.UTF_8);
+
+    /** true if the HTML ends with a valid signature of the GitHub build (ECDSA P-256 over everything before it). */
+    static boolean signedByBuild(byte[] html) {
+        try {
+            int at = -1;
+            for (int i = html.length - SIG_MARK.length; i >= Math.max(0, html.length - 400); i--) {
+                boolean ok = true;
+                for (int k = 0; k < SIG_MARK.length && ok; k++) ok = html[i + k] == SIG_MARK[k];
+                if (ok) { at = i; break; }
+            }
+            if (at < 0) return false;
+            String tail = new String(html, at + SIG_MARK.length, html.length - at - SIG_MARK.length, StandardCharsets.US_ASCII);
+            int end = tail.indexOf("-->");
+            if (end < 1) return false;
+            byte[] sig = Base64.decode(tail.substring(0, end).trim(), Base64.DEFAULT);
+            java.security.PublicKey key = java.security.KeyFactory.getInstance("EC")
+                    .generatePublic(new java.security.spec.X509EncodedKeySpec(Base64.decode(UPDATE_KEY, Base64.DEFAULT)));
+            java.security.Signature v = java.security.Signature.getInstance("SHA256withECDSA");
+            v.initVerify(key);
+            v.update(html, 0, at);
+            return v.verify(sig);
+        } catch (Exception e) {
+            return false;
+        }
+    }
     private WebView web;
     private ValueCallback<Uri[]> fileCallback;
 
@@ -75,7 +103,7 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(true);
         // the app (a local file) talks to the user's own Synology for syncing
         s.setAllowUniversalAccessFromFileURLs(true);
-        s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);   // Synology requests go through the native bridge, not the page
         s.setTextZoom(100);
 
         web.addJavascriptInterface(new Bridge(), "AndroidBridge");
@@ -92,7 +120,7 @@ public class MainActivity extends Activity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri u = request.getUrl();
-                if ("file".equals(u.getScheme())) return false;
+                if ("file".equals(u.getScheme()) && APP_URL.equals(u.toString())) return false;   // only the app itself
                 try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) { }
                 return true;
             }
@@ -144,6 +172,7 @@ public class MainActivity extends Activity {
             File f = cachedAppFile();
             if (!f.exists()) return null;
             byte[] cached = readAll(new java.io.FileInputStream(f));
+            if (!signedByBuild(cached)) { f.delete(); return null; }   // changed or unsigned: never run it
             byte[] bundled = readAll(getAssets().open("index.html"));
             return versionOf(cached) > versionOf(bundled) ? cached : null;
         } catch (Exception e) {
@@ -364,7 +393,7 @@ public class MainActivity extends Activity {
         public boolean saveApp(String html) {
             try {
                 byte[] b = html.getBytes(StandardCharsets.UTF_8);
-                if (!html.contains("id=\"loginBg\"") || versionOf(b) <= currentVersion()) return false;
+                if (!html.contains("id=\"loginBg\"") || versionOf(b) <= currentVersion() || !signedByBuild(b)) return false;
                 File tmp = new File(getFilesDir(), "app.html.tmp");
                 try (FileOutputStream os = new FileOutputStream(tmp)) { os.write(b); }
                 return tmp.renameTo(cachedAppFile());
@@ -461,8 +490,9 @@ public class MainActivity extends Activity {
                     if (c.getResponseCode() == 200) {
                         String ct = c.getContentType();
                         byte[] b = readAll(c.getInputStream());
-                        if (b.length > 0 && b.length < 300000 && ct != null && ct.startsWith("image/"))
-                            data = "data:" + ct.split(";")[0] + ";base64," + Base64.encodeToString(b, Base64.NO_WRAP);
+                        String type = ct == null ? "" : ct.split(";")[0].trim().toLowerCase();
+                        if (b.length > 0 && b.length < 300000 && type.matches("image/[a-z0-9.+-]+"))
+                            data = "data:" + type + ";base64," + Base64.encodeToString(b, Base64.NO_WRAP);
                     }
                 } catch (Exception e) {
                     data = null;

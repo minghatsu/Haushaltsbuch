@@ -11,6 +11,8 @@
  *   GET  api.php?a=pull&since=N        -> {rev, docs:[{col,id,data,rev}]}   (Authorization: Bearer <token>)
  *   POST api.php?a=push   {ops:[{col,id,data}]} -> {rev}                    (data null = löschen)
  *   POST api.php?a=logout
+ *   POST api.php?a=logoutAll           -> alle Geräte abmelden
+ *   POST api.php?a=password {old,new}  -> {token}  (neues Passwort, alle anderen Geräte werden abgemeldet)
  *
  *   App-Updates (neue Versionen kommen über die Synology auf PC und Handy):
  *   GET  api.php?a=version             -> {version}
@@ -27,6 +29,8 @@ header('Access-Control-Allow-Private-Network: true');
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: no-referrer');
+header('X-Frame-Options: DENY');
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
 // Datenordner mit zufälligem Namen, damit die Datenbank-Datei nicht erraten und heruntergeladen werden kann.
@@ -88,6 +92,8 @@ function requireAuth(): void {
     $s = db()->prepare('UPDATE tokens SET used = ? WHERE hash = ?');
     $s->execute([time(), hash('sha256', strtolower($m[1]))]);
     if ($s->rowCount() !== 1) fail('Nicht angemeldet', 401);
+    // devices that were not used for half a year are logged out
+    if (random_int(1, 50) === 1) db()->prepare('DELETE FROM tokens WHERE used < ?')->execute([time() - 180 * 86400]);
 }
 function appVersion(string $html): int {
     return preg_match('/name="hb-version" content="(\d+)"/', $html, $m) ? (int)$m[1] : 0;
@@ -152,6 +158,27 @@ function githubBuildAllowed(string $jwt): bool {
         && (int)($c['iat'] ?? 0) < $now + 300;
 }
 
+/* ---- protection against password guessing: after 5 wrong tries the login is locked, each round longer (1, 5, 15, 60 min) ---- */
+function loginLocked(): int {
+    $f = json_decode((string)(meta('fails') ?? '{}'), true) ?: [];
+    $until = (int)($f['until'] ?? 0);
+    return $until > time() ? $until - time() : 0;
+}
+function loginFailed(): void {
+    $f = json_decode((string)(meta('fails') ?? '{}'), true) ?: [];
+    $n = (int)($f['n'] ?? 0) + 1; $r = (int)($f['r'] ?? 0); $until = 0;
+    if ($n >= 5) { $r++; $until = time() + [60, 300, 900, 3600][min(3, $r - 1)]; $n = 0; }
+    setMeta('fails', json_encode(['n' => $n, 'r' => $r, 'until' => $until]));
+}
+function loginOk(): void { setMeta('fails', '{}'); }
+/** Setting the first password is only allowed from the home network, so nobody from outside can take over a fresh server. */
+function fromHomeNetwork(): bool {
+    $ip = (string)($_SERVER['REMOTE_ADDR'] ?? '');
+    if ($ip === '' ) return false;
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) return true;  // private or loopback
+    return false;
+}
+
 function checkPassword(string $pw): bool {
     $hash = meta('password');
     return $hash !== null && password_verify($pw, $hash);
@@ -193,6 +220,7 @@ try {
 
     if ($a === 'setup') {
         if (meta('password') !== null) fail('Passwort ist schon festgelegt', 409);
+        if (!fromHomeNetwork()) fail('Das erste Passwort kann nur im Heimnetz festgelegt werden', 403);
         $pw = (string)(body()['password'] ?? '');
         if (mb_strlen($pw) < 8) fail('Das Passwort braucht mindestens 8 Zeichen', 400);
         setMeta('password', password_hash($pw, PASSWORD_DEFAULT));
@@ -200,8 +228,11 @@ try {
     }
 
     if ($a === 'login') {
+        $wait = loginLocked();
+        if ($wait > 0) { $m = max(1, (int)ceil($wait / 60)); fail('Zu viele falsche Versuche – bitte in ' . $m . ($m === 1 ? ' Minute' : ' Minuten') . ' noch einmal', 429); }
         $pw = (string)(body()['password'] ?? '');
-        if (!checkPassword($pw)) { sleep(2); fail('Falsches Passwort', 403); }
+        if (!checkPassword($pw)) { loginFailed(); sleep(2); fail('Falsches Passwort', 403); }
+        loginOk();
         out(['token' => newToken()]);
     }
 
@@ -219,8 +250,9 @@ try {
     }
 
     if ($a === 'push') {
+        if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 30000000) fail('Zu viele Daten auf einmal', 413);
         $ops = body()['ops'] ?? null;
-        if (!is_array($ops)) fail('Ungültige Anfrage', 400);
+        if (!is_array($ops) || count($ops) > 5000) fail('Ungültige Anfrage', 400);
         $pdo = db();
         $pdo->exec('BEGIN IMMEDIATE');
         $rev = (int)(meta('rev') ?? 0);
@@ -229,12 +261,28 @@ try {
             $col = (string)($op['col'] ?? ''); $id = (string)($op['id'] ?? '');
             if (!in_array($col, ALLOWED_COLS, true) || $id === '' || strlen($id) > 200) continue;
             $data = array_key_exists('data', $op) && $op['data'] !== null ? json_encode($op['data'], JSON_UNESCAPED_UNICODE) : null;
+            if ($data !== null && strlen($data) > 3000000) continue;   // one document (e.g. a receipt photo) at most 3 MB
             $rev++;
             $put->execute([$col, $id, $data, $rev]);
         }
         setMeta('rev', (string)$rev);
         $pdo->exec('COMMIT');
         out(['rev' => $rev]);
+    }
+
+    if ($a === 'logoutAll') {   // e.g. after a phone was lost: every device has to log in again
+        db()->exec('DELETE FROM tokens');
+        out(['ok' => true]);
+    }
+
+    if ($a === 'password') {    // change the password; all other devices are logged out
+        $b = body();
+        if (!checkPassword((string)($b['old'] ?? ''))) { loginFailed(); sleep(2); fail('Das bisherige Passwort stimmt nicht', 403); }
+        $new = (string)($b['new'] ?? '');
+        if (mb_strlen($new) < 10) fail('Das neue Passwort braucht mindestens 10 Zeichen', 400);
+        setMeta('password', password_hash($new, PASSWORD_DEFAULT));
+        db()->exec('DELETE FROM tokens');
+        out(['token' => newToken()]);
     }
 
     if ($a === 'logout') {
@@ -246,5 +294,6 @@ try {
     fail('Unbekannte Aktion', 404);
 } catch (Throwable $e) {
     try { if (db()->inTransaction()) db()->exec('ROLLBACK'); } catch (Throwable $ignored) {}
-    fail('Serverfehler: ' . $e->getMessage(), 500);
+    error_log('Haushaltsbuch: ' . $e->getMessage());
+    fail('Serverfehler', 500);   // no details for outsiders
 }

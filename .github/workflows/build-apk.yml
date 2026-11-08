@@ -27,6 +27,25 @@ jobs:
             cat web/index.html
             printf '</body></html>'
           } > app.html
+      - name: pdf.js absichern (Prüfsummen, damit kein veränderter Fremdcode läuft)
+        run: |
+          for f in pdf.min.js pdf.worker.min.js; do
+            h=$(curl -fsSL "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.2.146/build/$f" | openssl dgst -sha384 -binary | base64 -w0)
+            [ -n "$h" ] || { echo "::error::pdf.js konnte nicht geladen werden"; exit 1; }
+            if [ "$f" = pdf.min.js ]; then key=__PDFJS_SRI__; else key=__PDFJS_WORKER_SRI__; fi
+            sed -i "s|$key|sha384-$h|" app.html
+          done
+      - name: Sicherheitsregeln (CSP) setzen
+        run: python3 tools/csp.py app.html
+      - name: App signieren (Handy und PC übernehmen nur signierte Updates)
+        env:
+          HB_SIGN_KEY: ${{ secrets.HB_SIGN_KEY }}
+        run: |
+          if [ -z "$HB_SIGN_KEY" ]; then echo "::error::Das Secret HB_SIGN_KEY fehlt (Einstellungen > Secrets and variables > Actions)"; exit 1; fi
+          printf '%s\n' "$HB_SIGN_KEY" > k.pem
+          sig=$(openssl dgst -sha256 -sign k.pem app.html | base64 -w0)
+          rm -f k.pem
+          printf '\n<!--hb-sig:%s-->\n' "$sig" >> app.html
       - uses: actions/upload-artifact@v4
         with:
           name: app-html

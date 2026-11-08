@@ -17,6 +17,18 @@ if (SMOKE) app.setPath("userData", path.join(app.getPath("temp"), "haushaltsbuch
 const cachedFile = () => path.join(app.getPath("userData"), "app.html");
 const windowFile = () => path.join(app.getPath("userData"), "fenster.json");
 
+/* Updates from the Synology are only used if the GitHub build signed them (ECDSA P-256, key below). */
+const crypto = require("crypto");
+const UPDATE_KEY = crypto.createPublicKey({ key: Buffer.from("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWc6eJAgFbzrfP4Smmawd8Iv5ApsSFtZXDcZ4odJm/NDemZmJ1c6KQt4h+Jn6e+5KhGaXm6EIuf0jWIHZUtHptQ==", "base64"), format: "der", type: "spki" });
+function signedByBuild(html) {
+  try {
+    const s = String(html), at = s.lastIndexOf("\n<!--hb-sig:");
+    if (at < 0 || s.length - at > 400) return false;
+    const end = s.indexOf("-->", at);
+    const sig = Buffer.from(s.slice(at + 12, end).trim(), "base64");
+    return crypto.verify("sha256", Buffer.from(s.slice(0, at), "utf8"), UPDATE_KEY, sig);
+  } catch (e) { return false; }
+}
 function versionOf(html) {
   const m = /name="hb-version" content="(\d+)"/.exec(String(html).slice(0, 4000));
   return m ? Number(m[1]) : 0;
@@ -26,6 +38,7 @@ function newestApp() {
   const bundled = fs.readFileSync(BUNDLED, "utf8");
   try {
     const cached = fs.readFileSync(cachedFile(), "utf8");
+    if (!signedByBuild(cached)) { try { fs.unlinkSync(cachedFile()); } catch (e) {} return bundled; }
     if (versionOf(cached) > versionOf(bundled)) return cached;
   } catch (e) {}
   return bundled;
@@ -188,7 +201,7 @@ ipcMain.on("pcPrefs", (e, json) => {
 ipcMain.on("saveApp", (e, html) => {
   try {
     html = String(html);
-    if (!html.includes('id="loginBg"') || versionOf(html) <= versionOf(newestApp())) { e.returnValue = false; return; }
+    if (!html.includes('id="loginBg"') || versionOf(html) <= versionOf(newestApp()) || !signedByBuild(html)) { e.returnValue = false; return; }
     const tmp = cachedFile() + ".tmp";
     fs.writeFileSync(tmp, html, "utf8");
     fs.renameSync(tmp, cachedFile());
@@ -224,8 +237,8 @@ ipcMain.on("fetchImage", async (e, req) => {
   try {
     if (!/^https:\/\//i.test(req.url)) throw new Error("bad url");
     const r = await fetch(req.url, { signal: AbortSignal.timeout(15000) });
-    const ct = (r.headers.get("content-type") || "").split(";")[0];
-    if (r.ok && ct.startsWith("image/")) { const b = Buffer.from(await r.arrayBuffer()); if (b.length && b.length < 300000) data = "data:" + ct + ";base64," + b.toString("base64"); }
+    const ct = (r.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+    if (r.ok && /^image\/[a-z0-9.+-]+$/.test(ct)) { const b = Buffer.from(await r.arrayBuffer()); if (b.length && b.length < 300000) data = "data:" + ct + ";base64," + b.toString("base64"); }
   } catch (err) { data = null; }
   if (e.sender.isDestroyed()) return;
   e.sender.executeJavaScript(`window.hbImgDone && window.hbImgDone(${JSON.stringify(req.id)}, ${JSON.stringify(data)})`).catch(() => {});
@@ -288,6 +301,8 @@ if (!SMOKE && !app.requestSingleInstanceLock()) {
       return new Response("", { status: 404 });
     });
     if (process.platform === "win32") app.setAppUserModelId("de.sascha.haushaltsbuch");
+    // the app never needs camera, microphone, location etc. in the PC version
+    require("electron").session.defaultSession.setPermissionRequestHandler((wc, perm, cb) => cb(perm === "notifications" || perm === "clipboard-sanitized-write"));
     loadPlanned();
     applyPrefs(prefs());
     createWindow();
