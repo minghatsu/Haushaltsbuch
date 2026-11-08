@@ -29,9 +29,15 @@ header('X-Frame-Options: DENY');
 header('Strict-Transport-Security: max-age=31536000');
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
-$CFG = ['mail_from' => 'Haushaltsbuch <noreply@localhost>', 'app_name' => 'Haushaltsbuch', 'signup' => true, 'max_accounts' => 1000, 'data_dir' => __DIR__ . '/daten'];
+$CFG = ['mail_from' => 'Haushaltsbuch <noreply@localhost>', 'app_name' => 'Haushaltsbuch', 'signup' => true, 'max_accounts' => 1000, 'data_dir' => ''];
 if (is_file(__DIR__ . '/config.php')) $CFG = array_merge($CFG, (array)(include __DIR__ . '/config.php'));
-define('DATA_DIR', $CFG['data_dir']);
+// Datenordner mit zufälligem Namen (cloud-…), damit die Datenbank nicht erraten und heruntergeladen werden kann.
+// Getrennt vom Ordner der api.php (data-…), beide können im selben Verzeichnis liegen.
+define('DATA_DIR', $CFG['data_dir'] !== '' ? $CFG['data_dir'] : (function (): string {
+    $found = glob(__DIR__ . '/cloud-*', GLOB_ONLYDIR) ?: [];
+    if ($found) { usort($found, fn($a, $b) => filemtime($b) <=> filemtime($a)); return $found[0]; }
+    return __DIR__ . '/cloud-' . bin2hex(random_bytes(12));
+})());
 const DEPLOY_REPO = 'minghatsu/haushaltsbuch';
 const DEPLOY_AUD = 'haushaltsbuch-deploy';
 const GH_ISSUER = 'https://token.actions.githubusercontent.com';
