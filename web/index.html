@@ -4501,7 +4501,7 @@ window.hbBack = () => {
 /* ---------- sync with the Synology ---------- */
 const SYNC = { token:"", rev:0, queue:[], state:"off", last:0, busy:false, skipped:false, setup:false };
 function loadSync(){ try { Object.assign(SYNC, JSON.parse(localStorage.getItem(SYNC_KEY)||"{}")); } catch(e){} SYNC.busy=false; SYNC.rq=SYNC.rq||[]; }
-function saveSync(){ try { localStorage.setItem(SYNC_KEY, JSON.stringify({token:SYNC.token, rev:SYNC.rev, queue:SYNC.queue, rq:SYNC.rq||[], last:SYNC.last, skipped:SYNC.skipped, email:SYNC.email||""})); } catch(e){} }
+function saveSync(){ try { localStorage.setItem(SYNC_KEY, JSON.stringify({token:SYNC.token, rev:SYNC.rev, queue:SYNC.queue, rq:SYNC.rq||[], last:SYNC.last, skipped:SYNC.skipped, asked:!!SYNC.asked, email:SYNC.email||""})); } catch(e){} }
 // receipt photos are too big for the normal queue: only their ids wait here, the photo is read when it is sent
 function rqAdd(id){ if (!SERVER || !SYNC.token) return; SYNC.rq=(SYNC.rq||[]).filter(x=>x!==id); SYNC.rq.push(id); saveSync(); flushSoon(); }
 function enqueue(col,id,data){
@@ -4576,7 +4576,10 @@ async function syncNow(){
     if (SYNC.queue.length || (SYNC.rq||[]).length) flushSoon(200);
     checkUpdate();
   } catch(e){
-    if (e.status===401){ SYNC.token=""; SYNC.state="login"; saveSync(); showLogin(); }
+    if (e.status===401){   // signed out on the server: no window popping up, just one note with a button
+      SYNC.token=""; SYNC.state="login"; saveSync();
+      toast("Abgleich abgemeldet – bitte neu anmelden", ()=>showLogin(), "Anmelden", 8000);
+    }
     else SYNC.state = navigator.onLine===false ? "offline" : "error";
     renderSyncDot();
   } finally { SYNC.busy=false; }
@@ -4603,7 +4606,8 @@ async function checkUpdate(force){
 let syncTimers=false;
 function startSync(){
   renderSyncDot();
-  if (!SYNC.token){ if (!SYNC.skipped) showLogin(); return; }
+  // the sign-in window opens by itself only once (first start); later it is under Einstellungen → Abgleich
+  if (!SYNC.token){ if (!SYNC.skipped && !SYNC.asked && !SYNC.last){ SYNC.asked=true; saveSync(); showLogin(); } return; }
   syncNow();
   if (syncTimers) return; syncTimers=true;
   setInterval(()=>{ if (document.visibilityState==="visible") syncNow(); }, 5000);
