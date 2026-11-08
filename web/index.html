@@ -451,6 +451,10 @@ html.touch .kpad{display:grid}
 .backdrop.show .sheet{transform:none}
 @media (min-width:700px){.backdrop{align-items:center}.sheet{border-radius:28px;padding-bottom:22px}}
 .grab{width:40px;height:5px;border-radius:99px;background:var(--line);margin:0 auto}
+/* phones: close by swiping the sheet down, so no X needed */
+.touch [data-addclose],.touch [data-hintclose],.touch #sheetClose{display:none}
+.touch .sheet .grab{width:46px;margin-bottom:4px}
+.sheet.dragging{transition:none!important}
 .sheet-head{display:flex;align-items:center;justify-content:space-between}
 .sheet-head h2{font-family:var(--f-display);font-size:19px;margin:0}
 .seg{display:grid;grid-template-columns:repeat(4,1fr);background:var(--sunk);border-radius:15px;padding:4px;gap:3px}
@@ -4841,6 +4845,38 @@ $("loginSeg").addEventListener("click", e=>{
 });
 $("loginGo").onclick = doLogin;
 ["loginPw","loginPw2","loginEmail","loginRCode","loginCode","loginCloud"].forEach(id=>$(id).addEventListener("keydown", e=>{ if (e.key==="Enter") doLogin(); }));
+/* swipe down to close the bottom sheets (add menu, hints, booking form) */
+(function(){
+  const CLOSERS={addBg:"[data-addclose]", hintBg:"[data-hintclose]", sheetBg:"#sheetClose"};
+  Object.keys(CLOSERS).forEach(id=>{
+    const bg=$(id), sh=bg && bg.querySelector(".sheet"); if (!sh) return;
+    let y0=0, x0=0, dy=0, t0=0, on=false, decided=false;
+    sh.addEventListener("touchstart", e=>{
+      if (e.touches.length!==1) return;
+      const t=e.target;
+      if (t.closest("input[type=range],.srail,.kpad,textarea")) return;
+      y0=e.touches[0].clientY; x0=e.touches[0].clientX; dy=0; t0=Date.now(); on=sh.scrollTop<=0; decided=false;
+    }, {passive:true});
+    sh.addEventListener("touchmove", e=>{
+      if (!on) return;
+      const d=e.touches[0].clientY-y0, dx=e.touches[0].clientX-x0;
+      if (!decided){ if (Math.abs(d)<8 && Math.abs(dx)<8) return; decided=true; if (d<=0 || Math.abs(dx)>Math.abs(d) || sh.scrollTop>0){ on=false; return; } sh.classList.add("dragging"); }
+      dy=Math.max(0,d); sh.style.transform=`translateY(${dy}px)`; bg.style.opacity=String(Math.max(.35,1-dy/600));
+      if (e.cancelable) e.preventDefault();
+    }, {passive:false});
+    const end=()=>{
+      if (!on || !decided){ on=false; return; } on=false;
+      const fast = dy>50 && dy/(Date.now()-t0) > 0.5;
+      sh.classList.remove("dragging");
+      if (dy > Math.min(140, sh.offsetHeight*0.3) || fast){
+        sh.style.transition="transform .2s ease-in"; sh.style.transform=`translateY(${sh.offsetHeight}px)`;
+        setTimeout(()=>{ const c=sh.querySelector(CLOSERS[id]); if (c) c.click(); sh.style.transition=""; sh.style.transform=""; bg.style.opacity=""; }, 190);
+      } else { sh.style.transform=""; bg.style.opacity=""; }
+      dy=0;
+    };
+    sh.addEventListener("touchend", end); sh.addEventListener("touchcancel", end);
+  });
+})();
 $("loginSkip").onclick = ()=>{ SYNC.skipped=true; saveSync(); $("loginBg").hidden=true; renderSyncDot(); if (wizShould()) setTimeout(()=>{ if (wizShould()) wizOpen(); }, 300); toast("Ohne Abgleich – anmelden kannst du dich unter Einstellungen"); };
 function renderSyncDot(){
   const b=$("settingsBtn"); if (!SYNCABLE){ return; }
