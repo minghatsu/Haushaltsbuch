@@ -4703,9 +4703,11 @@ async function ghCheck(manual){
     }
     if (num("web") > HB_VERSION){
       const a = asset("app.html");
-      if (a && await ghFetch(a.url, "app")==="saved"){
+      // "same" = this version was already fetched earlier and is waiting on the device
+      if (a && ["saved","same"].includes(await ghFetch(a.url, "app"))){
+        UPD.ready = true;
         toast("Neue Version ist da", ()=>window.AndroidBridge.reloadApp(), "Jetzt laden", 15000);
-        UPD.msg = verName(num("web")) + " geladen – beim nächsten Start aktiv"; return;
+        UPD.msg = verName(num("web")) + " ist bereit – wird beim nächsten Öffnen aktiv"; return;
       }
     }
     UPD.msg = "Aktuell – " + verName(HB_VERSION);
@@ -4735,7 +4737,11 @@ document.addEventListener("click", async e=>{
 });
 setTimeout(()=>ghCheck(), 20000);
 setInterval(()=>{ if (document.visibilityState==="visible") ghCheck(); }, 5*60*1000);
-document.addEventListener("visibilitychange", ()=>{ if (document.visibilityState==="visible") ghCheck(); });
+document.addEventListener("visibilitychange", ()=>{
+  if (document.visibilityState==="visible") ghCheck();
+  // a downloaded new version becomes active as soon as the app goes to the background (nothing is being typed then)
+  else if (UPD.ready && canGh()){ UPD.ready=false; window.AndroidBridge.reloadApp(); }
+});
 /* ---------- automatic updates (new versions are delivered through the Synology) ---------- */
 const HB_VERSION = +((document.querySelector('meta[name="hb-version"]')||{}).content||0);
 let updLast=0, updSeen=0;
