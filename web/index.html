@@ -1886,7 +1886,7 @@ document.addEventListener("click", e=>{
   if (e.target===$("addBg") || e.target.closest("[data-addclose]")){ closeAddMenu(); return; }
   const p=e.target.closest("[data-addpick]"); if (!p) return; const k=p.dataset.addpick; closeAddMenu();
   if (k==="hand") setTimeout(()=>openSheet("ausgabe"), 120);
-  else if (k==="receipt") setTimeout(()=>{ openSheet("ausgabe"); setTimeout(()=>runScan("camera"), 250); }, 120);
+  else if (k==="receipt") setTimeout(()=>runScan("camera", false, true), 120);   // camera first, the form only opens with the result
   else { UI.view="import"; render(); window.scrollTo({top:0}); }
 });
 document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("addBg").hidden) closeAddMenu(); });
@@ -3710,14 +3710,17 @@ function parseReceipt(lines){
   let cat=null; for (const [re,kind,word] of KW){ if (kind==="ausgabe" && re.test(all+" "+nrm(shop))){ cat=catByWord("ausgabe",word); if (cat) break; } }
   return { amount, date, shop, cat };
 }
-async function runScan(source, attachOnly){
+async function runScan(source, attachOnly, fresh){
+  // fresh = started from the + menu: the form is still closed, so progress shows as a toast and the form opens with the result
+  const busy = fresh ? (on => { if (on) toast("Quittung wird gelesen …", null, null, 8000); }) : scanBusy;
   try {
     let lines, img=null;
-    if (NATIVE_SCAN){ scanBusy(true); const res = await scanNative(source); if (!res){ scanBusy(false); return; } if (Array.isArray(res)) lines=res; else { lines=res.lines||[]; img=res.img||null; } }
+    if (NATIVE_SCAN){ busy(true); const res = await scanNative(source); if (!res){ busy(false); return; } if (Array.isArray(res)) lines=res; else { lines=res.lines||[]; img=res.img||null; } }
     else { const f = await new Promise(r=>{ const inp=$("scanFile"); inp.value=""; inp.onchange=()=>r(inp.files[0]||null); inp.click(); }); if (!f) return;
       try { img = await shrinkImage(f); } catch(e){}
       if (attachOnly){ lines=[]; } else lines = await scanImageFile(f); }
-    scanBusy(false);
+    busy(false);
+    if (fresh) openSheet("ausgabe");
     if (img){ UI.rcpt={state:"new", img}; renderRcptRow(); }
     if (attachOnly){ if (!img) toast("Das Foto konnte nicht übernommen werden"); return; }
     const r = parseReceipt(lines||[]);
@@ -3729,7 +3732,7 @@ async function runScan(source, attachOnly){
     renderSheet();
     let nItems=0; try { nItems=rememberPrices(r.shop, r.date, receiptItems(lines||[])); } catch(e){}
     toast(`Erkannt: ${eur(r.amount)}${r.date?" am "+shortDate(r.date):""}${nItems?` · ${nItems} Preise gemerkt`:""} – bitte kurz prüfen`, null, null, 4000);
-  } catch(e){ scanBusy(false); toast(e.message||"Quittung konnte nicht gelesen werden"); }
+  } catch(e){ busy(false); toast(e.message||"Quittung konnte nicht gelesen werden"); }
 }
 $("scanCam").onclick = () => runScan("camera");
 $("scanPick").onclick = () => runScan("gallery");
