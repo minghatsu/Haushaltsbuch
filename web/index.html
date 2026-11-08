@@ -2896,16 +2896,30 @@ document.addEventListener("keydown", e=>{ if (UI.wiz && e.key==="Enter" && e.tar
 
 
 /* ---------- Sicherheit des Abgleichs: Passwort ändern, alle Geräte abmelden, Warnung bei unverschlüsselter Verbindung ---------- */
-function serverInsecure(){
-  if (!SERVER || !/^http:\/\//i.test(SERVER)) return false;
-  const h=(SERVER.match(/^http:\/\/([^/:]+)/i)||[])[1]||"";
-  return !/^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|127\.|localhost$)|\.local$|\.fritz\.box$/i.test(h);
+
+document.addEventListener("change", async e=>{
+  if (e.target.id!=="srvAlt") return;
+  const raw=e.target.value.trim(), u = raw ? normServer(raw) : "";
+  if (raw && !u){ toast("Das ist keine gültige Adresse"); return; }
+  try { if (u) localStorage.setItem(SERVER_ALT_KEY,u); else localStorage.removeItem(SERVER_ALT_KEY); } catch(_){}
+  if (!u){ VIA_ALT=false; toast("Adresse für unterwegs entfernt"); renderSyncSec(); return; }
+  try { const r=await request(apiUrl(u,"status")); toast(r.status===200 ? "Adresse für unterwegs gespeichert – erreichbar ✓" : "Gespeichert, aber die Synology antwortet dort gerade nicht"); }
+  catch(_){ toast("Gespeichert – gerade nicht erreichbar (läuft Tailscale auf diesem Gerät?)"); }
+  renderSyncSec();
+});
+
+function hostSafe(u){   // home network or Tailscale (100.64.0.0/10, *.ts.net – already encrypted by Tailscale)
+  if (!u || !/^http:\/\//i.test(u)) return true;
+  const h=(u.match(/^http:\/\/([^/:]+)/i)||[])[1]||"";
+  return /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|127\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.|localhost$)|\.local$|\.fritz\.box$|\.ts\.net$/i.test(h);
 }
+function serverInsecure(){ return !hostSafe(SERVER) || !hostSafe(serverAlt()); }
 function renderSyncSec(){
   const el=$("syncSec"); if (!el) return;
   if (el.contains(document.activeElement) && typingNow()) return;   // never rebuild while someone types here (the keyboard would close)
   if (!SYNC.token){ el.innerHTML=""; return; }
-  el.innerHTML = `${serverInsecure()?`<div class="notice bad"><span>Die Verbindung zur Synology ist <b>unverschlüsselt</b> (http) und geht übers Internet. Bitte eine Adresse mit https verwenden.</span></div>`:""}
+  el.innerHTML = `${NATIVE?`<div class="field"><label for="srvAlt">Adresse für unterwegs (z. B. Tailscale)</label><input class="in" id="srvAlt" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="z. B. 100.101.102.103" value="${esc(serverAlt())}"><span class="small muted">${serverAlt()?(VIA_ALT?"Gerade verbunden über die Adresse für unterwegs.":"Gerade verbunden über das Heimnetz."):"Zu Hause nutzt die App die normale Adresse. Ist sie nicht erreichbar, nimmt sie diese hier."}</span></div>`:""}
+    ${serverInsecure()?`<div class="notice bad"><span>Die Verbindung zur Synology ist <b>unverschlüsselt</b> (http) und geht übers Internet. Bitte eine Adresse mit https verwenden.</span></div>`:""}
     ${UI.pwForm?`<div class="pwform"><div class="field"><label for="pwOld">Bisheriges Passwort</label><input class="in" type="password" id="pwOld" autocomplete="current-password"></div>
       <div class="field"><label for="pwNew">Neues Passwort (mind. 10 Zeichen)</label><input class="in" type="password" id="pwNew" autocomplete="new-password"></div>
       <div class="field"><label for="pwNew2">Neues Passwort wiederholen</label><input class="in" type="password" id="pwNew2" autocomplete="new-password"></div>
@@ -4440,9 +4454,22 @@ async function request(url, body){
   const r = await fetch(url, { method: body ? "POST" : "GET", headers: Object.assign({"Content-Type":"application/json"}, SYNC.token ? {Authorization:"Bearer "+SYNC.token} : {}), body: body ? JSON.stringify(body) : undefined, cache:"no-store" });
   return {status: r.status, text: await r.text()};
 }
+/* second address for on the way (e.g. Tailscale): at home the normal one is used, away the app switches by itself */
+const SERVER_ALT_KEY="haushaltsbuch-server-alt";
+function serverAlt(){ try { return NATIVE ? (localStorage.getItem(SERVER_ALT_KEY)||"") : ""; } catch(e){ return ""; } }
+let VIA_ALT=false;
+const apiUrl=(base,action,qs)=>base + (base.includes("?")?"&":"?") + "a=" + action + (qs||"");
+async function requestAny(action, qs, body){
+  const alt=serverAlt(), order = alt ? (VIA_ALT ? [alt,SERVER] : [SERVER,alt]) : [SERVER];
+  let last;
+  for (const base of order){
+    try { const r=await request(apiUrl(base,action,qs), body); if (r.status===0) throw new Error("Keine Verbindung"); VIA_ALT = base===alt && !!alt; return r; }
+    catch(e){ last=e; }
+  }
+  throw last||new Error("Keine Verbindung");
+}
 async function api(action, opts={}){
-  const url = SERVER + (SERVER.includes("?")?"&":"?") + "a=" + action + (opts.qs||"");
-  const r = await request(url, opts.body);
+  const r = await requestAny(action, opts.qs, opts.body);
   let j={}; try { j = JSON.parse(r.text); } catch(e){}
   if (r.status < 200 || r.status >= 300){ const err = new Error(j.error||("HTTP "+r.status)); err.status=r.status; err.data=j; throw err; }
   return j;
@@ -4495,7 +4522,7 @@ async function checkUpdate(force){
     if (v <= HB_VERSION || v <= updSeen) return;
     if (NATIVE){
       if (!window.AndroidBridge.saveApp) return; // older APK without self-update
-      const r = await request(SERVER + (SERVER.includes("?")?"&":"?") + "a=app");
+      const r = await requestAny("app");
       if (r.status !== 200 || !window.AndroidBridge.saveApp(r.text)) return;
     }
     updSeen = v;

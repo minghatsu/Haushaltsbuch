@@ -190,6 +190,7 @@ function fromHomeNetwork(): bool {
     $ip = (string)($_SERVER['REMOTE_ADDR'] ?? '');
     if ($ip === '' ) return false;
     if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) return true;  // private or loopback
+    if (preg_match('/^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./', $ip)) return true;   // Tailscale (own encrypted network)
     return false;
 }
 
