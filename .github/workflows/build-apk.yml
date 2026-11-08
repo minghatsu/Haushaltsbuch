@@ -48,6 +48,7 @@ jobs:
           printf '\n<!--hb-sig:%s-->\n' "$sig" >> app.html
       - uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: app-html
           path: app.html
 
@@ -80,6 +81,7 @@ jobs:
           cp app/build/outputs/apk/release/app-release.apk ../Haushaltsbuch.apk
       - uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: apk
           path: Haushaltsbuch.apk
 
@@ -135,6 +137,7 @@ jobs:
           npm run dist
       - uses: actions/upload-artifact@v4
         with:
+          retention-days: 1
           name: windows
           path: desktop/dist/Haushaltsbuch-Setup.exe
 
