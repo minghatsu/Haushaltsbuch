@@ -3213,7 +3213,8 @@ function renderSetHome(){
     <div class="sqk">${quick.map(k=>`<button data-spgo="${k}"><span>${ic(SP_PAGES[k][1],20)}</span>${short[k]}<small>${esc(spSummary(k))}</small></button>`).join("")}</div>
     <div class="sgl">Weitere Einstellungen</div>
     <div class="sgrp"><label class="sdark switch"><span class="ic">${ic("spark",19)}</span><span class="n"><b>Dunkles Design</b><small>${document.documentElement.dataset.theme==="dark"?"an":"aus – helles Design"}</small></span><input type="checkbox" id="sDark" ${document.documentElement.dataset.theme==="dark"?"checked":""}></label></div>
-    <div class="sgrp">${rest.map(k=>`<button data-spgo="${k}"><span class="ic">${ic(SP_PAGES[k][1],19)}</span><span class="n"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span><span class="ch">${ic("right",18)}</span></button>`).join("")}</div>`;
+    <div class="sgrp">${rest.map(k=>`<button data-spgo="${k}"><span class="ic">${ic(SP_PAGES[k][1],19)}</span><span class="n"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span><span class="ch">${ic("right",18)}</span></button>`).join("")}</div>
+    <div class="small muted" style="text-align:center;margin:18px 0 4px">Finanz MAMI · ${verName(+((document.querySelector('meta[name="hb-version"]')||{}).content||0))}</div>`;
 }
 function renderSpPages(){
   const k = SP_PAGES[UI.sp] ? UI.sp : null;
@@ -4657,6 +4658,8 @@ async function syncNow(){
   } finally { SYNC.busy=false; }
 }
 /* ---------- self-update straight from the GitHub release (works anywhere, no Synology needed) ---------- */
+// shown version: build 80 -> "V 0.8.0", 81 -> "V 0.8.1", 90 -> "V 0.9.0"
+function verName(n){ n=n|0; return n ? `V 0.${Math.floor(n/10)}.${n%10}` : "Testversion"; }
 const GH_REL = "https://api.github.com/repos/minghatsu/Haushaltsbuch/releases/tags/neueste";
 const UPD = {msg:"", ts:0, busy:false, last:0, started:Date.now()};
 const ghWait = {};
@@ -4685,17 +4688,17 @@ async function ghCheck(manual){
             catch(e){ toast(e.message); } };
           toast("Neue App-Version ist da", go, "Installieren", 20000);
         }
-        UPD.msg = "Neue Version " + (rel.name||"").replace(/^.*\(|\)$/g,"") + " ist da"; return;
+        UPD.msg = "Neue Version " + verName(num("web")) + " ist da"; return;
       }
     }
     if (num("web") > HB_VERSION){
       const a = asset("app.html");
       if (a && await ghFetch(a.url, "app")==="saved"){
         toast("Neue Version ist da", ()=>window.AndroidBridge.reloadApp(), "Jetzt laden", 15000);
-        UPD.msg = "Neue Version geladen – beim nächsten Start aktiv"; return;
+        UPD.msg = verName(num("web")) + " geladen – beim nächsten Start aktiv"; return;
       }
     }
-    UPD.msg = "Aktuell – Version " + HB_VERSION;
+    UPD.msg = "Aktuell – " + verName(HB_VERSION);
   } catch(e){ UPD.msg = e.message || "Prüfen hat nicht geklappt"; }
   finally { UPD.busy=false; UPD.ts=Date.now(); renderUpd(); }
 }

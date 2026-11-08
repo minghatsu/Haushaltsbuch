@@ -143,6 +143,12 @@ jobs:
         run: |
           echo "{\"rev\": $(git rev-list --count HEAD -- desktop/)}" > desktop/native.json
           cat desktop/native.json
+      - name: Versionsnummer (V 0.8.0 aus Build 80)
+        shell: bash
+        working-directory: desktop
+        run: |
+          N=${{ github.run_number }}
+          npm pkg set version="0.$((N/10)).$((N%10))"
       - name: Installer bauen
         working-directory: desktop
         env:
@@ -176,7 +182,7 @@ jobs:
           APK=$(git rev-list --count HEAD -- android/); EXE=$(git rev-list --count HEAD -- desktop/)
           gh release delete neueste -y --cleanup-tag || true
           gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html \
-            --title "Finanz MAMI (Build ${{ github.run_number }})" \
+            --title "Finanz MAMI V 0.$(( ${{ github.run_number }} / 10 )).$(( ${{ github.run_number }} % 10 ))" \
             --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=$APK exe=$EXE"
           gh release delete build-${{ github.run_number }} -y --cleanup-tag || true
       - name: Neue Version an die Synology schicken (PC und Handy aktualisieren sich dann selbst)
