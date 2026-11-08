@@ -1953,19 +1953,22 @@ function renderAvatar(){
   const p=S.settings&&S.settings.photo, n=String((S.settings&&S.settings.name)||"").trim();
   const ta=$("topAv"); ta.hidden=!p; ta.innerHTML = p ? `<img src="${esc(p)}" alt="">` : "";
   $("pfAv").innerHTML = p ? `<img src="${esc(p)}" alt="Profilfoto">` : esc((n[0]||"?").toUpperCase());
-  $("pfDel").hidden=!p; $("pfCam").hidden = !(window.AndroidBridge && window.AndroidBridge.scanReceipt && !(window.AndroidBridge && window.AndroidBridge.desktop));
-  $("pfPick").textContent = p ? "Anderes Foto" : "Foto wählen";
+  $("pfDel").hidden=!p; $("pfCam").hidden = !phoneCam();
+  $("pfPick").textContent = phoneCam() ? "Aus Galerie" : p ? "Anderes Foto" : "Foto wählen";
 }
 async function setAvatar(blob){
   try { S.settings.photo = await avatarFrom(blob); await saveSettings(); renderAvatar(); renderSetHome(); toast("Profilfoto gespeichert"); }
   catch(e){ toast("Das Foto konnte nicht übernommen werden"); }
 }
-$("pfPick").onclick = ()=>{ const i=$("pfFile"); i.value=""; i.click(); };
+// phone: gallery and camera through the app's own picker (the same one the receipts use); PC: normal file dialog
+function phoneCam(){ return !!(window.AndroidBridge && window.AndroidBridge.scanReceipt && !window.AndroidBridge.desktop); }
+async function avatarNative(source){
+  try { const res=await scanNative(source); if (!res || !res.img) return; setAvatar(await (await fetch(res.img)).blob()); }
+  catch(e){ toast(e.message||"Das Foto konnte nicht geöffnet werden"); }
+}
+$("pfPick").onclick = ()=>{ if (phoneCam()) return avatarNative("gallery"); const i=$("pfFile"); i.value=""; i.click(); };
 $("pfFile").onchange = ()=>{ const f=$("pfFile").files[0]; if (f) setAvatar(f); };
-$("pfCam").onclick = async ()=>{
-  try { const res=await scanNative("camera"); if (!res || !res.img) return; setAvatar(await (await fetch(res.img)).blob()); }
-  catch(e){ toast(e.message||"Kamera konnte nicht geöffnet werden"); }
-};
+$("pfCam").onclick = ()=>avatarNative("camera");
 $("pfDel").onclick = async ()=>{ delete S.settings.photo; await saveSettings(); renderAvatar(); renderSetHome(); toast("Profilfoto entfernt"); };
 $("topAv").onclick = ()=>{ UI.view="more"; UI.sp="start"; render(); renderSpPages(); window.scrollTo({top:0}); };
 $("sName").addEventListener("change", ()=>{ S.settings.name=$("sName").value.trim().slice(0,30); saveSettings(); $("greet").textContent=greeting(); toast("Gespeichert"); });

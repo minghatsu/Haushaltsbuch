@@ -134,9 +134,12 @@ public class MainActivity extends Activity {
                 fileCallback = callback;
                 Intent i = new Intent(Intent.ACTION_GET_CONTENT);
                 i.addCategory(Intent.CATEGORY_OPENABLE);
-                i.setType("*/*");
+                // pictures (accept="image/*") open the gallery, everything else the file picker
+                String[] acc = params.getAcceptTypes();
+                boolean img = acc != null && acc.length > 0 && acc[0] != null && acc[0].startsWith("image/");
+                i.setType(img ? "image/*" : "*/*");
                 try {
-                    startActivityForResult(Intent.createChooser(i, "Datei auswählen"), FILE_REQUEST);
+                    startActivityForResult(Intent.createChooser(i, img ? "Foto auswählen" : "Datei auswählen"), FILE_REQUEST);
                 } catch (Exception e) {
                     fileCallback = null;
                     return false;
@@ -223,7 +226,7 @@ public class MainActivity extends Activity {
                 Intent i = new Intent(Intent.ACTION_GET_CONTENT);
                 i.setType("image/*");
                 i.addCategory(Intent.CATEGORY_OPENABLE);
-                startActivityForResult(Intent.createChooser(i, "Quittung auswählen"), SCAN_GALLERY);
+                startActivityForResult(Intent.createChooser(i, "Foto auswählen"), SCAN_GALLERY);
             } else {
                 File dir = new File(getCacheDir(), "scan");
                 dir.mkdirs();
