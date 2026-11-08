@@ -11,6 +11,13 @@
  *   GET  api.php?a=pull&since=N        -> {rev, docs:[{col,id,data,rev}]}   (Authorization: Bearer <token>)
  *   POST api.php?a=push   {ops:[{col,id,data}]} -> {rev}                    (data null = löschen)
  *   POST api.php?a=logout
+ *   POST api.php?a=login  {password, code?} -> {token} | 401 {need2fa}   (code = 6 Ziffern aus der Authenticator-App oder Wiederherstellungscode)
+ *   GET  api.php?a=twofa               -> {on, recovery}       Zwei-Faktor-Anmeldung: Stand
+ *   POST api.php?a=twofaStart {password} -> {secret, uri}       neues Geheimnis für die Authenticator-App
+ *   POST api.php?a=twofaEnable {code}  -> {recovery:[…]}       erst mit richtigem Code aktiv
+ *   POST api.php?a=twofaDisable {password, code}
+ *   POST api.php?a=verify {password}   -> {ok}                 z. B. für „PIN vergessen“
+ *   Passwort vergessen: leere Datei passwort-zuruecksetzen.txt in diesen Ordner legen, dann im Heimnetz neu festlegen.
  *   POST api.php?a=logoutAll           -> alle Geräte abmelden
  *   POST api.php?a=password {old,new}  -> {token}  (neues Passwort, alle anderen Geräte werden abgemeldet)
  *
@@ -186,6 +193,48 @@ function fromHomeNetwork(): bool {
     return false;
 }
 
+/* ---- two-factor login (TOTP, RFC 6238): 6-digit code from an authenticator app ---- */
+function b32decode(string $b): string {
+    $b = strtoupper(preg_replace('/[^A-Za-z2-7]/', '', $b)); $bits = ''; $out = '';
+    foreach (str_split($b) as $c) $bits .= str_pad(decbin(strpos('ABCDEFGHIJKLMNOPQRSTUVWXYZ234567', $c)), 5, '0', STR_PAD_LEFT);
+    foreach (str_split($bits, 8) as $byte) if (strlen($byte) === 8) $out .= chr(bindec($byte));
+    return $out;
+}
+function b32encode(string $raw): string {
+    $bits = ''; $out = '';
+    foreach (str_split($raw) as $c) $bits .= str_pad(decbin(ord($c)), 8, '0', STR_PAD_LEFT);
+    foreach (str_split($bits, 5) as $chunk) $out .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'[bindec(str_pad($chunk, 5, '0'))];
+    return $out;
+}
+function totpAt(string $secret, int $step): string {
+    $h = hash_hmac('sha1', pack('N2', 0, $step), b32decode($secret), true);
+    $o = ord($h[19]) & 15;
+    $n = ((ord($h[$o]) & 127) << 24 | ord($h[$o + 1]) << 16 | ord($h[$o + 2]) << 8 | ord($h[$o + 3])) % 1000000;
+    return str_pad((string)$n, 6, '0', STR_PAD_LEFT);
+}
+/** Checks a code from the app (±30 s) or one of the one-time recovery codes; a code can only be used once. */
+function totpCheck(string $secret, string $code, string $metaUsed = 'totp_used'): bool {
+    $code = preg_replace('/\s+/', '', $code);
+    if (preg_match('/^\d{6}$/', $code)) {
+        $now = intdiv(time(), 30); $last = (int)(meta($metaUsed) ?? 0);
+        for ($d = -1; $d <= 1; $d++) {
+            $st = $now + $d;
+            if ($st > $last && hash_equals(totpAt($secret, $st), $code)) { setMeta($metaUsed, (string)$st); return true; }
+        }
+        return false;
+    }
+    $norm = strtr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $code)), ['0' => 'O', '1' => 'I', '8' => 'B']);   // easy to mix up when typing
+    if (strlen($norm) !== 10) return false;
+    $list = json_decode((string)(meta('totp_recovery') ?? '[]'), true) ?: [];
+    foreach ($list as $i => $h) {
+        if (password_verify($norm, $h)) { array_splice($list, $i, 1); setMeta('totp_recovery', json_encode($list)); return true; }
+    }
+    return false;
+}
+function totpOn(): bool { return (string)(meta('totp') ?? '') !== ''; }
+/** Password reset: whoever can put a file named passwort-zuruecksetzen.txt into this folder on the Synology owns it. */
+function resetRequested(): bool { return is_file(__DIR__ . '/passwort-zuruecksetzen.txt'); }
+
 function checkPassword(string $pw): bool {
     $hash = meta('password');
     return $hash !== null && password_verify($pw, $hash);
@@ -223,11 +272,17 @@ try {
         out(['version' => $v]);
     }
 
-    if ($a === 'status') out(['setup' => meta('password') === null, 'rev' => (int)(meta('rev') ?? 0)]);
+    if ($a === 'status') out(['setup' => meta('password') === null || (resetRequested() && fromHomeNetwork()), 'reset' => meta('password') !== null && resetRequested() && fromHomeNetwork(), 'rev' => (int)(meta('rev') ?? 0)]);
 
     if ($a === 'setup') {
-        if (meta('password') !== null) fail('Passwort ist schon festgelegt', 409);
-        if (!fromHomeNetwork()) fail('Das erste Passwort kann nur im Heimnetz festgelegt werden', 403);
+        $reset = meta('password') !== null && resetRequested();
+        if (meta('password') !== null && !$reset) fail('Passwort ist schon festgelegt', 409);
+        if (!fromHomeNetwork()) fail('Das Passwort kann nur im Heimnetz festgelegt werden', 403);
+        if ($reset) {   // new password: every device logs in again, two-factor login is switched off, the file is removed
+            db()->exec('DELETE FROM tokens');
+            foreach (['totp', 'totp_pending', 'totp_recovery', 'fails'] as $k) setMeta($k, '');
+            @unlink(__DIR__ . '/passwort-zuruecksetzen.txt');
+        }
         $pw = (string)(body()['password'] ?? '');
         if (mb_strlen($pw) < 8) fail('Das Passwort braucht mindestens 8 Zeichen', 400);
         setMeta('password', password_hash($pw, PASSWORD_DEFAULT));
@@ -239,6 +294,11 @@ try {
         if ($wait > 0) { $m = max(1, (int)ceil($wait / 60)); fail('Zu viele falsche Versuche – bitte in ' . $m . ($m === 1 ? ' Minute' : ' Minuten') . ' noch einmal', 429); }
         $pw = (string)(body()['password'] ?? '');
         if (!checkPassword($pw)) { loginFailed(); sleep(2); fail('Falsches Passwort', 403); }
+        if (totpOn()) {
+            $code = (string)(body()['code'] ?? '');
+            if ($code === '') out(['need2fa' => true], 401);
+            if (!totpCheck((string)meta('totp'), $code)) { loginFailed(); sleep(2); fail('Der Code stimmt nicht', 403); }
+        }
         loginOk();
         out(['token' => newToken()]);
     }
@@ -275,6 +335,46 @@ try {
         setMeta('rev', (string)$rev);
         $pdo->exec('COMMIT');
         out(['rev' => $rev]);
+    }
+
+    if ($a === 'twofa') {       // state of the two-factor login
+        out(['on' => totpOn(), 'recovery' => count(json_decode((string)(meta('totp_recovery') ?? '[]'), true) ?: [])]);
+    }
+
+    if ($a === 'twofaStart') {  // new secret for the authenticator app (only active after a correct code)
+        if (!checkPassword((string)(body()['password'] ?? ''))) { loginFailed(); sleep(2); fail('Das Passwort stimmt nicht', 403); }
+        $secret = b32encode(random_bytes(20));
+        setMeta('totp_pending', $secret);
+        out(['secret' => $secret, 'uri' => 'otpauth://totp/Haushaltsbuch?secret=' . $secret . '&issuer=Haushaltsbuch&digits=6&period=30']);
+    }
+
+    if ($a === 'twofaEnable') {
+        $secret = (string)(meta('totp_pending') ?? '');
+        if ($secret === '' || !totpCheck($secret, (string)(body()['code'] ?? ''), 'totp_pending_used')) { sleep(1); fail('Der Code stimmt nicht – Uhrzeit am Handy prüfen und den aktuellen Code eingeben', 403); }
+        $codes = []; $hashes = [];
+        for ($i = 0; $i < 8; $i++) {
+            $c = strtoupper(substr(b32encode(random_bytes(8)), 0, 10));
+            $codes[] = substr($c, 0, 5) . '-' . substr($c, 5);
+            $hashes[] = password_hash($c, PASSWORD_DEFAULT);
+        }
+        setMeta('totp', $secret); setMeta('totp_pending', ''); setMeta('totp_recovery', json_encode($hashes));
+        setMeta('totp_used', (string)(meta('totp_pending_used') ?? '0'));
+        out(['recovery' => $codes]);
+    }
+
+    if ($a === 'twofaDisable') {
+        $b = body();
+        if (!checkPassword((string)($b['password'] ?? ''))) { loginFailed(); sleep(2); fail('Das Passwort stimmt nicht', 403); }
+        if (totpOn() && !totpCheck((string)meta('totp'), (string)($b['code'] ?? ''))) { loginFailed(); sleep(2); fail('Der Code stimmt nicht', 403); }
+        foreach (['totp', 'totp_pending', 'totp_recovery'] as $k) setMeta($k, '');
+        out(['ok' => true]);
+    }
+
+    if ($a === 'verify') {      // e.g. "PIN vergessen": is this the password of the Synology?
+        if (loginLocked() > 0) fail('Zu viele falsche Versuche – bitte später noch einmal', 429);
+        if (!checkPassword((string)(body()['password'] ?? ''))) { loginFailed(); sleep(2); fail('Das Passwort stimmt nicht', 403); }
+        loginOk();
+        out(['ok' => true]);
     }
 
     if ($a === 'logoutAll') {   // e.g. after a phone was lost: every device has to log in again

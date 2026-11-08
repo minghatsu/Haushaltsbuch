@@ -470,6 +470,41 @@ public class MainActivity extends Activity {
             });
         }
 
+        /** true if the phone itself is protected (pattern, PIN, password) – then "PIN vergessen" can use it. */
+        @JavascriptInterface
+        public boolean deviceSecure() {
+            try {
+                android.app.KeyguardManager km = getSystemService(android.app.KeyguardManager.class);
+                return km != null && km.isDeviceSecure();
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        /** Unlock with the phone's own screen lock (or fingerprint); the answer comes back via window.hbBioDone(id, ok). */
+        @JavascriptInterface
+        @SuppressWarnings("deprecation")
+        public void deviceCredential(final String id) {
+            runOnUiThread(() -> {
+                final java.util.concurrent.Executor ex = getMainExecutor();
+                try {
+                    BiometricPrompt.Builder b = new BiometricPrompt.Builder(MainActivity.this)
+                        .setTitle("Haushaltsbuch entsperren")
+                        .setSubtitle("Mit der Displaysperre deines Handys");
+                    if (android.os.Build.VERSION.SDK_INT >= 30)
+                        b.setAllowedAuthenticators(android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_WEAK
+                            | android.hardware.biometrics.BiometricManager.Authenticators.DEVICE_CREDENTIAL);
+                    else b.setDeviceCredentialAllowed(true);
+                    b.build().authenticate(new CancellationSignal(), ex, new BiometricPrompt.AuthenticationCallback() {
+                        @Override public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult r) { bioDone(id, true); }
+                        @Override public void onAuthenticationError(int code, CharSequence msg) { bioDone(id, false); }
+                    });
+                } catch (Exception e) {
+                    bioDone(id, false);
+                }
+            });
+        }
+
         @JavascriptInterface
         public void scanReceipt(String id, String source) {
             runOnUiThread(() -> { scanId = id; startScan(source); });

@@ -715,6 +715,14 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 @media (min-width:1000px){.astack{margin:0}.astack .acard{left:28%;right:28%}}
 .pwform{display:flex;flex-direction:column;gap:10px}
 #syncSec{display:flex;flex-direction:column;gap:10px}#syncSec:empty{display:none}
+.lockalt{display:flex;flex-direction:column;gap:10px;width:100%;align-items:stretch}.lockalt .link{align-self:center}
+.reccode{font:800 22px var(--f-display);letter-spacing:.06em;white-space:nowrap;background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:16px 10px;user-select:all;-webkit-user-select:all}
+
+.tfa{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
+.tfaqr{align-self:center;background:#fff;border-radius:12px;padding:6px;line-height:0}
+.tfa a.btn{text-decoration:none;color:var(--fg);text-align:center}
+.tfakey{display:block;margin-top:4px;font-family:ui-monospace,monospace;letter-spacing:.04em;word-break:break-all;user-select:all;-webkit-user-select:all}
+.tfacodes{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tfacodes span{font:700 15px ui-monospace,monospace;background:var(--sunk);border-radius:10px;padding:8px;text-align:center;user-select:all;-webkit-user-select:all}
 </style>
 
 <div class="backdrop" id="addBg" hidden><div class="sheet addsheet" role="dialog" aria-label="Was möchtest du hinzufügen?"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><h2>Was möchtest du hinzufügen?</h2><button class="icon-btn" data-addclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -899,6 +907,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
     <p class="small muted" id="loginText" style="margin:0"></p>
     <div class="field" id="loginUrlRow" hidden><label for="loginUrl">Adresse der Synology</label><input class="in" id="loginUrl" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="z. B. 192.168.178.32"></div>
     <div class="field"><label for="loginPw">Passwort</label><input class="in" type="password" id="loginPw" autocomplete="current-password"></div>
+    <div class="field" id="loginCodeRow" hidden><label for="loginCode">Code aus der Authenticator-App</label><input class="in" id="loginCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" style="letter-spacing:.12em;text-align:center"></div>
     <div class="field" id="loginPw2Row" hidden><label for="loginPw2">Passwort wiederholen</label><input class="in" type="password" id="loginPw2" autocomplete="new-password"></div>
     <div class="small" id="loginErr" style="color:var(--bad)"></div>
     <button class="btn primary block" id="loginGo">Verbinden</button>
@@ -922,6 +931,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
     <button class="btn primary" id="lockNext" hidden>Weiter</button>
     <button class="btn" id="lockCancel" hidden>Abbrechen</button>
     <button class="link small" id="lockForgot">PIN vergessen?</button>
+    <div class="lockalt" id="lockAlt" hidden></div>
   </div>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastText"></span><button id="toastAct" hidden>Rückgängig</button></div>
@@ -2896,8 +2906,45 @@ function renderSyncSec(){
       <span class="small muted" id="pwErr" role="alert"></span>
       <div class="bkb"><button class="btn primary" id="pwSave">Passwort ändern</button><button class="btn" id="pwCancel">Abbrechen</button></div></div>`
     :`<div class="bkb"><button class="btn" id="pwOpen">Passwort ändern</button><button class="btn" id="logoutAll">Alle Geräte abmelden</button></div>
-      <span class="small muted">Handy verloren? „Alle Geräte abmelden“ – danach muss sich jedes Gerät neu mit dem Passwort anmelden.</span>`}`;
+      <span class="small muted">Handy verloren? „Alle Geräte abmelden“ – danach muss sich jedes Gerät neu mit dem Passwort anmelden.</span>`}
+    <div class="tfa" id="tfaBox">${tfaHtml()}</div>`;
+  if (UI.tfa===undefined){ UI.tfa=null; api("twofa").then(r=>{ UI.tfa=r; const b=$("tfaBox"); if (b) b.innerHTML=tfaHtml(); }).catch(x=>{ UI.tfa = x.status===404 ? {old:true} : null; const b=$("tfaBox"); if (b) b.innerHTML=tfaHtml(); }); }
 }
+/* Zwei-Faktor-Anmeldung (Authenticator-App) */
+function tfaHtml(){
+  const t=UI.tfa, st=UI.tfaStep||"";
+  const head=`<div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10 18h4M9.5 10.5l2 2 3.5-4"/></svg></span><span class="n"><b>Zwei-Faktor-Anmeldung</b><span>${!t?"wird geprüft …":t.old?"braucht die neue api.php auf der Synology":t.on?`an · ${t.recovery} Wiederherstellungscodes übrig`:"aus"}</span></span></div>`;
+  if (!t||t.old) return head;
+  if (st==="pw") return head+`<span class="small muted">Beim Anmelden eines Geräts brauchst du dann zusätzlich einen 6-stelligen Code aus einer App wie Google Authenticator oder Microsoft Authenticator.</span>
+    <div class="field"><label for="tfaPw">Dein Haushaltsbuch-Passwort</label><input class="in" type="password" id="tfaPw" autocomplete="current-password"></div><span class="small" id="tfaErr" style="color:var(--bad)"></span>
+    <div class="bkb"><button class="btn primary" id="tfaGo">Weiter</button><button class="btn" id="tfaCancel">Abbrechen</button></div>`;
+  if (st==="scan") return head+`<span class="small">1. Öffne deine Authenticator-App und scanne diesen Code${IS_PC?" mit dem Handy":""}:</span>
+    <div class="tfaqr">${qrSvg(UI.tfaUri,200)}</div>
+    ${!IS_PC&&NATIVE?`<a class="btn" href="${esc(UI.tfaUri)}">Direkt in der Authenticator-App öffnen</a>`:""}
+    <span class="small muted">Oder den Schlüssel von Hand eintragen: <b class="tfakey">${esc(UI.tfaSecret.replace(/(.{4})/g,"$1 ").trim())}</b></span>
+    <div class="field"><label for="tfaCode">2. Den 6-stelligen Code aus der App eingeben</label><input class="in" id="tfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="letter-spacing:.2em;text-align:center"></div><span class="small" id="tfaErr" style="color:var(--bad)"></span>
+    <div class="bkb"><button class="btn primary" id="tfaOn">Einschalten</button><button class="btn" id="tfaCancel">Abbrechen</button></div>`;
+  if (st==="codes") return head+`<div class="notice warn"><span><b>Wiederherstellungscodes aufschreiben!</b> Falls dein Handy mit der Authenticator-App verloren geht, meldest du dich mit einem dieser Codes an. Jeder gilt nur einmal. Sie werden nur jetzt angezeigt.</span></div>
+    <div class="tfacodes">${(UI.tfaCodes||[]).map(c=>`<span>${esc(c)}</span>`).join("")}</div>
+    <div class="bkb"><button class="btn" id="tfaCopy">Kopieren</button><button class="btn primary" id="tfaDone">Aufgeschrieben</button></div>`;
+  if (st==="off") return head+`<div class="field"><label for="tfaPw">Passwort</label><input class="in" type="password" id="tfaPw" autocomplete="current-password"></div>
+    <div class="field"><label for="tfaCode">Code aus der App</label><input class="in" id="tfaCode" inputmode="numeric" autocomplete="one-time-code" placeholder="6 Ziffern oder Wiederherstellungscode"></div><span class="small" id="tfaErr" style="color:var(--bad)"></span>
+    <div class="bkb"><button class="btn danger" id="tfaOffGo">Ausschalten</button><button class="btn" id="tfaCancel">Abbrechen</button></div>`;
+  return head+(t.on?`<div class="bkb"><button class="btn" id="tfaOffBtn">Ausschalten</button></div>`:`<span class="small muted">Schützt den Abgleich zusätzlich: Selbst mit deinem Passwort kommt niemand ohne dein Handy an deine Daten.</span><div class="bkb"><button class="btn primary" id="tfaStart">Einrichten</button></div>`);
+}
+function tfaRender(){ const b=$("tfaBox"); if (b) b.innerHTML=tfaHtml(); }
+document.addEventListener("click", async e=>{
+  const t=e.target; if (!t.closest("#tfaBox")) return;
+  const err=m=>{ const x=$("tfaErr"); if (x) x.textContent=m; };
+  if (t.closest("#tfaStart")){ UI.tfaStep="pw"; tfaRender(); setTimeout(()=>$("tfaPw")&&$("tfaPw").focus(),30); return; }
+  if (t.closest("#tfaOffBtn")){ UI.tfaStep="off"; tfaRender(); return; }
+  if (t.closest("#tfaCancel")){ UI.tfaStep=""; tfaRender(); return; }
+  if (t.closest("#tfaGo")){ try { const r=await api("twofaStart",{body:{password:$("tfaPw").value}}); UI.tfaSecret=r.secret; UI.tfaUri=r.uri; UI.tfaStep="scan"; tfaRender(); } catch(x){ err(x.message||"Hat nicht geklappt"); } return; }
+  if (t.closest("#tfaOn")){ try { const r=await api("twofaEnable",{body:{code:$("tfaCode").value.trim()}}); UI.tfaCodes=r.recovery; UI.tfa={on:true, recovery:r.recovery.length}; UI.tfaStep="codes"; UI.tfaSecret=UI.tfaUri=null; tfaRender(); } catch(x){ err(x.message||"Hat nicht geklappt"); } return; }
+  if (t.closest("#tfaCopy")){ try{ await navigator.clipboard.writeText((UI.tfaCodes||[]).join("\n")); toast("Kopiert"); }catch(_){ toast("Kopieren ging nicht – bitte abschreiben"); } return; }
+  if (t.closest("#tfaDone")){ UI.tfaCodes=null; UI.tfaStep=""; tfaRender(); toast("Zwei-Faktor-Anmeldung ist an"); return; }
+  if (t.closest("#tfaOffGo")){ try { await api("twofaDisable",{body:{password:$("tfaPw").value, code:$("tfaCode").value.trim()}}); UI.tfa={on:false, recovery:0}; UI.tfaStep=""; tfaRender(); toast("Zwei-Faktor-Anmeldung ist aus"); } catch(x){ err(x.message||"Hat nicht geklappt"); } }
+});
 document.addEventListener("click", async e=>{
   const t=e.target;
   if (t.closest("#pwOpen")){ UI.pwForm=true; renderSyncSec(); setTimeout(()=>$("pwOld")&&$("pwOld").focus(),30); return; }
@@ -2917,6 +2964,62 @@ document.addEventListener("click", async e=>{
     catch(x){ toast(x.status===404 ? "Dafür braucht die Synology die neue api.php" : "Hat nicht geklappt"); }
   }
 });
+
+/* ---------- kleiner QR-Code-Erzeuger (Byte-Modus, Fehlerkorrektur M, Version 1–10) ---------- */
+function qrMatrix(text){
+  const data=[...new TextEncoder().encode(text)];
+  const ECC=[10,16,26,18,24,16,18,22,22,26], BLK=[1,1,1,2,2,4,4,4,5,5];
+  const raw=v=>{ let r=(16*v+128)*v+64; if (v>=2){ const n=Math.floor(v/7)+2; r-=(25*n-10)*n-55; if (v>=7) r-=36; } return Math.floor(r/8); };
+  let ver=0;
+  for (let v=1; v<=10; v++){ const cap=raw(v)-ECC[v-1]*BLK[v-1]; if (4+(v<10?8:16)+data.length*8 <= cap*8){ ver=v; break; } }
+  if (!ver) throw new Error("Text zu lang für den QR-Code");
+  const size=ver*4+17, M=Array.from({length:size},()=>Array(size).fill(false)), F=Array.from({length:size},()=>Array(size).fill(false));
+  const set=(x,y,d)=>{ M[y][x]=d; F[y][x]=true; };
+  for (let i=0;i<size;i++){ set(6,i,i%2===0); set(i,6,i%2===0); }
+  for (const [cx,cy] of [[3,3],[size-4,3],[3,size-4]]) for (let dy=-4;dy<=4;dy++) for (let dx=-4;dx<=4;dx++){ const x=cx+dx,y=cy+dy; if (x>=0&&x<size&&y>=0&&y<size){ const d=Math.max(Math.abs(dx),Math.abs(dy)); set(x,y,d!==2&&d!==4); } }
+  const AL=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50]][ver-1];
+  AL.forEach((a,i)=>AL.forEach((b,j)=>{ if ((i===0&&j===0)||(i===0&&j===AL.length-1)||(i===AL.length-1&&j===0)) return; for (let dy=-2;dy<=2;dy++) for (let dx=-2;dx<=2;dx++) set(a+dx,b+dy,Math.max(Math.abs(dx),Math.abs(dy))!==1); }));
+  const fmt=mask=>{ const d=(0<<3)|mask; let r=d; for (let i=0;i<10;i++) r=(r<<1)^((r>>>9)*0x537); const b=((d<<10)|r)^0x5412, g=i=>((b>>>i)&1)!==0;
+    for (let i=0;i<=5;i++) set(8,i,g(i)); set(8,7,g(6)); set(8,8,g(7)); set(7,8,g(8)); for (let i=9;i<15;i++) set(14-i,8,g(i));
+    for (let i=0;i<8;i++) set(size-1-i,8,g(i)); for (let i=8;i<15;i++) set(8,size-15+i,g(i)); set(8,size-8,true); };
+  fmt(0);
+  if (ver>=7){ let r=ver; for (let i=0;i<12;i++) r=(r<<1)^((r>>>11)*0x1F25); const b=(ver<<12)|r; for (let i=0;i<18;i++){ const bit=((b>>>i)&1)!==0, a=size-11+i%3, c=Math.floor(i/3); set(a,c,bit); set(c,a,bit); } }
+  // data codewords
+  const bits=[], push=(v,n)=>{ for (let i=n-1;i>=0;i--) bits.push((v>>>i)&1); };
+  push(4,4); push(data.length, ver<10?8:16); data.forEach(b=>push(b,8));
+  const rawCw=raw(ver), ecc=ECC[ver-1], nb=BLK[ver-1], dataCw=rawCw-ecc*nb;
+  push(0, Math.min(4, dataCw*8-bits.length)); while (bits.length%8) bits.push(0);
+  const cw=[]; for (let i=0;i<bits.length;i+=8) cw.push(parseInt(bits.slice(i,i+8).join(""),2));
+  for (let p=0xEC; cw.length<dataCw; p^=0xEC^0x11) cw.push(p);
+  const mul=(x,y)=>{ let z=0; for (let i=7;i>=0;i--){ z=(z<<1)^((z>>>7)*0x11D); z^=((y>>>i)&1)*x; } return z; };
+  const div=Array(ecc).fill(0); div[ecc-1]=1; let root=1;
+  for (let i=0;i<ecc;i++){ for (let j=0;j<ecc;j++){ div[j]=mul(div[j],root); if (j+1<ecc) div[j]^=div[j+1]; } root=mul(root,2); }
+  const rem=d=>{ const r=Array(ecc).fill(0); for (const b of d){ const f=b^r.shift(); r.push(0); for (let i=0;i<ecc;i++) r[i]^=mul(div[i],f); } return r; };
+  const nShort=nb-rawCw%nb, shortLen=Math.floor(rawCw/nb), blocks=[];
+  for (let i=0,k=0;i<nb;i++){ const len=shortLen-ecc+(i<nShort?0:1), d=cw.slice(k,k+len); k+=len; const e=rem(d); if (i<nShort) d.push(0); blocks.push(d.concat(e)); }
+  const out=[]; for (let i=0;i<blocks[0].length;i++) blocks.forEach((b,j)=>{ if (i!==shortLen-ecc || j>=nShort) out.push(b[i]); });
+  let i=0;
+  for (let right=size-1; right>=1; right-=2){ if (right===6) right=5;
+    for (let v=0; v<size; v++) for (let j=0;j<2;j++){ const x=right-j, up=((right+1)&2)===0, y=up?size-1-v:v;
+      if (!F[y][x] && i<out.length*8){ M[y][x]=((out[i>>>3]>>>(7-(i&7)))&1)!==0; i++; } } }
+  // choose the mask with the lowest penalty
+  const MASK=[(x,y)=>(x+y)%2===0,(x,y)=>y%2===0,(x,y)=>x%3===0,(x,y)=>(x+y)%3===0,(x,y)=>(Math.floor(x/3)+Math.floor(y/2))%2===0,(x,y)=>x*y%2+x*y%3===0,(x,y)=>(x*y%2+x*y%3)%2===0,(x,y)=>((x+y)%2+x*y%3)%2===0];
+  const apply=m=>{ for (let y=0;y<size;y++) for (let x=0;x<size;x++) if (!F[y][x] && MASK[m](x,y)) M[y][x]=!M[y][x]; };
+  const penalty=()=>{ let p=0, dark=0;
+    for (let a=0;a<2;a++) for (let y=0;y<size;y++){ let run=1; for (let x=1;x<=size;x++){ const c=x<size&&(a?M[x][y]:M[y][x])===(a?M[x-1][y]:M[y][x-1]); if (c) run++; else { if (run>=5) p+=run-2; run=1; } } }
+    for (let y=0;y<size-1;y++) for (let x=0;x<size-1;x++){ const c=M[y][x]; if (c===M[y][x+1]&&c===M[y+1][x]&&c===M[y+1][x+1]) p+=3; }
+    for (let y=0;y<size;y++) for (let x=0;x<size;x++) if (M[y][x]) dark++;
+    return p+Math.floor(Math.abs(dark*20-size*size*10)/(size*size))*10; };
+  let best=0, bp=Infinity;
+  for (let m=0;m<8;m++){ apply(m); fmt(m); const p=penalty(); if (p<bp){ bp=p; best=m; } apply(m); }
+  apply(best); fmt(best);
+  return M;
+}
+function qrSvg(text, px){
+  const M=qrMatrix(text), n=M.length, q=4; let d="";
+  for (let y=0;y<n;y++) for (let x=0;x<n;x++) if (M[y][x]) d+=`M${x+q},${y+q}h1v1h-1z`;
+  return `<svg class="qr" viewBox="0 0 ${n+2*q} ${n+2*q}" width="${px||200}" height="${px||200}" shape-rendering="crispEdges" role="img" aria-label="QR-Code"><rect width="100%" height="100%" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+}
 
 const SP_PAGES = {
   konten:["Konten & Spaces","wallet"], budgets:["Monatsbudgets","target"], schulden:["Schulden","bank"], backup:["Abgleich & Backup","cloud"],
@@ -3278,6 +3381,49 @@ function pinHash(pin, salt){ let h=salt+":"+pin; for (let i=0;i<2000;i++) h=sha2
 const BIO = !!(window.AndroidBridge && window.AndroidBridge.biometricAvailable && window.AndroidBridge.biometricAvailable());
 const LOCK = { mode:null, pin:"", first:"", fails:0, until:0, hiddenAt:0, done:null };
 lockTriesLoad();
+
+/* ---------- PIN vergessen: Displaysperre des Handys, Synology-Passwort oder Wiederherstellungscode ---------- */
+function recoveryCode(){ const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r=crypto.getRandomValues(new Uint8Array(12)); let c=""; for (let i=0;i<12;i++){ c+=A[r[i]%A.length]; if (i===3||i===7) c+="-"; } return c; }
+function recNorm(c){ return String(c||"").toUpperCase().replace(/[^A-Z0-9]/g,"").replace(/O/g,"0").replace(/I/g,"1"); }
+function lockPanel(html){ const on=!!html; $("lockAlt").innerHTML=html||""; $("lockAlt").hidden=!on; ["pinDots","keypad","lockForgot"].forEach(id=>$(id).hidden=on); if (!on) $("lockForgot").hidden = LOCK.mode!=="unlock"; }
+function showRecovery(code, done){
+  $("lockTitle").textContent="Dein Wiederherstellungscode"; $("lockText").textContent="Schreib ihn auf und bewahr ihn sicher auf. Damit entsperrst du die App, falls du die PIN vergisst.";
+  lockPanel(`<div class="reccode">${esc(code)}</div><span class="small muted">Er wird nur dieses eine Mal angezeigt.</span><button class="btn primary" id="recDone">Ich habe ihn aufgeschrieben</button>`);
+  $("lockNext").hidden=true; $("lockCancel").hidden=true;
+  $("recDone").onclick=()=>{ lockPanel(""); done(); };
+}
+const CAN_DEVICE = !!(window.AndroidBridge && window.AndroidBridge.deviceCredential && window.AndroidBridge.deviceSecure && (()=>{ try{ return window.AndroidBridge.deviceSecure(); }catch(e){ return false; } })());
+function lockForgotShow(){
+  const cfg=lockCfg()||{};
+  const opts=[];
+  if (CAN_DEVICE) opts.push(`<button class="btn block" id="lfDevice">Mit der Displaysperre des Handys</button>`);
+  if (SYNC.token) opts.push(`<button class="btn block" id="lfPw">Mit dem Synology-Passwort</button>`);
+  if (cfg.rec) opts.push(`<button class="btn block" id="lfRec">Mit dem Wiederherstellungscode</button>`);
+  $("lockText").textContent = opts.length ? "So kannst du die App trotzdem entsperren und eine neue PIN festlegen:" : "";
+  lockPanel(`${opts.join("")}${!opts.length?`<span class="small">Die PIN lässt sich auf diesem Gerät nicht zurücksetzen. Lösch die App-Daten (bzw. installier das Programm neu) und melde dich mit deiner Synology an – dann kommen deine Daten zurück.</span>`:""}<button class="link small" id="lfBack">Zurück zur PIN</button>`);
+}
+function lockForgotOk(){ LOCK.fails=0; LOCK.rounds=0; LOCK.until=0; lockTriesSave(); LOCK.recUsed=true; lockPanel(""); toast("Entsperrt – leg jetzt eine neue PIN fest"); lockShow("set", ()=>renderLockEd()); }
+document.addEventListener("click", async e=>{
+  const t=e.target; if (!t.closest("#lockAlt")) return;
+  if (t.closest("#lfBack")){ lockPanel(""); $("lockText").textContent="Gib deine PIN ein."; return; }
+  if (t.closest("#lfDevice")){ const id=newId(); bioWaiting[id]=ok=>{ if (ok) { LOCK.recUsed=false; lockForgotOk(); } else $("lockErr").textContent="Nicht entsperrt."; }; try{ AndroidBridge.deviceCredential(id); }catch(_){} return; }
+  if (t.closest("#lfPw")){ lockPanel(`<input class="in" type="password" id="lfPwIn" placeholder="Synology-Passwort fürs Haushaltsbuch" autocomplete="current-password"><button class="btn primary block" id="lfPwGo">Entsperren</button><button class="link small" id="lfBack">Zurück zur PIN</button>`); setTimeout(()=>$("lfPwIn").focus(),30); return; }
+  if (t.closest("#lfPwGo")){
+    const pw=$("lfPwIn").value; if (!pw) return; $("lfPwGo").disabled=true; $("lockErr").textContent="";
+    try { await api("verify",{body:{password:pw}}); LOCK.recUsed=false; lockForgotOk(); }
+    catch(x){ $("lockErr").textContent = x.status===403 ? "Das Passwort stimmt nicht." : x.status===429 ? x.message : x.status===404 ? "Dafür braucht die Synology die neue api.php." : "Synology gerade nicht erreichbar."; }
+    finally { const b=$("lfPwGo"); if (b) b.disabled=false; }
+    return;
+  }
+  if (t.closest("#lfRec")){ lockPanel(`<input class="in" id="lfRecIn" placeholder="z. B. K7QM-4XPA-9TRE" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-align:center;letter-spacing:.08em"><button class="btn primary block" id="lfRecGo">Entsperren</button><button class="link small" id="lfBack">Zurück zur PIN</button>`); setTimeout(()=>$("lfRecIn").focus(),30); return; }
+  if (t.closest("#lfRecGo")){
+    const cfg=lockCfg()||{};
+    if (Date.now()<LOCK.until){ $("lockErr").textContent=`Zu viele Versuche – warte ${Math.ceil((LOCK.until-Date.now())/1000)} Sekunden.`; return; }
+    if (cfg.rec && pinHash(recNorm($("lfRecIn").value), cfg.rec.salt)===cfg.rec.hash) lockForgotOk();
+    else { LOCK.fails++; if (LOCK.fails>=5){ LOCK.rounds=(LOCK.rounds||0)+1; LOCK.until=Date.now()+[30,120,600,3600][Math.min(3,LOCK.rounds-1)]*1000; LOCK.fails=0; } lockTriesSave(); $("lockErr").textContent="Der Code stimmt nicht."; }
+  }
+});
+
 function lockShow(mode, done){
   LOCK.mode=mode; LOCK.pin=""; LOCK.first=""; LOCK.done=done||null;
   const cfg=lockCfg();
@@ -3287,7 +3433,7 @@ function lockShow(mode, done){
   $("lockNext").hidden = mode!=="set";
   $("lockForgot").hidden = mode!=="unlock";
   $("bioKey").classList.toggle("off", !(mode==="unlock" && BIO && cfg && cfg.bio));
-  $("lockErr").textContent=""; lockDots(); $("lockBg").hidden=false;
+  lockPanel(""); $("lockErr").textContent=""; lockDots(); $("lockBg").hidden=false;
   if (mode==="unlock" && BIO && cfg && cfg.bio) setTimeout(lockBio, 300);
 }
 function lockDots(){
@@ -3309,7 +3455,11 @@ function lockKey(k){
     if (LOCK.first && LOCK.pin.length===LOCK.first.length){
       if (LOCK.pin!==LOCK.first){ LOCK.first=""; $("lockNext").hidden=false; $("lockText").textContent="Wähl eine PIN mit 4 bis 6 Ziffern."; lockWrong("Die PINs stimmen nicht überein. Nochmal von vorn."); return; }
       const salt=newId(); const old=lockCfg();
-      try { localStorage.setItem(LOCK_KEY, JSON.stringify({salt, hash:pinHash(LOCK.pin,salt), len:LOCK.pin.length, bio: old? !!old.bio : BIO})); } catch(e){ lockWrong("PIN konnte nicht gespeichert werden."); return; }
+      const keepRec = old && old.rec && !LOCK.recUsed, code = keepRec ? null : recoveryCode();
+      const rec = keepRec ? old.rec : (()=>{ const s2=newId(); return {salt:s2, hash:pinHash(recNorm(code), s2)}; })();
+      try { localStorage.setItem(LOCK_KEY, JSON.stringify({salt, hash:pinHash(LOCK.pin,salt), len:LOCK.pin.length, bio: old? !!old.bio : BIO, rec})); } catch(e){ lockWrong("PIN konnte nicht gespeichert werden."); return; }
+      LOCK.recUsed=false;
+      if (code){ showRecovery(code, ()=>{ lockClose(true); toast("App-Sperre ist an"); }); return; }
       lockClose(true); toast("App-Sperre ist an"); return;
     }
     if (!LOCK.first && LOCK.pin.length===6) lockSetNext();
@@ -3332,7 +3482,7 @@ window.hbBioDone=(id, ok)=>{ const f=bioWaiting[id]; if (f){ delete bioWaiting[i
 $("keypad").addEventListener("click", e=>{ const b=e.target.closest("[data-k]"); if (b) lockKey(b.dataset.k); });
 document.addEventListener("keydown", e=>{ if (!LOCK.mode) return; if (/^\d$/.test(e.key)) lockKey(e.key); else if (e.key==="Backspace") lockKey("del"); else if (e.key==="Enter" && LOCK.mode==="set" && !LOCK.first) lockSetNext(); else if (e.key==="Escape" && LOCK.mode!=="unlock") lockClose(false); });
 $("lockCancel").onclick=()=>lockClose(false);
-$("lockForgot").onclick=()=>{ $("lockErr").textContent="Die PIN lässt sich nicht zurückholen. Lösch in den Android-Einstellungen die App-Daten (bzw. installier das Programm am PC neu) und melde dich wieder mit deiner Synology an – dann sind alle Daten wieder da."; };
+$("lockForgot").onclick=()=>{ lockForgotShow(); };
 // in set mode, 4 or 5 digits are confirmed with a tap on the PIN dots or Enter
 $("pinDots").addEventListener("click", ()=>{ if (LOCK.mode==="set" && !LOCK.first) lockSetNext(); });
 // lock when the app comes back after more than a minute in the background
@@ -3346,12 +3496,15 @@ function renderLockEd(){
   el.innerHTML = cfg
     ? `<div class="meta-row"><span>App-Sperre ist <b>an</b> (PIN mit ${Number(cfg.len)||0} Ziffern)</span></div>
        ${BIO?`<div class="switch"><label for="lockBioChk"><b>Fingerabdruck</b><br><span class="small muted">Statt PIN mit Fingerabdruck entsperren</span></label><input type="checkbox" id="lockBioChk" ${cfg.bio?"checked":""}></div>`:""}
-       <div class="row-btns"><button class="btn" id="lockChange">PIN ändern</button><button class="btn" id="lockOff">Sperre ausschalten</button></div>`
+       <div class="row-btns"><button class="btn" id="lockChange">PIN ändern</button><button class="btn" id="lockOff">Sperre ausschalten</button></div>
+       <div class="meta-row"><span class="small muted">${cfg.rec?"Wiederherstellungscode ist eingerichtet – damit entsperrst du die App, falls du die PIN vergisst.":"Noch kein Wiederherstellungscode – leg einen an, falls du die PIN mal vergisst."}</span></div>
+       <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="lockRecNew">${cfg.rec?"Neuen Wiederherstellungscode":"Wiederherstellungscode anlegen"}</button></div>`
     : `<div class="meta-row"><span>Schützt deine Finanzen mit einer PIN${BIO?" oder deinem Fingerabdruck":""}, wenn jemand anderes dein ${NATIVE&&!(window.AndroidBridge||{}).desktop?"Handy":"Gerät"} benutzt.</span></div><div class="row-btns"><button class="btn primary" id="lockOn">App-Sperre einrichten</button></div>`;
 }
 document.addEventListener("click", e=>{
   if (e.target.closest("#lockOn")) lockShow("set", ok=>{ renderLockEd(); });
   else if (e.target.closest("#lockChange")) lockShow("check", ok=>{ if (ok) lockShow("set", ()=>renderLockEd()); });
+  else if (e.target.closest("#lockRecNew")) lockShow("check", ok=>{ if (!ok) return; const cfg=lockCfg(); if (!cfg) return; const code=recoveryCode(), s2=newId(); cfg.rec={salt:s2, hash:pinHash(recNorm(code), s2)}; try{ localStorage.setItem(LOCK_KEY, JSON.stringify(cfg)); }catch(_){} $("lockBg").hidden=false; LOCK.mode="info"; showRecovery(code, ()=>{ $("lockBg").hidden=true; LOCK.mode=null; renderLockEd(); toast("Wiederherstellungscode gespeichert"); }); });
   else if (e.target.closest("#lockOff")) lockShow("check", ok=>{ if (ok){ try { localStorage.removeItem(LOCK_KEY); } catch(err){} toast("App-Sperre ist aus"); } renderLockEd(); });
 });
 document.addEventListener("change", e=>{
@@ -4275,7 +4428,7 @@ async function api(action, opts={}){
   const url = SERVER + (SERVER.includes("?")?"&":"?") + "a=" + action + (opts.qs||"");
   const r = await request(url, opts.body);
   let j={}; try { j = JSON.parse(r.text); } catch(e){}
-  if (r.status < 200 || r.status >= 300){ const err = new Error(j.error||("HTTP "+r.status)); err.status=r.status; throw err; }
+  if (r.status < 200 || r.status >= 300){ const err = new Error(j.error||("HTTP "+r.status)); err.status=r.status; err.data=j; throw err; }
   return j;
 }
 async function syncNow(){
@@ -4359,12 +4512,14 @@ async function showLogin(){
   loginChecked="";
   if (!SERVER){ $("loginText").textContent="Gib die Adresse deiner Synology ein und tippe auf „Verbinden“."; $("loginGo").disabled=false; return; }
   $("loginText").textContent="Verbindung wird geprüft …"; $("loginGo").disabled=true;
-  try { const st = await api("status"); SYNC.setup = !!st.setup; loginChecked=SERVER; }
+  try { const st = await api("status"); SYNC.setup = !!st.setup; SYNC.reset = !!st.reset; loginChecked=SERVER; }
   catch(e){ $("loginText").textContent = NATIVE ? "Unter dieser Adresse ist die Synology gerade nicht erreichbar. Prüfe die Adresse oder mach erst einmal ohne Abgleich weiter." : "Die Synology ist gerade nicht erreichbar. Du kannst erst einmal ohne Abgleich weitermachen."; $("loginGo").disabled=false; return; }
   $("loginGo").disabled=false;
   $("loginPw2Row").hidden = !SYNC.setup;
-  $("loginTitle").textContent = SYNC.setup ? "Passwort festlegen" : "Mit deiner Synology verbinden";
-  $("loginText").textContent = SYNC.setup
+  $("loginTitle").textContent = SYNC.reset ? "Neues Passwort festlegen" : SYNC.setup ? "Passwort festlegen" : "Mit deiner Synology verbinden";
+  $("loginText").textContent = SYNC.reset
+    ? "Auf der Synology liegt die Datei passwort-zuruecksetzen.txt. Leg jetzt ein neues Passwort fest – deine Daten bleiben erhalten, alle anderen Geräte melden sich neu an, die Zwei-Faktor-Anmeldung ist danach aus."
+    : SYNC.setup
     ? "Lege ein Passwort für dein Haushaltsbuch fest (mindestens 8 Zeichen). Damit meldest du dich auf jedem Gerät einmal an."
     : "Gib dein Haushaltsbuch-Passwort ein. Danach siehst du auf diesem Gerät dieselben Daten wie überall.";
   setTimeout(()=>$("loginPw").focus(), 50);
@@ -4383,8 +4538,10 @@ async function doLogin(){
   if (SYNC.setup && pw!==$("loginPw2").value){ $("loginErr").textContent="Die beiden Passwörter sind nicht gleich."; return; }
   $("loginGo").disabled=true; $("loginErr").textContent="";
   try {
-    const r = await api(SYNC.setup ? "setup" : "login", {body:{password:pw}});
-    const firstSetup = SYNC.setup;
+    const code=$("loginCode").value.trim();
+    const r = await api(SYNC.setup ? "setup" : "login", {body: SYNC.setup ? {password:pw} : (code ? {password:pw, code} : {password:pw})});
+    const firstSetup = SYNC.setup && !SYNC.reset;   // after a password reset the server keeps its data
+    SYNC.reset=false; $("loginCodeRow").hidden=true; $("loginCode").value="";
     SYNC.token=r.token; SYNC.rev=0; SYNC.skipped=false; SYNC.queue=[];
     if (firstSetup){ // new server: upload what this device has
       for (const k of ["tx","txb","fixed","months","debts"]) for (const [id,d] of Object.entries(memStore[k])) SYNC.queue.push({col:k,id,data:d});
@@ -4397,7 +4554,10 @@ async function doLogin(){
     saveSync(); $("loginBg").hidden=true; $("loginPw").value=""; $("loginPw2").value="";
     toast(firstSetup ? "Passwort gespeichert, Daten werden hochgeladen" : "Verbunden");
     startSync();
-  } catch(e){ $("loginErr").textContent = e.status===403 ? "Falsches Passwort." : (e.message||"Verbindung fehlgeschlagen."); }
+  } catch(e){
+    if (e.status===401 && e.data && e.data.need2fa){ $("loginCodeRow").hidden=false; $("loginErr").textContent=""; $("loginText").textContent="Zwei-Faktor-Anmeldung ist an: Gib den 6-stelligen Code aus deiner Authenticator-App ein."; setTimeout(()=>$("loginCode").focus(),30); }
+    else $("loginErr").textContent = e.status===403 ? (e.message||"Falsches Passwort.") : (e.message||"Verbindung fehlgeschlagen.");
+  }
   finally { $("loginGo").disabled=false; }
 }
 $("loginGo").onclick = doLogin;
