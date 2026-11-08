@@ -34,7 +34,14 @@ header('X-Frame-Options: DENY');
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
 // Datenordner mit zufälligem Namen, damit die Datenbank-Datei nicht erraten und heruntergeladen werden kann.
-const DATA_DIR = __DIR__ . '/data-__DATA_SUFFIX__';
+// The installation gives it a random name; a replaced api.php finds the existing folder by itself.
+define('DATA_DIR', (function (): string {
+    $fixed = __DIR__ . '/data-__DATA_SUFFIX__';
+    if (strpos($fixed, '__DATA' . '_SUFFIX__') === false) return $fixed;      // name filled in at installation
+    $found = glob(__DIR__ . '/data-*', GLOB_ONLYDIR) ?: [];
+    if ($found) { usort($found, fn($a, $b) => filemtime($b) <=> filemtime($a)); return $found[0]; }
+    return __DIR__ . '/data-' . bin2hex(random_bytes(12));
+})());
 const DEPLOY_REPO = 'minghatsu/haushaltsbuch';
 const DEPLOY_AUD = 'haushaltsbuch-deploy';
 const GH_ISSUER = 'https://token.actions.githubusercontent.com';
