@@ -233,6 +233,45 @@ ipcMain.on("http", async (e, req) => {
   e.sender.executeJavaScript(`window.hbHttpDone && window.hbHttpDone(${JSON.stringify(req.id)}, ${status}, ${JSON.stringify(text)})`).catch(() => {});
 });
 
+/* ---------- self-update from the GitHub release (private repo: read-only key the user entered) ---------- */
+function nativeRev() { try { return String(JSON.parse(fs.readFileSync(path.join(__dirname, "native.json"), "utf8")).rev || 0); } catch (e) { return "0"; } }
+ipcMain.on("nativeRev", (e) => { e.returnValue = nativeRev(); });
+ipcMain.on("ghFetch", async (e, req) => {
+  let result = "", err = "";
+  try {
+    if (!String(req.url).startsWith("https://api.github.com/repos/minghatsu/")) throw new Error("Adresse nicht erlaubt");
+    const json = req.kind === "json";
+    let r = await fetch(req.url, { redirect: "manual", signal: AbortSignal.timeout(300000), headers: {
+      Authorization: "Bearer " + req.token, "User-Agent": "FinanzMAMI", Accept: json ? "application/vnd.github+json" : "application/octet-stream" } });
+    if (r.status >= 300 && r.status < 400) {     // download link of the file: fetched without the key
+      const loc = r.headers.get("location");
+      if (!loc || !loc.startsWith("https://")) throw new Error("Weiterleitung fehlt");
+      r = await fetch(loc, { signal: AbortSignal.timeout(300000) });
+    }
+    if (r.status === 401 || r.status === 403) throw new Error("Update-Schlüssel ungültig oder abgelaufen");
+    if (r.status !== 200) throw new Error("GitHub antwortet mit " + r.status);
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (json) result = buf.toString("utf8");
+    else if (req.kind === "app") {
+      const html = buf.toString("utf8");
+      if (!signedByBuild(html)) throw new Error("Signatur stimmt nicht");
+      if (html.includes('id="loginBg"') && versionOf(html) > versionOf(newestApp())) {
+        const tmp = cachedFile() + ".tmp"; fs.writeFileSync(tmp, html, "utf8"); fs.renameSync(tmp, cachedFile()); result = "saved";
+      } else result = "same";
+    } else if (req.kind === "exe") {
+      if (buf.length < 1000000 || buf.subarray(0, 2).toString() !== "MZ") throw new Error("Download unvollständig");
+      const f = path.join(app.getPath("temp"), "FinanzMAMI-Update.exe");
+      fs.writeFileSync(f, buf);
+      // silent install; the installer starts the app again afterwards
+      require("child_process").spawn(f, ["/S", "--force-run"], { detached: true, stdio: "ignore" }).unref();
+      result = "installing";
+      setTimeout(() => { quitting = true; app.quit(); }, 800);
+    }
+  } catch (x) { err = String((x && x.message) || x); }
+  if (e.sender.isDestroyed()) return;
+  e.sender.executeJavaScript(`window.hbGhDone && window.hbGhDone(${JSON.stringify(req.id)}, ${JSON.stringify(result)}, ${JSON.stringify(err)})`).catch(() => {});
+});
+
 // merchant logos: downloaded here and handed to the app as data URL (the app keeps them for offline use)
 ipcMain.on("fetchImage", async (e, req) => {
   let data = null;

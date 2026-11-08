@@ -59,6 +59,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: app.html holen
         env:
           GH_TOKEN: ${{ github.token }}
@@ -74,6 +76,8 @@ jobs:
         run: |
           mkdir -p android/app/src/main/assets
           cp app.html android/app/src/main/assets/index.html
+          # version of the Android part: the app compares it with the release to know when a new APK is needed
+          git rev-list --count HEAD -- android/ > android/app/src/main/assets/native.txt
           cd android
           if ! gradle assembleRelease --no-daemon > ../gradle.log 2>&1; then
             # show the compiler/gradle errors as annotations, so they can be read without the full log
@@ -92,6 +96,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: app.html holen
         env:
           GH_TOKEN: ${{ github.token }}
@@ -122,6 +128,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: app.html holen
         env:
           GH_TOKEN: ${{ github.token }}
@@ -130,6 +138,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Version des PC-Teils
+        shell: bash
+        run: |
+          echo "{\"rev\": $(git rev-list --count HEAD -- desktop/)}" > desktop/native.json
+          cat desktop/native.json
       - name: Installer bauen
         working-directory: desktop
         env:
@@ -152,16 +165,19 @@ jobs:
       id-token: write   # signiertes GitHub-Token, mit dem die Synology neue Versionen annimmt
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Downloads bereitstellen
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release download build-${{ github.run_number }} -D . --clobber
           ls -la
+          APK=$(git rev-list --count HEAD -- android/); EXE=$(git rev-list --count HEAD -- desktop/)
           gh release delete neueste -y --cleanup-tag || true
           gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html \
             --title "Finanz MAMI (Build ${{ github.run_number }})" \
-            --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen."
+            --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=$APK exe=$EXE"
           gh release delete build-${{ github.run_number }} -y --cleanup-tag || true
       - name: Neue Version an die Synology schicken (PC und Handy aktualisieren sich dann selbst)
         continue-on-error: true

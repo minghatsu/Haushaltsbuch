@@ -817,6 +817,10 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div id="autoBk"></div>
       <input type="file" id="backupFile" accept=".json,application/json,text/plain" hidden>
     </div>
+    <div class="card sp bk" data-sp="backup" id="updCard" hidden>
+      <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg></span><span class="n"><b>Automatische Updates</b><span id="updState">Die App holt neue Versionen selbst.</span></span></div>
+      <div id="updBody"></div>
+    </div>
     <div class="card sp bk" data-sp="backup" hidden>
       <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M5 12a7 7 0 1 1 2 5M5 18v-4h4"/></svg></span><span class="n"><b>Gemerkte Zuordnungen</b><span id="rulesInfo"></span></span></div>
       <span class="small muted">Beim Kontoauszug-Import merkt sich die App, welcher Empfänger in welche Kategorie gehört. Zurücksetzen löscht nur diese Merkliste.</span>
@@ -3216,6 +3220,7 @@ function renderSpPages(){
   $("setHome").hidden = !!k; $("spHead").hidden = !k;
   document.querySelectorAll("#v-more [data-sp]").forEach(el=>el.hidden = el.dataset.sp!==k || (el.id==="syncBox" && !SYNCABLE));
   if (k) $("spTitle").textContent = SP_PAGES[k][0]; else renderSetHome();
+  if (k==="backup") renderUpd();
 }
 document.addEventListener("change", e=>{
   if (e.target.id!=="sDark") return;
@@ -4651,6 +4656,72 @@ async function syncNow(){
     renderSyncDot();
   } finally { SYNC.busy=false; }
 }
+/* ---------- self-update straight from the GitHub release (works anywhere, no Synology needed) ---------- */
+const GH_REL = "https://api.github.com/repos/minghatsu/Haushaltsbuch/releases/tags/neueste";
+const UPD = {msg:"", ts:0, busy:false, last:0, started:Date.now()};
+const ghWait = {};
+window.hbGhDone = (id, res, err) => { const f=ghWait[id]; if (f){ delete ghWait[id]; f(res, err); } };
+const canGh = () => !!(window.AndroidBridge && window.AndroidBridge.ghFetch);
+const updKey = () => String((S.settings && S.settings.updKey) || "");
+function ghFetch(url, kind){ return new Promise((ok, no)=>{ const id=newId(); ghWait[id]=(r,e)=> e ? no(new Error(e)) : ok(r); window.AndroidBridge.ghFetch(id, url, updKey(), kind); }); }
+async function ghCheck(manual){
+  if (!canGh() || !updKey() || UPD.busy) return;
+  if (!manual && Date.now()-UPD.last < 30*60*1000) return;
+  UPD.busy=true; UPD.last=Date.now(); if (manual){ UPD.msg="Prüfe …"; renderUpd(); }
+  try {
+    const rel = JSON.parse(await ghFetch(GH_REL, "json")), body = String(rel.body||"");
+    const num = k => { const m=body.match(new RegExp("\\b"+k+"=(\\d+)")); return m ? +m[1] : 0; };
+    const asset = n => (rel.assets||[]).find(a=>a.name===n);
+    const desk = !!window.AndroidBridge.desktop, mine = +(window.AndroidBridge.nativeRev() || 0), theirs = num(desk ? "exe" : "apk");
+    if (theirs > mine){
+      const a = asset(desk ? "Haushaltsbuch-Setup.exe" : "Haushaltsbuch.apk");
+      if (a){
+        if (desk){
+          const go = async () => { toast("Update wird geladen – Finanz MAMI startet gleich neu", null, null, 30000); try { await ghFetch(a.url, "exe"); } catch(e){ toast(e.message); } };
+          if (Date.now()-UPD.started < 2*60*1000 || manual) await go(); else toast("Neue PC-Version ist da", go, "Jetzt installieren", 20000);
+        } else {
+          const go = async () => { toast("Update wird geladen …", null, null, 20000);
+            try { const r=await ghFetch(a.url, "apk"); if (r==="permission") toast("Bitte „Apps aus dieser Quelle zulassen“ einschalten und dann noch einmal tippen", go, "Installieren", 20000); }
+            catch(e){ toast(e.message); } };
+          toast("Neue App-Version ist da", go, "Installieren", 20000);
+        }
+        UPD.msg = "Neue Version " + (rel.name||"").replace(/^.*\(|\)$/g,"") + " ist da"; return;
+      }
+    }
+    if (num("web") > HB_VERSION){
+      const a = asset("app.html");
+      if (a && await ghFetch(a.url, "app")==="saved"){
+        toast("Neue Version ist da", ()=>window.AndroidBridge.reloadApp(), "Jetzt laden", 15000);
+        UPD.msg = "Neue Version geladen – beim nächsten Start aktiv"; return;
+      }
+    }
+    UPD.msg = "Aktuell – Version " + HB_VERSION;
+  } catch(e){ UPD.msg = e.message || "Prüfen hat nicht geklappt"; }
+  finally { UPD.busy=false; UPD.ts=Date.now(); renderUpd(); }
+}
+function renderUpd(){
+  const card=$("updCard"); if (!card) return;
+  if (!window.AndroidBridge){ card.style.display="none"; return; }
+  const body=$("updBody"), st=$("updState");
+  if (!canGh()){ st.textContent="Diese App-Version kann sich noch nicht selbst aktualisieren – einmal die neue App installieren."; body.innerHTML=""; return; }
+  const has=!!updKey();
+  st.textContent = has ? (UPD.msg || "An – die App prüft alle 30 Minuten auf neue Versionen.") : "Einmal deinen Update-Schlüssel eintragen, dann aktualisiert sich die App selbst.";
+  if (document.activeElement && document.activeElement.id==="updKey") return;
+  body.innerHTML = has
+    ? `<div class="bkb"><button class="btn primary" id="updNow">Jetzt prüfen</button><button class="btn" id="updChange">Schlüssel ändern</button></div>`
+    : `<div class="field"><label for="updKey">Update-Schlüssel (GitHub, nur Lesen)</label><input class="in" id="updKey" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></div>
+       <div class="bkb"><button class="btn primary" id="updSave">Speichern</button></div>
+       <span class="small muted">Wird mit deinen anderen Geräten abgeglichen – du musst ihn nur einmal eintragen.</span>`;
+}
+document.addEventListener("click", async e=>{
+  if (e.target.closest("#updSave")){ const v=($("updKey").value||"").trim(); if (!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(v)){ toast("Das sieht nicht wie ein GitHub-Schlüssel aus"); return; }
+    S.settings.updKey=v; await saveSettings(); renderUpd(); ghCheck(true); return; }
+  if (e.target.closest("#updNow")){ ghCheck(true); return; }
+  if (e.target.closest("#updChange")){ delete S.settings.updKey; await saveSettings(); UPD.msg=""; renderUpd(); setTimeout(()=>$("updKey")&&$("updKey").focus(),30); }
+});
+setTimeout(()=>ghCheck(), 20000);
+setInterval(()=>{ if (document.visibilityState==="visible") ghCheck(); }, 5*60*1000);
+document.addEventListener("visibilitychange", ()=>{ if (document.visibilityState==="visible") ghCheck(); });
 /* ---------- automatic updates (new versions are delivered through the Synology) ---------- */
 const HB_VERSION = +((document.querySelector('meta[name="hb-version"]')||{}).content||0);
 let updLast=0, updSeen=0;

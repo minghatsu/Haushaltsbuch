@@ -151,6 +151,22 @@ public class MainActivity extends Activity {
         web.loadUrl(APP_URL);
     }
 
+    /** opens Android's installer for the downloaded update (Android itself checks that it is signed like this app) */
+    String installApk(File f) {
+        if (android.os.Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
+            Intent p = new Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + getPackageName()));
+            p.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            runOnUiThread(() -> { try { startActivity(p); } catch (Exception ignored) {} });
+            return "permission";
+        }
+        Uri u = FileProvider.getUriForFile(this, "de.sascha.haushaltsbuch.files", f);
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setDataAndType(u, "application/vnd.android.package-archive");
+        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+        runOnUiThread(() -> startActivity(i));
+        return "installing";
+    }
+
     private File cachedAppFile() { return new File(getFilesDir(), "app.html"); }
 
     private static int versionOf(byte[] html) {
@@ -438,6 +454,55 @@ public class MainActivity extends Activity {
                     if (c != null) c.disconnect();
                 }
                 final String js = "window.hbHttpDone&&window.hbHttpDone(" + JSONObject.quote(id) + "," + code + "," + JSONObject.quote(text) + ")";
+                runOnUiThread(() -> web.evaluateJavascript(js, null));
+            }).start();
+        }
+
+        /* ---- self-update from the GitHub release (private repo: read-only key the user entered) ---- */
+        @JavascriptInterface
+        public String nativeRev() {
+            try (InputStream is = getAssets().open("native.txt")) { return new String(readAll(is), StandardCharsets.UTF_8).trim(); }
+            catch (Exception e) { return "0"; }
+        }
+
+        /** kind "json": text back; "app": verify signature and keep as next app version; "apk": install the new Android app */
+        @JavascriptInterface
+        public void ghFetch(final String id, final String url, final String token, final String kind) {
+            new Thread(() -> {
+                String result = "", err = "";
+                try {
+                    if (!url.startsWith("https://api.github.com/repos/minghatsu/")) throw new IllegalArgumentException("Adresse nicht erlaubt");
+                    HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+                    c.setInstanceFollowRedirects(false);
+                    c.setConnectTimeout(10000); c.setReadTimeout(120000);
+                    c.setRequestProperty("Authorization", "Bearer " + token);
+                    c.setRequestProperty("User-Agent", "FinanzMAMI");
+                    c.setRequestProperty("Accept", "json".equals(kind) ? "application/vnd.github+json" : "application/octet-stream");
+                    int code = c.getResponseCode();
+                    if (code >= 300 && code < 400) {     // download link of the file: fetched without the key
+                        String loc = c.getHeaderField("Location"); c.disconnect();
+                        if (loc == null || !loc.startsWith("https://")) throw new IllegalStateException("Weiterleitung fehlt");
+                        c = (HttpURLConnection) new URL(loc).openConnection();
+                        c.setConnectTimeout(10000); c.setReadTimeout(120000);
+                        code = c.getResponseCode();
+                    }
+                    if (code == 401 || code == 403) throw new IllegalStateException("Update-Schlüssel ungültig oder abgelaufen");
+                    if (code != 200) throw new IllegalStateException("GitHub antwortet mit " + code);
+                    byte[] b = readAll(c.getInputStream()); c.disconnect();
+                    if ("json".equals(kind)) result = new String(b, StandardCharsets.UTF_8);
+                    else if ("app".equals(kind)) {
+                        if (!signedByBuild(b)) throw new IllegalStateException("Signatur stimmt nicht");
+                        result = saveApp(new String(b, StandardCharsets.UTF_8)) ? "saved" : "same";
+                    } else if ("apk".equals(kind)) {
+                        File dir = new File(getCacheDir(), "update"); dir.mkdirs();
+                        File f = new File(dir, "update.apk");
+                        try (FileOutputStream os = new FileOutputStream(f)) { os.write(b); }
+                        result = installApk(f);
+                    }
+                } catch (Exception e) {
+                    err = e.getMessage() == null ? "Fehler" : e.getMessage();
+                }
+                final String js = "window.hbGhDone&&window.hbGhDone(" + JSONObject.quote(id) + "," + JSONObject.quote(result) + "," + JSONObject.quote(err) + ")";
                 runOnUiThread(() -> web.evaluateJavascript(js, null));
             }).start();
         }

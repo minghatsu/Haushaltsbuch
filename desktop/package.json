@@ -18,7 +18,7 @@
   "build": {
     "appId": "de.sascha.haushaltsbuch",
     "productName": "Finanz MAMI",
-    "files": ["main.js", "preload.js", "app.html", "icon.png"],
+    "files": ["main.js", "preload.js", "app.html", "icon.png", "native.json"],
     "directories": { "output": "dist" },
     "win": { "target": "nsis", "icon": "icon.png" },
     "nsis": {
