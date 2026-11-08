@@ -34,8 +34,10 @@ if (is_file(__DIR__ . '/config.php')) $CFG = array_merge($CFG, (array)(include _
 // Datenordner mit zufälligem Namen (cloud-…), damit die Datenbank nicht erraten und heruntergeladen werden kann.
 // Getrennt vom Ordner der api.php (data-…), beide können im selben Verzeichnis liegen.
 define('DATA_DIR', $CFG['data_dir'] !== '' ? $CFG['data_dir'] : (function (): string {
-    $found = glob(__DIR__ . '/cloud-*', GLOB_ONLYDIR) ?: [];
-    if ($found) { usort($found, fn($a, $b) => filemtime($b) <=> filemtime($a)); return $found[0]; }
+    foreach (['/cloud-*', '/data-*'] as $pat) {     // eigener Ordner, sonst der (geschützte) Datenordner der api.php
+        $found = array_values(array_filter(glob(__DIR__ . $pat, GLOB_ONLYDIR) ?: [], 'is_writable'));
+        if ($found) { usort($found, fn($a, $b) => filemtime($b) <=> filemtime($a)); return $found[0]; }
+    }
     return __DIR__ . '/cloud-' . bin2hex(random_bytes(12));
 })());
 const DEPLOY_REPO = 'minghatsu/haushaltsbuch';
@@ -55,7 +57,7 @@ function db(): PDO {
         @file_put_contents(DATA_DIR . '/.htaccess', "Require all denied\nDeny from all\n");
         @file_put_contents(DATA_DIR . '/index.html', '');
     }
-    $pdo = new PDO('sqlite:' . DATA_DIR . '/haushaltsbuch.sqlite');
+    $pdo = new PDO('sqlite:' . DATA_DIR . '/konten.sqlite');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->exec('PRAGMA journal_mode=WAL'); $pdo->exec('PRAGMA busy_timeout=5000'); $pdo->exec('PRAGMA foreign_keys=ON');
     $pdo->exec('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, email TEXT UNIQUE NOT NULL, pw TEXT NOT NULL, created INTEGER, rev INTEGER NOT NULL DEFAULT 0,
