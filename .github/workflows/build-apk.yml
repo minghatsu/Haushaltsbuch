@@ -46,11 +46,12 @@ jobs:
           sig=$(openssl dgst -sha256 -sign k.pem app.html | base64 -w0)
           rm -f k.pem
           printf '\n<!--hb-sig:%s-->\n' "$sig" >> app.html
-      - uses: actions/upload-artifact@v4
-        with:
-          retention-days: 1
-          name: app-html
-          path: app.html
+      - name: Zwischenstand ablegen (statt Actions-Artefakten, deren Speicher begrenzt ist)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete build-${{ github.run_number }} -y --cleanup-tag || true
+          gh release create build-${{ github.run_number }} app.html --prerelease --title "Zwischenstand build-${{ github.run_number }}" --notes "Wird nach dem Build automatisch gelöscht." --target ${{ github.sha }}
 
   android:
     name: Android-App (APK)
@@ -58,9 +59,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: app-html
+      - name: app.html holen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download build-${{ github.run_number }} -p app.html -D . --clobber
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -79,11 +81,10 @@ jobs:
             exit 1
           fi
           cp app/build/outputs/apk/release/app-release.apk ../Haushaltsbuch.apk
-      - uses: actions/upload-artifact@v4
-        with:
-          retention-days: 1
-          name: apk
-          path: Haushaltsbuch.apk
+      - name: APK ablegen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload build-${{ github.run_number }} Haushaltsbuch.apk --clobber
 
   windows-test:
     name: Windows-App testen (Start + Abgleich)
@@ -91,10 +92,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: app-html
-          path: desktop
+      - name: app.html holen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download build-${{ github.run_number }} -p app.html -D desktop --clobber
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -121,10 +122,11 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: app-html
-          path: desktop
+      - name: app.html holen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: gh release download build-${{ github.run_number }} -p app.html -D desktop --clobber
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -135,11 +137,11 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm run dist
-      - uses: actions/upload-artifact@v4
-        with:
-          retention-days: 1
-          name: windows
-          path: desktop/dist/Haushaltsbuch-Setup.exe
+      - name: Installer ablegen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: gh release upload build-${{ github.run_number }} desktop/dist/Haushaltsbuch-Setup.exe --clobber
 
   release:
     name: Veröffentlichen
@@ -150,18 +152,17 @@ jobs:
       id-token: write   # signiertes GitHub-Token, mit dem die Synology neue Versionen annimmt
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          merge-multiple: true
       - name: Downloads bereitstellen
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          gh release download build-${{ github.run_number }} -D . --clobber
           ls -la
           gh release delete neueste -y --cleanup-tag || true
           gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html \
-            --title "Haushaltsbuch (Build ${{ github.run_number }})" \
+            --title "Finanz MAMI (Build ${{ github.run_number }})" \
             --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen."
+          gh release delete build-${{ github.run_number }} -y --cleanup-tag || true
       - name: Neue Version an die Synology schicken (PC und Handy aktualisieren sich dann selbst)
         continue-on-error: true
         env:
