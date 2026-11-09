@@ -12,8 +12,26 @@ jobs:
   web:
     name: Web-App zusammenstellen
     runs-on: ubuntu-latest
+    outputs:
+      android: ${{ steps.need.outputs.android }}
+      desktop: ${{ steps.need.outputs.desktop }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Muss Android/Windows neu gebaut werden?
+        id: need
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # only build the native apps when their part changed since the published release (saves Actions minutes)
+          APK=$(git rev-list --count HEAD -- android/); EXE=$(git rev-list --count HEAD -- desktop/)
+          BODY=$(gh release view neueste --json body --jq .body 2>/dev/null || echo "")
+          RA=$(echo "$BODY" | grep -o 'apk=[0-9]*' | cut -d= -f2); RE=$(echo "$BODY" | grep -o 'exe=[0-9]*' | cut -d= -f2)
+          FORCE=${{ github.event_name == 'workflow_dispatch' }}
+          if [ "$FORCE" = "true" ] || [ "$APK" != "$RA" ]; then echo "android=true" >> $GITHUB_OUTPUT; else echo "android=false" >> $GITHUB_OUTPUT; fi
+          if [ "$FORCE" = "true" ] || [ "$EXE" != "$RE" ]; then echo "desktop=true" >> $GITHUB_OUTPUT; else echo "desktop=false" >> $GITHUB_OUTPUT; fi
+          echo "Android: $APK (veröffentlicht $RA) · Windows: $EXE (veröffentlicht $RE)"
       - name: app.html bauen
         run: |
           {
@@ -59,6 +77,7 @@ jobs:
   android:
     name: Android-App (APK)
     needs: web
+    if: ${{ needs.web.outputs.android == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -128,6 +147,7 @@ jobs:
   windows:
     name: Windows-App (Installer)
     needs: web
+    if: ${{ needs.web.outputs.desktop == 'true' }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
