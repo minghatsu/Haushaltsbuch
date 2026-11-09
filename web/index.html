@@ -5020,7 +5020,7 @@ function renderSyncDot(){
   if (UI.view==="more"){ renderSyncInfo(); if (!UI.sp) renderSetHome(); }
 }
 function renderSyncInfo(){
-  $("syncBox").hidden = !SYNCABLE; if (!SYNCABLE) return;
+  $("syncBox").hidden = !SYNCABLE || UI.view!=="more" || UI.sp!=="sync"; if (!SYNCABLE) return;   // only on its own settings page
   const t = SYNC.last ? new Date(SYNC.last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "noch nie";
   const st = !SYNC.token ? "Nicht angemeldet" : SYNC.state==="ok" ? "Abgeglichen" : SYNC.state==="pending" ? `${SYNC.queue.length} Änderungen warten` : SYNC.state==="offline" ? "Offline – wird nachgeholt" : "Server nicht erreichbar";
   $("syncState").textContent = st; $("syncTitle").textContent = "Abgleich";
