@@ -572,6 +572,10 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 /* home columns: on phones the column wrappers disappear and "order" restores the one-column sequence */
 .cols,.col{display:contents}
 
+.wipe{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.wipe>b{color:var(--bad)}.wipebtn{color:var(--bad);align-self:flex-start}
+.wipego{background:var(--bad);color:#fff}.wipego:disabled{opacity:.45}
+
 .wck{display:flex!important;flex-direction:row!important;align-items:center;gap:12px}.wci{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none}
 .wct{flex:1;display:flex;flex-direction:column;min-width:0}.wbox{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;font-weight:900;color:#fff;flex:none}
 .wck.on .wbox{background:var(--accent);border-color:var(--accent)}
@@ -1053,6 +1057,7 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
       <div class="bkb"><button class="btn primary" id="backupSave">Speichern</button><span id="backupLoadRow" style="display:contents"><button class="btn" id="backupLoad">Laden</button></span></div>
       <span class="small muted">„Laden“ ersetzt alle Daten in dieser App durch die Datei. Fotos von Belegen sind nicht im Backup.</span>
       <div id="autoBk"></div>
+      <div class="wipe" id="wipeBox"><b>Neu anfangen</b><span class="small muted">Löscht alle Buchungen, Fixkosten, Schulden, Sparziele, Belegfotos und Einstellungen – auf diesem Gerät, auf dem PC und auf der Synology.</span><button class="btn wipebtn" id="wipeStart">Alle Daten löschen …</button></div>
       <input type="file" id="backupFile" accept=".json,application/json,text/plain" hidden>
     </div>
     <div class="card sp bk" data-sp="sync" id="updCard" hidden>
@@ -1453,6 +1458,41 @@ function backupData(){
   for (const d of S.debts){ const r={...d}; delete r.id; o.debts[d.id]=r; }
   return o;
 }
+/* ---------- start from scratch: everything goes, on all devices (the deletions are synced like normal edits) ---------- */
+function renderWipe(step){
+  const b=$("wipeBox"); if (!b) return;
+  if (!step){ b.innerHTML=`<b>Neu anfangen</b><span class="small muted">Löscht alle Buchungen, Fixkosten, Schulden, Sparziele, Belegfotos und Einstellungen – auf diesem Gerät, auf dem PC und auf der Synology.</span><button class="btn wipebtn" id="wipeStart">Alle Daten löschen …</button>`; return; }
+  const n=S.tx.length, f=S.fixed.length, d=S.debts.length, r=RCPT.ids.size;
+  b.innerHTML=`<b>Wirklich alles löschen?</b>
+    <div class="notice bad"><span>Gelöscht werden <b>${n} Buchungen</b>, <b>${f} Fixkosten</b>, <b>${d} Schulden</b>, ${r} Belegfotos, alle Sparziele, Budgets, Kategorien, Farben und Einstellungen – auf allen Geräten. <b>Das lässt sich nicht rückgängig machen.</b></span></div>
+    <span class="small">Tipp: Speichere vorher ein Backup – dann kannst du alles über „Laden“ zurückholen.</span>
+    <button class="btn" id="wipeBk">${ic("arrowDown",16)} Erst Backup speichern</button>
+    <label class="small" for="wipeWord">Zum Bestätigen <b>LÖSCHEN</b> eintippen:</label><input class="in" id="wipeWord" autocomplete="off" placeholder="LÖSCHEN">
+    <div class="row-btns"><button class="btn" id="wipeCancel">Abbrechen</button><button class="btn wipego" id="wipeGo" disabled>Endgültig löschen</button></div>`;
+}
+async function wipeAll(){
+  const keep={updKey:S.settings.updKey};      // the update key stays, so the app keeps updating itself
+  for (const k of ["tx","txb","fixed","months","debts"]){ for (const id of Object.keys(memStore[k])) enqueue(k,id,null); memStore[k]={}; }
+  if (SYNC.token) for (const id of Object.keys(memStore.acct)) SYNC.queue.push({col:"app",id:"acct-"+id,data:null});
+  memStore.acct={};
+  for (const id of [...RCPT.ids]) { try { await rcptDel(id); } catch(e){} }
+  S.settings={...clone(DEFAULT_SETTINGS), ...(keep.updKey?keep:{})};
+  if (SYNC.token){ SYNC.queue.push({col:"app",id:"settings",data:clone(S.settings)}); saveSync(); }
+  for (const k of ["hb-wiz-skip","hb-notify"]) try{ localStorage.removeItem(k); }catch(e){}
+  persistLocal(); flushSoon(0);
+  UI.view="home"; UI.sp=null; UI.wiz=null; if (typeof spSheetClose==="function") try{ spSheetClose(); }catch(e){}
+  rebuildMem(); window.scrollTo({top:0});
+  toast("Alles gelöscht – willkommen zum Neustart");
+  setTimeout(()=>{ if (wizShould()) wizOpen(); }, 600);
+}
+document.addEventListener("click", e=>{
+  const t=e.target;
+  if (t.closest("#wipeStart")){ renderWipe(1); return; }
+  if (t.closest("#wipeCancel")){ renderWipe(0); return; }
+  if (t.closest("#wipeBk")){ const b=$("backupSave"); if (b) b.click(); return; }
+  if (t.closest("#wipeGo")){ if (($("wipeWord").value||"").trim().toUpperCase()!=="LÖSCHEN") return; wipeAll(); }
+});
+document.addEventListener("input", e=>{ if (e.target.id==="wipeWord") $("wipeGo").disabled = e.target.value.trim().toUpperCase()!=="LÖSCHEN"; });
 function loadBackupObj(o, fromFile){
   if (!o || o.version!==1 || typeof o.fixed!=="object") throw new Error("bad");
   for (const k of ["tx","txb","fixed","months","debts","acct"]) memStore[k]=clone(o[k]||{});
