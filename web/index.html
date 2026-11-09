@@ -576,6 +576,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .tabs{grid-template-columns:repeat(3,1fr) 60px repeat(3,1fr);width:calc(100% - 16px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));max-width:560px;padding:4px 4px}
 .tab{height:58px;padding:0;min-width:0}
 .tab .tname{display:none}
+.tab[aria-selected="true"]:not(.plus) .tname{display:block;font-size:10px;font-weight:800;line-height:1;margin-top:3px;white-space:nowrap;color:var(--tcol,var(--accent))}
+.tab[aria-selected="true"]:not(.plus) svg.i{padding:3px 12px!important}
 .tab:not(.plus)::after{display:none}
 .tab:not(.plus) svg.i{box-sizing:content-box;padding:4px 12px!important;border-radius:999px;transition:background .2s}
 .tab:not(.plus){color:var(--tcol,var(--muted))!important}.tab:not(.plus) svg.i{stroke-width:2.1}
@@ -1009,8 +1011,8 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
   <button class="tab" role="tab" data-go="list" aria-selected="false" aria-label="Buchungen"><svg class="i" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".6"/><circle cx="4" cy="12" r=".6"/><circle cx="4" cy="18" r=".6"/></svg><span class="tname">Buchungen</span></button>
   <button class="tab" role="tab" data-go="fix" aria-selected="false" aria-label="Fixkosten"><svg class="i" viewBox="0 0 24 24"><path d="M17 3v4M7 3v4"/><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="m9 13.5 2 2 4-4"/></svg><span class="tname">Fixkosten</span></button>
   <button class="tab plus" data-addmenu="1" aria-label="Neue Buchung"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="tlabel">Neue Buchung</span></button>
-  <button class="tab" role="tab" data-go="year" aria-selected="false" aria-label="Analyse"><svg class="i" viewBox="0 0 24 24"><path d="M5 20v-7M10 20V6M15 20v-9M20 20V9"/></svg><span class="tname">Analyse</span></button>
   <button class="tab" role="tab" data-go="ziele" aria-selected="false" aria-label="Sparen"><svg class="i" viewBox="0 0 24 24"><path d="M5 11a7 6 0 0 1 12.6-3.4H20v4l-1.6.9A7 7 0 0 1 16 16.3V19h-3v-1.6a8 8 0 0 1-2 0V19H8v-2.7A6 6 0 0 1 5 11Z"/><path d="M10 7.5h3"/></svg><span class="tname">Sparen</span></button>
+  <button class="tab" role="tab" data-go="year" aria-selected="false" aria-label="Analyse"><svg class="i" viewBox="0 0 24 24"><path d="M5 20v-7M10 20V6M15 20v-9M20 20V9"/></svg><span class="tname">Analyse</span></button>
   <span class="spacer deskonly"></span>
   <button class="tab tset" role="tab" data-go="more" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><i class="sdot"></i><span class="tname"><span class="tlong">Einstellungen</span><span class="tshort">Optionen</span></span></button>
 </nav>
@@ -5221,7 +5223,7 @@ $("loginGo").onclick = doLogin;
 /* swipe between the main pages like the sides of a cube: the page follows the thumb,
    the old one turns away into the depth and gets darker, the new one turns in from the side */
 (function(){
-  const ORDER=["home","list","fix","year","ziele","more"], RENDER={home:()=>renderHome(), list:()=>renderList(), fix:()=>renderFix(), year:()=>renderYear(), ziele:()=>renderZiele(), more:()=>{ renderMore(); renderSpPages(); }};
+  const ORDER=["home","list","fix","ziele","year","more"], RENDER={home:()=>renderHome(), list:()=>renderList(), fix:()=>renderFix(), year:()=>renderYear(), ziele:()=>renderZiele(), more:()=>{ renderMore(); renderSpPages(); }};
   const main=document.querySelector("main.wrap");
   const blocked=t=>t.closest(".sheet,.backdrop,.pfed,#lockBg,#loginBg,#astack,.srail,.bt3,.bubbles,input,select,textarea,.wiz,[data-noswipe]") || document.querySelector(".backdrop:not([hidden])");
   const sec=k=>document.querySelector(`[data-view="${k}"]`);
@@ -5229,10 +5231,10 @@ $("loginGo").onclick = doLogin;
      for the turn we take two screen-sized copies (current page as it is scrolled, next page from its top)
      in a fixed stage, turn those, and hide the real page meanwhile. Small layers render completely. */
   let x0=0,y0=0,t0=0,on=false,lock=null,dir=0,cur=null,nbKey=null,W=1,p=0,busy=false,lastX=0,lastT=0,vx=0;
-  let stage=null,fC=null,fN=null,shC=null,shN=null,sY=0;
+  let stage=null,fC=null,fN=null,shC=null,shN=null,sY=0,nY=0; const MEM={};
   function face(srcSec, top){
     const f=document.createElement("div"); f.className="cubeface";
-    const c=srcSec.cloneNode(true); c.hidden=false; c.removeAttribute("id"); c.querySelectorAll("[id]").forEach(e=>e.removeAttribute("id"));
+    const c=srcSec.cloneNode(true); c.hidden=false; c.querySelectorAll("[id]").forEach(e=>e.removeAttribute("id"));
     c.classList.add("cubing");
     const r=cur.getBoundingClientRect();
     Object.assign(c.style,{position:"absolute",left:r.left+"px",width:r.width+"px",top:top+"px",margin:"0"});
@@ -5250,14 +5252,17 @@ $("loginGo").onclick = doLogin;
     stage=document.createElement("div"); stage.className="cubestage";
     Object.assign(stage.style,{top:sTop+"px",height:H+"px",perspective:Math.round(W*2.6)+"px",perspectiveOrigin:`50% ${H/2}px`});
     document.body.appendChild(stage);
-    const mainTop0 = main.getBoundingClientRect().top + scrollY, offT=cur.offsetTop;
+    const top0 = cur.getBoundingClientRect().top + scrollY;   // where every main page starts when scrolled to the top
     [fC,shC]=face(cur, cur.getBoundingClientRect().top - sTop);
     if (nbKey){
       const nb=sec(nbKey); try { RENDER[nbKey](); } catch(e){}
-      nb.hidden=false; [fN,shN]=face(nb, mainTop0 + offT - sTop); nb.hidden=true;
+      nb.hidden=false;
+      // show the next page where you left it last time (clamped to how far it can scroll)
+      const maxY=Math.max(0, Math.round(document.documentElement.scrollHeight - cur.offsetHeight + nb.offsetHeight - innerHeight));
+      nY=Math.min(MEM[nbKey]||0, maxY);
+      [fN,shN]=face(nb, top0 - sTop - nY); nb.hidden=true;
     }
     cur.style.visibility="hidden"; sY=scrollY;
-    document.documentElement.style.overflow="hidden";     // no vertical scrolling while the cube turns
     draw();
   }
   function draw(){
@@ -5269,7 +5274,6 @@ $("loginGo").onclick = doLogin;
   }
   function reset(){
     if (stage) stage.remove();
-    document.documentElement.style.overflow="";
     if (cur){ cur.style.visibility=""; if (Math.abs(scrollY-sY)>1) window.scrollTo({top:sY}); }
     stage=fC=fN=shC=shN=cur=nbKey=null; p=0; dir=0;
   }
@@ -5279,7 +5283,7 @@ $("loginGo").onclick = doLogin;
     const target = go && nbKey;
     p = target ? (dir<0?-1:1) : 0; draw();
     setTimeout(()=>{ const k=nbKey;
-      if (target){ UI.view=k; render(); sY=0; window.scrollTo({top:0}); }
+      if (target){ MEM[UI.view]=sY; UI.view=k; render(); sY=nY; window.scrollTo({top:nY}); }
       // drop the copies only after the real page has been drawn, so nothing flickers
       requestAnimationFrame(()=>{ reset(); busy=false; });
     }, 310);
