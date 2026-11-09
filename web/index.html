@@ -718,6 +718,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .anapanel{border-top:3px solid var(--tc)}.aph{display:flex;align-items:center;gap:12px}.aph .ic{width:36px;height:36px;border-radius:12px;background:var(--tc);color:#fff;display:grid;place-items:center;flex:none}.aph .n{flex:1;min-width:0;display:flex;flex-direction:column}.aph b{font-size:15px}
 .anapanel .kpis{margin:0}.anapanel .anab>.card-head h2{display:none}.anapanel .anab>.card-head{justify-content:flex-end}.aphx{border:0;background:none;color:var(--muted);padding:6px;cursor:pointer}
 main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdrop-filter:none!important}.cubing .filters,.cubing .rings,.cubing .jars,.cubing .acards,.cubing .table-wrap,.cubing [style*="overflow-x:auto"],.cubing .fxtiles,.cubing .srail{overflow:visible!important}
+.cubestage{position:fixed;left:0;right:0;z-index:15;overflow:hidden;pointer-events:none;contain:strict}.cubeface{position:absolute;inset:0;overflow:hidden;background:var(--bg);will-change:transform;transform-origin:50% 50%}
 .cubeshade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;border-radius:inherit;z-index:50}
 
 .bgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -5154,48 +5155,62 @@ $("loginGo").onclick = doLogin;
   const main=document.querySelector("main.wrap");
   const blocked=t=>t.closest(".sheet,.backdrop,.pfed,#lockBg,#loginBg,#astack,.srail,.bt3,.bubbles,input,select,textarea,.wiz,[data-noswipe]") || document.querySelector(".backdrop:not([hidden])");
   const sec=k=>document.querySelector(`[data-view="${k}"]`);
-  let x0=0,y0=0,t0=0,on=false,lock=null,dir=0,cur=null,nb=null,nbKey=null,W=1,p=0,busy=false,shC=null,shN=null,lastX=0,lastT=0,vx=0;
-  const shade=el=>{ const d=document.createElement("div"); d.className="cubeshade"; el.appendChild(d); return d; };
+  /* Phones drop parts of a long page that is turned in 3D. So we never turn the real pages:
+     for the turn we take two screen-sized copies (current page as it is scrolled, next page from its top)
+     in a fixed stage, turn those, and hide the real page meanwhile. Small layers render completely. */
+  let x0=0,y0=0,t0=0,on=false,lock=null,dir=0,cur=null,nbKey=null,W=1,p=0,busy=false,lastX=0,lastT=0,vx=0;
+  let stage=null,fC=null,fN=null,shC=null,shN=null;
+  function face(srcSec, top){
+    const f=document.createElement("div"); f.className="cubeface";
+    const c=srcSec.cloneNode(true); c.hidden=false; c.removeAttribute("id"); c.querySelectorAll("[id]").forEach(e=>e.removeAttribute("id"));
+    c.classList.add("cubing");
+    const r=cur.getBoundingClientRect();
+    Object.assign(c.style,{position:"absolute",left:r.left+"px",width:r.width+"px",top:top+"px",margin:"0"});
+    // keep sideways scroll positions (account cards, shop rail …)
+    const a=srcSec.querySelectorAll("*"), b=c.querySelectorAll("*");
+    for (let i=0;i<a.length;i++) if (a[i].scrollLeft) b[i].style.transform=`translateX(${-a[i].scrollLeft}px)`;
+    const sh=document.createElement("div"); sh.className="cubeshade";
+    f.appendChild(c); f.appendChild(sh); stage.appendChild(f); return [f,sh];
+  }
   function setup(d){
     dir=d; const i=ORDER.indexOf(UI.view); nbKey=ORDER[i+(d<0?1:-1)]||null;
-    cur=sec(UI.view); W=main.clientWidth;
-    const r=main.getBoundingClientRect(), topVis=Math.max(0, $("monthpill").getBoundingClientRect().bottom+4), mid=(innerHeight+topVis)/2;
-    main.style.perspective="1200px"; main.style.perspectiveOrigin=`50% ${mid - r.top}px`; main.style.position="relative";
-    cur.style.position="relative"; cur.classList.add("cubing");
-    cur.style.transformOrigin="50% "+(mid - cur.getBoundingClientRect().top)+"px";
-    shC=shade(cur);
-    if (!nbKey) return;
-    const offT=cur.offsetTop;
-    nb=sec(nbKey); try { RENDER[nbKey](); } catch(e){}
-    nb.hidden=false; nb.classList.add("cubing");
-    // same column as the current page (main has side padding), top edge at the visible top, only one screen high
-    Object.assign(nb.style,{position:"absolute",left:cur.offsetLeft+"px",width:cur.offsetWidth+"px",top:(scrollY + offT)+"px",height:Math.round(innerHeight*1.6)+"px",margin:"0",overflow:"hidden",transformOrigin:"50% "+(mid-(r.top+scrollY+offT))+"px",pointerEvents:"none",zIndex:"1"});
-    shN=shade(nb);
+    cur=sec(UI.view); W=innerWidth;
+    const hb=document.querySelector("header.top")||document.querySelector(".top"), hr=hb?hb.getBoundingClientRect():{bottom:0};
+    const sTop=Math.max(0, Math.round(hr.bottom)), H=innerHeight-sTop;
+    stage=document.createElement("div"); stage.className="cubestage";
+    Object.assign(stage.style,{top:sTop+"px",height:H+"px",perspective:Math.round(W*2.6)+"px",perspectiveOrigin:`50% ${H/2}px`});
+    document.body.appendChild(stage);
+    const mainTop0 = main.getBoundingClientRect().top + scrollY, offT=cur.offsetTop;
+    [fC,shC]=face(cur, cur.getBoundingClientRect().top - sTop);
+    if (nbKey){
+      const nb=sec(nbKey); try { RENDER[nbKey](); } catch(e){}
+      nb.hidden=false; [fN,shN]=face(nb, mainTop0 + offT - sTop); nb.hidden=true;
+    }
+    cur.style.visibility="hidden";
+    draw();
   }
   function draw(){
     const a=Math.min(1,Math.abs(p));
-    if (!nbKey){ cur.style.transform=`translateX(${p*W*0.25}px)`; return; }
-    const s=dir<0?-1:1;
-    // real cube: both faces turn around the same axis half a page deep, so their edges always touch
-    const h=cur.offsetWidth/2, th=s*a*90;
-    cur.style.transform=`translateZ(${-h}px) rotateY(${th}deg) translateZ(${h}px)`; shC.style.opacity=String(a*0.6);
-    nb.style.transform=`translateZ(${-h}px) rotateY(${th-s*90}deg) translateZ(${h}px)`; shN.style.opacity=String((1-a)*0.6);
+    if (!nbKey){ fC.style.transform=`translateX(${p*W*0.25}px)`; return; }
+    const s=dir<0?-1:1, h=W/2, th=s*a*90;
+    fC.style.transform=`translateZ(${-h}px) rotateY(${th}deg) translateZ(${h}px)`; shC.style.opacity=String(a*0.6);
+    fN.style.transform=`translateZ(${-h}px) rotateY(${th-s*90}deg) translateZ(${h}px)`; shN.style.opacity=String((1-a)*0.6);
   }
   function reset(){
-    for (const el of [cur,nb]) if (el){ Object.assign(el.style,{transform:"",transition:"",transformOrigin:"",backfaceVisibility:"",willChange:"",position:"",left:"",width:"",top:"",height:"",overflow:"",margin:"",pointerEvents:"",zIndex:""}); }
-    for (const d of [shC,shN]) if (d) d.remove();
-    for (const el of [cur,nb]) if (el) el.classList.remove("cubing");
-    if (nb && nb!==cur) nb.hidden=true;
-    main.style.perspective=main.style.perspectiveOrigin=main.style.position="";
-    cur=nb=nbKey=shC=shN=null; p=0; dir=0;
+    if (stage) stage.remove();
+    if (cur) cur.style.visibility="";
+    stage=fC=fN=shC=shN=cur=nbKey=null; p=0; dir=0;
   }
   function settle(go){
     busy=true;
-    const tr="transform .3s cubic-bezier(.2,.8,.2,1)";
-    [cur,nb].filter(Boolean).forEach(el=>el.style.transition=tr); [shC,shN].filter(Boolean).forEach(el=>el.style.transition="opacity .3s");
+    [fC,fN].filter(Boolean).forEach(el=>el.style.transition="transform .3s cubic-bezier(.2,.8,.2,1)"); [shC,shN].filter(Boolean).forEach(el=>el.style.transition="opacity .3s");
     const target = go && nbKey;
     p = target ? (dir<0?-1:1) : 0; draw();
-    setTimeout(()=>{ const k=nbKey; reset(); if (target){ UI.view=k; render(); window.scrollTo({top:0}); } busy=false; }, 310);
+    setTimeout(()=>{ const k=nbKey;
+      if (target){ UI.view=k; render(); window.scrollTo({top:0}); }
+      // drop the copies only after the real page has been drawn, so nothing flickers
+      requestAnimationFrame(()=>{ reset(); busy=false; });
+    }, 310);
   }
   document.addEventListener("touchstart", e=>{
     on=false; if (busy || e.touches.length!==1 || !ORDER.includes(UI.view) || blocked(e.target)) return;
