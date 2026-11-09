@@ -660,7 +660,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 #debtCard>.card-head{justify-content:flex-end}#debtCard>.card-head>h2{display:none}
 .sqk{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .sqk button{background:var(--surface);box-shadow:var(--shadow);border:0;border-radius:18px;padding:12px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:7px;font:600 12px var(--f-body);color:var(--fg);cursor:pointer;min-width:0}
-.sqk button span{width:40px;height:40px;border-radius:13px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.sqk button span{width:40px;height:40px;border-radius:13px;background:var(--tc,var(--accent));color:#fff;display:grid;place-items:center;box-shadow:0 4px 10px color-mix(in srgb,var(--tc,var(--accent)) 30%,transparent)}
+.sqk button[aria-pressed="true"] span{background:#111827}
 .sqk button small{color:var(--muted);font-size:10.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;padding:0 4px;margin-top:-4px}
 .sgl{font-weight:700;font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:6px 4px -6px}
 .sgrp{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
@@ -860,7 +861,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div class="field"><label>Meine Spaces und eigenen Konten</label><span class="small muted" style="margin-top:-2px">Geld zwischen diesen Konten ist eine Umbuchung, keine Einnahme oder Ausgabe.</span><div class="chips" id="spaceEd"></div><div id="spaceClean"></div></div>
     </div>
     <div class="card sp" data-sp="budgets" hidden>
-      <div class="field"><label>Monatsbudgets</label><span class="small muted" style="margin-top:-2px">Wie viel du pro Monat höchstens ausgeben willst. Ab 80 % warnt die Startseite. Leer lassen = kein Budget.</span><div id="budgetEd"></div></div>
+      <div class="field"><div id="budgetEd"></div><span class="small muted">Leer lassen = kein Budget.</span></div>
     </div>
     <div class="card sp bk" data-sp="sync" id="syncBox" hidden>
       <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.5 1.6A3.8 3.8 0 0 1 17 18z"/></svg><i id="syncDot"></i></span><span class="n"><b id="syncTitle">Abgleich</b><span id="syncState">–</span></span></div>
@@ -935,7 +936,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       </div>
       <input type="file" id="pfFile" accept="image/*" hidden>
       <div class="card"><div class="field"><label for="sName">Wie sollen wir dich nennen?</label><input class="in pc-big" id="sName" autocomplete="given-name" placeholder="z. B. Sascha" maxlength="30"><span class="small muted">Für die Begrüßung oben links.</span></div></div>
-      <div class="card pc-wiz"><b>Alles noch einmal einrichten?</b><span class="small">Name, Verdienstart, Kontostand, Fixkosten und Budgets in fünf kurzen Schritten – deine Daten bleiben erhalten.</span><div><button class="btn" id="wizAgain">Einrichtung starten</button></div></div>
+      <div hidden><button class="btn" id="wizAgain">Einrichtung starten</button></div>
     </div>
     <div class="sp pc" data-sp="start" hidden>
       <div class="pc-sect">Deine Läden <span>Antippen zum An- und Ausschalten – die Nummer ist die Reihenfolge</span></div>
@@ -3299,15 +3300,30 @@ function renderSetHome(){
   const TCOL={start:"#1a7a5c",steuer:"#c27c0e",kategorien:"#7a5bc2",sync:"#3d63a8",notify:"#d4813a",sicherheit:"#b23a3a"};
   const tileBtn = k => `<button class="stile" data-spgo="${k}" style="--tc:${TCOL[k]||"var(--accent)"}"><span class="sti">${ic(SP_PAGES[k][1],22)}</span><span class="stt"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span></button>`;
   const row = k => `<button data-spgo="${k}"><span class="ic">${ic(SP_PAGES[k][1],19)}</span><span class="n"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span><span class="ch">${ic("right",18)}</span></button>`;
-  const short={konten:"Konten",budgets:"Budgets",schulden:"Schulden",backup:"Backup"};
+  const short={konten:"Konten",budgets:"Budgets",schulden:"Schulden",backup:"Backup",steuer:"Steuer",start:"Startseite",kategorien:"Kategorien",sync:"Abgleich",notify:"Meldungen",sicherheit:"Sicherheit"};
+  const QCOL={konten:"#3d63a8",budgets:"#c27c0e",schulden:"#7a5bc2",steuer:"#d4813a",start:"#1a7a5c",kategorien:"#c0497a",sync:"#2f7fb8",notify:"#e0902b",sicherheit:"#b23a3a",backup:"#2e9c74",dark:"#4b5563",wiz:"#8a6d1f"};
+  const dark=document.documentElement.dataset.theme==="dark";
+  const qtile = k => k==="dark"
+      ? `<button data-qdark="1" style="--tc:${QCOL.dark}" aria-pressed="${dark}"><span>${ic("spark",20)}</span>Dunkel<small>${dark?"an":"aus"}</small></button>`
+    : k==="wiz"
+      ? `<button data-qwiz="1" style="--tc:${QCOL.wiz}"><span>${ic("sparkle"in P?"sparkle":"check",20)}</span>Einrichtung<small>5 Schritte</small></button>`
+      : `<button data-spgo="${k}" style="--tc:${QCOL[k]}"><span>${ic(SP_PAGES[k][1],20)}</span>${short[k]}<small>${esc(qsub(k))}</small></button>`;
+  const qsub = k => {
+    const st=S.settings;
+    if (k==="steuer") return "Klasse "+(["I","II","III","IV","V","VI"][(Number(st.steuerklasse)||1)-1]||"I");
+    if (k==="start"){ const n=(st.shops||[]).length; return n ? n+" Läden" : "keine Läden"; }
+    if (k==="kategorien") return cats("ausgabe").length+cats("betrieb").length+incCats().length+" Stück";
+    if (k==="sync") return !SYNCABLE ? "aus" : !SYNC.token ? "aus" : SYNC.state==="ok" ? "an" : "wartet";
+    if (k==="notify"){ const c=notifyCfg(); return !CAN_NOTIFY ? "–" : c.on&&notifyPerm()==="granted" ? "an" : "aus"; }
+    if (k==="sicherheit") return lockCfg() ? "Sperre an" : "Sperre aus";
+    if (k==="backup"){ try { return abCfg().on && CAN_AUTOBK ? "wöchentlich" : "Datei"; } catch(e){ return "Datei"; } }
+    return spSummary(k);
+  };
+  const SGROUPS=[["Geld",["konten","budgets","schulden",...(hasSelf()||hasJob()?["steuer"]:[])]],["Anpassen",["start","kategorien","dark","wiz"]],["App",[...(SYNCABLE||window.AndroidBridge?["sync"]:[]),"notify","sicherheit","backup"]]];
   $("setHome").innerHTML = `
     <button class="sprof" data-spgo="profil" aria-label="Profil ändern"><span class="av">${S.settings.photo?`<img src="${esc(S.settings.photo)}" alt="">`:esc((name.trim()[0]||"?").toUpperCase())}</span>
       <span class="pt"><b>${esc(name||"Dein Name")}</b><small>${name?"Profil bearbeiten":"Tippen, um Name und Foto einzutragen"}</small><span class="pchip"><i class="${dot}"></i>${esc(line)}</span></span><span class="ch">${ic("right",18)}</span></button>
-    <div class="sqk">${quick.map(k=>`<button data-spgo="${k}"><span>${ic(SP_PAGES[k][1],20)}</span>${short[k]}<small>${esc(spSummary(k))}</small></button>`).join("")}</div>
-    <div class="sgl">Aussehen</div>
-    <div class="sgrp"><label class="sdark switch"><span class="ic">${ic("spark",19)}</span><span class="n"><b>Dunkles Design</b><small>${document.documentElement.dataset.theme==="dark"?"an":"aus – helles Design"}</small></span><input type="checkbox" id="sDark" ${document.documentElement.dataset.theme==="dark"?"checked":""}></label></div>
-    <div class="stiles">${tileBtn("start")}</div>
-    ${groups.map(([t,ks])=>`<div class="sgl">${t}</div><div class="stiles">${ks.map(tileBtn).join("")}</div>`).join("")}
+    ${SGROUPS.map(([t,ks])=>`<div class="sgl">${t}</div><div class="sqk">${ks.map(qtile).join("")}</div>`).join("")}
     <div class="small muted" style="text-align:center;margin:18px 0 4px">Finanz MAMI · ${verName(+((document.querySelector('meta[name="hb-version"]')||{}).content||0))}</div>`;
 }
 function renderSpPages(){
@@ -3327,6 +3343,13 @@ function renderSpPages(){
   h.hidden=!hv;
   if (hv) h.innerHTML=`<span class="shi" style="background:${hv[1]}">${ic(hv[0],26)}</span><span class="small">${esc(hv[2])}</span>`, h.style.setProperty("--tc",hv[1]);
 }
+document.addEventListener("click", e=>{
+  if (e.target.closest("[data-qwiz]")){ const w=$("wizAgain"); if (w) w.click(); return; }
+  if (!e.target.closest("[data-qdark]")) return;
+  const t=document.documentElement.dataset.theme==="dark"?"light":"dark"; document.documentElement.dataset.theme=t;
+  try{ localStorage.setItem("hb-theme",t); }catch(_){}
+  renderSetHome(); try{ render(); }catch(_){}
+});
 document.addEventListener("change", e=>{
   if (e.target.id!=="sDark") return;
   const t=e.target.checked?"dark":"light"; document.documentElement.dataset.theme=t;
