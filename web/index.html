@@ -643,6 +643,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .jltiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}.jltiles .card{border:0;text-align:left;display:flex;flex-direction:column;gap:5px;color:inherit;margin:0}.jltiles b{font-size:14px}.jltiles small{font-size:12px;color:var(--muted);line-height:1.35}.jltiles small b{font-size:12.5px;color:var(--fg)}
 .jlpe{display:flex;flex-direction:column;gap:6px}.jlpr{display:grid;grid-template-columns:1fr 90px 36px;gap:6px;align-items:center}
 .jlmap{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:5px 0}.jlmap>span{display:flex;align-items:center;gap:9px;min-width:0}.jlmap b{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.jlmap select{max-width:48%}
+.jlnew #bhN{grid-column:1/-1}.jltip{margin:0;position:relative;padding-right:42px}.jltip .icon-btn{position:absolute;top:6px;right:6px;width:30px;height:30px}
 .jlnew{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.jlnew select{grid-column:1/-1}.jlnew .btn{grid-column:1/-1;justify-content:center}
 
 /* tile colour edit mode */
@@ -1653,9 +1654,13 @@ const hasJob  = () => { const w=S.settings.work; return w===undefined || ["anges
 const EXTRA_INC = {minijob:["Minijob","minijob"], selbst:["Selbstständigkeit","selbst"], angestellt:["Gehalt","lohn"]};
 function addExtraInc(st){ for (const k of st.extra||[]){ const e=EXTRA_INC[k]; const c=st.cats=clone(st.cats||DEFAULT_SETTINGS.cats); c.einnahme=c.einnahme||[]; if (!c.einnahme.some(x=>(typeof x==="string"?x:x.name)===e[0] || (typeof x!=="string"&&x.art===e[1]))) c.einnahme.push({name:e[0], art:e[1]}); } }
 async function setExtra(list){ S.settings.extra=list; addExtraInc(S.settings); await saveSettings(); render(); }
+function addProfCats(st, w){ const P=GPROF[w]; if (!P) return; const c=st.cats=clone(st.cats||DEFAULT_SETTINGS.cats);
+  c.ausgabe=c.ausgabe||[]; for (const n of P.cats||[]) if (!c.ausgabe.includes(n)) c.ausgabe.push(n);
+  c.einnahme=c.einnahme||[]; for (const [n,a] of P.inc||[]) if (!c.einnahme.some(x=>(typeof x==="string"?x:x.name)===n)) c.einnahme.push({name:n, art:a}); }
 function addWorkInc(st, w){ const ic2=WORK_INC[w]; if (!ic2) return; const c=st.cats=clone(st.cats||DEFAULT_SETTINGS.cats); c.einnahme=c.einnahme||[];
   if (!c.einnahme.some(x=>(typeof x==="string"?x:x.name)===ic2[0])) c.einnahme.unshift({name:ic2[0], art:ic2[1]}); }
-async function setWork(w){ S.settings.work=w; if (S.settings.extra) S.settings.extra=S.settings.extra.filter(k=>extraFor(w).some(x=>x[0]===k)); addWorkInc(S.settings, w); if (["alg","grusi"].includes(w)){ const j=S.settings.jl=S.settings.jl||{}; if (!j.amount && w==="grusi") j.amount=563; if (j.payDay==null) j.payDay = w==="alg"?0:1; } await saveSettings(); render(); }
+async function setWork(w){ const prev=S.settings.work; S.settings.work=w; addProfCats(S.settings, w);
+  if (prev!==w && GPROF[w]){ const j=S.settings.jl=S.settings.jl||{}; j.payDay=GPROF[w].day; if (prev!==undefined) j.amount = w==="grusi" ? 563 : 0; if (!GPROF[w].pots) delete j.pots; } if (S.settings.extra) S.settings.extra=S.settings.extra.filter(k=>extraFor(w).some(x=>x[0]===k)); addWorkInc(S.settings, w); if (["alg","grusi"].includes(w)){ const j=S.settings.jl=S.settings.jl||{}; if (!j.amount && w==="grusi") j.amount=563; if (j.payDay==null) j.payDay = w==="alg"?0:1; } await saveSettings(); render(); }
 document.addEventListener("click", e=>{ const g=e.target.closest("[data-setworkgrp]"); if (g){ UI.workGrp=g.dataset.setworkgrp; render(); return; } const he=e.target.closest("[data-homeextra]"); if (he){ const k=he.dataset.homeextra, cur=UI.exSel||[]; UI.exSel = !k ? [] : cur.includes(k) ? cur.filter(x=>x!==k) : [...cur,k]; render(); return; }
   if (e.target.closest("[data-homeexok]")){ UI.askExtra=false; setExtra(UI.exSel||[]); toast("Gespeichert – änderbar unter Steuer & Einkommen"); return; }
   const b=e.target.closest("[data-setwork]"); if (b){ UI.askExtra=true; UI.exSel=[]; setWork(b.dataset.setwork); toast("Gespeichert – änderbar unter Steuer & Einkommen"); } });
@@ -1672,12 +1677,49 @@ function acctColor(name, i){ return userCol("acct", name) || (isGreen() && i>0 ?
 function userCol(group, key){ const c=(S.settings&&S.settings.colors)||{}; return (c[group]||{})[key]||null; }
 /* ---------- looking for work (ALG I / Grundsicherung): pay day, pots from the standard rate, appointments, side job ---------- */
 const isJobless = () => ["alg","grusi"].includes(S.settings.work);
+/* every way of earning money gets its own start page card, settings page, appointments and tips */
+const GPROF={
+  alg:{amt:"Arbeitslosengeld", tile:"Leistung & Amt", day:0, pots:1, side:"jl", terms:["Agentur für Arbeit","Nachweise abgeben","Bewerbungsgespräch","Maßnahme / Kurs","Weiterbewilligung abgeben"]},
+  grusi:{amt:"Grundsicherung", tile:"Leistung & Amt", day:1, pots:1, side:"jl", terms:["Jobcenter-Termin","Weiterbewilligung abgeben","Nachweise abgeben","Bewerbungsgespräch","Maßnahme / Kurs"]},
+  studium:{amt:"BAföG", tile:"Studium & BAföG", day:0, side:"bafoeg", cd:"BAföG endet", cdHint:"Ende der Förderungshöchstdauer laut Bescheid",
+    terms:["BAföG-Folgeantrag","Rückmeldung / Semesterbeitrag","Prüfung","Leistungsnachweis abgeben","Wohngeld-Antrag"],
+    tip:"Nebenjob: Bis zur Minijob-Grenze von 603 € im Monat wird dein BAföG in der Regel nicht gekürzt. Den Folgeantrag spätestens 2 Monate vor Ende des Bewilligungszeitraums stellen, sonst kommt das Geld zu spät.",
+    cats:["Uni & Bücher","Semesterbeitrag","Miete & Wohnen"]},
+  schule:{amt:"Taschengeld", tile:"Schule & Taschengeld", day:1, side:"ferien", terms:["Klassenfahrt bezahlen","Schüler-BAföG-Antrag","Prüfung","Zeugnis"],
+    tip:"Ferienjob: Ab 15 darfst du in den Ferien bis zu 4 Wochen im Jahr arbeiten. Schüler-BAföG gibt es meist ab Klasse 10, wenn du nicht bei den Eltern wohnst.",
+    cats:["Schule & Material","Handy"], inc:[["Taschengeld","sonstige"]]},
+  azubi:{amt:"Ausbildungsgehalt", tile:"Ausbildung", day:0, cd:"Ausbildung endet", cdHint:"Ende laut Ausbildungsvertrag",
+    terms:["Berufsschule","Zwischenprüfung","Abschlussprüfung","BAB-Antrag","Berichtsheft abgeben"],
+    tip:"Wohnst du nicht mehr bei den Eltern? Dann prüf die Berufsausbildungsbeihilfe (BAB) bei der Agentur für Arbeit. Fahrten zur Berufsschule kannst du in der Steuererklärung angeben.",
+    cats:["Berufsschule & Material","Fahrt zur Arbeit"]},
+  rente:{amt:"Rente", tile:"Rente", day:0, side:"steuer", terms:["Rentenbescheid prüfen","Rentenanpassung (Juli)","Steuererklärung abgeben","Krankenkasse"],
+    tip:"Neben einer Altersrente darfst du seit 2023 unbegrenzt dazuverdienen. Ein Teil der Rente ist steuerpflichtig – die Analyse sagt dir, ob du eine Steuererklärung abgeben musst.",
+    cats:["Gesundheit & Medikamente","Pflege"]},
+  eltern:{amt:"Elterngeld", tile:"Elternzeit", day:0, cd:"Elterngeld endet", cdHint:"letzter Lebensmonat mit Elterngeld laut Bescheid",
+    terms:["Elterngeld-Nachweis","U-Untersuchung","Kita-Anmeldung","Kindergeld-Antrag"],
+    tip:"In der Elternzeit darfst du bis zu 32 Stunden pro Woche arbeiten. ElterngeldPlus: halber Betrag, dafür doppelt so lange. Plane früh, wovon du nach dem Elterngeld lebst.",
+    cats:["Kind & Baby","Kita"], inc:[["Kindergeld","kindergeld"]]},
+  krank:{amt:"Krankengeld", tile:"Krankengeld", day:0, since:1, cd:"Krankengeld endet", cdHint:"höchstens 78 Wochen ab Beginn der Krankheit",
+    terms:["Arzttermin","Krankmeldung an die Kasse","Reha-Antrag","Gutachten / Medizinischer Dienst"],
+    tip:"Krankengeld: 70 % vom Brutto, höchstens 90 % vom Netto – für dieselbe Krankheit höchstens 78 Wochen in 3 Jahren. Die Krankmeldung muss lückenlos sein, sonst stoppt die Zahlung.",
+    cats:["Gesundheit & Medikamente","Zuzahlungen"]},
+  beamte:{amt:"Besoldung", tile:"Besoldung & Beihilfe", day:1, side:"beihilfe", terms:["Beihilfe einreichen","PKV-Rechnung einreichen","Beurteilung"],
+    tip:"Arztrechnungen: Beihilfe und private Krankenversicherung zahlen getrennt – reich beides ein, sonst bleibt Geld liegen.",
+    cats:["Private Krankenversicherung","Arzt & Rechnungen"], inc:[["Beihilfe & PKV-Erstattung","sonstige"]]},
+};
+const prof = () => GPROF[S.settings.work] || null;
+const hasProfile = () => !!prof();
+// the end date shown as countdown (Krankengeld: 78 weeks after the start)
+function profEnd(){ const P=prof(), j=jlCfg(); if (!P||!P.cd) return null;
+  if (P.since){ if (!j.since) return null; const d=new Date(j.since+"T12:00"); d.setDate(d.getDate()+546); return d.toISOString().slice(0,10); }
+  return j.until||null; }
 // rough split of the standard rate (Regelbedarf) into pots – a guide, editable
 const POT_DEF=[["Essen & Trinken",34.5,"food",/lebensm|essen|haushalt|super|rewe|edeka|aldi|lidl|getränk/],["Strom & Wohnen",8.4,"bolt",/strom|energie|wohn|gas/],["Handy & Internet",8.3,"phone",/handy|internet|telefon|mobil|wlan|abo/],["Bus & Bahn",8.9,"car",/bus|bahn|ticket|tank|auto|park|fahr|verkehr/],["Kleidung",7.5,"shirt",/kleid|schuh|mode/],["Freizeit",8.9,"spark",/freizeit|spaß|spass|kino|hobby|sport|urlaub|ausgehen/],["Haushalt & Möbel",6.3,"home",/möbel|deko|bau|werkzeug/],["Gesundheit",3.7,"health",/gesund|apothek|arzt|drogerie|pflege/],["Sonstiges",13.5,"dots",/./]];
 function jlCfg(){
   const st=S.settings, j=st.jl=st.jl||{};
   if (j.amount==null) j.amount = st.work==="grusi" ? 563 : 0;
-  if (j.payDay==null) j.payDay = st.work==="alg" ? 0 : 1;          // 0 = last day of the month
+  if (j.payDay==null) j.payDay = (GPROF[st.work]||{day:1}).day;          // 0 = last day of the month
+  j.beihilfe=j.beihilfe||[];
   if (!j.pots) j.pots = POT_DEF.map(([n,p])=>({n, v:Math.round((j.amount||563)*p/100)}));
   j.terms=j.terms||[]; j.catPot=j.catPot||{};
   return j;
@@ -1696,6 +1738,7 @@ function jlKeep(gross){
   let k=Math.min(gross,100); if (gross>100) k+=(Math.min(gross,520)-100)*0.2; if (gross>520) k+=(Math.min(gross,1000)-520)*0.3; if (gross>1000) k+=(Math.min(gross,top)-1000)*0.1;
   return Math.round(k); }
 function joblessTop(ym, free, c){
+  const P=prof(); if (!P) return "";
   const j=jlCfg(), np=nextPay(), cur=ymOf(new Date()), grusi=S.settings.work==="grusi";
   const spent={}; for (const t of c.tx) if (t.kind==="ausgabe"){ const p=potOfCat(t.cat); spent[p]=(spent[p]||0)+t.amount; }
   const pots=j.pots.filter(p=>p.v>0).map(p=>({...p, s:spent[p.n]||0})), show=UI.potAll?pots:pots.slice(0,4);
@@ -1703,49 +1746,72 @@ function joblessTop(ym, free, c){
   const terms=j.terms.filter(t=>t.d>=today).sort((a,b)=>(a.d+(a.t||"")).localeCompare(b.d+(b.t||""))).slice(0,3);
   const mini=Number(j.mini)||0, keep=jlKeep(mini), goal=(S.settings.goals||[])[0];
   const potIc=n=>(POT_DEF.find(x=>x[0]===n)||[,,"dots"])[2];
+  const end=profEnd(), endDays=end?Math.round((new Date(end+"T12:00")-new Date(today+"T12:00"))/864e5):null;
+  const fmtD=d=>new Date(d+"T12:00").toLocaleDateString("de-DE",{day:"numeric",month:"long",year:"numeric"});
+  const go=`data-go="more" data-sp="amt"`;
+  const tiles=[];
+  // tile 1: what matters most for this group
+  if (P.side==="jl") tiles.push(`<button class="card" ${go}><span class="jli">${ic("cash",17)}</span><b>Minijob</b><small>${mini?`${esc(eur0(mini))} Lohn<br><b>${esc(eur0(keep))} behältst du</b>`:"Rechner öffnen"}</small></button>`);
+  else if (P.side==="bafoeg") tiles.push(`<button class="card" ${go}><span class="jli">${ic("case",17)}</span><b>Nebenjob</b><small>${mini?`${esc(eur0(mini))} im Monat<br><b class="${mini>603?"neg":""}">${mini>603?`${esc(eur0(mini-603))} über der Grenze`:`noch ${esc(eur0(603-mini))} frei`}</b>`:"bis 603 € ohne Abzug"}</small></button>`);
+  else if (P.side==="ferien") tiles.push(`<button class="card" ${go}><span class="jli">${ic("case",17)}</span><b>Ferienjob</b><small>${mini?`${esc(eur0(mini))} verdient<br><b>bleibt dir ganz</b>`:"eintragen, was du verdienst"}</small></button>`);
+  else if (P.side==="beihilfe"){ const open=j.beihilfe.filter(x=>!x.done), sumO=sum(open,x=>Number(x.amt)||0);
+    tiles.push(`<button class="card" ${go}><span class="jli">${ic("health",17)}</span><b>Beihilfe</b><small>${open.length?`${open.length} offen<br><b>${esc(eur0(sumO))} ausstehend</b>`:"keine Rechnung offen"}</small></button>`); }
+  else if (P.side==="steuer"){ const y=Number(ym.slice(0,4)), tx=taxCalc(y), ts=taxStatus(y,tx);
+    tiles.push(`<button class="card" data-go="year"><span class="jli">${ic("receipt",17)}</span><b>Steuer ${y}</b><small>${ts.kind==="pflicht"?`<b class="neg">Erklärung Pflicht</b><br>ca. ${esc(eur0(Math.max(0,tx.due)))}`:ts.kind==="erstattung"?`<b class="pos">ca. ${esc(eur0(-tx.due))} zurück</b>`:"keine Erklärung nötig"}</small></button>`); }
+  if (P.cd) tiles.push(`<button class="card" ${go}><span class="jli">${ic("cal",17)}</span><b>${esc(P.cd)}</b><small>${end?`${endDays<0?"seit":"am"} ${esc(new Date(end+"T12:00").toLocaleDateString("de-DE"))}<br><b class="${endDays>=0&&endDays<=90?"neg":""}">${endDays<0?"vorbei":endDays<62?`noch ${endDays} Tage`:`noch ${Math.round(endDays/30.4)} Monate`}</b>`:P.since?"Beginn eintragen":"Datum eintragen"}</small></button>`);
+  if (tiles.length<2) tiles.push(goal?`<button class="card" data-goalsopen="1"><span class="jli">${ic("piggy",17)}</span><b>${S.settings.work==="schule"?"Sparziel":"Rücklage"}</b><small>${esc(goal.name)}<br><b>${esc(eur0(goalSaved(goal).v))} / ${esc(eur0(goal.target))}</b></small></button>`
+        :`<button class="card" id="goalFirst"><span class="jli">${ic("piggy",17)}</span><b>${S.settings.work==="schule"?"Sparziel":"Rücklage"}</b><small>${S.settings.work==="schule"?"auf etwas hin sparen":"für teure Monate anlegen"}</small></button>`);
   return `<div class="jl">
     <div class="jlpay"><small>Nächste Zahlung · ${esc(np.date.toLocaleDateString("de-DE",{day:"numeric",month:"long"}))}</small>
       <div class="jlcd"><div><b>${np.days}</b><span>${np.days===1?"Tag":"Tage"}</span></div><div><b>${left==null?"–":esc(eur0(left))}</b><span>übrig</span></div><div><b>${left==null?"–":esc(eur0(Math.max(0,left)/np.days))}</b><span>pro Tag</span></div></div>
-      <span class="jlsub">${grusi?"Grundsicherung":"Arbeitslosengeld"} ${j.amount?esc(eur0(j.amount)):"– Betrag eintragen"}${grusi&&j.rentDirect?" · Miete zahlt das Amt direkt":""}</span></div>
-    <div class="card jlpots"><div class="card-head"><h2>${hIc("target")}Deine Töpfe</h2><button class="link" data-go="more" data-sp="amt">Anpassen ${ic("right",16)}</button></div>
+      <span class="jlsub">${esc(P.amt)} ${j.amount?esc(eur0(j.amount)):"– Betrag eintragen"}${grusi&&j.rentDirect?" · Miete zahlt das Amt direkt":""}</span></div>
+    ${P.pots?`<div class="card jlpots"><div class="card-head"><h2>${hIc("target")}Deine Töpfe</h2><button class="link" ${go}>Anpassen ${ic("right",16)}</button></div>
       ${show.map(p=>{ const r=p.s/p.v, ov=p.s>p.v, col=ov?"var(--bad)":themeCol("#2e9c74", j.pots.indexOf(j.pots.find(x=>x.n===p.n)));
         return `<div class="bpr"><span class="bpic" style="--bc:${col}">${ic(potIc(p.n),16)}</span><span class="bpm"><span class="bpl"><b>${esc(p.n)}</b><span class="${ov?"neg":"muted"}">${ov?`${esc(eur0(p.s-p.v))} drüber`:`${esc(eur0(p.v-p.s))} frei`}</span></span><span class="bpbar"><i style="width:${Math.min(100,Math.max(p.s?3:0,r*100))}%;background:${col}"></i></span></span></div>`; }).join("")}
-      ${pots.length>4?`<button class="link small bpmore" data-potall="1">${UI.potAll?"Weniger":`Alle ${pots.length} Töpfe`}</button>`:""}</div>
+      ${pots.length>4?`<button class="link small bpmore" data-potall="1">${UI.potAll?"Weniger":`Alle ${pots.length} Töpfe`}</button>`:""}</div>`:""}
+    <div class="jltiles">${tiles.slice(0,2).join("")}</div>
     <div class="card jlterms"><div class="card-head"><h2>${hIc("cal")}Termine & Fristen</h2>${terms.length?`<span class="pill">${terms.length} offen</span>`:""}</div>
-      ${terms.length?terms.map(t=>`<div class="jlt"><span class="jli">${ic(/bewillig|antrag|nachweis|frist/i.test(t.n)?"doc":"cal",16)}</span><span class="n"><b>${esc(t.n)}</b><small>${esc(new Date(t.d+"T12:00").toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit"}))}${t.t?` · ${esc(t.t)} Uhr`:""}${t.d===today?" · heute":""}</small></span></div>`).join(""):`<p class="small muted" style="margin:0">Keine Termine eingetragen.</p>`}
-      <button class="link small" data-go="more" data-sp="amt" style="margin-top:8px">+ Termin eintragen</button></div>
-    <div class="jltiles">
-      <button class="card" data-go="more" data-sp="amt"><span class="jli">${ic("cash",17)}</span><b>Minijob</b><small>${mini?`${esc(eur0(mini))} Lohn<br><b>${esc(eur0(keep))} behältst du</b>`:"Rechner öffnen"}</small></button>
-      ${goal?`<button class="card" data-goalsopen="1"><span class="jli">${ic("piggy",17)}</span><b>Rücklage</b><small>${esc(goal.name)}<br><b>${esc(eur0(goalSaved(goal).v))} / ${esc(eur0(goal.target))}</b></small></button>`
-        :`<button class="card" id="goalFirst"><span class="jli">${ic("piggy",17)}</span><b>Rücklage</b><small>für teure Monate anlegen</small></button>`}
-    </div></div>`;
+      ${terms.length?terms.map(t=>`<div class="jlt"><span class="jli">${ic(/bewillig|antrag|nachweis|frist|einreich|bescheid|meldung/i.test(t.n)?"doc":"cal",16)}</span><span class="n"><b>${esc(t.n)}</b><small>${esc(new Date(t.d+"T12:00").toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit"}))}${t.t?` · ${esc(t.t)} Uhr`:""}${t.d===today?" · heute":""}</small></span></div>`).join(""):`<p class="small muted" style="margin:0">Keine Termine eingetragen.</p>`}
+      <button class="link small" ${go} style="margin-top:8px">+ Termin eintragen</button></div>
+    ${P.tip&&!(S.settings.tipsOff||{})[S.settings.work]?`<div class="notice info jltip"><span>${esc(P.tip)}</span><button class="icon-btn" data-tipoff="1" aria-label="Tipp ausblenden">×</button></div>`:""}
+  </div>`;
 }
+document.addEventListener("click", e=>{ if (e.target.closest("[data-tipoff]")){ const o=S.settings.tipsOff=S.settings.tipsOff||{}; o[S.settings.work]=1; saveSettings(); } });
 document.addEventListener("click", e=>{ if (e.target.closest("#stmtCam")||e.target.closest("#stmtMore")) stmtPhoto(); });
 document.addEventListener("click", e=>{ if (e.target.closest("[data-potall]")){ UI.potAll=!UI.potAll; render(); } });
 // settings page "Leistung & Amt"
 function renderAmtEd(){
   const el=$("amtEd"); if (!el) return; if (el.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) return;
-  const j=jlCfg(), w=S.settings.work, mini=Number(j.mini)||0, today=isoToday();
-  const ecats=cats("ausgabe");
+  const j=jlCfg(), w=S.settings.work, P=prof()||GPROF.alg, mini=Number(j.mini)||0, today=isoToday();
+  const ecats=cats("ausgabe"), end=profEnd();
   el.innerHTML=`
     <div class="field"><label for="aWork">Wie verdienst du dein Geld?</label><select class="in" id="aWork">${WGROUPS.map(([g,gt])=>`<optgroup label="${gt}">${WORK.filter(x=>x[3]===g).map(([k,t])=>`<option value="${k}" ${k===w?"selected":""}>${t}</option>`).join("")}</optgroup>`).join("")}</select></div>
     <div class="field"><label>Verdienst du noch etwas dazu?</label><div class="exchips">${exChips()}</div></div>
-    <div class="grid2"><div class="field"><label for="aAmt">${w==="alg"?"Arbeitslosengeld":"Grundsicherung"} pro Monat (€)</label><input class="in" id="aAmt" inputmode="decimal" value="${j.amount?esc(numStr(j.amount)):""}" placeholder="${w==="grusi"?"563":"laut Bescheid"}"></div>
+    <div class="grid2"><div class="field"><label for="aAmt">${esc(P.amt)} pro Monat (€)</label><input class="in" id="aAmt" inputmode="decimal" value="${j.amount?esc(numStr(j.amount)):""}" placeholder="${w==="grusi"?"563":w==="schule"?"z. B. 50":"laut Bescheid / Abrechnung"}"></div>
       <div class="field"><label for="aDay">Geld kommt am</label><select class="in" id="aDay">${[0,...Array.from({length:28},(_,i)=>i+1)].map(d=>`<option value="${d}" ${d===j.payDay?"selected":""}>${d?d+". des Monats":"Monatsende"}</option>`).join("")}</select></div></div>
     ${w==="grusi"?`<div class="switch"><label for="aRent"><b>Miete zahlt das Amt direkt</b><br><span class="small muted">an deinen Vermieter</span></label><input type="checkbox" id="aRent" ${j.rentDirect?"checked":""}></div>`:""}
-    <div class="section-title" style="font-size:14px">Töpfe</div>
+    ${P.cd?`<div class="field"><label for="${P.since?"aSince":"aUntil"}">${P.since?"Krank seit":esc(P.cd)}</label><input class="in" type="date" id="${P.since?"aSince":"aUntil"}" value="${esc((P.since?j.since:j.until)||"")}"><span class="small muted">${esc(P.cdHint||"")}${P.since&&end?` – endet spätestens am ${esc(new Date(end+"T12:00").toLocaleDateString("de-DE"))}`:""}</span></div>`:""}
+    ${P.pots?`<div class="section-title" style="font-size:14px">Töpfe</div>
     <p class="small muted" style="margin:-4px 0 8px">Richtwerte, ungefähr so wie das Amt den Regelsatz aufteilt. Ändere die Beträge, wie es für dich passt.</p>
     <div class="jlpe">${j.pots.map((p,i)=>`<div class="jlpr"><input class="in" data-potn="${i}" value="${esc(p.n)}" aria-label="Name"><input class="in" data-potv="${i}" inputmode="decimal" value="${esc(numStr(p.v))}" aria-label="Betrag"><button class="icon-btn" data-potdel="${i}" aria-label="Topf löschen">×</button></div>`).join("")}</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="chip" data-potadd="1">+ Topf</button><button class="chip" data-potsplit="1">Neu aufteilen aus ${esc(eur0(j.amount||563))}</button></div>
     <div class="section-title" style="font-size:14px">Welche Kategorie gehört in welchen Topf?</div>
-    ${ecats.map(c=>`<div class="jlmap"><span>${tile("ausgabe",c)}<b>${esc(c)}</b></span><select class="in" data-catpot="${esc(c)}">${j.pots.map(p=>`<option ${potOfCat(c)===p.n?"selected":""}>${esc(p.n)}</option>`).join("")}</select></div>`).join("")}
+    ${ecats.map(c=>`<div class="jlmap"><span>${tile("ausgabe",c)}<b>${esc(c)}</b></span><select class="in" data-catpot="${esc(c)}">${j.pots.map(p=>`<option ${potOfCat(c)===p.n?"selected":""}>${esc(p.n)}</option>`).join("")}</select></div>`).join("")}`:""}
+    ${P.side==="beihilfe"?`<div class="section-title" style="font-size:14px">Beihilfe & PKV</div>
+    <p class="small muted" style="margin:-4px 0 8px">Trag jede eingereichte Arztrechnung ein und hak sie ab, wenn das Geld da ist.</p>
+    ${j.beihilfe.slice().sort((a,b)=>(a.done-b.done)||(b.d||"").localeCompare(a.d||"")).map(x=>`<div class="jlt ${x.done?"past":""}"><button class="icon-btn" data-bhdone="${esc(x.id)}" aria-label="${x.done?"Wieder offen":"Erstattet"}">${x.done?"✓":"○"}</button><span class="n"><b>${esc(x.n)} · ${esc(eur(x.amt))}</b><small>eingereicht ${esc(new Date(x.d+"T12:00").toLocaleDateString("de-DE"))}${x.done?" · erstattet":""}</small></span><button class="icon-btn" data-bhdel="${esc(x.id)}" aria-label="Löschen">×</button></div>`).join("")}
+    <div class="jlnew"><input class="in" id="bhN" placeholder="z. B. Zahnarzt"><input class="in" id="bhA" inputmode="decimal" placeholder="Betrag €"><input class="in" type="date" id="bhD" value="${today}"><button class="btn primary" id="bhAdd">Eintragen</button></div>`:""}
     <div class="section-title" style="font-size:14px">Termine & Fristen</div>
     ${j.terms.slice().sort((a,b)=>a.d.localeCompare(b.d)).map(t=>`<div class="jlt ${t.d<today?"past":""}"><span class="jli">${ic("cal",16)}</span><span class="n"><b>${esc(t.n)}</b><small>${esc(new Date(t.d+"T12:00").toLocaleDateString("de-DE"))}${t.t?` · ${esc(t.t)} Uhr`:""}</small></span><button class="icon-btn" data-termdel="${esc(t.id)}" aria-label="Termin löschen">×</button></div>`).join("")}
-    <div class="jlnew"><select class="in" id="tN"><option>Jobcenter-Termin</option><option>Agentur für Arbeit</option><option>Weiterbewilligung abgeben</option><option>Nachweise abgeben</option><option>Bewerbungsgespräch</option><option>Maßnahme / Kurs</option></select><input class="in" type="date" id="tD" value="${today}"><input class="in" type="time" id="tT"><button class="btn primary" id="tAdd">Eintragen</button></div>
-    <div class="section-title" style="font-size:14px">Minijob-Rechner</div>
+    <div class="jlnew"><select class="in" id="tN">${P.terms.map(n=>`<option>${esc(n)}</option>`).join("")}<option>Sonstiger Termin</option></select><input class="in" type="date" id="tD" value="${today}"><input class="in" type="time" id="tT"><button class="btn primary" id="tAdd">Eintragen</button></div>
+    ${P.side==="jl"?`<div class="section-title" style="font-size:14px">Minijob-Rechner</div>
     <div class="field"><label for="aMini">Lohn pro Monat (€ brutto)</label><input class="in" id="aMini" inputmode="decimal" value="${mini?esc(numStr(mini)):""}" placeholder="z. B. 300"></div>
     ${mini?`<div class="notice info"><span>Von <b>${esc(eur(mini))}</b> behältst du ungefähr <b>${esc(eur(jlKeep(mini)))}</b> zusätzlich, <b>${esc(eur(Math.max(0,mini-jlKeep(mini))))}</b> werden ${w==="alg"?"vom Arbeitslosengeld":"von der Grundsicherung"} abgezogen.</span></div>`:""}
-    <p class="small muted" style="margin:8px 0 0">${w==="alg"?"Arbeitslosengeld: 165 € Nebenverdienst im Monat sind frei, höchstens 15 Stunden pro Woche.":"Grundsicherung: die ersten 100 € sind frei, darüber bleiben 20 % (bis 520 €), 30 % (bis 1.000 €) und 10 % (bis 1.200 €, mit Kind 1.500 €)."} Angaben ohne Gewähr – im Zweifel beim ${w==="alg"?"Arbeitsamt":"Jobcenter"} nachfragen.</p>`;
+    <p class="small muted" style="margin:8px 0 0">${w==="alg"?"Arbeitslosengeld: 165 € Nebenverdienst im Monat sind frei, höchstens 15 Stunden pro Woche.":"Grundsicherung: die ersten 100 € sind frei, darüber bleiben 20 % (bis 520 €), 30 % (bis 1.000 €) und 10 % (bis 1.200 €, mit Kind 1.500 €)."} Angaben ohne Gewähr – im Zweifel beim ${w==="alg"?"Arbeitsamt":"Jobcenter"} nachfragen.</p>`
+    :P.side==="bafoeg"||P.side==="ferien"?`<div class="section-title" style="font-size:14px">${P.side==="bafoeg"?"Nebenjob":"Ferienjob"}</div>
+    <div class="field"><label for="aMini">${P.side==="bafoeg"?"Lohn pro Monat (€ brutto)":"Verdient (€)"}</label><input class="in" id="aMini" inputmode="decimal" value="${mini?esc(numStr(mini)):""}" placeholder="z. B. 450"></div>
+    ${P.side==="bafoeg"&&mini?`<div class="notice ${mini>603?"warn":"ok"}"><span>${mini>603?`Du liegst <b>${esc(eur(mini-603))}</b> über der Minijob-Grenze – das BAföG kann gekürzt werden. Melde den Verdienst dem BAföG-Amt.`:`Passt: noch <b>${esc(eur(603-mini))}</b> bis zur Grenze von 603 €.`}</span></div>`:""}`:""}
+    ${P.tip?`<div class="notice info" style="margin-top:14px"><span>${esc(P.tip)}</span></div>`:""}`;
 }
 function jlSave(){ saveSettings(); }
 document.addEventListener("change", e=>{
@@ -1755,6 +1821,8 @@ document.addEventListener("change", e=>{
   else if (t.id==="aDay"){ j.payDay=Number(t.value); }
   else if (t.id==="aRent"){ j.rentDirect=t.checked; }
   else if (t.id==="aMini"){ j.mini=parseAmt(t.value)||0; }
+  else if (t.id==="aUntil"){ j.until=t.value||""; }
+  else if (t.id==="aSince"){ j.since=t.value||""; }
   else if (t.dataset.potn!=null){ const p=j.pots[+t.dataset.potn], old=p.n, nw=t.value.trim()||old; p.n=nw; for (const k in j.catPot) if (j.catPot[k]===old) j.catPot[k]=nw; }
   else if (t.dataset.potv!=null){ j.pots[+t.dataset.potv].v=parseAmt(t.value)||0; }
   else if (t.dataset.catpot!=null){ j.catPot[t.dataset.catpot]=t.value; }
@@ -1766,6 +1834,9 @@ document.addEventListener("click", e=>{
   if (t.closest("[data-potadd]")){ j.pots.push({n:"Neuer Topf", v:0}); }
   else if (t.closest("[data-potsplit]")){ j.pots=POT_DEF.map(([n,p])=>({n, v:Math.round((j.amount||563)*p/100)})); j.catPot={}; }
   else if (t.closest("[data-potdel]")){ j.pots.splice(+t.closest("[data-potdel]").dataset.potdel,1); }
+  else if (t.closest("[data-bhdone]")){ const x=j.beihilfe.find(x=>x.id===t.closest("[data-bhdone]").dataset.bhdone); if (x) x.done=!x.done; }
+  else if (t.closest("[data-bhdel]")){ const id=t.closest("[data-bhdel]").dataset.bhdel; j.beihilfe=j.beihilfe.filter(x=>x.id!==id); }
+  else if (t.closest("#bhAdd")){ const a=parseAmt($("bhA").value)||0, n=$("bhN").value.trim()||"Arztrechnung"; if (!a){ toast("Bitte einen Betrag eintragen"); return; } j.beihilfe.push({id:newId(), n, amt:a, d:$("bhD").value||isoToday(), done:false}); toast("Eingetragen"); }
   else if (t.closest("[data-termdel]")){ const id=t.closest("[data-termdel]").dataset.termdel; j.terms=j.terms.filter(x=>x.id!==id); }
   else if (t.closest("#tAdd")){ const d=$("tD").value; if (!d){ toast("Bitte ein Datum wählen"); return; } j.terms.push({id:newId(), n:$("tN").value, d, t:$("tT").value||""}); toast("Termin eingetragen"); }
   else return;
@@ -2403,8 +2474,10 @@ function renderHome(){
   for (const d of S.debts){ const st=debtState(d); if (st.noCover) hints.push({k:"debt", lvl:"warn", t:`${d.name}: Rate deckt die Zinsen nicht`, s:"Die Schuld wird so nicht kleiner."}); }
   for (const gl of (S.settings.goals||[])){ const sv=goalSaved(gl); if (gl.target>0 && sv.v>=gl.target) hints.push({k:"goal", lvl:"good", t:`Sparziel „${gl.name}“ erreicht`, s:eur(sv.v)}); }
   if (!hints.some(h=>h.lvl!=="good")) hints.unshift({lvl:"good", t: ym>=cur ? "Du liegst im Plan" : `${MONTHS[ymParts(ym)[1]-1]}: ${c.net>=0?"+":"−"} ${eur(Math.abs(c.net))}`, s: ym>=cur ? (days&&free>0?`Noch ${eur(free/days)} pro Tag frei.`:"") : (c.net>=0?"mehr eingenommen als ausgegeben":"mehr ausgegeben als eingenommen")});
-  if (isJobless()){ const td=isoToday(), tm=new Date(Date.now()+864e5).toISOString().slice(0,10);
-    for (const t of (S.settings.jl&&S.settings.jl.terms)||[]) if (t.d===td||t.d===tm) hints.unshift({k:"term", lvl:"warn", t:`${t.d===td?"Heute":"Morgen"}: ${t.n}`, s:t.t?`um ${t.t} Uhr`:""}); }
+  if (hasProfile()){ const td=isoToday(), tm=new Date(Date.now()+864e5).toISOString().slice(0,10);
+    for (const t of (S.settings.jl&&S.settings.jl.terms)||[]) if (t.d===td||t.d===tm) hints.unshift({k:"term", lvl:"warn", t:`${t.d===td?"Heute":"Morgen"}: ${t.n}`, s:t.t?`um ${t.t} Uhr`:""});
+    const P=prof(), end=profEnd(); if (P.cd && end){ const dl=Math.round((new Date(end+"T12:00")-new Date(td+"T12:00"))/864e5); if (dl>=0 && dl<=60) hints.unshift({k:"profend", lvl:"warn", t:`${P.cd} in ${dl} ${dl===1?"Tag":"Tagen"}`, s:`am ${new Date(end+"T12:00").toLocaleDateString("de-DE")} – plan rechtzeitig, wie es danach weitergeht.`}); }
+    if (P.side==="beihilfe"){ const old=(S.settings.jl.beihilfe||[]).filter(x=>!x.done && x.d && (Date.now()-new Date(x.d+"T12:00"))/864e5>42); if (old.length) hints.push({k:"beihilfe", lvl:"warn", t:`${old.length} Beihilfe-${old.length===1?"Antrag":"Anträge"} seit über 6 Wochen offen`, s:"Nachfragen lohnt sich."}); } }
   UI.hints=hints; updateBell();
   if (ym===cur) notifyAlerts(hints);
   // --- budgets as tiles (the 3 that are used up most)
@@ -2417,7 +2490,7 @@ function renderHome(){
   $("v-home").innerHTML = `
     ${S.settings.work===undefined?`<div class="card workq"><b>Wie verdienst du dein Geld?</b><span class="small muted">Dann zeigt die App nur, was zu dir passt.</span>${workPicker("", UI.workGrp||"", "setwork")}</div>`:S.settings.extra===undefined&&S.settings.work!==undefined&&UI.askExtra?`<div class="card workq"><b>Verdienst du noch etwas dazu?</b><span class="small muted">Du kannst mehreres anhaken.</span>${extraPicker(S.settings.work, UI.exSel||[], "homeextra")}<button class="btn primary" data-homeexok="1" style="margin-top:10px">Fertig</button></div>`:""}
     ${needStart?`<div class="notice info"><span>Trag einmal deinen Kontostand vom 1.1.${y} ein, dann stimmt die Rechnung.</span><button class="btn primary" data-go="more" data-scroll="sStart">Eintragen</button></div>`:""}
-    ${isJobless()?joblessTop(ym, free, c):""}
+    ${hasProfile()?joblessTop(ym, free, c):""}
     <div class="homeTop" style="display:flex;flex-direction:column;gap:10px" ${isJobless()?"hidden":""}>
       <div class="astack ${accts.length>1?"":"one"}" id="astack" ${accts.length>1?`tabindex="0" aria-label="Konten – wischen zum Blättern"`:""}>${acardHtml}</div>
       ${accts.length>1?`<div class="adots" id="adots">${accts.map((_,i)=>`<button data-cdot="${i}" aria-label="Karte ${i+1}"><i></i></button>`).join("")}</div>`:""}
@@ -3748,7 +3821,7 @@ async function wizFinish(){
   const w=UI.wiz; wizRead();
   const st=S.settings, y=ymOf(new Date()).slice(0,4), today=isoToday();
   if (w.name) st.name=w.name;
-  st.work=w.work||st.work||"beides"; st.extra=extraFor(st.work).map(x=>x[0]).filter(k=>(w.extra||[]).includes(k)); addWorkInc(st, st.work); addExtraInc(st);
+  const prevW=st.work; st.work=w.work||st.work||"beides"; st.extra=extraFor(st.work).map(x=>x[0]).filter(k=>(w.extra||[]).includes(k)); addWorkInc(st, st.work); addProfCats(st, st.work); if (prevW!==st.work && GPROF[st.work]){ const j=st.jl=st.jl||{}; j.payDay=GPROF[st.work].day; } addExtraInc(st);
   const bal=parseAmt(w.bal);
   if (w.bal!=="" && isFinite(bal)){ st.accountAnchors={...(st.accountAnchors||{}), Hauptkonto:{date:today, balance:Math.round(bal*100)/100}}; st.startBalance={...(st.startBalance||{}), [y]:Math.round(bal*100)/100}; }
   const bud={...(st.budgets||{})}; for (const [c,v] of Object.entries(w.bud)){ const a=parseAmt(v); if (a>0) bud[c]=Math.round(a*100)/100; } st.budgets=bud;
@@ -3948,7 +4021,7 @@ function qrSvg(text, px){
 const SP_PAGES = {
   konten:["Konten & Spaces","wallet"], budgets:["Monatsbudgets","target"], schulden:["Schulden","bank"], backup:["Backup","save"],
   profil:["Profil","user"], sync:["Abgleich & Updates","cloud"], notify:["Benachrichtigungen","bell"], steuer:["Steuer & Einkommen","receipt"],
-  start:["Startseite","home"], laeden:["Deine Läden","cart"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"], farben:["Farben","palette"], amt:["Leistung & Amt","cash"]
+  start:["Startseite","home"], laeden:["Deine Läden","cart"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"], farben:["Farben","palette"], get amt(){ return [(GPROF[S.settings&&S.settings.work]||{}).tile||"Leistung & Amt","cash"]; }
 };
 function spSummary(k){
   const st=S.settings, y=UI.ym.slice(0,4);
@@ -3962,7 +4035,7 @@ function spSummary(k){
   if (k==="start"){ return "Blöcke sortieren"; }
   if (k==="laeden"){ const n=(st.shops||[]).length; return n?`${n} ausgewählt`:"keine"; }
   if (k==="sicherheit"){ return lockCfg() ? "App-Sperre an" : "App-Sperre aus"; }
-  if (k==="amt"){ const j=st.jl||{}; return (st.work==="alg"?"ALG I":"Grundsicherung")+(j.amount?" · "+eur0(j.amount):""); }
+  if (k==="amt"){ const j=st.jl||{}, P=GPROF[st.work]; return (P?P.amt:"Leistung")+(j.amount?" · "+eur0(j.amount):"")+(P&&P.side==="beihilfe"&&(j.beihilfe||[]).some(x=>!x.done)?` · ${(j.beihilfe||[]).filter(x=>!x.done).length} Beihilfe offen`:""); }
   if (k==="farben"){ const c=st.colors||{}, n=Object.values(c).reduce((a,o)=>a+Object.keys(o||{}).length,0); return n?`${n} eigene`:"Standard"; }
   if (k==="notify"){ const c=notifyCfg(); return !CAN_NOTIFY ? "nur in der App" : c.on&&notifyPerm()==="granted" ? "an" : "aus"; }
   if (k==="kategorien"){ return `${cats("ausgabe").length+cats("betrieb").length+incCats().length} Kategorien`; }
@@ -4004,7 +4077,7 @@ function renderSetHome(){
   };
   const QK=Object.keys(QCOL); for (const k of QK) QCOL[k]=themeCol(QCOL[k], QK.indexOf(k));
   TED.more={}; for (const k of Object.keys(QCOL)) TED.more[k]=[k==="dark"?"Dunkel":k==="wiz"?"Einrichtung":short[k]||k, QCOL[k], k==="dark"?"spark":k==="wiz"?"check":(SP_PAGES[k]||[,"dots"])[1]];
-  const SGROUPS=[["Geld",["konten","budgets","schulden",...(isJobless()?["amt"]:["steuer"])]],["Anpassen",["start","laeden","kategorien","farben",...(WIDE.matches?["dark"]:[]),"wiz"]],["App",[...(SYNCABLE||window.AndroidBridge?["sync"]:[]),"notify","sicherheit","backup"]]];
+  const SGROUPS=[["Geld",["konten","budgets","schulden",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"])]],["Anpassen",["start","laeden","kategorien","farben",...(WIDE.matches?["dark"]:[]),"wiz"]],["App",[...(SYNCABLE||window.AndroidBridge?["sync"]:[]),"notify","sicherheit","backup"]]];
   $("setHome").innerHTML = `
     <button class="sprof" data-spgo="profil" aria-label="Profil ändern"><span class="av">${S.settings.photo?`<img src="${esc(S.settings.photo)}" alt="">`:esc((name.trim()[0]||"?").toUpperCase())}</span>
       <span class="pt"><b>${esc(name||"Dein Name")}</b><small>${name?"Profil bearbeiten":"Tippen, um Name und Foto einzutragen"}</small><span class="pchip"><i class="${dot}"></i>${esc(line)}</span></span><span class="ch">${ic("right",18)}</span></button>
@@ -4224,7 +4297,7 @@ function renderMore(){
   $("catEd-einnahme").innerHTML = incCats().map(c=>`<div class="crow">${tile("einnahme",c.name)}<div class="f1"><b>${esc(c.name)}</b></div><button class="artbtn" data-artpick="${esc(c.name)}" aria-label="Art von ${esc(c.name)}"><span>${esc(artLabel(c.art))}</span>${ic("down",16)}</button>${xBtn("einnahme",c.name)}</div>`).join("")+`<button class="cadd" data-catadd="einnahme">+ Neue Einnahme-Art</button>`;
   const w=S.settings.work||"beides";
   if (document.activeElement!==$("sWork")) $("sWork").innerHTML = WGROUPS.map(([g,gt])=>`<optgroup label="${gt}">${WORK.filter(x=>x[3]===g).map(([k,t])=>`<option value="${k}" ${k===w?"selected":""}>${t}</option>`).join("")}</optgroup>`).join("");
-  $("sWorkInfo").textContent = (WORK.find(x=>x[0]===w)||WORK[3])[2] + (!hasJob()&&!hasSelf()&&!isJobless()?" – Steuer-Felder sind ausgeblendet.":"") + (w==="alg"||w==="grusi"?" – die Startseite zeigt Zahltag, Töpfe und Termine. Einstellungen dazu unter „Leistung & Amt“.":w==="angestellt"?" – Rücklage, Betrieb, Umsatzsteuer und EÜR sind ausgeblendet.":w==="selbst"?" – die Felder für Gehalt sind ausgeblendet.":"");
+  $("sWorkInfo").textContent = (WORK.find(x=>x[0]===w)||WORK[3])[2] + (!hasJob()&&!hasSelf()&&!isJobless()?" – Steuer-Felder sind ausgeblendet.":"") + (GPROF[w]?` – die Startseite zeigt Zahltag${GPROF[w].pots?", Töpfe":""} und Termine. Einstellungen dazu unter „${GPROF[w].tile}“.`:w==="angestellt"?" – Rücklage, Betrieb, Umsatzsteuer und EÜR sind ausgeblendet.":w==="selbst"?" – die Felder für Gehalt sind ausgeblendet.":"");
   $("sExtra").innerHTML = exChips();
   $("sJobBox").hidden = !hasJob(); $("sSelfBox").hidden = !hasSelf(); $("catBetField").hidden = !hasSelf();
   renderNotifyEd(); renderAutoBk();
