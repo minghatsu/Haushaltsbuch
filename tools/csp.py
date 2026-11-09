@@ -7,7 +7,7 @@ if len(scripts) != 1:
     sys.exit("erwartet genau ein <script>, gefunden: %d" % len(scripts))
 h = base64.b64encode(hashlib.sha256(scripts[0].encode("utf-8")).digest()).decode()
 csp = ("default-src 'self'; script-src 'sha256-%s' https://cdn.jsdelivr.net; "
-       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; "
+       "style-src 'self' 'unsafe-inline'; font-src 'self' data:; "
        "img-src 'self' data: blob: https:; connect-src 'self' data: blob: https: http:; "
        "object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'") % h
 tag = '<meta http-equiv="Content-Security-Policy" content="%s">' % csp
