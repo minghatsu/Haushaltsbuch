@@ -717,7 +717,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .anaq{margin-bottom:14px}.anaq button{position:relative}
 .anapanel{border-top:3px solid var(--tc)}.aph{display:flex;align-items:center;gap:12px}.aph .ic{width:36px;height:36px;border-radius:12px;background:var(--tc);color:#fff;display:grid;place-items:center;flex:none}.aph .n{flex:1;min-width:0;display:flex;flex-direction:column}.aph b{font-size:15px}
 .anapanel .kpis{margin:0}.anapanel .anab>.card-head h2{display:none}.anapanel .anab>.card-head{justify-content:flex-end}.aphx{border:0;background:none;color:var(--muted);padding:6px;cursor:pointer}
-main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdrop-filter:none!important}.cubing .filters,.cubing .rings,.cubing .jars,.cubing .acards,.cubing .table-wrap,.cubing [style*="overflow-x:auto"],.cubing .fxtiles{overflow:hidden!important}
+main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdrop-filter:none!important}.cubing .filters,.cubing .rings,.cubing .jars,.cubing .acards,.cubing .table-wrap,.cubing [style*="overflow-x:auto"],.cubing .fxtiles,.cubing .srail{overflow:visible!important}
 .cubeshade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;border-radius:inherit;z-index:50}
 
 .bgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -5165,10 +5165,11 @@ $("loginGo").onclick = doLogin;
     cur.style.transformOrigin="50% "+(mid - cur.getBoundingClientRect().top)+"px";
     shC=shade(cur);
     if (!nbKey) return;
+    const offT=cur.offsetTop;
     nb=sec(nbKey); try { RENDER[nbKey](); } catch(e){}
     nb.hidden=false; nb.classList.add("cubing");
     // same column as the current page (main has side padding), top edge at the visible top, only one screen high
-    Object.assign(nb.style,{position:"absolute",left:cur.offsetLeft+"px",width:cur.offsetWidth+"px",top:(topVis - r.top)+"px",height:(innerHeight-topVis)+"px",overflow:"hidden",transformOrigin:"50% "+(mid-topVis)+"px",pointerEvents:"none",zIndex:"1"});
+    Object.assign(nb.style,{position:"absolute",left:cur.offsetLeft+"px",width:cur.offsetWidth+"px",top:(scrollY + offT)+"px",height:Math.round(innerHeight*1.6)+"px",margin:"0",overflow:"hidden",transformOrigin:"50% "+(mid-(r.top+scrollY+offT))+"px",pointerEvents:"none",zIndex:"1"});
     shN=shade(nb);
   }
   function draw(){
@@ -5181,7 +5182,7 @@ $("loginGo").onclick = doLogin;
     nb.style.transform=`translateZ(${-h}px) rotateY(${th-s*90}deg) translateZ(${h}px)`; shN.style.opacity=String((1-a)*0.6);
   }
   function reset(){
-    for (const el of [cur,nb]) if (el){ Object.assign(el.style,{transform:"",transition:"",transformOrigin:"",backfaceVisibility:"",willChange:"",position:"",left:"",width:"",top:"",height:"",overflow:"",pointerEvents:"",zIndex:""}); }
+    for (const el of [cur,nb]) if (el){ Object.assign(el.style,{transform:"",transition:"",transformOrigin:"",backfaceVisibility:"",willChange:"",position:"",left:"",width:"",top:"",height:"",overflow:"",margin:"",pointerEvents:"",zIndex:""}); }
     for (const d of [shC,shN]) if (d) d.remove();
     for (const el of [cur,nb]) if (el) el.classList.remove("cubing");
     if (nb && nb!==cur) nb.hidden=true;
