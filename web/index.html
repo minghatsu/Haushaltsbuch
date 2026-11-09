@@ -571,6 +571,18 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 }
 /* home columns: on phones the column wrappers disappear and "order" restores the one-column sequence */
 .cols,.col{display:contents}
+
+/* phone tab bar with labels: 3 tabs | + | 3 tabs */
+.tabs{grid-template-columns:repeat(3,1fr) 60px repeat(3,1fr);width:calc(100% - 16px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));max-width:560px;padding:4px 4px}
+.tab{height:62px;gap:3px;padding:6px 0 7px;min-width:0}
+.tab .tname{display:block;font-size:min(10px,2.5vw);font-weight:700;letter-spacing:-.03em;line-height:1;white-space:nowrap}
+.tab:not(.plus)::after{display:none}
+.tab:not(.plus) svg.i{box-sizing:content-box;padding:4px 12px!important;border-radius:999px;transition:background .2s}
+.tab[aria-selected="true"]:not(.plus) svg.i{background:var(--accent-soft)!important}
+.tab[aria-selected="true"] .tname{color:var(--accent)}
+.tab .tlong{display:none}.tab .tshort{display:inline}
+.tset{position:relative}.tset .sdot{position:absolute;top:6px;right:calc(50% - 20px);width:8px;height:8px;border-radius:50%;background:var(--sdot);box-shadow:0 0 0 2px var(--surface);display:none}.tset.dot .sdot{display:block}
+#settingsBtn{display:none}
 .brand,.deskonly,.tab .tlabel{display:none}
 
 /* ---------- desktop / wide window: sidebar on the left, content in columns ---------- */
@@ -588,7 +600,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   .tab[aria-selected="true"]{background:var(--accent-soft);color:var(--accent)}
   .tab.plus{order:-1;width:100%;height:auto;border-radius:14px;padding:12px 14px;display:flex;justify-content:flex-start;gap:12px;margin-bottom:14px;font-size:15px}
   .tab.plus svg.i{width:22px;height:22px}
-  .tab .tlabel,.tab .tname{display:inline}
+  .tab .tlabel,.tab .tname{display:inline}.tab .tname{font-size:inherit;max-width:none}.tab .tlong{display:inline}.tab .tshort{display:none}.tab:not(.plus) svg.i{padding:0!important}.tab[aria-selected="true"]:not(.plus) svg.i{background:none!important}.tset .sdot{top:50%;right:14px;margin-top:-4px}
   .tab{height:auto}.tab:not(.plus)::after{display:none}.tab.plus{margin-top:0;box-shadow:none}.tabs{overflow:auto}
   .tab:not(.plus) svg.i{padding:0;background:none!important}
   .deskonly{display:flex}
@@ -714,6 +726,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .hkpi .hki{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:#fff;background:var(--tc);flex:none}
 .hkpi small{display:block;color:var(--muted);font-size:12px}.hkpi b{display:block;font:800 17px var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .anarow .kpis{margin:0}
+.zstack{display:flex;flex-direction:column;gap:14px}.zstack>.card{order:0!important;margin:0}
 .anaq{margin-bottom:14px}.anaq button{position:relative}
 .anapanel{border-top:3px solid var(--tc)}.anasheet .sheet-head{align-items:center}.anasheet .aph{flex:1;min-width:0}.anasheet .aph .ic{width:36px;height:36px;border-radius:12px;background:var(--tc);color:#fff;display:grid;place-items:center;flex:none}.anasheet .anab{margin-top:4px}.anasheet .anab>.card-head h2{display:none}.anasheet .anab>.card-head{justify-content:flex-end}.anasheet .kpis{margin:0}.aph{display:flex;align-items:center;gap:12px}.aph .ic{width:36px;height:36px;border-radius:12px;background:var(--tc);color:#fff;display:grid;place-items:center;flex:none}.aph .n{flex:1;min-width:0;display:flex;flex-direction:column}.aph b{font-size:15px}
 .anapanel .kpis{margin:0}.anapanel .anab>.card-head h2{display:none}.anapanel .anab>.card-head{justify-content:flex-end}.aphx{border:0;background:none;color:var(--muted);padding:6px;cursor:pointer}
@@ -871,6 +884,7 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
   <section class="view" id="v-fix" data-view="fix" hidden></section>
   <section class="view" id="v-belege" data-view="belege" hidden></section>
   <section class="view" id="v-year" data-view="year" hidden></section>
+  <section class="view" id="v-ziele" data-view="ziele" hidden></section>
   <section class="view" id="v-more" data-view="more" hidden>
     <div id="setHome"></div>
     <div class="sphead" id="spHead" hidden><button class="spback" id="spBack" aria-label="Zurück zu den Einstellungen">‹</button><h2 id="spTitle"></h2></div>
@@ -989,11 +1003,12 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
   <div class="brand"><svg viewBox="0 0 120 120" style="width:36px;height:36px;flex:none" aria-hidden="true"><rect width="120" height="120" rx="28" fill="#1a7a5c"/><circle cx="60" cy="51" r="21" fill="#fff"/><circle cx="60" cy="23" r="10" fill="#fff" stroke="#1a7a5c" stroke-width="4"/><path d="M24 102c0-14 10-24 22-26 4 4 9 6 14 6s10-2 14-6c12 2 22 12 22 26z" fill="#fff"/><path d="M66.7 43.5A10.5 10.5 0 1 0 66.7 58.5M48 48.6h13M48 53.4h12" fill="none" stroke="#1a7a5c" stroke-width="4.2" stroke-linecap="round"/></svg>Finanz MAMI</div>
   <button class="tab" role="tab" data-go="home" aria-selected="true" aria-label="Start"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span class="tname">Start</span></button>
   <button class="tab" role="tab" data-go="list" aria-selected="false" aria-label="Buchungen"><svg class="i" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".6"/><circle cx="4" cy="12" r=".6"/><circle cx="4" cy="18" r=".6"/></svg><span class="tname">Buchungen</span></button>
-  <button class="tab plus" data-addmenu="1" aria-label="Neue Buchung"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="tlabel">Neue Buchung</span></button>
   <button class="tab" role="tab" data-go="fix" aria-selected="false" aria-label="Fixkosten"><svg class="i" viewBox="0 0 24 24"><path d="M17 3v4M7 3v4"/><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="m9 13.5 2 2 4-4"/></svg><span class="tname">Fixkosten</span></button>
+  <button class="tab plus" data-addmenu="1" aria-label="Neue Buchung"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="tlabel">Neue Buchung</span></button>
   <button class="tab" role="tab" data-go="year" aria-selected="false" aria-label="Analyse"><svg class="i" viewBox="0 0 24 24"><path d="M5 20v-7M10 20V6M15 20v-9M20 20V9"/></svg><span class="tname">Analyse</span></button>
+  <button class="tab" role="tab" data-go="ziele" aria-selected="false" aria-label="Sparen"><svg class="i" viewBox="0 0 24 24"><path d="M5 11a7 6 0 0 1 12.6-3.4H20v4l-1.6.9A7 7 0 0 1 16 16.3V19h-3v-1.6a8 8 0 0 1-2 0V19H8v-2.7A6 6 0 0 1 5 11Z"/><path d="M10 7.5h3"/></svg><span class="tname">Sparen</span></button>
   <span class="spacer deskonly"></span>
-  <button class="tab deskonly" role="tab" data-go="more" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Einstellungen</button>
+  <button class="tab tset" role="tab" data-go="more" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><i class="sdot"></i><span class="tname"><span class="tlong">Einstellungen</span><span class="tshort">Optionen</span></span></button>
 </nav>
 
 <div class="backdrop" id="sheetBg" hidden>
@@ -1089,7 +1104,7 @@ const DEFAULT_SETTINGS = {
   }
 };
 const KIND_LABEL = {ausgabe:"Ausgabe", betrieb:"Betrieblich", einnahme:"Einnahme", vorauszahlung:"Steuer-Vorauszahlung"};
-const TITLES = {home:"Übersicht", list:"Buchungen", fix:"Fixkosten", year:"Analyse", more:"Einstellungen", import:"Import", belege:"Belege"};
+const TITLES = {home:"Übersicht", list:"Buchungen", fix:"Fixkosten", year:"Analyse", ziele:"Sparen", more:"Einstellungen", import:"Import", belege:"Belege"};
 
 /* ---------- icons ---------- */
 const P = {
@@ -1731,7 +1746,7 @@ function render(){
   document.querySelectorAll(".tab[data-go]").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.go===(UI.view==="import"||UI.view==="belege"?"list":UI.view))));
   document.querySelectorAll("[data-view]").forEach(s=>s.hidden = s.dataset.view!==UI.view);
   $("banner").innerHTML = (mem && !LOCAL) ? `<div class="notice warn" style="margin-bottom:14px"><span>Speichern ist hier gerade nicht möglich. Öffne die App über deinen Link in Claude, während du angemeldet bist.</span></div>` : "";
-  ({home:renderHome, list:renderList, fix:renderFix, year:renderYear, more:renderMore, import:renderImport, belege:renderBelege})[UI.view]();
+  ({home:renderHome, list:renderList, fix:renderFix, year:renderYear, ziele:renderZiele, more:renderMore, import:renderImport, belege:renderBelege})[UI.view]();
   if (!$("sheetBg").hidden) renderSheet();
   notifyPlanSoon();
   if (wizShould()) setTimeout(()=>{ if (wizShould()) wizOpen(); }, 400);
@@ -2256,6 +2271,11 @@ function goalsRings(){
       return `<button class="jarb" data-goalsopen="1" aria-label="${esc(g.name)}: ${esc(eur(sv.v))} von ${esc(eur(t))}"><span class="jar ${done?"done":""}"><span class="w" style="height:${Math.round(pct*82)}%"></span><span class="goal"></span><span class="ji">${ic(goalIcon(g.name),18)}</span><span class="jp ${pct<0.3?"low":""}">${done?"✓":Math.round(pct*100)+" %"}</span></span><b>${esc(g.name)}</b><small>${esc(eur0(sv.v).replace(/\s?€/,""))} / ${esc(eur0(t))}</small></button>`; }).join("")}
       <button class="jarb" id="${goals.length?"goalAddRing":"goalFirst"}" aria-label="Sparziel hinzufügen"><span class="jar add">${ic("plusIn",24)}</span><b>${goals.length?"Neu":"Sparziel anlegen"}</b><small>&nbsp;</small></button>
     </div></div>`;
+}
+/* ---------- Sparen: savings goals, debts and the tax reserve on one page ---------- */
+function renderZiele(){
+  const ym=UI.ym, goals=S.settings.goals||[];
+  $("v-ziele").innerHTML = `<div class="zstack">${goalsRings()}${goals.length||UI.goalEdit?goalsCard():""}${debtRings()}${taxGauge(ym)}</div>`;
 }
 function debtRings(){
   if (!S.debts.length) return "";
@@ -5171,7 +5191,7 @@ $("loginGo").onclick = doLogin;
 /* swipe between the main pages like the sides of a cube: the page follows the thumb,
    the old one turns away into the depth and gets darker, the new one turns in from the side */
 (function(){
-  const ORDER=["home","list","fix","year"], RENDER={home:()=>renderHome(), list:()=>renderList(), fix:()=>renderFix(), year:()=>renderYear()};
+  const ORDER=["home","list","fix","year","ziele"], RENDER={home:()=>renderHome(), list:()=>renderList(), fix:()=>renderFix(), year:()=>renderYear(), ziele:()=>renderZiele()};
   const main=document.querySelector("main.wrap");
   const blocked=t=>t.closest(".sheet,.backdrop,.pfed,#lockBg,#loginBg,#astack,.srail,.bt3,.bubbles,input,select,textarea,.wiz,[data-noswipe]") || document.querySelector(".backdrop:not([hidden])");
   const sec=k=>document.querySelector(`[data-view="${k}"]`);
@@ -5325,6 +5345,7 @@ function renderSyncDot(){
   const b=$("settingsBtn"); if (!SYNCABLE){ return; }
   const col = !SYNC.token ? "var(--faint)" : SYNC.state==="ok" ? "var(--good)" : SYNC.state==="pending" ? "var(--warn)" : "var(--bad)";
   b.style.boxShadow = `var(--shadow), inset 0 0 0 2px ${col}`;
+  const td=document.querySelector(".tset"); if (td){ td.style.setProperty("--sdot", col); td.classList.toggle("dot", !!SYNC.token && SYNC.state!=="ok"); }
   if (UI.view==="more"){ renderSyncInfo(); if (!UI.sp) renderSetHome(); }
 }
 function renderSyncInfo(){
