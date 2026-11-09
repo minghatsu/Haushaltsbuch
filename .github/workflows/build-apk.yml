@@ -7,14 +7,22 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+
+# normal updates (only the app content changed) need just ONE job – it builds, signs and publishes.
+# It runs on the runner named in the repository variable RUNNER (e.g. the own laptop), otherwise on GitHub.
+defaults:
+  run:
+    shell: bash
 
 jobs:
   web:
     name: Web-App zusammenstellen
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     outputs:
       android: ${{ steps.need.outputs.android }}
       desktop: ${{ steps.need.outputs.desktop }}
+      native: ${{ steps.need.outputs.native }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,6 +39,8 @@ jobs:
           FORCE=${{ github.event_name == 'workflow_dispatch' }}
           if [ "$FORCE" = "true" ] || [ "$APK" != "$RA" ]; then echo "android=true" >> $GITHUB_OUTPUT; else echo "android=false" >> $GITHUB_OUTPUT; fi
           if [ "$FORCE" = "true" ] || [ "$EXE" != "$RE" ]; then echo "desktop=true" >> $GITHUB_OUTPUT; else echo "desktop=false" >> $GITHUB_OUTPUT; fi
+          echo "ra=$RA" >> $GITHUB_OUTPUT; echo "re=$RE" >> $GITHUB_OUTPUT
+          if [ "$FORCE" = "true" ] || [ "$APK" != "$RA" ] || [ "$EXE" != "$RE" ]; then echo "native=true" >> $GITHUB_OUTPUT; else echo "native=false" >> $GITHUB_OUTPUT; fi
           echo "Android: $APK (veröffentlicht $RA) · Windows: $EXE (veröffentlicht $RE)"
       - name: app.html bauen
         run: |
@@ -54,7 +64,9 @@ jobs:
             sed -i "s|$key|sha384-$h|" app.html
           done
       - name: Sicherheitsregeln (CSP) setzen
-        run: python3 tools/csp.py app.html
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then PY=python; else PY=python3; fi
+          $PY tools/csp.py app.html
       - name: App signieren (Handy und PC übernehmen nur signierte Updates)
         env:
           HB_SIGN_KEY: ${{ secrets.HB_SIGN_KEY }}
@@ -65,6 +77,7 @@ jobs:
           rm -f k.pem
           printf '\n<!--hb-sig:%s-->\n' "$sig" >> app.html
       - name: Zwischenstand ablegen (statt Actions-Artefakten, deren Speicher begrenzt ist)
+        if: ${{ steps.need.outputs.native == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -73,6 +86,29 @@ jobs:
             gh release delete "$t" -y --cleanup-tag || true
           done
           gh release create build-${{ github.run_number }} app.html --prerelease --title "Zwischenstand build-${{ github.run_number }}" --notes "Wird nach dem Build automatisch gelöscht." --target ${{ github.sha }}
+
+      - name: Veröffentlichen (nur App-Inhalt geändert – Handy- und PC-App bleiben)
+        if: ${{ steps.need.outputs.native == 'false' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download neueste -p Haushaltsbuch.apk -p Haushaltsbuch-Setup.exe -D . --clobber
+          gh release delete neueste -y --cleanup-tag || true
+          gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html \
+            --title "Finanz MAMI V 0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 ))" \
+            --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=${{ steps.need.outputs.ra }} exe=${{ steps.need.outputs.re }}"
+          for t in $(gh api "repos/${{ github.repository }}/releases?per_page=100" --jq '.[].tag_name' | grep '^build-'); do
+            gh release delete "$t" -y --cleanup-tag || true
+          done
+          rm -f Haushaltsbuch.apk Haushaltsbuch-Setup.exe
+      - name: Neue Version an die Synology schicken
+        if: ${{ steps.need.outputs.native == 'false' }}
+        continue-on-error: true
+        env:
+          DEPLOY_URL: https://miracleframe.synology.me/haushaltsbuch/api.php
+        run: |
+          TOKEN=$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=haushaltsbuch-deploy" | sed -n 's/.*"value":"\([^"]*\)".*/\1/p')
+          curl -fsS --retry 3 --max-time 60 -X POST -H "X-Deploy-Token: $TOKEN" -H "Content-Type: text/html" --data-binary @app.html "$DEPLOY_URL?a=deploy"
 
   android:
     name: Android-App (APK)
@@ -115,6 +151,7 @@ jobs:
   windows-test:
     name: Windows-App testen (Start + Abgleich)
     needs: web
+    if: ${{ needs.web.outputs.desktop == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -191,7 +228,7 @@ jobs:
     name: Veröffentlichen
     needs: [web, android, windows, windows-test]
     # the app content is published as soon as it is built; a failed APK or Windows build keeps the previous file (e.g. GitHub outage)
-    if: ${{ always() && needs.web.result == 'success' }}
+    if: ${{ always() && needs.web.result == 'success' && needs.web.outputs.native == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
