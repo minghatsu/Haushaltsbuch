@@ -572,6 +572,20 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 /* home columns: on phones the column wrappers disappear and "order" restores the one-column sequence */
 .cols,.col{display:contents}
 
+/* shops page: search + categories to open */
+.shoped{display:flex;flex-direction:column;gap:8px}
+.shsearch{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:16px;padding:0 12px;box-shadow:var(--shadow);color:var(--muted)}.shsearch .in{border:0;background:none;box-shadow:none;padding:12px 0;flex:1}
+.shacc{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.shhead{width:100%;display:flex;align-items:center;gap:11px;border:0;background:none;padding:12px 14px;color:inherit;text-align:left}.shhead b{flex:1;font-size:14.5px}.shhead small{color:var(--muted);font-size:12px;font-weight:600}
+.shci{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none}
+.shlist,.shhits{padding:0 10px 8px}.shhits{padding-top:6px}
+.shrow{width:100%;display:flex;align-items:center;gap:11px;border:0;background:none;padding:8px 4px;border-top:1px solid var(--line);color:inherit;text-align:left}.shrow:first-child{border-top:0}
+.shrow b{flex:1;font-size:14px;font-weight:600}.shrow em{font-style:normal;font-size:11px;font-weight:800;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:2px 8px}
+.shrow .brand,.shrow>span:first-child{flex:none}
+.shck{width:24px;height:24px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;color:#fff;font-weight:900;font-size:13px;flex:none}.shrow[aria-pressed=true] .shck{background:var(--accent);border-color:var(--accent)}
+#darkBtn[aria-pressed=true]{color:#f5c542}
+@media (min-width:1000px){#darkBtn{display:none}}
+
 .wname{display:flex;align-items:center;gap:12px}.wname .in{flex:1;min-width:0}
 .wav{width:64px;height:64px;border-radius:50%;flex:none;border:3px dashed color-mix(in srgb,var(--accent) 45%,transparent);background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;padding:0;overflow:hidden;font:800 24px var(--f-display)}
 .wav img{width:100%;height:100%;object-fit:cover}.wav:has(img){border-style:solid;border-color:var(--accent)}
@@ -1020,6 +1034,7 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
       <select id="selM" class="msel" aria-label="Monat"></select><select id="selY" class="msel" aria-label="Jahr"></select>
       <button id="nextM" aria-label="Nächster Monat"><svg class="i" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
     </div>
+    <button class="roundbtn" id="darkBtn" aria-label="Hell oder dunkel"></button>
     <button class="roundbtn bell" id="bellBtn" aria-label="Hinweise"><svg class="i" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9M10 20.5h4"/></svg><span class="badge" hidden>0</span></button>
     <button class="roundbtn" id="settingsBtn" aria-label="Schulden und Einstellungen" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
   </div>
@@ -1134,9 +1149,10 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
       <div class="card"><div class="field"><label for="sName">Wie sollen wir dich nennen?</label><input class="in pc-big" id="sName" autocomplete="given-name" placeholder="z. B. Sascha" maxlength="30"><span class="small muted">Für die Begrüßung oben links.</span></div></div>
       <div hidden><button class="btn" id="wizAgain">Einrichtung starten</button></div>
     </div>
+    <div class="sp pc" data-sp="laeden" hidden>
+      <div id="shopEd" class="shoped"></div>
+    </div>
     <div class="sp pc" data-sp="start" hidden>
-      <div class="pc-sect">Deine Läden <span>Antippen zum An- und Ausschalten – die Nummer ist die Reihenfolge</span></div>
-      <div class="bubbles" id="shopEd"></div>
       <div class="pc-sect">Startseite <span>Antippen blendet aus oder ein · gedrückt halten und ziehen zum Sortieren · Konten bleiben immer oben</span></div>
       <div id="homeEd"></div>
       <div class="card"><div class="switch"><label for="sLogos"><b>Händler-Logos</b><br><span class="small muted">Lädt das Logo bekannter Händler (über Google). Aus: farbiger Anfangsbuchstabe.</span></label><input type="checkbox" id="sLogos"></div></div>
@@ -1358,7 +1374,7 @@ const BRANDS = [
   [/\bcheck24\b/,"C","#063773","check24.de"],[/\ballianz\b/,"A","#003781","allianz.de"],[/\bhuk\b/,"H","#003F7D","huk.de"],[/\badac\b/,"A","#FFCC00","adac.de","#111"],[/\baok\b/,"A","#005E3F","aok.de"],[/\btk\b|techniker krankenkasse/,"T","#00A3AD","tk.de"],[/\bbarmer\b/,"B","#00A0E3","barmer.de"],
   [/\bapcoa\b/,"A","#0B4B8F","apcoa.de"],[/\beasypark\b/,"E","#E0004D","easypark.de"],[/\bjoyclub\b/,"J","#C2185B","joyclub.de"],[/pok[eé]mon/,"P","#FFCB05","pokemon.com","#2A75BB"],[/künstlersozialkasse|kuenstlersozialkasse|\bksk\b/,"K","#00518E","kuenstlersozialkasse.de"]
 ];
-const SHOP_DOMAINS = {penny:"penny.de", rewe:"rewe.de", edeka:"edeka.de", aldinord:"aldi-nord.de", aldi:"aldi-sued.de", lidl:"lidl.de", kaufland:"kaufland.de", netto:"netto-online.de", rossmann:"rossmann.de", dm:"dm.de", norma:"norma-online.de", globus:"globus.de"};
+const SHOP_DOMAINS = {penny:"penny.de", rewe:"rewe.de", edeka:"edeka.de", aldinord:"aldi-nord.de", aldi:"aldi-sued.de", lidl:"lidl.de", kaufland:"kaufland.de", netto:"netto-online.de", rossmann:"rossmann.de", dm:"dm.de", norma:"norma-online.de", globus:"globus.de", hit:"hit.de", tegut:"tegut.com", mueller:"mueller.de", hm:"hm.com", zara:"zara.com", cunda:"c-and-a.com", primark:"primark.com", kik:"kik.de", takko:"takko.com", newyorker:"newyorker.de", tkmaxx:"tkmaxx.de", deichmann:"deichmann.com", mediamarkt:"mediamarkt.de", saturn:"saturn.de", expert:"expert.de", obi:"obi.de", hornbach:"hornbach.de", bauhaus:"bauhaus.info", toom:"toom.de", ikea:"ikea.com", jysk:"jysk.de", poco:"poco.de", action:"action.com", tedi:"tedi.com", fressnapf:"fressnapf.de", amazon:"amazon.de", zalando:"zalando.de", otto:"otto.de", temu:"temu.com"};
 function brandFor(text){
   const n=nrm(text); if (!n) return null;
   const sh = (typeof SHOPS!=="undefined") ? SHOPS.find(x=>x.re.test(n)) : null;
@@ -2441,7 +2457,7 @@ function closeHints(){ $("hintBg").classList.remove("show"); setTimeout(()=>{ $(
 $("hintBg").addEventListener("click", e=>{ if (e.target===$("hintBg") || e.target.closest("[data-hintclose]")) closeHints(); });
 document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("hintBg").hidden) closeHints(); });
 /* ---------- start page blocks: your own order, each can be hidden ---------- */
-const HOME_BLOCKS = [["quick","Schnellknöpfe"],["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["debts","Schulden"],["recent","Letzte Buchungen"]];   // shop offers now have their own page "Einkauf"
+const HOME_BLOCKS = [["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["debts","Schulden"],["recent","Letzte Buchungen"]];   // shop offers now have their own page "Einkauf"
 function homeOrder(){ const o=(S.settings.homeOrder||[]).filter(k=>HOME_BLOCKS.some(b=>b[0]===k)); for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; }
 function homeBlocks(html){
   const hid=new Set(S.settings.homeHidden||[]), list=homeOrder().filter(k=>!hid.has(k) && html[k] && !(k==="tax"&&!hasSelf()) && !(k==="budgets"&&isJobless())).map(k=>`<div class="hblock" data-hb="${k}">${html[k]}</div>`);
@@ -2741,19 +2757,49 @@ document.addEventListener("change", e=>{
 
 /* ---------- weekly offers of the shops you actually buy at ---------- */
 const SHOPS = [
-  {id:"penny",    name:"Penny",     re:/\bpenny\b/,                 color:"#CD1414", url:"https://www.penny.de/angebote"},
-  {id:"rewe",     name:"REWE",      re:/\brewe\b/,                  color:"#CC071E", url:"https://www.rewe.de/angebote/"},
-  {id:"edeka",    name:"EDEKA",     re:/\bedeka\b/,                 color:"#1F4B9C", url:"https://www.edeka.de/eh/angebote.jsp"},
-  {id:"aldinord", name:"Aldi Nord", re:/\baldi ?nord\b/,            color:"#00549F", url:"https://www.aldi-nord.de/angebote.html"},
-  {id:"aldi",     name:"Aldi Süd",  re:/\baldi\b/,                  color:"#00005F", url:"https://www.aldi-sued.de/de/angebote.html"},
-  {id:"lidl",     name:"Lidl",      re:/\blidl\b/,                  color:"#0050AA", url:"https://www.lidl.de/"},
-  {id:"kaufland", name:"Kaufland",  re:/\bkaufland\b/,              color:"#E10915", url:"https://filiale.kaufland.de/angebote/aktuelle-woche.html"},
-  {id:"netto",    name:"Netto",     re:/\bnetto marken|\bnetto\b/,  color:"#FFD400", ink:"#1A1A1A", url:"https://www.netto-online.de/filialangebote"},
-  {id:"rossmann", name:"Rossmann",  re:/\brossmann\b/,              color:"#C3002D", url:"https://www.rossmann.de/de/angebote"},
-  {id:"dm",       name:"dm",        re:/\bdm\b(?!\s*[0-9])|dm-drogerie|dm drogerie/, color:"#002878", url:"https://www.dm.de/"},
-  {id:"norma",    name:"Norma",     re:/\bnorma\b/,                 color:"#E3000F", url:"https://www.norma-online.de/de/angebote/"},
-  {id:"globus",   name:"Globus",    re:/\bglobus\b/,                color:"#00843D", url:"https://www.globus.de/angebote/"}
+  {cat:"disc", id:"penny",    name:"Penny",     re:/\bpenny\b/,                 color:"#CD1414", url:"https://www.penny.de/angebote"},
+  {cat:"super", id:"rewe",     name:"REWE",      re:/\brewe\b/,                  color:"#CC071E", url:"https://www.rewe.de/angebote/"},
+  {cat:"super", id:"edeka",    name:"EDEKA",     re:/\bedeka\b/,                 color:"#1F4B9C", url:"https://www.edeka.de/eh/angebote.jsp"},
+  {cat:"disc", id:"aldinord", name:"Aldi Nord", re:/\baldi ?nord\b/,            color:"#00549F", url:"https://www.aldi-nord.de/angebote.html"},
+  {cat:"disc", id:"aldi",     name:"Aldi Süd",  re:/\baldi\b/,                  color:"#00005F", url:"https://www.aldi-sued.de/de/angebote.html"},
+  {cat:"disc", id:"lidl",     name:"Lidl",      re:/\blidl\b/,                  color:"#0050AA", url:"https://www.lidl.de/"},
+  {cat:"super", id:"kaufland", name:"Kaufland",  re:/\bkaufland\b/,              color:"#E10915", url:"https://filiale.kaufland.de/angebote/aktuelle-woche.html"},
+  {cat:"disc", id:"netto",    name:"Netto",     re:/\bnetto marken|\bnetto\b/,  color:"#FFD400", ink:"#1A1A1A", url:"https://www.netto-online.de/filialangebote"},
+  {cat:"drog", id:"rossmann", name:"Rossmann",  re:/\brossmann\b/,              color:"#C3002D", url:"https://www.rossmann.de/de/angebote"},
+  {cat:"drog", id:"dm",       name:"dm",        re:/\bdm\b(?!\s*[0-9])|dm-drogerie|dm drogerie/, color:"#002878", url:"https://www.dm.de/"},
+  {cat:"disc", id:"norma",    name:"Norma",     re:/\bnorma\b/,                 color:"#E3000F", url:"https://www.norma-online.de/de/angebote/"},
+  {cat:"super", id:"globus",   name:"Globus",    re:/\bglobus\b/,                color:"#00843D", url:"https://www.globus.de/angebote/"}
+  ,{cat:"super", id:"hit", name:"HIT", re:/\bhit markt|\bhit\b/, color:"#E2001A", url:"https://www.hit.de/angebote"}
+  ,{cat:"super", id:"tegut", name:"tegut", re:/\btegut\b/, color:"#E2001A", url:"https://www.tegut.com/angebote-produkte/angebote.html"}
+  ,{cat:"drog", id:"mueller", name:"Müller", re:/\bmüller\b|\bmueller\b/, color:"#F07D00", url:"https://www.mueller.de/angebote/"}
+  ,{cat:"kleid", id:"hm", name:"H&M", re:/\bh ?& ?m\b|\bh und m\b|hennes/, color:"#E50010", url:"https://www2.hm.com/de_de/sale.html"}
+  ,{cat:"kleid", id:"zara", name:"Zara", re:/\bzara\b/, color:"#111111", url:"https://www.zara.com/de/"}
+  ,{cat:"kleid", id:"cunda", name:"C&A", re:/\bc ?& ?a\b|\bc und a\b/, color:"#004B93", url:"https://www.c-and-a.com/de/de/shop/sale"}
+  ,{cat:"kleid", id:"primark", name:"Primark", re:/\bprimark\b/, color:"#0DB2E3", url:"https://www.primark.com/de-de"}
+  ,{cat:"kleid", id:"kik", name:"KiK", re:/\bkik\b/, color:"#E30613", url:"https://www.kik.de/angebote"}
+  ,{cat:"kleid", id:"takko", name:"Takko", re:/\btakko\b/, color:"#C8102E", url:"https://www.takko.com/de-de/sale/"}
+  ,{cat:"kleid", id:"newyorker", name:"New Yorker", re:/\bnew yorker\b/, color:"#1A1A1A", url:"https://www.newyorker.de/"}
+  ,{cat:"kleid", id:"tkmaxx", name:"TK Maxx", re:/\btk ?maxx\b/, color:"#C8102E", url:"https://www.tkmaxx.de/"}
+  ,{cat:"kleid", id:"deichmann", name:"Deichmann", re:/\bdeichmann\b/, color:"#00843D", url:"https://www.deichmann.com/de-de/sale"}
+  ,{cat:"elek", id:"mediamarkt", name:"MediaMarkt", re:/media ?markt/, color:"#DF0000", url:"https://www.mediamarkt.de/de/campaign/angebote"}
+  ,{cat:"elek", id:"saturn", name:"Saturn", re:/\bsaturn\b/, color:"#F28B00", url:"https://www.saturn.de/de/campaign/angebote"}
+  ,{cat:"elek", id:"expert", name:"expert", re:/\bexpert\b/, color:"#E2001A", url:"https://www.expert.de/angebote"}
+  ,{cat:"bau", id:"obi", name:"OBI", re:/\bobi\b/, color:"#FF7E21", url:"https://www.obi.de/angebote"}
+  ,{cat:"bau", id:"hornbach", name:"Hornbach", re:/\bhornbach\b/, color:"#F7A600", ink:"#1A1A1A", url:"https://www.hornbach.de/angebote/"}
+  ,{cat:"bau", id:"bauhaus", name:"Bauhaus", re:/\bbauhaus\b/, color:"#E30613", url:"https://www.bauhaus.info/angebote"}
+  ,{cat:"bau", id:"toom", name:"toom", re:/\btoom\b/, color:"#C7003C", url:"https://toom.de/angebote"}
+  ,{cat:"moebel", id:"ikea", name:"IKEA", re:/\bikea\b/, color:"#0058A3", url:"https://www.ikea.com/de/de/offers/"}
+  ,{cat:"moebel", id:"jysk", name:"JYSK", re:/\bjysk\b/, color:"#1B4F9C", url:"https://jysk.de/angebote"}
+  ,{cat:"moebel", id:"poco", name:"POCO", re:/\bpoco\b/, color:"#E3000F", url:"https://www.poco.de/angebote"}
+  ,{cat:"moebel", id:"action", name:"Action", re:/\baction\b/, color:"#0E4C92", url:"https://www.action.com/de-de/wochenangebote/"}
+  ,{cat:"moebel", id:"tedi", name:"TEDi", re:/\btedi\b/, color:"#E2001A", url:"https://www.tedi.com/de/angebote"}
+  ,{cat:"tier", id:"fressnapf", name:"Fressnapf", re:/\bfressnapf\b/, color:"#00843D", url:"https://www.fressnapf.de/angebote/"}
+  ,{cat:"online", id:"amazon", name:"Amazon", re:/\bamazon\b|amzn/, color:"#232F3E", url:"https://www.amazon.de/deals"}
+  ,{cat:"online", id:"zalando", name:"Zalando", re:/\bzalando\b/, color:"#FF6900", url:"https://www.zalando.de/sale/"}
+  ,{cat:"online", id:"otto", name:"OTTO", re:/\botto\b/, color:"#D52B1E", url:"https://www.otto.de/sale/"}
+  ,{cat:"online", id:"temu", name:"Temu", re:/\btemu\b/, color:"#FB7701", url:"https://www.temu.com/de"}
 ];
+const SHOP_CATS=[["super","Supermarkt","cart"],["disc","Discounter","tag"],["drog","Drogerie","health"],["kleid","Kleidung & Schuhe","shirt"],["elek","Elektronik","tv"],["bau","Baumarkt","home"],["moebel","Möbel & Haushalt","home"],["tier","Tierbedarf","paw"],["online","Online","cloud"]];
 function shopStats(){
   const from = shiftYm(ymOf(new Date()), -5), out={};
   for (const t of S.tx){
@@ -2911,12 +2957,24 @@ document.addEventListener("change", e=>{
   else { const v=parseAmt(raw); if (!(v>0)){ toast("Bitte einen Betrag eingeben"); return; } b[el.dataset.budget]=Math.round(v*100)/100; }
   S.settings.budgets=b; el.blur(); saveSettings(); toast("Budget gespeichert"); render();
 });
+function renderDarkBtn(){ const b=$("darkBtn"); if (!b) return; const d=document.documentElement.dataset.theme==="dark"; b.innerHTML=d?`<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>`:`<svg class="i" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>`; b.setAttribute("aria-pressed", String(d)); }
+$("darkBtn").onclick=()=>{ const t=document.documentElement.dataset.theme==="dark"?"light":"dark"; document.documentElement.dataset.theme=t; try{ localStorage.setItem("hb-theme",t); }catch(_){} renderDarkBtn(); try{ render(); }catch(_){} };
+setTimeout(renderDarkBtn,0);
 function renderShopEd(){
-  const sel=S.settings.shops||[], stats=Object.fromEntries(shopStats().map(o=>[o.shop.id,o]));
-  const order=[...sel.map(id=>SHOPS.find(x=>x.id===id)).filter(Boolean), ...SHOPS.filter(x=>!sel.includes(x.id))];
-  $("shopEd").innerHTML = order.map(sh=>{ const i=sel.indexOf(sh.id), n=stats[sh.id]?stats[sh.id].count:0;
-    return `<button class="bub${i<0?" off":""}" data-shop="${sh.id}" aria-pressed="${i>=0}" aria-label="${esc(sh.name)}">${brandBadge({t:sh.name.replace(/ .*/,"").slice(0,1), bg:sh.color, ink:sh.ink||"#fff", domain:SHOP_DOMAINS[sh.id]||""})}${i>=0?`<em>${i+1}</em>`:""}<small>${esc(sh.name)}</small><i>${n?n+(n===1?" Einkauf":" Einkäufe"):"–"}</i></button>`; }).join("");
+  const el=$("shopEd"); if (!el) return;
+  const sel=S.settings.shops||[], q=nrm(UI.shopQ||""), open=UI.shopOpen||(UI.shopOpen={});
+  const badge=sh=>brandBadge({t:sh.name.replace(/ .*/,"").slice(0,1), bg:sh.color, ink:sh.ink||"#fff", domain:SHOP_DOMAINS[sh.id]||""});
+  const row=sh=>{ const i=sel.indexOf(sh.id); return `<button class="shrow" data-shop="${sh.id}" aria-pressed="${i>=0}">${badge(sh)}<b>${esc(sh.name)}</b>${i>=0?`<em>${i+1}</em>`:""}<span class="shck">${i>=0?"✓":""}</span></button>`; };
+  const search=`<div class="shsearch"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input class="in" id="shopQ" placeholder="Laden suchen …" value="${esc(UI.shopQ||"")}" autocomplete="off"></div>`;
+  if (q){ const hits=SHOPS.filter(sh=>nrm(sh.name).includes(q)); 
+    if (document.activeElement && document.activeElement.id==="shopQ"){ const l=el.querySelector(".shhits"); if (l){ l.innerHTML=hits.length?hits.map(row).join(""):`<p class="small muted">Kein Laden gefunden.</p>`; return; } }
+    el.innerHTML=search+`<div class="shacc open shhits">${hits.length?hits.map(row).join(""):`<p class="small muted">Kein Laden gefunden.</p>`}</div>`; return; }
+  el.innerHTML=search+SHOP_CATS.map(([c,t,icn])=>{ const list=SHOPS.filter(x=>x.cat===c); if (!list.length) return ""; const n=list.filter(x=>sel.includes(x.id)).length, o=!!open[c];
+    return `<div class="shacc ${o?"open":""}"><button class="shhead" data-shopcat="${c}" aria-expanded="${o}"><span class="shci">${ic(icn,18)}</span><b>${t}</b><small>${n} von ${list.length}</small>${ic(o?"up":"down",18)}</button>${o?`<div class="shlist">${list.map(row).join("")}</div>`:""}</div>`; }).join("")
+    + (sel.length?`<p class="small muted" style="margin:10px 4px 0">Die Nummer ist die Reihenfolge auf der Einkauf-Seite.</p>`:"");
 }
+document.addEventListener("click", e=>{ const h=e.target.closest("[data-shopcat]"); if (!h) return; const o=UI.shopOpen||(UI.shopOpen={}); o[h.dataset.shopcat]=!o[h.dataset.shopcat]; renderShopEd(); });
+document.addEventListener("input", e=>{ if (e.target.id==="shopQ"){ const had=!!UI.shopQ; UI.shopQ=e.target.value; if (!UI.shopQ || !had){ renderShopEd(); const i=$("shopQ"); if (i){ i.focus(); i.setSelectionRange(i.value.length,i.value.length); } } else renderShopEd(); } });
 document.addEventListener("click", e=>{
   const b=e.target.closest("[data-shop]"); if (!b) return;
   const id=b.dataset.shop, sel=[...(S.settings.shops||[])], i=sel.indexOf(id);
@@ -3815,7 +3873,7 @@ function qrSvg(text, px){
 const SP_PAGES = {
   konten:["Konten & Spaces","wallet"], budgets:["Monatsbudgets","target"], schulden:["Schulden","bank"], backup:["Backup","save"],
   profil:["Profil","user"], sync:["Abgleich & Updates","cloud"], notify:["Benachrichtigungen","bell"], steuer:["Steuer & Einkommen","receipt"],
-  start:["Startseite & Läden","home"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"], farben:["Farben","palette"], amt:["Leistung & Amt","cash"]
+  start:["Startseite","home"], laeden:["Deine Läden","cart"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"], farben:["Farben","palette"], amt:["Leistung & Amt","cash"]
 };
 function spSummary(k){
   const st=S.settings, y=UI.ym.slice(0,4);
@@ -3826,7 +3884,8 @@ function spSummary(k){
   if (k==="sync"){ const a = !SYNCABLE ? "" : !SYNC.token ? "Abgleich aus" : SYNC.state==="ok" ? "abgeglichen" : "wartet"; const u = updKey() ? "Updates an" : "Updates aus"; return [a,u].filter(Boolean).join(" · "); }
   if (k==="profil"){ return (st.name ? st.name : "Name") + (st.photo ? " · mit Foto" : " & Foto"); }
   if (k==="steuer"){ const L=(LAENDER.find(x=>x[0]===(st.land||"NW"))||[,""])[1]; return `${(WORK.find(x=>x[0]===(st.work||"beides"))||[,"Job + selbstständig"])[1]} · Klasse ${["I","II","III","IV","V","VI"][(st.steuerklasse||1)-1]} · ${L}${st.reserveRate&&hasSelf()?` · ${numStr(st.reserveRate)} % Rücklage`:""}`; }
-  if (k==="start"){ const n=(st.shops||[]).length; return `Blöcke${n?` · ${n} Läden`:" · keine Läden"}`; }
+  if (k==="start"){ return "Blöcke sortieren"; }
+  if (k==="laeden"){ const n=(st.shops||[]).length; return n?`${n} ausgewählt`:"keine"; }
   if (k==="sicherheit"){ return lockCfg() ? "App-Sperre an" : "App-Sperre aus"; }
   if (k==="amt"){ const j=st.jl||{}; return (st.work==="alg"?"ALG I":"Grundsicherung")+(j.amount?" · "+eur0(j.amount):""); }
   if (k==="farben"){ const c=st.colors||{}, n=Object.values(c).reduce((a,o)=>a+Object.keys(o||{}).length,0); return n?`${n} eigene`:"Standard"; }
@@ -3848,8 +3907,8 @@ function renderSetHome(){
   const TCOL={start:"#1a7a5c",steuer:"#c27c0e",kategorien:"#7a5bc2",sync:"#3d63a8",notify:"#d4813a",sicherheit:"#b23a3a"};
   const tileBtn = k => `<button class="stile" data-spgo="${k}" style="--tc:${themeCol(TCOL[k])||"var(--accent)"}"><span class="sti">${ic(SP_PAGES[k][1],22)}</span><span class="stt"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span></button>`;
   const row = k => `<button data-spgo="${k}"><span class="ic">${ic(SP_PAGES[k][1],19)}</span><span class="n"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span><span class="ch">${ic("right",18)}</span></button>`;
-  const short={konten:"Konten",budgets:"Budgets",schulden:"Schulden",backup:"Backup",steuer:"Steuer",start:"Startseite",kategorien:"Kategorien",farben:"Farben",amt:"Amt",sync:"Abgleich",notify:"Meldungen",sicherheit:"Sicherheit"};
-  const QCOL={konten:"#3d63a8",budgets:"#c27c0e",schulden:"#7a5bc2",steuer:"#d4813a",start:"#1a7a5c",kategorien:"#c0497a",farben:"#d14d72",amt:"#3d63a8",sync:"#2f7fb8",notify:"#e0902b",sicherheit:"#b23a3a",backup:"#2e9c74",dark:"#4b5563",wiz:"#8a6d1f"};
+  const short={konten:"Konten",budgets:"Budgets",schulden:"Schulden",backup:"Backup",steuer:"Steuer",start:"Startseite",laeden:"Läden",kategorien:"Kategorien",farben:"Farben",amt:"Amt",sync:"Abgleich",notify:"Meldungen",sicherheit:"Sicherheit"};
+  const QCOL={konten:"#3d63a8",budgets:"#c27c0e",schulden:"#7a5bc2",steuer:"#d4813a",start:"#1a7a5c",laeden:"#0f8a8a",kategorien:"#c0497a",farben:"#d14d72",amt:"#3d63a8",sync:"#2f7fb8",notify:"#e0902b",sicherheit:"#b23a3a",backup:"#2e9c74",dark:"#4b5563",wiz:"#8a6d1f"};
   const dark=document.documentElement.dataset.theme==="dark";
   const qtile = k => k==="dark"
       ? `<button data-qdark="1" data-tk="dark" style="--tc:${userCol("set","dark")||QCOL.dark}" aria-pressed="${dark}"><span>${ic("spark",20)}</span>Dunkel<small>${dark?"an":"aus"}</small></button>`
@@ -3859,7 +3918,8 @@ function renderSetHome(){
   const qsub = k => {
     const st=S.settings;
     if (k==="steuer") return "Klasse "+(["I","II","III","IV","V","VI"][(Number(st.steuerklasse)||1)-1]||"I");
-    if (k==="start"){ const n=(st.shops||[]).length; return n ? n+" Läden" : "keine Läden"; }
+    if (k==="start") return "Blöcke";
+    if (k==="laeden"){ const n=(st.shops||[]).length; return n ? n+" Läden" : "keine"; }
     if (k==="kategorien") return cats("ausgabe").length+cats("betrieb").length+incCats().length+" Stück";
     if (k==="sync") return !SYNCABLE ? "aus" : !SYNC.token ? "aus" : SYNC.state==="ok" ? "an" : "wartet";
     if (k==="notify"){ const c=notifyCfg(); return !CAN_NOTIFY ? "–" : c.on&&notifyPerm()==="granted" ? "an" : "aus"; }
@@ -3869,7 +3929,7 @@ function renderSetHome(){
   };
   const QK=Object.keys(QCOL); for (const k of QK) QCOL[k]=themeCol(QCOL[k], QK.indexOf(k));
   TED.more={}; for (const k of Object.keys(QCOL)) TED.more[k]=[k==="dark"?"Dunkel":k==="wiz"?"Einrichtung":short[k]||k, QCOL[k], k==="dark"?"spark":k==="wiz"?"check":(SP_PAGES[k]||[,"dots"])[1]];
-  const SGROUPS=[["Geld",["konten","budgets","schulden",...(isJobless()?["amt"]:["steuer"])]],["Anpassen",["start","kategorien","farben","dark","wiz"]],["App",[...(SYNCABLE||window.AndroidBridge?["sync"]:[]),"notify","sicherheit","backup"]]];
+  const SGROUPS=[["Geld",["konten","budgets","schulden",...(isJobless()?["amt"]:["steuer"])]],["Anpassen",["start","laeden","kategorien","farben",...(WIDE.matches?["dark"]:[]),"wiz"]],["App",[...(SYNCABLE||window.AndroidBridge?["sync"]:[]),"notify","sicherheit","backup"]]];
   $("setHome").innerHTML = `
     <button class="sprof" data-spgo="profil" aria-label="Profil ändern"><span class="av">${S.settings.photo?`<img src="${esc(S.settings.photo)}" alt="">`:esc((name.trim()[0]||"?").toUpperCase())}</span>
       <span class="pt"><b>${esc(name||"Dein Name")}</b><small>${name?"Profil bearbeiten":"Tippen, um Name und Foto einzutragen"}</small><span class="pchip"><i class="${dot}"></i>${esc(line)}</span></span><span class="ch">${ic("right",18)}</span></button>
