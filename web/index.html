@@ -667,6 +667,18 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .sgrp button{display:flex;align-items:center;gap:12px;width:100%;padding:13px 16px;border:0;background:none;font:inherit;color:var(--fg);text-align:left;cursor:pointer}
 .sgrp button+button{border-top:1px solid var(--line)}
 .sgrp .sdark+button{border-top:1px solid var(--line)}
+.stiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stile{border:0;cursor:pointer;text-align:left;background:var(--surface);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:4px;min-width:0;color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.stile .sti{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:#fff;background:var(--tc);margin-bottom:6px;box-shadow:0 4px 12px color-mix(in srgb,var(--tc) 35%,transparent)}
+.stile b{font:800 15px var(--f-display);line-height:1.2}
+.stile small{color:var(--muted);font-size:12.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nfed{display:flex;flex-direction:column;gap:12px}
+.ngrp{display:flex;flex-direction:column;padding:4px 14px}.ngrp>.nrow{padding:12px 0;border-bottom:1px solid var(--line)}.ngrp>.nrow:last-child{border-bottom:0}
+.nrow{display:flex;align-items:center;gap:12px}.nrow>label{flex:1;min-width:0}
+.nic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;flex:none;color:#fff;background:var(--tc)}.nic.big{width:44px;height:44px;border-radius:14px}
+.nsel{align-items:flex-start}.nsl{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}.nsl select{margin-top:4px}
+.stt{display:flex;flex-direction:column;gap:3px;min-width:0}
+.stile:only-child{flex-direction:row;align-items:center;gap:14px;grid-column:1/-1}.stile:only-child .sti{margin:0}
 /* settings pages, style "Kacheln & Farbe" */
 .sp.pc{display:flex;flex-direction:column;gap:12px}.sp.pc[hidden]{display:none}
 .pc-sect{font:800 15px var(--f-display);margin:6px 2px -2px;display:flex;flex-direction:column;gap:2px}.pc-sect span{font:500 12.5px var(--f-body,inherit);color:var(--muted)}
@@ -924,7 +936,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
       <div id="homeEd"></div>
       <div class="card"><div class="switch"><label for="sLogos"><b>Händler-Logos</b><br><span class="small muted">Lädt das Logo bekannter Händler (über Google). Aus: farbiger Anfangsbuchstabe.</span></label><input type="checkbox" id="sLogos"></div></div>
     </div>
-    <div class="card sp" data-sp="notify" hidden><div id="notifyEd" style="display:flex;flex-direction:column;gap:14px"></div></div>
+    <div class="sp pc" data-sp="notify" hidden><div id="notifyEd" class="nfed"></div></div>
     <div class="card sp" data-sp="sicherheit" hidden>
       <div class="field" id="lockEd"></div>
     </div>
@@ -2725,19 +2737,24 @@ function renderNotifyEd(){
   const el=$("notifyEd"); if (!el) return;
   if (!CAN_NOTIFY){ el.innerHTML=`<div class="notice info"><span>Benachrichtigungen gibt es in der Handy- und PC-App. Dort kannst du hier einstellen, worüber sie dich informiert – auch wenn die App geschlossen ist.</span></div>`; return; }
   const c=notifyCfg(), perm=notifyPerm(), on=c.on&&perm==="granted";
-  const sw=(k,t,d)=>`<div class="switch"><label for="nf-${k}"><b>${t}</b><br><span class="small muted">${d}</span></label><input type="checkbox" id="nf-${k}" data-nf="${k}" ${c[k]?"checked":""} ${on?"":"disabled"}></div>`;
-  const sel=(k,t,d,opts)=>`<div class="field"><label for="nf-${k}">${t}</label><select class="in" id="nf-${k}" data-nf="${k}" ${on?"":"disabled"}>${opts.map(([v,l])=>`<option value="${v}" ${String(c[k])===v?"selected":""}>${l}</option>`).join("")}</select>${d?`<span class="small muted">${d}</span>`:""}</div>`;
+  const NI={budget:["target","#c27c0e"],minus:["minus","#b23a3a"],reserve:["shield","#3d63a8"],debt:["bank","#7a5bc2"],goal:["piggy","#2e9c74"],fix:["repeat","#1a7a5c"],daily:["plus","#d4813a"],imp:["arrowDown","#3d63a8"],tax:["receipt","#c27c0e"],month:["chart","#7a5bc2"],week:["chart","#2e9c74"],hour:["bell","#6b7a72"]};
+  const nic=k=>{ const [i,col]=NI[k]||["bell","var(--accent)"]; return `<span class="nic" style="--tc:${col}">${ic(i,18)}</span>`; };
+  const sw=(k,t,d)=>`<div class="switch nrow">${nic(k)}<label for="nf-${k}"><b>${t}</b><br><span class="small muted">${d}</span></label><input type="checkbox" id="nf-${k}" data-nf="${k}" ${c[k]?"checked":""} ${on?"":"disabled"}></div>`;
+  const sel=(k,t,d,opts)=>`<div class="nrow nsel">${nic(k)}<div class="nsl"><label for="nf-${k}"><b>${t}</b></label>${d?`<span class="small muted">${d}</span>`:""}<select class="in" id="nf-${k}" data-nf="${k}" ${on?"":"disabled"}>${opts.map(([v,l])=>`<option value="${v}" ${String(c[k])===v?"selected":""}>${l}</option>`).join("")}</select></div></div>`;
   el.innerHTML = `
-    <div class="switch"><label for="nf-on"><b>Benachrichtigungen</b><br><span class="small muted">${IS_PC?"Kommen als Windows-Meldung unten rechts – auch wenn das Fenster zu ist, solange Finanz MAMI unten in der Taskleiste läuft.":perm==="granted"?"Kommen als Popup aufs Handy, auch wenn die App geschlossen ist.":"Die App fragt einmal nach der Erlaubnis von Android."}</span></label><input type="checkbox" id="nf-on" ${on?"checked":""}></div>
+    <div class="card nmaster"><div class="switch nrow"><span class="nic big" style="--tc:var(--accent)">${ic("bell",22)}</span><label for="nf-on"><b>Benachrichtigungen</b><br><span class="small muted">${IS_PC?"Kommen als Windows-Meldung unten rechts – auch wenn das Fenster zu ist, solange Finanz MAMI unten in der Taskleiste läuft.":perm==="granted"?"Kommen als Popup aufs Handy, auch wenn die App geschlossen ist.":"Die App fragt einmal nach der Erlaubnis von Android."}</span></label><input type="checkbox" id="nf-on" ${on?"checked":""}></div>
     ${c.on&&perm!=="granted"?`<div class="notice warn"><span>${IS_PC?"Windows":"Android"} blockiert die Benachrichtigungen gerade.</span><button class="btn" id="nfSys">Erlauben</button></div>`:""}
-    <div class="section-title">Warnungen</div>
-    <span class="small muted" style="margin-top:-8px">Kommen sofort, sobald die App es bemerkt – jede nur einmal.</span>
+    </div>
+    <div class="pc-sect">Warnungen <span>Kommen sofort, sobald die App es bemerkt – jede nur einmal.</span></div>
+    <div class="card ngrp">
     ${sw("budget","Budget","Bei 80 % verbraucht und wenn es überschritten ist")}
     ${sw("minus","Konto im Minus","Höchstens einmal am Tag")}
     ${hasSelf()?sw("reserve","Steuer-Rücklage","Wenn die Rücklage dein Guthaben übersteigt"):""}
     ${sw("debt","Schulden","Wenn eine Rate die Zinsen nicht deckt")}
     ${sw("goal","Sparziele","Wenn ein Sparziel erreicht ist")}
-    <div class="section-title">Erinnerungen</div>
+    </div>
+    <div class="pc-sect">Erinnerungen <span>Kommen zur eingestellten Uhrzeit, auch wenn die App zu ist.</span></div>
+    <div class="card ngrp">
     ${sel("fix","Offene Fixkosten","Nur wenn noch etwas nicht abgehakt ist.",[["","Aus"],["3","Am 3. des Monats"],["25","Am 25. des Monats"],["3,25","Am 3. und am 25."]])}
     ${sel("daily","Ausgaben eintragen","Jeden Tag eine kurze Erinnerung.",[["","Aus"],["18:00","Täglich um 18 Uhr"],["19:00","Täglich um 19 Uhr"],["20:00","Täglich um 20 Uhr"],["21:00","Täglich um 21 Uhr"],["22:00","Täglich um 22 Uhr"]])}
     ${sel("imp","Kontoauszug importieren","Wenn so lange kein neuer Auszug importiert wurde.",[["","Aus"],["7","Nach 7 Tagen"],["14","Nach 14 Tagen"],["30","Nach 30 Tagen"]])}
@@ -2745,10 +2762,11 @@ function renderNotifyEd(){
     ${sw("month","Monatsrückblick","Am 1. für den vergangenen Monat")}
     ${sw("week","Wochenrückblick","Sonntags um 18 Uhr")}
     ${sel("hour","Uhrzeit für Erinnerungen","Gilt für Fixkosten, Kontoauszug, Steuer und Monatsrückblick.",[["8","8 Uhr"],["9","9 Uhr"],["10","10 Uhr"],["12","12 Uhr"],["17","17 Uhr"],["19","19 Uhr"]])}
+    </div>
     <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="nfTest" ${on?"":"disabled"}>Test-Benachrichtigung</button><button class="btn" id="nfSys2">${IS_PC?"Windows-Einstellungen":"Android-Einstellungen"}</button></div>
-    ${IS_PC&&AndroidBridge.pcPrefs?(()=>{ let p={}; try{ p=JSON.parse(AndroidBridge.pcPrefs("")); }catch(_){} return `<div class="section-title">PC</div>
+    ${IS_PC&&AndroidBridge.pcPrefs?(()=>{ let p={}; try{ p=JSON.parse(AndroidBridge.pcPrefs("")); }catch(_){} return `<div class="pc-sect">PC</div><div class="card ngrp">
     <div class="switch"><label for="pcTray"><b>Im Hintergrund weiterlaufen</b><br><span class="small muted">Schließen legt Finanz MAMI unten rechts in die Taskleiste – nötig für Erinnerungen. Ganz beenden: Rechtsklick aufs Symbol › Beenden.</span></label><input type="checkbox" id="pcTray" ${p.tray!==false?"checked":""}></div>
-    <div class="switch"><label for="pcAuto"><b>Mit Windows starten</b><br><span class="small muted">Startet unsichtbar im Hintergrund, damit Erinnerungen auch nach einem Neustart kommen.</span></label><input type="checkbox" id="pcAuto" ${p.autostart?"checked":""}></div>`; })():""}`;
+    <div class="switch"><label for="pcAuto"><b>Mit Windows starten</b><br><span class="small muted">Startet unsichtbar im Hintergrund, damit Erinnerungen auch nach einem Neustart kommen.</span></label><input type="checkbox" id="pcAuto" ${p.autostart?"checked":""}></div></div>`; })():""}`;
 }
 document.addEventListener("change", e=>{
   if (e.target.id==="nf-on"){ const c=notifyCfg(); if (e.target.checked){ c.on=true; notifySave(c); try{ AndroidBridge.notifyAsk(); if (AndroidBridge.desktop) window.hbNotifyPerm(true); }catch(_){} } else { c.on=false; notifySave(c); renderNotifyEd(); } return; }
@@ -3270,6 +3288,8 @@ function renderSetHome(){
   }
   const quick=["konten","budgets","schulden","backup"];
   const groups=[["Finanzen",["steuer","kategorien"]],["App",[...(SYNCABLE||window.AndroidBridge?["sync"]:[]),"notify","sicherheit"]]];
+  const TCOL={start:"#1a7a5c",steuer:"#c27c0e",kategorien:"#7a5bc2",sync:"#3d63a8",notify:"#d4813a",sicherheit:"#b23a3a"};
+  const tileBtn = k => `<button class="stile" data-spgo="${k}" style="--tc:${TCOL[k]||"var(--accent)"}"><span class="sti">${ic(SP_PAGES[k][1],22)}</span><span class="stt"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span></button>`;
   const row = k => `<button data-spgo="${k}"><span class="ic">${ic(SP_PAGES[k][1],19)}</span><span class="n"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span><span class="ch">${ic("right",18)}</span></button>`;
   const short={konten:"Konten",budgets:"Budgets",schulden:"Schulden",backup:"Backup"};
   $("setHome").innerHTML = `
@@ -3277,8 +3297,9 @@ function renderSetHome(){
       <span class="pt"><b>${esc(name||"Dein Name")}</b><small>${name?"Profil bearbeiten":"Tippen, um Name und Foto einzutragen"}</small><span class="pchip"><i class="${dot}"></i>${esc(line)}</span></span><span class="ch">${ic("right",18)}</span></button>
     <div class="sqk">${quick.map(k=>`<button data-spgo="${k}"><span>${ic(SP_PAGES[k][1],20)}</span>${short[k]}<small>${esc(spSummary(k))}</small></button>`).join("")}</div>
     <div class="sgl">Aussehen</div>
-    <div class="sgrp"><label class="sdark switch"><span class="ic">${ic("spark",19)}</span><span class="n"><b>Dunkles Design</b><small>${document.documentElement.dataset.theme==="dark"?"an":"aus – helles Design"}</small></span><input type="checkbox" id="sDark" ${document.documentElement.dataset.theme==="dark"?"checked":""}></label>${row("start")}</div>
-    ${groups.map(([t,ks])=>`<div class="sgl">${t}</div><div class="sgrp">${ks.map(row).join("")}</div>`).join("")}
+    <div class="sgrp"><label class="sdark switch"><span class="ic">${ic("spark",19)}</span><span class="n"><b>Dunkles Design</b><small>${document.documentElement.dataset.theme==="dark"?"an":"aus – helles Design"}</small></span><input type="checkbox" id="sDark" ${document.documentElement.dataset.theme==="dark"?"checked":""}></label></div>
+    <div class="stiles">${tileBtn("start")}</div>
+    ${groups.map(([t,ks])=>`<div class="sgl">${t}</div><div class="stiles">${ks.map(tileBtn).join("")}</div>`).join("")}
     <div class="small muted" style="text-align:center;margin:18px 0 4px">Finanz MAMI · ${verName(+((document.querySelector('meta[name="hb-version"]')||{}).content||0))}</div>`;
 }
 function renderSpPages(){
