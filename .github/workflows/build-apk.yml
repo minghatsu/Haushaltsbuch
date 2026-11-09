@@ -150,7 +150,7 @@ jobs:
         shell: bash
         working-directory: desktop
         run: |
-          N=${{ github.run_number }}
+          N=$(( ${{ github.run_number }} - 88 ))
           npm pkg set version="0.$((N/10)).$((N%10))"
       - name: Installer bauen
         working-directory: desktop
@@ -195,7 +195,7 @@ jobs:
           fi
           gh release delete neueste -y --cleanup-tag || true
           gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html \
-            --title "Finanz MAMI V 0.$(( ${{ github.run_number }} / 10 )).$(( ${{ github.run_number }} % 10 ))" \
+            --title "Finanz MAMI V 0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 ))" \
             --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=$APK exe=$EXE"
           # remove this and any leftover intermediate releases (from runs that failed halfway)
           for t in $(gh api "repos/${{ github.repository }}/releases?per_page=100" --jq '.[].tag_name' | grep '^build-'); do
