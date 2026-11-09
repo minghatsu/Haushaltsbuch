@@ -169,9 +169,9 @@ jobs:
 
   release:
     name: Veröffentlichen
-    needs: [android, windows, windows-test]
-    # the phone app and the app content are published even if only the Windows build failed (e.g. GitHub download outage)
-    if: ${{ always() && needs.android.result == 'success' }}
+    needs: [web, android, windows, windows-test]
+    # the app content is published as soon as it is built; a failed APK or Windows build keeps the previous file (e.g. GitHub outage)
+    if: ${{ always() && needs.web.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -187,6 +187,12 @@ jobs:
           gh release download build-${{ github.run_number }} -D . --clobber
           ls -la
           APK=$(git rev-list --count HEAD -- android/); EXE=$(git rev-list --count HEAD -- desktop/)
+          if [ ! -f Haushaltsbuch.apk ]; then
+            # Android build failed or did not start: keep the previous APK and its version number
+            gh release download neueste -p Haushaltsbuch.apk -D . --clobber
+            APK=$(gh release view neueste --json body --jq .body | grep -o 'apk=[0-9]*' | cut -d= -f2)
+            echo "Android-Build fehlt – bisherige APK bleibt (apk=$APK)"
+          fi
           if [ ! -f Haushaltsbuch-Setup.exe ]; then
             # Windows build failed: keep the previous installer and its version number, so PCs do not update in circles
             gh release download neueste -p Haushaltsbuch-Setup.exe -D . --clobber
