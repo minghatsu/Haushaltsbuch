@@ -1124,6 +1124,8 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
       <div class="field"><label for="sLand">Bundesland</label><select class="in" id="sLand"></select></div>
       <div id="sJobBox" style="display:contents">
       <div class="section-title" style="font-size:14px">Angestellt <span class="small muted" id="sLohnYear"></span></div>
+      <div class="switch"><label for="sMind"><b>Ich bekomme Mindestlohn</b><br><span class="small muted" id="sMindInfo">Gehalt steigt jedes Jahr automatisch mit</span></label><input type="checkbox" id="sMind"></div>
+      <div class="field" id="sMindHF"><label for="sMindH">Stunden pro Woche</label><input class="in" id="sMindH" inputmode="decimal" placeholder="z. B. 40"></div>
       <div class="grid2 stack">
         <div class="field"><label for="sLohnM">Bruttogehalt pro Monat (€)</label><input class="in" id="sLohnM" inputmode="decimal" placeholder="leer = nicht angestellt"></div>
         <div class="field"><label for="sLohnN">Gehälter im Jahr</label><select class="in" id="sLohnN"><option value="12">12 (normal)</option><option value="12.5">12,5</option><option value="13">13 – mit 13. Gehalt</option><option value="13.5">13,5</option><option value="14">14 – 13. und 14. Gehalt</option></select></div>
@@ -1628,13 +1630,20 @@ document.addEventListener("click", e=>{
 });
 function incArtOptions(sel){ const hide=v=>v!==sel && ((v==="selbst"&&!hasSelf()) || ((v==="lohn"||v==="sonderzahlung")&&!hasJob())); return INC_ARTS.map(([g,os])=>`<optgroup label="${g}">${os.filter(([v])=>!hide(v)).map(([v,l])=>`<option value="${v}" ${v===sel?"selected":""}>${l}</option>`).join("")}</optgroup>`).join(""); }
 // ways of earning money, chosen in two steps: group first, then the exact one
-const WORK = [["angestellt","Angestellt","Voll- oder Teilzeit, Gehalt mit Lohnsteuer","job"],["beamte","Beamte","Besoldung mit Lohnsteuer, keine Sozialabgaben","job"],["minijob","Minijob / Midijob","bis 603 € im Monat bzw. Übergangsbereich","job"],["selbst","Selbstständig","Eigene Rechnungen, kein Job daneben","job"],["beides","Angestellt und selbstständig","Job plus Selbstständigkeit nebenbei","job"],
+/* values that change every year – the app always uses the ones of the year shown; unknown future years keep the last known values */
+const YV={2025:{ml:12.82, mj:556}, 2026:{ml:13.90, mj:603}, 2027:{ml:14.60, mj:633}};
+function yv(y){ y=Number(y)||new Date().getFullYear(); const ks=Object.keys(YV).map(Number).sort((a,b)=>a-b); let k=ks[0]; for (const x of ks) if (x<=y) k=x; return {...YV[k], y:k}; }
+const MJ_NOW = yv().mj;
+const ml2 = v => Number(v).toLocaleString("de-DE",{minimumFractionDigits:2, maximumFractionDigits:2});
+// minimum wage: hours per week × wage × 13/3 weeks per month
+function mindestMonat(y){ const m=S.settings.mindest; if (!m||!m.on||!(Number(m.h)>0)) return 0; return Math.round(yv(y).ml*Number(m.h)*13/3*100)/100; }
+const WORK = [["angestellt","Angestellt","Voll- oder Teilzeit, Gehalt mit Lohnsteuer","job"],["beamte","Beamte","Besoldung mit Lohnsteuer, keine Sozialabgaben","job"],["minijob","Minijob / Midijob",`bis ${MJ_NOW} € im Monat bzw. Übergangsbereich`,"job"],["selbst","Selbstständig","Eigene Rechnungen, kein Job daneben","job"],["beides","Angestellt und selbstständig","Job plus Selbstständigkeit nebenbei","job"],
   ["azubi","Ausbildung","Ausbildungsgehalt, evtl. Berufsausbildungsbeihilfe","edu"],["studium","Studium","BAföG, Nebenjob, Unterstützung der Eltern","edu"],["schule","Schule","Schüler-BAföG, Taschengeld, Ferienjob","edu"],
   ["alg","Arbeitslosengeld (ALG I)","Arbeit suchen, Geld von der Agentur für Arbeit","staat"],["grusi","Grundsicherung (Bürgergeld)","Geld vom Jobcenter","staat"],["eltern","Elternzeit","Elterngeld, Kindergeld","staat"],["krank","Krank / Erwerbsminderung","Krankengeld oder Erwerbsminderungsrente","staat"],
   ["rente","Rente / Pension","Altersrente, Pension, Betriebsrente","rente"]];
 const WGROUPS = [["job","Ich arbeite","case"],["edu","Ausbildung, Studium, Schule","book"],["staat","Geld vom Staat","bank"],["rente","Rente / Pension","heart"]];
 // side incomes on top of the main one ("Verdienst du noch etwas dazu?")
-const EXTRA = [["minijob","Minijob / Nebenjob","z. B. bis 603 € im Monat","cash"],["selbst","Selbstständig nebenbei","eigene Rechnungen","case"],["angestellt","Angestellt nebenbei","Teilzeit mit Lohnsteuer","wallet"]];
+const EXTRA = [["minijob","Minijob / Nebenjob",`z. B. bis ${MJ_NOW} € im Monat`,"cash"],["selbst","Selbstständig nebenbei","eigene Rechnungen","case"],["angestellt","Angestellt nebenbei","Teilzeit mit Lohnsteuer","wallet"]];
 const extraFor = w => EXTRA.filter(([k])=> !(k===w || (k==="selbst"&&w==="beides") || (k==="angestellt"&&(w==="beides"))));
 const hasExtra = k => (S.settings.extra||[]).includes(k);
 function extraPicker(main, sel, attr){
@@ -1683,7 +1692,7 @@ const GPROF={
   grusi:{amt:"Grundsicherung", tile:"Leistung & Amt", day:1, pots:1, side:"jl", terms:["Jobcenter-Termin","Weiterbewilligung abgeben","Nachweise abgeben","Bewerbungsgespräch","Maßnahme / Kurs"]},
   studium:{amt:"BAföG", tile:"Studium & BAföG", day:0, side:"bafoeg", cd:"BAföG endet", cdHint:"Ende der Förderungshöchstdauer laut Bescheid",
     terms:["BAföG-Folgeantrag","Rückmeldung / Semesterbeitrag","Prüfung","Leistungsnachweis abgeben","Wohngeld-Antrag"],
-    tip:"Nebenjob: Bis zur Minijob-Grenze von 603 € im Monat wird dein BAföG in der Regel nicht gekürzt. Den Folgeantrag spätestens 2 Monate vor Ende des Bewilligungszeitraums stellen, sonst kommt das Geld zu spät.",
+    tip:`Nebenjob: Bis zur Minijob-Grenze von ${MJ_NOW} € im Monat wird dein BAföG in der Regel nicht gekürzt. Den Folgeantrag spätestens 2 Monate vor Ende des Bewilligungszeitraums stellen, sonst kommt das Geld zu spät.`,
     cats:["Uni & Bücher","Semesterbeitrag","Miete & Wohnen"]},
   schule:{amt:"Taschengeld", tile:"Schule & Taschengeld", day:1, side:"ferien", terms:["Klassenfahrt bezahlen","Schüler-BAföG-Antrag","Prüfung","Zeugnis"],
     tip:"Ferienjob: Ab 15 darfst du in den Ferien bis zu 4 Wochen im Jahr arbeiten. Schüler-BAföG gibt es meist ab Klasse 10, wenn du nicht bei den Eltern wohnst.",
@@ -1748,11 +1757,11 @@ function joblessTop(ym, free, c){
   const potIc=n=>(POT_DEF.find(x=>x[0]===n)||[,,"dots"])[2];
   const end=profEnd(), endDays=end?Math.round((new Date(end+"T12:00")-new Date(today+"T12:00"))/864e5):null;
   const fmtD=d=>new Date(d+"T12:00").toLocaleDateString("de-DE",{day:"numeric",month:"long",year:"numeric"});
-  const go=`data-go="more" data-sp="amt"`;
+  const go=`data-go="more" data-sp="amt"`, MJ=yv(ym.slice(0,4)).mj;
   const tiles=[];
   // tile 1: what matters most for this group
   if (P.side==="jl") tiles.push(`<button class="card" ${go}><span class="jli">${ic("cash",17)}</span><b>Minijob</b><small>${mini?`${esc(eur0(mini))} Lohn<br><b>${esc(eur0(keep))} behältst du</b>`:"Rechner öffnen"}</small></button>`);
-  else if (P.side==="bafoeg") tiles.push(`<button class="card" ${go}><span class="jli">${ic("case",17)}</span><b>Nebenjob</b><small>${mini?`${esc(eur0(mini))} im Monat<br><b class="${mini>603?"neg":""}">${mini>603?`${esc(eur0(mini-603))} über der Grenze`:`noch ${esc(eur0(603-mini))} frei`}</b>`:"bis 603 € ohne Abzug"}</small></button>`);
+  else if (P.side==="bafoeg") tiles.push(`<button class="card" ${go}><span class="jli">${ic("case",17)}</span><b>Nebenjob</b><small>${mini?`${esc(eur0(mini))} im Monat<br><b class="${mini>MJ?"neg":""}">${mini>MJ?`${esc(eur0(mini-MJ))} über der Grenze`:`noch ${esc(eur0(MJ-mini))} frei`}</b>`:`bis ${MJ} € ohne Abzug`}</small></button>`);
   else if (P.side==="ferien") tiles.push(`<button class="card" ${go}><span class="jli">${ic("case",17)}</span><b>Ferienjob</b><small>${mini?`${esc(eur0(mini))} verdient<br><b>bleibt dir ganz</b>`:"eintragen, was du verdienst"}</small></button>`);
   else if (P.side==="beihilfe"){ const open=j.beihilfe.filter(x=>!x.done), sumO=sum(open,x=>Number(x.amt)||0);
     tiles.push(`<button class="card" ${go}><span class="jli">${ic("health",17)}</span><b>Beihilfe</b><small>${open.length?`${open.length} offen<br><b>${esc(eur0(sumO))} ausstehend</b>`:"keine Rechnung offen"}</small></button>`); }
@@ -1776,6 +1785,8 @@ function joblessTop(ym, free, c){
     ${P.tip&&!(S.settings.tipsOff||{})[S.settings.work]?`<div class="notice info jltip"><span>${esc(P.tip)}</span><button class="icon-btn" data-tipoff="1" aria-label="Tipp ausblenden">×</button></div>`:""}
   </div>`;
 }
+document.addEventListener("change", e=>{ const t=e.target; if (t.id==="aMind"){ const m=S.settings.mindest={...(S.settings.mindest||{})}; m.on=t.checked; if (m.on&&!m.h) m.h=40; saveSettings(); }
+  else if (t.id==="aMindH"){ const v=parseAmt(t.value); if (isFinite(v)){ S.settings.mindest={...(S.settings.mindest||{}), h:Math.min(60,Math.max(0,v))}; saveSettings(); toast("Gespeichert"); } } });
 document.addEventListener("click", e=>{ if (e.target.closest("[data-tipoff]")){ const o=S.settings.tipsOff=S.settings.tipsOff||{}; o[S.settings.work]=1; saveSettings(); } });
 document.addEventListener("click", e=>{ if (e.target.closest("#stmtCam")||e.target.closest("#stmtMore")) stmtPhoto(); });
 document.addEventListener("click", e=>{ if (e.target.closest("[data-potall]")){ UI.potAll=!UI.potAll; render(); } });
@@ -1810,7 +1821,7 @@ function renderAmtEd(){
     <p class="small muted" style="margin:8px 0 0">${w==="alg"?"Arbeitslosengeld: 165 € Nebenverdienst im Monat sind frei, höchstens 15 Stunden pro Woche.":"Grundsicherung: die ersten 100 € sind frei, darüber bleiben 20 % (bis 520 €), 30 % (bis 1.000 €) und 10 % (bis 1.200 €, mit Kind 1.500 €)."} Angaben ohne Gewähr – im Zweifel beim ${w==="alg"?"Arbeitsamt":"Jobcenter"} nachfragen.</p>`
     :P.side==="bafoeg"||P.side==="ferien"?`<div class="section-title" style="font-size:14px">${P.side==="bafoeg"?"Nebenjob":"Ferienjob"}</div>
     <div class="field"><label for="aMini">${P.side==="bafoeg"?"Lohn pro Monat (€ brutto)":"Verdient (€)"}</label><input class="in" id="aMini" inputmode="decimal" value="${mini?esc(numStr(mini)):""}" placeholder="z. B. 450"></div>
-    ${P.side==="bafoeg"&&mini?`<div class="notice ${mini>603?"warn":"ok"}"><span>${mini>603?`Du liegst <b>${esc(eur(mini-603))}</b> über der Minijob-Grenze – das BAföG kann gekürzt werden. Melde den Verdienst dem BAföG-Amt.`:`Passt: noch <b>${esc(eur(603-mini))}</b> bis zur Grenze von 603 €.`}</span></div>`:""}`:""}
+    ${P.side==="bafoeg"&&mini?`<div class="notice ${mini>yv().mj?"warn":"ok"}"><span>${mini>yv().mj?`Du liegst <b>${esc(eur(mini-yv().mj))}</b> über der Minijob-Grenze – das BAföG kann gekürzt werden. Melde den Verdienst dem BAföG-Amt.`:`Passt: noch <b>${esc(eur(yv().mj-mini))}</b> bis zur Grenze von ${yv().mj} €.`}</span></div>`:""}`:""}
     ${P.tip?`<div class="notice info" style="margin-top:14px"><span>${esc(P.tip)}</span></div>`:""}`;
 }
 function jlSave(){ saveSettings(); }
@@ -2165,8 +2176,9 @@ function estFull(zve, joint, z, ersatz, anrMax){
 function lohnYear(year){
   const ly=(S.settings.lohn||{})[year]||{};
   const n=Number(ly.n)||12, extra=["urlaub","weihnacht","bonus"].reduce((a,k)=>a+(Number(ly[k])||0),0);
-  const monat = ly.monat!=null && ly.monat!=="" ? Number(ly.monat)||0 : (Number(ly.brutto)>0 ? Math.round((Number(ly.brutto)/12)*100)/100 : 0);
-  const legacy = ly.monat==null && Number(ly.brutto)>0;   // older version: only the yearly sum was entered
+  const mm=mindestMonat(year);
+  const monat = mm>0 ? mm : ly.monat!=null && ly.monat!=="" ? Number(ly.monat)||0 : (Number(ly.brutto)>0 ? Math.round((Number(ly.brutto)/12)*100)/100 : 0);
+  const legacy = !(mm>0) && ly.monat==null && Number(ly.brutto)>0;   // older version: only the yearly sum was entered
   const brutto = legacy ? Number(ly.brutto) : Math.round((monat*n+extra)*100)/100;
   const base = { monat, n, urlaub:Number(ly.urlaub)||0, weihnacht:Number(ly.weihnacht)||0, bonus:Number(ly.bonus)||0, extra, brutto, sonderzahl: legacy?0:Math.round((monat*(n-12)+extra)*100)/100, lst:ly.lst };
   // pay slips entered for this year replace the estimate: months with a slip count as they are, the others are estimated
@@ -2478,6 +2490,10 @@ function renderHome(){
     for (const t of (S.settings.jl&&S.settings.jl.terms)||[]) if (t.d===td||t.d===tm) hints.unshift({k:"term", lvl:"warn", t:`${t.d===td?"Heute":"Morgen"}: ${t.n}`, s:t.t?`um ${t.t} Uhr`:""});
     const P=prof(), end=profEnd(); if (P.cd && end){ const dl=Math.round((new Date(end+"T12:00")-new Date(td+"T12:00"))/864e5); if (dl>=0 && dl<=60) hints.unshift({k:"profend", lvl:"warn", t:`${P.cd} in ${dl} ${dl===1?"Tag":"Tagen"}`, s:`am ${new Date(end+"T12:00").toLocaleDateString("de-DE")} – plan rechtzeitig, wie es danach weitergeht.`}); }
     if (P.side==="beihilfe"){ const old=(S.settings.jl.beihilfe||[]).filter(x=>!x.done && x.d && (Date.now()-new Date(x.d+"T12:00"))/864e5>42); if (old.length) hints.push({k:"beihilfe", lvl:"warn", t:`${old.length} Beihilfe-${old.length===1?"Antrag":"Anträge"} seit über 6 Wochen offen`, s:"Nachfragen lohnt sich."}); } }
+  { const ny=new Date().getFullYear(), nm=new Date().getMonth(), a=YV[ny], b=YV[ny-1];
+    if (nm<=1 && a && b && ym>=cur){ const md=S.settings.mindest||{};
+      if (md.on && md.h && a.ml!==b.ml){ const plus=(a.ml-b.ml)*md.h*13/3; hints.unshift({k:"mindest", lvl:"good", t:`Neu ab ${ny}: Mindestlohn ${ml2(a.ml)} €`, s:`Du bekommst ca. ${eur0(plus)} mehr brutto im Monat. Prüf, ob es auf deiner Abrechnung steht.`}); }
+      if (a.mj!==b.mj && (["minijob","studium","schule","alg","grusi"].includes(S.settings.work)||hasExtra("minijob"))) hints.push({k:"mjgrenze", lvl:"warn", t:`Neu ab ${ny}: Minijob-Grenze ${a.mj} €`, s:`vorher ${b.mj} € im Monat`}); } }
   UI.hints=hints; updateBell();
   if (ym===cur) notifyAlerts(hints);
   // --- budgets as tiles (the 3 that are used up most)
@@ -3651,7 +3667,10 @@ function lohnSection(y){
   const months=Array.from({length:12},(_,i)=>{ const ym=y+"-"+pad(i+1), has=map[ym], past=ym<cur; return `<button class="sm ${has?"ok":past&&sl.length?"miss":"fut"}" data-slipm="${ym}" aria-label="${MONTHS[i]}">${MONTHS[i].slice(0,3)}${has?" ✓":past&&sl.length?" ?":""}</button>`; }).join("");
   const missing=Array.from({length:12},(_,i)=>y+"-"+pad(i+1)).filter(ym=>ym<cur&&!map[ym]);
   const tax=taxCalc(y);
-  return `${slipEditor()}
+  const md=S.settings.mindest||{}, v=yv(y), nx=YV[Number(y)+1];
+  const mindCard=`<div class="card flat mindc"><div class="switch" style="margin:0"><label for="aMind"><b>Ich bekomme Mindestlohn</b><br><span class="small muted">${md.on&&md.h?`${ml2(v.ml)} € × ${numStr(md.h)} Std./Woche = <b>${esc(eur0(mindestMonat(y)))}</b> brutto im Monat${nx?` · ab Januar ${Number(y)+1}: ${ml2(nx.ml)} € → ca. ${esc(eur0(Math.round(nx.ml*md.h*13/3)))}`:""}`:`${y}: ${ml2(v.ml)} € pro Stunde – dein Gehalt steigt dann jedes Jahr automatisch mit`}</span></label><input type="checkbox" id="aMind" ${md.on?"checked":""}></div>
+    ${md.on?`<div class="field" style="margin:10px 0 0"><label for="aMindH">Stunden pro Woche</label><input class="in" id="aMindH" inputmode="decimal" value="${md.h?esc(numStr(md.h)):""}" placeholder="z. B. 40"></div>`:""}</div>`;
+  return `${slipEditor()}${mindCard}
     <div class="kpis k3"><div class="kpi"><small>Brutto bisher</small><b>${esc(eur0(b))}</b><span>${sl.length} ${sl.length===1?"Abrechnung":"Abrechnungen"}</span></div><div class="kpi"><small>Lohnsteuer</small><b>${esc(eur0(l))}</b><span>inkl. Soli/KiSt</span></div><div class="kpi"><small>Netto</small><b>${esc(eur0(n))}</b><span>ausgezahlt</span></div></div>
     <div class="card flat"><div class="card-head"><h2>Abrechnungen ${y}</h2><span class="small muted">${sl.length} von 12</span></div>
       <div class="smgrid">${months}</div>
@@ -4265,7 +4284,9 @@ function renderMore(){
   const ly=(st.lohn||{})[y]||{};
   $("sLohnYear").textContent = "· "+y;
   const lj=lohnYear(y);
-  setVal("sLohnM", lj.monat?numStr(lj.monat):""); setVal("sUrlaub", lj.urlaub?numStr(lj.urlaub):""); setVal("sWeih", lj.weihnacht?numStr(lj.weihnacht):""); setVal("sBonus", lj.bonus?numStr(lj.bonus):"");
+  { const md=S.settings.mindest||{}, yy=UI.ym.slice(0,4), v=yv(yy); $("sMind").checked=!!md.on; $("sMindHF").hidden=!md.on; setVal("sMindH", md.h?numStr(md.h):""); $("sLohnM").disabled=!!md.on;
+    $("sMindInfo").textContent = md.on&&md.h ? `${ml2(v.ml)} € × ${numStr(md.h)} Std. = ${eur(mindestMonat(yy))} im Monat (${yy})${YV[Number(yy)+1]?` · ab ${Number(yy)+1}: ${ml2(YV[Number(yy)+1].ml)} €`:""}` : `${yy}: ${ml2(v.ml)} € pro Stunde – das Gehalt steigt jedes Jahr automatisch mit`; }
+  setVal("sLohnM", mindestMonat(UI.ym.slice(0,4))>0 ? numStr(mindestMonat(UI.ym.slice(0,4))) : lj.monat?numStr(lj.monat):""); setVal("sUrlaub", lj.urlaub?numStr(lj.urlaub):""); setVal("sWeih", lj.weihnacht?numStr(lj.weihnacht):""); setVal("sBonus", lj.bonus?numStr(lj.bonus):"");
   if (document.activeElement!==$("sLohnN")) $("sLohnN").value=String(lj.n);
   $("sLohnSum").hidden = !(lj.brutto>0);
   $("sLohnSum").innerHTML = lj.brutto>0 ? `<span>Bruttolohn ${esc(y)}: <b>${esc(eur(lj.brutto))}</b>${lj.sonderzahl>0?` – davon ${esc(eur(lj.sonderzahl))} Sonderzahlungen (13. Gehalt, Urlaubsgeld …). Die zählen in voller Höhe in dem Jahr, in dem sie kommen, und werden nicht auf die Monate verteilt.`:""}</span>` : "";
@@ -5141,6 +5162,8 @@ function setLohn(field, v){ const y=UI.ym.slice(0,4), l={...(S.settings.lohn||{}
   if (o.monat==null) o.monat=cur.monat;                     // switch older entries over to "per month"
   o[field]=v; l[y]=o; S.settings.lohn=l; o.brutto=lohnYear(y).brutto; }
 bindNum("sLohnM",(v,raw)=>setLohn("monat", raw===""?0:Math.round(v*100)/100));
+$("sMind").addEventListener("change",e=>{ const m=S.settings.mindest={...(S.settings.mindest||{})}; m.on=e.target.checked; if (m.on&&!m.h) m.h=40; render(); saveSettings(); toast("Gespeichert"); });
+bindNum("sMindH",v=>{ S.settings.mindest={...(S.settings.mindest||{}), h:Math.min(60,Math.max(0,v))}; });
 bindNum("sUrlaub",v=>setLohn("urlaub", Math.round(v*100)/100)); bindNum("sWeih",v=>setLohn("weihnacht", Math.round(v*100)/100)); bindNum("sBonus",v=>setLohn("bonus", Math.round(v*100)/100));
 $("sLohnN").addEventListener("change",()=>{ setLohn("n", Number($("sLohnN").value)||12); render(); saveSettings(); toast("Gespeichert"); });
 bindNum("sLSt",(v,raw)=>{ const y=UI.ym.slice(0,4), l={...(S.settings.lohn||{})}; l[y]={...(l[y]||{})}; if (raw==="") delete l[y].lst; else l[y].lst=Math.round(v*100)/100; S.settings.lohn=l; });
