@@ -572,6 +572,16 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 /* home columns: on phones the column wrappers disappear and "order" restores the one-column sequence */
 .cols,.col{display:contents}
 
+.artbtn{flex:0 1 auto;max-width:48%;display:flex;align-items:center;gap:4px;border:0;background:var(--sunk);border-radius:12px;padding:9px 10px;font:600 13px var(--f-body);color:var(--fg);min-width:0}
+.artbtn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.artbtn svg{flex:none;color:var(--muted)}
+.artsheet .sgl{margin:12px 2px 4px}
+.artrow{width:100%;display:flex;align-items:center;gap:12px;border:0;background:none;padding:9px 2px;border-top:1px solid var(--line);color:inherit;text-align:left;font:inherit}
+.artsheet .sgl+.artrow{border-top:0}
+.ari{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none}
+.art{flex:1;min-width:0;display:flex;flex-direction:column}.art b{font-size:14.5px;font-weight:700}.art small{font-size:12px;color:var(--muted);line-height:1.35}
+.arr{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);flex:none}.artrow.on .arr{border:7px solid var(--accent)}
+.artrow.on{background:color-mix(in srgb,var(--accent) 6%,transparent);border-radius:12px}
+
 .stmtcam{display:flex;align-items:center;gap:14px;border:0;text-align:left;width:100%;color:inherit;font:inherit;cursor:pointer;margin-bottom:12px}
 .notice.ok{background:color-mix(in srgb,var(--good) 14%,transparent);color:var(--fg)}
 
@@ -1026,6 +1036,7 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
 </div>
 <div class="backdrop" id="spBg" hidden><div class="sheet spsheet" role="dialog" aria-label="Einstellungen"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 10px"><h2 id="spSheetTitle"></h2><button class="icon-btn" data-spclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="spBody"></div></div></div>
 <div class="backdrop" id="tcBg" hidden><div class="sheet tcsheet" role="dialog" aria-label="Kachelfarbe"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 6px"><h2 id="tcTitle"></h2><button class="icon-btn" data-tcclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="tcBody"></div></div></div>
+<div class="backdrop" id="artBg" hidden><div class="sheet artsheet" role="dialog" aria-label="Art der Einnahme"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 6px"><h2 id="artTitle"></h2><button class="icon-btn" data-artclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><p class="small muted" id="artSub" style="margin:-2px 0 8px">Danach rechnet die App Steuer &amp; Co.</p><div id="artList"></div></div></div>
 <div class="backdrop" id="anaBg" hidden><div class="sheet anasheet" role="dialog" aria-label="Analyse"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><div class="aph" id="anaHead"></div><button class="icon-btn" data-anaclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="anab" id="anaBody"></div></div></div>
 <div class="backdrop" id="hintBg" hidden><div class="sheet hintsheet" role="dialog" aria-label="Hinweise"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 6px"><h2>Hinweise</h2><button class="icon-btn" data-hintclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="hintList"></div></div></div>
 <header class="top">
@@ -1591,6 +1602,29 @@ const INC_ARTS = [
   ["Vermögen", [["kapital","Zinsen & Dividenden"],["miete","Mieteinnahmen"]]],
   ["Sonstiges", [["unterhalt","Unterhalt"],["erstattung","Erstattung / Rückzahlung"],["verkauf","Verkauf (z. B. Kleinanzeigen)"],["geschenk","Geschenk"],["sonstige","Sonstige"]]]
 ];
+// income types with a short note on what they mean for the numbers (shown in the picker)
+const ART_INFO = {selbst:["case","Eigene Rechnungen – Steuer, Rücklage & EÜR"], lohn:["wallet","Angestellt mit Lohnsteuer"], sonderzahlung:["gift","Urlaubs-/Weihnachtsgeld, Bonus – mit Lohnsteuer"], minijob:["cash","bis 603 € im Monat steuerfrei"],
+  lohnersatz:["list","Arbeitslosen-/Krankengeld – steuerfrei, zählt aber beim Steuersatz mit"], buergergeld:["bank","Grundsicherung – steuerfrei"], kindergeld:["heart","steuerfrei"], elterngeld:["heart","steuerfrei, zählt beim Steuersatz mit"],
+  rente:["spark","teilweise steuerpflichtig"], wohngeld:["home","steuerfrei"], bafoeg:["book","steuerfrei"], kapital:["chart","Abgeltungsteuer, Sparerpauschbetrag 1.000 €"], miete:["home","steuerpflichtig (Anlage V)"],
+  unterhalt:["heart","meist steuerfrei für dich"], erstattung:["repeat","zählt nicht als Einkommen"], verkauf:["tag","privat meist steuerfrei"], geschenk:["gift","steuerfrei"], sonstige:["dots","wird nicht besteuert gerechnet"]};
+function artLabel(v){ for (const [,os] of INC_ARTS) for (const [k,l] of os) if (k===v) return l; return "Sonstige"; }
+function artOpen(name){
+  const c=incCats().find(x=>x.name===name), sel=c?c.art:"sonstige";
+  const hide=v=>v!==sel && ((v==="selbst"&&!hasSelf()) || ((v==="lohn"||v==="sonderzahlung")&&!hasJob()));
+  $("artTitle").textContent=`Art von „${name}“`;
+  $("artList").innerHTML=INC_ARTS.map(([g,os])=>{ const list=os.filter(([v])=>!hide(v)); if (!list.length) return "";
+    return `<div class="sgl">${g}</div>${list.map(([v,l])=>{ const [i,d]=ART_INFO[v]||["dots",""]; return `<button class="artrow ${v===sel?"on":""}" data-artset="${v}" data-artname="${esc(name)}"><span class="ari">${ic(i in P?i:"dots",18)}</span><span class="art"><b>${esc(l)}</b><small>${esc(d)}</small></span><span class="arr"></span></button>`; }).join("")}`; }).join("");
+  const bg=$("artBg"); bg.querySelector(".sheet").scrollTop=0; bg.hidden=false; requestAnimationFrame(()=>bg.classList.add("show"));
+}
+function artClose(){ const bg=$("artBg"); bg.classList.remove("show"); setTimeout(()=>{ bg.hidden=true; },200); }
+document.addEventListener("click", e=>{
+  const o=e.target.closest("[data-artpick]"); if (o){ artOpen(o.dataset.artpick); return; }
+  if (e.target===$("artBg") || e.target.closest("[data-artclose]")){ artClose(); return; }
+  const s=e.target.closest("[data-artset]"); if (!s) return;
+  const name=s.dataset.artname, v=s.dataset.artset, c=clone(S.settings.cats||DEFAULT_SETTINGS.cats);
+  c.einnahme=c.einnahme.map(x=>{ const o2=typeof x==="string"?{name:x,art:"sonstige"}:x; return o2.name===name?{...o2,art:v}:o2; });
+  S.settings.cats=c; saveSettings(); render(); artClose(); toast(`${name}: ${artLabel(v)}`);
+});
 function incArtOptions(sel){ const hide=v=>v!==sel && ((v==="selbst"&&!hasSelf()) || ((v==="lohn"||v==="sonderzahlung")&&!hasJob())); return INC_ARTS.map(([g,os])=>`<optgroup label="${g}">${os.filter(([v])=>!hide(v)).map(([v,l])=>`<option value="${v}" ${v===sel?"selected":""}>${l}</option>`).join("")}</optgroup>`).join(""); }
 // ways of earning money, chosen in two steps: group first, then the exact one
 const WORK = [["angestellt","Angestellt","Voll- oder Teilzeit, Gehalt mit Lohnsteuer","job"],["minijob","Minijob / Midijob","bis 603 € im Monat bzw. Übergangsbereich","job"],["selbst","Selbstständig","Eigene Rechnungen, kein Job daneben","job"],["beides","Angestellt und selbstständig","Job plus Selbstständigkeit nebenbei","job"],
@@ -4150,7 +4184,7 @@ function renderMore(){
     $("catEd-"+k).innerHTML = list.map((n,i)=>{ const c=catColor(k,n); return `<div class="crow">${tile(k,n)}<div class="f1"><b>${esc(n)}</b><span class="cbar"><i style="width:${Math.round(vals[i]/max*100)}%;background:${c}"></i></span></div><span class="camt">${vals[i]?eur(vals[i]):"–"}</span>${xBtn(k,n)}</div>`; }).join("")
       + `<button class="cadd" data-catadd="${k}">+ Neue Kategorie</button>`;
   }
-  $("catEd-einnahme").innerHTML = incCats().map(c=>`<div class="crow">${tile("einnahme",c.name)}<div class="f1"><b>${esc(c.name)}</b></div><select class="in" data-incart="${esc(c.name)}" aria-label="Art von ${esc(c.name)}">${incArtOptions(c.art)}</select>${xBtn("einnahme",c.name)}</div>`).join("")+`<button class="cadd" data-catadd="einnahme">+ Neue Einnahme-Art</button>`;
+  $("catEd-einnahme").innerHTML = incCats().map(c=>`<div class="crow">${tile("einnahme",c.name)}<div class="f1"><b>${esc(c.name)}</b></div><button class="artbtn" data-artpick="${esc(c.name)}" aria-label="Art von ${esc(c.name)}"><span>${esc(artLabel(c.art))}</span>${ic("down",16)}</button>${xBtn("einnahme",c.name)}</div>`).join("")+`<button class="cadd" data-catadd="einnahme">+ Neue Einnahme-Art</button>`;
   const w=S.settings.work||"beides";
   if (document.activeElement!==$("sWork")) $("sWork").innerHTML = WGROUPS.map(([g,gt])=>`<optgroup label="${gt}">${WORK.filter(x=>x[3]===g).map(([k,t])=>`<option value="${k}" ${k===w?"selected":""}>${t}</option>`).join("")}</optgroup>`).join("");
   $("sWorkInfo").textContent = (WORK.find(x=>x[0]===w)||WORK[3])[2] + (!hasJob()&&!hasSelf()&&!isJobless()?" – Steuer-Felder sind ausgeblendet.":"") + (w==="alg"||w==="grusi"?" – die Startseite zeigt Zahltag, Töpfe und Termine. Einstellungen dazu unter „Leistung & Amt“.":w==="angestellt"?" – Rücklage, Betrieb, Umsatzsteuer und EÜR sind ausgeblendet.":w==="selbst"?" – die Felder für Gehalt sind ausgeblendet.":"");
@@ -6145,7 +6179,7 @@ $("loginGo").onclick = doLogin;
 })();
 /* swipe down to close the bottom sheets (add menu, hints, booking form) */
 (function(){
-  const CLOSERS={tcBg:"[data-tcclose]", addBg:"[data-addclose]", hintBg:"[data-hintclose]", anaBg:"[data-anaclose]", spBg:"[data-spclose]", sheetBg:"#sheetClose"};
+  const CLOSERS={artBg:"[data-artclose]", tcBg:"[data-tcclose]", addBg:"[data-addclose]", hintBg:"[data-hintclose]", anaBg:"[data-anaclose]", spBg:"[data-spclose]", sheetBg:"#sheetClose"};
   Object.keys(CLOSERS).forEach(id=>{
     const bg=$(id), sh=bg && bg.querySelector(".sheet"); if (!sh) return;
     let y0=0, x0=0, dy=0, t0=0, on=false, decided=false;
