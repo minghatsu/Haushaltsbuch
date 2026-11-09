@@ -579,7 +579,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .wcrumb{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px}.wcrumb i{font-style:normal;color:var(--muted);font-weight:700}
 .wcrumb button,.wcrumb span{border:0;background:var(--accent-soft);color:var(--accent);font:800 12px var(--f-body);padding:5px 10px;border-radius:999px;letter-spacing:.02em}
 .wcrumb span{background:var(--accent);color:#fff}
-.wizbg{overflow-x:hidden}
+.wizbg{overflow-x:hidden}.wfoot.solo .btn{max-width:490px}
 
 .wipe{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
 .wipe>b{color:var(--bad)}.wipebtn{color:var(--bad);align-self:flex-start}
@@ -3547,7 +3547,7 @@ function wizShould(){
   return true;
 }
 function wizOpen(){
-  UI.wiz={step:0, name:S.settings.name||"", work:S.settings.work||"", extra:[...(S.settings.extra||[])], exAsk:false, bal:"", fix:{}, own:[], bud:{}};
+  UI.wiz={step:0, forced:!S.settings.wizDone, name:S.settings.name||"", work:S.settings.work||"", extra:[...(S.settings.extra||[])], exAsk:false, bal:"", fix:{}, own:[], bud:{}};
   let el=$("wizBg"); if (!el){ el=document.createElement("div"); el.id="wizBg"; el.className="wizbg"; document.body.appendChild(el); }
   el.hidden=false; document.body.classList.add("locked"); wizRender(); wizAnimIn(1);
 }
@@ -3592,7 +3592,7 @@ function wizRender(){
   if (st===4) body=head("Fast fertig: Budgets","Wie viel willst du im Monat höchstens ausgeben? Leer lassen = kein Budget.")+`<div class="wfix">${cats("ausgabe").filter(c=>!/bargeld/i.test(c)).map(c=>`<label class="wrow"><span>${esc(c)}</span><input class="in" data-wzbud="${esc(c)}" inputmode="decimal" value="${esc(w.bud[c]||"")}" placeholder="kein Budget"></label>`).join("")}</div>
       ${SYNCABLE&&!(SYNC&&SYNC.token)?`<div class="notice info" style="margin-top:14px"><span>Handy und PC abgleichen? Das geht jederzeit unter Einstellungen › Abgleich & Backup.</span></div>`:""}`;
   el.innerHTML=`<div class="wiz" role="dialog" aria-label="Einrichtung">${body}
-    <div class="wfoot">${st?`<button class="btn" id="wzBack">Zurück</button>`:`<button class="btn" id="wzSkipAll">Später</button>`}<button class="btn primary" id="wzNext">${st===N-1?"Fertig":st===3&&!Object.keys(w.fix).length&&!w.own.length?"Überspringen":"Weiter"}</button></div></div>`;
+    <div class="wfoot ${!st&&w.forced?"solo":""}">${st?`<button class="btn" id="wzBack">Zurück</button>`:w.forced?"":`<button class="btn" id="wzSkipAll">Später</button>`}<button class="btn primary" id="wzNext">${st===N-1?"Fertig":st===3&&!Object.keys(w.fix).length&&!w.own.length?"Überspringen":"Weiter"}</button></div></div>`;
   const f=el.querySelector("input"); if (f && st!==3 && st!==4) setTimeout(()=>f.focus({preventScroll:true}),50);
 }
 function wizRead(){
@@ -5519,7 +5519,7 @@ $("backupFile").addEventListener("change", async e => {
 
 // Android back button: close the sheet, then return to the start page, then leave the app
 window.hbBack = () => {
-  if (UI.wiz && $("wizBg") && !$("wizBg").hidden){ wizBackOne(); return true; }
+  if (UI.wiz && $("wizBg") && !$("wizBg").hidden){ if (!wizBackOne() && !UI.wiz.forced) wizClose(); return true; }
   if (!$("docRev").hidden){ drFinish(null); return true; }
   if (!$("fanBg").hidden){ fanClose(); return true; }
   if (!$("sheetBg").hidden){ closeSheet(); return true; }
