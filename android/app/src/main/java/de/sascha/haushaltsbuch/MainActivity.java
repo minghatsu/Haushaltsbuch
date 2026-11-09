@@ -148,7 +148,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        web.loadUrl(APP_URL);
+        loadApp();
     }
 
     /** opens Android's installer for the downloaded update (Android itself checks that it is signed like this app) */
@@ -165,6 +165,14 @@ public class MainActivity extends Activity {
         i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
         runOnUiThread(() -> startActivity(i));
         return "installing";
+    }
+
+    /** Shows the newest version: a downloaded (signed) update directly, otherwise the copy inside the APK.
+     *  Loaded as data with the app's own address, so storage and everything else stay the same. */
+    void loadApp() {
+        byte[] html = newestApp();
+        if (html == null) { web.loadUrl(APP_URL); return; }
+        web.loadDataWithBaseURL(APP_URL, new String(html, StandardCharsets.UTF_8), "text/html", "utf-8", APP_URL);
     }
 
     private File cachedAppFile() { return new File(getFilesDir(), "app.html"); }
@@ -460,6 +468,14 @@ public class MainActivity extends Activity {
 
         /* ---- self-update from the GitHub release (private repo: read-only key the user entered) ---- */
         @JavascriptInterface
+        public String appVersions() {
+            try {
+                byte[] c = cachedAppFile().exists() ? readAll(new java.io.FileInputStream(cachedAppFile())) : null;
+                return "{\"bundled\":" + versionOf(readAll(getAssets().open("index.html"))) + ",\"cached\":" + versionOf(c) + "}";
+            } catch (Exception e) { return "{}"; }
+        }
+
+        @JavascriptInterface
         public String nativeRev() {
             try (InputStream is = getAssets().open("native.txt")) { return new String(readAll(is), StandardCharsets.UTF_8).trim(); }
             catch (Exception e) { return "0"; }
@@ -614,7 +630,7 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void reloadApp() {
-            runOnUiThread(() -> web.loadUrl(APP_URL));
+            runOnUiThread(MainActivity.this::loadApp);
         }
 
         @JavascriptInterface

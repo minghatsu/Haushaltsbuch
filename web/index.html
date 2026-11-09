@@ -4720,7 +4720,8 @@ function renderUpd(){
   const body=$("updBody"), st=$("updState");
   if (!canGh()){ st.textContent="Diese App-Version kann sich noch nicht selbst aktualisieren – einmal die neue App installieren."; body.innerHTML=""; return; }
   const has=!!updKey();
-  const when = UPD.ts ? " · geprüft " + new Date(UPD.ts).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}) : "";
+  let waiting=""; try { const v=JSON.parse(window.AndroidBridge.appVersions ? window.AndroidBridge.appVersions() : "{}"); if ((v.cached|0) > HB_VERSION) waiting = " · " + verName(v.cached) + " liegt bereit"; } catch(e){}
+  const when = waiting + (UPD.ts ? " · geprüft " + new Date(UPD.ts).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}) : "");
   st.textContent = has ? (UPD.msg || "An – die App prüft alle 30 Minuten auf neue Versionen.") + when : "Einmal deinen Update-Schlüssel eintragen, dann aktualisiert sich die App selbst.";
   if (document.activeElement && document.activeElement.id==="updKey") return;
   body.innerHTML = has
