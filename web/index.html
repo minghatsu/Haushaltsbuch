@@ -573,7 +573,23 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .cols,.col{display:contents}
 
 /* Farben page */
-.colsec{margin-bottom:16px}.colsec h3{font-size:14px;margin:0 0 4px}.colsec>p{margin:0 0 8px}
+.colsec{margin-bottom:16px}
+.colpk{--c:hsl(var(--h) var(--s) var(--l));padding:6px 2px 16px;display:flex;flex-direction:column;gap:10px}
+.pkprev{display:flex;align-items:center;gap:10px}
+.pkic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex:none;color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent)}
+.pkcard{flex:1;height:44px;border-radius:12px;background:linear-gradient(150deg,var(--c),color-mix(in srgb,var(--c) 62%,#000));color:#fff;display:flex;align-items:center;padding:0 12px;font-size:14px}
+.pkhex{font-size:12px;color:var(--muted);width:62px;text-align:right}
+.colpk label{display:flex;flex-direction:column;gap:6px;font:700 12.5px var(--f-body);color:var(--muted)}
+.pkr{-webkit-appearance:none;appearance:none;width:100%;height:24px;border-radius:999px;margin:0;outline:none}
+.pkr::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:var(--c);border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.pkr::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--c);border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.pkh{background:linear-gradient(90deg,hsl(0 var(--s) var(--l)),hsl(60 var(--s) var(--l)),hsl(120 var(--s) var(--l)),hsl(180 var(--s) var(--l)),hsl(240 var(--s) var(--l)),hsl(300 var(--s) var(--l)),hsl(360 var(--s) var(--l)))}
+.pks{background:linear-gradient(90deg,hsl(var(--h) 0% var(--l)),hsl(var(--h) 100% var(--l)))}
+.pkl{background:linear-gradient(90deg,hsl(var(--h) var(--s) 8%),hsl(var(--h) var(--s) 50%),hsl(var(--h) var(--s) 92%))}
+.pkrec{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.pkrec small{font-size:12px;color:var(--muted);font-weight:700;margin-right:2px}
+.pkrec button{width:28px;height:28px;border-radius:50%;border:0;box-shadow:inset 0 0 0 2px rgba(255,255,255,.4)}
+.pkbtns{display:grid;grid-template-columns:1fr 1.4fr;gap:8px}.pkbtns .btn{justify-content:center}
+.colsec h3{font-size:14px;margin:0 0 4px}.colsec>p{margin:0 0 8px}
 .colrow{border-bottom:1px solid var(--line)}.colrow:last-child{border-bottom:0}
 .colhead{width:100%;display:flex;align-items:center;gap:12px;border:0;background:none;padding:9px 2px;text-align:left;color:inherit}
 .colhead b{flex:1;font-size:14px;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.colhead small{color:var(--muted);font-size:11.5px}
@@ -3654,7 +3670,7 @@ function renderColorEd(){
   let accts=[...new Set([...(UI.acctNames||[]), ...accountNames()])]; if (!accts.length) accts=["Hauptkonto"]; const open=UI.colOpen||"";
   const row=(group,key,label,cur,icon,isAcct)=>{ const own=userCol(group,key), c=own||cur, id=group+"|"+key;
     return `<div class="colrow ${open===id?"open":""}"><button class="colhead" data-colopen="${esc(id)}">${isAcct?`<span class="colcard" style="background:linear-gradient(150deg, ${c}, color-mix(in srgb, ${c} 62%, #000))"></span>`:`<span class="colic" style="background:color-mix(in srgb, ${c} 16%, transparent);color:${c}">${ic(icon,18)}</span>`}<b>${esc(label)}</b>${own?`<small>eigene Farbe</small>`:""}<i class="colsw" style="background:${c}"></i></button>
-      ${open===id?`<div class="colpal">${COLSW.map(h=>`<button class="${h===own?"on":""}" style="background:${h}" data-colset="${esc(id)}|${h}" aria-label="${h}"></button>`).join("")}<label class="colcustom" title="Eigene Farbe"><input type="color" value="${own||"#1a7a5c"}" data-colin="${esc(id)}">${ic("palette",16)}</label>${own?`<button class="colreset" data-colset="${esc(id)}|">Standard</button>`:""}</div>`:""}</div>`; };
+      ${open===id?colPicker(id, c, isAcct, icon):""}</div>`; };
   const acctDef=n=> n==="Hauptkonto"||accts.indexOf(n)===0 ? "#1a7a5c" : "#34413b";
   el.innerHTML=`<div class="colsec"><h3>Konten</h3><p class="small muted">Die großen Karten oben auf der Startseite.</p>${accts.map(n=>row("acct",n,n,acctDef(n),"wallet",true)).join("")}</div>
     <div class="colsec"><h3>Ausgaben</h3>${cats("ausgabe").map(n=>row("cat","ausgabe|"+n,n,catColor("ausgabe",n).startsWith("#")?catColor("ausgabe",n):cssVar(catColor("ausgabe",n)),iconFor("ausgabe",n))).join("")}</div>
@@ -3662,6 +3678,32 @@ function renderColorEd(){
     <div class="colsec"><h3>Leiste unten</h3>${Object.entries(TABDEF).map(([k,[l,d,i]])=>row("tab",k,l,d,i)).join("")}</div>
     <button class="btn" data-colresetall="1" style="margin-top:6px">Alle Farben zurücksetzen</button>`;
 }
+// picker: three sliders – colour, strength, light/dark – with a live preview; saved only on "Übernehmen"
+function hexToHsl(hex){ let r=0,g=0,b=0; const m=/^#?([\da-f]{6})$/i.exec(String(hex).trim()); if (m){ const n=parseInt(m[1],16); r=(n>>16&255)/255; g=(n>>8&255)/255; b=(n&255)/255; }
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2; let h=0, s=0;
+  if (mx!==mn){ const d=mx-mn; s=l>0.5?d/(2-mx-mn):d/(mx+mn); h = mx===r ? (g-b)/d+(g<b?6:0) : mx===g ? (b-r)/d+2 : (r-g)/d+4; h*=60; }
+  return {h:Math.round(h), s:Math.round(s*100), l:Math.round(l*100)}; }
+function hslToHex(h,s,l){ s/=100; l/=100; const k=n=>(n+h/30)%12, a=s*Math.min(l,1-l), f=n=>l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1));
+  return "#"+[f(0),f(8),f(4)].map(x=>Math.round(x*255).toString(16).padStart(2,"0")).join(""); }
+function colPicker(id, cur, isAcct, icon){
+  if (!UI.colHSL || UI.colHSL.id!==id){ const c=cur.startsWith("#")?cur:cssVar(cur); UI.colHSL={id, ...hexToHsl(c)}; }
+  const {h,s,l}=UI.colHSL, rec=(S.settings.colRecent||[]).slice(0,8);
+  return `<div class="colpk" data-pk="${esc(id)}" style="--h:${h};--s:${s}%;--l:${l}%">
+    <div class="pkprev"><span class="pkic">${ic(icon,20)}</span><span class="pkcard"><b>${isAcct?"123,00 €":"Vorschau"}</b></span><code class="pkhex">${hslToHex(h,s,l)}</code></div>
+    <label>Farbe<input type="range" min="0" max="360" value="${h}" data-pkk="h" class="pkr pkh"></label>
+    <label>Kräftig<input type="range" min="0" max="100" value="${s}" data-pkk="s" class="pkr pks"></label>
+    <label>Hell / Dunkel<input type="range" min="8" max="92" value="${l}" data-pkk="l" class="pkr pkl"></label>
+    ${rec.length?`<div class="pkrec"><small>Zuletzt</small>${rec.map(x=>`<button style="background:${x}" data-pkrec="${x}" aria-label="${x}"></button>`).join("")}</div>`:""}
+    <div class="pkbtns"><button class="btn" data-colset="${esc(id)}|">Standard</button><button class="btn primary" data-pkok="${esc(id)}">Übernehmen</button></div>
+  </div>`;
+}
+function pkUpdate(box){ const {h,s,l}=UI.colHSL; box.style.setProperty("--h",h); box.style.setProperty("--s",s+"%"); box.style.setProperty("--l",l+"%"); const x=box.querySelector(".pkhex"); if (x) x.textContent=hslToHex(h,s,l); }
+document.addEventListener("input", e=>{ const r=e.target.closest("[data-pkk]"); if (!r || !UI.colHSL) return; UI.colHSL[r.dataset.pkk]=Number(r.value); pkUpdate(r.closest(".colpk")); });
+document.addEventListener("click", e=>{
+  const rc=e.target.closest("[data-pkrec]"); if (rc && UI.colHSL){ Object.assign(UI.colHSL, hexToHsl(rc.dataset.pkrec)); const box=rc.closest(".colpk"); box.querySelectorAll("[data-pkk]").forEach(i=>i.value=UI.colHSL[i.dataset.pkk]); pkUpdate(box); return; }
+  const ok=e.target.closest("[data-pkok]"); if (ok && UI.colHSL){ const hex=hslToHex(UI.colHSL.h,UI.colHSL.s,UI.colHSL.l);
+    S.settings.colRecent=[hex, ...(S.settings.colRecent||[]).filter(x=>x!==hex)].slice(0,8); UI.colOpen=""; UI.colHSL=null; setUserCol(ok.dataset.pkok, hex); toast("Farbe übernommen"); }
+});
 function cssVar(v){ const m=/var\((--[\w-]+)\)/.exec(v); return m ? getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim()||"#888" : v; }
 function setUserCol(id, hex){
   const [group, ...rest]=id.split("|"), key=rest.join("|"), c=S.settings.colors=S.settings.colors||{}; c[group]=c[group]||{};
@@ -3669,8 +3711,8 @@ function setUserCol(id, hex){
   saveSettings(); applyTabColors(); renderColorEd();
 }
 document.addEventListener("click", e=>{
-  const o=e.target.closest("[data-colopen]"); if (o){ UI.colOpen = UI.colOpen===o.dataset.colopen ? "" : o.dataset.colopen; renderColorEd(); return; }
-  const s=e.target.closest("[data-colset]"); if (s){ const v=s.dataset.colset, i=v.lastIndexOf("|"); setUserCol(v.slice(0,i), v.slice(i+1)); return; }
+  const o=e.target.closest("[data-colopen]"); if (o){ UI.colOpen = UI.colOpen===o.dataset.colopen ? "" : o.dataset.colopen; UI.colHSL=null; renderColorEd(); return; }
+  const s=e.target.closest("[data-colset]"); if (s){ const v=s.dataset.colset, i=v.lastIndexOf("|"); UI.colHSL=null; if (!v.slice(i+1)) UI.colOpen=""; setUserCol(v.slice(0,i), v.slice(i+1)); return; }
   if (e.target.closest("[data-colresetall]")){ S.settings.colors={}; UI.colOpen=""; saveSettings(); applyTabColors(); renderColorEd(); toast("Alle Farben wieder Standard"); }
 });
 document.addEventListener("change", e=>{ const t=e.target.closest("[data-colin]"); if (t) setUserCol(t.dataset.colin, t.value); });
