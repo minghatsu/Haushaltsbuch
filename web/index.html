@@ -3204,7 +3204,7 @@ function renderYear(){
       <div class="kpi"><small>${mc.net>=0?"Übrig":"Mehr ausgegeben"}</small><b class="${mc.net<0?"neg":"pos"}">${mc.net>=0?"+":"−"} ${esc(eur0(Math.abs(mc.net)))}</b><span>${mc.income?`${Math.round(Math.max(0,mc.net)/mc.income*100)} % gespart`:esc(MONTHS[ymParts(ym)[1]-1])}</span></div>
       <div class="kpi"><small>Ø pro Tag</small><b>${esc(eur0(perDay))}</b><span>ausgegeben</span></div>
       <div class="kpi"><small>vs. ${esc(MONTHS[ymParts(prevYm)[1]-1])}</small>${delta===null?`<b>–</b><span>keine Daten</span>`:`<b class="${delta>0?"neg":"pos"}">${delta>0?"+":"−"} ${Math.abs(Math.round(delta))} %</b><span>${ym===cur?"bis heute ":""}${delta>0?"mehr":"weniger"} ausgegeben</span>`}</div>
-      <div class="kpi"><small>Steuer ${y}</small>${!hasSelf()?(Math.abs(tax.due)<1?`<b>–</b><span>ausgeglichen</span>`:tax.due<0?`<b class="pos">+ ${esc(eur0(-tax.due))}</b><span>Erstattung (Schätzung)</span>`:`<b class="neg">− ${esc(eur0(tax.due))}</b><span>Nachzahlung (Schätzung)</span>`):need<=0&&!tax.resBal?`<b>–</b><span>keine Nachzahlung</span>`:resCover>=0?`<b class="pos">✓ reicht</b><span>Rücklage ${esc(eur0(tax.resBal))}</span>`:`<b class="neg">− ${esc(eur0(-resCover))}</b><span>fehlen noch</span>`}</div>
+      ${isJobless() && !(S.settings.work==="alg" && tax.brutto>0) ? `<div class="kpi"><small>Einnahmen</small><b class="pos">+ ${esc(eur0(mc.income))}</b><span>im ${esc(MONTHS[ymParts(ym)[1]-1])}</span></div>` : `<div class="kpi"><small>Steuer ${y}</small>${!hasSelf()?(Math.abs(tax.due)<1?`<b>–</b><span>ausgeglichen</span>`:tax.due<0?`<b class="pos">+ ${esc(eur0(-tax.due))}</b><span>Erstattung (Schätzung)</span>`:`<b class="neg">− ${esc(eur0(tax.due))}</b><span>Nachzahlung (Schätzung)</span>`):need<=0&&!tax.resBal?`<b>–</b><span>keine Nachzahlung</span>`:resCover>=0?`<b class="pos">✓ reicht</b><span>Rücklage ${esc(eur0(tax.resBal))}</span>`:`<b class="neg">− ${esc(eur0(-resCover))}</b><span>fehlen noch</span>`}</div>`}
     </div>`;
   const ycum=yearCum(ym), yknown=new Set(accountNames());
   const ymain = ym<=cur && Object.keys(S.settings.accountAnchors||{}).some(n=>n==="Hauptkonto" && (yknown.has(n)||ym===cur)) ? "Hauptkonto" : "";
@@ -3253,6 +3253,15 @@ function renderYear(){
   tiles.push({k:"cat",icon:"tag",title:"Kategorien",sub:`Wohin dein Geld im ${esc(MONTHS[ymParts(ym)[1]-1])} fließt`,body:chartFor("cat"),short:eur0(mc.expenses)},
     {k:"trend",icon:"chart",title:`Verlauf ${y}`,sub:`Ausgaben pro Monat · Ø ${esc(eur0(avgExp))}`,body:chartFor("trend"),short:`Ø ${eur0(avgExp)}`},
     {k:"io",icon:"repeat",title:`Ein &amp; Aus ${y}`,sub:`${esc(eur0(inc))} rein · ${esc(eur0(exp))} raus`,body:chartFor("io"),short:`${inc-exp>=0?"+":"−"} ${eur0(Math.abs(inc-exp))}`});
+  if (isJobless()){
+    const sal = tax.brutto>0 || S.tx.some(t=>t.kind==="einnahme" && (t.date||"").startsWith(String(y)) && ["lohn","sonderzahlung"].includes(incArt(t.cat)));
+    const warn = S.settings.work==="alg" && sal;
+    for (let i=tiles.length-1;i>=0;i--){ const t=tiles[i];
+      if (t.k==="tax" && warn){ t.title="Steuer"; t.short="Erklärung Pflicht";
+        t.sub = tax.due>=1 ? `ca. ${esc(eur0(tax.due))} Nachzahlung möglich` : "Steuererklärung abgeben";
+        t.body = `<div class="notice warn" style="margin-bottom:12px"><span><b>Steuererklärung ist Pflicht.</b> Du hattest ${y} Gehalt und Arbeitslosengeld. Das Arbeitslosengeld ist zwar steuerfrei, erhöht aber den Steuersatz auf dein Gehalt (Progressionsvorbehalt) – ${tax.due>=1?`es droht eine <b>Nachzahlung von ca. ${esc(eur0(tax.due))}</b>. Leg dir das Geld am besten schon zurück.`:"nach dieser Schätzung bleibt es ungefähr ausgeglichen."} Abgabe bis 31. Juli des Folgejahres.</span></div>` + t.body; }
+      else if (["tax","wk","euer"].includes(t.k)) tiles.splice(i,1); }
+  }
   tiles.sort((a,b)=>ord.indexOf(a.k)-ord.indexOf(b.k));
   const sel=tiles.find(t=>t.k===UI.anaSel);
   const GRP=[["Auswertung",["kpi","cat","trend","io"]],["Planung",["calc","plan"]],["Arbeit &amp; Steuer",["lohn","wk","tax","euer"]]];
