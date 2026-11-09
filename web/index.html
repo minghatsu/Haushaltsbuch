@@ -709,6 +709,11 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .btile .bti{color:var(--accent)}.btile b{font-size:13.5px}.btile.off{opacity:.5}.btile .tog{position:absolute;right:10px;top:10px}
 .btile .bmv{display:flex;gap:4px;margin-top:-2px}.btile .bmv .icon-btn{width:30px;height:30px}
 .crows{display:flex;flex-direction:column;gap:6px}
+.hkpi{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hkpi button{border:0;cursor:pointer;background:var(--surface);border-radius:18px;padding:11px 12px;display:flex;align-items:center;gap:10px;text-align:left;color:var(--fg);box-shadow:var(--shadow);min-width:0}
+.hkpi .hki{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:#fff;background:var(--tc);flex:none}
+.hkpi small{display:block;color:var(--muted);font-size:12px}.hkpi b{display:block;font:800 17px var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.anarow .kpis{margin:0}
 .bgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .bt3{position:relative;background:var(--surface);border-radius:16px;padding:12px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y;min-width:0;box-shadow:0 1px 3px rgba(0,0,0,.05);transition:opacity .15s,transform .15s}
 .bt3 .bti{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--accent);color:#fff}
@@ -1942,7 +1947,10 @@ function renderHome(){
     <div class="homeTop" style="display:flex;flex-direction:column;gap:10px">
       <div class="astack ${accts.length>1?"":"one"}" id="astack" ${accts.length>1?`tabindex="0" aria-label="Konten – wischen zum Blättern"`:""}>${acardHtml}</div>
       ${accts.length>1?`<div class="adots" id="adots">${accts.map((_,i)=>`<button data-cdot="${i}" aria-label="Karte ${i+1}"><i></i></button>`).join("")}</div>`:""}
-      <details class="calc" id="heroDetails" ${UI.heroOpen?"open":""}><summary>So berechnet ${ic("chevron",14)}</summary>${waterfall(ym, cum, c, mainName)}</details>
+      <div class="hkpi">
+        <button data-go="year"><span class="hki" style="--tc:#c27c0e">${ic("chart",18)}</span><span><small>Ø pro Tag</small><b>${esc(eur0(c.expenses/Math.max(1, ym===cur?new Date().getDate():daysIn(ym))))}</b></span></button>
+        <button data-debtgo="1"><span class="hki" style="--tc:#7a5bc2">${ic("bank",18)}</span><span><small>Schulden</small><b>${debtsTotal>0?esc(eur0(debtsTotal)):"keine"}</b></span></button>
+      </div>
     </div>
     ${homeBlocks({
       tip: `<div class="tipline ${tipCls}"><span class="e">${ic(tipCls?"alert":"check",19)}</span><span>${tip}</span></div>`,
@@ -1964,7 +1972,7 @@ function renderHome(){
       offers: offersCard(),
     })}
     <div style="text-align:center;margin:4px 0 8px"><button class="link small" data-go="more" data-scroll="homeEd">${ic("sliders",15)} Startseite anpassen</button></div>`;
-  const det = $("heroDetails"); if (det) det.addEventListener("toggle", ()=>{ UI.heroOpen = det.open; });
+
   initStack(); initShopRail();
 }
 
@@ -1992,7 +2000,8 @@ function waterfall(ym, cum, c, mainName){
       return `<div class="wrow k-${s.kind} ${s.sep?"sep":""}"><span class="wl">${esc(s.l)}</span><span class="wt">${lo<0?`<i class="zero" style="left:${sc(0)}%"></i>`:""}<i style="left:${a}%;width:${w}%;background:${s.v<0&&s.kind==="sum"?"var(--bad)":col[s.kind]}"></i></span><span class="wv ${s.kind==="in"?"pos":s.kind==="out"||s.v<0?"neg":""}">${s.kind==="in"?"+ ":s.kind==="out"?"− ":s.v<0?"− ":""}${esc(eur0(Math.abs(s.v)))}</span></div>`; }).join("")}
   </div>`;
 }
-document.addEventListener("click", e=>{ const b=e.target.closest("[data-calcmode]"); if (!b) return; e.preventDefault(); UI.calcMode=b.dataset.calcmode; UI.heroOpen=true; renderHome(); });
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-calcmode]"); if (!b) return; e.preventDefault(); UI.calcMode=b.dataset.calcmode; (UI.anaOpen||(UI.anaOpen={})).calc=true; render(); });
+document.addEventListener("click", e=>{ if (!e.target.closest("[data-debtgo]")) return; UI.view="more"; UI.sp="schulden"; render(); window.scrollTo({top:0}); });
 /* ---------- bell with hints (instead of the info box on the start page) ---------- */
 function openAddMenu(){ $("addBg").hidden=false; requestAnimationFrame(()=>$("addBg").classList.add("show")); }
 function closeAddMenu(){ $("addBg").classList.remove("show"); setTimeout(()=>{ $("addBg").hidden=true; },200); }
@@ -2646,7 +2655,7 @@ function renderYear(){
   const prevExp = sum(monthCalc(prevYm).tx.filter(t=>(t.kind==="ausgabe"||t.kind==="betrieb") && (ym!==cur || Number(t.date.slice(8,10))<=dayNow)),t=>t.amount) + (ym!==cur ? monthCalc(prevYm).fixPaid : 0);
   const curExp = ym===cur ? sum(mc.tx.filter(t=>t.kind==="ausgabe"||t.kind==="betrieb"),t=>t.amount) : mc.expenses;
   const delta = prevExp>0 ? (curExp/prevExp-1)*100 : null, perDay = mc.expenses/Math.max(1, ym===cur?dayNow:daysIn(ym));
-  const mode = UI.anaChart||"cat", open=UI.anaOpen||(UI.anaOpen={});
+  const mode = UI.anaChart||"cat", open=UI.anaOpen||(UI.anaOpen={kpi:true});
   // expenses per month of the year
   const nice2=niceMax(Math.max(1,...rows.map(r=>r.c.expenses))), sy2=v=>pt+(H-pt-pb)*(1-v/nice2), avgExp=exp/Math.max(1,rows.filter(r=>r.c.expenses>0).length);
   let svg2=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ausgaben pro Monat ${y}">`;
@@ -2660,13 +2669,17 @@ function renderYear(){
        <div class="meta-row small" style="margin-top:8px"><span class="muted">Jahr: ein <b class="pos">${esc(eur0(inc))}</b> · aus <b>${esc(eur0(exp))}</b></span><span class="muted">31.12.: <b>${esc(eur0(endBal))}</b></span></div>`;
   const need=Math.max(0,tax.due)+(tax.gewst||0);
   const accRow=(k,icon,title,sub,body)=>`<div class="card anarow ${open[k]?"open":""}"><button class="anah" data-anaopen="${k}" aria-expanded="${!!open[k]}"><span class="ic">${ic(icon,18)}</span><span class="n"><b>${title}</b><span class="small muted">${sub}</span></span>${ic(open[k]?"up":"down",18)}</button>${open[k]?`<div class="anab">${body}</div>`:""}</div>`;
-  $("v-year").innerHTML = `
-    <div class="kpis">
+  const kpisHtml=`    <div class="kpis">
       <div class="kpi"><small>${mc.net>=0?"Übrig":"Mehr ausgegeben"}</small><b class="${mc.net<0?"neg":"pos"}">${mc.net>=0?"+":"−"} ${esc(eur0(Math.abs(mc.net)))}</b><span>${mc.income?`${Math.round(Math.max(0,mc.net)/mc.income*100)} % gespart`:esc(MONTHS[ymParts(ym)[1]-1])}</span></div>
       <div class="kpi"><small>Ø pro Tag</small><b>${esc(eur0(perDay))}</b><span>ausgegeben</span></div>
       <div class="kpi"><small>vs. ${esc(MONTHS[ymParts(prevYm)[1]-1])}</small>${delta===null?`<b>–</b><span>keine Daten</span>`:`<b class="${delta>0?"neg":"pos"}">${delta>0?"+":"−"} ${Math.abs(Math.round(delta))} %</b><span>${ym===cur?"bis heute ":""}${delta>0?"mehr":"weniger"} ausgegeben</span>`}</div>
       <div class="kpi"><small>Steuer ${y}</small>${!hasSelf()?(Math.abs(tax.due)<1?`<b>–</b><span>ausgeglichen</span>`:tax.due<0?`<b class="pos">+ ${esc(eur0(-tax.due))}</b><span>Erstattung (Schätzung)</span>`:`<b class="neg">− ${esc(eur0(tax.due))}</b><span>Nachzahlung (Schätzung)</span>`):need<=0&&!tax.resBal?`<b>–</b><span>keine Nachzahlung</span>`:resCover>=0?`<b class="pos">✓ reicht</b><span>Rücklage ${esc(eur0(tax.resBal))}</span>`:`<b class="neg">− ${esc(eur0(-resCover))}</b><span>fehlen noch</span>`}</div>
-    </div>
+    </div>`;
+  const ycum=yearCum(ym), yknown=new Set(accountNames());
+  const ymain = ym<=cur && Object.keys(S.settings.accountAnchors||{}).some(n=>n==="Hauptkonto" && (yknown.has(n)||ym===cur)) ? "Hauptkonto" : "";
+  $("v-year").innerHTML = `
+    ${accRow("kpi","insight","Auf einen Blick", `${mc.net>=0?"Übrig":"Mehr ausgegeben"} ${mc.net>=0?"+":"−"} ${esc(eur0(Math.abs(mc.net)))} · Ø ${esc(eur0(perDay))} pro Tag`, kpisHtml)}
+    ${accRow("calc","chart","So berechnet", `Stand heute ${esc(eur0(ycum.balance))} · frei ${esc(eur0(ycum.balance-ycum.reserveBal))}`, waterfall(ym, ycum, mc, ymain))}
     <div class="card anachart">
       <div class="tlchips" role="group" aria-label="Diagramm">${[["cat","Kategorien"],["trend","Verlauf"],["io","Ein / Aus"]].map(([k,l])=>`<button class="fchip" data-anachart="${k}" aria-pressed="${mode===k}">${l}</button>`).join("")}</div>
       ${chartBody}
@@ -5116,6 +5129,61 @@ $("loginSeg").addEventListener("click", e=>{
 });
 $("loginGo").onclick = doLogin;
 ["loginPw","loginPw2","loginEmail","loginRCode","loginCode","loginCloud"].forEach(id=>$(id).addEventListener("keydown", e=>{ if (e.key==="Enter") doLogin(); }));
+/* swipe between the main pages like the sides of a cube: the page follows the thumb,
+   the old one turns away into the depth and gets darker, the new one turns in from the side */
+(function(){
+  const ORDER=["home","list","fix","year"], RENDER={home:()=>renderHome(), list:()=>renderList(), fix:()=>renderFix(), year:()=>renderYear()};
+  const main=document.querySelector("main.wrap");
+  const blocked=t=>t.closest(".sheet,.backdrop,.pfed,#lockBg,#loginBg,#astack,.srail,.bt3,.bubbles,input,select,textarea,.wiz,[data-noswipe]") || document.querySelector(".backdrop:not([hidden])");
+  let x0=0,y0=0,t0=0,on=false,lock=null,dir=0,cur=null,nb=null,nbKey=null,W=1,p=0;
+  const sec=k=>document.querySelector(`[data-view="${k}"]`);
+  function setup(d){
+    dir=d; const i=ORDER.indexOf(UI.view); nbKey=ORDER[i+(d<0?1:-1)]||null;
+    cur=sec(UI.view); W=main.clientWidth;
+    const r=main.getBoundingClientRect(), topVis=Math.max(0, $("monthpill").getBoundingClientRect().bottom) ;
+    main.style.perspective="1100px"; main.style.perspectiveOrigin=`50% ${innerHeight/2 - r.top}px`; main.style.position="relative";
+    cur.style.backfaceVisibility="hidden"; cur.style.transformOrigin=(d<0?"right":"left")+" "+(innerHeight/2 - cur.getBoundingClientRect().top)+"px";
+    if (!nbKey) return;
+    nb=sec(nbKey); try { RENDER[nbKey](); } catch(e){}
+    nb.hidden=false; Object.assign(nb.style,{position:"absolute",left:"0",right:"0",top:(topVis - r.top)+"px",backfaceVisibility:"hidden",transformOrigin:(d<0?"left":"right")+" "+(innerHeight/2-topVis)+"px",pointerEvents:"none"});
+  }
+  function draw(){
+    const a=Math.min(1,Math.abs(p));
+    if (!nbKey){ cur.style.transform=`translateX(${p*W*0.25}px)`; return; }
+    const s=dir<0?-1:1;
+    cur.style.transform=`translateX(${s*a*W}px) rotateY(${s*a*90}deg)`; cur.style.filter=`brightness(${1-a*0.6})`;
+    nb.style.transform=`translateX(${-s*(1-a)*W}px) rotateY(${-s*(1-a)*90}deg)`; nb.style.filter=`brightness(${1-(1-a)*0.6})`;
+  }
+  function reset(){
+    for (const el of [cur,nb]) if (el){ el.style.transform=el.style.filter=el.style.transition=el.style.transformOrigin=el.style.backfaceVisibility=""; }
+    if (nb){ Object.assign(nb.style,{position:"",left:"",right:"",top:"",pointerEvents:""}); }
+    main.style.perspective=main.style.perspectiveOrigin=main.style.position="";
+    cur=nb=nbKey=null; p=0; dir=0;
+  }
+  function settle(go){
+    const els=[cur,nb].filter(Boolean); els.forEach(el=>el.style.transition="transform .28s cubic-bezier(.2,.8,.2,1), filter .28s");
+    const target = go && nbKey;
+    p = target ? (dir<0?-1:1) : 0; draw();
+    setTimeout(()=>{ const k=nbKey; reset(); if (target){ UI.view=k; render(); window.scrollTo({top:0}); } else render(); }, 290);
+  }
+  document.addEventListener("touchstart", e=>{
+    on=false; if (e.touches.length!==1 || !ORDER.includes(UI.view) || blocked(e.target)) return;
+    x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now(); lock=null; on=true;
+  }, {passive:true});
+  document.addEventListener("touchmove", e=>{
+    if (!on) return;
+    const dx=e.touches[0].clientX-x0, dy=e.touches[0].clientY-y0;
+    if (lock===null){ if (Math.abs(dx)<10 && Math.abs(dy)<10) return; lock = Math.abs(dx)>Math.abs(dy)*1.3 ? "x" : "y"; if (lock==="x") setup(dx<0?-1:1); }
+    if (lock!=="x") return;
+    if ((dx<0?-1:1)!==dir){ reset(); setup(dx<0?-1:1); }
+    p = dx/W * (nbKey?1:0.5); draw();
+    if (e.cancelable) e.preventDefault();
+  }, {passive:false});
+  const end=()=>{ if (!on) return; on=false; if (lock!=="x" || !cur) return;
+    const fast=Math.abs(p)>0.12 && (Date.now()-t0)<260;
+    settle(Math.abs(p)>0.4 || fast); };
+  document.addEventListener("touchend", end); document.addEventListener("touchcancel", end);
+})();
 /* pull to refresh: drag a page down from the very top -> sync, update check and fresh view */
 (function(){
   const el=$("ptr"), MAX=110, GO=70; let y0=0, x0=0, d=0, on=false, decided=false, busy=false;
