@@ -574,12 +574,14 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 
 /* phone tab bar with labels: 3 tabs | + | 3 tabs */
 .tabs{grid-template-columns:repeat(3,1fr) 60px repeat(3,1fr);width:calc(100% - 16px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));max-width:560px;padding:4px 4px}
-.tab{height:62px;gap:3px;padding:6px 0 7px;min-width:0}
-.tab .tname{display:block;font-size:min(10px,2.5vw);font-weight:700;letter-spacing:-.03em;line-height:1;white-space:nowrap}
+.tab{height:58px;padding:0;min-width:0}
+.tab .tname{display:none}
 .tab:not(.plus)::after{display:none}
 .tab:not(.plus) svg.i{box-sizing:content-box;padding:4px 12px!important;border-radius:999px;transition:background .2s}
-.tab[aria-selected="true"]:not(.plus) svg.i{background:var(--accent-soft)!important}
-.tab[aria-selected="true"] .tname{color:var(--accent)}
+.tab:not(.plus){color:var(--tcol,var(--muted))!important}.tab:not(.plus) svg.i{stroke-width:2.1}
+.tab[aria-selected="true"]:not(.plus) svg.i{background:color-mix(in srgb,var(--tcol,var(--accent)) 16%,transparent)!important}
+.tab[data-go=home]{--tcol:#1a7a5c}.tab[data-go=list]{--tcol:#3d63a8}.tab[data-go=fix]{--tcol:#c27c0e}.tab[data-go=year]{--tcol:#d14d72}.tab[data-go=ziele]{--tcol:#7a5bc2}.tab[data-go=more]{--tcol:#5b6472}
+[data-theme=dark] .tab[data-go=list]{--tcol:#7aa2f0}[data-theme=dark] .tab[data-go=more]{--tcol:#a3acb9}
 .tab .tlong{display:none}.tab .tshort{display:inline}
 .tset{position:relative}.tset .sdot{position:absolute;top:6px;right:calc(50% - 20px);width:8px;height:8px;border-radius:50%;background:var(--sdot);box-shadow:0 0 0 2px var(--surface);display:none}.tset.dot .sdot{display:block}
 #settingsBtn{display:none}
@@ -600,7 +602,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   .tab[aria-selected="true"]{background:var(--accent-soft);color:var(--accent)}
   .tab.plus{order:-1;width:100%;height:auto;border-radius:14px;padding:12px 14px;display:flex;justify-content:flex-start;gap:12px;margin-bottom:14px;font-size:15px}
   .tab.plus svg.i{width:22px;height:22px}
-  .tab .tlabel,.tab .tname{display:inline}.tab .tname{font-size:inherit;max-width:none}.tab .tlong{display:inline}.tab .tshort{display:none}.tab:not(.plus) svg.i{padding:0!important}.tab[aria-selected="true"]:not(.plus) svg.i{background:none!important}.tset .sdot{top:50%;right:14px;margin-top:-4px}
+  .tab .tlabel,.tab .tname{display:inline}.tab .tname{font-size:inherit;max-width:none}.tab .tlong{display:inline}.tab .tshort{display:none}.tab:not(.plus) svg.i{padding:0!important}.tab[aria-selected="true"]:not(.plus) svg.i{background:none!important}.tset .sdot{top:50%;right:14px;margin-top:-4px}.tab:not(.plus){color:var(--muted)!important}.tab[aria-selected="true"]:not(.plus){color:var(--accent)!important}
   .tab{height:auto}.tab:not(.plus)::after{display:none}.tab.plus{margin-top:0;box-shadow:none}.tabs{overflow:auto}
   .tab:not(.plus) svg.i{padding:0;background:none!important}
   .deskonly{display:flex}
@@ -728,6 +730,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .anarow .kpis{margin:0}
 .zstack{display:flex;flex-direction:column;gap:14px}.zstack>.card{order:0!important;margin:0}
 .anaq{margin-bottom:14px}.anaq button{position:relative}
+.spsheet #spBody>.card{box-shadow:none;padding:0;background:none;margin:0 0 12px}.spsheet #spBody>.sphero{margin-bottom:12px}
 .anapanel{border-top:3px solid var(--tc)}.anasheet .sheet-head{align-items:center}.anasheet .aph{flex:1;min-width:0}.anasheet .aph .ic{width:36px;height:36px;border-radius:12px;background:var(--tc);color:#fff;display:grid;place-items:center;flex:none}.anasheet .anab{margin-top:4px}.anasheet .anab>.card-head h2{display:none}.anasheet .anab>.card-head{justify-content:flex-end}.anasheet .kpis{margin:0}.aph{display:flex;align-items:center;gap:12px}.aph .ic{width:36px;height:36px;border-radius:12px;background:var(--tc);color:#fff;display:grid;place-items:center;flex:none}.aph .n{flex:1;min-width:0;display:flex;flex-direction:column}.aph b{font-size:15px}
 .anapanel .kpis{margin:0}.anapanel .anab>.card-head h2{display:none}.anapanel .anab>.card-head{justify-content:flex-end}.aphx{border:0;background:none;color:var(--muted);padding:6px;cursor:pointer}
 main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdrop-filter:none!important}.cubing .filters,.cubing .rings,.cubing .jars,.cubing .acards,.cubing .table-wrap,.cubing [style*="overflow-x:auto"],.cubing .fxtiles,.cubing .srail{overflow:visible!important}
@@ -851,6 +854,7 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
   <div class="pfzoom"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5M8.5 11h5"/></svg><input type="range" id="pfZoom" min="1" max="4" step="0.01" value="1" aria-label="Zoom"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5M8.5 11h5M11 8.5v5"/></svg></div>
   <div class="pfedbtns"><button class="btn" id="pfEdCancel">Abbrechen</button><button class="btn primary" id="pfEdOk">Übernehmen</button></div>
 </div>
+<div class="backdrop" id="spBg" hidden><div class="sheet spsheet" role="dialog" aria-label="Einstellungen"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 10px"><h2 id="spSheetTitle"></h2><button class="icon-btn" data-spclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="spBody"></div></div></div>
 <div class="backdrop" id="anaBg" hidden><div class="sheet anasheet" role="dialog" aria-label="Analyse"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><div class="aph" id="anaHead"></div><button class="icon-btn" data-anaclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="anab" id="anaBody"></div></div></div>
 <div class="backdrop" id="hintBg" hidden><div class="sheet hintsheet" role="dialog" aria-label="Hinweise"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 6px"><h2>Hinweise</h2><button class="icon-btn" data-hintclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="hintList"></div></div></div>
 <header class="top">
@@ -1748,6 +1752,8 @@ function render(){
   $("banner").innerHTML = (mem && !LOCAL) ? `<div class="notice warn" style="margin-bottom:14px"><span>Speichern ist hier gerade nicht möglich. Öffne die App über deinen Link in Claude, während du angemeldet bist.</span></div>` : "";
   ({home:renderHome, list:renderList, fix:renderFix, year:renderYear, ziele:renderZiele, more:renderMore, import:renderImport, belege:renderBelege})[UI.view]();
   if (!$("sheetBg").hidden) renderSheet();
+  if (UI.view==="more" && UI.sp && !spsOpen() && spUseSheet() && SP_PAGES[UI.sp]){ spSheetOpen(UI.sp); }
+  else if (UI.view!=="more" && spsOpen()){ $("spBg").hidden=true; $("spBg").classList.remove("show"); spSheetRestore(); SPS.open=null; UI.sp=null; }
   notifyPlanSoon();
   if (wizShould()) setTimeout(()=>{ if (wizShould()) wizOpen(); }, 400);
 }
@@ -3455,9 +3461,10 @@ function renderSetHome(){
 }
 function renderSpPages(){
   const k = SP_PAGES[UI.sp] ? UI.sp : null;
-  $("setHome").hidden = !!k; $("spHead").hidden = !k;
-  document.querySelectorAll("#v-more [data-sp]").forEach(el=>el.hidden = el.dataset.sp!==k || (el.id==="syncBox" && !SYNCABLE));
-  if (k) $("spTitle").textContent = SP_PAGES[k][0]; else renderSetHome();
+  const inSheet = spsOpen();
+  $("setHome").hidden = !!k && !inSheet; $("spHead").hidden = !k || inSheet;
+  document.querySelectorAll("#v-more [data-sp], #spBody [data-sp]").forEach(el=>el.hidden = el.dataset.sp!==k || (el.id==="syncBox" && !SYNCABLE));
+  if (k) $("spTitle").textContent = SP_PAGES[k][0]; if (!k || inSheet) renderSetHome();
   if (k==="sync") renderUpd();
   const HERO={konten:["wallet","#3d63a8","Kontostände, Hauptkonto und Spaces – damit die App für jeden Monat richtig rechnet."],
     budgets:["target","#c27c0e","Wie viel du pro Monat höchstens ausgeben willst. Ab 80 % warnt die App."],
@@ -3484,9 +3491,32 @@ document.addEventListener("change", e=>{
   renderSetHome(); if (typeof renderHome==="function") try{ render(); }catch(_){}
 });
 document.addEventListener("click", e=>{
-  const b=e.target.closest("[data-spgo]"); if (b){ UI.sp=b.dataset.spgo; renderSpPages(); window.scrollTo({top:0}); return; }
+  const b=e.target.closest("[data-spgo]"); if (b){ if (spUseSheet()){ spSheetOpen(b.dataset.spgo); return; } UI.sp=b.dataset.spgo; renderSpPages(); window.scrollTo({top:0}); return; }
   if (e.target.closest("#spBack")){ UI.sp=null; renderSpPages(); window.scrollTo({top:0}); }
 });
+/* phones: a settings tile opens its page as a bottom sheet (like the + menu); swipe down closes it.
+   The page's own elements are moved into the sheet and back, so all their buttons keep working. */
+var SPS={open:null, nodes:[]};
+function spsOpen(){ return !!(SPS && SPS.open); }
+function spUseSheet(){ return !matchMedia("(min-width:1000px)").matches; }
+function spSheetOpen(k){
+  if (!SP_PAGES[k]) return;
+  if (SPS.open) spSheetRestore();
+  SPS.open=k; UI.sp=k; renderSpPages();
+  const body=$("spBody"); body.innerHTML="";
+  const els=[$("spHero"), ...document.querySelectorAll(`#v-more [data-sp="${k}"]`)].filter(el=>el && !el.hidden);
+  SPS.nodes=els.map(el=>{ const ph=document.createComment("sp"); el.parentNode.insertBefore(ph, el); body.appendChild(el); return [el,ph]; });
+  $("spSheetTitle").textContent=SP_PAGES[k][0];
+  const bg=$("spBg"); bg.querySelector(".sheet").scrollTop=0; bg.hidden=false; requestAnimationFrame(()=>bg.classList.add("show"));
+}
+function spSheetRestore(){ SPS.nodes.forEach(([el,ph])=>{ if (ph.parentNode) ph.replaceWith(el); }); SPS.nodes=[]; }
+function spSheetClose(){
+  if (!SPS.open) return;
+  const bg=$("spBg"); bg.classList.remove("show");
+  setTimeout(()=>{ bg.hidden=true; spSheetRestore(); SPS.open=null; UI.sp=null; if (UI.view==="more") renderSpPages(); }, 200);
+}
+$("spBg").addEventListener("click", e=>{ if (e.target===$("spBg") || e.target.closest("[data-spclose]")) spSheetClose(); });
+document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("spBg").hidden) spSheetClose(); });
 function renderMore(){
   if (!(UI.debtEdit && $("debtCard").contains(document.activeElement) && document.activeElement.tagName!=="BUTTON")){
     const total = sum(S.debts,d=>debtState(d).remaining);
@@ -5191,7 +5221,7 @@ $("loginGo").onclick = doLogin;
 /* swipe between the main pages like the sides of a cube: the page follows the thumb,
    the old one turns away into the depth and gets darker, the new one turns in from the side */
 (function(){
-  const ORDER=["home","list","fix","year","ziele"], RENDER={home:()=>renderHome(), list:()=>renderList(), fix:()=>renderFix(), year:()=>renderYear(), ziele:()=>renderZiele()};
+  const ORDER=["home","list","fix","year","ziele","more"], RENDER={home:()=>renderHome(), list:()=>renderList(), fix:()=>renderFix(), year:()=>renderYear(), ziele:()=>renderZiele(), more:()=>{ renderMore(); renderSpPages(); }};
   const main=document.querySelector("main.wrap");
   const blocked=t=>t.closest(".sheet,.backdrop,.pfed,#lockBg,#loginBg,#astack,.srail,.bt3,.bubbles,input,select,textarea,.wiz,[data-noswipe]") || document.querySelector(".backdrop:not([hidden])");
   const sec=k=>document.querySelector(`[data-view="${k}"]`);
@@ -5213,7 +5243,7 @@ $("loginGo").onclick = doLogin;
     f.appendChild(c); f.appendChild(sh); stage.appendChild(f); return [f,sh];
   }
   function setup(d){
-    dir=d; const i=ORDER.indexOf(UI.view); nbKey=ORDER[i+(d<0?1:-1)]||null;
+    dir=d; const i=ORDER.indexOf(UI.view), n=ORDER.length; nbKey=ORDER[(i+(d<0?1:-1)+n)%n];   // endless: after the last page comes the first
     cur=sec(UI.view); W=innerWidth;
     const hb=document.querySelector("header.top")||document.querySelector(".top"), hr=hb?hb.getBoundingClientRect():{bottom:0};
     const sTop=Math.max(0, Math.round(hr.bottom)), H=innerHeight-sTop;
@@ -5255,7 +5285,7 @@ $("loginGo").onclick = doLogin;
     }, 310);
   }
   document.addEventListener("touchstart", e=>{
-    on=false; if (busy || e.touches.length!==1 || !ORDER.includes(UI.view) || blocked(e.target)) return;
+    on=false; if (busy || e.touches.length!==1 || !ORDER.includes(UI.view) || (UI.view==="more" && UI.sp && !spsOpen()) || blocked(e.target)) return;
     const x=e.touches[0].clientX; if (x<18 || x>innerWidth-18) return;     // leave the screen edges to Android's back gesture
     x0=lastX=x; y0=e.touches[0].clientY; t0=lastT=Date.now(); vx=0; lock=null; on=true;
   }, {passive:true});
@@ -5309,7 +5339,7 @@ $("loginGo").onclick = doLogin;
 })();
 /* swipe down to close the bottom sheets (add menu, hints, booking form) */
 (function(){
-  const CLOSERS={addBg:"[data-addclose]", hintBg:"[data-hintclose]", anaBg:"[data-anaclose]", sheetBg:"#sheetClose"};
+  const CLOSERS={addBg:"[data-addclose]", hintBg:"[data-hintclose]", anaBg:"[data-anaclose]", spBg:"[data-spclose]", sheetBg:"#sheetClose"};
   Object.keys(CLOSERS).forEach(id=>{
     const bg=$(id), sh=bg && bg.querySelector(".sheet"); if (!sh) return;
     let y0=0, x0=0, dy=0, t0=0, on=false, decided=false;
