@@ -572,6 +572,17 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 /* home columns: on phones the column wrappers disappear and "order" restores the one-column sequence */
 .cols,.col{display:contents}
 
+/* tile colour edit mode */
+.tedbar{display:flex;justify-content:flex-end;margin:0 0 -6px}
+.tedbtn{border:0;background:var(--surface);box-shadow:var(--shadow);color:var(--muted);font:700 12.5px var(--f-body);padding:7px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px}
+.tedbar.on{justify-content:space-between;align-items:center;gap:10px;background:var(--accent-soft);border-radius:18px;padding:8px 8px 8px 14px;margin:0 0 6px}
+.tedbar.on span{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--accent)}.tedbar.on .btn{padding:8px 16px}
+@keyframes tedwig{0%{transform:rotate(-1.8deg)}50%{transform:rotate(1.8deg)}100%{transform:rotate(-1.8deg)}}
+.tediting .sqk button{animation:tedwig .32s ease-in-out infinite}
+.tediting .sqk button:nth-child(2n){animation-delay:-.11s;animation-duration:.36s}.tediting .sqk button:nth-child(3n){animation-delay:-.2s}
+.tediting .sgl{margin-bottom:10px}
+.tediting .sqk button span{outline:2px dashed color-mix(in srgb,var(--tc) 55%,transparent);outline-offset:3px}
+
 /* Farben page */
 .colsec{margin-bottom:16px}
 .colpk{--c:hsl(var(--h) var(--s) var(--l));padding:6px 2px 16px;display:flex;flex-direction:column;gap:10px}
@@ -951,6 +962,7 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
   <div class="pfedbtns"><button class="btn" id="pfEdCancel">Abbrechen</button><button class="btn primary" id="pfEdOk">Übernehmen</button></div>
 </div>
 <div class="backdrop" id="spBg" hidden><div class="sheet spsheet" role="dialog" aria-label="Einstellungen"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 10px"><h2 id="spSheetTitle"></h2><button class="icon-btn" data-spclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="spBody"></div></div></div>
+<div class="backdrop" id="tcBg" hidden><div class="sheet tcsheet" role="dialog" aria-label="Kachelfarbe"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 6px"><h2 id="tcTitle"></h2><button class="icon-btn" data-tcclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="tcBody"></div></div></div>
 <div class="backdrop" id="anaBg" hidden><div class="sheet anasheet" role="dialog" aria-label="Analyse"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><div class="aph" id="anaHead"></div><button class="icon-btn" data-anaclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="anab" id="anaBody"></div></div></div>
 <div class="backdrop" id="hintBg" hidden><div class="sheet hintsheet" role="dialog" aria-label="Hinweise"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 6px"><h2>Hinweise</h2><button class="icon-btn" data-hintclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="hintList"></div></div></div>
 <header class="top">
@@ -1885,6 +1897,7 @@ function render(){
   ({home:renderHome, list:renderList, fix:renderFix, year:renderYear, ziele:renderZiele, shop:renderShop, more:renderMore, import:renderImport, belege:renderBelege})[UI.view]();
   if (!$("sheetBg").hidden) renderSheet();
   applyTabColors();
+  if (UI.tileEdit && UI.tileEdit!==UI.view) UI.tileEdit="";
   if (UI.view==="more" && UI.sp && !spsOpen() && spUseSheet() && SP_PAGES[UI.sp]){ spSheetOpen(UI.sp); }
   else if (UI.view!=="more" && spsOpen()){ $("spBg").hidden=true; $("spBg").classList.remove("show"); spSheetRestore(); SPS.open=null; UI.sp=null; }
   notifyPlanSoon();
@@ -2647,7 +2660,7 @@ let TL_={};
 function anaFill(t, force){
   const body=$("anaBody");
   if (!force && body.contains(document.activeElement) && /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;   // don't disturb typing
-  const col=(TL_[t.k]||[])[1]||"var(--accent)";
+  const col=userCol("ana",t.k)||(TL_[t.k]||[])[1]||"var(--accent)";
   $("anaBg").querySelector(".sheet").style.setProperty("--tc", col);
   $("anaHead").innerHTML=`<span class="ic">${ic(t.icon,18)}</span><span class="n"><b>${t.title}</b><span class="small muted">${t.sub}</span></span>`;
   if (force || body.innerHTML!==t.body) body.innerHTML=t.body;
@@ -2922,10 +2935,11 @@ function renderYear(){
   tiles.sort((a,b)=>ord.indexOf(a.k)-ord.indexOf(b.k));
   const sel=tiles.find(t=>t.k===UI.anaSel);
   const GRP=[["Auswertung",["kpi","cat","trend","io"]],["Planung",["calc","plan"]],["Arbeit &amp; Steuer",["lohn","wk","tax","euer"]]];
-  const tileBtn=t=>`<button data-anaopen="${t.k}" aria-pressed="${t.k===UI.anaSel}" style="--tc:${TL[t.k][1]}"><span>${ic(t.icon,20)}</span>${t.k==="wk"&&!hasJob()?"Steuererkl.":TL[t.k][0]}<small>${esc(t.short||"")}</small></button>`;
+  const tileBtn=t=>`<button data-anaopen="${t.k}" data-tk="${t.k}" aria-pressed="${t.k===UI.anaSel}" style="--tc:${userCol("ana",t.k)||TL[t.k][1]}"><span>${ic(t.icon,20)}</span>${t.k==="wk"&&!hasJob()?"Steuererkl.":TL[t.k][0]}<small>${esc(t.short||"")}</small></button>`;
   // tiles in groups; the opened one shows right under its own group
-  $("v-year").innerHTML = GRP.map(([g,ks])=>{ const ts=tiles.filter(t=>ks.includes(t.k)); if (!ts.length) return "";
-    return `<div class="sgl">${g}</div><div class="sqk anaq">${ts.map(tileBtn).join("")}</div>`; }).join("");
+  TED.year={}; for (const t of tiles) TED.year[t.k]=[TL[t.k][0], TL[t.k][1], t.icon];
+  $("v-year").innerHTML = tedBar("year") + `<div class="${UI.tileEdit==="year"?"tediting":""}">` + GRP.map(([g,ks])=>{ const ts=tiles.filter(t=>ks.includes(t.k)); if (!ts.length) return "";
+    return `<div class="sgl">${g}</div><div class="sqk anaq">${ts.map(tileBtn).join("")}</div>`; }).join("") + `</div>`;
   UI.anaTiles=tiles; TL_=TL;
   if (!$("anaBg").hidden && sel) anaFill(sel, false);
   function PANEL_(){ return sel?`<div class="card anapanel" style="--tc:${TL[sel.k][1]}"><div class="aph"><span class="ic">${ic(sel.icon,18)}</span><span class="n"><b>${sel.title}</b><span class="small muted">${sel.sub}</span></span><button class="aphx" data-anaopen="${sel.k}" aria-label="Zuklappen">${ic("up",18)}</button></div><div class="anab">${sel.body}</div></div>`:""; }
@@ -3580,10 +3594,10 @@ function renderSetHome(){
   const QCOL={konten:"#3d63a8",budgets:"#c27c0e",schulden:"#7a5bc2",steuer:"#d4813a",start:"#1a7a5c",kategorien:"#c0497a",farben:"#d14d72",sync:"#2f7fb8",notify:"#e0902b",sicherheit:"#b23a3a",backup:"#2e9c74",dark:"#4b5563",wiz:"#8a6d1f"};
   const dark=document.documentElement.dataset.theme==="dark";
   const qtile = k => k==="dark"
-      ? `<button data-qdark="1" style="--tc:${QCOL.dark}" aria-pressed="${dark}"><span>${ic("spark",20)}</span>Dunkel<small>${dark?"an":"aus"}</small></button>`
+      ? `<button data-qdark="1" data-tk="dark" style="--tc:${userCol("set","dark")||QCOL.dark}" aria-pressed="${dark}"><span>${ic("spark",20)}</span>Dunkel<small>${dark?"an":"aus"}</small></button>`
     : k==="wiz"
-      ? `<button data-qwiz="1" style="--tc:${QCOL.wiz}"><span>${ic("sparkle"in P?"sparkle":"check",20)}</span>Einrichtung<small>5 Schritte</small></button>`
-      : `<button data-spgo="${k}" style="--tc:${QCOL[k]}"><span>${ic(SP_PAGES[k][1],20)}</span>${short[k]}<small>${esc(qsub(k))}</small></button>`;
+      ? `<button data-qwiz="1" data-tk="wiz" style="--tc:${userCol("set","wiz")||QCOL.wiz}"><span>${ic("sparkle"in P?"sparkle":"check",20)}</span>Einrichtung<small>5 Schritte</small></button>`
+      : `<button data-spgo="${k}" data-tk="${k}" style="--tc:${userCol("set",k)||QCOL[k]}"><span>${ic(SP_PAGES[k][1],20)}</span>${short[k]}<small>${esc(qsub(k))}</small></button>`;
   const qsub = k => {
     const st=S.settings;
     if (k==="steuer") return "Klasse "+(["I","II","III","IV","V","VI"][(Number(st.steuerklasse)||1)-1]||"I");
@@ -3595,11 +3609,13 @@ function renderSetHome(){
     if (k==="backup"){ try { return abCfg().on && CAN_AUTOBK ? "wöchentlich" : "Datei"; } catch(e){ return "Datei"; } }
     return spSummary(k);
   };
+  TED.more={}; for (const k of Object.keys(QCOL)) TED.more[k]=[k==="dark"?"Dunkel":k==="wiz"?"Einrichtung":short[k]||k, QCOL[k], k==="dark"?"spark":k==="wiz"?"check":(SP_PAGES[k]||[,"dots"])[1]];
   const SGROUPS=[["Geld",["konten","budgets","schulden",...(hasSelf()||hasJob()?["steuer"]:[])]],["Anpassen",["start","kategorien","farben","dark","wiz"]],["App",[...(SYNCABLE||window.AndroidBridge?["sync"]:[]),"notify","sicherheit","backup"]]];
   $("setHome").innerHTML = `
     <button class="sprof" data-spgo="profil" aria-label="Profil ändern"><span class="av">${S.settings.photo?`<img src="${esc(S.settings.photo)}" alt="">`:esc((name.trim()[0]||"?").toUpperCase())}</span>
       <span class="pt"><b>${esc(name||"Dein Name")}</b><small>${name?"Profil bearbeiten":"Tippen, um Name und Foto einzutragen"}</small><span class="pchip"><i class="${dot}"></i>${esc(line)}</span></span><span class="ch">${ic("right",18)}</span></button>
-    ${SGROUPS.map(([t,ks])=>`<div class="sgl">${t}</div><div class="sqk">${ks.map(qtile).join("")}</div>`).join("")}
+    ${tedBar("more")}
+    <div class="${UI.tileEdit==="more"?"tediting":""}">${SGROUPS.map(([t,ks])=>`<div class="sgl">${t}</div><div class="sqk">${ks.map(qtile).join("")}</div>`).join("")}</div>
     <div class="small muted" style="text-align:center;margin:18px 0 4px">Finanz MAMI · ${verName(+((document.querySelector('meta[name="hb-version"]')||{}).content||0))}</div>`;
 }
 function renderSpPages(){
@@ -3709,6 +3725,7 @@ function setUserCol(id, hex){
   const [group, ...rest]=id.split("|"), key=rest.join("|"), c=S.settings.colors=S.settings.colors||{}; c[group]=c[group]||{};
   if (hex) c[group][key]=hex; else delete c[group][key];
   saveSettings(); applyTabColors(); renderColorEd();
+  if (UI.tedId===id){ tedClose(); if (UI.view==="year") renderYear(); else if (UI.view==="more") renderSetHome(); }
 }
 document.addEventListener("click", e=>{
   const o=e.target.closest("[data-colopen]"); if (o){ UI.colOpen = UI.colOpen===o.dataset.colopen ? "" : o.dataset.colopen; UI.colHSL=null; renderColorEd(); return; }
@@ -3716,6 +3733,26 @@ document.addEventListener("click", e=>{
   if (e.target.closest("[data-colresetall]")){ S.settings.colors={}; UI.colOpen=""; saveSettings(); applyTabColors(); renderColorEd(); toast("Alle Farben wieder Standard"); }
 });
 document.addEventListener("change", e=>{ const t=e.target.closest("[data-colin]"); if (t) setUserCol(t.dataset.colin, t.value); });
+/* ---------- tile colours: pencil -> tiles wiggle -> tap one -> sliders in a sheet ---------- */
+var TED={year:{}, more:{}};
+function tedBar(page){
+  return UI.tileEdit===page
+    ? `<div class="tedbar on"><span>${ic("palette",16)} Tippe eine Kachel an, um ihre Farbe zu ändern</span><button class="btn primary" data-tedit="">Fertig</button></div>`
+    : `<div class="tedbar"><button class="tedbtn" data-tedit="${page}" aria-label="Kachelfarben bearbeiten">${ic("palette",16)} Farben</button></div>`;
+}
+function tedOpen(page, k){
+  const d=TED[page][k]; if (!d) return; const grp=page==="year"?"ana":"set", id=grp+"|"+k;
+  UI.colHSL=null; UI.tedId=id;
+  $("tcTitle").textContent=d[0]; $("tcBody").innerHTML=colPicker(id, userCol(grp,k)||d[1], false, d[2]);
+  const bg=$("tcBg"); bg.hidden=false; requestAnimationFrame(()=>bg.classList.add("show"));
+}
+function tedClose(){ const bg=$("tcBg"); if (bg.hidden) return; bg.classList.remove("show"); UI.tedId=null; setTimeout(()=>{ bg.hidden=true; $("tcBody").innerHTML=""; },200); }
+$("tcBg").addEventListener("click", e=>{ if (e.target===$("tcBg") || e.target.closest("[data-tcclose]")) tedClose(); });
+document.addEventListener("click", e=>{
+  const b=e.target.closest("[data-tedit]"); if (b){ UI.tileEdit=b.dataset.tedit||""; if (UI.view==="year") renderYear(); else renderSetHome(); return; }
+  // while editing, a tap on a tile picks its colour instead of opening it
+  if (UI.tileEdit && UI.tileEdit===UI.view){ const t=e.target.closest(".tediting [data-tk]"); if (t){ e.preventDefault(); e.stopImmediatePropagation(); tedOpen(UI.view, t.dataset.tk); } }
+}, true);
 function renderMore(){
   if (!(UI.debtEdit && $("debtCard").contains(document.activeElement) && document.activeElement.tagName!=="BUTTON")){
     const total = sum(S.debts,d=>debtState(d).remaining);
@@ -5714,7 +5751,7 @@ $("loginGo").onclick = doLogin;
 })();
 /* swipe down to close the bottom sheets (add menu, hints, booking form) */
 (function(){
-  const CLOSERS={addBg:"[data-addclose]", hintBg:"[data-hintclose]", anaBg:"[data-anaclose]", spBg:"[data-spclose]", sheetBg:"#sheetClose"};
+  const CLOSERS={tcBg:"[data-tcclose]", addBg:"[data-addclose]", hintBg:"[data-hintclose]", anaBg:"[data-anaclose]", spBg:"[data-spclose]", sheetBg:"#sheetClose"};
   Object.keys(CLOSERS).forEach(id=>{
     const bg=$(id), sh=bg && bg.querySelector(".sheet"); if (!sh) return;
     let y0=0, x0=0, dy=0, t0=0, on=false, decided=false;
