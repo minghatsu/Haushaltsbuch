@@ -572,6 +572,11 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 /* home columns: on phones the column wrappers disappear and "order" restores the one-column sequence */
 .cols,.col{display:contents}
 
+.wname{display:flex;align-items:center;gap:12px}.wname .in{flex:1;min-width:0}
+.wav{width:64px;height:64px;border-radius:50%;flex:none;border:3px dashed color-mix(in srgb,var(--accent) 45%,transparent);background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;padding:0;overflow:hidden;font:800 24px var(--f-display)}
+.wav img{width:100%;height:100%;object-fit:cover}.wav:has(img){border-style:solid;border-color:var(--accent)}
+.wphoto{display:flex;gap:8px;margin-top:12px}.wphoto .btn{flex:1;justify-content:center;gap:6px;background:var(--surface);box-shadow:var(--shadow)}.wphoto #wzPhDel{flex:none;width:48px;color:var(--bad)}
+
 @keyframes wzInF{from{opacity:0;transform:translateX(64px)}to{opacity:1;transform:none}}
 @keyframes wzInB{from{opacity:0;transform:translateX(-64px)}to{opacity:1;transform:none}}
 @keyframes wzOutF{to{opacity:0;transform:translateX(-64px)}}
@@ -1501,6 +1506,7 @@ document.addEventListener("click", e=>{
   if (t.closest("#wipeBk")){ const b=$("backupSave"); if (b) b.click(); return; }
   if (t.closest("#wipeGo")){ if (($("wipeWord").value||"").trim().toUpperCase()!=="LÖSCHEN") return; wipeAll(); }
 });
+document.addEventListener("input", e=>{ if (e.target.id==="wzName"){ const sp=document.querySelector("#wzAv span"); if (sp) sp.textContent=(e.target.value.trim()[0]||"?").toUpperCase(); } });
 document.addEventListener("input", e=>{ if (e.target.id==="wipeWord") $("wipeGo").disabled = e.target.value.trim().toUpperCase()!=="LÖSCHEN"; });
 function loadBackupObj(o, fromFile){
   if (!o || o.version!==1 || typeof o.fixed!=="object") throw new Error("bad");
@@ -2554,7 +2560,7 @@ async function pfeSave(){
   const cx=PFE.w/2 - PFE.x/sc, cy=PFE.h/2 - PFE.y/sc, c=document.createElement("canvas");
   c.width=c.height=256; c.getContext("2d").drawImage($("pfImg"), cx-side/2, cy-side/2, side, side, 0, 0, 256, 256);
   S.settings.photo=c.toDataURL("image/jpeg",0.85); S.settings.photoSrc=PFE.src; S.settings.photoCrop={z:+PFE.z.toFixed(3), x:+(PFE.x/S0).toFixed(4), y:+(PFE.y/S0).toFixed(4)};
-  $("pfEd").hidden=true; await saveSettings(); renderAvatar(); renderSetHome(); toast("Profilfoto gespeichert");
+  $("pfEd").hidden=true; await saveSettings(); renderAvatar(); renderSetHome(); if (UI.wiz && UI.wiz.step===0) wizRender(); toast("Profilfoto gespeichert");
 }
 (function(){
   const st=$("pfStage"), pts=new Map(); let last=null;
@@ -3578,7 +3584,8 @@ function wizRender(){
   const crumb = st===1 && (g1 || w.exAsk) ? `<div class="wcrumb"><button data-wzcrumb="0">Schritt 2</button>${g1?`<i>›</i><button data-wzcrumb="1">${esc((WGROUPS.find(x=>x[0]===g1)||[,""])[1])}</button>`:""}${w.exAsk&&w.work?`<i>›</i><span>${esc((WORK.find(x=>x[0]===w.work)||[,""])[1])}</span>`:""}</div>` : `<small class="wk">Schritt ${st+1} von ${N}</small>`;
   const head=(t,sub)=>`<div class="wsteps">${Array.from({length:N},(_,i)=>`<i class="${i<=st?"on":""}"></i>`).join("")}</div>${crumb}<h2 class="wt">${t}</h2><p class="ws">${sub}</p>`;
   let body="";
-  if (st===0) body=head("Willkommen! Wie heißt du?","Für die Begrüßung oben links – du kannst es auch leer lassen.")+`<input class="in wbig" id="wzName" value="${esc(w.name)}" placeholder="Dein Vorname" maxlength="30" autocomplete="given-name">`;
+  if (st===0) body=head("Willkommen! Wie heißt du?","Name und Foto sind freiwillig – für die Begrüßung oben links.")+`<div class="wname"><button class="wav" id="wzAv" aria-label="Profilfoto">${S.settings.photo?`<img src="${esc(S.settings.photo)}" alt="">`:`<span>${esc(((w.name||"").trim()[0]||"?").toUpperCase())}</span>`}</button><input class="in wbig" id="wzName" value="${esc(w.name)}" placeholder="Dein Vorname" maxlength="30" autocomplete="given-name"></div>
+    <div class="wphoto">${phoneCam()?`<button class="btn" id="wzCam">${ic("camera",18)} Foto machen</button>`:""}<button class="btn" id="wzPick">${ic("user",18)} ${phoneCam()?"Aus Galerie":"Foto wählen"}</button>${S.settings.photo?`<button class="btn" id="wzPhDel" aria-label="Foto entfernen">✕</button>`:""}</div>`;
   if (st===1) body = w.exAsk && w.work
     ? head("Verdienst du noch etwas dazu?","Du kannst mehreres anhaken – oder „Nein“.")+extraPicker(w.work, w.extra||[], "wzextra")
     : head("Wie verdienst du dein Geld?","Dann zeigt die App nur, was zu dir passt.")+workPicker(w.work, w.grp===undefined ? workGroup(w.work) : w.grp, "wzwork");
@@ -3626,6 +3633,9 @@ document.addEventListener("click", e=>{ if (e.target.closest("#wizAgain")) wizOp
 document.addEventListener("click", async e=>{
   const w=UI.wiz; if (!w || !e.target.closest("#wizBg")) return;
   const t=e.target;
+  if (t.closest("#wzCam")){ wizRead(); avatarNative("camera"); return; }
+  if (t.closest("#wzPick")||t.closest("#wzAv")){ wizRead(); if (S.settings.photoSrc && t.closest("#wzAv")) pfeOpen(S.settings.photoSrc, S.settings.photoCrop); else $("pfPick").click(); return; }
+  if (t.closest("#wzPhDel")){ wizRead(); S.settings.photo=""; S.settings.photoSrc=""; S.settings.photoCrop=null; saveSettings(); renderAvatar(); wizRender(); return; }
   const wc=t.closest("[data-wzcrumb]"); if (wc){ const lv=+wc.dataset.wzcrumb; wizNav(()=>{ if (lv===0){ w.grp=""; w.exAsk=false; } else { w.grp=w.grp===undefined?workGroup(w.work):w.grp; w.exAsk=false; } }, -1); return; }
   const wg=t.closest("[data-wzworkgrp]"); if (wg){ const g=wg.dataset.wzworkgrp; if (!g){ wizBackOne(); return; } wizNav(()=>{ w.grp=g; }, 1); return; }
   const wk=t.closest("[data-wzwork]"); if (wk){ const k=wk.dataset.wzwork; wk.classList.add("on"); wizNav(()=>{ if (w.work!==k) w.extra=[]; w.work=k; w.exAsk=true; }, 1); return; }
