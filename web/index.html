@@ -677,6 +677,13 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .nrow{display:flex;align-items:center;gap:12px}.nrow>label{flex:1;min-width:0}
 .nic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;flex:none;color:#fff;background:var(--tc)}.nic.big{width:44px;height:44px;border-radius:14px}
 .nsel{align-items:flex-start}.nsl{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}.nsl select{margin-top:4px}
+.sphero{display:flex;align-items:center;gap:14px;border-radius:20px;padding:14px 16px;margin-bottom:12px;background:color-mix(in srgb,var(--tc) 12%,var(--surface));color:var(--fg)}
+.sphero .shi{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;color:#fff;flex:none;box-shadow:0 6px 14px color-mix(in srgb,var(--tc) 35%,transparent)}
+.sphero .small{line-height:1.45}
+[data-sp="steuer"] .section-title{margin-top:10px;padding-top:16px;border-top:1px solid var(--line);font:800 16px var(--f-display);display:flex;align-items:center;gap:8px}
+[data-sp="steuer"] .section-title::before{content:"";width:8px;height:22px;border-radius:4px;background:#c27c0e}
+#budgetEd .edit-row.acct-row{display:flex;align-items:center;gap:12px;border-top:1px solid var(--line);padding:10px 0}#budgetEd .edit-row.acct-row:first-child{border-top:0}
+#budgetEd .edit-row.acct-row>span{flex:1;min-width:0;display:flex;align-items:center;gap:10px}#budgetEd .edit-row.acct-row .in{width:130px;flex:none;text-align:right}
 .stt{display:flex;flex-direction:column;gap:3px;min-width:0}
 .stile:only-child{flex-direction:row;align-items:center;gap:14px;grid-column:1/-1}.stile:only-child .sti{margin:0}
 /* settings pages, style "Kacheln & Farbe" */
@@ -845,6 +852,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
   <section class="view" id="v-more" data-view="more" hidden>
     <div id="setHome"></div>
     <div class="sphead" id="spHead" hidden><button class="spback" id="spBack" aria-label="Zurück zu den Einstellungen">‹</button><h2 id="spTitle"></h2></div>
+    <div class="sphero" id="spHero" hidden></div>
     <div class="card sp" id="debtCard" data-sp="schulden" hidden></div>
     <div class="card sp" data-sp="konten" hidden>
       <div class="field"><span class="small muted" style="margin-top:-2px">Trag einmal ein, was heute auf einem Konto ist. Die App rechnet den Stand für jeden Monat aus deinen importierten Kontoauszügen aus.</span><div id="acctEd"></div></div>
@@ -3308,6 +3316,16 @@ function renderSpPages(){
   document.querySelectorAll("#v-more [data-sp]").forEach(el=>el.hidden = el.dataset.sp!==k || (el.id==="syncBox" && !SYNCABLE));
   if (k) $("spTitle").textContent = SP_PAGES[k][0]; else renderSetHome();
   if (k==="sync") renderUpd();
+  const HERO={konten:["wallet","#3d63a8","Kontostände, Hauptkonto und Spaces – damit die App für jeden Monat richtig rechnet."],
+    budgets:["target","#c27c0e","Wie viel du pro Monat höchstens ausgeben willst. Ab 80 % warnt die App."],
+    schulden:["bank","#7a5bc2","Kredite und Schulden mit Rate – die App zeigt, wann du schuldenfrei bist."],
+    backup:["save","#1a7a5c","Alle Daten in einer Datei sichern oder wiederherstellen – auch automatisch jede Woche."],
+    steuer:["receipt","#c27c0e","Steuerklasse, Gehalt und Selbstständigkeit – daraus schätzt die App Steuer und Rücklage."],
+    sicherheit:["shield","#b23a3a","PIN, Fingerabdruck und Wiederherstellung – schützt deine Finanzen auf diesem Gerät."],
+    sync:["cloud","#3d63a8","Handy und PC bleiben gleich, und die App holt sich neue Versionen selbst."]};
+  const h=$("spHero"), hv=k&&HERO[k];
+  h.hidden=!hv;
+  if (hv) h.innerHTML=`<span class="shi" style="background:${hv[1]}">${ic(hv[0],26)}</span><span class="small">${esc(hv[2])}</span>`, h.style.setProperty("--tc",hv[1]);
 }
 document.addEventListener("change", e=>{
   if (e.target.id!=="sDark") return;
