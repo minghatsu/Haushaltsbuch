@@ -572,6 +572,9 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 /* home columns: on phones the column wrappers disappear and "order" restores the one-column sequence */
 .cols,.col{display:contents}
 
+.stmtcam{display:flex;align-items:center;gap:14px;border:0;text-align:left;width:100%;color:inherit;font:inherit;cursor:pointer;margin-bottom:12px}
+.notice.ok{background:color-mix(in srgb,var(--good) 14%,transparent);color:var(--fg)}
+
 /* shops page: search + categories to open */
 .shoped{display:flex;flex-direction:column;gap:8px}
 .shsearch{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:16px;padding:0 12px;box-shadow:var(--shadow);color:var(--muted)}.shsearch .in{border:0;background:none;box-shadow:none;padding:12px 0;flex:1}
@@ -1683,6 +1686,7 @@ function joblessTop(ym, free, c){
         :`<button class="card" id="goalFirst"><span class="jli">${ic("piggy",17)}</span><b>Rücklage</b><small>für teure Monate anlegen</small></button>`}
     </div></div>`;
 }
+document.addEventListener("click", e=>{ if (e.target.closest("#stmtCam")||e.target.closest("#stmtMore")) stmtPhoto(); });
 document.addEventListener("click", e=>{ if (e.target.closest("[data-potall]")){ UI.potAll=!UI.potAll; render(); } });
 // settings page "Leistung & Amt"
 function renderAmtEd(){
@@ -5229,6 +5233,68 @@ function pdfStatementRows(lines){
     return [t.date, payee.replace(/\s+/g," ").slice(0,90), rest.join(" ").slice(0,160), amount, type];
   });
 }
+/* ---------- paper statements: photograph page by page, read with text recognition, check against the balances ---------- */
+// recognised text lines (with position on the photo) -> lines like from a PDF: amounts become their own cells
+function ocrToStmtLines(ocr, page){
+  const L=(ocr||[]).filter(l=>l.t && l.y!=null).map(l=>({x:l.x||0, y:l.y, w:l.w||l.t.length*8, h:l.h||12, t:l.t}));
+  if (!L.length) return [];
+  const W=Math.max(...L.map(l=>l.x+l.w));
+  L.sort((a,b)=>(a.y+a.h/2)-(b.y+b.h/2));
+  const rows=[];
+  for (const l of L){ const r=rows.find(r=>Math.abs((r.y+r.h/2)-(l.y+l.h/2)) < Math.max(r.h,l.h)*0.55); if (r){ r.items.push(l); r.h=Math.max(r.h,l.h); } else rows.push({y:l.y, h:l.h, items:[l]}); }
+  const AM=/^([+\-−–])?(\d{1,3}(?:\.\d{3})*|\d+),\d{2}([+\-−–]|S|H)?$/;
+  return rows.map(r=>{
+    r.items.sort((a,b)=>a.x-b.x);
+    const cells=[];
+    for (const it of r.items){
+      // split one recognised line into words, keep amounts (and the S/H, +/- next to them) as separate cells at their estimated position
+      const words=it.t.split(/\s+/).filter(Boolean), cw=it.w/Math.max(1,it.t.length); let pos=0, buf=null;
+      for (const wd of words){ const at=it.t.indexOf(wd,pos); pos=at+wd.length; const x=it.x+at*cw, x2=it.x+pos*cw;
+        const prev=cells[cells.length-1];
+        if (/^(S|H|[+\-−–])$/.test(wd) && !buf && prev && AM.test(prev.s)){ prev.s+=" "+wd; prev.x2=x2; continue; }   // "33,43 S" stays one amount
+        if (/^(EUR|€)$/.test(wd)) continue;
+        if (AM.test(wd)){ if (buf){ cells.push(buf); buf=null; } cells.push({x, x2, s:wd}); }
+        else if (buf){ buf.s+=" "+wd; buf.x2=x2; } else buf={x, x2, s:wd}; }
+      if (buf) cells.push(buf);
+    }
+    return {page, y:-r.y, w:W, cells, text:cells.map(c=>c.s).join("  ")};
+  });
+}
+// old and new balance printed on the statement (for the check)
+function stmtBalances(lines){
+  let oldB=null, newB=null;
+  const amt=l=>{ for (let i=l.cells.length-1;i>=0;i--){ let a=pdfAmount(l.cells[i].s); if (!a && l.cells[i+1]) a=pdfAmount(l.cells[i].s+" "+l.cells[i+1].s); if (a) return a.v*(a.sign<0?-1:1); } return null; };
+  for (const l of lines){ const t=l.text.toLowerCase();
+    if (oldB==null && /(alter|bisheriger|vorheriger)\s+(konto)?stand|kontostand alt|saldo alt|anfangssaldo|saldovortrag|vortrag vom/.test(t)){ const v=amt(l); if (v!=null) oldB=v; }
+    if (/(neuer)\s+(konto)?stand|kontostand neu|saldo neu|endsaldo|neuer saldo/.test(t)){ const v=amt(l); if (v!=null) newB=v; } }
+  return {oldB, newB};
+}
+async function stmtPhoto(){
+  let ocr=null;
+  try {
+    if (NATIVE_SCAN){ const res=await scanNative("camera"); if (!res) return; ocr=Array.isArray(res)?res:(res.lines||[]); const img=Array.isArray(res)?null:res.img;
+      if (img){ const rv=await docReview(img,{lines:ocr}); if (!rv) return; if (rv.action==="retake") return stmtPhoto(); } }
+    else { const f=await new Promise(r=>{ const inp=$("scanFile"); inp.value=""; inp.onchange=()=>r(inp.files[0]||null); inp.click(); }); if (!f) return;
+      let img=null; try { img=await shrinkImage(f); } catch(e){}
+      if (img){ const rv=await docReview(img,{}); if (!rv) return; if (rv.action==="retake") return stmtPhoto(); img=rv.img; }
+      ocr=await scanImageFile(img||f); scanBusy(false); }
+  } catch(e){ scanBusy(false); toast(e.message||"Foto konnte nicht gelesen werden"); return; }
+  const prev=UI.imp&&UI.imp.photo ? UI.imp : null, pages=prev?prev.pages:[];
+  pages.push(ocr||[]);
+  const lines=pages.flatMap((o,i)=>ocrToStmtLines(o,i+1)), rows=pdfStatementRows(lines);
+  if (!rows.length){ toast(prev?"Auf dieser Seite wurden keine Buchungen erkannt":"Keine Buchungen erkannt – gerade, hell und scharf fotografieren"); if (!prev) return; }
+  const bal=stmtBalances(lines);
+  const headers=["Datum","Empfänger","Verwendungszweck","Betrag","Buchungsart"];
+  UI.imp={ fileName:`Foto-Kontoauszug · ${pages.length} ${pages.length===1?"Seite":"Seiten"}`, headers, raw:rows.slice(0,2000), map:{date:0, payee:1, payer:-1, ref:2, amount:3, type:4, account:-1, status:-1, sh:-1, soll:-1, haben:-1, paypal:false}, items:null, pdf:true, photo:true, pages, bal };
+  buildItems(); UI.view="import"; render(); window.scrollTo({top:0});
+}
+// the check: old balance + everything recognised = new balance?
+function stmtCheck(imp){
+  const b=imp.bal||{}; if (b.oldB==null || b.newB==null) return `<div class="notice info" style="margin-top:14px"><span>Auf dem Foto wurde kein <b>alter und neuer Kontostand</b> gefunden – dann kann die App nicht nachrechnen. Prüf die Liste bitte selbst.</span></div>`;
+  const sum=Math.round((imp.raw||[]).reduce((a,r)=>a+(Number(r[3])||0),0)*100)/100, diff=Math.round((b.newB-(b.oldB+sum))*100)/100;
+  if (Math.abs(diff)<0.01) return `<div class="notice ok" style="margin-top:14px"><span>✓ <b>Alles erkannt.</b> Alter Stand ${esc(eur(b.oldB))} + Buchungen ${esc(eur(sum))} = neuer Stand ${esc(eur(b.newB))}.</span></div>`;
+  return `<div class="notice warn" style="margin-top:14px"><span><b>Es fehlen noch ${esc(eur(Math.abs(diff)))}</b> ${diff<0?"(zu viel abgezogen)":""}. Alter Stand ${esc(eur(b.oldB))} + erkannte Buchungen ${esc(eur(sum))} ergibt ${esc(eur(b.oldB+sum))}, auf dem Auszug steht ${esc(eur(b.newB))}. Vermutlich wurde eine Zeile nicht erkannt oder ein Betrag falsch gelesen – Beträge prüfen oder die fehlende Buchung danach von Hand eintragen. Hat der Auszug mehrere Seiten? Dann die nächste dazu fotografieren.</span></div>`;
+}
 async function loadPdf(file){
   toast("PDF wird gelesen …");
   let rows;
@@ -5352,6 +5418,7 @@ function renderImport(){
   const v=$("v-import"), imp=UI.imp;
   if (!imp){
     v.innerHTML = `
+      <button class="card stmtcam" id="stmtCam"><span class="ictile" style="width:56px;height:56px;border-radius:18px;background:var(--accent);color:#fff">${ic("camera",26)}</span><span><b style="font-size:16px">Kontoauszug fotografieren</b><br><span class="small muted">Für Papier-Auszüge ohne Onlinebanking – Seite für Seite, die App rechnet nach.</span></span></button>
       <div class="drop" id="drop">
         <span class="ictile" style="width:56px;height:56px;border-radius:18px;background:var(--accent-soft);color:var(--accent)">${ic("arrowDown",26)}</span>
         <div><b style="font-size:16px">Kontoauszug auswählen (CSV oder PDF)</b><br><span class="small muted">oder hierher ziehen</span></div>
@@ -5403,7 +5470,8 @@ function renderImport(){
       <div class="small muted" style="margin-bottom:12px">${esc(imp.fileName)}</div>
       <div class="sumgrid"><div><b>${take.length-nFix}</b><span class="small muted">neue Buchungen</span></div><div><b>${nFix}</b><span class="small muted">Fixkosten abhaken</span></div><div><b>${dups}</b><span class="small muted">schon importiert</span></div></div>
       ${nIgn&&!imp.showIgnored?`<div class="notice info" style="margin-top:14px"><span>${nIgn} davon hast du früher bewusst übersprungen.</span><button class="btn" id="impShowIgn">Wieder anzeigen</button></div>`:""}
-      ${imp.pdf?`<div class="notice info" style="margin-top:14px"><span>Aus einer PDF gelesen. Prüf kurz Beträge und Vorzeichen.${imp.items.some(i=>i.maybeDup&&!i.dup)?` <b>${imp.items.filter(i=>i.maybeDup&&!i.dup).length}</b> mit gleichem Tag und Betrag gibt es schon – die werden übersprungen, außer du stellst sie um.`:""}</span></div>`:""}
+      ${imp.photo?stmtCheck(imp)+`<button class="btn" id="stmtMore" style="margin-top:10px">${ic("camera",17)} Weitere Seite fotografieren</button>`:""}
+      ${imp.pdf&&!imp.photo?`<div class="notice info" style="margin-top:14px"><span>Aus einer PDF gelesen. Prüf kurz Beträge und Vorzeichen.${imp.items.some(i=>i.maybeDup&&!i.dup)?` <b>${imp.items.filter(i=>i.maybeDup&&!i.dup).length}</b> mit gleichem Tag und Betrag gibt es schon – die werden übersprungen, außer du stellst sie um.`:""}</span></div>`:""}
       ${unsure?`<div class="notice warn" style="margin-top:14px"><span><b>${unsure}</b> ${unsure===1?"Buchung ist":"Buchungen sind"} unsicher zugeordnet und gelb markiert. Kurz prüfen, dann importieren.</span></div>`:""}
     </div>
     ${(()=>{ const names=[...new Set(imp.items.map(i=>i.acct).filter(Boolean))].sort((a,b)=>(b==="Hauptkonto")-(a==="Hauptkonto")||a.localeCompare(b,"de")); return names.length&&mem ? `<div class="card"><div class="card-head"><h2>Kontostände</h2><span class="small muted">aus dieser Datei</span></div><p class="small muted" style="margin:-6px 0 8px">Trag ein, was heute auf dem Konto ist. Den Rest rechnet die App aus.</p>${acctRows(names)}</div>` : ""; })()}
