@@ -324,6 +324,9 @@ html.touch .kpad{display:grid}
 .exi{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none}.exi[style*="background"]{color:#fff}
 .lrow{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:14px;background:var(--sunk);margin-bottom:6px}.lrow.on{background:var(--accent-soft)}.lrow.off{opacity:.7}
 .stor{margin-bottom:6px}.stor>b{font-family:var(--f-display);font-size:28px;display:block}.storbar{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--sunk);margin:8px 0 4px}.storbar i{display:block;height:100%}
+.abr{margin:9px 0}.abl{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;margin-bottom:4px}.abl span{color:var(--muted);white-space:nowrap}
+.abig{margin:0 0 10px}.abig b{display:block;font-family:var(--f-display);font-size:26px;letter-spacing:-.02em}
+.amr{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;height:70px;align-items:end;margin-top:6px}.amr span{display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end}.amr i{display:block;width:100%;background:var(--accent);border-radius:4px 4px 2px 2px;min-height:2px}.amr small{font-size:10px;color:var(--faint);margin-top:3px}
 textarea.in{font-family:inherit;line-height:1.45}
 .devname{padding:6px 10px;font-weight:700;margin-bottom:2px}
 .ictile.bavatar.lpk svg{width:62%;height:62%}
@@ -1953,6 +1956,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.4.6","9. November 2026",["Analyse: überall 4 Kacheln pro Bereich – neu Sparziele und Fixkosten","Eigene Kacheln für jede Gruppe, z. B. BAföG-Rückzahlung, Töpfe, Stundenlohn, 78-Wochen-Grenze, Zuzahlungen"]],
   ["0.4.5","9. November 2026",["Einstellungen neu: Profil mit Zahlen, Schnell-Schalter, Abos & Verträge, Export, Hilfe, Feedback, Belege & Speicher, Geräte"]],
   ["0.4.4","9. November 2026",["Datenschutz, Nutzungsbedingungen und Impressum","Schrift und Laden-Logos eingebaut – nichts mehr an Google"]],
   ["0.4.3","9. November 2026",["Mindestlohn-Automatik: Gehalt steigt jedes Jahr mit","Werte pro Jahr (Mindestlohn, Minijob-Grenze)"]],
@@ -3546,6 +3550,114 @@ function planQuarters(rows, cur){
       </div>`:""}
     </div>`; }).join("")}</div>`;
 }
+/* ---------- Analyse: four tiles in every section, the third section fits the way you earn your money ---------- */
+const AGRP = {
+  angestellt:["Arbeit &amp; Steuer",["lohn","wk","tax","hourly"]],
+  beamte:["Besoldung &amp; Steuer",["lohn","wk","tax","beihilfe"]],
+  azubi:["Ausbildung &amp; Steuer",["lohn","wk","tax","bab"]],
+  minijob:["Minijob",["lohn","mjgrenze","hourly","quellen"]],
+  selbst:["Selbstständig &amp; Steuer",["tax","wk","euer","ruecklage"]],
+  beides:["Arbeit &amp; Steuer",["lohn","wk","tax","euer"]],
+  alg:["Leistung &amp; Amt",["pots","mini","terms","nachweis"]],
+  grusi:["Leistung &amp; Amt",["pots","mini","terms","nachweis"]],
+  studium:["Studium &amp; BAföG",["bafoeg","nebenjob","rueck","tax"]],
+  schule:["Schule &amp; Taschengeld",["taschen","ferien","wofuer","tax"]],
+  rente:["Rente &amp; Steuer",["rente","tax","hinzu","kk"]],
+  eltern:["Elternzeit",["elend","kindergeld","kind","tax"]],
+  krank:["Krankengeld",["kgverlauf","kgende","zuzahl","tax"]]
+};
+const anaGrp = () => AGRP[S.settings.work] || AGRP.beides;
+const ATL = {goal:["Sparziele","#2f7fb8","piggy"], fix:["Fixkosten","#0f766e","repeat"], hourly:["Stundenlohn","#15803d","cash"], beihilfe:["Beihilfe","#0e7490","health"],
+  bab:["BAB-Check","#4d7c0f","book"], mjgrenze:["Grenze","#c27c0e","target"], quellen:["Quellen","#047857","list"], ruecklage:["Rücklage","#3f6212","piggy"],
+  pots:["Töpfe","#15803d","target"], mini:["Minijob","#4d7c0f","case"], terms:["Termine","#0e7490","cal"], nachweis:["Nachweis","#047857","doc"],
+  bafoeg:["BAföG","#15803d","book"], nebenjob:["Nebenjob","#4d7c0f","case"], rueck:["Rückzahlung","#0e7490","bank"],
+  taschen:["Taschengeld","#15803d","wallet"], ferien:["Ferienjob","#4d7c0f","case"], wofuer:["Wofür","#0e7490","tag"],
+  rente:["Rente","#15803d","heart"], hinzu:["Hinzuverdienst","#4d7c0f","case"], kk:["Krankenkasse","#0e7490","health"],
+  elend:["Elterngeld","#15803d","cal"], kindergeld:["Kindergeld","#4d7c0f","heart"], kind:["Kinderkosten","#0e7490","gift"],
+  kgverlauf:["Krankengeld","#15803d","chart"], kgende:["78 Wochen","#4d7c0f","cal"], zuzahl:["Zuzahlungen","#0e7490","health"]};
+const aCard=(h,body,extra)=>`<div class="card flat">${h?`<div class="card-head"><h2>${h}</h2>${extra||""}</div>`:""}${body}</div>`;
+const aBar=(label,v,max,col,right)=>`<div class="abr"><span class="abl"><b>${label}</b><span>${right!=null?right:esc(eur0(v))}</span></span><span class="bpbar"><i style="width:${max>0?Math.min(100,Math.max(v>0?2:0,v/max*100)):0}%;background:${col||"var(--accent)"}"></i></span></div>`;
+const yIncByArt = (y, arts) => S.tx.filter(t=>t.kind==="einnahme" && (t.date||"").startsWith(String(y)) && arts.includes(incArt(t.cat)));
+const yIncByCat = (y, re) => S.tx.filter(t=>t.kind==="einnahme" && (t.date||"").startsWith(String(y)) && re.test(nrm(t.cat||"")));
+const yExpByCat = (y, re) => S.tx.filter(t=>(t.kind==="ausgabe"||t.kind==="betrieb") && (t.date||"").startsWith(String(y)) && re.test(nrm((t.cat||"")+" "+(t.note||""))));
+function monthsRow(txs, y){ const m=Array(12).fill(0); for (const t of txs){ const i=Number((t.date||"").slice(5,7))-1; if (i>=0) m[i]+=t.amount; } const mx=Math.max(1,...m);
+  return `<div class="amr">${m.map((v,i)=>`<span title="${MONTHS[i]}: ${esc(eur0(v))}"><i style="height:${Math.round(v/mx*100)}%"></i><small>${MSHORT[i].slice(0,1)}</small></span>`).join("")}</div>`; }
+function dLeft(iso){ return iso ? Math.round((new Date(iso+"T12:00")-new Date(isoToday()+"T12:00"))/864e5) : null; }
+function anaGroupTiles(y, ym, mc, tax, TS){
+  const st=S.settings, j=jlCfg(), out=[], L=lohnYear(y), mn=MONTHS[ymParts(ym)[1]-1], yvv=yv(y);
+  const add=(k,sub,body,short)=>out.push({k, icon:ATL[k][2], title:ATL[k][0], sub, body, short});
+  // planning: savings goals and fixed costs (everyone)
+  { const goals=st.goals||[], pc=goals.length?Math.round(sum(goals,g=>Math.min(1,goalSaved(g).v/(Number(g.target)||1)))/goals.length*100):0;
+    add("goal", goals.length?`${goals.length} ${goals.length===1?"Ziel":"Ziele"} · im Schnitt ${pc} %`:"Noch kein Sparziel", aCard("Sparziele",
+      goals.length ? goals.map(g=>{ const v=goalSaved(g).v, t=Number(g.target)||0; return aBar(esc(g.name), v, t, v>=t?"var(--good)":"var(--accent)", `${esc(eur0(v))} / ${esc(eur0(t))}`); }).join("") + `<button class="link small" data-goalsopen="1" data-go="home" style="margin-top:10px">Auf der Startseite bearbeiten</button>`
+      : `<p class="small muted" style="margin:0 0 10px">Spar auf etwas hin – Notgroschen, Urlaub, Führerschein – und sieh, wie viel du jeden Monat zurücklegen musst.</p><button class="btn primary" id="goalFirst" data-go="home">Sparziel anlegen</button>`), goals.length?`${pc} %`:"anlegen"); }
+  { const fx=fixedForMonth(ym, true), tot=sum(fx,f=>f.id in (mc.paid||{}) ? Number(mc.paid[f.id])||0 : planAmt(f,ym)), pct=mc.income>0?Math.round(tot/mc.income*100):null;
+    add("fix", `${esc(eur0(tot))} im ${esc(mn)}${pct!=null?` · ${pct} % der Einnahmen`:""}`, aCard(`Fixkosten ${esc(mn)}`,
+      `<div class="abig"><b>${esc(eur0(tot))}</b><span class="small muted">${pct!=null?`${pct} % von dem, was reinkam${pct>60?" – das ist viel, schau nach Abos, die du kündigen kannst":""}`:"fest jeden Monat"}</span></div>`
+      + fx.map(f=>({f, v:f.id in (mc.paid||{}) ? Number(mc.paid[f.id])||0 : planAmt(f,ym)})).sort((a,b)=>b.v-a.v).slice(0,6).map(({f,v})=>aBar(esc(f.name), v, tot)).join("")
+      + `<button class="link small" data-go="fix" style="margin-top:10px">Alle Fixkosten ${ic("right",14)}</button>`), pct!=null?`${pct} %`:eur0(tot)); }
+  const [, keys] = anaGrp();
+  const need = k => keys.includes(k);
+  if (need("hourly")){ const h=Number(st.wochenstd)||Number((st.mindest||{}).h)||0, mon=L.monat||mindestMonat(y)||0, hr=h&&mon?mon/(h*13/3):0;
+    add("hourly", hr?`${esc(eur(hr))} brutto pro Stunde`:"Stunden eintragen", aCard("Stundenlohn",
+      `<div class="field" style="margin:0 0 10px"><label for="aStd">Stunden pro Woche</label><input class="in" id="aStd" inputmode="decimal" value="${h?esc(numStr(h)):""}" placeholder="z. B. 40"></div>`
+      + (hr?`<div class="abig"><b>${esc(eur(hr))}</b><span class="small muted">brutto pro Stunde · ${esc(eur0(mon))} im Monat</span></div>${hr<yvv.ml-0.005?`<div class="notice bad"><span>Das liegt <b>unter dem Mindestlohn</b> von ${ml2(yvv.ml)} € (${y}). Sprich deinen Arbeitgeber an – das ist nicht erlaubt.</span></div>`:`<div class="notice ok"><span>${esc(eur(hr-yvv.ml))} über dem Mindestlohn von ${ml2(yvv.ml)} €.</span></div>`}`
+        : `<p class="small muted" style="margin:0">${mon?"Trag deine Wochenstunden ein.":"Trag zuerst dein Bruttogehalt ein (Gehalt-Kachel oder Steuer & Einkommen)."}</p>`)), hr?eur(hr):"Std. fehlen"); }
+  if (need("beihilfe")){ const bh=j.beihilfe||[], open=bh.filter(x=>!x.done), so=sum(open,x=>Number(x.amt)||0);
+    add("beihilfe", open.length?`${open.length} offen · ${esc(eur0(so))}`:"nichts offen", aCard("Beihilfe & PKV", (bh.length?bh.slice().sort((a,b)=>(a.done-b.done)||(b.d||"").localeCompare(a.d||"")).slice(0,8).map(x=>aBar(esc(x.n)+(x.done?" ✓":""), Number(x.amt)||0, Math.max(...bh.map(z=>Number(z.amt)||0)), x.done?"var(--good)":"var(--warn)", `${esc(eur(x.amt))}${x.done?"":" offen"}`)).join(""):`<p class="small muted" style="margin:0">Noch keine Arztrechnung eingetragen.</p>`)+`<button class="link small" data-go="more" data-sp="amt" style="margin-top:10px">Rechnungen verwalten ${ic("right",14)}</button>`), open.length?`${open.length} offen`:"0 offen"); }
+  if (need("bab")) add("bab", "Berufsausbildungsbeihilfe prüfen", aCard("Berufsausbildungsbeihilfe (BAB)", `<p class="small" style="margin:0 0 8px;line-height:1.55">BAB gibt es von der Agentur für Arbeit, wenn das Ausbildungsgehalt nicht reicht. Meist gilt:</p><ul class="lgl"><li>du wohnst <b>nicht</b> bei deinen Eltern, weil der Betrieb zu weit weg ist – oder du bist über 18, verheiratet oder hast ein Kind</li><li>es ist deine erste Berufsausbildung</li><li>Gehalt (und ggf. Einkommen der Eltern) liegt unter dem Bedarf</li></ul><p class="small muted" style="margin:0">Dein Ausbildungsgehalt: <b>${esc(eur0(L.monat||j.amount||0))}</b> im Monat. Den genauen Anspruch rechnet die Agentur aus – ein Antrag kostet nichts.</p>`), "prüfen");
+  if (need("mjgrenze")){ const yr=sum(yIncByArt(y,["lohn","minijob"]),t=>t.amount), lim=yvv.mj*12, mon=new Date().getFullYear()===Number(y)?new Date().getMonth()+1:12;
+    add("mjgrenze", `${esc(eur0(yr))} von ${esc(eur0(lim))} im Jahr`, aCard(`Minijob-Grenze ${y}`, aBar("Verdient", yr, lim, yr>lim?"var(--bad)":"var(--accent)", `${esc(eur0(yr))} / ${esc(eur0(lim))}`)
+      + `<p class="small muted" style="margin:10px 0 0">Grenze ${y}: <b>${yvv.mj} €</b> im Monat, im Jahr ${esc(eur0(lim))}. Gelegentlich darfst du drüber (höchstens 2 Monate im Jahr). Im Schnitt bisher: <b>${esc(eur0(yr/mon))}</b> pro Monat.</p>${yr/mon>yvv.mj?`<div class="notice warn" style="margin-top:10px"><span>Du liegst im Schnitt über der Grenze – dann wird es ein Midijob mit Abzügen.</span></div>`:""}`), `${Math.round(yr/Math.max(1,lim)*100)} %`); }
+  if (need("quellen")){ const inc=S.tx.filter(t=>t.kind==="einnahme"&&(t.date||"").startsWith(String(y))), by={}; for (const t of inc) by[t.cat||"Sonstige"]=(by[t.cat||"Sonstige"]||0)+t.amount;
+    const arr=Object.entries(by).sort((a,b)=>b[1]-a[1]), tot=sum(arr,x=>x[1]);
+    add("quellen", `${arr.length} ${arr.length===1?"Quelle":"Quellen"} · ${esc(eur0(tot))} in ${y}`, aCard(`Woher dein Geld ${y} kam`, arr.length?arr.map(([k,v])=>aBar(esc(k), v, arr[0][1], null, `${esc(eur0(v))} · ${Math.round(v/tot*100)} %`)).join(""):`<p class="small muted" style="margin:0">Noch keine Einnahmen in ${y}.</p>`), `${arr.length} Arten`); }
+  if (need("ruecklage")){ const need2=Math.max(0,tax.due)+(tax.gewst||0), cov=tax.resBal-need2;
+    add("ruecklage", `${esc(eur0(tax.resBal))} zurückgelegt`, aCard(`Steuer-Rücklage ${y}`, aBar("Rücklage", tax.resBal, Math.max(tax.resBal,need2), cov>=0?"var(--good)":"var(--warn)", esc(eur0(tax.resBal))) + aBar("Voraussichtlich fällig", need2, Math.max(tax.resBal,need2), "var(--c6)", esc(eur0(need2)))
+      + `<div class="notice ${cov>=0?"ok":"warn"}" style="margin-top:10px"><span>${cov>=0?`Reicht – Puffer <b>${esc(eur0(cov))}</b>.`:`Es fehlen noch <b>${esc(eur0(-cov))}</b>. Erhöhe deine Rücklage-Quote (gerade ${esc(numStr(st.reserveRate||0))} %).`}</span></div>`), cov>=0?"reicht":`− ${eur0(-cov)}`); }
+  if (need("pots")){ const spent={}; for (const t of mc.tx) if (t.kind==="ausgabe"){ const p=potOfCat(t.cat); spent[p]=(spent[p]||0)+t.amount; }
+    const pots=j.pots.filter(p=>p.v>0), over=pots.filter(p=>(spent[p.n]||0)>p.v).length;
+    add("pots", over?`${over} ${over===1?"Topf":"Töpfe"} drüber im ${esc(mn)}`:`alle im Rahmen im ${esc(mn)}`, aCard(`Töpfe ${esc(mn)}`, pots.map(p=>{ const s=spent[p.n]||0; return aBar(esc(p.n), s, p.v, s>p.v?"var(--bad)":"var(--accent)", `${esc(eur0(s))} / ${esc(eur0(p.v))}`); }).join("")+`<button class="link small" data-go="more" data-sp="amt" style="margin-top:10px">Töpfe anpassen ${ic("right",14)}</button>`), over?`${over} drüber`:"im Rahmen"); }
+  if (need("mini")){ const m=Number(j.mini)||0, k=jlKeep(m);
+    add("mini", m?`${esc(eur0(k))} von ${esc(eur0(m))} behältst du`:"Rechner", aCard("Minijob-Rechner", m?`<div class="abig"><b>${esc(eur0(k))}</b><span class="small muted">von ${esc(eur0(m))} Lohn behältst du zusätzlich</span></div>`+aBar("Abzug vom Amt", m-k, m, "var(--c6)"):`<p class="small muted" style="margin:0">Rechne aus, wie viel dir von einem Nebenjob bleibt.</p>`, `<button class="link" data-go="more" data-sp="amt">Ändern</button>`), m?`+ ${eur0(k)}`:"rechnen"); }
+  if (need("terms")){ const td=isoToday(), up=(j.terms||[]).filter(t=>t.d>=td).sort((a,b)=>a.d.localeCompare(b.d));
+    add("terms", up.length?`${up.length} offen · nächster ${esc(new Date(up[0].d+"T12:00").toLocaleDateString("de-DE"))}`:"keine offen", aCard("Termine & Fristen", (up.length?up.slice(0,6).map(t=>`<div class="jlt"><span class="jli">${ic("cal",16)}</span><span class="n"><b>${esc(t.n)}</b><small>${esc(new Date(t.d+"T12:00").toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit"}))}${t.t?` · ${esc(t.t)} Uhr`:""}</small></span></div>`).join(""):`<p class="small muted" style="margin:0">Keine offenen Termine.</p>`)+`<button class="link small" data-go="more" data-sp="amt" style="margin-top:8px">+ Termin eintragen</button>`), `${up.length} offen`); }
+  if (need("nachweis")) add("nachweis", "Monatsbericht und Kontoauszüge", aCard("Nachweis fürs Amt", `<p class="small" style="margin:0 0 10px;line-height:1.55">Für Weiterbewilligung oder Nachfragen vom Amt: ein Monatsbericht mit allen Einnahmen und Ausgaben. Kontoauszüge kannst du unter Buchungen › Import fotografieren.</p><button class="btn primary" data-exp="report">Bericht ${esc(mn)} speichern</button>`), "Bericht");
+  if (need("bafoeg")){ const tx=yIncByArt(y,["bafoeg"]), tot=sum(tx,t=>t.amount), end=st.work==="studium"?profEnd():null;
+    add("bafoeg", `${esc(eur0(tot))} in ${y}`, aCard(`BAföG ${y}`, `<div class="abig"><b>${esc(eur0(tot))}</b><span class="small muted">bisher in ${y}${j.amount?` · ${esc(eur0(j.amount))} im Monat`:""}</span></div>${monthsRow(tx,y)}${end?`<p class="small muted" style="margin:10px 0 0">Förderung endet am <b>${esc(new Date(end+"T12:00").toLocaleDateString("de-DE"))}</b>. Folgeantrag spätestens 2 Monate vor Ende des Bewilligungszeitraums.</p>`:""}`), eur0(j.amount||tot/12)+"/M"); }
+  if (need("nebenjob")){ const m=Number(j.mini)||0;
+    add("nebenjob", m?`${esc(eur0(m))} von ${yvv.mj} €`:`bis ${yvv.mj} € ohne Abzug`, aCard("Nebenjob & BAföG", aBar("Verdienst im Monat", m, yvv.mj, m>yvv.mj?"var(--bad)":"var(--accent)", `${esc(eur0(m))} / ${yvv.mj} €`)+`<p class="small muted" style="margin:10px 0 0">Bis zur Minijob-Grenze (${y}: ${yvv.mj} €) wird BAföG in der Regel nicht gekürzt.</p>`, `<button class="link" data-go="more" data-sp="amt">Ändern</button>`), m?`noch ${eur0(Math.max(0,yvv.mj-m))}`:"eintragen"); }
+  if (need("rueck")){ const all=S.tx.filter(t=>t.kind==="einnahme"&&incArt(t.cat)==="bafoeg"), tot=sum(all,t=>t.amount), loan=Math.min(10010, tot/2);
+    add("rueck", `ca. ${esc(eur0(loan))} später zurückzahlen`, aCard("BAföG-Rückzahlung", `<div class="abig"><b>${esc(eur0(loan))}</b><span class="small muted">von ${esc(eur0(tot))} BAföG bisher (in der App)</span></div>${aBar("Darlehen", loan, 10010, "var(--accent)", `${esc(eur0(loan))} / 10.010 €`)}<p class="small muted" style="margin:10px 0 0">Beim Studierenden-BAföG ist die Hälfte ein zinsloses Darlehen, höchstens 10.010 €. Zurückgezahlt wird ab 5 Jahre nach Ende der Förderungshöchstdauer, in Raten ab 130 € im Monat. Wer früher alles auf einmal zahlt, bekommt einen Nachlass.</p>`), eur0(loan)); }
+  if (need("taschen")){ const tx=yIncByCat(y,/taschen/), tot=sum(tx,t=>t.amount);
+    add("taschen", `${esc(eur0(tot))} in ${y}`, aCard(`Taschengeld ${y}`, `<div class="abig"><b>${esc(eur0(tot))}</b><span class="small muted">bekommen in ${y}${j.amount?` · ${esc(eur0(j.amount))} im Monat`:""}</span></div>${monthsRow(tx,y)}`), eur0(tot)); }
+  if (need("ferien")){ const tx=yIncByArt(y,["lohn","minijob"]), tot=sum(tx,t=>t.amount)||Number(j.mini)||0;
+    add("ferien", tot?`${esc(eur0(tot))} verdient`:"noch nichts", aCard("Ferienjob", `<div class="abig"><b>${esc(eur0(tot))}</b><span class="small muted">verdient in ${y}</span></div><p class="small muted" style="margin:0">Ab 15 darfst du in den Ferien bis zu 4 Wochen im Jahr arbeiten, höchstens 8 Stunden am Tag. Wurde Lohnsteuer abgezogen, bekommst du sie mit einer Steuererklärung meist komplett zurück – siehe Kachel „Steuer“.</p>`), tot?eur0(tot):"0 €"); }
+  if (need("wofuer")){ const by={}; for (const t of S.tx) if ((t.kind==="ausgabe")&&(t.date||"").startsWith(String(y))) by[t.cat||"Sonstiges"]=(by[t.cat||"Sonstiges"]||0)+t.amount;
+    const arr=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,6), tot=sum(Object.values(by),v=>v);
+    add("wofuer", arr.length?`am meisten: ${esc(arr[0][0])}`:"noch keine Ausgaben", aCard(`Wofür dein Geld ${y} draufging`, arr.length?arr.map(([k,v])=>aBar(esc(k), v, arr[0][1], null, `${esc(eur0(v))} · ${Math.round(v/tot*100)} %`)).join(""):`<p class="small muted" style="margin:0">Noch keine Ausgaben in ${y}.</p>`), arr.length?arr[0][0].split(" ")[0]:"–"); }
+  if (need("rente")){ const tx=yIncByArt(y,["rente"]), tot=sum(tx,t=>t.amount);
+    add("rente", `${esc(eur0(tot))} in ${y}`, aCard(`Rente ${y}`, `<div class="abig"><b>${esc(eur0(tot))}</b><span class="small muted">bisher in ${y}${j.amount?` · ${esc(eur0(j.amount))} im Monat`:""}</span></div>${monthsRow(tx,y)}<p class="small muted" style="margin:10px 0 0">Die Renten werden jedes Jahr zum <b>1. Juli</b> angepasst. Prüf danach deinen Bescheid und trag den neuen Betrag ein.</p>`), eur0(j.amount||tot/12)+"/M"); }
+  if (need("hinzu")){ const tx=yIncByArt(y,["lohn","minijob","selbst"]), tot=sum(tx,t=>t.amount);
+    add("hinzu", tot?`${esc(eur0(tot))} dazuverdient`:"unbegrenzt erlaubt", aCard("Hinzuverdienst", `<div class="abig"><b>${esc(eur0(tot))}</b><span class="small muted">dazuverdient in ${y}</span></div><p class="small muted" style="margin:0">Neben einer <b>Altersrente</b> darfst du seit 2023 unbegrenzt dazuverdienen. Bei einer <b>Erwerbsminderungsrente</b> gelten Grenzen – frag vorher bei der Rentenversicherung nach. Der Verdienst kann die Steuer erhöhen.</p>`), tot?eur0(tot):"frei"); }
+  if (need("kk")){ const r=Number(j.amount)||0;
+    add("kk", "Kranken- und Pflegeversicherung", aCard("Krankenkasse als Rentner", `<p class="small" style="margin:0 0 8px;line-height:1.55">Von der Bruttorente gehen etwa <b>11 bis 12 %</b> für Kranken- und Pflegeversicherung ab (Kinderlose etwas mehr). Die Rentenversicherung zahlt die andere Hälfte der Krankenversicherung.</p>${r?`<p class="small muted" style="margin:0">Bei ${esc(eur0(r))} wären das grob <b>${esc(eur0(r*0.11))} – ${esc(eur0(r*0.12))}</b> im Monat. Steht im Rentenbescheid genau.</p>`:""}<p class="small muted" style="margin:8px 0 0">Kosten für Arzt, Zahnersatz und Medikamente: Zuzahlungen sammeln – über der Belastungsgrenze gibt es eine Befreiung.</p>`), "ca. 11–12 %"); }
+  if (need("elend")){ const end=st.work==="eltern"?profEnd():null, dl=dLeft(end), m=dl!=null&&dl>0?Math.ceil(dl/30.4):0, rest=m*(Number(j.amount)||0);
+    add("elend", end?(dl<0?"beendet":`noch ${m} ${m===1?"Monat":"Monate"}`):"Ende eintragen", aCard("Elterngeld", end?`<div class="abig"><b>${dl<0?"vorbei":`${m} ${m===1?"Monat":"Monate"}`}</b><span class="small muted">bis ${esc(new Date(end+"T12:00").toLocaleDateString("de-DE"))}${rest?` · noch ca. ${esc(eur0(rest))}`:""}</span></div><p class="small muted" style="margin:0">Danach fällt das Elterngeld weg. Rechne früh durch, wovon ihr dann lebt – und leg, wenn es geht, etwas zur Seite.</p>`:`<p class="small muted" style="margin:0">Trag ein, bis wann du Elterngeld bekommst.</p>`, `<button class="link" data-go="more" data-sp="amt">Ändern</button>`), end?(dl<0?"vorbei":`${m} Mon.`):"eintragen"); }
+  if (need("kindergeld")){ const tx=yIncByArt(y,["kindergeld"]), tot=sum(tx,t=>t.amount), z=Number(st.kinder)||0, per=TAX26.kindergeld/12;
+    add("kindergeld", z?`${z} × ${esc(eur0(per))} im Monat`:`${esc(eur0(tot))} in ${y}`, aCard(`Kindergeld ${y}`, `<div class="abig"><b>${esc(eur0(tot))}</b><span class="small muted">bekommen in ${y}${z?` · erwartet ${esc(eur0(z*per))} im Monat`:""}</span></div>${monthsRow(tx,y)}${!z?`<p class="small muted" style="margin:10px 0 0">Trag unter Steuer & Einkommen die Zahl deiner Kinder ein.</p>`:""}`), z?eur0(z*per):eur0(tot)); }
+  if (need("kind")){ const tx=yExpByCat(y,/kind|baby|kita|windel|schule|spielzeug/), tot=sum(tx,t=>t.amount), mtx=tx.filter(t=>t.date.startsWith(ym));
+    add("kind", `${esc(eur0(sum(mtx,t=>t.amount)))} im ${esc(mn)}`, aCard(`Kinderkosten ${y}`, `<div class="abig"><b>${esc(eur0(tot))}</b><span class="small muted">in ${y} · im ${esc(mn)} ${esc(eur0(sum(mtx,t=>t.amount)))}</span></div>${monthsRow(tx,y)}<p class="small muted" style="margin:10px 0 0">Zählt alle Ausgaben in Kategorien wie „Kind & Baby“ oder „Kita“. Kita-Kosten kannst du in der Steuererklärung angeben.</p>`), eur0(tot)); }
+  if (need("kgverlauf")){ const tx=yIncByArt(y,["lohnersatz"]), tot=sum(tx,t=>t.amount);
+    add("kgverlauf", `${esc(eur0(tot))} in ${y}`, aCard(`Krankengeld ${y}`, `<div class="abig"><b>${esc(eur0(tot))}</b><span class="small muted">bisher in ${y}${j.amount?` · ${esc(eur0(j.amount))} im Monat`:""}</span></div>${monthsRow(tx,y)}<p class="small muted" style="margin:10px 0 0">Krankengeld ist steuerfrei, erhöht aber den Steuersatz auf anderes Einkommen.</p>`), eur0(tot)); }
+  if (need("kgende")){ const end=st.work==="krank"?profEnd():null, dl=dLeft(end), wk=dl!=null?Math.max(0,Math.ceil(dl/7)):null;
+    add("kgende", end?(dl<0?"Ende erreicht":`noch ${wk} Wochen`):"Beginn eintragen", aCard("78-Wochen-Grenze", end?`${aBar("vergangen", 546-Math.max(0,dl), 546, dl<=60?"var(--bad)":"var(--accent)", `${Math.round((546-Math.max(0,dl))/7)} von 78 Wochen`)}<p class="small muted" style="margin:10px 0 0">Krankengeld endet spätestens am <b>${esc(new Date(end+"T12:00").toLocaleDateString("de-DE"))}</b>. Danach: Arbeitslosengeld (Nahtlosigkeit) oder Erwerbsminderungsrente – rechtzeitig bei Agentur für Arbeit und Rentenversicherung melden.</p>`:`<p class="small muted" style="margin:0">Trag ein, seit wann du krank bist.</p>`, `<button class="link" data-go="more" data-sp="amt">Ändern</button>`), end?(dl<0?"vorbei":`${wk} Wo.`):"eintragen"); }
+  if (need("zuzahl")){ const tx=yExpByCat(y,/zuzahl|apothek|medikament|arzt|gesund|physio|zahn/), tot=sum(tx,t=>t.amount), incY=sum(S.tx.filter(t=>t.kind==="einnahme"&&(t.date||"").startsWith(String(y))),t=>t.amount), lim=incY*0.02;
+    add("zuzahl", `${esc(eur0(tot))} von ca. ${esc(eur0(lim))}`, aCard(`Zuzahlungen ${y}`, aBar("Gesundheitskosten", tot, Math.max(lim,tot), tot>=lim&&lim>0?"var(--good)":"var(--accent)", `${esc(eur0(tot))} / ${esc(eur0(lim))}`)+`<p class="small muted" style="margin:10px 0 0">Belastungsgrenze: <b>2 %</b> deiner Bruttoeinnahmen im Jahr (bei chronischer Krankheit 1 %). Darüber kannst du dich bei der Krankenkasse von Zuzahlungen befreien lassen – Quittungen aufheben! Hier zählen Ausgaben in Kategorien wie Gesundheit, Apotheke, Zuzahlungen.</p>`), lim>0?`${Math.round(tot/lim*100)} %`:eur0(tot)); }
+  return out;
+}
+document.addEventListener("change", e=>{ if (e.target.id!=="aStd") return; const v=parseAmt(e.target.value); if (!isFinite(v)) return; S.settings.wochenstd=Math.min(80,Math.max(0,v)); e.target.blur(); saveSettings(); });
+
 function renderYear(){
   const y=Number(UI.ym.slice(0,4)), cur=ymOf(new Date());
   const rows=[]; let maxV=1;
@@ -3598,8 +3710,8 @@ function renderYear(){
     ${accRow("kpi","insight","Auf einen Blick", `${mc.net>=0?"Übrig":"Mehr ausgegeben"} ${mc.net>=0?"+":"−"} ${esc(eur0(Math.abs(mc.net)))} · Ø ${esc(eur0(perDay))} pro Tag`, kpisHtml, `${mc.net>=0?"+":"−"} ${eur0(Math.abs(mc.net))}`)}
     ${accRow("calc","cash","So berechnet", `Stand heute ${esc(eur0(ycum.balance))} · frei ${esc(eur0(ycum.balance-ycum.reserveBal))}`, waterfall(ym, ycum, mc, ymain), `frei ${eur0(ycum.balance-ycum.reserveBal)}`)}
     ${accRow("plan","cal","Jahresplan", `${esc(eur0(inc))} rein · ${esc(eur0(exp))} raus`, planQuarters(rows,cur), `${inc-exp>=0?"+":"−"} ${eur0(Math.abs(inc-exp))}`)}
-    ${hasJob()||TS.sal?accRow("lohn","wallet","Gehalt &amp; Abrechnungen", (()=>{ const sl=slipsOf(y), L=lohnYear(y); return sl.length?`${sl.length} von 12 Abrechnungen · ${esc(eur0(L.brutto))} brutto`:"Lohnabrechnungen hochladen"; })(), lohnSection(y), `${slipsOf(y).length} von 12`):""}
-    ${(hasJob()||TS.sal)&&TS.show?accRow("wk","doc","Werbungskosten &amp; Steuererklärung", (()=>{ const w=wkCalc(y); return w.total?`${esc(eur0(w.total))} gesammelt${w.total>TAX26.anPausch?" · über der Pauschale":""}`:"Homeoffice, Fahrten, Arbeitsmittel"; })(), wkSection(y), eur0(wkCalc(y).total)):!hasSelf()?"":accRow("wk","doc","Steuererklärung", "Was du angeben kannst", wkSection(y), "Angaben")}
+    ${true?accRow("lohn","wallet","Gehalt &amp; Abrechnungen", (()=>{ const sl=slipsOf(y), L=lohnYear(y); return sl.length?`${sl.length} von 12 Abrechnungen · ${esc(eur0(L.brutto))} brutto`:"Lohnabrechnungen hochladen"; })(), lohnSection(y), `${slipsOf(y).length} von 12`):""}
+    ${hasJob()||TS.sal||!hasSelf()?accRow("wk","doc","Werbungskosten &amp; Steuererklärung", (()=>{ const w=wkCalc(y); return w.total?`${esc(eur0(w.total))} gesammelt${w.total>TAX26.anPausch?" · über der Pauschale":""}`:"Homeoffice, Fahrten, Arbeitsmittel"; })(), wkSection(y), eur0(wkCalc(y).total)):!hasSelf()?"":accRow("wk","doc","Steuererklärung", "Was du angeben kannst", wkSection(y), "Angaben")}
     ${accRow("tax","receipt",hasSelf()?"Steuer &amp; Selbstständig":"Steuer", `${hasSelf()?`Gewinn ${esc(eur0(tax.gewinn))} · `:""}${tax.due>=0?`Nachzahlung ca. ${esc(eur0(tax.due))}`:`Erstattung ca. ${esc(eur0(-tax.due))}`}`, `<div class="anagrid">${hasSelf()?`<div class="card half"><div class="card-head"><h2>Selbstständig</h2><span class="pill ${st.kleinunternehmer?(kuOver?"bad":"ok"):""}">${st.kleinunternehmer?"Kleinunternehmer":"Mit Umsatzsteuer"}</span></div>
       <div class="kv"><span>Einnahmen netto</span><span>${esc(eur(self))}</span>
         ${st.kleinunternehmer?"":`<span>Umsatzsteuer ${esc(st.vatRate)} %</span><span>${esc(eur(self*vat))}</span><span>Brutto</span><span>${esc(eur(self*(1+vat)))}</span>`}
@@ -3636,14 +3748,16 @@ function renderYear(){
     ${!hasSelf()?"":accRow("euer","arrowDown","EÜR exportieren", "Für Steuerbüro oder ELSTER (Anlage EÜR)", `<div class="card flat"><div class="card-head"><h2>Für die Steuer</h2></div>
       <p class="small muted" style="margin:-6px 0 12px">Alle Einnahmen und Ausgaben deiner Selbstständigkeit ${y} als Liste für Steuerbüro oder ELSTER (Anlage EÜR) – mit Brutto, Umsatzsteuer und Netto, betrieblichen Fixkosten und Summen. Öffnet sich in Excel.</p>
       <button class="btn primary" id="euerBtn" data-year="${y}">EÜR ${y} exportieren</button></div>`, "Export")}`;
-  const ord=["kpi","cat","trend","io","calc","plan","lohn","wk","tax","euer"];
+  for (const [k,[n,c]] of Object.entries(ATL)) TL[k]=[n,c];
+  const GRP=[["Auswertung",["kpi","cat","trend","io"]],["Planung",["calc","plan","goal","fix"]], anaGrp()];
+  const ord=GRP.flatMap(g=>g[1]);
   tiles.push({k:"cat",icon:"tag",title:"Kategorien",sub:`Wohin dein Geld im ${esc(MONTHS[ymParts(ym)[1]-1])} fließt`,body:chartFor("cat"),short:eur0(mc.expenses)},
     {k:"trend",icon:"chart",title:`Verlauf ${y}`,sub:`Ausgaben pro Monat · Ø ${esc(eur0(avgExp))}`,body:chartFor("trend"),short:`Ø ${eur0(avgExp)}`},
     {k:"io",icon:"repeat",title:`Ein &amp; Aus ${y}`,sub:`${esc(eur0(inc))} rein · ${esc(eur0(exp))} raus`,body:chartFor("io"),short:`${inc-exp>=0?"+":"−"} ${eur0(Math.abs(inc-exp))}`});
+  tiles.push(...anaGroupTiles(y, ym, mc, tax, TS));
   if (!hasSelf()){
     const i=tiles.findIndex(t=>t.k==="tax"), t=tiles[i];
-    if (t && !TS.show) tiles.splice(i,1);
-    else if (t){
+    if (t){
       const rIn = tax.rente>0 ? `<div class="field" style="margin:0 0 12px"><label>Rentenbeginn (Jahr) – bestimmt, wie viel der Rente steuerpflichtig ist</label><input class="in" type="number" inputmode="numeric" min="1960" max="2060" data-rentstart value="${esc(tax.rStart)}"></div>` : "";
       let n="";
       if (TS.kind==="pflicht"){ t.title="Steuer"; t.short="Erklärung Pflicht"; t.sub = tax.due>=1 ? `ca. ${esc(eur0(tax.due))} Nachzahlung möglich` : "Steuererklärung abgeben";
@@ -3652,14 +3766,13 @@ function renderYear(){
           : `<div class="notice warn" style="margin-bottom:12px"><span><b>Steuererklärung ist Pflicht.</b> Du hattest ${y} Gehalt und ${esc(TS.why)} (über 410 €). Das ist zwar steuerfrei, erhöht aber den Steuersatz auf dein Gehalt (Progressionsvorbehalt) – ${tax.due>=1?`es droht eine <b>Nachzahlung von ca. ${esc(eur0(tax.due))}</b>. Leg dir das Geld am besten schon zurück.`:tax.due<=-1?`nach dieser Schätzung bekommst du sogar ca. <b>${esc(eur0(-tax.due))}</b> zurück.`:"nach dieser Schätzung bleibt es ungefähr ausgeglichen."} Abgabe bis 31. Juli des Folgejahres.</span></div>`; }
       else if (TS.kind==="erstattung"){ t.short=`+ ${eur0(-tax.due)}`; t.sub=`Erstattung möglich ca. ${esc(eur0(-tax.due))}`;
         n=`<div class="notice ok" style="margin-bottom:12px"><span><b>Eine Steuererklärung lohnt sich.</b> Du bekommst voraussichtlich ca. <b>${esc(eur0(-tax.due))}</b> Lohnsteuer zurück. Sie ist freiwillig und geht bis zu 4 Jahre rückwirkend.</span></div>`; }
-      else if (TS.kind==="none" && !TS.jobMain){ t.short="Nicht nötig"; t.sub="Keine Steuererklärung nötig";
+      else if (TS.kind==="none" && (!TS.jobMain || !TS.show)){ t.short="Nicht nötig"; t.sub="Keine Steuererklärung nötig";
         n=`<div class="notice info" style="margin-bottom:12px"><span>Nach dieser Schätzung musst du für ${y} keine Steuererklärung abgeben und bekommst auch nichts zurück.</span></div>`; }
       t.body = n + rIn + t.body;
     }
   }
   tiles.sort((a,b)=>ord.indexOf(a.k)-ord.indexOf(b.k));
   const sel=tiles.find(t=>t.k===UI.anaSel);
-  const GRP=[["Auswertung",["kpi","cat","trend","io"]],["Planung",["calc","plan"]],["Arbeit &amp; Steuer",["lohn","wk","tax","euer"]]];
   const tileBtn=t=>`<button data-anaopen="${t.k}" data-tk="${t.k}" aria-pressed="${t.k===UI.anaSel}" style="--tc:${userCol("ana",t.k)||themeCol(TL[t.k][1], ord.indexOf(t.k))}"><span>${ic(t.icon,20)}</span>${t.k==="wk"&&!hasJob()?"Steuererkl.":TL[t.k][0]}<small>${esc(t.short||"")}</small></button>`;
   // tiles in groups; the opened one shows right under its own group
   TED.year={}; for (const t of tiles) TED.year[t.k]=[TL[t.k][0], themeCol(TL[t.k][1], ord.indexOf(t.k)), t.icon];
