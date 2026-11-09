@@ -310,6 +310,22 @@ html.touch .kpad{display:grid}
 .legalbox h2{margin:10px 0 4px;font-family:var(--f-display);font-size:22px}.lgic{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;background:var(--accent-soft);color:var(--accent)}
 .lgl{margin:0 0 10px;padding-left:18px;line-height:1.6;font-size:14px}.lgchk{display:flex;gap:10px;align-items:flex-start;margin:14px 0;font-size:13.5px;line-height:1.45}.lgchk input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--accent)}
 .legalbox .btn{width:100%;justify-content:center}.legalbox .btn:disabled{opacity:.45}
+.sprof .pstat{display:block;opacity:.85;font-size:11.5px;margin-top:2px}
+.qsw{padding:4px 14px;margin:12px 0 0}.qswr{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.qswr:last-child{border:0}
+.qswr .qi{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none}
+.qswr>b,.qsl{flex:1}.qsl{background:none;border:0;color:inherit;font:inherit;text-align:left;padding:0;cursor:pointer;display:flex;flex-direction:column}.qsl small{color:var(--muted);font-size:12px}
+.tg{width:46px;height:28px;border-radius:99px;border:0;background:var(--sunk);position:relative;cursor:pointer;flex:none;transition:background .2s}.tg:after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s}
+.tg.on{background:var(--accent)}.tg.on:after{left:21px}
+.hasnew{position:relative}.hasnew:after{content:"neu";position:absolute;top:6px;right:6px;background:#e0902b;color:#fff;font-size:9.5px;font-weight:800;border-radius:6px;padding:1px 5px}
+.clog{padding:12px 0;border-bottom:1px solid var(--line)}.clog.top .clh b{color:var(--accent)}.clh{display:flex;justify-content:space-between;align-items:baseline}.clog ul{margin:6px 0 0;padding-left:18px;line-height:1.55;font-size:14px}
+.fbk{display:flex;gap:8px;margin-bottom:12px}.chip.on{background:var(--accent);color:#fff}
+.abo{padding:12px 0;border-bottom:1px solid var(--line)}.abh{display:flex;align-items:center;gap:10px;margin-bottom:8px}.abh .n{flex:1;display:flex;flex-direction:column}.abh small{color:var(--muted)}.abo .grid2{margin:0}
+.exr{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.exr:last-of-type{border-bottom:0}.exr .n{flex:1;display:flex;flex-direction:column;min-width:0}.exr small{color:var(--muted);font-size:12.5px;line-height:1.4}
+.exi{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none}.exi[style*="background"]{color:#fff}
+.lrow{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:14px;background:var(--sunk);margin-bottom:6px}.lrow.on{background:var(--accent-soft)}.lrow.off{opacity:.7}
+.stor{margin-bottom:6px}.stor>b{font-family:var(--f-display);font-size:28px;display:block}.storbar{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--sunk);margin:8px 0 4px}.storbar i{display:block;height:100%}
+textarea.in{font-family:inherit;line-height:1.45}
+.devname{padding:6px 10px;font-weight:700;margin-bottom:2px}
 .ictile.bavatar.lpk svg{width:62%;height:62%}
 .ictile.bavatar img{position:absolute;inset:0;margin:auto;width:24px;height:24px;object-fit:contain}
 .card h2:has(.h2ic){display:flex;align-items:center;gap:10px}
@@ -1190,6 +1206,15 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
     <div class="card sp" data-sp="farben" id="colorEd" hidden></div>
     <div class="card sp" data-sp="amt" id="amtEd" hidden></div>
     <div class="card sp" data-sp="recht" id="rechtEd" hidden></div>
+    <div class="card sp" data-sp="abos" id="abosEd" hidden></div>
+    <div class="card sp" data-sp="export" id="exportEd" hidden></div>
+    <div class="card sp" data-sp="sprache" id="spracheEd" hidden></div>
+    <div class="card sp" data-sp="neu" id="neuEd" hidden></div>
+    <div class="card sp" data-sp="hilfe" id="hilfeEd" hidden></div>
+    <div class="card sp" data-sp="feedback" id="fbEd" hidden></div>
+    <div class="card sp" data-sp="speicher" id="speicherEd" hidden></div>
+    <div class="card sp" data-sp="geraete" id="geraeteEd" hidden></div>
+
     <div class="sp pc" data-sp="kategorien" hidden>
       <div class="pc-sect">Ausgaben privat <span id="catMon"></span></div>
       <div class="crows" id="catEd-ausgabe"></div>
@@ -1888,7 +1913,12 @@ const LEGAL = {
 <h3>Muster-Widerrufsformular</h3><p>An: ${impLines().replace(/<br>/g,", ")}<br>Hiermit widerrufe(n) ich/wir den von mir/uns abgeschlossenen Vertrag über folgende digitale Inhalte/Dienstleistung: ______<br>Bestellt am: ______<br>Name: ______<br>Anschrift: ______<br>Datum: ______</p>`],
   impressum:["Impressum", ()=>`<h3>Angaben gemäß § 5 DDG</h3><p>${impLines()}</p><p class="small muted">Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV: siehe oben.</p>`]
 };
-const legalKeys = () => ["datenschutz","agb",...(LEGAL_PAID?["widerruf"]:[]),"impressum"];
+LEGAL.lizenzen=["Lizenzen", ()=>`<p>Finanz MAMI verwendet diese freien Bausteine – danke an alle, die sie bauen:</p>
+<h3>Inter (Schrift)</h3><p>© The Inter Project Authors (Rasmus Andersson). SIL Open Font License 1.1 – die Schrift darf frei genutzt und weitergegeben werden, aber nicht allein verkauft werden.</p>
+<h3>Simple Icons (Laden-Logos)</h3><p>CC0 1.0 – gemeinfrei. Die Logos sind Marken der jeweiligen Unternehmen und dienen nur zur Erkennung; es besteht keine Verbindung zu diesen Unternehmen.</p>
+<h3>Tesseract.js (Texterkennung)</h3><p>© Tesseract.js-Autoren, Apache License 2.0.</p>
+<h3>pdf.js (PDF lesen)</h3><p>© Mozilla Foundation, Apache License 2.0.</p>`];
+const legalKeys = () => ["datenschutz","agb",...(LEGAL_PAID?["widerruf"]:[]),"impressum","lizenzen"];
 function renderRecht(){
   const el=$("rechtEd"); if (!el) return; const open=UI.legalOpen||"";
   el.innerHTML = legalKeys().map(k=>`<div class="lgsec ${open===k?"on":""}"><button class="lghd" data-legal="${k}"><b>${LEGAL[k][0]}</b>${ic(open===k?"up":"down",18)}</button>${open===k?`<div class="legal">${LEGAL[k][1]()}</div>`:""}</div>`).join("")
@@ -1920,6 +1950,156 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
   try{ localStorage.setItem("hb-legal", LEGAL_VER); }catch(_){}
   S.settings.legalOk={v:LEGAL_VER, d:isoToday()}; saveSettings();
   const el=$("legalBg"); if (el) el.hidden=true; if (!UI.wiz) document.body.classList.remove("locked"); });
+
+/* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
+const CHANGELOG=[
+  ["0.4.5","9. November 2026",["Einstellungen neu: Profil mit Zahlen, Schnell-Schalter, Abos & Verträge, Export, Hilfe, Feedback, Belege & Speicher, Geräte"]],
+  ["0.4.4","9. November 2026",["Datenschutz, Nutzungsbedingungen und Impressum","Schrift und Laden-Logos eingebaut – nichts mehr an Google"]],
+  ["0.4.3","9. November 2026",["Mindestlohn-Automatik: Gehalt steigt jedes Jahr mit","Werte pro Jahr (Mindestlohn, Minijob-Grenze)"]],
+  ["0.4.2","9. November 2026",["Eigene Startseite für Studium, Schule, Ausbildung, Rente, Elternzeit, Krankengeld und Beamte"]],
+  ["0.4.1","9. November 2026",["Steuer-Kachel passend zu jeder Gruppe","Neu: Beamte"]],
+  ["0.4.0","9. November 2026",["Keine Steuer-Kacheln mehr bei Grundsicherung"]]];
+function curVerShort(){ const n=+((document.querySelector('meta[name="hb-version"]')||{}).content||0); return n ? verName(n).replace(/^V /,"") : CHANGELOG[0][0]; }
+function neuUnseen(){ try{ return localStorage.getItem("hb-seenlog")!==CHANGELOG[0][0]; }catch(e){ return false; } }
+function renderNeu(){ const el=$("neuEd"); if (!el) return; try{ localStorage.setItem("hb-seenlog", CHANGELOG[0][0]); }catch(e){}
+  el.innerHTML = CHANGELOG.map(([v,d,items],i)=>`<div class="clog ${i?"":"top"}"><div class="clh"><b>V ${esc(v)}</b><span class="small muted">${esc(d)}</span></div><ul>${items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join(""); }
+
+const FAQ=[
+  ["Wie trage ich etwas ein?","Tippe unten auf das große Plus. Du kannst selbst eintippen, einen Beleg fotografieren oder Kontoauszüge importieren."],
+  ["Wo finde ich meine Belegfotos?","Einstellungen › Belege & Speicher › „Belege ansehen“ – oder in den Buchungen oben auf „Belege“."],
+  ["Wie fotografiere ich einen Kontoauszug?","Plus › Foto › Kontoauszug. Leg das Blatt flach auf einen dunklen Untergrund, gutes Licht, alle vier Ecken im Bild. Die App prüft Schärfe und Kanten."],
+  ["Warum stimmt mein Kontostand nicht?","Trag einmal den Stand vom 1. Januar ein (Einstellungen › Konten). Danach rechnet die App jeden Monat weiter."],
+  ["Was ist „pro Tag frei“?","Geld auf dem Konto minus alles, was diesen Monat noch fest abgeht (Fixkosten, Rücklage), geteilt durch die restlichen Tage."],
+  ["Sind meine Daten sicher?","Sie bleiben auf deinem Gerät. Mit Abgleich gehen sie verschlüsselt nur an deinen Synology-Server. Unter Sicherheit kannst du eine PIN oder den Fingerabdruck einschalten."],
+  ["Wie mache ich ein Backup?","Einstellungen › Backup. Auf dem Handy und PC macht die App das auch automatisch jede Woche."],
+  ["Wie stimmt die Steuer-Schätzung besser?","Lade deine Lohnabrechnungen hoch (Analyse › Gehalt) und trag Vorsorge und Werbungskosten ein. Es bleibt eine Schätzung."],
+  ["Ich habe eine neue Arbeit / bin arbeitslos geworden","Einstellungen › Steuer & Einkommen (oder die Kachel deiner Gruppe) › „Wie verdienst du dein Geld?“. Die App baut sich danach um."],
+  ["Wie lösche ich alles?","Einstellungen › Backup › „Alle Daten löschen“."]];
+function renderHilfe(){ const el=$("hilfeEd"); if (!el) return; const o=UI.faqOpen;
+  el.innerHTML = FAQ.map(([q,a],i)=>`<div class="lgsec ${o===i?"on":""}"><button class="lghd" data-faq="${i}"><b>${esc(q)}</b>${ic(o===i?"up":"down",18)}</button>${o===i?`<p class="small" style="margin:0 0 12px;line-height:1.55">${esc(a)}</p>`:""}</div>`).join("")
+   + `<button class="btn" data-spgo="feedback" style="margin-top:14px">Frage nicht dabei? Schreib uns</button>`; }
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-faq]"); if (!b) return; const i=+b.dataset.faq; UI.faqOpen = UI.faqOpen===i ? null : i; renderHilfe(); });
+
+function fbText(){ const t=($("fbTxt")||{}).value||""; const info=($("fbInfo")||{}).checked;
+  return t.trim() + (info?`\n\n---\nFinanz MAMI ${verName(+((document.querySelector('meta[name="hb-version"]')||{}).content||0))} · ${window.AndroidBridge?(IS_PC?"PC":"Android"):"Browser"} · ${(WORK.find(x=>x[0]===S.settings.work)||[,"–"])[1]}`:""); }
+function renderFeedback(){ const el=$("fbEd"); if (!el) return; if (el.contains(document.activeElement)) return;
+  const kind=UI.fbKind||"idee", mail=IMPRESSUM.mail;
+  el.innerHTML=`<div class="fbk">${[["fehler","Fehler"],["idee","Idee"],["lob","Lob"]].map(([k,l])=>`<button class="chip ${kind===k?"on":""}" data-fbk="${k}" aria-pressed="${kind===k}">${l}</button>`).join("")}</div>
+    <div class="field"><label for="fbTxt">${kind==="fehler"?"Was ist passiert? Was hast du davor gemacht?":kind==="lob"?"Was gefällt dir?":"Was wünschst du dir?"}</label><textarea class="in" id="fbTxt" rows="6" placeholder="Schreib einfach drauflos …">${esc(UI.fbDraft||"")}</textarea></div>
+    <label class="lgchk" style="margin:4px 0 12px"><input type="checkbox" id="fbInfo" checked><span>Version, Gerät und Gruppe anhängen (keine Finanzdaten)</span></label>
+    <div class="row-btns" style="justify-content:flex-start">${mail?`<button class="btn primary" id="fbMail">Per E-Mail senden</button>`:""}<button class="btn ${mail?"":"primary"}" id="fbCopy">Text kopieren</button></div>
+    ${mail?"":`<p class="small muted" style="margin:10px 0 0">Die Feedback-Adresse wird mit dem Impressum ergänzt. Bis dahin: Text kopieren und an den Entwickler schicken.</p>`}`; }
+document.addEventListener("input", e=>{ if (e.target.id==="fbTxt") UI.fbDraft=e.target.value; });
+document.addEventListener("click", async e=>{
+  const k=e.target.closest("[data-fbk]"); if (k){ UI.fbKind=k.dataset.fbk; renderFeedback(); return; }
+  if (e.target.closest("#fbCopy")){ const t=fbText(); if (!t.trim()){ toast("Bitte erst etwas schreiben"); return; } try{ await navigator.clipboard.writeText(t); toast("Kopiert"); }catch(_){ toast("Kopieren ging nicht – Text bitte markieren"); } return; }
+  if (e.target.closest("#fbMail")){ const t=fbText(); if (!t.trim()){ toast("Bitte erst etwas schreiben"); return; } const subj={fehler:"Fehler",idee:"Idee",lob:"Lob"}[UI.fbKind||"idee"]+" – Finanz MAMI";
+    const u=`mailto:${IMPRESSUM.mail}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(t)}`; try{ window.open(u,"_blank"); }catch(_){ location.href=u; } }
+});
+
+// subscriptions & contracts: fixed costs with a renewal date and notice period
+function aboCfg(){ return S.settings.abos||{}; }
+function aboDeadline(a){ if (!a||!a.end) return null; const d=new Date(a.end+"T12:00"); d.setMonth(d.getMonth()-(Number(a.notice)||0)); return isoOf(d); }
+function renderAbos(){ const el=$("abosEd"); if (!el) return; if (el.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) return;
+  const A=aboCfg(), today=isoToday();
+  const list=S.fixed.filter(f=>!debtFor(f.id)).map(f=>({f,a:A[f.id]||{},dl:aboDeadline(A[f.id])})).sort((x,y)=>(x.dl||"9999").localeCompare(y.dl||"9999")||String(x.f.name).localeCompare(String(y.f.name)));
+  if (!list.length){ el.innerHTML=`<p class="small muted">Noch keine Fixkosten. Leg zuerst unter „Fixkosten“ deine Abos und Verträge an – hier trägst du dann Laufzeit und Kündigungsfrist ein.</p>`; return; }
+  const sumM=sum(S.fixed,f=>{ const a=planAmt(f, ymOf(new Date())); return (f.rhythm||"monatlich")==="monatlich"?a:0; });
+  el.innerHTML=`<p class="small muted" style="margin:0 0 10px">Trag ein, bis wann ein Vertrag läuft und wie lange vorher du kündigen musst. Die App erinnert dich 30 Tage vor der Frist.</p>
+    ${list.map(({f,a,dl})=>{ const days=dl?Math.round((new Date(dl+"T12:00")-new Date(today+"T12:00"))/864e5):null;
+      return `<div class="abo"><div class="abh">${(()=>{ const b=brandFor(f.name); return b?brandBadge(b):tile("ausgabe",f.cat||f.name); })()}<span class="n"><b>${esc(f.name)}</b><small>${esc(eur(listAmt(f, ymOf(new Date()))))} · ${esc(f.rhythm||"monatlich")}</small></span>${dl?`<span class="pill ${days<0?"":days<=30?"bad":"ok"}">${days<0?"Frist vorbei":days<=30?`noch ${days} T.`:`kündbar bis ${new Date(dl+"T12:00").toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"2-digit"})}`}</span>`:""}</div>
+        <div class="grid2"><div class="field"><label>Läuft bis / verlängert sich am</label><input class="in" type="date" data-aboend="${esc(f.id)}" value="${esc(a.end||"")}"></div>
+        <div class="field"><label>Kündigungsfrist</label><select class="in" data-abonot="${esc(f.id)}">${[[0,"jederzeit"],[0.5,"2 Wochen"],[1,"1 Monat"],[2,"2 Monate"],[3,"3 Monate"],[6,"6 Monate"]].map(([v,l])=>`<option value="${v}" ${Number(a.notice||0)===v?"selected":""}>${l}</option>`).join("")}</select></div></div></div>`; }).join("")}`;
+}
+document.addEventListener("change", e=>{ const t=e.target; const id=t.dataset&&(t.dataset.aboend||t.dataset.abonot); if (!id) return;
+  const A=S.settings.abos={...(S.settings.abos||{})}; const a=A[id]={...(A[id]||{})};
+  if (t.dataset.aboend!=null) a.end=t.value||""; else a.notice=Number(t.value)||0;
+  if (!a.end && !a.notice) delete A[id]; t.blur(); saveSettings(); renderAbos(); });
+function aboHints(hints){ const A=aboCfg(), today=isoToday();
+  for (const f of S.fixed){ const dl=aboDeadline(A[f.id]); if (!dl) continue; const d=Math.round((new Date(dl+"T12:00")-new Date(today+"T12:00"))/864e5);
+    if (d>=0 && d<=30) hints.push({k:"abo", lvl:"warn", t:`${f.name}: kündigen bis ${new Date(dl+"T12:00").toLocaleDateString("de-DE")}`, s:d===0?"Heute ist der letzte Tag.":`Noch ${d} ${d===1?"Tag":"Tage"} – sonst verlängert sich der Vertrag.`}); } }
+
+// export: bookings as CSV for Excel, monthly report as a printable page
+function exportCsv(from, to){
+  const rows=[["Datum","Art","Kategorie","Text","Betrag"]];
+  for (const t of S.tx.filter(t=>t.date>=from && t.date<=to).sort((a,b)=>a.date.localeCompare(b.date)))
+    rows.push([t.date, {ausgabe:"Ausgabe",einnahme:"Einnahme",betrieb:"Betrieblich",vorauszahlung:"Steuer-Vorauszahlung"}[t.kind]||t.kind, t.cat||"", txPayee(t), (t.kind==="einnahme"?"":"-")+Number(t.amount).toFixed(2).replace(".",",")]);
+  return {n:rows.length-1, text:"﻿"+rows.map(r=>r.map(v=>{ v=csvSafe(v); return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }).join(";")).join("\r\n")};
+}
+function reportHtml(ym){
+  const c=monthCalc(ym), [y,m]=ymParts(ym), by={};
+  for (const t of c.tx) if (t.kind==="ausgabe"||t.kind==="betrieb") by[t.cat||"Sonstiges"]=(by[t.cat||"Sonstiges"]||0)+t.amount;
+  const cats=Object.entries(by).sort((a,b)=>b[1]-a[1]);
+  const fx=fixedForMonth(ym);
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Monatsbericht ${MONTHS[m-1]} ${y}</title>
+<style>body{font-family:system-ui,sans-serif;color:#14251c;max-width:760px;margin:24px auto;padding:0 16px}h1{margin:0}h2{margin:26px 0 8px;font-size:17px;color:#1a7a5c}table{width:100%;border-collapse:collapse;font-size:14px}td{padding:6px 4px;border-bottom:1px solid #e3e8e5}td:last-child{text-align:right;white-space:nowrap}.k{display:flex;gap:10px;margin-top:14px}.k div{flex:1;background:#eef5f0;border-radius:12px;padding:10px}.k b{display:block;font-size:20px}small{color:#5d7466}@media print{body{margin:0}}</style></head><body>
+<small>Finanz MAMI · Monatsbericht</small><h1>${MONTHS[m-1]} ${y}</h1>${S.settings.name?`<small>${esc(S.settings.name)}</small>`:""}
+<div class="k"><div><small>Einnahmen</small><b>${esc(eur(c.income))}</b></div><div><small>Ausgaben</small><b>${esc(eur(c.expenses))}</b></div><div><small>${c.net>=0?"Übrig":"Minus"}</small><b>${esc(eur(c.net))}</b></div></div>
+<h2>Ausgaben nach Kategorie</h2><table>${cats.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${esc(eur(v))}</td></tr>`).join("")||"<tr><td>keine</td><td></td></tr>"}</table>
+<h2>Fixkosten</h2><table>${fx.map(f=>`<tr><td>${esc(f.name)}</td><td>${esc(eur((c.paid[f.id]!=null?c.paid[f.id]:planAmt(f,ym))))}</td></tr>`).join("")||"<tr><td>keine</td><td></td></tr>"}</table>
+<h2>Alle Buchungen</h2><table>${c.tx.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(t=>`<tr><td>${esc(new Date(t.date+"T12:00").toLocaleDateString("de-DE"))} · ${esc(txPayee(t)||t.cat||"")}</td><td>${t.kind==="einnahme"?"+":"−"} ${esc(eur(t.amount))}</td></tr>`).join("")}</table>
+<p><small>Erstellt am ${new Date().toLocaleDateString("de-DE")}. Zum Speichern als PDF: Teilen › Drucken › Als PDF speichern.</small></p></body></html>`;
+}
+function renderExport(){ const el=$("exportEd"); if (!el) return; const ym=UI.ym, [y,m]=ymParts(ym);
+  el.innerHTML=`<div class="exr"><span class="exi">${ic("doc",20)}</span><span class="n"><b>Monatsbericht ${esc(MONTHS[m-1])} ${y}</b><small>Einnahmen, Ausgaben, Kategorien und alle Buchungen – z. B. fürs Jobcenter oder BAföG-Amt. Lässt sich als PDF drucken.</small></span><button class="btn primary" data-exp="report">Speichern</button></div>
+    <div class="exr"><span class="exi">${ic("chart",20)}</span><span class="n"><b>Buchungen ${esc(MONTHS[m-1])} ${y}</b><small>Als Tabelle für Excel (CSV)</small></span><button class="btn" data-exp="month">Speichern</button></div>
+    <div class="exr"><span class="exi">${ic("cal",20)}</span><span class="n"><b>Buchungen ganzes Jahr ${y}</b><small>Als Tabelle für Excel (CSV)</small></span><button class="btn" data-exp="year">Speichern</button></div>
+    ${hasSelf()?`<div class="exr"><span class="exi">${ic("receipt",20)}</span><span class="n"><b>EÜR ${y}</b><small>Für Steuerbüro oder ELSTER</small></span><button class="btn" id="euerBtn" data-year="${y}">Speichern</button></div>`:""}
+    <p class="small muted" style="margin:10px 0 0">Monat und Jahr richten sich nach dem Monat oben in der App. Ein komplettes Backup gibt es unter „Backup“.</p>`; }
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-exp]"); if (!b) return; const ym=UI.ym, y=ym.slice(0,4), k=b.dataset.exp;
+  if (k==="report"){ saveTextFile(`Monatsbericht-${ym}.html`, reportHtml(ym), "text/html", "Monatsbericht gespeichert"); return; }
+  const r = k==="month" ? exportCsv(ym+"-01", ym+"-31") : exportCsv(y+"-01-01", y+"-12-31");
+  if (!r.n){ toast("Keine Buchungen in diesem Zeitraum"); return; }
+  saveTextFile(`Buchungen-${k==="month"?ym:y}.csv`, r.text, "text/csv", `${r.n} Buchungen gespeichert`); });
+
+function renderSprache(){ const el=$("spracheEd"); if (!el) return;
+  el.innerHTML=`<div class="section-title" style="font-size:14px;margin-top:0">Sprache</div>
+    <div class="lrow on"><b>Deutsch</b><span>✓</span></div><div class="lrow off"><b>English</b><span class="small muted">kommt bald</span></div>
+    <div class="section-title" style="font-size:14px">Währung</div>
+    <div class="lrow on"><b>Euro (€)</b><span>✓</span></div><div class="lrow off"><b>Schweizer Franken, Pfund, Dollar …</b><span class="small muted">kommt mit Englisch</span></div>
+    <div class="section-title" style="font-size:14px">Zahlen & Datum</div><p class="small muted" style="margin:0">So zeigt die App Beträge und Daten: <b>1.234,56 €</b> · <b>${esc(new Date().toLocaleDateString("de-DE"))}</b></p>`; }
+
+// receipts & storage
+async function renderSpeicher(){ const el=$("speicherEd"); if (!el) return;
+  el.innerHTML=`<p class="small muted">Wird berechnet …</p>`;
+  let rc=0, rb=0, lc=0, lb=0, est=null, ls=0;
+  try { const all=await rcptOp("readonly", st=>st.getAll()); rc=(all||[]).length; rb=sum(all||[],v=>((v&&v.img)||"").length*0.75); } catch(e){}
+  try { const all=await logoStore("readonly", st=>st.getAll()); lc=(all||[]).filter(v=>v&&v.data).length; lb=sum(all||[],v=>((v&&v.data)||"").length*0.75); } catch(e){}
+  try { for (let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); ls+=(k.length+(localStorage.getItem(k)||"").length)*2; } } catch(e){}
+  try { if (navigator.storage && navigator.storage.estimate) est=await navigator.storage.estimate(); } catch(e){}
+  const mb=v=>v<1048576?`${Math.max(1,Math.round(v/1024))} KB`:`${(v/1048576).toLocaleString("de-DE",{maximumFractionDigits:1})} MB`;
+  const tot=rb+lb+ls, bar=(v,c)=>`<i style="width:${tot?Math.max(v?2:0,v/tot*100):0}%;background:${c}"></i>`;
+  el.innerHTML=`<div class="stor"><b>${mb(tot)}</b><span class="small muted">belegt die App auf diesem Gerät</span><div class="storbar">${bar(rb,"var(--accent)")}${bar(ls,"#7a5bc2")}${bar(lb,"#c27c0e")}</div></div>
+    <div class="exr"><span class="exi" style="background:var(--accent)">${ic("camera",20)}</span><span class="n"><b>Belegfotos</b><small>${rc} ${rc===1?"Foto":"Fotos"} · ${mb(rb)}</small></span><button class="btn primary" id="spBelege">Ansehen</button></div>
+    <div class="exr"><span class="exi" style="background:#7a5bc2">${ic("doc",20)}</span><span class="n"><b>Buchungen & Einstellungen</b><small>${S.tx.length} Buchungen · ${mb(ls)}</small></span></div>
+    <div class="exr"><span class="exi" style="background:#c27c0e">${ic("cart",20)}</span><span class="n"><b>Geladene Logos</b><small>${lc} · ${mb(lb)}</small></span>${lc?`<button class="btn" id="logoClear">Leeren</button>`:""}</div>
+    ${est&&est.quota?`<p class="small muted" style="margin:10px 0 0">Frei für die App: ca. ${mb(Math.max(0,est.quota-est.usage))}</p>`:""}`;
+}
+document.addEventListener("click", e=>{ if (!e.target.closest("#spBelege")) return; try{ if (spsOpen()) spSheetClose(); }catch(_){} UI.sp=null; UI.view="belege"; render(); window.scrollTo({top:0}); });
+document.addEventListener("click", async e=>{ if (!e.target.closest("#logoClear")) return; try{ await logoStore("readwrite", st=>st.clear()); LOGO.map.clear(); toast("Logo-Speicher geleert"); }catch(_){ } renderSpeicher(); render(); });
+
+// devices: every device announces itself through the sync (col "app", id "dev-…")
+function devId(){ let id=null; try{ id=localStorage.getItem("hb-devid"); if (!id){ id=newId(); localStorage.setItem("hb-devid", id); } }catch(e){ id="local"; } return id; }
+function devType(){ return IS_PC ? "pc" : window.AndroidBridge ? "phone" : "web"; }
+function devList(){ try{ return JSON.parse(localStorage.getItem("hb-devs")||"{}"); }catch(e){ return {}; } }
+function devStore(id, data){ const d=devList(); if (data===null) delete d[id]; else d[id]=data; try{ localStorage.setItem("hb-devs", JSON.stringify(d)); }catch(e){} }
+function devMe(){ const d=devList()[devId()]||{}; return { name: d.name || (devType()==="pc"?"PC":devType()==="phone"?"Handy":"Browser"), type:devType(), ver:curVerShort(), seen:Date.now() }; }
+function devPing(force){ if (!SYNCABLE || !SYNC.token) return; const me=devList()[devId()]; if (!force && me && Date.now()-(me.seen||0)<6*3600e3 && me.ver===curVerShort()) return;
+  const d=devMe(); devStore(devId(), d); enqueue("app","dev-"+devId(), d); }
+setTimeout(()=>devPing(), 8000); setInterval(()=>devPing(), 30*60e3);
+function renderGeraete(){ const el=$("geraeteEd"); if (!el) return; if (el.contains(document.activeElement) && document.activeElement.tagName==="INPUT") return;
+  const me=devId(), L=Object.entries(devList()); if (!L.some(([id])=>id===me)) L.unshift([me, devMe()]);
+  const ago=t=>{ const m=Math.round((Date.now()-t)/60000); return m<2?"gerade eben":m<60?`vor ${m} Min.`:m<1440?`vor ${Math.round(m/60)} Std.`:`vor ${Math.round(m/1440)} Tagen`; };
+  el.innerHTML=`${!SYNCABLE||!SYNC.token?`<div class="notice info" style="margin-bottom:12px"><span>Der Abgleich ist aus – andere Geräte siehst du erst, wenn er an ist.</span><button class="btn" data-spgo="sync">Abgleich</button></div>`:""}
+    ${L.sort((a,b)=>(b[0]===me)-(a[0]===me)||(b[1].seen||0)-(a[1].seen||0)).map(([id,d])=>`<div class="exr"><span class="exi">${ic(d.type==="pc"?"tv":d.type==="phone"?"phone":"cloud",20)}</span><span class="n">${id===me?`<input class="in devname" id="devName" value="${esc(d.name||"")}" aria-label="Name dieses Geräts">`:`<b>${esc(d.name||"Gerät")}</b>`}<small>${id===me?"Dieses Gerät · ":""}V ${esc(d.ver||"?")} · ${id===me?"jetzt aktiv":"zuletzt "+ago(d.seen||0)}</small></span>${id===me?"":`<button class="icon-btn" data-devdel="${esc(id)}" aria-label="Aus der Liste entfernen">×</button>`}</div>`).join("")}
+    ${SYNCABLE&&SYNC.token?`<div class="wipe" style="margin-top:14px"><b>Handy verloren?</b><span class="small muted">Meldet alle Geräte ab – jedes muss sich mit dem Synology-Passwort neu anmelden.</span><button class="btn wipebtn" id="logoutAll">Alle Geräte abmelden</button></div>`:""}`;
+}
+document.addEventListener("change", e=>{ if (e.target.id!=="devName") return; const d={...devMe(), name:e.target.value.trim().slice(0,30)||devMe().name}; devStore(devId(), d); if (SYNC.token) enqueue("app","dev-"+devId(), d); e.target.blur(); toast("Gespeichert"); renderGeraete(); });
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-devdel]"); if (!b) return; const id=b.dataset.devdel; devStore(id, null); if (SYNC.token) enqueue("app","dev-"+id, null); renderGeraete(); });
+// quick switches on the settings page
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-qsw]"); if (!b) return; const k=b.dataset.qsw;
+  if (k==="lock"){ if (spUseSheet()) spSheetOpen("sicherheit"); else { UI.sp="sicherheit"; renderSpPages(); } return; }
+  if (k==="notify"){ const c=notifyCfg(); if (c.on){ c.on=false; notifySave(c); toast("Erinnerungen aus"); renderSetHome(); } else { if (spUseSheet()) spSheetOpen("notify"); else { UI.sp="notify"; renderSpPages(); } } } });
 
 function jlSave(){ saveSettings(); }
 document.addEventListener("change", e=>{
@@ -2591,6 +2771,7 @@ function renderHome(){
     if (nm<=1 && a && b && ym>=cur){ const md=S.settings.mindest||{};
       if (md.on && md.h && a.ml!==b.ml){ const plus=(a.ml-b.ml)*md.h*13/3; hints.unshift({k:"mindest", lvl:"good", t:`Neu ab ${ny}: Mindestlohn ${ml2(a.ml)} €`, s:`Du bekommst ca. ${eur0(plus)} mehr brutto im Monat. Prüf, ob es auf deiner Abrechnung steht.`}); }
       if (a.mj!==b.mj && (["minijob","studium","schule","alg","grusi"].includes(S.settings.work)||hasExtra("minijob"))) hints.push({k:"mjgrenze", lvl:"warn", t:`Neu ab ${ny}: Minijob-Grenze ${a.mj} €`, s:`vorher ${b.mj} € im Monat`}); } }
+  aboHints(hints);
   UI.hints=hints; updateBell();
   if (ym===cur) notifyAlerts(hints);
   // --- budgets as tiles (the 3 that are used up most)
@@ -4137,7 +4318,7 @@ function qrSvg(text, px){
 const SP_PAGES = {
   konten:["Konten & Spaces","wallet"], budgets:["Monatsbudgets","target"], schulden:["Schulden","bank"], backup:["Backup","save"],
   profil:["Profil","user"], sync:["Abgleich & Updates","cloud"], notify:["Benachrichtigungen","bell"], steuer:["Steuer & Einkommen","receipt"],
-  start:["Startseite","home"], laeden:["Deine Läden","cart"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"], farben:["Farben","palette"], recht:["Rechtliches","doc"], get amt(){ return [(GPROF[S.settings&&S.settings.work]||{}).tile||"Leistung & Amt","cash"]; }
+  start:["Startseite","home"], laeden:["Deine Läden","cart"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"], farben:["Farben","palette"], recht:["Rechtliches","doc"], abos:["Abos & Verträge","repeat"], export:["Export","arrowDown"], sprache:["Sprache & Währung","book"], neu:["Was ist neu","spark"], hilfe:["Hilfe","insight"], feedback:["Feedback","heart"], speicher:["Belege & Speicher","camera"], geraete:["Geräte","phone"], get amt(){ return [(GPROF[S.settings&&S.settings.work]||{}).tile||"Leistung & Amt","cash"]; }
 };
 function spSummary(k){
   const st=S.settings, y=UI.ym.slice(0,4);
@@ -4157,6 +4338,11 @@ function spSummary(k){
   if (k==="kategorien"){ return `${cats("ausgabe").length+cats("betrieb").length+incCats().length} Kategorien`; }
   return "";
 }
+function profLine(){ const w=WORK.find(x=>x[0]===S.settings.work), ex=(S.settings.extra||[]).map(k=>(EXTRA.find(x=>x[0]===k)||[,""])[1].replace(/ nebenbei| \/ Nebenjob/,"")).filter(Boolean);
+  const first=S.tx.reduce((m,t)=>t.date&&t.date<m?t.date:m,"9999"); const since = first<"9999" ? ` · seit ${MSHORT[Number(first.slice(5,7))-1]} ${first.slice(0,4)}` : "";
+  return (w?w[1]:"Profil bearbeiten")+(ex.length?" + "+ex.join(", "):"")+since; }
+function profStats(){ const n=S.tx.length, c=abCfg(); const bk = c.last ? (()=>{ const d=Math.floor((Date.now()-c.last)/864e5); return d<1?"Backup heute":d===1?"Backup gestern":`Backup vor ${d} Tagen`; })() : "noch kein Backup";
+  return `${n.toLocaleString("de-DE")} ${n===1?"Buchung":"Buchungen"} · ${RCPT.ids.size} Belege · ${bk}`; }
 function renderSetHome(){
   const name=S.settings.name||"";
   let dot="o", line="Nur auf diesem Gerät gespeichert";
@@ -4171,14 +4357,14 @@ function renderSetHome(){
   const TCOL={start:"#1a7a5c",steuer:"#c27c0e",kategorien:"#7a5bc2",sync:"#3d63a8",notify:"#d4813a",sicherheit:"#b23a3a"};
   const tileBtn = k => `<button class="stile" data-spgo="${k}" style="--tc:${themeCol(TCOL[k])||"var(--accent)"}"><span class="sti">${ic(SP_PAGES[k][1],22)}</span><span class="stt"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span></button>`;
   const row = k => `<button data-spgo="${k}"><span class="ic">${ic(SP_PAGES[k][1],19)}</span><span class="n"><b>${esc(SP_PAGES[k][0])}</b><small>${esc(spSummary(k))}</small></span><span class="ch">${ic("right",18)}</span></button>`;
-  const short={konten:"Konten",budgets:"Budgets",schulden:"Schulden",backup:"Backup",steuer:"Steuer",start:"Startseite",laeden:"Läden",kategorien:"Kategorien",farben:"Farben",amt:({studium:"BAföG",schule:"Taschengeld",azubi:"Ausbildung",rente:"Rente",eltern:"Elternzeit",krank:"Krankengeld",beamte:"Beihilfe"})[S.settings.work]||"Amt",recht:"Rechtliches",sync:"Abgleich",notify:"Meldungen",sicherheit:"Sicherheit"};
-  const QCOL={konten:"#3d63a8",budgets:"#c27c0e",schulden:"#7a5bc2",steuer:"#d4813a",start:"#1a7a5c",laeden:"#0f8a8a",kategorien:"#c0497a",farben:"#d14d72",amt:"#3d63a8",sync:"#2f7fb8",notify:"#e0902b",sicherheit:"#b23a3a",backup:"#2e9c74",recht:"#4b5563",dark:"#4b5563",wiz:"#8a6d1f"};
+  const short={konten:"Konten",budgets:"Budgets",schulden:"Schulden",backup:"Backup",steuer:"Steuer",start:"Startseite",laeden:"Läden",kategorien:"Kategorien",farben:"Farben",amt:({studium:"BAföG",schule:"Taschengeld",azubi:"Ausbildung",rente:"Rente",eltern:"Elternzeit",krank:"Krankengeld",beamte:"Beihilfe"})[S.settings.work]||"Amt",recht:"Rechtliches",abos:"Abos",export:"Export",sprache:"Sprache",neu:"Was ist neu",hilfe:"Hilfe",feedback:"Feedback",speicher:"Belege",geraete:"Geräte",sync:"Abgleich",notify:"Meldungen",sicherheit:"Sicherheit"};
+  const QCOL={konten:"#3d63a8",budgets:"#c27c0e",schulden:"#7a5bc2",steuer:"#d4813a",start:"#1a7a5c",laeden:"#0f8a8a",kategorien:"#c0497a",farben:"#d14d72",amt:"#3d63a8",sync:"#2f7fb8",notify:"#e0902b",sicherheit:"#b23a3a",backup:"#2e9c74",recht:"#4b5563",abos:"#0f766e",export:"#047857",sprache:"#65a30d",neu:"#15803d",hilfe:"#0e7490",feedback:"#4d7c0f",speicher:"#1a7a5c",geraete:"#3f6212",dark:"#4b5563",wiz:"#8a6d1f"};
   const dark=document.documentElement.dataset.theme==="dark";
   const qtile = k => k==="dark"
       ? `<button data-qdark="1" data-tk="dark" style="--tc:${userCol("set","dark")||QCOL.dark}" aria-pressed="${dark}"><span>${ic("spark",20)}</span>Dunkel<small>${dark?"an":"aus"}</small></button>`
     : k==="wiz"
       ? `<button data-qwiz="1" data-tk="wiz" style="--tc:${userCol("set","wiz")||QCOL.wiz}"><span>${ic("sparkle"in P?"sparkle":"check",20)}</span>Einrichtung<small>5 Schritte</small></button>`
-      : `<button data-spgo="${k}" data-tk="${k}" style="--tc:${userCol("set",k)||QCOL[k]}"><span>${ic(SP_PAGES[k][1],20)}</span>${short[k]}<small>${esc(qsub(k))}</small></button>`;
+      : `<button data-spgo="${k}" data-tk="${k}" class="${k==="neu"&&neuUnseen()?"hasnew":""}" style="--tc:${userCol("set",k)||QCOL[k]}"><span>${ic(SP_PAGES[k][1],20)}</span>${short[k]}<small>${esc(qsub(k))}</small></button>`;
   const qsub = k => {
     const st=S.settings;
     if (k==="steuer") return "Klasse "+(["I","II","III","IV","V","VI"][(Number(st.steuerklasse)||1)-1]||"I");
@@ -4188,16 +4374,30 @@ function renderSetHome(){
     if (k==="sync") return !SYNCABLE ? "aus" : !SYNC.token ? "aus" : SYNC.state==="ok" ? "an" : "wartet";
     if (k==="notify"){ const c=notifyCfg(); return !CAN_NOTIFY ? "–" : c.on&&notifyPerm()==="granted" ? "an" : "aus"; }
     if (k==="sicherheit") return lockCfg() ? "Sperre an" : "Sperre aus";
-    if (k==="recht") return "Datenschutz";
+    if (k==="recht") return "Lizenzen";
+    if (k==="abos"){ const n=Object.values(st.abos||{}).filter(a=>a&&a.end).length; return n?`${n} mit Frist`:"Fristen"; }
+    if (k==="export") return "Bericht · Excel";
+    if (k==="sprache") return "Deutsch · €";
+    if (k==="neu") return "V "+curVerShort();
+    if (k==="hilfe") return "Tipps";
+    if (k==="feedback") return "melden";
+    if (k==="speicher") return RCPT.ids.size+" Fotos";
+    if (k==="geraete"){ const n=Math.max(1,Object.keys(devList()).length); return n===1?"1 Gerät":n+" Geräte"; }
     if (k==="backup"){ try { return abCfg().on && CAN_AUTOBK ? "wöchentlich" : "Datei"; } catch(e){ return "Datei"; } }
     return spSummary(k);
   };
   const QK=Object.keys(QCOL); for (const k of QK) QCOL[k]=themeCol(QCOL[k], QK.indexOf(k));
   TED.more={}; for (const k of Object.keys(QCOL)) TED.more[k]=[k==="dark"?"Dunkel":k==="wiz"?"Einrichtung":short[k]||k, QCOL[k], k==="dark"?"spark":k==="wiz"?"check":(SP_PAGES[k]||[,"dots"])[1]];
-  const SGROUPS=[["Geld",["konten","budgets","schulden",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"])]],["Anpassen",["start","laeden","kategorien","farben",...(WIDE.matches?["dark"]:[]),"wiz"]],["App",[...(SYNCABLE||window.AndroidBridge?["sync"]:[]),"notify","sicherheit","backup","recht"]]];
+  const SGROUPS=[["Geld",["konten","budgets","schulden",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"])]],["Anpassen",["start","laeden","kategorien","farben","wiz","abos","export","sprache"]],["App",[...(SYNCABLE||window.AndroidBridge?["sync"]:[]),"backup","neu","hilfe","feedback","recht","speicher","geraete"]]];
+  const nc=notifyCfg(), nOn=CAN_NOTIFY&&nc.on&&notifyPerm()==="granted", lOn=!!lockCfg();
+  const qsw=`<div class="card qsw">
+      <div class="qswr"><span class="qi">${ic("spark",17)}</span><b>Dunkelmodus</b><button class="tg ${dark?"on":""}" data-qdark="1" role="switch" aria-checked="${dark}" aria-label="Dunkelmodus"></button></div>
+      <div class="qswr"><span class="qi">${ic("shield",17)}</span><button class="qsl" data-spgo="sicherheit"><b>App-Sperre</b><small>${lOn?"PIN / Fingerabdruck":"aus"}</small></button><button class="tg ${lOn?"on":""}" data-qsw="lock" role="switch" aria-checked="${lOn}" aria-label="App-Sperre"></button></div>
+      ${CAN_NOTIFY?`<div class="qswr"><span class="qi">${ic("bell",17)}</span><button class="qsl" data-spgo="notify"><b>Erinnerungen</b><small>${nOn?"an · Einstellungen":"aus"}</small></button><button class="tg ${nOn?"on":""}" data-qsw="notify" role="switch" aria-checked="${nOn}" aria-label="Erinnerungen"></button></div>`:""}</div>`;
   $("setHome").innerHTML = `
     <button class="sprof" data-spgo="profil" aria-label="Profil ändern"><span class="av">${S.settings.photo?`<img src="${esc(S.settings.photo)}" alt="">`:esc((name.trim()[0]||"?").toUpperCase())}</span>
-      <span class="pt"><b>${esc(name||"Dein Name")}</b><small>${name?"Profil bearbeiten":"Tippen, um Name und Foto einzutragen"}</small><span class="pchip"><i class="${dot}"></i>${esc(line)}</span></span><span class="ch">${ic("right",18)}</span></button>
+      <span class="pt"><b>${esc(name||"Dein Name")}</b><small>${name?esc(profLine()):"Tippen, um Name und Foto einzutragen"}</small><small class="pstat">${esc(profStats())}</small><span class="pchip"><i class="${dot}"></i>${esc(line)}</span></span><span class="ch">${ic("right",18)}</span></button>
+    ${qsw}
     ${tedBar("more")}
     <div class="${UI.tileEdit==="more"?"tediting":""}">${SGROUPS.map(([t,ks])=>`<div class="sgl">${t}</div><div class="sqk">${ks.map(qtile).join("")}</div>`).join("")}</div>
     <div class="small muted" style="text-align:center;margin:18px 0 4px">Finanz MAMI · ${verName(+((document.querySelector('meta[name="hb-version"]')||{}).content||0))}</div>`;
@@ -4212,6 +4412,7 @@ function renderSpPages(){
   if (k==="farben") renderColorEd();
   if (k==="amt") renderAmtEd();
   if (k==="recht") renderRecht();
+  if (k==="abos") renderAbos(); if (k==="export") renderExport(); if (k==="sprache") renderSprache(); if (k==="neu") renderNeu(); if (k==="hilfe") renderHilfe(); if (k==="feedback") renderFeedback(); if (k==="speicher") renderSpeicher(); if (k==="geraete") renderGeraete();
   const HERO={konten:["wallet","#3d63a8","Kontostände, Hauptkonto und Spaces – damit die App für jeden Monat richtig rechnet."],
     budgets:["target","#c27c0e","Wie viel du pro Monat höchstens ausgeben willst. Ab 80 % warnt die App."],
     schulden:["bank","#7a5bc2","Kredite und Schulden mit Rate – die App zeigt, wann du schuldenfrei bist."],
@@ -4219,7 +4420,12 @@ function renderSpPages(){
     steuer:["receipt","#c27c0e","Steuerklasse, Gehalt und Selbstständigkeit – daraus schätzt die App Steuer und Rücklage."],
     sicherheit:["shield","#b23a3a","PIN, Fingerabdruck und Wiederherstellung – schützt deine Finanzen auf diesem Gerät."],
     sync:["cloud","#3d63a8","Handy und PC bleiben gleich, und die App holt sich neue Versionen selbst."],
-    recht:["doc","#4b5563","Datenschutz, Nutzungsbedingungen und Impressum – was mit deinen Daten passiert."]};
+    recht:["doc","#4b5563","Datenschutz, Nutzungsbedingungen, Impressum und Lizenzen – was mit deinen Daten passiert."],
+    abos:["repeat","#0f766e","Laufzeit und Kündigungsfrist deiner Verträge – damit sich nichts ungewollt verlängert."],
+    export:["arrowDown","#047857","Buchungen als Tabelle oder Monatsbericht – fürs Amt, das Steuerbüro oder dich."],
+    speicher:["camera","#1a7a5c","Deine Belegfotos und wie viel Platz die App auf diesem Gerät braucht."],
+    geraete:["phone","#0e7490","Welche Geräte mit deiner Synology abgleichen – und wann zuletzt."],
+    feedback:["heart","#4d7c0f","Fehler gefunden oder eine Idee? Schreib es kurz auf."]};
   const h=$("spHero"), hv=k&&HERO[k];
   h.hidden=!hv;
   if (hv){ const hc=themeCol(hv[1]); h.innerHTML=`<span class="shi" style="background:${hc}">${ic(hv[0],26)}</span><span class="small">${esc(hv[2])}</span>`; h.style.setProperty("--tc",hc); }
@@ -6002,6 +6208,7 @@ async function syncNow(){
       if (pending.has(d.col+"/"+d.id)) continue;
       changed=true;
       if (d.col==="app" && d.id.startsWith("rcpt-")){ const k=d.id.slice(5); try { if (d.data && d.data.img) await rcptPut(k, d.data.img, true); else await rcptDel(k, true); } catch(e){} continue; }
+      if (d.col==="app" && d.id.startsWith("dev-")){ devStore(d.id.slice(4), d.data); continue; }
       if (d.col==="app" && d.id.startsWith("acct-")){ const k=d.id.slice(5); if (d.data===null) delete memStore.acct[k]; else memStore.acct[k]=d.data; continue; }
       if (d.col==="app"){ if (d.id==="settings" && d.data){ const m={...clone(DEFAULT_SETTINGS),...d.data}; m.cats={...clone(DEFAULT_SETTINGS.cats),...(d.data.cats||{})}; S.settings=m; } continue; }
       if (!memStore[d.col]) continue;
