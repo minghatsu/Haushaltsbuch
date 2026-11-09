@@ -572,6 +572,15 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 /* home columns: on phones the column wrappers disappear and "order" restores the one-column sequence */
 .cols,.col{display:contents}
 
+@keyframes wzInF{from{opacity:0;transform:translateX(64px)}to{opacity:1;transform:none}}
+@keyframes wzInB{from{opacity:0;transform:translateX(-64px)}to{opacity:1;transform:none}}
+@keyframes wzOutF{to{opacity:0;transform:translateX(-64px)}}
+@keyframes wzOutB{to{opacity:0;transform:translateX(64px)}}
+.wcrumb{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px}.wcrumb i{font-style:normal;color:var(--muted);font-weight:700}
+.wcrumb button,.wcrumb span{border:0;background:var(--accent-soft);color:var(--accent);font:800 12px var(--f-body);padding:5px 10px;border-radius:999px;letter-spacing:.02em}
+.wcrumb span{background:var(--accent);color:#fff}
+.wizbg{overflow-x:hidden}
+
 .wipe{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
 .wipe>b{color:var(--bad)}.wipebtn{color:var(--bad);align-self:flex-start}
 .wipego{background:var(--bad);color:#fff}.wipego:disabled{opacity:.45}
@@ -1578,7 +1587,7 @@ const workGroup = w => (WORK.find(x=>x[0]===w)||[])[3]||"";
 const WORK_INC = {angestellt:["Gehalt","lohn"], minijob:["Minijob","minijob"], azubi:["Ausbildungsgehalt","lohn"], studium:["BAföG","bafoeg"], schule:["Schüler-BAföG","bafoeg"], alg:["Arbeitslosengeld","lohnersatz"], grusi:["Grundsicherung","buergergeld"], eltern:["Elterngeld","elterngeld"], krank:["Krankengeld","lohnersatz"], rente:["Rente","rente"]};
 function workPicker(sel, grp, attr){   // two steps: group tiles, then the exact choices of that group
   if (!grp) return `<div class="wgrid">${WGROUPS.map(([g,t,i])=>`<button class="wgt ${workGroup(sel)===g?"on":""}" data-${attr}grp="${g}"><span>${ic(i in P?i:"dots",22)}</span><b>${t}</b></button>`).join("")}</div>`;
-  return `<button class="link small wback" data-${attr}grp="">‹ ${esc((WGROUPS.find(x=>x[0]===grp)||[,""])[1])} – andere Auswahl</button><div class="wopts">${WORK.filter(x=>x[3]===grp).map(([k,t,d])=>`<button class="wopt ${sel===k?"on":""}" data-${attr}="${k}"><b>${t}</b><small>${d}</small></button>`).join("")}</div>`;
+  return `${attr==="wzwork"?"":`<button class="link small wback" data-${attr}grp="">‹ ${esc((WGROUPS.find(x=>x[0]===grp)||[,""])[1])} – andere Auswahl</button>`}<div class="wopts">${WORK.filter(x=>x[3]===grp).map(([k,t,d])=>`<button class="wopt ${sel===k?"on":""}" data-${attr}="${k}"><b>${t}</b><small>${d}</small></button>`).join("")}</div>`;
 }
 const hasSelf = () => { const w=S.settings.work; return w===undefined || w==="selbst" || w==="beides" || hasExtra("selbst"); };   // show Rücklage, Betrieb, Umsatzsteuer, EÜR …
 const hasJob  = () => { const w=S.settings.work; return w===undefined || ["angestellt","beides","azubi","minijob"].includes(w) || hasExtra("angestellt") || hasExtra("minijob"); };       // show salary fields
@@ -3540,17 +3549,38 @@ function wizShould(){
 function wizOpen(){
   UI.wiz={step:0, name:S.settings.name||"", work:S.settings.work||"", extra:[...(S.settings.extra||[])], exAsk:false, bal:"", fix:{}, own:[], bud:{}};
   let el=$("wizBg"); if (!el){ el=document.createElement("div"); el.id="wizBg"; el.className="wizbg"; document.body.appendChild(el); }
-  el.hidden=false; document.body.classList.add("locked"); wizRender();
+  el.hidden=false; document.body.classList.add("locked"); wizRender(); wizAnimIn(1);
+}
+/* page change inside the setup: the old cards slide out, the new ones slide in one after the other (backwards = mirrored) */
+function wizItems(){ const root=$("wizBg") && $("wizBg").querySelector(".wiz"); if (!root) return []; const it=[];
+  for (const ch of root.children){ if (ch.matches(".wsteps,.wfoot")) continue; if (ch.matches(".wopts,.wgrid,.wchips,.wfix")) it.push(...ch.children); else it.push(ch); }
+  return it; }
+function wizAnimIn(dir){ wizItems().forEach((x,i)=>{ x.style.animation=`${dir<0?"wzInB":"wzInF"} .4s cubic-bezier(.2,.8,.2,1) ${Math.min(i,10)*45}ms both`; }); }
+function wizNav(fn, dir){
+  const w=UI.wiz; if (!w || w.anim) return; w.anim=true;
+  const it=wizItems(); it.forEach((x,i)=>{ x.style.animation=`${dir<0?"wzOutB":"wzOutF"} .17s ease-in ${Math.min(i,8)*18}ms both`; });
+  setTimeout(()=>{ w.anim=false; fn(); if (!UI.wiz) return; wizRender(); $("wizBg").scrollTop=0; wizAnimIn(dir); }, 170+Math.min(it.length,8)*18);
+}
+// one level back: extra question -> exact choice -> the 4 groups -> previous step
+function wizBackOne(){
+  const w=UI.wiz; if (!w) return false; wizRead();
+  if (w.step===1){ const grp = w.grp===undefined ? workGroup(w.work) : w.grp;
+    if (w.exAsk){ wizNav(()=>{ w.exAsk=false; w.grp=grp; }, -1); return true; }
+    if (grp){ wizNav(()=>{ w.grp=""; }, -1); return true; } }
+  if (w.step===0) return false;
+  wizNav(()=>{ w.step--; if (w.step===1 && w.work) w.exAsk=true; }, -1); return true;
 }
 function wizClose(){ UI.wiz=null; const el=$("wizBg"); if (el) el.hidden=true; document.body.classList.remove("locked"); }
 function wizRender(){
   const w=UI.wiz, el=$("wizBg"); if (!w||!el) return;
   const N=5, st=w.step, y=ymOf(new Date()).slice(0,4);
-  const head=(t,sub)=>`<div class="wsteps">${Array.from({length:N},(_,i)=>`<i class="${i<=st?"on":""}"></i>`).join("")}</div><small class="wk">Schritt ${st+1} von ${N}</small><h2 class="wt">${t}</h2><p class="ws">${sub}</p>`;
+  const g1 = st===1 ? (w.grp===undefined ? workGroup(w.work) : w.grp) : "";
+  const crumb = st===1 && (g1 || w.exAsk) ? `<div class="wcrumb"><button data-wzcrumb="0">Schritt 2</button>${g1?`<i>›</i><button data-wzcrumb="1">${esc((WGROUPS.find(x=>x[0]===g1)||[,""])[1])}</button>`:""}${w.exAsk&&w.work?`<i>›</i><span>${esc((WORK.find(x=>x[0]===w.work)||[,""])[1])}</span>`:""}</div>` : `<small class="wk">Schritt ${st+1} von ${N}</small>`;
+  const head=(t,sub)=>`<div class="wsteps">${Array.from({length:N},(_,i)=>`<i class="${i<=st?"on":""}"></i>`).join("")}</div>${crumb}<h2 class="wt">${t}</h2><p class="ws">${sub}</p>`;
   let body="";
   if (st===0) body=head("Willkommen! Wie heißt du?","Für die Begrüßung oben links – du kannst es auch leer lassen.")+`<input class="in wbig" id="wzName" value="${esc(w.name)}" placeholder="Dein Vorname" maxlength="30" autocomplete="given-name">`;
   if (st===1) body = w.exAsk && w.work
-    ? head("Verdienst du noch etwas dazu?",`Du hast gewählt: <span class="pill">${esc((WORK.find(x=>x[0]===w.work)||[,""])[1])}</span> – du kannst mehreres anhaken.`)+`<button class="link small wback" data-wzexback="1">‹ Auswahl ändern</button>`+extraPicker(w.work, w.extra||[], "wzextra")
+    ? head("Verdienst du noch etwas dazu?","Du kannst mehreres anhaken – oder „Nein“.")+extraPicker(w.work, w.extra||[], "wzextra")
     : head("Wie verdienst du dein Geld?","Dann zeigt die App nur, was zu dir passt.")+workPicker(w.work, w.grp===undefined ? workGroup(w.work) : w.grp, "wzwork");
   if (st===2) body=head("Wie viel ist heute auf deinem Konto?","Der aktuelle Stand deines Girokontos. Ab hier rechnet die App weiter.")+`<div class="wamt"><input class="in wbig" id="wzBal" inputmode="decimal" value="${esc(w.bal)}" placeholder="0,00"><span>€</span></div>`;
   if (st===3){ const tot=sum(Object.values(w.fix),v=>parseAmt(v)||0)+sum(w.own,x=>parseAmt(x.a)||0);
@@ -3596,19 +3626,20 @@ document.addEventListener("click", e=>{ if (e.target.closest("#wizAgain")) wizOp
 document.addEventListener("click", async e=>{
   const w=UI.wiz; if (!w || !e.target.closest("#wizBg")) return;
   const t=e.target;
-  const wg=t.closest("[data-wzworkgrp]"); if (wg){ w.grp=wg.dataset.wzworkgrp; wizRender(); return; }
-  const wk=t.closest("[data-wzwork]"); if (wk){ if (w.work!==wk.dataset.wzwork) w.extra=[]; w.work=wk.dataset.wzwork; w.exAsk=true; wizRender(); return; }
+  const wc=t.closest("[data-wzcrumb]"); if (wc){ const lv=+wc.dataset.wzcrumb; wizNav(()=>{ if (lv===0){ w.grp=""; w.exAsk=false; } else { w.grp=w.grp===undefined?workGroup(w.work):w.grp; w.exAsk=false; } }, -1); return; }
+  const wg=t.closest("[data-wzworkgrp]"); if (wg){ const g=wg.dataset.wzworkgrp; if (!g){ wizBackOne(); return; } wizNav(()=>{ w.grp=g; }, 1); return; }
+  const wk=t.closest("[data-wzwork]"); if (wk){ const k=wk.dataset.wzwork; wk.classList.add("on"); wizNav(()=>{ if (w.work!==k) w.extra=[]; w.work=k; w.exAsk=true; }, 1); return; }
   const we=t.closest("[data-wzextra]"); if (we){ const k=we.dataset.wzextra; w.extra=w.extra||[]; w.extra = !k ? [] : w.extra.includes(k) ? w.extra.filter(x=>x!==k) : [...w.extra, k]; wizRender(); return; }
-  if (t.closest("[data-wzexback]")){ w.exAsk=false; wizRender(); return; }
+  if (t.closest("[data-wzexback]")){ wizBackOne(); return; }
   const fx=t.closest("[data-wzfix]"); if (fx){ wizRead(); const n=fx.dataset.wzfix; if (n in w.fix) delete w.fix[n]; else w.fix[n]=fx.dataset.def||""; wizRender(); const i=document.querySelector(`[data-wzfixamt="${CSS.escape(n)}"]`); if (i&&!i.value) i.focus(); return; }
   if (t.closest("#wzOwn")){ wizRead(); w.own.push({n:"",a:""}); wizRender(); const i=document.querySelector(`[data-wzownn="${w.own.length-1}"]`); if (i) i.focus(); return; }
-  if (t.closest("#wzBack")){ wizRead(); w.step=Math.max(0,w.step-1); wizRender(); return; }
+  if (t.closest("#wzBack")){ wizBackOne(); return; }
   if (t.closest("#wzSkipAll")){ try{ localStorage.setItem("hb-wiz-skip","1"); }catch(_){} wizClose(); toast("Die Einrichtung findest du unter Einstellungen › Startseite"); return; }
   if (t.closest("#wzNext")){ wizRead();
     if (w.step===1 && !w.work){ toast("Bitte eine Möglichkeit wählen"); return; }
-    if (w.step===1 && !w.exAsk){ w.exAsk=true; wizRender(); return; }
+    if (w.step===1 && !w.exAsk){ wizNav(()=>{ w.exAsk=true; }, 1); return; }
     if (w.step===2 && w.bal!=="" && !isFinite(parseAmt(w.bal))){ toast("Bitte eine Zahl eingeben"); return; }
-    if (w.step<4){ w.step++; wizRender(); $("wizBg").scrollTop=0; } else await wizFinish(); }
+    if (w.step<4){ wizNav(()=>{ w.step++; }, 1); } else await wizFinish(); }
 });
 document.addEventListener("keydown", e=>{ if (UI.wiz && e.key==="Enter" && e.target.closest && e.target.closest("#wizBg") && e.target.tagName==="INPUT" && UI.wiz.step!==3 && UI.wiz.step!==4){ e.preventDefault(); $("wzNext").click(); } });
 
@@ -5488,6 +5519,7 @@ $("backupFile").addEventListener("change", async e => {
 
 // Android back button: close the sheet, then return to the start page, then leave the app
 window.hbBack = () => {
+  if (UI.wiz && $("wizBg") && !$("wizBg").hidden){ wizBackOne(); return true; }
   if (!$("docRev").hidden){ drFinish(null); return true; }
   if (!$("fanBg").hidden){ fanClose(); return true; }
   if (!$("sheetBg").hidden){ closeSheet(); return true; }
