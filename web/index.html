@@ -1500,6 +1500,9 @@ const PALETTE = ["--c1","--c2","--c3","--c4","--c5","--c6"];
 const GREENS=["#2e9c74","#1a7a5c","#0f766e","#4d7c0f","#15803d","#3f6212","#0e7490","#166534","#65a30d","#047857","#34b285","#14532d"];
 function isGreen(){ return !(S.settings && S.settings.theme==="bunt"); }
 function themeCol(hex, i){ if (!isGreen() || !hex || hex[0]!=="#") return hex; if (i==null){ let h=0; for (const ch of hex) h=(h*31+ch.charCodeAt(0))>>>0; i=h; } return GREENS[i%GREENS.length]; }
+// account cards: own colour, else in the green package a green tone per card (the first card keeps the brand green)
+const ACG=["#0f766e","#3f6212","#166534","#0e7490","#14532d","#4d7c0f","#047857"];
+function acctColor(name, i){ return userCol("acct", name) || (isGreen() && i>0 ? ACG[(i-1)%ACG.length] : null); }
 function userCol(group, key){ const c=(S.settings&&S.settings.colors)||{}; return (c[group]||{})[key]||null; }
 /* ---------- budget plan on the start page: one ring for the month, a slim bar per budget with today's mark ---------- */
 function budgetPlanEmpty(){
@@ -2089,8 +2092,8 @@ function renderHome(){
   const spark = mainName && ym<=cur ? sparkPath(mainName, asOf) : "";
   const when = ym===cur?"heute":ym<cur?"Ende "+MONTHS[ymParts(ym)[1]-1]:"voraussichtlich Ende "+MONTHS[ymParts(ym)[1]-1];
   UI.acctNames=accts.map(a=>a.name);
-  const acol=a=>{ const c=userCol("acct", a.name); return c?` style="background:linear-gradient(150deg, ${c}, color-mix(in srgb, ${c} 62%, #000))"`:""; };
-  const acardHtml = accts.map((a,i)=>`<div class="acard ${i?"alt":""} ${a.total?"tot":""} ${a.bal<0&&!userCol("acct",a.name)?"minus":""}" data-ci="${i}"${acol(a)}><div class="l">${esc(a.name)} · ${esc(when)}</div><div class="b">${esc(eur(a.bal))}</div>
+  const acol=(a,i)=>{ const c=acctColor(a.name,i); return c?` style="background:linear-gradient(150deg, ${c}, color-mix(in srgb, ${c} 62%, #000))"`:""; };
+  const acardHtml = accts.map((a,i)=>`<div class="acard ${i?"alt":""} ${a.total?"tot":""} ${a.bal<0&&!acctColor(a.name,i)?"minus":""}" data-ci="${i}"${acol(a,i)}><div class="l">${esc(a.name)} · ${esc(when)}</div><div class="b">${esc(eur(a.bal))}</div>
       ${a.main&&spark?`<svg class="spark" viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true"><path d="${spark}" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2.2" stroke-linejoin="round"/></svg>`:""}
       <div class="m">${a.main?`<span>${c.net>=0?"↑":"↓"} ${esc(eur0(Math.abs(c.net)))} ${c.net>=0?"übrig":"mehr ausgegeben"} im ${esc(MONTHS[ymParts(ym)[1]-1])}</span>${mainName?`<span>Mit Spaces ${esc(eur(cum.balance))}</span>`:""}`
         : a.total ? `<span>Hauptkonto und alle Spaces</span>` : a.guess ? `<span>Space · ${esc(a.how||"")}</span>` : `<span>Space</span>`}</div></div>`).join("");
@@ -3693,7 +3696,7 @@ function renderColorEd(){
   const row=(group,key,label,cur,icon,isAcct)=>{ const own=userCol(group,key), c=own||cur, id=group+"|"+key;
     return `<div class="colrow ${open===id?"open":""}"><button class="colhead" data-colopen="${esc(id)}">${isAcct?`<span class="colcard" style="background:linear-gradient(150deg, ${c}, color-mix(in srgb, ${c} 62%, #000))"></span>`:`<span class="colic" style="background:color-mix(in srgb, ${c} 16%, transparent);color:${c}">${ic(icon,18)}</span>`}<b>${esc(label)}</b>${own?`<small>eigene Farbe</small>`:""}<i class="colsw" style="background:${c}"></i></button>
       ${open===id?colPicker(id, c, isAcct, icon):""}</div>`; };
-  const acctDef=n=> n==="Hauptkonto"||accts.indexOf(n)===0 ? "#1a7a5c" : "#34413b";
+  const acctDef=n=>{ const i=(UI.acctNames||[]).indexOf(n); return i>0 && isGreen() ? ACG[(i-1)%ACG.length] : i>0 ? "#34413b" : "#1a7a5c"; };
   el.innerHTML=`<div class="colsec"><h3>Farbpaket</h3><div class="colpkg"><button data-cpkg="gruen" aria-pressed="${isGreen()}"><i style="background:linear-gradient(90deg,#34b285,#1a7a5c,#4d7c0f,#0f766e)"></i>Grün</button><button data-cpkg="bunt" aria-pressed="${!isGreen()}"><i style="background:linear-gradient(90deg,#3d63a8,#d14d72,#c27c0e,#7a5bc2)"></i>Bunt</button></div><p class="small muted">Gilt für alle Kacheln und Symbole, die du nicht selbst eingefärbt hast.</p></div>
     <div class="colsec"><h3>Konten</h3><p class="small muted">Die großen Karten oben auf der Startseite.</p>${accts.map(n=>row("acct",n,n,acctDef(n),"wallet",true)).join("")}</div>
     <div class="colsec"><h3>Ausgaben</h3>${cats("ausgabe").map(n=>row("cat","ausgabe|"+n,n,catColor("ausgabe",n).startsWith("#")?catColor("ausgabe",n):cssVar(catColor("ausgabe",n)),iconFor("ausgabe",n))).join("")}</div>
