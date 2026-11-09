@@ -331,6 +331,16 @@ html.touch .kpad{display:grid}
 .pbig small{display:block;color:var(--muted);font-size:12.5px;line-height:1.4;margin-top:2px}.pbi{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none}
 .pqr{display:grid;place-items:center;background:#fff;border-radius:18px;padding:10px}.pcode{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.6;word-spacing:4px;background:var(--sunk);border-radius:12px;padding:10px 12px;word-break:break-all;user-select:all}
 #loginPair{display:flex;flex-direction:column;gap:12px}
+.gmchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.gmhead{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 8px}.gmhead h2{margin:0;font-family:var(--f-display)}
+.gmtabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none}.gmtabs::-webkit-scrollbar{display:none}
+.gav{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;color:#fff;font-size:12px;font-weight:800;flex:none}.gmavs{display:flex;gap:4px}
+.gmbal{font-family:var(--f-display);font-size:24px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}.gmbal.pos{color:var(--good)}.gmbal.neg{color:var(--bad)}
+.gmmem{display:flex;align-items:center;gap:10px;padding:6px 0}.gmmem>span:not(.gav){flex:1}.gmmem .gav{flex:0 0 26px}.gmexp{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.gmexp .n{flex:1;display:flex;flex-direction:column}.gmexp small{color:var(--muted)}
+.gmgoal{padding:10px 0;border-bottom:1px solid var(--line)}.gmgoal:last-child{border:0}.gmby{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12.5px;color:var(--muted)}.gmby span{margin-right:8px}
+.gmadd{display:flex;gap:8px;margin-top:8px}.gmadd .in{flex:1}.gmshop{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.gmshop span{flex:1}.gmshop.done span{text-decoration:line-through;color:var(--muted)}
+.gmck{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);background:none;color:#fff;font-weight:800;cursor:pointer}.gmshop.done .gmck{background:var(--accent);border-color:var(--accent)}
+.gmpub{padding:8px 0;border-bottom:1px solid var(--line)}.gmpub:last-child{border:0}.gmintro h2{font-family:var(--f-display);margin:10px 0 8px}
+.gmcard .gmrow{display:flex;justify-content:space-between;width:100%;border:0;background:none;color:inherit;font:inherit;padding:8px 0;border-top:1px solid var(--line);cursor:pointer}
 textarea.in{font-family:inherit;line-height:1.45}
 .devname{padding:6px 10px;font-weight:700;margin-bottom:2px}
 .ictile.bavatar.lpk svg{width:62%;height:62%}
@@ -1103,6 +1113,7 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
   </section>
   <section class="view" id="v-fix" data-view="fix" hidden></section>
   <section class="view" id="v-belege" data-view="belege" hidden></section>
+  <section class="view" id="v-gemeinsam" data-view="gemeinsam" hidden></section>
   <section class="view" id="v-year" data-view="year" hidden></section>
   <section class="view" id="v-ziele" data-view="ziele" hidden></section>
   <section class="view" id="v-shop" data-view="shop" hidden></section>
@@ -1345,7 +1356,7 @@ const DEFAULT_SETTINGS = {
   }
 };
 const KIND_LABEL = {ausgabe:"Ausgabe", betrieb:"Betrieblich", einnahme:"Einnahme", vorauszahlung:"Steuer-Vorauszahlung"};
-const TITLES = {home:"Übersicht", list:"Buchungen", fix:"Fixkosten", year:"Analyse", ziele:"Sparen", shop:"Einkauf", more:"Einstellungen", import:"Import", belege:"Belege"};
+const TITLES = {home:"Übersicht", list:"Buchungen", fix:"Fixkosten", year:"Analyse", ziele:"Sparen", shop:"Einkauf", more:"Einstellungen", import:"Import", belege:"Belege", gemeinsam:"Gemeinsam"};
 
 /* ---------- icons ---------- */
 const P = {
@@ -1892,6 +1903,7 @@ const LEGAL = {
 <p>Einige Angaben können besonders geschützt sein (Art. 9 DSGVO), z. B. die Kirchensteuer (Religion), Krankengeld oder Gesundheitskosten. Du entscheidest selbst, ob du sie einträgst; sie werden nur für die Berechnungen in der App verwendet.</p>
 <h3>3. Abgleich zwischen Geräten (freiwillig)</h3>
 <p><b>Geräte koppeln (ohne Konto):</b> Koppelst du Geräte per QR-Code, werden deine Daten schon auf dem Gerät mit einem Schlüssel verschlüsselt (AES-256, Ende-zu-Ende), den nur deine gekoppelten Geräte kennen. Der Abgleich-Server speichert nur eine Zufallsnummer, die Prüfsumme eines Zugangsschlüssels und verschlüsselte Datenpakete – weder Name noch E-Mail, und der Anbieter kann die Inhalte nicht lesen. Ungenutzte Kopplungen werden nach zwei Jahren gelöscht; du kannst sie jederzeit selbst löschen.</p>
+<p><b>Gemeinsame Bereiche:</b> Teilst du einen Bereich mit anderen (z. B. Partner oder WG), gilt dasselbe Prinzip mit einem eigenen Schlüssel für diesen Bereich. Die anderen Mitglieder sehen nur, was du dort einträgst oder ausdrücklich freigibst (z. B. ein Budget, ein Sparziel, die Summe deiner Fixkosten) – nie deine Konten, Kontostände oder Buchungen.</p>
 <p><b>Mit Passwort oder Konto:</b> Wenn du unter „Abgleich & Updates“ stattdessen den Abgleich mit Passwort einschaltest und dich anmeldest, werden deine Daten verschlüsselt (HTTPS) an den Synology-Server übertragen, bei dem du dich anmeldest, und dort gespeichert, damit Handy und PC gleich bleiben. Rechtsgrundlage ist die Nutzung der App (Art. 6 Abs. 1 lit. b DSGVO). Die Daten bleiben dort, bis du sie löschst („Alle Daten löschen“) oder den Abgleich beendest und um Löschung bittest.</p>
 <h3>4. Updates</h3>
 <p>Die App fragt regelmäßig beim Update-Server des Anbieters nach einer neuen Version und lädt sie herunter. Dabei wird technisch bedingt deine IP-Adresse übertragen; deine Finanzdaten nicht. Rechtsgrundlage ist unser berechtigtes Interesse, Fehler und Sicherheitslücken schnell zu beheben (Art. 6 Abs. 1 lit. f DSGVO). Server-Protokolle werden nach spätestens 14 Tagen gelöscht.</p>
@@ -1968,6 +1980,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.4.8","10. November 2026",["Neu: Gemeinsam – mit Partner oder WG Ausgaben teilen und ausgleichen, gemeinsame Sparziele, Einkaufsliste","Budgets, Sparziele und Fixkosten einzeln freigeben – alles andere bleibt privat"]],
   ["0.4.7","10. November 2026",["Geräte koppeln ohne Konto: QR-Code scannen, Daten Ende-zu-Ende verschlüsselt","Feedback per E-Mail an kontakt@miracleframe.de"]],
   ["0.4.6","9. November 2026",["Analyse: überall 4 Kacheln pro Bereich – neu Sparziele und Fixkosten","Eigene Kacheln für jede Gruppe, z. B. BAföG-Rückzahlung, Töpfe, Stundenlohn, 78-Wochen-Grenze, Zuzahlungen"]],
   ["0.4.5","9. November 2026",["Einstellungen neu: Profil mit Zahlen, Schnell-Schalter, Abos & Verträge, Export, Hilfe, Feedback, Belege & Speicher, Geräte"]],
@@ -2565,7 +2578,7 @@ function render(){
   document.querySelectorAll(".tab[data-go]").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.go===(UI.view==="import"||UI.view==="belege"?"list":UI.view))));
   document.querySelectorAll("[data-view]").forEach(s=>s.hidden = s.dataset.view!==UI.view);
   $("banner").innerHTML = (mem && !LOCAL) ? `<div class="notice warn" style="margin-bottom:14px"><span>Speichern ist hier gerade nicht möglich. Öffne die App über deinen Link in Claude, während du angemeldet bist.</span></div>` : "";
-  ({home:renderHome, list:renderList, fix:renderFix, year:renderYear, ziele:renderZiele, shop:renderShop, more:renderMore, import:renderImport, belege:renderBelege})[UI.view]();
+  ({home:renderHome, list:renderList, fix:renderFix, year:renderYear, ziele:renderZiele, shop:renderShop, more:renderMore, import:renderImport, belege:renderBelege, gemeinsam:renderGemeinsam})[UI.view]();
   if (!$("sheetBg").hidden) renderSheet();
   applyTabColors();
   if (UI.tileEdit && UI.tileEdit!==UI.view) UI.tileEdit="";
@@ -2820,6 +2833,7 @@ function renderHome(){
     </div>`,
       budgets: bt.length ? budgetPlanCard(ym, g.filter(x=>x.budget), streak) : budgetPlanEmpty(),
       fix: fixedAreas(ym),
+      gemeinsam: gemeinsamCard(),
       tax: taxGauge(ym),
       goals: goalsRings() + (UI.goalsOpen||UI.goalEdit?goalsCard():""),
       debts: debtRings(),
@@ -2898,7 +2912,7 @@ function closeHints(){ $("hintBg").classList.remove("show"); setTimeout(()=>{ $(
 $("hintBg").addEventListener("click", e=>{ if (e.target===$("hintBg") || e.target.closest("[data-hintclose]")) closeHints(); });
 document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("hintBg").hidden) closeHints(); });
 /* ---------- start page blocks: your own order, each can be hidden ---------- */
-const HOME_BLOCKS = [["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["debts","Schulden"],["recent","Letzte Buchungen"]];   // shop offers now have their own page "Einkauf"
+const HOME_BLOCKS = [["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["debts","Schulden"],["gemeinsam","Gemeinsam"],["recent","Letzte Buchungen"]];   // shop offers now have their own page "Einkauf"
 function homeOrder(){ const o=(S.settings.homeOrder||[]).filter(k=>HOME_BLOCKS.some(b=>b[0]===k)); for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; }
 function homeBlocks(html){
   const hid=new Set(S.settings.homeHidden||[]), list=homeOrder().filter(k=>!hid.has(k) && html[k] && !(k==="tax"&&!hasSelf()) && !(k==="budgets"&&isJobless())).map(k=>`<div class="hblock" data-hb="${k}">${html[k]}</div>`);
@@ -6917,6 +6931,190 @@ document.addEventListener("change", async e=>{ if (e.target.id!=="pairCam") retu
   try { const t=await qrFromFile(f); if (!t || !pairParse(t)){ $("loginErr").textContent="Kein Kopplungs-Code erkannt. Halte das Handy ruhig und näher an den Bildschirm – oder füge den Code ein."; return; }
     $("pairCode").value=t; $("loginErr").textContent=""; await pairJoin(t); UI.pstep="start"; }
   catch(x){ $("loginErr").textContent=x.message||"Das hat nicht geklappt."; } });
+
+/* ---------- "Gemeinsam": shared areas with other people (partner, WG) – everybody keeps their own data ----------
+   Every shared area is its own encrypted vault on the pairing server with its own key. Members get the key by QR code.
+   Inside: shared expenses with settling up, shared savings goals, a shopping list and what each member chose to share
+   from their private data (budgets, fixed costs, savings goals). */
+async function makeKeys(kB64, vB64){
+  const base=await crypto.subtle.importKey("raw", fromB64u(kB64), "HKDF", false, ["deriveKey","deriveBits"]);
+  const prm=info=>({name:"HKDF", hash:"SHA-256", salt:new TextEncoder().encode("finanz-mami-v1"), info:new TextEncoder().encode(info)});
+  return { enc:await crypto.subtle.deriveKey(prm("enc"), base, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]),
+    mac:await crypto.subtle.deriveKey(prm("id"), base, {name:"HMAC", hash:"SHA-256", length:256}, false, ["sign"]),
+    auth:toHex(await crypto.subtle.deriveBits(prm("auth"), base, 256)), vault:toHex(fromB64u(vB64)) };
+}
+const SPK={};   // keys per shared area
+const spList = () => S.settings.shared||[];
+function spLocal(v){ try{ return JSON.parse(localStorage.getItem("hb-sp-"+v)||"null") || {docs:{}, rev:0, queue:[]}; }catch(e){ return {docs:{}, rev:0, queue:[]}; } }
+function spLocalSave(v,o){ try{ localStorage.setItem("hb-sp-"+v, JSON.stringify(o)); }catch(e){} }
+function me(){ const m=S.settings.me||{}; if (!m.id){ m.id=newId(); m.name=m.name||S.settings.name||""; S.settings.me=m; setTimeout(saveSettings,0); } return m; }
+async function spKeys(sp){ return SPK[sp.v] || (SPK[sp.v]=await makeKeys(sp.k, sp.v)); }
+async function spRequest(sp, action, qs, body){
+  const K=await spKeys(sp), url=apiUrl(sp.s||pairUrl(), action, qs), auth="Bearer "+K.vault+"."+K.auth;
+  let r;
+  if (NATIVE && window.AndroidBridge.http){ r=await new Promise(res=>{ const id=newId(); httpWaiting[id]=res; window.AndroidBridge.http(id, body?"POST":"GET", url, auth, body?JSON.stringify(body):""); }); if (!r.status) throw new Error("offline"); }
+  else { const f=await fetch(url,{method:body?"POST":"GET", headers:{"Content-Type":"application/json", Authorization:auth}, body:body?JSON.stringify(body):undefined, cache:"no-store"}); r={status:f.status, text:await f.text()}; }
+  let j={}; try{ j=JSON.parse(r.text); }catch(e){}
+  if (r.status<200||r.status>=300){ const e=new Error(j.error||"HTTP "+r.status); e.status=r.status; throw e; }
+  return j;
+}
+async function spEnc(K,obj){ const iv=crypto.getRandomValues(new Uint8Array(12)), ct=await crypto.subtle.encrypt({name:"AES-GCM",iv}, K.enc, new TextEncoder().encode(JSON.stringify(obj))); const o=new Uint8Array(12+ct.byteLength); o.set(iv); o.set(new Uint8Array(ct),12); return b64u(o); }
+async function spDec(K,b){ const u=fromB64u(b); return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM", iv:u.slice(0,12)}, K.enc, u.slice(12)))); }
+function spPut(sp, id, data){ const L=spLocal(sp.v); if (data===null) delete L.docs[id]; else L.docs[id]=data; L.queue=(L.queue||[]).filter(o=>o.i!==id); L.queue.push({i:id, d:data}); spLocalSave(sp.v, L); spSyncSoon(); }
+let SP_BUSY=false, spTimer=null;
+function spSyncSoon(ms){ clearTimeout(spTimer); spTimer=setTimeout(spSyncAll, ms==null?500:ms); }
+async function spSyncAll(){
+  if (SP_BUSY || !spList().length || !(window.crypto&&crypto.subtle)) return; SP_BUSY=true; let changed=false;
+  try { for (const sp of spList()){ try {
+    const K=await spKeys(sp), L=spLocal(sp.v);
+    spPublish(sp, L);
+    if (L.queue&&L.queue.length){ const q=L.queue.slice(0,200), ops=[];
+      for (const o of q) ops.push({h:b64u((await crypto.subtle.sign("HMAC", K.mac, new TextEncoder().encode("sp\u0000"+o.i))).slice(0,24)), b:await spEnc(K,{i:o.i, d:o.d})});
+      await spRequest(sp,"push","",{ops}); L.queue=L.queue.filter(o=>!q.includes(o)); }
+    const res=await spRequest(sp,"pull","&since="+(L.rev||0));
+    const pend=new Set((L.queue||[]).map(o=>o.i));
+    for (const d of res.docs||[]){ if (!d.b) continue; try { const o=await spDec(K,d.b); if (pend.has(o.i)) continue; if (o.d===null) delete L.docs[o.i]; else L.docs[o.i]=o.d; changed=true; } catch(e){} }
+    L.rev=res.rev||L.rev; L.ok=Date.now(); spLocalSave(sp.v, L);
+    if (res.more) spSyncSoon(200);
+  } catch(e){ if (e.status===401){ sp.lost=true; } } } }
+  finally { SP_BUSY=false; }
+  if (changed && (UI.view==="gemeinsam"||UI.view==="home")){ BG_RENDER=true; try{ render(); } finally { BG_RENDER=false; } }
+}
+setInterval(()=>{ if (document.visibilityState==="visible") spSyncAll(); }, 15000);
+setTimeout(spSyncAll, 4000);
+// what this member shares from their private data (choice per area)
+function spSel(v){ const a=S.settings.shareSel||{}; return a[v]||{bud:{}, goal:{}, fix:"none"}; }
+function spSelSet(v, fn){ const a={...(S.settings.shareSel||{})}; const s=JSON.parse(JSON.stringify(spSel(v))); fn(s); a[v]=s; S.settings.shareSel=a; saveSettings(); }
+function spPubData(v){
+  const sel=spSel(v), ym=ymOf(new Date()), out={budgets:[], goals:[], fixed:null, ts:ym};
+  const spent={}; for (const t of monthCalc(ym).tx) if (t.kind==="ausgabe") spent[t.cat]=(spent[t.cat]||0)+t.amount;
+  for (const [c,on] of Object.entries(sel.bud||{})) if (on && (S.settings.budgets||{})[c]) out.budgets.push({c, b:Number(S.settings.budgets[c])||0, s:Math.round((spent[c]||0)*100)/100});
+  for (const g of S.settings.goals||[]) if ((sel.goal||{})[g.id]) out.goals.push({n:g.name, t:Number(g.target)||0, v:Math.round(goalSaved(g).v*100)/100});
+  if (sel.fix==="sum"||sel.fix==="list"){ const fx=fixedForMonth(ym, true).filter(f=>!debtFor(f.id)), items=fx.map(f=>({n:f.name, a:Math.round(planAmt(f,ym)*100)/100}));
+    out.fixed = sel.fix==="sum" ? {sum:Math.round(sum(items,x=>x.a)*100)/100} : {sum:Math.round(sum(items,x=>x.a)*100)/100, items}; }
+  return out;
+}
+function spPublish(sp, L){ const m=me(), id="pub-"+m.id, d=spPubData(sp.v), cur=L.docs[id];
+  if (!cur || JSON.stringify(cur)!==JSON.stringify(d)){ L.docs[id]=d; L.queue=(L.queue||[]).filter(o=>o.i!==id); L.queue.push({i:id, d}); }
+  const mm=L.docs["m-"+m.id]; if (!mm || mm.name!==(m.name||"Ich")){ const md={name:m.name||"Ich", c:(mm&&mm.c)||MCOL[Object.keys(L.docs).filter(k=>k.startsWith("m-")).length%MCOL.length]}; L.docs["m-"+m.id]=md; L.queue.push({i:"m-"+m.id, d:md}); } }
+const MCOL=["#1a7a5c","#c2410c","#2f7fb8","#7a5bc2","#c27c0e","#0f766e"];
+function spCode(sp){ return "HBS1."+sp.v+"."+sp.k+(sp.s&&sp.s!==META_PAIR?"."+b64u(new TextEncoder().encode(sp.s)):""); }
+function spParse(t){ const m=String(t||"").replace(/\s+/g,"").match(/HBS1\.([A-Za-z0-9_-]{22})\.([A-Za-z0-9_-]{43})(?:\.([A-Za-z0-9_-]+))?/); if (!m) return null; let s=""; if (m[3]) try{ s=new TextDecoder().decode(fromB64u(m[3])); }catch(e){ return null; } return {v:m[1], k:m[2], s}; }
+async function spCreate(name){
+  const sp={v:b64u(crypto.getRandomValues(new Uint8Array(16))), k:b64u(crypto.getRandomValues(new Uint8Array(32))), s:META_PAIR?"":pairUrl(), n:name};
+  const K=await spKeys(sp); await spRequest(sp,"create","",{vault:K.vault, auth:K.auth});
+  S.settings.shared=[...spList(), sp]; saveSettings(); spPut(sp,"meta",{name}); UI.gmSel=sp.v; return sp; }
+async function spJoin(code){ const p=spParse(code); if (!p) throw new Error("Das ist kein Code für einen gemeinsamen Bereich.");
+  if (spList().some(x=>x.v===p.v)) throw new Error("Diesem Bereich bist du schon beigetreten.");
+  await spRequest(p,"pull","&since=999999999").catch(e=>{ throw new Error(e.status===401?"Diesen Bereich gibt es nicht (mehr).":"Server nicht erreichbar – bist du online?"); });
+  p.n="Gemeinsam"; S.settings.shared=[...spList(), p]; saveSettings(); UI.gmSel=p.v; await spSyncAll(); const L=spLocal(p.v); if (L.docs.meta&&L.docs.meta.name){ p.n=L.docs.meta.name; saveSettings(); } return p; }
+function spLeave(v){ const sp=spList().find(x=>x.v===v); if (!sp) return; spPut(sp,"m-"+me().id,null); spPut(sp,"pub-"+me().id,null);
+  setTimeout(()=>{ S.settings.shared=spList().filter(x=>x.v!==v); saveSettings(); try{ localStorage.removeItem("hb-sp-"+v); }catch(e){} UI.gmSel=null; render(); }, 2500); }
+// who owes whom: shared expenses split evenly, settlements move money directly
+function spBalance(L){ const mem=Object.keys(L.docs).filter(k=>k.startsWith("m-")).map(k=>k.slice(2)), net={}; for (const m of mem) net[m]=0;
+  for (const [k,x] of Object.entries(L.docs)) if (k.startsWith("x-")){ const a=Number(x.a)||0;
+    if (x.settle){ net[x.p]=(net[x.p]||0)+a; net[x.to]=(net[x.to]||0)-a; }
+    else { const who=(x.for&&x.for.length?x.for:mem); net[x.p]=(net[x.p]||0)+a; for (const m of who) net[m]=(net[m]||0)-a/who.length; } }
+  return net; }
+function spName(L,id){ const m=L.docs["m-"+id]; return id===me().id ? "Du" : (m&&m.name)||"Jemand"; }
+function spAv(L,id){ const m=L.docs["m-"+id]||{}; return `<span class="gav" style="background:${m.c||"#5b6472"}">${esc(((m.name||"?").trim()[0]||"?").toUpperCase())}</span>`; }
+function gemeinsamCard(){ if (!spList().length) return `<div class="card gmcard"><div class="card-head"><h2>${hIc("user")}Gemeinsam</h2></div><p class="small muted" style="margin:0 0 10px">Mit Partner oder WG: gemeinsame Ausgaben, Sparziele und Einkaufsliste – jeder behält sein eigenes Konto.</p><button class="btn" data-go="gemeinsam">Ausprobieren</button></div>`;
+  return `<div class="card gmcard"><div class="card-head"><h2>${hIc("user")}Gemeinsam</h2><button class="link" data-go="gemeinsam">Öffnen ${ic("right",16)}</button></div>${spList().map(sp=>{ const L=spLocal(sp.v), net=spBalance(L), mine=net[me().id]||0;
+    return `<button class="gmrow" data-go="gemeinsam" data-gmsel="${esc(sp.v)}"><b>${esc(sp.n||"Gemeinsam")}</b><span class="${Math.abs(mine)<0.01?"muted":mine>0?"pos":"neg"}">${Math.abs(mine)<0.01?"ausgeglichen":mine>0?`du bekommst ${esc(eur(mine))}`:`du gibst ${esc(eur(-mine))}`}</span></button>`; }).join("")}</div>`; }
+function renderGemeinsam(){
+  const el=$("v-gemeinsam"); if (!el) return; if (el.contains(document.activeElement) && typingNow()) return;
+  const step=UI.gmStep||"", list=spList(), m=me();
+  if (!(window.crypto&&crypto.subtle)){ el.innerHTML=`<div class="card"><p>Gemeinsame Bereiche gehen nur in der Handy- oder PC-App.</p></div>`; return; }
+  if (step==="new"||step==="join"||!list.length&&step!=="invite"){
+    const join=step==="join";
+    el.innerHTML=`<div class="card gmintro"><span class="lgic">${ic("user",26)}</span><h2>${join?"Einem Bereich beitreten":list.length?"Neuer gemeinsamer Bereich":"Gemeinsam statt einsam"}</h2>
+      ${!list.length&&!step?`<p class="small muted" style="margin:0 0 12px;line-height:1.5">Teile mit Partner, Familie oder WG nur das, was ihr gemeinsam habt: Ausgaben mit automatischem Ausgleich, Sparziele, eine Einkaufsliste – und auf Wunsch einzelne Budgets oder Fixkosten. Konten und alles andere bleiben privat. Ende-zu-Ende verschlüsselt, ohne Konto.</p>`:""}
+      <div class="field"><label for="gmMe">Dein Name (sehen die anderen)</label><input class="in" id="gmMe" value="${esc(m.name||S.settings.name||"")}" placeholder="z. B. Sascha"></div>
+      ${join?`<label class="btn primary block" style="justify-content:center;gap:8px">${ic("camera",18)} QR-Code fotografieren<input type="file" accept="image/*" capture="environment" id="gmCam" hidden></label>
+        <div class="field"><label for="gmCode">… oder Code einfügen</label><textarea class="in" id="gmCode" rows="3" placeholder="HBS1.…" autocapitalize="off" spellcheck="false"></textarea></div>
+        <div class="row-btns"><button class="btn" data-gmstep="">Zurück</button><button class="btn primary" id="gmJoinGo">Beitreten</button></div>`
+      :step==="new"?`<div class="field"><label for="gmName">Name des Bereichs</label><input class="in" id="gmName" placeholder="z. B. Wir zwei, WG, Familie"></div>
+        <div class="row-btns"><button class="btn" data-gmstep="">Zurück</button><button class="btn primary" id="gmNewGo">Anlegen</button></div>`
+      :`<div class="row-btns" style="justify-content:stretch"><button class="btn primary" data-gmstep="new">Bereich anlegen</button><button class="btn" data-gmstep="join">Beitreten</button></div>`}
+      <span class="small" id="gmErr" style="color:var(--bad)"></span></div>`; return; }
+  const sp=list.find(x=>x.v===UI.gmSel)||list[0]; UI.gmSel=sp.v; const L=spLocal(sp.v), tab=UI.gmTab||"over";
+  const mem=Object.keys(L.docs).filter(k=>k.startsWith("m-")).map(k=>k.slice(2)), net=spBalance(L), mine=net[m.id]||0;
+  const chips=`<div class="gmchips">${list.map(x=>`<button class="chip ${x.v===sp.v?"on":""}" data-gmsel="${esc(x.v)}">${esc(x.n||"Gemeinsam")}</button>`).join("")}<button class="chip" data-gmstep="new">+ Neu</button><button class="chip" data-gmstep="join">Beitreten</button></div>`;
+  if (step==="invite"){ el.innerHTML=chips+`<div class="card"><h2 style="margin:0 0 6px">Jemanden einladen</h2><p class="small" style="margin:0 0 10px;line-height:1.5">Die andere Person öffnet <b>Gemeinsam › Beitreten</b> und fotografiert diesen Code. Sie sieht danach nur diesen Bereich – nichts von deinen anderen Daten.</p>
+    <div class="pqr">${qrSvg(spCode(sp),230)}</div><div class="pcode" style="margin-top:10px">${esc(spCode(sp).replace(/(.{5})/g,"$1 ").trim())}</div>
+    <div class="row-btns" style="margin-top:12px"><button class="btn" id="gmCopy">Code kopieren</button><button class="btn primary" data-gmstep="">Fertig</button></div></div>`; return; }
+  const TABS=[["over","Übersicht"],["exp","Ausgaben"],["goal","Sparziele"],["shop","Einkauf"],["share","Freigaben"]];
+  const exps=Object.entries(L.docs).filter(([k])=>k.startsWith("x-")).map(([k,x])=>({id:k,...x})).sort((a,b)=>(b.d||"").localeCompare(a.d||""));
+  const goals=Object.entries(L.docs).filter(([k])=>k.startsWith("g-")).map(([k,x])=>({id:k,...x})), contr=Object.entries(L.docs).filter(([k])=>k.startsWith("c-")).map(([k,x])=>({id:k,...x}));
+  const shop=Object.entries(L.docs).filter(([k])=>k.startsWith("s-")).map(([k,x])=>({id:k,...x})).sort((a,b)=>(a.done-b.done)||(a.ts||0)-(b.ts||0));
+  const pubs=mem.map(id=>({id, p:L.docs["pub-"+id]})).filter(x=>x.p);
+  const balHtml = mem.length<2 ? `<p class="small muted" style="margin:0">Noch allein hier – lade jemanden ein.</p><button class="btn primary" data-gmstep="invite" style="margin-top:10px">Jemanden einladen</button>`
+    : `<div class="gmbal ${Math.abs(mine)<0.01?"":mine>0?"pos":"neg"}">${Math.abs(mine)<0.01?"Alles ausgeglichen":mine>0?`Du bekommst ${esc(eur(mine))}`:`Du gibst ${esc(eur(-mine))}`}</div>
+      ${mem.filter(id=>id!==m.id).map(id=>`<div class="gmmem">${spAv(L,id)}<span>${esc(spName(L,id))}</span><b class="${(net[id]||0)>0.005?"pos":(net[id]||0)<-0.005?"neg":"muted"}">${(net[id]||0)>0.005?"bekommt ":(net[id]||0)<-0.005?"gibt ":""}${esc(eur(Math.abs(net[id]||0)))}</b></div>`).join("")}
+      ${mine<-0.005?`<div class="row-btns" style="margin-top:10px">${mem.filter(id=>(net[id]||0)>0.005).map(id=>`<button class="btn" data-gmsettle="${esc(id)}" data-amt="${Math.min(-mine, net[id]).toFixed(2)}">${esc(eur(Math.min(-mine, net[id])))} an ${esc(spName(L,id))} gezahlt</button>`).join("")}</div>`:""}`;
+  const goalHtml = g => { const cs=contr.filter(c=>c.g===g.id), tot=sum(cs,c=>Number(c.a)||0), by={}; for (const c of cs) by[c.m]=(by[c.m]||0)+(Number(c.a)||0);
+    return `<div class="gmgoal"><div class="abl"><b>${esc(g.n)}</b><span>${esc(eur0(tot))} / ${esc(eur0(g.t))}</span></div><span class="bpbar"><i style="width:${Math.min(100,tot/(g.t||1)*100)}%;background:${tot>=g.t?"var(--good)":"var(--accent)"}"></i></span>
+      <div class="gmby">${Object.entries(by).map(([id,v])=>`${spAv(L,id)}<span>${esc(eur0(v))}</span>`).join("")}</div>${tab==="goal"?`<div class="gmadd"><input class="in" inputmode="decimal" placeholder="Betrag €" data-gmcin="${esc(g.id)}"><button class="btn" data-gmcadd="${esc(g.id)}">Eingezahlt</button><button class="icon-btn" data-gmdel="${esc(g.id)}" aria-label="Ziel löschen">×</button></div>`:""}</div>`; };
+  const pubHtml = pubs.map(({id,p})=>{ const parts=[];
+      for (const b of p.budgets||[]) parts.push(aBar(`${esc(b.c)} <span class="muted small">Budget</span>`, b.s, b.b, b.s>b.b?"var(--bad)":"var(--accent)", `${esc(eur0(b.s))} / ${esc(eur0(b.b))}`));
+      for (const g of p.goals||[]) parts.push(aBar(`${esc(g.n)} <span class="muted small">Sparziel</span>`, g.v, g.t, "var(--good)", `${esc(eur0(g.v))} / ${esc(eur0(g.t))}`));
+      if (p.fixed) parts.push(p.fixed.items ? p.fixed.items.map(f=>`<div class="abl"><b>${esc(f.n)}</b><span>${esc(eur(f.a))}</span></div>`).join("")+`<div class="abl"><b>Fixkosten gesamt</b><span>${esc(eur0(p.fixed.sum))}</span></div>` : `<div class="abl"><b>Fixkosten im Monat</b><span>${esc(eur0(p.fixed.sum))}</span></div>`);
+      return parts.length?`<div class="gmpub"><div class="gmmem">${spAv(L,id)}<b>${esc(spName(L,id))} teilt</b></div>${parts.join("")}</div>`:""; }).join("");
+  const body = tab==="over" ? `<div class="card"><div class="card-head"><h2>Ausgleich</h2>${mem.length>1?`<button class="link" data-gmstep="invite">Einladen</button>`:""}</div>${balHtml}</div>
+      ${goals.length?`<div class="card"><div class="card-head"><h2>Gemeinsame Sparziele</h2><button class="link" data-gmtab="goal">Alle</button></div>${goals.map(goalHtml).join("")}</div>`:""}
+      ${pubHtml?`<div class="card"><div class="card-head"><h2>Freigegeben</h2></div>${pubHtml}</div>`:""}
+      ${shop.filter(s=>!s.done).length?`<div class="card"><div class="card-head"><h2>Einkaufsliste</h2><button class="link" data-gmtab="shop">${shop.filter(s=>!s.done).length} offen</button></div></div>`:""}`
+    : tab==="exp" ? `<div class="card"><h2 style="margin:0 0 10px">Ausgabe eintragen</h2><div class="grid2"><input class="in" id="gxT" placeholder="Wofür? z. B. Rewe"><input class="in" id="gxA" inputmode="decimal" placeholder="Betrag €"></div>
+        <div class="grid2" style="margin-top:8px"><select class="in" id="gxP">${mem.map(id=>`<option value="${esc(id)}" ${id===m.id?"selected":""}>bezahlt von ${esc(spName(L,id))}</option>`).join("")}</select><input class="in" type="date" id="gxD" value="${isoToday()}"></div>
+        <button class="btn primary block" id="gxAdd" style="margin-top:10px">Eintragen – wird gleich aufgeteilt</button></div>
+      <div class="card">${exps.length?exps.slice(0,60).map(x=>`<div class="gmexp">${spAv(L,x.p)}<span class="n"><b>${x.settle?`Ausgleich an ${esc(spName(L,x.to))}`:esc(x.t||"Ausgabe")}</b><small>${esc(new Date((x.d||isoToday())+"T12:00").toLocaleDateString("de-DE"))} · ${esc(spName(L,x.p))}${x.settle?"":" hat bezahlt"}</small></span><b>${esc(eur(x.a))}</b>${x.by===m.id?`<button class="icon-btn" data-gmdel="${esc(x.id)}" aria-label="Löschen">×</button>`:""}</div>`).join(""):`<p class="small muted" style="margin:0">Noch keine gemeinsamen Ausgaben.</p>`}</div>`
+    : tab==="goal" ? `<div class="card"><h2 style="margin:0 0 10px">Neues gemeinsames Sparziel</h2><div class="grid2"><input class="in" id="ggN" placeholder="z. B. Urlaub"><input class="in" id="ggT" inputmode="decimal" placeholder="Ziel €"></div><button class="btn primary block" id="ggAdd" style="margin-top:10px">Anlegen</button></div>
+      <div class="card">${goals.length?goals.map(goalHtml).join(""):`<p class="small muted" style="margin:0">Noch kein gemeinsames Sparziel.</p>`}</div>`
+    : tab==="shop" ? `<div class="card"><div class="gmadd"><input class="in" id="gsT" placeholder="z. B. Milch"><button class="btn primary" id="gsAdd">Hinzufügen</button></div>
+      ${shop.map(s=>`<div class="gmshop ${s.done?"done":""}"><button class="gmck" data-gmshop="${esc(s.id)}" aria-label="${s.done?"Wieder offen":"Erledigt"}">${s.done?"✓":""}</button><span>${esc(s.t)}</span><button class="icon-btn" data-gmdel="${esc(s.id)}" aria-label="Löschen">×</button></div>`).join("")}
+      ${shop.some(s=>s.done)?`<button class="link small" id="gsClear" style="margin-top:8px">Erledigte entfernen</button>`:""}</div>`
+    : (()=>{ const sel=spSel(sp.v), bud=Object.entries(S.settings.budgets||{}).filter(([c,v])=>v>0);
+      return `<div class="card"><h2 style="margin:0 0 4px">Was die anderen von dir sehen</h2><p class="small muted" style="margin:0 0 10px">Alles, was hier nicht an ist, bleibt privat. Konten, Kontostand und Buchungen werden nie geteilt.</p>
+        <div class="section-title" style="font-size:14px;margin-top:4px">Budgets</div>${bud.length?bud.map(([c,v])=>`<div class="switch"><label><b>${esc(c)}</b><br><span class="small muted">${esc(eur0(v))} im Monat – die anderen sehen Budget und was du davon ausgegeben hast</span></label><input type="checkbox" data-gmsb="${esc(c)}" ${(sel.bud||{})[c]?"checked":""}></div>`).join(""):`<p class="small muted">Noch keine Budgets angelegt.</p>`}
+        <div class="section-title" style="font-size:14px">Sparziele</div>${(S.settings.goals||[]).length?(S.settings.goals||[]).map(g=>`<div class="switch"><label><b>${esc(g.name)}</b><br><span class="small muted">Stand und Ziel</span></label><input type="checkbox" data-gmsg="${esc(g.id)}" ${(sel.goal||{})[g.id]?"checked":""}></div>`).join(""):`<p class="small muted">Noch keine eigenen Sparziele.</p>`}
+        <div class="section-title" style="font-size:14px">Fixkosten</div><div class="seg" role="group">${[["none","privat"],["sum","nur Summe"],["list","einzeln"]].map(([k,l])=>`<button data-gmsf="${k}" aria-pressed="${(sel.fix||"none")===k}">${l}</button>`).join("")}</div></div>
+        <div class="card"><div class="row-btns"><button class="btn" data-gmstep="invite">Jemanden einladen</button><button class="btn danger" id="gmLeave">Bereich verlassen</button></div></div>`; })();
+  el.innerHTML = chips + `<div class="gmhead"><h2>${esc(sp.n||"Gemeinsam")}</h2><span class="gmavs">${mem.map(id=>spAv(L,id)).join("")}</span></div>
+    <div class="gmtabs">${TABS.map(([k,l])=>`<button class="fchip" data-gmtab="${k}" aria-pressed="${tab===k}">${l}</button>`).join("")}</div>` + body;
+}
+document.addEventListener("click", async e=>{
+  const t=e.target; if (!t.closest) return;
+  if (t.closest("#v-gemeinsam button, #v-home .gmcard") && document.activeElement && document.activeElement.blur && document.activeElement!==document.body) document.activeElement.blur();
+  const st=t.closest("[data-gmstep]"); if (st){ UI.gmStep=st.dataset.gmstep; renderGemeinsam(); window.scrollTo({top:0}); return; }
+  const se=t.closest("[data-gmsel]"); if (se){ UI.gmSel=se.dataset.gmsel; UI.gmStep=""; if (UI.view==="gemeinsam") renderGemeinsam(); return; }
+  const tb=t.closest("[data-gmtab]"); if (tb){ UI.gmTab=tb.dataset.gmtab; renderGemeinsam(); return; }
+  if (!t.closest("#v-gemeinsam")) return;
+  const sp=spList().find(x=>x.v===UI.gmSel), err=m=>{ const x=$("gmErr"); if (x) x.textContent=m; else toast(m); };
+  const saveMe=()=>{ const n=($("gmMe")||{}).value; if (n!=null){ const mm=me(); mm.name=n.trim().slice(0,30); S.settings.me=mm; } };
+  if (t.closest("#gmNewGo")){ const n=$("gmName").value.trim()||"Gemeinsam"; saveMe(); if (!me().name){ err("Bitte deinen Namen eintragen"); return; } t.closest("#gmNewGo").disabled=true;
+    try { await spCreate(n.slice(0,40)); UI.gmStep="invite"; render(); } catch(x){ err("Server nicht erreichbar – bist du online?"); t.closest("#gmNewGo").disabled=false; } return; }
+  if (t.closest("#gmJoinGo")){ const code=$("gmCode").value; saveMe(); if (!me().name){ err("Bitte deinen Namen eintragen"); return; } try { await spJoin(code); UI.gmStep=""; render(); toast("Beigetreten"); } catch(x){ err(x.message); } return; }
+  if (t.closest("#gmCopy")&&sp){ try{ await navigator.clipboard.writeText(spCode(sp)); toast("Code kopiert"); }catch(_){ toast("Bitte markieren und kopieren"); } return; }
+  if (!sp) return;
+  if (t.closest("#gxAdd")){ const a=parseAmt($("gxA").value); if (!(a>0)){ toast("Bitte einen Betrag eintragen"); return; } spPut(sp,"x-"+newId(),{t:$("gxT").value.trim().slice(0,60)||"Ausgabe", a:Math.round(a*100)/100, p:$("gxP").value, d:$("gxD").value||isoToday(), by:me().id}); toast("Eingetragen"); renderGemeinsam(); return; }
+  const stl=t.closest("[data-gmsettle]"); if (stl){ spPut(sp,"x-"+newId(),{settle:true, a:Number(stl.dataset.amt), p:me().id, to:stl.dataset.gmsettle, d:isoToday(), by:me().id}); toast("Ausgleich eingetragen"); renderGemeinsam(); return; }
+  if (t.closest("#ggAdd")){ const n=$("ggN").value.trim(), a=parseAmt($("ggT").value); if (!n||!(a>0)){ toast("Bitte Name und Ziel eintragen"); return; } spPut(sp,"g-"+newId(),{n:n.slice(0,40), t:a}); renderGemeinsam(); return; }
+  const ca=t.closest("[data-gmcadd]"); if (ca){ const inp=document.querySelector(`[data-gmcin="${ca.dataset.gmcadd}"]`), a=parseAmt(inp&&inp.value); if (!(a>0)){ toast("Bitte einen Betrag eintragen"); return; } spPut(sp,"c-"+newId(),{g:ca.dataset.gmcadd, m:me().id, a:Math.round(a*100)/100, d:isoToday()}); toast("Eingezahlt"); renderGemeinsam(); return; }
+  if (t.closest("#gsAdd")){ const v=$("gsT").value.trim(); if (!v) return; spPut(sp,"s-"+newId(),{t:v.slice(0,60), done:false, ts:Date.now()}); renderGemeinsam(); setTimeout(()=>{ const i=$("gsT"); if (i) i.focus(); },30); return; }
+  const sh=t.closest("[data-gmshop]"); if (sh){ const L=spLocal(sp.v), x=L.docs[sh.dataset.gmshop]; if (x) spPut(sp, sh.dataset.gmshop, {...x, done:!x.done}); renderGemeinsam(); return; }
+  if (t.closest("#gsClear")){ const L=spLocal(sp.v); for (const [k,x] of Object.entries(L.docs)) if (k.startsWith("s-")&&x.done) spPut(sp,k,null); renderGemeinsam(); return; }
+  const dl=t.closest("[data-gmdel]"); if (dl){ spPut(sp, dl.dataset.gmdel, null); if (dl.dataset.gmdel.startsWith("g-")){ const L=spLocal(sp.v); for (const [k,x] of Object.entries(L.docs)) if (k.startsWith("c-")&&x.g===dl.dataset.gmdel) spPut(sp,k,null); } renderGemeinsam(); return; }
+  const sf=t.closest("[data-gmsf]"); if (sf){ spSelSet(sp.v, s=>{ s.fix=sf.dataset.gmsf; }); spSyncSoon(); renderGemeinsam(); return; }
+  if (t.closest("#gmLeave")){ const b=t.closest("#gmLeave"); if (b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Wirklich verlassen?"; setTimeout(()=>{ b.dataset.armed=""; b.textContent="Bereich verlassen"; },4000); return; } spLeave(sp.v); toast("Bereich verlassen"); return; }
+});
+document.addEventListener("change", async e=>{ const t=e.target; if (!t.closest||!t.closest("#v-gemeinsam")) return; const sp=spList().find(x=>x.v===UI.gmSel);
+  if (t.id==="gmCam"){ const f=t.files&&t.files[0]; t.value=""; if (!f) return; const x=$("gmErr"); if (x) x.textContent="QR-Code wird gelesen …";
+    try { const c=await qrFromFile(f); if (!c||!spParse(c)){ if (x) x.textContent="Kein Code erkannt – näher ran oder Code einfügen."; return; } $("gmCode").value=c; if (x) x.textContent=""; } catch(_){ if (x) x.textContent="Das Foto ließ sich nicht lesen."; } return; }
+  if (!sp) return;
+  if (t.dataset.gmsb!=null){ spSelSet(sp.v, s=>{ s.bud=s.bud||{}; s.bud[t.dataset.gmsb]=t.checked; }); spSyncSoon(); }
+  else if (t.dataset.gmsg!=null){ spSelSet(sp.v, s=>{ s.goal=s.goal||{}; s.goal[t.dataset.gmsg]=t.checked; }); spSyncSoon(); }
+});
+document.addEventListener("keydown", e=>{ if (e.key==="Enter" && e.target.id==="gsT"){ const b=$("gsAdd"); if (b) b.click(); } });
 
 /* ---------- boot ---------- */
 render();
