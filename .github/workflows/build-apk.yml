@@ -48,6 +48,7 @@ jobs:
             printf '<!doctype html><html lang="de"><head><meta charset="utf-8">'
             printf '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
             printf '<meta name="hb-server" content="http://192.168.178.32/haushaltsbuch/api.php">'
+            printf '<meta name="hb-pair" content="https://miracleframe.synology.me/haushaltsbuch/pair.php">'
             printf '<meta name="hb-version" content="%s">' "${{ github.run_number }}"
             printf '<title>Finanz MAMI</title>'
             printf '<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%%}[hidden]{display:none!important}</style>'
