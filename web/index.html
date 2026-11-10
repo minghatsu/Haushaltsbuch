@@ -2212,6 +2212,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.9.0","10. November 2026",["Gehalt wird beim Import erkannt, wenn „Lohn“ oder „Gehalt“ im Verwendungszweck steht","Deine RKF-Zahlungen zählen jetzt als Gehalt"]],
   ["0.8.9","10. November 2026",["Kredite & Schulden: fehlende Kredite werden angelegt, der Block erscheint auch ohne Einträge auf der Startseite","„Gesamt mit Spaces“ ist jetzt einfach die Summe aller Konto-Karten"]],
   ["0.8.8","10. November 2026",["Kredite & Schulden: Stände, Zinsen und Tilgungsplan aus deiner Haushaltsbuch-Tabelle 2025 übernommen"]],
   ["0.8.7","10. November 2026",["„Darlehnsrate“, „Tilgung“ und „Annuität“ im Verwendungszweck werden jetzt als Kreditrate erkannt","Kontoauszug nochmal importieren: bei schon vorhandenen Buchungen ergänzt die App den Verwendungszweck – so werden auch alte Kreditraten erkannt"]],
@@ -4389,6 +4390,24 @@ document.addEventListener("change", e=>{ const f=e.target.closest("[data-lf]"); 
 var LOAN_TOLD=new Set();
 function loanCheck(){ try { const c=loanCands(); const i=c.findIndex(x=>!LOAN_TOLD.has(x.p.id)); if (i<0) return; c.forEach(x=>LOAN_TOLD.add(x.p.id));
   toast(c[i].off?"Umschuldung erkannt – sieh sie dir an":"Kredit erkannt – sieh ihn dir an", ()=>loanSheet(i), "Ansehen", 12000); } catch(e){} }
+/* ---------- one-time: Sascha's salary from RKFmobil (also booked as "DRK-MOBIL") counts as Gehalt ---------- */
+const RKF_RE=/\b(rkf|drk)[ -]?mobil/i;
+async function salaryFix1110(){
+  if (S.settings.fix1110b || !S.tx.length) return;
+  const hits=S.tx.filter(t=>t.kind==="einnahme" && RKF_RE.test(t.note||"")); if (!hits.length) return;
+  S.settings.fix1110b=1;
+  let cat=(incCats().find(c=>c.art==="lohn")||{}).name;
+  if (!cat){ cat="Gehalt"; const c=clone(S.settings.cats||{}); c.einnahme=[...(c.einnahme||cats("einnahme")), {name:cat, art:"lohn"}]; S.settings.cats=c; }
+  const rules=(S.settings.rules||[]).slice();
+  for (const n of new Set(hits.map(t=>nrm(t.note)))){ const i=rules.findIndex(r=>r.match===n); if (i>=0) rules[i].target="einnahme|"+cat; else rules.push({match:n, target:"einnahme|"+cat}); }
+  for (const n of ["rkfmobil","rkf mobil","drk-mobil"]) if (!rules.some(r=>r.match===n)) rules.push({match:n, target:"einnahme|"+cat});
+  S.settings.rules=rules.slice(-400); await saveSettings();
+  const bund={}; for (const t of hits) if (t.cat!==cat) (bund[t._b||"_"]=bund[t._b||"_"]||[]).push(t);
+  for (const [b,ts] of Object.entries(bund)){
+    if (b==="_"){ for (const t of ts) await safe(()=>saveTxDoc(t.id, {...plainTx(t), cat}, t)); continue; }
+    const items=clone(S.txb[b]||{}); for (const t of ts) if (items[t.id]) items[t.id].cat=cat; await safe(()=>put("txb", b, {items})); }
+  render(); toast(`${hits.length} Gehaltszahlungen von RKF als „${cat}“ einsortiert`, null, null, 9000);
+}
 /* ---------- one-time update of Sascha's loans to the state of his 2025 sheet (10.11.2026) – remove again later ---------- */
 const FIX1110_T=[4124,4150,4175,4200,4226,4252,4278,4304,4330,4356,4383,4409,4436,4463,4491,4518,4545,4573,4601,4629,4657,4686,4714,4743,4772,4801,4830,4859,4889,4919,4949,4979,5009,5040,5070,5101,5132,5164,5195,5227,5259,5291,5323,5355,5388,5421,5454,5487,5520,5554,5588,5622,5656,5691,5725,5760,5795,5831,5866,5902,5938,5974,6010,6047,6084,6121,6158,6196,6233,6271,6310,6348,6387,6426,6465,6504,6544,6584,6624,6664,6705,6745,6787,6828,6870,6911,6953,6996,7038,7081,7124,7168,7212,7255,7300,7344,7389,7434,7479,7525,7571,7617,7663,7710,7757,7804,7852,7899,7947,7996,8045,8094,8143,8192,8242,8293,8343,8394,8445,8497,8548,8600,8653,8705,8758,8812,8866,8920,8974,9029,9084,9139,9195,9251,9307,9364,9421,9478,9536,9594,9652,9711,9770,9830,9890,9950,10011,10071,10133,10195,10257,10319,10382,10445,10509,10573,10637,10702,10767,10833,10899,10965,11032,11099,11167,11235,11303,11372,11441,11511,11581,11652,11723,11794,11866,11938,12011,12084,12158,12232,12306,3382], FIX1110_Z=[8278,8252,8227,8202,8176,8150,8124,8098,8072,8046,8019,7993,7966,7939,7911,7884,7857,7829,7801,7773,7745,7716,7688,7659,7630,7601,7572,7543,7513,7483,7453,7423,7393,7362,7332,7301,7270,7238,7207,7175,7143,7111,7079,7047,7014,6981,6948,6915,6882,6848,6814,6780,6746,6711,6677,6642,6607,6571,6536,6500,6464,6428,6392,6355,6318,6281,6244,6206,6169,6131,6092,6054,6015,5976,5937,5898,5858,5818,5778,5738,5697,5657,5615,5574,5532,5491,5449,5406,5364,5321,5278,5234,5190,5147,5102,5058,5013,4968,4923,4877,4831,4785,4739,4692,4645,4598,4550,4503,4455,4406,4357,4308,4259,4210,4160,4109,4059,4008,3957,3905,3854,3802,3749,3697,3644,3590,3536,3482,3428,3373,3318,3263,3207,3151,3095,3038,2981,2924,2866,2808,2750,2691,2632,2572,2512,2452,2391,2331,2269,2207,2145,2083,2020,1957,1893,1829,1765,1700,1635,1569,1503,1437,1370,1303,1235,1167,1099,1030,961,891,821,750,679,608,536,464,391,318,244,170,96,21];
 async function debtFix1110(){
@@ -5750,7 +5769,7 @@ function rebuildTx(){
   for (const t of out) if (t.um && t.kind!=="umbuchung"){ t._k0=t.kind; t.kind="umbuchung"; }   // money only passing through (loan payout, payoff)
   markWithdrawals(out);
   S.tx = out;
-  clearTimeout(rebuildTx.lt); rebuildTx.lt=setTimeout(()=>{ if (typeof debtFix1110==="function") debtFix1110().catch(()=>{}); if (typeof loanCheck==="function") loanCheck(); if (typeof recurCheck==="function" && !UI.recur && !UI.loan) setTimeout(recurCheck, 4000); }, 2500);
+  clearTimeout(rebuildTx.lt); rebuildTx.lt=setTimeout(()=>{ if (typeof debtFix1110==="function") debtFix1110().catch(()=>{}); if (typeof salaryFix1110==="function") salaryFix1110().catch(()=>{}); if (typeof loanCheck==="function") loanCheck(); if (typeof recurCheck==="function" && !UI.recur && !UI.loan) setTimeout(recurCheck, 4000); }, 2500);
 }
 function plainTx(t){ const r={...t}; delete r.id; delete r._b; if (r.kind==="abhebung") r.kind="ausgabe"; if (r.kind==="umbuchung") r.kind=r._k0||"ausgabe"; delete r._k0; return r; }
 async function saveTxDoc(id, doc, old){
@@ -6626,6 +6645,7 @@ function suggest(r){
     return {target:"ausgabe|"+(cats("ausgabe")[0]||""), sure:false};
   }
   if (/(^|\D)\d{2,4}\s?[\/\-]\s?20\d\d(\D|$)|(^|\D)\d{3} 20\d\d(\D|$)/.test(nrm(r.ref)) && !/\b(lohn|gehalt|rente|bezüge|bezuege|entgelt)\b/.test(text)){ const c=incCats().find(c=>c.art==="selbst"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
+  if (/\b(lohn|gehalt|bezüge|bezuege|entgelt|lohn\/gehalt)\b/.test(text)){ const c=incCats().find(c=>c.art==="lohn"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
   if (/bundesagentur|arbeitsagentur|agentur für arbeit|agentur fuer arbeit/.test(text)){ const c=incCats().find(c=>c.art==="lohnersatz"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
   if (/\bspaces?\b/.test(text)) return {target:"skip|", sure:false};
   if (/weihnachtsgeld|urlaubsgeld|13\.? ?(monats)?gehalt|14\.? ?(monats)?gehalt|sonderzahlung|einmalzahlung|jahressonderzahlung|inflationsausgleich|prämie|praemie|\bbonus\b|tantieme|gratifikation/.test(text)){ const c=incCats().find(c=>c.art==="sonderzahlung"); if (c) return {target:"einnahme|"+c.name, sure:true}; }
