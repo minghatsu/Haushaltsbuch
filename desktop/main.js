@@ -216,6 +216,45 @@ ipcMain.on("saveApp", (e, html) => {
 ipcMain.on("reloadApp", () => { if (win) win.loadURL(APP_URL); });
 
 // Requests to the Synology are made here (not in the page), so browser rules for the home network never block them.
+/* ---------- encrypted storage of the app data: a random key, itself locked by Windows (DPAPI via safeStorage) ---------- */
+let VAULT_KEY = null;
+function vaultKey() {
+  if (VAULT_KEY) return VAULT_KEY;
+  const { safeStorage } = require("electron");
+  if (!safeStorage.isEncryptionAvailable()) throw new Error("no safeStorage");
+  const f = path.join(app.getPath("userData"), "tresor.bin");
+  if (fs.existsSync(f)) VAULT_KEY = Buffer.from(safeStorage.decryptString(fs.readFileSync(f)), "base64");
+  else { VAULT_KEY = crypto.randomBytes(32); fs.writeFileSync(f, safeStorage.encryptString(VAULT_KEY.toString("base64"))); }
+  return VAULT_KEY;
+}
+ipcMain.on("seal", (e, text) => {
+  try { const iv = crypto.randomBytes(12), c = crypto.createCipheriv("aes-256-gcm", vaultKey(), iv);
+    const ct = Buffer.concat([c.update(String(text), "utf8"), c.final(), c.getAuthTag()]);
+    e.returnValue = "v1:" + Buffer.concat([iv, ct]).toString("base64"); } catch (err) { e.returnValue = ""; }
+});
+ipcMain.on("unseal", (e, sealed) => {
+  try { const s = String(sealed); if (!s.startsWith("v1:")) throw new Error("fmt");
+    const u = Buffer.from(s.slice(3), "base64"), d = crypto.createDecipheriv("aes-256-gcm", vaultKey(), u.subarray(0, 12));
+    d.setAuthTag(u.subarray(u.length - 16));
+    e.returnValue = Buffer.concat([d.update(u.subarray(12, u.length - 16)), d.final()]).toString("utf8"); } catch (err) { e.returnValue = "\u0000fail"; }
+});
+ipcMain.on("pbkdf2", (e, pin, salt, iter) => {
+  try { e.returnValue = crypto.pbkdf2Sync(String(pin), String(salt), Math.max(1000, Math.min(Number(iter) || 0, 2000000)), 32, "sha256").toString("hex"); } catch (err) { e.returnValue = ""; }
+});
+// https to the Synology's local address: the certificate must be valid for its internet name (certHost)
+function httpsPinned(req) {
+  return new Promise((ok, bad) => {
+    const u = new URL(req.url), tls = require("tls");
+    if (u.protocol !== "https:" || !/^(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)[0-9.]+$/.test(u.hostname) || !/^[a-z0-9.-]+$/.test(req.certHost)) return bad(new Error("bad"));
+    const headers = { "Content-Type": "application/json" }; if (req.auth) headers.Authorization = req.auth;
+    const post = req.method === "POST", body = post ? Buffer.from(req.body || "", "utf8") : null; if (body) headers["Content-Length"] = body.length;
+    const r = require("https").request(u, { method: post ? "POST" : "GET", headers, timeout: 30000, servername: req.certHost,
+      checkServerIdentity: (h, cert) => tls.checkServerIdentity(req.certHost, cert) }, res => {
+      const chunks = []; res.on("data", c => chunks.push(c)); res.on("end", () => ok({ status: res.statusCode, text: Buffer.concat(chunks).toString("utf8") }));
+    });
+    r.on("timeout", () => r.destroy(new Error("timeout"))); r.on("error", bad); if (body) r.write(body); r.end();
+  });
+}
 ipcMain.on("http", async (e, req) => {
   let status = 0, text = "";
   try {
@@ -223,9 +262,12 @@ ipcMain.on("http", async (e, req) => {
     const headers = { "Content-Type": "application/json" };
     if (req.auth) headers.Authorization = req.auth;
     const post = req.method === "POST";
-    const r = await fetch(req.url, { method: post ? "POST" : "GET", headers, body: post ? req.body : undefined, signal: AbortSignal.timeout(30000) });
-    status = r.status;
-    text = await r.text();
+    if (req.certHost) { const p = await httpsPinned(req); status = p.status; text = p.text; }
+    else {
+      const r = await fetch(req.url, { method: post ? "POST" : "GET", headers, body: post ? req.body : undefined, signal: AbortSignal.timeout(30000) });
+      status = r.status;
+      text = await r.text();
+    }
   } catch (err) {
     status = 0; text = "";
   }

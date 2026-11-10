@@ -471,16 +471,41 @@ public class MainActivity extends Activity {
          * Network requests to the Synology go through Android directly (not the WebView), so the browser rules
          * for local network access never get in the way. The answer comes back via window.hbHttpDone(id, status, text).
          */
+        /** encrypted storage for the app data (see Vault) */
+        @JavascriptInterface
+        public String seal(String text) { return Vault.seal(MainActivity.this, text == null ? "" : text); }
+        @JavascriptInterface
+        public String unseal(String sealed) { String r = Vault.unseal(MainActivity.this, sealed); return r == null ? "\u0000fail" : r; }
+        @JavascriptInterface
+        public String pbkdf2(String pin, String salt, int iter) { return Vault.pbkdf2(pin == null ? "" : pin, salt == null ? "" : salt, iter); }
+
         @JavascriptInterface
         public void http(final String id, final String method, final String url, final String auth, final String body) {
+            httpAs(id, method, url, auth, body, "");
+        }
+
+        /** like http(), but for the Synology in the home network: https to its local address (192.168.…),
+            the certificate has to be valid for certHost (its internet name) – so nobody in the WLAN can read along */
+        @JavascriptInterface
+        public void httpAs(final String id, final String method, final String url, final String auth, final String body, final String certHost) {
             new Thread(() -> {
                 int code = 0;
                 String text = "";
                 HttpURLConnection c = null;
                 try {
                     if (!url.startsWith("http://") && !url.startsWith("https://")) throw new IllegalArgumentException();
-                    c = (HttpURLConnection) new URL(url).openConnection();
-                    c.setConnectTimeout(8000);
+                    URL u0 = new URL(url);
+                    c = (HttpURLConnection) u0.openConnection();
+                    final boolean pin = certHost != null && !certHost.isEmpty();
+                    if (pin) {
+                        if (!(c instanceof javax.net.ssl.HttpsURLConnection)
+                                || !u0.getHost().matches("^(192\\.168\\.|10\\.|172\\.(1[6-9]|2\\d|3[01])\\.)[0-9.]+$")
+                                || !certHost.matches("^[a-z0-9.-]+$")) throw new IllegalArgumentException();
+                        final String want = certHost;
+                        ((javax.net.ssl.HttpsURLConnection) c).setHostnameVerifier((h, ses) -> javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(want, ses));
+                        c.setInstanceFollowRedirects(false);
+                    }
+                    c.setConnectTimeout(pin ? 4000 : 8000);
                     c.setReadTimeout(30000);
                     c.setUseCaches(false);
                     c.setRequestMethod("POST".equals(method) ? "POST" : "GET");

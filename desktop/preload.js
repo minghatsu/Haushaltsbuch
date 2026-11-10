@@ -10,6 +10,11 @@ contextBridge.exposeInMainWorld("AndroidBridge", {
   fetchImage: (id, url) => ipcRenderer.send("fetchImage", { id: String(id), url: String(url) }),
   http: (id, method, url, auth, body) =>
     ipcRenderer.send("http", { id: String(id), method: String(method), url: String(url), auth: String(auth || ""), body: String(body || "") }),
+  httpAs: (id, method, url, auth, body, certHost) =>
+    ipcRenderer.send("http", { id: String(id), method: String(method), url: String(url), auth: String(auth || ""), body: String(body || ""), certHost: String(certHost || "") }),
+  seal: (text) => ipcRenderer.sendSync("seal", String(text)),
+  unseal: (sealed) => ipcRenderer.sendSync("unseal", String(sealed)),
+  pbkdf2: (pin, salt, iter) => ipcRenderer.sendSync("pbkdf2", String(pin), String(salt), Number(iter)),
   openInApp: (url) => ipcRenderer.send("openInApp", String(url)),
   notifyState: () => "granted",
   notifyAsk: () => true,
