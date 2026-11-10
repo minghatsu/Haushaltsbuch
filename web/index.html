@@ -2225,6 +2225,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.9.5","10. November 2026",["Buchungen eines Tages stehen in der Reihenfolge, in der sie gebucht wurden – die neueste oben. Für schon importierte Buchungen: Kontoauszug einmal neu importieren"]],
   ["0.9.4","10. November 2026",["Startseite: „Noch pro Tag“ – dein Hauptkonto geteilt durch die restlichen Tage im Monat","Die kleine Schulden-Kachel ist weg – die Schulden stehen im eigenen Block"]],
   ["0.9.3","10. November 2026",["Mindestlohn: Stunden pro Woche können sich ändern – mit „ab Monat“ und Pausen","Gehalt & Abrechnungen: Monate ohne Abrechnung werden mit dem Mindestlohn geschätzt, Netto aus deinen Gehaltseingängen"]],
   ["0.9.2","10. November 2026",["Kredite & Schulden: neues Feld „Ursprünglich geliehen“ – der Balken zeigt, wie viel du schon abbezahlt hast","Studienkredit: 16.900 € laut KfW-Kreditportal"]],
@@ -7245,7 +7246,9 @@ function buildItems(){
   for (const n of (S.settings.spaces||[])) spaces.add(nrm(n));
   imp.spaces = spaces;
   const soft={}; if (imp.pdf) for (const t of S.tx){ const sk=t.date+"|"+Number(t.amount).toFixed(2); soft[sk]=(soft[sk]||0)+1; }
-  for (const r of imp.raw){
+  // the order inside the file is the booking order of a day (banks give no time): keep it for sorting
+  const dts=imp.raw.map(r=>parseDate(r[m.date])).filter(Boolean), desc = dts.length>1 && dts[0]>dts[dts.length-1];
+  for (const [ri,r] of imp.raw.entries()){
     const date=parseDate(r[m.date]);
     let amount=parseBankAmt(r[m.amount]);
     if (m.soll>=0 && m.haben>=0 && m.amount===m.soll){ const so=parseBankAmt(r[m.soll]), ha=parseBankAmt(r[m.haben]); amount=(isFinite(ha)?Math.abs(ha):0)-(isFinite(so)?Math.abs(so):0); }
@@ -7256,6 +7259,7 @@ function buildItems(){
     const it = { date, amount, payee:payee||"", ref:(m.ref>=0?r[m.ref]:"")||"", type:(m.type>=0?r[m.type]:"")||"", acct:(m.account>=0?String(r[m.account]||"").trim():"") };
     let key = hashKey(date+"|"+amount.toFixed(2)+"|"+nrm(it.payee)+"|"+nrm(it.ref).slice(0,60));
     while (seen.has(key)) key += "b"; seen.add(key);
+    it.ord = desc ? imp.raw.length-ri : ri;
     it.key=key; it.ignored = ignored.has(key) && !keys.has(key); it.dup = keys.has(key) || (it.ignored && !imp.showIgnored);
     // PDF: the same booking may already be there from a CSV import (other wording) -> same day and amount: suggest to skip
     if (imp.pdf && !it.dup){ const sk=date+"|"+Math.abs(amount).toFixed(2); if ((soft[sk]||0)>0){ soft[sk]--; it.maybeDup=true; } }
@@ -7269,15 +7273,18 @@ function buildItems(){
   imp.items = items;
   refBackfill(items);
 }
+const ordTs = it => new Date(it.date+"T00:00:00").getTime() + (Number(it.ord)||0);
 // bookings imported before the purpose text was kept: take it from the file again (helps to recognise loans)
 async function refBackfill(items){
-  const byKey=new Map(); for (const it of items) if (it.dup && it.ref && String(it.ref).trim()) byKey.set(it.key, String(it.ref).replace(/\s+/g," ").trim().slice(0,120));
-  if (!byKey.size) return; const bund={};
-  for (const t of S.tx){ if (t.ref || !t.importKey || !byKey.has(t.importKey) || !t._b) continue; (bund[t._b]=bund[t._b]||[]).push(t); }
+  const byKey=new Map(), ordBy=new Map(); for (const it of items) if (it.dup){ ordBy.set(it.key, ordTs(it)); if (it.ref && String(it.ref).trim()) byKey.set(it.key, String(it.ref).replace(/\s+/g," ").trim().slice(0,120)); }
+  if (!ordBy.size) return; const bund={};
+  for (const t of S.tx){ if (!t.importKey || !ordBy.has(t.importKey) || !t._b) continue; if (t.ref && t.ts===ordBy.get(t.importKey)) continue; (bund[t._b]=bund[t._b]||[]).push(t); }
   let n=0;
-  for (const [b,ts] of Object.entries(bund)){ const items2=clone(S.txb[b]||{}); let ch=0;
-    for (const t of ts){ if (items2[t.id] && !items2[t.id].ref){ items2[t.id].ref=byKey.get(t.importKey); ch++; } }
-    if (ch && await safe(()=>put("txb", b, {items:items2}))) n+=ch; }
+  for (const [b,ts] of Object.entries(bund)){ const items2=clone(S.txb[b]||{}); let ch=0, chr=0;
+    for (const t of ts){ const x=items2[t.id]; if (!x) continue;
+      if (!x.ref && byKey.has(t.importKey)){ x.ref=byKey.get(t.importKey); ch++; chr++; }
+      if (x.ts!==ordBy.get(t.importKey)){ x.ts=ordBy.get(t.importKey); ch++; } }   // booking order of the day from the file
+    if (ch && await safe(()=>put("txb", b, {items:items2}))) n+=chr; }
   if (n){ RECUR_TOLD=false; LOAN_TOLD=new Set(); setTimeout(()=>{ loanCheck(); recurCheck(); }, 600); }
 }
 function renderImport(){
@@ -7370,7 +7377,7 @@ async function commitImport(){
       m.paidKeys[v]=it.key; m.importKeys=[...(m.importKeys||[]), it.key]; m._fresh[v]=true; nFix++;
     } else {
       let amount=Math.abs(it.amount), note=(it.payee||"").trim().slice(0,80);
-      const doc={ date:it.date, amount:Math.round(amount*100)/100, kind:k==="vz"?"vorauszahlung":k, cat:k==="vz"?"Steuer-Vorauszahlung":v, note, ts:Date.now(), importKey:it.key, source:"n26" };
+      const doc={ date:it.date, amount:Math.round(amount*100)/100, kind:k==="vz"?"vorauszahlung":k, cat:k==="vz"?"Steuer-Vorauszahlung":v, note, ts:ordTs(it), importKey:it.key, source:"n26" };
       const ref=String(it.ref||"").replace(/\s+/g," ").trim().slice(0,120); if (ref) doc.ref=ref;   // purpose text: helps to recognise loans
       if (k==="einnahme" && incArt(v)==="selbst" && !S.settings.kleinunternehmer) doc.net=Math.round(amount/(1+vat)*100)/100; // invoice incl. VAT: the balance counts it all, taxes use the net amount
       (bundles[ym]=bundles[ym]||{})[newId()+nTx.toString(36)]=doc; nTx++;
