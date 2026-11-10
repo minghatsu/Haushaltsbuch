@@ -101,7 +101,7 @@ jobs:
           gh release download neueste -p Haushaltsbuch.apk -p Haushaltsbuch-Setup.exe -D . --clobber
           gh release delete neueste -y --cleanup-tag || true
           gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html \
-            --title "Finanz MAMI V 0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 ))" \
+            --title "Finanz MAMI · Handy v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · PC v0.$(( (${{ github.run_number }} - 142) / 10 )).$(( (${{ github.run_number }} - 142) % 10 ))" \
             --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=${{ steps.need.outputs.ra }} exe=${{ steps.need.outputs.re }}"
           for t in $(gh api "repos/${{ github.repository }}/releases?per_page=100" --jq '.[].tag_name' | grep '^build-'); do
             gh release delete "$t" -y --cleanup-tag || true
@@ -209,11 +209,11 @@ jobs:
         run: |
           echo "{\"rev\": $(git rev-list --count HEAD -- desktop/)}" > desktop/native.json
           cat desktop/native.json
-      - name: Versionsnummer (V 0.8.0 aus Build 80)
+      - name: Versionsnummer des PC (eigene Zählung, Build 143 = v0.0.1)
         shell: bash
         working-directory: desktop
         run: |
-          N=$(( ${{ github.run_number }} - 88 ))
+          N=$(( ${{ github.run_number }} - 142 ))
           npm pkg set version="0.$((N/10)).$((N%10))"
       - name: Installer bauen
         working-directory: desktop
@@ -264,7 +264,7 @@ jobs:
           fi
           gh release delete neueste -y --cleanup-tag || true
           gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html \
-            --title "Finanz MAMI V 0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 ))" \
+            --title "Finanz MAMI · Handy v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · PC v0.$(( (${{ github.run_number }} - 142) / 10 )).$(( (${{ github.run_number }} - 142) % 10 ))" \
             --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=$APK exe=$EXE"
           # remove this and any leftover intermediate releases (from runs that failed halfway)
           for t in $(gh api "repos/${{ github.repository }}/releases?per_page=100" --jq '.[].tag_name' | grep '^build-'); do
@@ -280,33 +280,3 @@ jobs:
           curl -fsS --retry 3 --max-time 60 -X POST -H "X-Deploy-Token: $TOKEN" -H "Content-Type: text/html" \
             --data-binary @app.html "$DEPLOY_URL?a=deploy"
 
-  public:
-    name: Öffentliche Downloads für Tester (minghatsu/finanz-mami)
-    needs: [web, release]
-    # runs after either publish path; skipped quietly while the secret PUBLIC_RELEASE_TOKEN is not set up
-    if: ${{ always() && needs.web.result == 'success' && needs.release.result != 'failure' && needs.release.result != 'cancelled' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Neueste Version spiegeln
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PUB_TOKEN: ${{ secrets.PUBLIC_RELEASE_TOKEN }}
-          PUB: minghatsu/finanz-mami
-        run: |
-          if [ -z "$PUB_TOKEN" ]; then echo "Secret PUBLIC_RELEASE_TOKEN fehlt – öffentliche Downloads übersprungen"; exit 0; fi
-          mkdir pub && cd pub
-          gh release download neueste -R "${{ github.repository }}" -D . --clobber
-          REL=$(gh api "repos/${{ github.repository }}/releases/tags/neueste")
-          TITLE=$(echo "$REL" | jq -r .name); VERS=$(echo "$REL" | jq -r .body | grep -o 'web=[0-9]* apk=[0-9]* exe=[0-9]*')
-          mv Haushaltsbuch.apk Finanz-MAMI.apk; mv Haushaltsbuch-Setup.exe Finanz-MAMI-Setup.exe
-          zip -q Finanz-MAMI-Windows.zip Finanz-MAMI-Setup.exe
-          NOTES=$(printf '%s\n\n%s\n%s\n%s\n\n%s\n\n%s' \
-            "**Testversion – danke fürs Ausprobieren!**" \
-            "📱 **Android:** Finanz-MAMI.apk herunterladen und öffnen. Beim ersten Mal fragt Android, ob Apps aus dieser Quelle erlaubt sind – einmal zulassen." \
-            "💻 **Windows:** Finanz-MAMI-Windows.zip herunterladen, entpacken und Finanz-MAMI-Setup.exe starten. Meldet Windows „Unbekannter Herausgeber“: „Weitere Informationen“ › „Trotzdem ausführen“." \
-            "🔄 Updates kommen danach automatisch." \
-            "Feedback: in der App unter Einstellungen › Feedback oder an kontakt@miracleframe.de" \
-            "Versionen für die automatischen Updates: $VERS")
-          GH_TOKEN=$PUB_TOKEN gh release delete neueste -R "$PUB" -y --cleanup-tag || true
-          GH_TOKEN=$PUB_TOKEN gh release create neueste Finanz-MAMI.apk Finanz-MAMI-Windows.zip Finanz-MAMI-Setup.exe app.html \
-            -R "$PUB" --title "$TITLE" --notes "$NOTES" --latest

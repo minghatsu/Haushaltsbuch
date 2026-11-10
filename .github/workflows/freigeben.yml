@@ -1,0 +1,35 @@
+name: Für Tester freigeben
+# Erst selbst testen, dann hier "Run workflow" – die aktuell neueste Version geht an alle Tester (minghatsu/finanz-mami).
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public:
+    name: Neueste Version für Tester freigeben
+    runs-on: ubuntu-latest
+    steps:
+      - name: Neueste Version spiegeln
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUB_TOKEN: ${{ secrets.PUBLIC_RELEASE_TOKEN }}
+          PUB: minghatsu/finanz-mami
+        run: |
+          if [ -z "$PUB_TOKEN" ]; then echo "::error::Secret PUBLIC_RELEASE_TOKEN fehlt"; exit 1; fi
+          mkdir pub && cd pub
+          gh release download neueste -R "${{ github.repository }}" -D . --clobber
+          REL=$(gh api "repos/${{ github.repository }}/releases/tags/neueste")
+          TITLE=$(echo "$REL" | jq -r .name); VERS=$(echo "$REL" | jq -r .body | grep -o 'web=[0-9]* apk=[0-9]* exe=[0-9]*')
+          mv Haushaltsbuch.apk Finanz-MAMI.apk; mv Haushaltsbuch-Setup.exe Finanz-MAMI-Setup.exe
+          zip -q Finanz-MAMI-Windows.zip Finanz-MAMI-Setup.exe
+          NOTES=$(printf '%s\n\n%s\n%s\n%s\n\n%s\n\n%s' \
+            "**Testversion – danke fürs Ausprobieren!**" \
+            "📱 **Android:** Finanz-MAMI.apk herunterladen und öffnen. Beim ersten Mal fragt Android, ob Apps aus dieser Quelle erlaubt sind – einmal zulassen." \
+            "💻 **Windows:** Finanz-MAMI-Windows.zip herunterladen, entpacken und Finanz-MAMI-Setup.exe starten. Meldet Windows „Unbekannter Herausgeber“: „Weitere Informationen“ › „Trotzdem ausführen“." \
+            "🔄 Updates kommen danach automatisch." \
+            "Feedback: in der App unter Einstellungen › Feedback oder an kontakt@miracleframe.de" \
+            "Versionen für die automatischen Updates: $VERS")
+          GH_TOKEN=$PUB_TOKEN gh release delete neueste -R "$PUB" -y --cleanup-tag || true
+          GH_TOKEN=$PUB_TOKEN gh release create neueste Finanz-MAMI.apk Finanz-MAMI-Windows.zip Finanz-MAMI-Setup.exe app.html \
+            -R "$PUB" --title "$TITLE" --notes "$NOTES" --latest
+          echo "### Freigegeben: $TITLE" >> "$GITHUB_STEP_SUMMARY"

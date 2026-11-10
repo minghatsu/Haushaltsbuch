@@ -2091,6 +2091,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.5.5","10. November 2026",["Neue Versionsanzeige (v0.5.5) – der PC hat jetzt eigene Versionsnummern ab v0.0.1"]],
   ["0.5.3","10. November 2026",["Updates funktionieren jetzt für alle – ohne Schlüssel"]],
   ["0.5.2","10. November 2026",["Neu: freiwillige Tour durch die App, passend zu deiner Auswahl – jederzeit unter Hilfe"]],
   ["0.5.1","10. November 2026",["Neue Installation startet mit leerer Übersicht","Hell/Dunkel-Knopf oben entfernt (bleibt in den Einstellungen)","Rechtstexte lassen sich wieder hochscrollen, ohne dass das Fenster zugeht"]],
@@ -2105,10 +2106,10 @@ const CHANGELOG=[
   ["0.4.2","9. November 2026",["Eigene Startseite für Studium, Schule, Ausbildung, Rente, Elternzeit, Krankengeld und Beamte"]],
   ["0.4.1","9. November 2026",["Steuer-Kachel passend zu jeder Gruppe","Neu: Beamte"]],
   ["0.4.0","9. November 2026",["Keine Steuer-Kacheln mehr bei Grundsicherung"]]];
-function curVerShort(){ const n=+((document.querySelector('meta[name="hb-version"]')||{}).content||0); return n ? verName(n).replace(/^V /,"") : CHANGELOG[0][0]; }
+function curVerShort(){ const n=+((document.querySelector('meta[name="hb-version"]')||{}).content||0); return n ? verName(n).replace(/^v/,"") : CHANGELOG[0][0]; }
 function neuUnseen(){ try{ return localStorage.getItem("hb-seenlog")!==CHANGELOG[0][0]; }catch(e){ return false; } }
 function renderNeu(){ const el=$("neuEd"); if (!el) return; try{ localStorage.setItem("hb-seenlog", CHANGELOG[0][0]); }catch(e){}
-  el.innerHTML = CHANGELOG.map(([v,d,items],i)=>`<div class="clog ${i?"":"top"}"><div class="clh"><b>V ${esc(v)}</b><span class="small muted">${esc(d)}</span></div><ul>${items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join(""); }
+  el.innerHTML = CHANGELOG.map(([v,d,items],i)=>`<div class="clog ${i?"":"top"}"><div class="clh"><b>v${esc(v)}</b><span class="small muted">${esc(d)}</span></div><ul>${items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join(""); }
 
 const FAQ=[
   ["Wie trage ich etwas ein?","Tippe unten auf das große Plus. Du kannst selbst eintippen, einen Beleg fotografieren oder Kontoauszüge importieren."],
@@ -4759,7 +4760,7 @@ function renderSetHome(){
     if (k==="abos"){ const n=Object.values(st.abos||{}).filter(a=>a&&a.end).length; return n?`${n} mit Frist`:"Fristen"; }
     if (k==="export") return "Bericht · Excel";
     if (k==="sprache") return `${(LANGS.find(x=>x[0]===LANG)||LANGS[0])[1]} · €${S.settings.cur2?" · "+S.settings.cur2:""}`;
-    if (k==="neu") return "V "+curVerShort();
+    if (k==="neu") return "v"+curVerShort();
     if (k==="hilfe") return "Tipps";
     if (k==="feedback") return "melden";
     if (k==="speicher") return RCPT.ids.size+" Fotos";
@@ -6615,8 +6616,9 @@ async function syncNow(){
   } finally { SYNC.busy=false; }
 }
 /* ---------- self-update straight from the GitHub release (works anywhere, no Synology needed) ---------- */
-// shown version: build 80 -> "V 0.8.0", 81 -> "V 0.8.1", 90 -> "V 0.9.0"
-function verName(n){ n=n|0; if (!n) return "Testversion"; const m=Math.max(0,n-88); return `V 0.${Math.floor(m/10)}.${m%10}`; }   // numbering restarted at V 0.1.0 with build 98
+// shown version "v0.5.4": phone/app count from build 88, the PC version has its own numbering from build 142 (build 143 = v0.0.1)
+const VER_BASE = {app:88, pc:142};
+function verName(n, pc){ n=n|0; if (!n) return "Testversion"; if (pc===undefined) pc=IS_PC; const m=Math.max(0, n-(pc?VER_BASE.pc:VER_BASE.app)); return `v0.${Math.floor(m/10)}.${m%10}`; }
 const GH_REL = "https://api.github.com/repos/minghatsu/Haushaltsbuch/releases/tags/neueste";
 const GH_REL_PUB = "https://api.github.com/repos/minghatsu/finanz-mami/releases/tags/neueste";   // public download repo for testers – no key needed
 const UPD = {msg:"", ts:0, busy:false, last:0, started:Date.now()};
