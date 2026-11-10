@@ -2091,6 +2091,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.5.3","10. November 2026",["Updates funktionieren jetzt für alle – ohne Schlüssel"]],
   ["0.5.2","10. November 2026",["Neu: freiwillige Tour durch die App, passend zu deiner Auswahl – jederzeit unter Hilfe"]],
   ["0.5.1","10. November 2026",["Neue Installation startet mit leerer Übersicht","Hell/Dunkel-Knopf oben entfernt (bleibt in den Einstellungen)","Rechtstexte lassen sich wieder hochscrollen, ohne dass das Fenster zugeht"]],
   ["0.5.0","10. November 2026",["Impressum vollständig"]],
@@ -6617,6 +6618,7 @@ async function syncNow(){
 // shown version: build 80 -> "V 0.8.0", 81 -> "V 0.8.1", 90 -> "V 0.9.0"
 function verName(n){ n=n|0; if (!n) return "Testversion"; const m=Math.max(0,n-88); return `V 0.${Math.floor(m/10)}.${m%10}`; }   // numbering restarted at V 0.1.0 with build 98
 const GH_REL = "https://api.github.com/repos/minghatsu/Haushaltsbuch/releases/tags/neueste";
+const GH_REL_PUB = "https://api.github.com/repos/minghatsu/finanz-mami/releases/tags/neueste";   // public download repo for testers – no key needed
 const UPD = {msg:"", ts:0, busy:false, last:0, started:Date.now()};
 const ghWait = {};
 window.hbGhDone = (id, res, err) => { const f=ghWait[id]; if (f){ delete ghWait[id]; f(res, err); } };
@@ -6624,13 +6626,14 @@ const canGh = () => !!(window.AndroidBridge && window.AndroidBridge.ghFetch);
 const updKey = () => String((S.settings && S.settings.updKey) || "");
 function ghFetch(url, kind){ return new Promise((ok, no)=>{ const id=newId(); ghWait[id]=(r,e)=> e ? no(new Error(e)) : ok(r); window.AndroidBridge.ghFetch(id, url, updKey(), kind); }); }
 async function ghCheck(manual){
-  if (!canGh() || !updKey() || UPD.busy) return;
+  if (!canGh() || UPD.busy) return;
   if (!manual && Date.now()-UPD.last < 30*60*1000) return;
   UPD.busy=true; UPD.last=Date.now(); if (manual){ UPD.msg="Prüfe …"; renderUpd(); }
   try {
-    const rel = JSON.parse(await ghFetch(GH_REL, "json")), body = String(rel.body||"");
+    const rel = JSON.parse(await ghFetch(updKey() ? GH_REL : GH_REL_PUB, "json")), body = String(rel.body||"");
     const num = k => { const m=body.match(new RegExp("\\b"+k+"=(\\d+)")); return m ? +m[1] : 0; };
-    const asset = n => (rel.assets||[]).find(a=>a.name===n);
+    const ALT = {"Haushaltsbuch.apk":"Finanz-MAMI.apk", "Haushaltsbuch-Setup.exe":"Finanz-MAMI-Setup.exe"};
+    const asset = n => (rel.assets||[]).find(a=>a.name===n || a.name===ALT[n]);
     const desk = !!window.AndroidBridge.desktop, mine = +(window.AndroidBridge.nativeRev() || 0), theirs = num(desk ? "exe" : "apk");
     if (theirs > mine){
       const a = asset(desk ? "Haushaltsbuch-Setup.exe" : "Haushaltsbuch.apk");
@@ -6668,19 +6671,21 @@ function renderUpd(){
   const has=!!updKey();
   let waiting=""; try { const v=JSON.parse(window.AndroidBridge.appVersions ? window.AndroidBridge.appVersions() : "{}"); if ((v.cached|0) > HB_VERSION) waiting = " · " + verName(v.cached) + " liegt bereit"; } catch(e){}
   const when = waiting + (UPD.ts ? " · geprüft " + new Date(UPD.ts).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}) : "");
-  st.textContent = has ? (UPD.msg || "An – die App prüft alle 30 Minuten auf neue Versionen.") + when : "Einmal deinen Update-Schlüssel eintragen, dann aktualisiert sich die App selbst.";
+  st.textContent = (UPD.msg || "An – die App prüft alle 30 Minuten auf neue Versionen.") + when;
   if (document.activeElement && document.activeElement.id==="updKey") return;
   body.innerHTML = has
     ? `<div class="bkb"><button class="btn primary" id="updNow">Jetzt prüfen</button><button class="btn" id="updChange">Schlüssel ändern</button></div>`
-    : `<div class="field"><label for="updKey">Update-Schlüssel (GitHub, nur Lesen)</label><input class="in" id="updKey" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></div>
+    : UI.updKeyForm ? `<div class="field"><label for="updKey">Entwickler-Schlüssel (GitHub, nur Lesen)</label><input class="in" id="updKey" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></div>
        <div class="bkb"><button class="btn primary" id="updSave">Speichern</button></div>
-       <span class="small muted">Wird mit deinen anderen Geräten abgeglichen – du musst ihn nur einmal eintragen.</span>`;
+       <span class="small muted">Nur für den Entwickler – alle anderen bekommen Updates ohne Schlüssel.</span>`
+    : `<div class="bkb"><button class="btn primary" id="updNow">Jetzt prüfen</button></div><button class="link small" id="updKeyShow" style="margin-top:6px">Entwickler-Schlüssel</button>`;
 }
 document.addEventListener("click", async e=>{
   if (e.target.closest("#updSave")){ const v=($("updKey").value||"").trim(); if (!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(v)){ toast("Das sieht nicht wie ein GitHub-Schlüssel aus"); return; }
-    S.settings.updKey=v; await saveSettings(); renderUpd(); ghCheck(true); return; }
+    S.settings.updKey=v; UI.updKeyForm=false; await saveSettings(); renderUpd(); ghCheck(true); return; }
   if (e.target.closest("#updNow")){ ghCheck(true); return; }
-  if (e.target.closest("#updChange")){ delete S.settings.updKey; await saveSettings(); UPD.msg=""; renderUpd(); setTimeout(()=>$("updKey")&&$("updKey").focus(),30); }
+  if (e.target.closest("#updKeyShow")){ UI.updKeyForm=true; renderUpd(); return; }
+  if (e.target.closest("#updChange")){ UI.updKeyForm=true; delete S.settings.updKey; await saveSettings(); UPD.msg=""; renderUpd(); setTimeout(()=>$("updKey")&&$("updKey").focus(),30); }
 });
 setTimeout(()=>ghCheck(), 20000);
 setInterval(()=>{ if (document.visibilityState==="visible") ghCheck(); }, 5*60*1000);

@@ -241,8 +241,9 @@ ipcMain.on("ghFetch", async (e, req) => {
   try {
     if (!String(req.url).startsWith("https://api.github.com/repos/minghatsu/")) throw new Error("Adresse nicht erlaubt");
     const json = req.kind === "json";
-    let r = await fetch(req.url, { redirect: "manual", signal: AbortSignal.timeout(300000), headers: {
-      Authorization: "Bearer " + req.token, "User-Agent": "FinanzMAMI", Accept: json ? "application/vnd.github+json" : "application/octet-stream" } });
+    const headers = { "User-Agent": "FinanzMAMI", Accept: json ? "application/vnd.github+json" : "application/octet-stream" };
+    if (req.token) headers.Authorization = "Bearer " + req.token;     // public download repo: no key
+    let r = await fetch(req.url, { redirect: "manual", signal: AbortSignal.timeout(300000), headers });
     if (r.status >= 300 && r.status < 400) {     // download link of the file: fetched without the key
       const loc = r.headers.get("location");
       if (!loc || !loc.startsWith("https://")) throw new Error("Weiterleitung fehlt");

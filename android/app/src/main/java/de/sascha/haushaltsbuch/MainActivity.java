@@ -491,7 +491,7 @@ public class MainActivity extends Activity {
                     HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
                     c.setInstanceFollowRedirects(false);
                     c.setConnectTimeout(10000); c.setReadTimeout(120000);
-                    c.setRequestProperty("Authorization", "Bearer " + token);
+                    if (token != null && !token.isEmpty()) c.setRequestProperty("Authorization", "Bearer " + token);   // public download repo: no key
                     c.setRequestProperty("User-Agent", "FinanzMAMI");
                     c.setRequestProperty("Accept", "json".equals(kind) ? "application/vnd.github+json" : "application/octet-stream");
                     int code = c.getResponseCode();
