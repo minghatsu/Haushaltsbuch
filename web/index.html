@@ -2212,6 +2212,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.8.5","10. November 2026",["Tilgungsplan ohne Restschuld-Spalte (z. B. KfW oder Bundesverwaltungsamt): die App rechnet den offenen Betrag selbst aus"]],
   ["0.8.4","10. November 2026",["Fixkosten erkennen: regelmäßige Zahlungen aus deinen Kontoauszügen werden als Fixkosten vorgeschlagen – auch für schon importierte Daten","Kreditraten und Steuer-Ratenzahlungen erkennt die App dabei und legt sie unter „Kredite & Schulden“ an"]],
   ["0.8.3","10. November 2026",["Umschuldung erkennen: Kredit-Auszahlung und z. B. Zahlung ans Finanzamt zählen nicht mehr als Einnahme/Ausgabe – die App legt den Kredit mit Rate selbst an"]],
   ["0.8.2","10. November 2026",["„Kredite & Schulden“: Art wählbar (Kredit, Ratenkauf, Dispo, privat)","Jede Rate zeigt Zinsen und Tilgung getrennt – auch in der Analyse"]],
@@ -2808,6 +2809,8 @@ function planFromTable(rows, startYm){
     if (row.zins==null && row.rate!=null && row.tilg!=null) row.zins=r2(row.rate-row.tilg);
     out.push({ym, ...row});
   }
+  // no balance column (e.g. KfW/BVA plans): the rest after each rate is the sum of the repayments still to come
+  if (out.length && out.every(x=>x.rest==null) && out.every(x=>x.tilg!=null)){ let left=0; for (let i=out.length-1;i>=0;i--){ out[i].rest=r2(left); left+=out[i].tilg; } }
   return out;
 }
 // without a head row: amounts in a line are usually  rate, interest, repayment, rest  (the app checks which two add up)
