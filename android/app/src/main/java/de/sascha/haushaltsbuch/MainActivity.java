@@ -569,7 +569,7 @@ public class MainActivity extends Activity {
                     code = c.getResponseCode();
                     InputStream is = code >= 400 ? c.getErrorStream() : c.getInputStream();
                     text = is == null ? "" : new String(readAll(is), StandardCharsets.UTF_8);
-                } catch (Exception e) {
+                } catch (Throwable e) {   // also "out of memory": always answer, so the app does not wait forever
                     code = 0;
                     text = "";
                 } finally {

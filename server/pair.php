@@ -129,9 +129,14 @@ try {
         $v = authVault();
         $since = max(0, (int)($_GET['since'] ?? 0));
         $s = q('SELECT h, b, rev FROM docs WHERE vault = ? AND rev > ? ORDER BY rev LIMIT 2000', [$v['id'], $since]);
-        $docs = []; $last = $since;
-        foreach ($s as $r) { $docs[] = ['h' => $r['h'], 'b' => $r['b'], 'rev' => (int)$r['rev']]; $last = (int)$r['rev']; }
-        $more = count($docs) === 2000;
+        // at most ~4 MB per answer – the rest comes with the next call (photos would otherwise make one huge answer that phones can't load)
+        $docs = []; $last = $since; $bytes = 0; $cut = false;
+        foreach ($s as $r) {
+            $n = strlen((string)$r['b']);
+            if ($docs && $bytes + $n > 4000000) { $cut = true; break; }
+            $docs[] = ['h' => $r['h'], 'b' => $r['b'], 'rev' => (int)$r['rev']]; $last = (int)$r['rev']; $bytes += $n;
+        }
+        $more = $cut || count($docs) === 2000;
         out(['rev' => $more ? $last : (int)$v['rev'], 'docs' => $docs, 'more' => $more]);
     }
 
