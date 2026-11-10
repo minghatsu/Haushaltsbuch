@@ -134,7 +134,7 @@ try {
         $cur = q('SELECT rev, size FROM vaults WHERE id = ?', [$v['id']])->fetch();
         $rev = (int)$cur['rev']; $size = (int)$cur['size']; $start = $size;
         $others = (int)(q('SELECT COALESCE(SUM(size), 0) FROM vaults WHERE id <> ?', [$v['id']])->fetchColumn() ?: 0);
-        $free = @disk_free_space(DATA_DIR);
+        $free = false; try { if (function_exists('disk_free_space')) $free = @disk_free_space(DATA_DIR); } catch (\Throwable $e) { $free = false; }
         $old = $pdo->prepare('SELECT LENGTH(b) FROM docs WHERE vault = ? AND h = ?');
         $put = $pdo->prepare('INSERT INTO docs (vault, h, b, rev) VALUES (?, ?, ?, ?) ON CONFLICT(vault, h) DO UPDATE SET b = excluded.b, rev = excluded.rev');
         foreach ($ops as $op) {
