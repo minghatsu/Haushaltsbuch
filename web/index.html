@@ -2165,6 +2165,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.6.3","10. November 2026",["Abgleich unterwegs: ohne WLAN zu Hause nutzt die App jetzt automatisch die Internet-Adresse der Synology"]],
   ["0.6.2","10. November 2026",["Analyse als Story: Monat oder ganzes Jahr in Karten, die von selbst weiterlaufen","Jahr-Ansicht mit allen Monaten, teuerstem Monat, Kategorien und Vergleich zum Vorjahr"]],
   ["0.6.1","10. November 2026",["Karte oder bar? Beim Eintragen wählst du jetzt, wie du bezahlt hast","Bargeld als eigene Karte und als Block auf der Startseite – mit „Abgehoben“ und Kassensturz","Abhebungen zählen nicht mehr doppelt als Ausgabe"]],
   ["0.6.0","10. November 2026",["Bank-Logos in der Bank-Auswahl – fehlende auf Wunsch online"]],
@@ -7112,7 +7113,9 @@ async function request(url, body){
 }
 /* second address for on the way (e.g. Tailscale): at home the normal one is used, away the app switches by itself */
 const SERVER_ALT_KEY="haushaltsbuch-server-alt";
-function serverAlt(){ try { return NATIVE && MODE!=="cloud" ? (localStorage.getItem(SERVER_ALT_KEY)||"") : ""; } catch(e){ return ""; } }
+// away from home the LAN address (192.168.…) is unreachable: without an own second address the app uses the Synology's internet address
+function serverAlt(){ try { if (!NATIVE || MODE!=="nas") return ""; const own=localStorage.getItem(SERVER_ALT_KEY)||""; if (own) return own;
+  return META_PAIR && /^https:/.test(META_PAIR) && /^http:\/\/(192\.168|10\.|172\.(1[6-9]|2\d|3[01]))/.test(SERVER) ? META_PAIR.replace(/pair\.php.*$/,"api.php") : ""; } catch(e){ return ""; } }
 let VIA_ALT=false;
 const apiUrl=(base,action,qs)=>base + (base.includes("?")?"&":"?") + "a=" + action + (qs||"");
 async function requestAny(action, qs, body){
