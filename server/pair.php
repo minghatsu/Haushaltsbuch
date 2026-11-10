@@ -31,6 +31,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204);
 const MAX_BLOB = 6000000;          // one encrypted package (e.g. a receipt photo) at most ~6 MB
 const MAX_VAULT = 800000000;       // all data of one vault at most ~800 MB
 const MAX_CREATE_PER_HOUR = 20;    // new vaults per IP address and hour
+const MAX_CREATE_ALL_HOUR = 200;   // new vaults per hour from all addresses together
+const MAX_TOTAL = 20000000000;     // all vaults together at most ~20 GB
+const MIN_FREE = 2000000000;       // always leave at least ~2 GB free on the disk
 
 // data folder with a random name, so the database can't be guessed and downloaded
 define('DATA_DIR', (function (): string {
@@ -101,7 +104,13 @@ try {
         $have = q('SELECT auth FROM vaults WHERE id = ?', [$id])->fetchColumn();
         if ($have !== false) { if (hash_equals((string)$have, hash('sha256', $auth))) out(['ok' => true]); fail('Diese Nummer ist schon vergeben', 409); }
         if (!ipCount('ipcreate', MAX_CREATE_PER_HOUR)) fail('Zu viele neue Kopplungen – bitte später noch einmal', 429);
+        $all = q('SELECT n, since FROM ipcreate WHERE ip = ?', ['*'])->fetch();
+        if ($all && (int)$all['since'] > time() - 3600 && (int)$all['n'] >= MAX_CREATE_ALL_HOUR) fail('Gerade zu viele neue Kopplungen – bitte später noch einmal', 429);
+        if ($all && (int)$all['since'] > time() - 3600) q('UPDATE ipcreate SET n = n + 1 WHERE ip = ?', ['*']);
+        else q('INSERT INTO ipcreate (ip, n, since) VALUES (?, 1, ?) ON CONFLICT(ip) DO UPDATE SET n = 1, since = excluded.since', ['*', time()]);
         ipBump('ipcreate');
+        // vaults that were created but never got any data are removed after a week
+        if (random_int(1, 20) === 1) q('DELETE FROM vaults WHERE size = 0 AND rev = 0 AND created < ?', [time() - 7 * 86400]);
         q('INSERT INTO vaults (id, auth, created, used) VALUES (?, ?, ?, ?)', [$id, hash('sha256', $auth), time(), time()]);
         out(['ok' => true]);
     }
@@ -123,7 +132,9 @@ try {
         if (!is_array($ops) || count($ops) > 5000) fail('Ungültige Anfrage', 400);
         $pdo = db(); $pdo->exec('BEGIN IMMEDIATE');
         $cur = q('SELECT rev, size FROM vaults WHERE id = ?', [$v['id']])->fetch();
-        $rev = (int)$cur['rev']; $size = (int)$cur['size'];
+        $rev = (int)$cur['rev']; $size = (int)$cur['size']; $start = $size;
+        $others = (int)(q('SELECT COALESCE(SUM(size), 0) FROM vaults WHERE id <> ?', [$v['id']])->fetchColumn() ?: 0);
+        $free = @disk_free_space(DATA_DIR);
         $old = $pdo->prepare('SELECT LENGTH(b) FROM docs WHERE vault = ? AND h = ?');
         $put = $pdo->prepare('INSERT INTO docs (vault, h, b, rev) VALUES (?, ?, ?, ?) ON CONFLICT(vault, h) DO UPDATE SET b = excluded.b, rev = excluded.rev');
         foreach ($ops as $op) {
@@ -133,6 +144,7 @@ try {
             $old->execute([$v['id'], $h]); $was = (int)($old->fetchColumn() ?: 0);
             $size += strlen((string)$b) - $was;
             if ($size > MAX_VAULT) { $pdo->exec('ROLLBACK'); fail('Speicher voll – bitte alte Belegfotos löschen', 413); }
+            if ($size > $start && ($others + $size > MAX_TOTAL || ($free !== false && $free - ($size - $start) < MIN_FREE))) { $pdo->exec('ROLLBACK'); fail('Der Server ist gerade voll – bitte später noch einmal', 507); }
             $rev++;
             $put->execute([$v['id'], $h, $b, $rev]);
         }

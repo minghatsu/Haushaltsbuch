@@ -2101,7 +2101,7 @@ function renderAmtEd(){
     ${P.tip?`<div class="notice info" style="margin-top:14px"><span>${esc(P.tip)}</span></div>`:""}`;
 }
 /* ---------- legal: privacy policy, terms of use, cancellation policy, imprint + consent on first start ---------- */
-const LEGAL_VER = "2026-11-09";            // raise when the texts change in substance – everybody is asked again once
+const LEGAL_VER = "2026-11-10";            // raise when the texts change in substance – everybody is asked again once
 const LEGAL_PAID = false;                  // cancellation policy only shows once something costs money
 const IMPRESSUM = { name:"Sascha Georg Küpper", street:"Brühler Straße 144", city:"42657 Solingen", mail:"kontakt@miracleframe.de" };
 const FEEDBACK_MAIL = "kontakt@miracleframe.de";   // to be filled in before publishing
@@ -2112,22 +2112,24 @@ const LEGAL = {
 <p><b>Kurz gesagt:</b> Deine Finanzdaten bleiben auf deinem Gerät. Du brauchst kein Konto, es gibt keine Werbung, kein Tracking und keine Analyse-Dienste. Daten verlassen dein Gerät nur in den unten genannten Fällen – und nie zum Verkauf.</p>
 <h3>1. Verantwortlich</h3><p>${impLines()}</p>
 <h3>2. Daten auf deinem Gerät</h3>
-<p>Alles, was du einträgst, speichert die App nur im Speicher der App auf deinem Gerät: Buchungen, Konten, Fixkosten, Schulden, Sparziele, Budgets, Termine, Profil (Name, Foto), Belegfotos, Lohnabrechnungen und Angaben zu Einkommen, Steuer und Sozialleistungen. Der Anbieter hat darauf keinen Zugriff.</p>
+<p>Alles, was du einträgst, speichert die App nur im Speicher der App auf deinem Gerät: Buchungen, Konten, Fixkosten, Schulden, Sparziele, Budgets, Termine, Profil (Name, Foto), Belegfotos, Lohnabrechnungen und Angaben zu Einkommen, Steuer und Sozialleistungen. In der Handy- und PC-App sind diese Daten auf dem Gerät verschlüsselt gespeichert (der Schlüssel liegt im Android-Keystore bzw. ist durch Windows geschützt). Der Anbieter hat darauf keinen Zugriff.</p>
 <p>Einige Angaben können besonders geschützt sein (Art. 9 DSGVO), z. B. die Kirchensteuer (Religion), Krankengeld oder Gesundheitskosten. Du entscheidest selbst, ob du sie einträgst; sie werden nur für die Berechnungen in der App verwendet.</p>
 <h3>3. Abgleich zwischen Geräten (freiwillig)</h3>
-<p><b>Geräte koppeln (ohne Konto):</b> Koppelst du Geräte per QR-Code, werden deine Daten schon auf dem Gerät mit einem Schlüssel verschlüsselt (AES-256, Ende-zu-Ende), den nur deine gekoppelten Geräte kennen. Der Abgleich-Server speichert nur eine Zufallsnummer, die Prüfsumme eines Zugangsschlüssels und verschlüsselte Datenpakete – weder Name noch E-Mail, und der Anbieter kann die Inhalte nicht lesen. Ungenutzte Kopplungen werden nach zwei Jahren gelöscht; du kannst sie jederzeit selbst löschen.</p>
+<p><b>Geräte koppeln (ohne Konto):</b> Koppelst du Geräte per QR-Code, werden deine Daten schon auf dem Gerät mit einem Schlüssel verschlüsselt (AES-256, Ende-zu-Ende), den nur deine gekoppelten Geräte kennen. Der Abgleich-Server speichert nur eine Zufallsnummer, die Prüfsumme eines Zugangsschlüssels und verschlüsselte Datenpakete – weder Name noch E-Mail, und der Anbieter kann die Inhalte nicht lesen. Ungenutzte Kopplungen werden nach zwei Jahren gelöscht, Kopplungen ganz ohne Daten nach einer Woche; du kannst sie jederzeit selbst löschen.</p>
 <p><b>Gemeinsame Bereiche:</b> Teilst du einen Bereich mit anderen (z. B. Partner oder WG), gilt dasselbe Prinzip mit einem eigenen Schlüssel für diesen Bereich. Die anderen Mitglieder sehen nur, was du dort einträgst oder ausdrücklich freigibst (z. B. ein Budget, ein Sparziel, die Summe deiner Fixkosten) – nie deine Konten, Kontostände oder Buchungen.</p>
-<p><b>Mit Passwort oder Konto:</b> Wenn du unter „Abgleich & Updates“ stattdessen den Abgleich mit Passwort einschaltest und dich anmeldest, werden deine Daten verschlüsselt (HTTPS) an den Synology-Server übertragen, bei dem du dich anmeldest, und dort gespeichert, damit Handy und PC gleich bleiben. Rechtsgrundlage ist die Nutzung der App (Art. 6 Abs. 1 lit. b DSGVO). Die Daten bleiben dort, bis du sie löschst („Alle Daten löschen“) oder den Abgleich beendest und um Löschung bittest.</p>
+<p><b>Mit Passwort oder Konto:</b> Wenn du unter „Abgleich & Updates“ stattdessen den Abgleich mit Passwort einschaltest und dich anmeldest, werden deine Daten an den Synology-Server übertragen, bei dem du dich anmeldest, und dort gespeichert, damit Handy und PC gleich bleiben. Die Verbindung ist verschlüsselt (HTTPS); nur innerhalb deines eigenen Heimnetzes kann sie unverschlüsselt (HTTP) sein, solange die Synology dort kein HTTPS anbietet – die App zeigt das unter „Abgleich“ an. Schaltest du dort den <b>Ende-zu-Ende-Tresor</b> ein, werden die Daten zusätzlich schon auf dem Gerät verschlüsselt; der Server speichert dann nur verschlüsselte Pakete sowie Name, Typ und App-Version deiner Geräte. Rechtsgrundlage ist die Nutzung der App (Art. 6 Abs. 1 lit. b DSGVO). Die Daten bleiben dort, bis du sie löschst („Alle Daten löschen“) oder den Abgleich beendest und um Löschung bittest.</p>
 <h3>4. Updates</h3>
-<p>Die App fragt regelmäßig beim Update-Server des Anbieters nach einer neuen Version und lädt sie herunter. Dabei wird technisch bedingt deine IP-Adresse übertragen; deine Finanzdaten nicht. Rechtsgrundlage ist unser berechtigtes Interesse, Fehler und Sicherheitslücken schnell zu beheben (Art. 6 Abs. 1 lit. f DSGVO). Server-Protokolle werden nach spätestens 14 Tagen gelöscht.</p>
+<p>Die App fragt regelmäßig nach einer neuen Version und lädt sie herunter – bei GitHub (GitHub Inc., USA; eine Übermittlung in die USA ist möglich, EU-US Data Privacy Framework) und, wenn du den Abgleich mit Passwort nutzt, bei deiner Synology. Dabei wird technisch bedingt deine IP-Adresse übertragen; deine Finanzdaten nicht. Jede neue Version ist digital signiert, die App nimmt nur echte Versionen des Anbieters an. Rechtsgrundlage ist unser berechtigtes Interesse, Fehler und Sicherheitslücken schnell zu beheben (Art. 6 Abs. 1 lit. f DSGVO). Für die Protokolle bei GitHub gilt die Datenschutzerklärung von GitHub.</p>
 <h3>5. Texterkennung bei Fotos und PDFs</h3>
-<p>Belege, Kontoauszüge und Lohnabrechnungen werden <b>auf deinem Gerät</b> gelesen – die Bilder und PDFs verlassen es nicht. Nur das Erkennungsprogramm (Tesseract.js, pdf.js) und die deutschen Sprachdaten werden beim ersten Benutzen vom Dienst jsDelivr geladen. Dabei erfährt jsDelivr (und dessen Netzwerk-Partner) deine IP-Adresse. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.</p>
+<p>Belege, Kontoauszüge und Lohnabrechnungen werden <b>auf deinem Gerät</b> gelesen – die Bilder und PDFs verlassen es nicht. In der Android-App übernimmt das die eingebaute Texterkennung ML Kit von Google direkt auf dem Gerät; Google erhält dabei keine Bilder, ML Kit kann aber technische Nutzungs- und Diagnosedaten an Google senden. Auf dem PC und im Browser werden das Erkennungsprogramm (Tesseract.js, pdf.js) und die Sprachdaten beim ersten Benutzen vom Dienst jsDelivr geladen und per Prüfsumme kontrolliert. Dabei erfährt jsDelivr (und dessen Netzwerk-Partner) deine IP-Adresse. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.</p>
 <h3>6. Händler-Logos (nur wenn du es einschaltest)</h3>
 <p>Bekannte Läden haben ihr Logo in der App eingebaut. Schaltest du unter „Startseite“ „Fehlende Händler-Logos online laden“ ein, fragt die App für andere Händler bei Google (Google Ireland Ltd.) und DuckDuckGo nach dem Logo. Dabei werden der Name der Händler-Webseite und deine IP-Adresse übertragen; bei Google ist eine Übermittlung in die USA möglich (EU-US Data Privacy Framework). Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du jederzeit mit dem Schalter widerrufen kannst. Geladene Logos werden auf deinem Gerät gespeichert.</p>
+<h3>6a. Wechselkurse und Prospekte</h3>
+<p>Die App enthält Tageskurse der Europäischen Zentralbank. Tippst du im Währungsrechner auf „Aktualisieren“, lädt sie neue Kurse vom Dienst Frankfurter (api.frankfurter.dev bzw. api.frankfurter.app); dabei wird deine IP-Adresse übertragen. Öffnest du bei einem Laden das Prospekt, wird die Webseite des Händlers aufgerufen – dafür gilt dessen Datenschutzerklärung.</p>
 <h3>7. Kamera, Fotos, Benachrichtigungen</h3>
 <p>Die App fragt nur dann nach Zugriff auf Kamera, Fotos oder Benachrichtigungen, wenn du eine Funktion benutzt, die das braucht. Erinnerungen werden auf deinem Gerät erzeugt.</p>
 <h3>8. Backups</h3>
-<p>Backup-Dateien erstellst du selbst. Wo du sie speicherst oder an wen du sie weitergibst, entscheidest du.</p>
+<p>Backup-Dateien erstellst du selbst. Sind deine Geräte gekoppelt oder ist der Tresor eingeschaltet, werden Backups verschlüsselt und lassen sich nur mit deinem Code öffnen. Wo du sie speicherst oder an wen du sie weitergibst, entscheidest du.</p>
 <h3>9. Löschen</h3>
 <p>Unter Einstellungen › Backup › „Alle Daten löschen“ löschst du alles auf diesem Gerät und – bei eingeschaltetem Abgleich – auf dem Server. Deinstallierst du die App, sind die Daten auf dem Gerät ebenfalls weg.</p>
 <h3>10. Deine Rechte</h3>
@@ -2195,6 +2197,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.7.0","10. November 2026",["Datenschutzerklärung aktualisiert (Verschlüsselung, Tresor, Updates über GitHub, Wechselkurse)","Texterkennung am PC wird per Prüfsumme kontrolliert"]],
   ["0.6.9","10. November 2026",["Beleg-Fotos und „Gemeinsam“-Daten sind jetzt auch auf dem Gerät verschlüsselt","Kopierte Codes verschwinden nach einer Minute aus der Zwischenablage","Unverschlüsselte Verbindungen nur noch ins Heimnetz"]],
   ["0.6.8","10. November 2026",["Backups bei gekoppelten Geräten jetzt verschlüsselt – öffnen mit dem Wiederherstellungs-Code","Bildschirmschutz: keine Screenshots und kein Vorschaubild in der App-Übersicht (unter Sicherheit abschaltbar)","Benachrichtigungen zeigen auf dem Sperrbildschirm keine Beträge mehr"]],
   ["0.6.7","10. November 2026",["Ende-zu-Ende-Tresor: auf Wunsch geht alles nur noch verschlüsselt zur Synology – der Schlüssel liegt als QR-Code nur auf deinen Geräten","Mit Tresor werden auch Backups verschlüsselt"]],
@@ -5843,7 +5846,7 @@ async function scanNative(source){
 let tessLoad=null;
 function loadTesseract(){
   if (window.Tesseract) return Promise.resolve();
-  return tessLoad || (tessLoad = new Promise((ok,bad)=>{ const sc=document.createElement("script"); sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"; sc.onload=ok; sc.onerror=()=>{ tessLoad=null; bad(new Error("Texterkennung konnte nicht geladen werden – bist du online?")); }; document.head.appendChild(sc); }));
+  return tessLoad || (tessLoad = new Promise((ok,bad)=>{ const sc=document.createElement("script"), h="__TESS_SRI__"; if (h.startsWith("sha384-")){ sc.integrity=h; sc.crossOrigin="anonymous"; } sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"; sc.onload=ok; sc.onerror=()=>{ tessLoad=null; bad(new Error("Texterkennung konnte nicht geladen werden – bist du online?")); }; document.head.appendChild(sc); }));
 }
 async function scanImageFile(file){
   scanBusy(true, "Texterkennung wird geladen …");

@@ -69,6 +69,9 @@ jobs:
             if [ "$f" = pdf.min.js ]; then key=__PDFJS_SRI__; else key=__PDFJS_WORKER_SRI__; fi
             sed -i "s|$key|sha384-$h|" app.html
           done
+          h=$(curl -fsSL "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js" | openssl dgst -sha384 -binary | base64 -w0)
+          [ -n "$h" ] || { echo "::error::tesseract.js konnte nicht geladen werden"; exit 1; }
+          sed -i "s|__TESS_SRI__|sha384-$h|" app.html
       - name: Sicherheitsregeln (CSP) setzen
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then PY=python; else PY=python3; fi
