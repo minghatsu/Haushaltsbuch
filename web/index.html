@@ -2212,6 +2212,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.8.9","10. November 2026",["Kredite & Schulden: fehlende Kredite werden angelegt, der Block erscheint auch ohne Einträge auf der Startseite","„Gesamt mit Spaces“ ist jetzt einfach die Summe aller Konto-Karten"]],
   ["0.8.8","10. November 2026",["Kredite & Schulden: Stände, Zinsen und Tilgungsplan aus deiner Haushaltsbuch-Tabelle 2025 übernommen"]],
   ["0.8.7","10. November 2026",["„Darlehnsrate“, „Tilgung“ und „Annuität“ im Verwendungszweck werden jetzt als Kreditrate erkannt","Kontoauszug nochmal importieren: bei schon vorhandenen Buchungen ergänzt die App den Verwendungszweck – so werden auch alte Kreditraten erkannt"]],
   ["0.8.6","10. November 2026",["Fixkosten erkennen: BAföG- und KfW-Raten (Bundesverwaltungsamt, KfW) werden als BAföG / Studienkredit erkannt","Regelmäßige Überweisungen an Personen kannst du als „Privat geliehen“ markieren – die App legt die Schuld dann an","Neue Schuld-Art „BAföG / Studium“ 🎓"]],
@@ -3137,7 +3138,7 @@ function renderHome(){
   const mainName = anchored.includes("Hauptkonto") ? "Hauptkonto" : "";
   const mainBal = mainName ? accountBalance(mainName, asOf) : cum.balance;
   const others = anchored.filter(n=>n!==mainName);
-  const acctLine = mainName || others.length ? `<div class="acctline">${mainName?`<span>Gesamt mit Spaces <b>${esc(eur(cum.balance))}</b></span>`:""}${others.map(n=>`<span>${esc(n)} <b>${esc(eur(accountBalance(n,asOf)))}</b></span>`).join("")}</div>` : "";
+  const acctLine = mainName || others.length ? `<div class="acctline">${mainName?`<span>Gesamt mit Spaces <b>${esc(eur(mainBal+sum(others,n=>accountBalance(n,asOf)||0)))}</b></span>`:""}${others.map(n=>`<span>${esc(n)} <b>${esc(eur(accountBalance(n,asOf)))}</b></span>`).join("")}</div>` : "";
 
   // --- cards with the accounts (swipe): Hauptkonto big, every Space with a known balance next to it
   const accts=[{name:mainName||"Kontostand", bal:mainBal, main:true}, ...others.map(n=>({name:n, bal:accountBalance(n,asOf)}))];
@@ -3155,7 +3156,7 @@ function renderHome(){
       for (const x of est) accts.push({name:x.name, bal:x.bal, guess:true, how: x.adj?"aus Umsätzen, abgeglichen mit Gesamt":"aus deinen Umsätzen"});
     }
     else if (Math.abs(rest)>=0.01 && others.length===0) accts.push({name:"Spaces", bal:rest, guess:true, how:"Gesamt minus Hauptkonto"});
-    if (accts.length>1) accts.push({name:"Gesamt mit Spaces", bal:cum.balance, total:true});
+    if (accts.length>1) accts.push({name:"Gesamt mit Spaces", bal:Math.round(sum(accts,a=>Number(a.bal)||0)*100)/100, total:true});   // simply the cards added up
   }
   if (cashOn() && ym<=cur && asOf>=S.settings.cash.since){ if (!mainName) accts[0].bal=Math.round((accts[0].bal-cashFlows(asOf))*100)/100; accts.splice(1,0,{name:"Bargeld", bal:cashBal(asOf), cash:true}); }
   const spark = mainName && ym<=cur ? sparkPath(mainName, asOf) : "";
@@ -3164,7 +3165,7 @@ function renderHome(){
   const acol=(a,i)=>{ const c=acctColor(a.name,i); return c?` style="background:linear-gradient(150deg, ${c}, color-mix(in srgb, ${c} 62%, #000))"`:""; };
   const acardHtml = accts.map((a,i)=>`<div class="acard ${i?"alt":""} ${a.cash?"cashc":""} ${a.total?"tot":""} ${a.bal<0&&!acctColor(a.name,i)?"minus":""}" data-ci="${i}"${acol(a,i)}><div class="l">${esc(a.name)} · ${esc(when)}</div><div class="b">${esc(eur(a.bal))}</div>${fxLine(a.bal)}
       ${a.main&&spark?`<svg class="spark" viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true"><path d="${spark}" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2.2" stroke-linejoin="round"/></svg>`:""}
-      <div class="m">${a.main?`<span>${c.net>=0?"↑":"↓"} ${esc(eur0(Math.abs(c.net)))} ${c.net>=0?"übrig":"mehr ausgegeben"} im ${esc(MONTHS[ymParts(ym)[1]-1])}</span>${mainName?`<span>Mit Spaces ${esc(eur(cum.balance))}</span>`:""}`
+      <div class="m">${a.main?`<span>${c.net>=0?"↑":"↓"} ${esc(eur0(Math.abs(c.net)))} ${c.net>=0?"übrig":"mehr ausgegeben"} im ${esc(MONTHS[ymParts(ym)[1]-1])}</span>${mainName?`<span>Mit Spaces ${esc(eur((accts.find(x=>x.total)||{bal:cum.balance}).bal))}</span>`:""}`
         : a.cash ? `<span>💶 im Portemonnaie</span>` : a.total ? `<span>Hauptkonto und alle Spaces</span>` : a.guess ? `<span>Space · ${esc(a.how||"")}</span>` : `<span>Space</span>`}</div></div>`).join("");
   // --- one sentence in plain words: the most important thing right now
   const over = budgetWarn.find(x=>x.v>x.budget), near = budgetWarn.find(x=>x.v<=x.budget);
@@ -3528,7 +3529,9 @@ function renderZiele(){
   $("v-ziele").innerHTML = `<div class="zstack">${goalsRings()}${goals.length||UI.goalEdit?goalsCard():""}${debtRings()}${taxGauge(ym)}</div>`;
 }
 function debtRings(){
-  if (!S.debts.length) return "";
+  if (!S.debts.length) return `<div class="card rcard"><div class="card-head"><h2>${hIc("bank")}Schulden</h2></div>
+    <div class="small muted" style="margin:-4px 0 10px">Noch keine Kredite oder Schulden eingetragen.</div>
+    <div class="rings"><button class="rbtn" data-debtnew="1" aria-label="Schuld hinzufügen"><span class="ring add">${ic("plusIn",22)}</span><b>Neu</b><small>&nbsp;</small></button></div></div>`;
   const st=S.debts.map(d=>[d,debtState(d)]), total=sum(st,x=>x[1].remaining);
   return `<div class="card rcard" style="order:7"><div class="card-head"><h2>${hIc("bank")}Schulden</h2><button class="link" data-go="more" data-sp="schulden">Alle anzeigen ${ic("right",16)}</button></div>
     <div class="small muted" style="margin:-4px 0 10px">Noch offen: <b style="color:var(--fg)">${esc(eur(total))}</b></div>
@@ -4389,17 +4392,26 @@ function loanCheck(){ try { const c=loanCands(); const i=c.findIndex(x=>!LOAN_TO
 /* ---------- one-time update of Sascha's loans to the state of his 2025 sheet (10.11.2026) – remove again later ---------- */
 const FIX1110_T=[4124,4150,4175,4200,4226,4252,4278,4304,4330,4356,4383,4409,4436,4463,4491,4518,4545,4573,4601,4629,4657,4686,4714,4743,4772,4801,4830,4859,4889,4919,4949,4979,5009,5040,5070,5101,5132,5164,5195,5227,5259,5291,5323,5355,5388,5421,5454,5487,5520,5554,5588,5622,5656,5691,5725,5760,5795,5831,5866,5902,5938,5974,6010,6047,6084,6121,6158,6196,6233,6271,6310,6348,6387,6426,6465,6504,6544,6584,6624,6664,6705,6745,6787,6828,6870,6911,6953,6996,7038,7081,7124,7168,7212,7255,7300,7344,7389,7434,7479,7525,7571,7617,7663,7710,7757,7804,7852,7899,7947,7996,8045,8094,8143,8192,8242,8293,8343,8394,8445,8497,8548,8600,8653,8705,8758,8812,8866,8920,8974,9029,9084,9139,9195,9251,9307,9364,9421,9478,9536,9594,9652,9711,9770,9830,9890,9950,10011,10071,10133,10195,10257,10319,10382,10445,10509,10573,10637,10702,10767,10833,10899,10965,11032,11099,11167,11235,11303,11372,11441,11511,11581,11652,11723,11794,11866,11938,12011,12084,12158,12232,12306,3382], FIX1110_Z=[8278,8252,8227,8202,8176,8150,8124,8098,8072,8046,8019,7993,7966,7939,7911,7884,7857,7829,7801,7773,7745,7716,7688,7659,7630,7601,7572,7543,7513,7483,7453,7423,7393,7362,7332,7301,7270,7238,7207,7175,7143,7111,7079,7047,7014,6981,6948,6915,6882,6848,6814,6780,6746,6711,6677,6642,6607,6571,6536,6500,6464,6428,6392,6355,6318,6281,6244,6206,6169,6131,6092,6054,6015,5976,5937,5898,5858,5818,5778,5738,5697,5657,5615,5574,5532,5491,5449,5406,5364,5321,5278,5234,5190,5147,5102,5058,5013,4968,4923,4877,4831,4785,4739,4692,4645,4598,4550,4503,4455,4406,4357,4308,4259,4210,4160,4109,4059,4008,3957,3905,3854,3802,3749,3697,3644,3590,3536,3482,3428,3373,3318,3263,3207,3151,3095,3038,2981,2924,2866,2808,2750,2691,2632,2572,2512,2452,2391,2331,2269,2207,2145,2083,2020,1957,1893,1829,1765,1700,1635,1569,1503,1437,1370,1303,1235,1167,1099,1030,961,891,821,750,679,608,536,464,391,318,244,170,96,21];
 async function debtFix1110(){
-  if (S.settings.fix1110 || !S.debts.length) return;
-  const by=re=>S.debts.find(d=>re.test(String(d.name||"").trim()));
+  if (S.settings.fix1110 || !S.tx.length) return;
+  const by=re=>S.debts.find(d=>re.test(String(d.name||"").trim())), fx=re=>S.fixed.find(f=>re.test(String(f.name||"").trim()));
   const st=by(/^steuerschulden$/i), sz=by(/^schatzi schulden$/i), sk=by(/^studienkredit$/i);
-  if (!st && !sz && !sk) return;
+  const fSt=fx(/^steuerschulden$/i), fSz=fx(/^schatzi schulden$/i), fSk=fx(/^studienkredit$/i);
+  const his = fSz || /sascha/i.test(S.settings.name||"") || (S.settings.rules||[]).some(r=>/kreditanstalt|schatzi/i.test(r.match||""));
+  if (!st && !sz && !sk && !his) return;   // only Sascha's data
   S.settings.fix1110=1; await saveSettings();
+  // his debts are missing on this device: create them, linked to his fixed costs
+  const mkFix=async(f,name,amount)=>{ if (f) return f.id; const id=newId(); await safe(()=>put("fixed", id, {name, amount, kind:"privat", order:S.fixed.length})); return id; };
+  const hasDb=S.debts.some(d=>/deutsche bank/i.test(d.name||""));
+  if (!st && !hasDb) await safe(async()=>put("debts", newId(), {name:"Kredit Deutsche Bank (Steuern)", art:"kredit", start:27866.05, since:"2025-12", zins:8.6, plan:[], auto:true, fixedId:await mkFix(fSt,"Steuerschulden",432)}));
+  if (!sz) await safe(async()=>put("debts", newId(), {name:"Schatzi Schulden", art:"privat", start:13836.54, since:"2026-01", zins:0, plan:[], auto:true, fixedId:await mkFix(fSz,"Schatzi Schulden",132)}));
+  if (!sk){ const id=newId(); await safe(async()=>put("debts", id, {name:"Studienkredit", art:"bafoeg", start:0, since:"2026-12", zins:0, plan:[], fixedId:await mkFix(fSk,"Studienkredit",124.02)})); }
+  const sk2=sk || S.debts.find(d=>/^studienkredit$/i.test(String(d.name||"").trim()));
   const save=async(o,ch)=>{ const d={...o, ...ch}; delete d.id; await safe(()=>put("debts", o.id, d)); };
   if (st && Math.abs(Number(st.start)-30000)<0.01) await save(st, {name:"Kredit Deutsche Bank (Steuern)", art:"kredit", start:27866.05, since:"2025-12", zins:8.6, plan:[], auto:true});
   if (sz && Math.abs(Number(sz.start)-15420.54)<0.01) await save(sz, {art:"privat", start:13836.54, since:"2026-01", zins:0, plan:[], auto:true});
-  if (sk && !(sk.plan||[]).length){ const plan=[]; let left=FIX1110_T.reduce((a,b)=>a+b,0);
+  if (sk2 && !(sk2.plan||[]).length){ const plan=[]; let left=FIX1110_T.reduce((a,b)=>a+b,0);
     FIX1110_T.forEach((t,i)=>{ left-=t; plan.push({ym:shiftYm("2026-12",i), tilg:t/100, zins:FIX1110_Z[i]/100, rate:r2((t+FIX1110_Z[i])/100), rest:r2(left/100)}); });
-    await save(sk, {art:"bafoeg", plan, start:r2(plan[0].rest+plan[0].tilg), since:"2026-12"}); }
+    await save(sk2, {art:"bafoeg", plan, start:r2(plan[0].rest+plan[0].tilg), since:"2026-12"}); }
   render(); toast("Deine Kredite sind jetzt auf dem aktuellen Stand", null, null, 9000);
 }
 /* ---------- Fixkosten erkennen: Zahlungen an denselben Empfänger, regelmäßig und fast gleich hoch ---------- */
