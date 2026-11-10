@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld("AndroidBridge", {
     ipcRenderer.send("http", { id: String(id), method: String(method), url: String(url), auth: String(auth || ""), body: String(body || "") }),
   httpAs: (id, method, url, auth, body, certHost) =>
     ipcRenderer.send("http", { id: String(id), method: String(method), url: String(url), auth: String(auth || ""), body: String(body || ""), certHost: String(certHost || "") }),
+  setSecure: (on) => ipcRenderer.send("setSecure", !!on),
   seal: (text) => ipcRenderer.sendSync("seal", String(text)),
   unseal: (sealed) => ipcRenderer.sendSync("unseal", String(sealed)),
   pbkdf2: (pin, salt, iter) => ipcRenderer.sendSync("pbkdf2", String(pin), String(salt), Number(iter)),

@@ -49,6 +49,11 @@ public final class Notifier {
                 .setStyle(new Notification.BigTextStyle().bigText(text))
                 .setContentIntent(pi)
                 .setAutoCancel(true)
+                // on the lock screen only "Finanz MAMI" shows, not the amounts
+                .setVisibility(Notification.VISIBILITY_PRIVATE)
+                .setPublicVersion(new Notification.Builder(c, CH_REMIND.equals(ch) ? CH_REMIND : CH_ALERT)
+                        .setSmallIcon(R.drawable.ic_stat).setColor(0xFF147A5B)
+                        .setContentTitle("Finanz MAMI").setContentText("Neue Nachricht – entsperren zum Lesen").build())
                 .build();
         try { nm.notify(id, n); } catch (SecurityException ignored) {}
     }

@@ -94,6 +94,9 @@ public class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // no screenshots, screen recordings or preview picture in the app overview (can be switched off in Sicherheit)
+        if (getSharedPreferences("hb-native", MODE_PRIVATE).getBoolean("secure", true))
+            getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
         web = new WebView(this);
         setContentView(web);
 
@@ -471,6 +474,14 @@ public class MainActivity extends Activity {
          * Network requests to the Synology go through Android directly (not the WebView), so the browser rules
          * for local network access never get in the way. The answer comes back via window.hbHttpDone(id, status, text).
          */
+        /** screen protection on/off (FLAG_SECURE), remembered for the next start */
+        @JavascriptInterface
+        public void setSecure(final boolean on) {
+            getSharedPreferences("hb-native", MODE_PRIVATE).edit().putBoolean("secure", on).apply();
+            runOnUiThread(() -> { if (on) getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
+                                  else getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE); });
+        }
+
         /** encrypted storage for the app data (see Vault) */
         @JavascriptInterface
         public String seal(String text) { return Vault.seal(MainActivity.this, text == null ? "" : text); }

@@ -104,6 +104,10 @@ function saveBounds() {
   } catch (e) {}
 }
 
+const secureFile = () => path.join(app.getPath("userData"), "bildschirmschutz.json");
+function secureOn() { try { return JSON.parse(fs.readFileSync(secureFile(), "utf8")).on !== false; } catch (e) { return true; } }
+ipcMain.on("setSecure", (e, on) => { try { fs.writeFileSync(secureFile(), JSON.stringify({ on: !!on })); } catch (err) {} if (win) win.setContentProtection(!!on); });
+
 function createWindow() {
   const b = loadBounds();
   win = new BrowserWindow({
@@ -122,6 +126,7 @@ function createWindow() {
     },
   });
   if (b.maximized) win.maximize();
+  win.setContentProtection(secureOn());   // screenshots and screen sharing show a black window (switch in Sicherheit)
   win.on("close", (e) => {
     saveBounds();
     if (!quitting && !SMOKE && prefs().tray) { e.preventDefault(); win.hide(); }   // keep running in the tray for reminders
