@@ -2212,6 +2212,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.9.1","10. November 2026",["Kredite & Schulden: deine drei Kredite werden richtig eingetragen"]],
   ["0.9.0","10. November 2026",["Gehalt wird beim Import erkannt, wenn „Lohn“ oder „Gehalt“ im Verwendungszweck steht","Deine RKF-Zahlungen zählen jetzt als Gehalt"]],
   ["0.8.9","10. November 2026",["Kredite & Schulden: fehlende Kredite werden angelegt, der Block erscheint auch ohne Einträge auf der Startseite","„Gesamt mit Spaces“ ist jetzt einfach die Summe aller Konto-Karten"]],
   ["0.8.8","10. November 2026",["Kredite & Schulden: Stände, Zinsen und Tilgungsplan aus deiner Haushaltsbuch-Tabelle 2025 übernommen"]],
@@ -4411,26 +4412,24 @@ async function salaryFix1110(){
 /* ---------- one-time update of Sascha's loans to the state of his 2025 sheet (10.11.2026) – remove again later ---------- */
 const FIX1110_T=[4124,4150,4175,4200,4226,4252,4278,4304,4330,4356,4383,4409,4436,4463,4491,4518,4545,4573,4601,4629,4657,4686,4714,4743,4772,4801,4830,4859,4889,4919,4949,4979,5009,5040,5070,5101,5132,5164,5195,5227,5259,5291,5323,5355,5388,5421,5454,5487,5520,5554,5588,5622,5656,5691,5725,5760,5795,5831,5866,5902,5938,5974,6010,6047,6084,6121,6158,6196,6233,6271,6310,6348,6387,6426,6465,6504,6544,6584,6624,6664,6705,6745,6787,6828,6870,6911,6953,6996,7038,7081,7124,7168,7212,7255,7300,7344,7389,7434,7479,7525,7571,7617,7663,7710,7757,7804,7852,7899,7947,7996,8045,8094,8143,8192,8242,8293,8343,8394,8445,8497,8548,8600,8653,8705,8758,8812,8866,8920,8974,9029,9084,9139,9195,9251,9307,9364,9421,9478,9536,9594,9652,9711,9770,9830,9890,9950,10011,10071,10133,10195,10257,10319,10382,10445,10509,10573,10637,10702,10767,10833,10899,10965,11032,11099,11167,11235,11303,11372,11441,11511,11581,11652,11723,11794,11866,11938,12011,12084,12158,12232,12306,3382], FIX1110_Z=[8278,8252,8227,8202,8176,8150,8124,8098,8072,8046,8019,7993,7966,7939,7911,7884,7857,7829,7801,7773,7745,7716,7688,7659,7630,7601,7572,7543,7513,7483,7453,7423,7393,7362,7332,7301,7270,7238,7207,7175,7143,7111,7079,7047,7014,6981,6948,6915,6882,6848,6814,6780,6746,6711,6677,6642,6607,6571,6536,6500,6464,6428,6392,6355,6318,6281,6244,6206,6169,6131,6092,6054,6015,5976,5937,5898,5858,5818,5778,5738,5697,5657,5615,5574,5532,5491,5449,5406,5364,5321,5278,5234,5190,5147,5102,5058,5013,4968,4923,4877,4831,4785,4739,4692,4645,4598,4550,4503,4455,4406,4357,4308,4259,4210,4160,4109,4059,4008,3957,3905,3854,3802,3749,3697,3644,3590,3536,3482,3428,3373,3318,3263,3207,3151,3095,3038,2981,2924,2866,2808,2750,2691,2632,2572,2512,2452,2391,2331,2269,2207,2145,2083,2020,1957,1893,1829,1765,1700,1635,1569,1503,1437,1370,1303,1235,1167,1099,1030,961,891,821,750,679,608,536,464,391,318,244,170,96,21];
 async function debtFix1110(){
-  if (S.settings.fix1110 || !S.tx.length) return;
-  const by=re=>S.debts.find(d=>re.test(String(d.name||"").trim())), fx=re=>S.fixed.find(f=>re.test(String(f.name||"").trim()));
-  const st=by(/^steuerschulden$/i), sz=by(/^schatzi schulden$/i), sk=by(/^studienkredit$/i);
-  const fSt=fx(/^steuerschulden$/i), fSz=fx(/^schatzi schulden$/i), fSk=fx(/^studienkredit$/i);
-  const his = fSz || /sascha/i.test(S.settings.name||"") || (S.settings.rules||[]).some(r=>/kreditanstalt|schatzi/i.test(r.match||""));
-  if (!st && !sz && !sk && !his) return;   // only Sascha's data
-  S.settings.fix1110=1; await saveSettings();
-  // his debts are missing on this device: create them, linked to his fixed costs
-  const mkFix=async(f,name,amount)=>{ if (f) return f.id; const id=newId(); await safe(()=>put("fixed", id, {name, amount, kind:"privat", order:S.fixed.length})); return id; };
-  const hasDb=S.debts.some(d=>/deutsche bank/i.test(d.name||""));
-  if (!st && !hasDb) await safe(async()=>put("debts", newId(), {name:"Kredit Deutsche Bank (Steuern)", art:"kredit", start:27866.05, since:"2025-12", zins:8.6, plan:[], auto:true, fixedId:await mkFix(fSt,"Steuerschulden",432)}));
-  if (!sz) await safe(async()=>put("debts", newId(), {name:"Schatzi Schulden", art:"privat", start:13836.54, since:"2026-01", zins:0, plan:[], auto:true, fixedId:await mkFix(fSz,"Schatzi Schulden",132)}));
-  if (!sk){ const id=newId(); await safe(async()=>put("debts", id, {name:"Studienkredit", art:"bafoeg", start:0, since:"2026-12", zins:0, plan:[], fixedId:await mkFix(fSk,"Studienkredit",124.02)})); }
-  const sk2=sk || S.debts.find(d=>/^studienkredit$/i.test(String(d.name||"").trim()));
-  const save=async(o,ch)=>{ const d={...o, ...ch}; delete d.id; await safe(()=>put("debts", o.id, d)); };
-  if (st && Math.abs(Number(st.start)-30000)<0.01) await save(st, {name:"Kredit Deutsche Bank (Steuern)", art:"kredit", start:27866.05, since:"2025-12", zins:8.6, plan:[], auto:true});
-  if (sz && Math.abs(Number(sz.start)-15420.54)<0.01) await save(sz, {art:"privat", start:13836.54, since:"2026-01", zins:0, plan:[], auto:true});
-  if (sk2 && !(sk2.plan||[]).length){ const plan=[]; let left=FIX1110_T.reduce((a,b)=>a+b,0);
-    FIX1110_T.forEach((t,i)=>{ left-=t; plan.push({ym:shiftYm("2026-12",i), tilg:t/100, zins:FIX1110_Z[i]/100, rate:r2((t+FIX1110_Z[i])/100), rest:r2(left/100)}); });
-    await save(sk2, {art:"bafoeg", plan, start:r2(plan[0].rest+plan[0].tilg), since:"2026-12"}); }
+  if (S.settings.fix1110c || !S.tx.length) return;
+  const near=(v,x,t)=>Math.abs((Number(v)||0)-x)<=t;
+  const his = /sascha/i.test(S.settings.name||"") || S.debts.some(d=>near(d.start,30000,0.01)) || (S.settings.rules||[]).some(r=>/kreditanstalt|schatzi/i.test(r.match||""))
+    || S.tx.some(t=>RKF_RE.test(t.note||"") || /kristin k(ü|u|ue)pper/i.test(t.note||""));
+  if (!his) return;   // only Sascha's data
+  S.settings.fix1110c=1; S.settings.fix1110=1; await saveSettings();
+  const used=new Set(), usedF=new Set();
+  const pickD=(re,amt)=>{ const d=S.debts.find(d=>!used.has(d.id) && (re.test(String(d.name||"")) || (amt && near(d.start,amt,0.01)))); if (d) used.add(d.id); return d; };
+  const pickF=(re,amt,tol)=>{ const f=S.fixed.find(f=>!usedF.has(f.id) && re.test(String(f.name||""))) || S.fixed.find(f=>!usedF.has(f.id) && near(f.amount,amt,tol)); if (f) usedF.add(f.id); return f; };
+  const fixFor=async(d,re,name,amt,tol)=>{ if (d && d.fixedId && S.fixed.some(f=>f.id===d.fixedId)){ usedF.add(d.fixedId); return d.fixedId; }
+    const f=pickF(re,amt,tol); if (f) return f.id; const id=newId(); await safe(()=>put("fixed", id, {name, amount:amt, kind:"privat", order:S.fixed.length})); usedF.add(id); return id; };
+  const store=async(o,data)=>{ const d={...(o||{}), ...data}; delete d.id; await safe(()=>put("debts", o?o.id:newId(), d)); };
+  const db=pickD(/steuer|deutsche bank/i, 30000), sz=pickD(/schatzi/i, 15420.54), sk=pickD(/studien|kfw|baf(ö|oe|o)g|bildung/i, 14618.91);
+  await store(db, {name:"Kredit Deutsche Bank (Steuern)", art:"kredit", start:27866.05, since:"2025-12", zins:8.6, plan:[], auto:true, fixedId:await fixFor(db,/steuerschuld|deutsche bank/i,"Kredit Deutsche Bank",432,1)});
+  await store(sz, {name:"Schatzi Schulden", art:"privat", start:13836.54, since:"2026-01", zins:0, plan:[], auto:true, fixedId:await fixFor(sz,/schatzi/i,"Schatzi Schulden",132,0.01)});
+  const plan=[]; let left=FIX1110_T.reduce((a,b)=>a+b,0);
+  FIX1110_T.forEach((t,i)=>{ left-=t; plan.push({ym:shiftYm("2026-12",i), tilg:t/100, zins:FIX1110_Z[i]/100, rate:r2((t+FIX1110_Z[i])/100), rest:r2(left/100)}); });
+  await store(sk, {name:"Studienkredit (KfW)", art:"bafoeg", plan, start:r2(plan[0].rest+plan[0].tilg), since:"2026-12", zins:7.3, auto:true, fixedId:await fixFor(sk,/studien|kfw|kreditanstalt/i,"Studienkredit (KfW)",124.02,0.01)});
   render(); toast("Deine Kredite sind jetzt auf dem aktuellen Stand", null, null, 9000);
 }
 /* ---------- Fixkosten erkennen: Zahlungen an denselben Empfänger, regelmäßig und fast gleich hoch ---------- */
