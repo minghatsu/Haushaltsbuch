@@ -1975,7 +1975,7 @@ function renderAmtEd(){
 /* ---------- legal: privacy policy, terms of use, cancellation policy, imprint + consent on first start ---------- */
 const LEGAL_VER = "2026-11-09";            // raise when the texts change in substance – everybody is asked again once
 const LEGAL_PAID = false;                  // cancellation policy only shows once something costs money
-const IMPRESSUM = { name:"", street:"", city:"", mail:"" };
+const IMPRESSUM = { name:"Sascha Georg Küpper", street:"Brühler Straße 144", city:"42657 Solingen", mail:"kontakt@miracleframe.de" };
 const FEEDBACK_MAIL = "kontakt@miracleframe.de";   // to be filled in before publishing
 function impLines(){ const i=IMPRESSUM, miss='<i class="muted">[wird vor der Veröffentlichung ergänzt]</i>';
   return `${i.name?esc(i.name):miss}<br>${i.street?esc(i.street):miss}<br>${i.city?esc(i.city):miss}<br>E-Mail: ${i.mail?esc(i.mail):miss}`; }
@@ -2067,6 +2067,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.5.0","10. November 2026",["Impressum vollständig"]],
   ["0.4.9","10. November 2026",["Neu: 8 Sprachen – Deutsch, English, Türkçe, Русский, Українська, Polski, العربية, Română","Währungsrechner mit EZB-Kursen, Kontostand zusätzlich in einer zweiten Währung, Buchungen in Fremdwährung"]],
   ["0.4.8","10. November 2026",["Neu: Gemeinsam – mit Partner oder WG Ausgaben teilen und ausgleichen, gemeinsame Sparziele, Einkaufsliste","Budgets, Sparziele und Fixkosten einzeln freigeben – alles andere bleibt privat"]],
   ["0.4.7","10. November 2026",["Geräte koppeln ohne Konto: QR-Code scannen, Daten Ende-zu-Ende verschlüsselt","Feedback per E-Mail an kontakt@miracleframe.de"]],
