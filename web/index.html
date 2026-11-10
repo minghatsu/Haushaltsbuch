@@ -1071,7 +1071,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .btile .bti{color:var(--accent)}.btile b{font-size:13.5px}.btile.off{opacity:.5}.btile .tog{position:absolute;right:10px;top:10px}
 .btile .bmv{display:flex;gap:4px;margin-top:-2px}.btile .bmv .icon-btn{width:30px;height:30px}
 .crows{display:flex;flex-direction:column;gap:6px}
-.hkpi{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hkpi{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hkpi.one{grid-template-columns:1fr}
 .hkpi button{border:0;cursor:pointer;background:var(--surface);border-radius:18px;padding:11px 12px;display:flex;align-items:center;gap:10px;text-align:left;color:var(--fg);box-shadow:var(--shadow);min-width:0}
 .hkpi .hki{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:#fff;background:var(--tc);flex:none}
 .hkpi small{display:block;color:var(--muted);font-size:12px}.hkpi b{display:block;font:800 17px var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2225,7 +2225,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
-  ["0.9.4","10. November 2026",["Startseite: „Noch pro Tag“ – dein Hauptkonto geteilt durch die restlichen Tage im Monat"]],
+  ["0.9.4","10. November 2026",["Startseite: „Noch pro Tag“ – dein Hauptkonto geteilt durch die restlichen Tage im Monat","Die kleine Schulden-Kachel ist weg – die Schulden stehen im eigenen Block"]],
   ["0.9.3","10. November 2026",["Mindestlohn: Stunden pro Woche können sich ändern – mit „ab Monat“ und Pausen","Gehalt & Abrechnungen: Monate ohne Abrechnung werden mit dem Mindestlohn geschätzt, Netto aus deinen Gehaltseingängen"]],
   ["0.9.2","10. November 2026",["Kredite & Schulden: neues Feld „Ursprünglich geliehen“ – der Balken zeigt, wie viel du schon abbezahlt hast","Studienkredit: 16.900 € laut KfW-Kreditportal"]],
   ["0.9.1","10. November 2026",["Kredite & Schulden: deine drei Kredite werden richtig eingetragen"]],
@@ -3232,11 +3232,10 @@ function renderHome(){
     <div class="homeTop" style="display:flex;flex-direction:column;gap:10px" ${isJobless()?"hidden":""}>
       <div class="astack ${accts.length>1?"":"one"}" id="astack" ${accts.length>1?`tabindex="0" aria-label="Konten – wischen zum Blättern"`:""}>${acardHtml}</div>
       ${accts.length>1?`<div class="adots" id="adots">${accts.map((_,i)=>`<button data-cdot="${i}" aria-label="Karte ${i+1}"><i></i></button>`).join("")}</div>`:""}
-      <div class="hkpi">
+      <div class="hkpi one">
         ${ym===cur ? (()=>{ const left=Math.max(1, daysIn(ym)-new Date().getDate()), v=mainBal/left;   // what is on the main account, spread over the days still left
           return `<button data-go="year" aria-label="Noch ${eur0(v)} pro Tag für ${left} Tage"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small>Noch pro Tag · ${left} ${left===1?"Tag":"Tage"}</small><b>${esc(eur0(v))}</b></span></button>`; })()
         : `<button data-go="year"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small>Ø pro Tag ausgegeben</small><b>${esc(eur0(c.expenses/Math.max(1, daysIn(ym))))}</b></span></button>`}
-        <button data-debtgo="1"><span class="hki" style="--tc:${themeCol("#7a5bc2",6)}">${ic("bank",18)}</span><span><small>Schulden</small><b>${debtsTotal>0?esc(eur0(debtsTotal)):"keine"}</b></span></button>
       </div>
     </div>
     ${homeBlocks({
