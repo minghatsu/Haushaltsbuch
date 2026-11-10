@@ -2212,6 +2212,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.8.6","10. November 2026",["Fixkosten erkennen: BAföG- und KfW-Raten (Bundesverwaltungsamt, KfW) werden als BAföG / Studienkredit erkannt","Regelmäßige Überweisungen an Personen kannst du als „Privat geliehen“ markieren – die App legt die Schuld dann an","Neue Schuld-Art „BAföG / Studium“ 🎓"]],
   ["0.8.5","10. November 2026",["Tilgungsplan ohne Restschuld-Spalte (z. B. KfW oder Bundesverwaltungsamt): die App rechnet den offenen Betrag selbst aus"]],
   ["0.8.4","10. November 2026",["Fixkosten erkennen: regelmäßige Zahlungen aus deinen Kontoauszügen werden als Fixkosten vorgeschlagen – auch für schon importierte Daten","Kreditraten und Steuer-Ratenzahlungen erkennt die App dabei und legt sie unter „Kredite & Schulden“ an"]],
   ["0.8.3","10. November 2026",["Umschuldung erkennen: Kredit-Auszahlung und z. B. Zahlung ans Finanzamt zählen nicht mehr als Einnahme/Ausgabe – die App legt den Kredit mit Rate selbst an"]],
@@ -4276,10 +4277,10 @@ function niceMax(v){ if (v<=0) return 100; const p=Math.pow(10,Math.floor(Math.l
 function shortK(v){ return v>=1000 ? (Math.round(v/100)/10).toString().replace(".",",")+"k" : String(Math.round(v)); }
 
 // kind of debt: only for the look and the wording – the maths is the same for all
-const DEBT_ART=[["kredit","Kredit","🏦"],["ratenkauf","Ratenkauf","🛍️"],["dispo","Dispo","💳"],["privat","Privat geliehen","🤝"],["sonst","Sonstige","📄"]];
-const debtArt = d => (DEBT_ART.find(x=>x[0]===d.art)||[])[0] || (/dispo|überzieh/i.test(d.name||"") ? "dispo" : /kredit|darlehen|finanzierung|bank/i.test(d.name||"") ? "kredit" : "sonst");
-const debtArtName = d => (DEBT_ART.find(x=>x[0]===debtArt(d))||DEBT_ART[4])[1];
-const debtArtIcon = d => (DEBT_ART.find(x=>x[0]===debtArt(d))||DEBT_ART[4])[2];
+const DEBT_ART=[["kredit","Kredit","🏦"],["ratenkauf","Ratenkauf","🛍️"],["dispo","Dispo","💳"],["privat","Privat geliehen","🤝"],["bafoeg","BAföG / Studium","🎓"],["sonst","Sonstige","📄"]];
+const debtArt = d => (DEBT_ART.find(x=>x[0]===d.art)||[])[0] || (/dispo|überzieh/i.test(d.name||"") ? "dispo" : /bafög|bafoeg|studienkredit|bildungskredit/i.test(d.name||"") ? "bafoeg" : /kredit|darlehen|finanzierung|bank/i.test(d.name||"") ? "kredit" : "sonst");
+const debtArtName = d => (DEBT_ART.find(x=>x[0]===debtArt(d))||DEBT_ART.find(x=>x[0]==="sonst"))[1];
+const debtArtIcon = d => (DEBT_ART.find(x=>x[0]===debtArt(d))||DEBT_ART.find(x=>x[0]==="sonst"))[2];
 // interest and repayment of all rates in the current month (interest is gone, repayment lowers the debt)
 function debtSplitNow(){ let z=0, t=0; for (const d of S.debts){ const st=debtState(d); if (st.remaining<=0.005 || !st.rate) continue; z+=st.zinsNow; t+=Math.max(0, st.rate-st.zinsNow); } return {z:r2(z), t:r2(t)}; }
 /* ---------- Umschuldung erkennen: Kredit-Auszahlung, Ablösung (z. B. Finanzamt) und die Monatsrate ----------
@@ -4287,6 +4288,13 @@ function debtSplitNow(){ let z=0, t=0; for (const d of S.debts){ const st=debtSt
 const LOAN_BANK=/santander|creditplus|auxmoney|smava|targobank|barclays|consors ?finanz|bnp paribas|cofidis|oney|bank11|skg bank|younited|easybank|finanzcheck|verivox|check24|ferratum|bon-?kredit|maxda|kreditprivat|teambank|easycredit|ratenkredit/i;
 const LOAN_WORD=/darlehen|kredit|finanzierung|ratenkredit/i;
 const LOAN_TAX=/finanzamt|finanzkasse|steuerverwaltung|landeshauptkasse|bundeskasse|staatsoberkasse|stadtkasse|gemeindekasse|steuerkasse/i;
+const LOAN_EDU=/bundesverwaltungsamt|\bbva\b|baf(ö|oe|o)g|darlehenskasse|studienkredit|bildungskredit|studienfinanz|kfw/i;
+const LOAN_BAF=/bundesverwaltungsamt|\bbva\b|baf(ö|oe|o)g/i;
+const LOAN_PRIV=/schulden|zurück|zurueck|rückzahl|rueckzahl|geliehen|leihe|abzahl|darlehen privat|rate \d+ ?(von|\/)/i;
+const LOAN_FIRM=/gmbh|\bag\b|\bkg\b|\bse\b|e\.?\s?v\.?\b|mbh|bank|sparkasse|versicher|stadtwerke|telekom|vodafone|amazon|paypal|klarna|markt|shop|service|verlag|zentrale|kasse|amt\b|\bstadt\b|gemeinde|verein|club|studio|praxis|apotheke|tankstelle|ltd|inc|group|online|energie|immobilien|hausverwaltung/i;
+// a payee that looks like a person: two or three words with capitals, no digits, no company word
+const looksPerson = s => { s=String(s||"").trim(); if (!s || /\d/.test(s) || LOAN_FIRM.test(s) || LOAN_TAX.test(s) || LOAN_BANK.test(s)) return false;
+  const w=s.replace(/[,.]/g," ").split(/\s+/).filter(Boolean); return w.length>=2 && w.length<=4 && w.every(x=>/^[A-ZÄÖÜ][a-zäöüß\-]+$/.test(x) || /^(von|van|de|der|und|u|&)$/.test(x)); };
 const LOAN_OFF=/ablös|abloes|umschuld|vorzeitige.{0,12}rückzahl|restschuld/i;
 const LOAN_STOP=new Set(["gmbh","ag","kg","se","sa","bank","und","der","die","das","rate","darlehen","kredit","auszahlung","nr","vom","fuer","für","zahlung","lastschrift","gutschrift","sepa","konto","vertrag","ratenkredit","europe","deutschland","germany"]);
 function loanWords(s){ return String(s||"").toLowerCase().replace(/[^a-zäöüß ]/g," ").split(/\s+/).filter(w=>w.length>2 && !LOAN_STOP.has(w)); }
@@ -4401,17 +4409,23 @@ function recurCands(){
     if (S.fixed.some(f=>Number(f.amount)>0 && Math.abs(Number(f.amount)-med)<=Math.max(1,med*0.03) && yms.filter(ym=>((S.months[ym]||{}).paid||{})[f.id]!=null).length >= yms.length*0.5)) continue;   // quarterly tax prepayments are no fixed costs
     if (rhythm==="monatlich" && gaps.filter(x=>x===1).length < gaps.length*0.6) continue;
     const last=yms[yms.length-1], lastM=Number(last.slice(5,7)), txt=near.map(t=>(t.note||"")+" "+(t.ref||"")).join(" ");
-    const tax=LOAN_TAX.test(txt), raten=/klarna|ratepay|ratenkauf|teilzahlung|ratenzahlung/i.test(txt), loan=tax || raten || LOAN_BANK.test(txt) || LOAN_WORD.test(txt);
+    const tax=LOAN_TAX.test(txt), raten=/klarna|ratepay|ratenkauf|teilzahlung|ratenzahlung/i.test(txt), edu=LOAN_EDU.test(txt), baf=LOAN_BAF.test(txt),
+      person=!tax && !edu && near.filter(t=>looksPerson(t.note)).length>near.length/2, privHint=person && LOAN_PRIV.test(txt),
+      loan=tax || raten || edu || privHint || LOAN_BANK.test(txt) || LOAN_WORD.test(txt);
     const nm=String(near[near.length-1].note||"").replace(/\b(gmbh|ag|se|kg|mbh|co|b\.?v\.?|s\.?a\.?|ltd|inc|international|deutschland|europe)\b\.?/gi,"").replace(/[^\wäöüÄÖÜß&+\- ]/g," ").replace(/\s+/g," ").trim().split(" ").slice(0,3).join(" ");
     out.push({key:k, name:nm || loanName(near[0].note), amount:r2(median(near.map(t=>t.amount))), rhythm, months: rhythm==="monatlich" ? null : rhythmMonths(rhythm, lastM),
-      items:near, n:near.length, loan, tax, raten, since:yms[0], betrieb: near.filter(t=>t.kind==="betrieb").length > near.length/2, day:Math.round(median(near.map(t=>Number(t.date.slice(8,10))))) });
+      items:near, n:near.length, loan, tax, raten, edu, baf, person, since:yms[0], betrieb: near.filter(t=>t.kind==="betrieb").length > near.length/2, day:Math.round(median(near.map(t=>Number(t.date.slice(8,10))))) });
   }
   return out.sort((a,b)=>b.amount-a.amount);
 }
+// what kind of debt a recurring payment pays off
+const recurArt = x => x.tax ? "tax" : x.edu ? "bafoeg" : x.raten ? "ratenkauf" : x.person && !LOAN_BANK.test(x.items.map(t=>t.note).join(" ")) && !LOAN_WORD.test(x.items.map(t=>(t.note||"")+" "+(t.ref||"")).join(" ")) ? "privat" : "kredit";
+const RC_ART_TXT = {tax:"Steuerschuld in Raten", bafoeg:"BAföG / Studienkredit", ratenkauf:"Ratenkauf", kredit:"Kreditrate", privat:"Privat geliehen"};
+function recurChips(x){ const base=recurArt(x)==="privat" ? "kredit" : recurArt(x); return x.person ? [...new Set(["privat", base])] : [base]; }
 const recurRhythm = c => c.rhythm==="monatlich" ? `jeden Monat · ${c.n} Mal` : c.rhythm==="quartal" ? `alle 3 Monate · ${c.n} Mal` : c.rhythm==="halbjahr" ? `alle 6 Monate · ${c.n} Mal` : `jährlich · ${c.n} Mal`;
 function recurSheet(){
   const c=recurCands(); if (!c.length){ toast("Keine neuen wiederkehrenden Zahlungen gefunden"); return; }
-  UI.recur={c, on:new Set(c.map(x=>x.key)), names:{}, loan:Object.fromEntries(c.map(x=>[x.key, x.loan])), open:{}};
+  UI.recur={c, on:new Set(c.map(x=>x.key)), names:{}, loan:Object.fromEntries(c.map(x=>[x.key, x.loan ? recurArt(x) : ""])), open:{}};
   let el=$("recurBg"); if (!el){ el=document.createElement("div"); el.id="recurBg"; el.className="backdrop"; el.innerHTML=`<div class="sheet" role="dialog" aria-label="Fixkosten gefunden"></div>`; document.body.appendChild(el);
     el.addEventListener("click", e=>{ if (e.target===el || e.target.closest("[data-rcclose]")) recurClose(); }); }
   recurRender(); el.hidden=false; requestAnimationFrame(()=>el.classList.add("show")); }
@@ -4420,9 +4434,9 @@ function recurRender(){ const el=$("recurBg"), R=UI.recur; if (!el || !R) return
   el.querySelector(".sheet").innerHTML=`<div class="sheet-head"><h2>${R.c.length} Fixkosten gefunden</h2><button class="iconbtn" data-rcclose="1" aria-label="Schließen">✕</button></div>
     <div class="notice warn" style="margin:0 0 10px"><span><b>Diese Zahlungen kommen regelmäßig.</b> Als Fixkosten übernehmen? Die passenden Buchungen werden dann abgehakt – nichts zählt doppelt.</span></div>
     <div class="rclist">${R.c.map(x=>`<label class="rcrow"><input type="checkbox" data-rckey="${esc(x.key)}" ${R.on.has(x.key)?"checked":""}><span class="rcn"><input class="rcname" data-rcname="${esc(x.key)}" value="${esc(R.names[x.key]||x.name)}" aria-label="Name"><small>${esc(recurRhythm(x))} · seit ${esc(monthName(x.since))}${x.betrieb?" · betrieblich":""}</small></span><b>${esc(eur(x.amount))}</b></label>
-      <div class="rcloan"><button class="rclt ${R.loan[x.key]?"on":""}" data-rcloan="${esc(x.key)}" aria-pressed="${!!R.loan[x.key]}">${R.loan[x.key]?"✓ ":""}${x.tax?"Steuerschuld in Raten":"Kreditrate"}</button>
+      <div class="rcloan">${recurChips(x).map(a=>`<button class="rclt ${R.loan[x.key]===a?"on":""}" data-rcloan="${esc(x.key)}|${a}" aria-pressed="${R.loan[x.key]===a}">${R.loan[x.key]===a?"✓ ":""}${RC_ART_TXT[a]}</button>`).join("")}
         ${R.loan[x.key]?`<input class="in rcopen" data-rcopen="${esc(x.key)}" inputmode="decimal" placeholder="noch offen (€)" value="${esc(R.open[x.key]||"")}" aria-label="Noch offen in Euro">`:""}</div>`).join("")}</div>
-    ${R.c.some(x=>R.loan[x.key])?`<p class="small muted" style="margin:8px 0 0">Bei Kreditraten legt die App den Kredit unter „Kredite & Schulden“ an. Trag ein, was <b>heute noch offen</b> ist (steht im Online-Banking oder auf dem Kontoauszug des Kredits).</p>`:""}
+    ${R.c.some(x=>R.loan[x.key])?`<p class="small muted" style="margin:8px 0 0">Bei Kreditraten und Rückzahlungen legt die App die Schuld unter „Kredite & Schulden“ an. Trag ein, was <b>heute noch offen</b> ist (steht im Online-Banking oder auf dem Kontoauszug des Kredits).</p>`:""}
     <div class="row-btns" style="margin-top:12px"><button class="btn" id="recurNo">Keine davon</button><button class="btn primary" id="recurOk" ${n?"":"disabled"}>${n} als Fixkosten übernehmen</button></div>`; }
 async function recurApply(){
   const R=UI.recur; if (!R) return; const take=R.c.filter(x=>R.on.has(x.key)), skip=R.c.filter(x=>!R.on.has(x.key));
@@ -4434,7 +4448,9 @@ async function recurApply(){
     if (!(await safe(()=>put("fixed", id, f)))) return;
     for (const t of x.items){ const ym=t.date.slice(0,7); const m=months[ym]||(months[ym]=clone(S.months[ym]||{paid:{}})); m.paid=m.paid||{}; m.paid[id]=r2((Number(m.paid[id])||0)+t.amount); (dels[t._b||"_"]=dels[t._b||"_"]||[]).push(t); }
     const open=parseAmt(R.open[x.key]||"");
-    if (R.loan[x.key] && open>0) await safe(()=>put("debts", newId(), {name: x.tax ? "Steuerschulden ("+name+")" : name, art: x.tax?"sonst":x.raten?"ratenkauf":"kredit", start:r2(open), since:shiftYm(ymOf(new Date()),1), zins:0, fixedId:id, auto:true}));
+    const art=R.loan[x.key];
+    if (art && open>0){ const dn = art==="tax" ? "Steuerschulden ("+name+")" : art==="privat" ? "Schulden bei "+name : art==="bafoeg" ? (x.baf?"BAföG-Rückzahlung":"Studienkredit ("+name+")") : name;
+      await safe(()=>put("debts", newId(), {name:dn, art: art==="tax"?"sonst":art, start:r2(open), since:shiftYm(ymOf(new Date()),1), zins:0, fixedId:id, auto:true})); }
     const match=nrm(x.items[x.items.length-1].note); if (match && !rules.some(r=>r.match===match)) rules.push({match, target:"fix|"+id});   // next imports tick it by themselves
   }
   for (const [ym,m] of Object.entries(months)) await safe(()=>put("months", ym, m));
@@ -4451,7 +4467,7 @@ document.addEventListener("click", async e=>{
 document.addEventListener("change", e=>{ const c=e.target.closest("[data-rckey]"); if (!c || !UI.recur) return; if (c.checked) UI.recur.on.add(c.dataset.rckey); else UI.recur.on.delete(c.dataset.rckey);
   const b=$("recurOk"); if (b){ const n=UI.recur.on.size; b.disabled=!n; b.textContent=`${n} als Fixkosten übernehmen`; } });
 document.addEventListener("input", e=>{ if (!UI.recur) return; const c=e.target.closest("[data-rcname]"); if (c) UI.recur.names[c.dataset.rcname]=c.value; const o=e.target.closest("[data-rcopen]"); if (o) UI.recur.open[o.dataset.rcopen]=o.value; });
-document.addEventListener("click", e=>{ const b=e.target.closest("[data-rcloan]"); if (!b || !UI.recur) return; const k=b.dataset.rcloan; UI.recur.loan[k]=!UI.recur.loan[k]; const y=$("recurBg").querySelector(".sheet").scrollTop; recurRender(); $("recurBg").querySelector(".sheet").scrollTop=y; });
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-rcloan]"); if (!b || !UI.recur) return; const [k,a]=b.dataset.rcloan.split("|"); UI.recur.loan[k] = UI.recur.loan[k]===a ? "" : a; const y=$("recurBg").querySelector(".sheet").scrollTop; recurRender(); $("recurBg").querySelector(".sheet").scrollTop=y; });
 document.addEventListener("click", e=>{ if (e.target.closest(".rcname")) e.preventDefault(); }, true);
 // once per start: point to it when there are suggestions (e.g. for data imported before this existed)
 var RECUR_TOLD=false;
