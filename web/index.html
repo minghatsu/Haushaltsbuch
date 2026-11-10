@@ -2197,6 +2197,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.7.5","10. November 2026",["Abgleich zeigt bei einem Fehler jetzt den genauen Grund statt nur „Server nicht erreichbar“"]],
   ["0.7.3","10. November 2026",["Kopplung repariert sich selbst, wenn der Server sie verloren hat – deine Daten werden neu hochgeladen","Gekoppelte Geräte melden sich nach einem Server-Problem selbst wieder an"]],
   ["0.7.0","10. November 2026",["Datenschutzerklärung aktualisiert (Verschlüsselung, Tresor, Updates über GitHub, Wechselkurse)","Texterkennung am PC wird per Prüfsumme kontrolliert"]],
   ["0.6.9","10. November 2026",["Beleg-Fotos und „Gemeinsam“-Daten sind jetzt auch auf dem Gerät verschlüsselt","Kopierte Codes verschwinden nach einer Minute aus der Zwischenablage","Unverschlüsselte Verbindungen nur noch ins Heimnetz"]],
@@ -5019,7 +5020,7 @@ function renderSetHome(){
     if (!SYNC.token){ line="Abgleich aus"; }
     else if (SYNC.state==="ok"){ dot=""; line="Abgeglichen"+(SYNC.last?" · "+new Date(SYNC.last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}):""); }
     else if (SYNC.state==="pending"){ dot="w"; line=`${SYNC.queue.length} Änderungen warten`; }
-    else { dot="b"; line=SYNC.state==="offline"?"Offline – wird nachgeholt":"Server nicht erreichbar"; }
+    else { dot="b"; line=SYNC.state==="offline"?"Offline – wird nachgeholt":SYNC.err?"Server-Fehler: "+SYNC.err:"Server nicht erreichbar"; }
   }
   const quick=["konten","budgets","schulden","backup"];
   const groups=[["Finanzen",["steuer","kategorien"]],["App",[...(SYNCABLE||window.AndroidBridge?["sync"]:[]),"notify","sicherheit"]]];
@@ -7267,7 +7268,7 @@ async function syncNow(){
       if (!memStore[d.col]) continue;
       if (d.data===null) delete memStore[d.col][d.id]; else memStore[d.col][d.id]=d.data;
     }
-    SYNC.rev = res.rev || SYNC.rev; SYNC.last = Date.now(); SYNC.state = hold ? "vault" : SYNC.queue.length||(SYNC.rq||[]).length ? "pending" : "ok"; saveSync();
+    SYNC.rev = res.rev || SYNC.rev; SYNC.last = Date.now(); SYNC.err=""; SYNC.state = hold ? "vault" : SYNC.queue.length||(SYNC.rq||[]).length ? "pending" : "ok"; saveSync();
     if (changed){ persistLocal(); BG_RENDER=true; try { rebuildMem(); } finally { BG_RENDER=false; } } else renderSyncDot();
     if ((!hold && (SYNC.queue.length || (SYNC.rq||[]).length)) || res.more) flushSoon(200);
     checkUpdate();
@@ -7282,6 +7283,8 @@ async function syncNow(){
       toast("Abgleich abgemeldet – bitte neu anmelden", ()=>showLogin(), "Anmelden", 8000);
     }
     else SYNC.state = navigator.onLine===false ? "offline" : "error";
+    // remember what went wrong, so the status can say it instead of a general "not reachable"
+    SYNC.err = e && e.status ? `${e.message||"Fehler"} (${e.status})` : (e && e.message && !/Keine Verbindung/.test(e.message) ? e.message : "");
     renderSyncDot();
   } finally { SYNC.busy=false; }
 }
@@ -7736,7 +7739,7 @@ function renderSyncDot(){
 function renderSyncInfo(){
   $("syncBox").hidden = !SYNCABLE || UI.view!=="more" || UI.sp!=="sync"; if (!SYNCABLE) return;   // only on its own settings page
   const t = SYNC.last ? new Date(SYNC.last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "noch nie";
-  const st = !SYNC.token ? "Nicht angemeldet" : SYNC.state==="ok" ? "Abgeglichen" : SYNC.state==="pending" ? `${SYNC.queue.length} Änderungen warten` : SYNC.state==="offline" ? "Offline – wird nachgeholt" : "Server nicht erreichbar";
+  const st = !SYNC.token ? "Nicht angemeldet" : SYNC.state==="ok" ? "Abgeglichen" : SYNC.state==="pending" ? `${SYNC.queue.length} Änderungen warten` : SYNC.state==="offline" ? "Offline – wird nachgeholt" : SYNC.err ? "Server-Fehler: "+SYNC.err : "Server nicht erreichbar";
   $("syncState").textContent = st; $("syncTitle").textContent = "Abgleich";
   $("syncMoreBtn").hidden = !SYNC.token;
   $("syncMore").hidden = SYNC.token ? $("syncMoreBtn").getAttribute("aria-expanded")!=="true" : false;   // signed out: only the "Anmelden" button
