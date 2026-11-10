@@ -2212,6 +2212,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.8.7","10. November 2026",["„Darlehnsrate“, „Tilgung“ und „Annuität“ im Verwendungszweck werden jetzt als Kreditrate erkannt","Kontoauszug nochmal importieren: bei schon vorhandenen Buchungen ergänzt die App den Verwendungszweck – so werden auch alte Kreditraten erkannt"]],
   ["0.8.6","10. November 2026",["Fixkosten erkennen: BAföG- und KfW-Raten (Bundesverwaltungsamt, KfW) werden als BAföG / Studienkredit erkannt","Regelmäßige Überweisungen an Personen kannst du als „Privat geliehen“ markieren – die App legt die Schuld dann an","Neue Schuld-Art „BAföG / Studium“ 🎓"]],
   ["0.8.5","10. November 2026",["Tilgungsplan ohne Restschuld-Spalte (z. B. KfW oder Bundesverwaltungsamt): die App rechnet den offenen Betrag selbst aus"]],
   ["0.8.4","10. November 2026",["Fixkosten erkennen: regelmäßige Zahlungen aus deinen Kontoauszügen werden als Fixkosten vorgeschlagen – auch für schon importierte Daten","Kreditraten und Steuer-Ratenzahlungen erkennt die App dabei und legt sie unter „Kredite & Schulden“ an"]],
@@ -4286,7 +4287,7 @@ function debtSplitNow(){ let z=0, t=0; for (const d of S.debts){ const st=debtSt
 /* ---------- Umschuldung erkennen: Kredit-Auszahlung, Ablösung (z. B. Finanzamt) und die Monatsrate ----------
    Payout and payoff are only money passing through: marked "um", they count neither as income nor as expense. */
 const LOAN_BANK=/santander|creditplus|auxmoney|smava|targobank|barclays|consors ?finanz|bnp paribas|cofidis|oney|bank11|skg bank|younited|easybank|finanzcheck|verivox|check24|ferratum|bon-?kredit|maxda|kreditprivat|teambank|easycredit|ratenkredit/i;
-const LOAN_WORD=/darlehen|kredit|finanzierung|ratenkredit/i;
+const LOAN_WORD=/darle?he?n|kredit|finanzierung|tilgung|annuität|annuitaet/i;
 const LOAN_TAX=/finanzamt|finanzkasse|steuerverwaltung|landeshauptkasse|bundeskasse|staatsoberkasse|stadtkasse|gemeindekasse|steuerkasse/i;
 const LOAN_EDU=/bundesverwaltungsamt|\bbva\b|baf(ö|oe|o)g|darlehenskasse|studienkredit|bildungskredit|studienfinanz|kfw/i;
 const LOAN_BAF=/bundesverwaltungsamt|\bbva\b|baf(ö|oe|o)g/i;
@@ -4296,7 +4297,7 @@ const LOAN_FIRM=/gmbh|\bag\b|\bkg\b|\bse\b|e\.?\s?v\.?\b|mbh|bank|sparkasse|vers
 const looksPerson = s => { s=String(s||"").trim(); if (!s || /\d/.test(s) || LOAN_FIRM.test(s) || LOAN_TAX.test(s) || LOAN_BANK.test(s)) return false;
   const w=s.replace(/[,.]/g," ").split(/\s+/).filter(Boolean); return w.length>=2 && w.length<=4 && w.every(x=>/^[A-ZÄÖÜ][a-zäöüß\-]+$/.test(x) || /^(von|van|de|der|und|u|&)$/.test(x)); };
 const LOAN_OFF=/ablös|abloes|umschuld|vorzeitige.{0,12}rückzahl|restschuld/i;
-const LOAN_STOP=new Set(["gmbh","ag","kg","se","sa","bank","und","der","die","das","rate","darlehen","kredit","auszahlung","nr","vom","fuer","für","zahlung","lastschrift","gutschrift","sepa","konto","vertrag","ratenkredit","europe","deutschland","germany"]);
+const LOAN_STOP=new Set(["gmbh","ag","kg","se","sa","bank","und","der","die","das","rate","darlehen","darlehn","darlehnsrate","darlehensrate","kredit","auszahlung","nr","vom","fuer","für","zahlung","lastschrift","gutschrift","sepa","konto","vertrag","ratenkredit","europe","deutschland","germany"]);
 function loanWords(s){ return String(s||"").toLowerCase().replace(/[^a-zäöüß ]/g," ").split(/\s+/).filter(w=>w.length>2 && !LOAN_STOP.has(w)); }
 const loanKey = s => loanWords(s).slice(0,2).join(" ");
 const loanName = s => { const w=loanWords(s).slice(0,2); return w.length ? w.map(x=>x[0].toUpperCase()+x.slice(1)).join(" ") : "Kredit"; };
@@ -7176,6 +7177,18 @@ function buildItems(){
   }
   items.sort((a,b)=>b.date.localeCompare(a.date));
   imp.items = items;
+  refBackfill(items);
+}
+// bookings imported before the purpose text was kept: take it from the file again (helps to recognise loans)
+async function refBackfill(items){
+  const byKey=new Map(); for (const it of items) if (it.dup && it.ref && String(it.ref).trim()) byKey.set(it.key, String(it.ref).replace(/\s+/g," ").trim().slice(0,120));
+  if (!byKey.size) return; const bund={};
+  for (const t of S.tx){ if (t.ref || !t.importKey || !byKey.has(t.importKey) || !t._b) continue; (bund[t._b]=bund[t._b]||[]).push(t); }
+  let n=0;
+  for (const [b,ts] of Object.entries(bund)){ const items2=clone(S.txb[b]||{}); let ch=0;
+    for (const t of ts){ if (items2[t.id] && !items2[t.id].ref){ items2[t.id].ref=byKey.get(t.importKey); ch++; } }
+    if (ch && await safe(()=>put("txb", b, {items:items2}))) n+=ch; }
+  if (n){ RECUR_TOLD=false; LOAN_TOLD=new Set(); setTimeout(()=>{ loanCheck(); recurCheck(); }, 600); }
 }
 function renderImport(){
   const v=$("v-import"), imp=UI.imp;
