@@ -55,7 +55,17 @@ function db(): PDO {
         @file_put_contents(DATA_DIR . '/.htaccess', "Require all denied\nDeny from all\n");
         @file_put_contents(DATA_DIR . '/index.html', '');
     }
-    $pdo = new PDO('sqlite:' . DATA_DIR . '/tresore.sqlite');
+    // the database gets a random file name: the web server (nginx on Synology) ignores .htaccess, so the name must not be guessable
+    $dbs = glob(DATA_DIR . '/tresore-*.sqlite') ?: [];
+    if ($dbs) $file = $dbs[0];
+    else {
+        $file = DATA_DIR . '/tresore-' . bin2hex(random_bytes(16)) . '.sqlite';
+        if (is_file(DATA_DIR . '/tresore.sqlite')) {   // move the old, guessable file (and its journal) over
+            if (!@rename(DATA_DIR . '/tresore.sqlite', $file)) fail('Datenbank konnte nicht umbenannt werden', 500);
+            foreach (['-wal', '-shm'] as $x) if (is_file(DATA_DIR . '/tresore.sqlite' . $x)) @rename(DATA_DIR . '/tresore.sqlite' . $x, $file . $x);
+        }
+    }
+    $pdo = new PDO('sqlite:' . $file);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->exec('PRAGMA journal_mode=WAL'); $pdo->exec('PRAGMA busy_timeout=5000');
     $pdo->exec('CREATE TABLE IF NOT EXISTS vaults (id TEXT PRIMARY KEY, auth TEXT NOT NULL, created INTEGER, used INTEGER, rev INTEGER NOT NULL DEFAULT 0, size INTEGER NOT NULL DEFAULT 0)');

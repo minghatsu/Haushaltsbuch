@@ -51,7 +51,6 @@ jobs:
           {
             printf '<!doctype html><html lang="de"><head><meta charset="utf-8">'
             printf '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
-            printf '<meta name="hb-server" content="http://192.168.178.32/haushaltsbuch/api.php">'
             printf '<meta name="hb-pair" content="https://miracleframe.synology.me/haushaltsbuch/pair.php">'
             printf '<meta name="hb-version" content="%s">' "${{ github.run_number }}"
             if [ -n "$RATES" ]; then printf "<meta name=\"hb-rates\" content='%s'>" "$RATES"; fi
@@ -110,14 +109,6 @@ jobs:
             gh release delete "$t" -y --cleanup-tag || true
           done
           rm -f Haushaltsbuch.apk Haushaltsbuch-Setup.exe
-      - name: Neue Version an die Synology schicken
-        if: ${{ steps.need.outputs.native == 'false' }}
-        continue-on-error: true
-        env:
-          DEPLOY_URL: https://miracleframe.synology.me/haushaltsbuch/api.php
-        run: |
-          TOKEN=$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=haushaltsbuch-deploy" | sed -n 's/.*"value":"\([^"]*\)".*/\1/p')
-          curl -fsS --retry 3 --max-time 60 -X POST -H "X-Deploy-Token: $TOKEN" -H "Content-Type: text/html" --data-binary @app.html "$DEPLOY_URL?a=deploy"
 
   android:
     name: Android-App (APK)
@@ -273,13 +264,4 @@ jobs:
           for t in $(gh api "repos/${{ github.repository }}/releases?per_page=100" --jq '.[].tag_name' | grep '^build-'); do
             gh release delete "$t" -y --cleanup-tag || true
           done
-      - name: Neue Version an die Synology schicken (PC und Handy aktualisieren sich dann selbst)
-        continue-on-error: true
-        env:
-          DEPLOY_URL: https://miracleframe.synology.me/haushaltsbuch/api.php
-        run: |
-          TOKEN=$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=haushaltsbuch-deploy" | jq -r .value)
-          curl -fsS --retry 3 --max-time 60 -X POST -H "X-Deploy-Token: $TOKEN" -H "Content-Type: text/html" \
-            --data-binary @app.html "$DEPLOY_URL?a=deploy"
 
