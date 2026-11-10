@@ -44,12 +44,17 @@ jobs:
           echo "Android: $APK (veröffentlicht $RA) · Windows: $EXE (veröffentlicht $RE)"
       - name: app.html bauen
         run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then PY=python; else PY=python3; fi
+          # Tageskurse der EZB fest einbauen (die App lädt sonst nur auf Knopfdruck neu)
+          RATES=$(curl -fsS --max-time 20 https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml 2>/dev/null | $PY -c "import sys,re,json; x=sys.stdin.read(); d=re.search(r\"time=.(\\d{4}-\\d\\d-\\d\\d)\",x); r={c:float(v) for c,v in re.findall(r\"currency=.([A-Z]{3}). rate=.([\\d.]+)\",x)}; print(json.dumps({'d':d.group(1),'r':r},separators=(',',':')) if d and r else '')" 2>/dev/null) || RATES=""
+          echo "EZB-Kurse: ${RATES:-keine (App nutzt Näherungswerte)}"
           {
             printf '<!doctype html><html lang="de"><head><meta charset="utf-8">'
             printf '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
             printf '<meta name="hb-server" content="http://192.168.178.32/haushaltsbuch/api.php">'
             printf '<meta name="hb-pair" content="https://miracleframe.synology.me/haushaltsbuch/pair.php">'
             printf '<meta name="hb-version" content="%s">' "${{ github.run_number }}"
+            if [ -n "$RATES" ]; then printf "<meta name=\"hb-rates\" content='%s'>" "$RATES"; fi
             printf '<title>Finanz MAMI</title>'
             printf '<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%%}[hidden]{display:none!important}</style>'
             printf '</head><body>'
