@@ -2197,6 +2197,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.7.8","10. November 2026",["Abgleich hängt nie mehr fest und nennt den Grund, wenn es nicht klappt"]],
   ["0.7.7","10. November 2026",["Abgleich: bei Verbindungsproblemen steht jetzt dabei, was genau schiefging (Zeitüberschreitung, Zertifikat …)"]],
   ["0.7.5","10. November 2026",["Abgleich zeigt bei einem Fehler jetzt den genauen Grund statt nur „Server nicht erreichbar“"]],
   ["0.7.3","10. November 2026",["Kopplung repariert sich selbst, wenn der Server sie verloren hat – deine Daten werden neu hochgeladen","Gekoppelte Geräte melden sich nach einem Server-Problem selbst wieder an"]],
@@ -7193,8 +7194,10 @@ window.hbHttpDone = (id, status, text) => { const done = httpWaiting[id]; if (do
 async function request(url, body, certHost){
   if (NATIVE && window.AndroidBridge.http){
     const r = await new Promise(res => { const id = newId(); httpWaiting[id] = res; const B=window.AndroidBridge, a=[id, body ? "POST" : "GET", url, SYNC.token ? "Bearer "+SYNC.token : "", body ? JSON.stringify(body) : ""];
+      // never wait forever: after 60 s the request counts as failed (otherwise the sync would hang until the app restarts)
+      setTimeout(()=>{ if (httpWaiting[id]){ delete httpWaiting[id]; res({status:0, text:"ERR:Zeitüberschreitung (keine Antwort nach 60 s)"}); } }, 60000);
       if (certHost) B.httpAs(...a, certHost); else B.http(...a); });
-    if (!r.status) throw new Error("Keine Verbindung");
+    if (!r.status) throw new Error(/^ERR:/.test(r.text||"") ? "Verbindung: "+netWhy(r.text.slice(4)) : "Keine Verbindung");
     return r;
   }
   const r = await fetch(url, { method: body ? "POST" : "GET", headers: Object.assign({"Content-Type":"application/json"}, SYNC.token ? {Authorization:"Bearer "+SYNC.token} : {}), body: body ? JSON.stringify(body) : undefined, cache:"no-store" });
@@ -7227,7 +7230,7 @@ function netWhy(t){ const x=String(t||"");
 async function requestAny(action, qs, body){
   let last;
   for (const rt of netRoutes()){
-    try { const r=await request(apiUrl(rt.base,action,qs), body, rt.cert); if (r.status===0) throw new Error(/^ERR:/.test(r.text||"") ? "Verbindung: "+netWhy(r.text.slice(4)) : "Keine Verbindung");
+    try { const r=await request(apiUrl(rt.base,action,qs), body, rt.cert); if (r.status===0) throw new Error("Keine Verbindung");
       if (NET_LAST!==rt.k){ NET_LAST=rt.k; try{ localStorage.setItem("hb-net-last",rt.k); }catch(_){} } VIA_ALT = rt.k==="alt";
       if (rt.k!=="plain" && isLanHttp(SERVER) && !lsGet(TLS_OK_KEY)) try{ localStorage.setItem(TLS_OK_KEY,"1"); }catch(_){}
       return r; }
@@ -7754,7 +7757,8 @@ function renderSyncInfo(){
   $("syncNow").hidden = !SYNC.token; renderSyncSec(); $("syncLogout").classList.toggle("primary", !SYNC.token);
 }
 document.addEventListener("click", e=>{
-  if (e.target.closest("#syncNow")){ syncNow().then(()=>{ renderSyncInfo(); toast(SYNC.state==="ok"?"Abgeglichen":"Abgleich gerade nicht möglich"); }); }
+  if (e.target.closest("#syncNow")){ const why = !SERVER ? "keine Server-Adresse" : !SYNC.token ? "nicht angemeldet" : SYNC.busy ? "läuft noch" : "";
+    syncNow().then(()=>{ renderSyncInfo(); toast(SYNC.state==="ok" ? "Abgeglichen" : "Abgleich gerade nicht möglich"+(why ? " – "+why : SYNC.err ? " – "+SYNC.err : ""), null, null, 9000); }); }
   if (e.target.closest("#syncLogout")){
     if (!SYNC.token){ showLogin(); return; }
     const b=e.target.closest("#syncLogout"); if (b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Wirklich abmelden?"; setTimeout(()=>{ b.dataset.armed=""; renderSyncInfo(); },3000); return; }
