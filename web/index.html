@@ -1060,7 +1060,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .spsheet #spBody>.card{box-shadow:none;padding:0;background:none;margin:0 0 12px}.spsheet #spBody>.sphero{margin-bottom:12px}
 .anapanel{border-top:3px solid var(--tc)}.anasheet .sheet-head{align-items:center}.anasheet .aph{flex:1;min-width:0}.anasheet .aph .ic{width:36px;height:36px;border-radius:12px;background:var(--tc);color:#fff;display:grid;place-items:center;flex:none}.anasheet .anab{margin-top:4px}.anasheet .anab>.card-head h2{display:none}.anasheet .anab>.card-head{justify-content:flex-end}.anasheet .kpis{margin:0}.aph{display:flex;align-items:center;gap:12px}.aph .ic{width:36px;height:36px;border-radius:12px;background:var(--tc);color:#fff;display:grid;place-items:center;flex:none}.aph .n{flex:1;min-width:0;display:flex;flex-direction:column}.aph b{font-size:15px}
 .anapanel .kpis{margin:0}.anapanel .anab>.card-head h2{display:none}.anapanel .anab>.card-head{justify-content:flex-end}.aphx{border:0;background:none;color:var(--muted);padding:6px;cursor:pointer}
-main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdrop-filter:none!important}.cubing .filters,.cubing .rings,.cubing .jars,.cubing .acards,.cubing .table-wrap,.cubing [style*="overflow-x:auto"],.cubing .fxtiles,.cubing .srail{overflow:visible!important}
+main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdrop-filter:none!important}.cubing .filters,.cubing .rings,.cubing .jars,.cubing .acards,.cubing .table-wrap,.cubing [style*="overflow-x:auto"],.cubing .fxtiles,.cubing .srail,.cubing .stabs{overflow:visible!important}
 .cubestage{position:fixed;left:0;right:0;z-index:15;overflow:hidden;pointer-events:none;contain:strict}.cubeface{position:absolute;inset:0;overflow:hidden;background:var(--bg);will-change:transform;transform-origin:50% 50%}
 .cubeshade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;border-radius:inherit;z-index:50}
 
@@ -2173,6 +2173,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.6.5","10. November 2026",["Kategorie-Reiter über dem Läden-Rad lassen sich jetzt seitlich wischen"]],
   ["0.6.4","10. November 2026",["Läden: „Alle Läden“ und ganze Kategorien mit einem Häkchen auswählen","Angebote: Kategorie-Reiter über dem Läden-Rad – so findest du einen Laden schneller"]],
   ["0.6.3","10. November 2026",["Abgleich unterwegs: ohne WLAN zu Hause nutzt die App jetzt automatisch die Internet-Adresse der Synology"]],
   ["0.6.2","10. November 2026",["Analyse als Story: Monat oder ganzes Jahr in Karten, die von selbst weiterlaufen","Jahr-Ansicht mit allen Monaten, teuerstem Monat, Kategorien und Vergleich zum Vorjahr"]],
@@ -3604,7 +3605,7 @@ function offersCard(){
     <div class="notice info"><span>Wähl aus, von welchen Läden du die Wochenangebote hier sehen willst.</span><button class="btn primary" data-go="more" data-scroll="shopEd">Läden auswählen</button></div></div>`;
   const tabsHere=SHOP_CATS.map(c=>[c, chosen.filter(sh=>sh.cat===c[0]).length]).filter(x=>x[1]>0);
   if (UI.shopCat && !tabsHere.some(x=>x[0][0]===UI.shopCat)) UI.shopCat="";
-  const tabs = tabsHere.length>=2 ? `<div class="stabs" role="group" aria-label="Kategorie">${[[["","Alle"],chosen.length], ...tabsHere].map(([c,n])=>`<button class="stab ${(UI.shopCat||"")===c[0]?"on":""}" data-shoptab="${c[0]}" aria-pressed="${(UI.shopCat||"")===c[0]}">${esc(SHOP_TAB[c[0]]||c[1])}<small>${n}</small></button>`).join("")}</div>` : "";
+  const tabs = tabsHere.length>=2 ? `<div class="stabs" data-noswipe="1" role="group" aria-label="Kategorie">${[[["","Alle"],chosen.length], ...tabsHere].map(([c,n])=>`<button class="stab ${(UI.shopCat||"")===c[0]?"on":""}" data-shoptab="${c[0]}" aria-pressed="${(UI.shopCat||"")===c[0]}">${esc(SHOP_TAB[c[0]]||c[1])}<small>${n}</small></button>`).join("")}</div>` : "";
   chosen = UI.shopCat ? chosen.filter(sh=>sh.cat===UI.shopCat) : chosen;
   if (!chosen.some(sh=>sh.id===UI.shopSel)) UI.shopSel=chosen[0].id;
   return `<div class="card" style="order:9" id="offersCard">
@@ -7500,7 +7501,7 @@ $("loginGo").onclick = doLogin;
     const r=cur.getBoundingClientRect();
     Object.assign(c.style,{position:"absolute",left:r.left+"px",width:r.width+"px",top:top+"px",margin:"0"});
     // keep sideways scroll positions (account cards, shop rail …)
-    const SC=".srail,.acards,.filters,.rings,.jars,.bubbles,.table-wrap,.tlchips", a=srcSec.querySelectorAll(SC), b=c.querySelectorAll(SC);
+    const SC=".srail,.stabs,.acards,.filters,.rings,.jars,.bubbles,.table-wrap,.tlchips", a=srcSec.querySelectorAll(SC), b=c.querySelectorAll(SC);
     for (let i=0;i<a.length && i<b.length;i++) if (a[i].scrollLeft) [...b[i].children].forEach(ch=>ch.style.transform=`translateX(${-a[i].scrollLeft}px)`);
     const sh=document.createElement("div"); sh.className="cubeshade";
     f.appendChild(c); f.appendChild(sh); stage.appendChild(f); return [f,sh];
