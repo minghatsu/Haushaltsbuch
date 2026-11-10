@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.webkit.JavascriptInterface;
+import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -98,6 +99,7 @@ public class MainActivity extends Activity {
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
+        s.setMediaPlaybackRequiresUserGesture(false);   // live camera preview for the document scanner
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
         s.setAllowFileAccess(true);
@@ -128,6 +130,18 @@ public class MainActivity extends Activity {
 
         // <input type="file"> for the CSV import and backup restore
         web.setWebChromeClient(new WebChromeClient() {
+            /** live camera for the document scanner (getUserMedia): only the camera, only after the user allowed it */
+            @Override
+            public void onPermissionRequest(final PermissionRequest request) {
+                runOnUiThread(() -> {
+                    boolean cam = false;
+                    for (String r : request.getResources()) if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(r)) cam = true;
+                    if (!cam) { request.deny(); return; }
+                    if (checkSelfPermission(android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED)
+                        request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+                    else { pendingCam = request; requestPermissions(new String[]{android.Manifest.permission.CAMERA}, CAM_REQUEST); }
+                });
+            }
             @Override
             public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
                 if (fileCallback != null) fileCallback.onReceiveValue(null);
@@ -252,6 +266,11 @@ public class MainActivity extends Activity {
                 i.addCategory(Intent.CATEGORY_OPENABLE);
                 startActivityForResult(Intent.createChooser(i, "Foto auswählen"), SCAN_GALLERY);
             } else {
+                // with CAMERA in the manifest, the system camera only opens once the permission is granted
+                if (checkSelfPermission(android.Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{android.Manifest.permission.CAMERA}, SCAN_CAM_REQUEST);
+                    return;
+                }
                 File dir = new File(getCacheDir(), "scan");
                 dir.mkdirs();
                 File f = new File(dir, "quittung.jpg");
@@ -333,6 +352,11 @@ public class MainActivity extends Activity {
         runOnUiThread(() -> web.evaluateJavascript(js, null));
     }
 
+    private void ocrDone(String id, String json, String err) {
+        final String js = "window.hbOcrDone && window.hbOcrDone(" + JSONObject.quote(id) + "," + (json == null ? "null" : JSONObject.quote(json)) + "," + (err == null ? "null" : JSONObject.quote(err)) + ")";
+        runOnUiThread(() -> web.evaluateJavascript(js, null));
+    }
+
     private void scanDone(String json, String err) {
         final String js = "window.hbScanDone && window.hbScanDone(" + JSONObject.quote(scanId == null ? "" : scanId) + ","
             + (json == null ? "null" : JSONObject.quote(json)) + "," + (err == null ? "null" : JSONObject.quote(err)) + ")";
@@ -352,10 +376,24 @@ public class MainActivity extends Activity {
     }
 
     private static final int NOTIFY_REQUEST = 7;
+    private static final int CAM_REQUEST = 8;
+    private static final int SCAN_CAM_REQUEST = 9;
+    private PermissionRequest pendingCam;
 
     @Override
     public void onRequestPermissionsResult(int code, String[] perms, int[] res) {
         super.onRequestPermissionsResult(code, perms, res);
+        if (code == SCAN_CAM_REQUEST) {
+            if (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) startScan("camera");
+            else scanDone(null, "Kamera nicht erlaubt");
+            return;
+        }
+        if (code == CAM_REQUEST && pendingCam != null) {
+            if (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) pendingCam.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+            else pendingCam.deny();
+            pendingCam = null;
+            return;
+        }
         if (code == NOTIFY_REQUEST && web != null)
             web.evaluateJavascript("window.hbNotifyPerm && window.hbNotifyPerm(" + (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) + ")", null);
     }
@@ -592,6 +630,35 @@ public class MainActivity extends Activity {
                     bioDone(id, false);
                 }
             });
+        }
+
+        /** Text recognition for a picture the app already has (live scanner frame or the straightened photo).
+         *  Answers window.hbOcrDone(id, json, err) with the lines and their positions in that picture. */
+        @JavascriptInterface
+        public void ocrImage(final String id, final String dataUrl) {
+            new Thread(() -> {
+                try {
+                    String b64 = dataUrl.substring(dataUrl.indexOf(',') + 1);
+                    byte[] bytes = Base64.decode(b64, Base64.DEFAULT);
+                    Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    if (bm == null) throw new IllegalStateException("Bild konnte nicht gelesen werden");
+                    TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS).process(InputImage.fromBitmap(bm, 0))
+                        .addOnSuccessListener(text -> {
+                            try {
+                                JSONArray arr = new JSONArray();
+                                for (Text.TextBlock b : text.getTextBlocks()) for (Text.Line l : b.getLines()) {
+                                    JSONObject o = new JSONObject();
+                                    o.put("t", l.getText());
+                                    Rect r = l.getBoundingBox();
+                                    if (r != null) { o.put("x", r.left); o.put("y", r.top); o.put("w", r.width()); o.put("h", r.height()); }
+                                    arr.put(o);
+                                }
+                                ocrDone(id, arr.toString(), null);
+                            } catch (Exception e) { ocrDone(id, null, "Text konnte nicht erkannt werden"); }
+                        })
+                        .addOnFailureListener(e -> ocrDone(id, null, "Text konnte nicht erkannt werden"));
+                } catch (Exception e) { ocrDone(id, null, e.getMessage() == null ? "Fehler" : e.getMessage()); }
+            }).start();
         }
 
         @JavascriptInterface
