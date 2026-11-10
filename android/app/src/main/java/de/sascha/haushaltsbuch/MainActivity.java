@@ -401,6 +401,14 @@ public class MainActivity extends Activity {
             web.evaluateJavascript("window.hbNotifyPerm && window.hbNotifyPerm(" + (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) + ")", null);
     }
 
+    /** home network, Tailscale or this device: the only places plain http may go to */
+    static boolean homeHost(String h) {
+        if (h == null) return false;
+        h = h.toLowerCase(java.util.Locale.ROOT);
+        return h.matches("^(10\\.|192\\.168\\.|172\\.(1[6-9]|2\\d|3[01])\\.|127\\.|100\\.(6[4-9]|[7-9]\\d|1[01]\\d|12[0-7])\\.)[0-9.]+$")
+                || h.equals("localhost") || h.endsWith(".local") || h.endsWith(".fritz.box") || h.endsWith(".ts.net");
+    }
+
     /** Called from JavaScript as window.AndroidBridge */
     private class Bridge {
         /** "granted" or "denied" – whether the app may show notifications */
@@ -474,6 +482,36 @@ public class MainActivity extends Activity {
          * Network requests to the Synology go through Android directly (not the WebView), so the browser rules
          * for local network access never get in the way. The answer comes back via window.hbHttpDone(id, status, text).
          */
+        /** copies a code as "sensitive" (no preview) and removes it from the clipboard again after sec seconds */
+        @JavascriptInterface
+        public void copySecret(final String text, final int sec) {
+            runOnUiThread(() -> {
+                try {
+                    final android.content.ClipboardManager cm = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                    if (cm == null) return;
+                    android.content.ClipData clip = android.content.ClipData.newPlainText("Code", text);
+                    android.os.PersistableBundle ex = new android.os.PersistableBundle();
+                    ex.putBoolean("android.content.extra.IS_SENSITIVE", true);
+                    clip.getDescription().setExtras(ex);
+                    final boolean[] changed = {false};
+                    final android.content.ClipboardManager.OnPrimaryClipChangedListener l = () -> changed[0] = true;
+                    cm.setPrimaryClip(clip);
+                    cm.addPrimaryClipChangedListener(l);
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                        try {
+                            cm.removePrimaryClipChangedListener(l);
+                            android.content.ClipData now = cm.getPrimaryClip();
+                            boolean ours = now != null && now.getItemCount() > 0 && text.contentEquals(now.getItemAt(0).coerceToText(MainActivity.this));
+                            if (ours || (now == null && !changed[0])) {
+                                if (android.os.Build.VERSION.SDK_INT >= 28) cm.clearPrimaryClip();
+                                else cm.setPrimaryClip(android.content.ClipData.newPlainText("", ""));
+                            }
+                        } catch (Exception ignored) {}
+                    }, Math.max(10, Math.min(sec, 600)) * 1000L);
+                } catch (Exception ignored) {}
+            });
+        }
+
         /** screen protection on/off (FLAG_SECURE), remembered for the next start */
         @JavascriptInterface
         public void setSecure(final boolean on) {
@@ -506,6 +544,8 @@ public class MainActivity extends Activity {
                 try {
                     if (!url.startsWith("http://") && !url.startsWith("https://")) throw new IllegalArgumentException();
                     URL u0 = new URL(url);
+                    // unencrypted only inside the home network or Tailscale – never across the internet
+                    if (url.startsWith("http://") && !homeHost(u0.getHost())) throw new IllegalArgumentException("http only at home");
                     c = (HttpURLConnection) u0.openConnection();
                     final boolean pin = certHost != null && !certHost.isEmpty();
                     if (pin) {

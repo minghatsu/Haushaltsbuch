@@ -8,7 +8,7 @@ if len(scripts) != 1:
 h = base64.b64encode(hashlib.sha256(scripts[0].encode("utf-8")).digest()).decode()
 csp = ("default-src 'self'; script-src 'sha256-%s' https://cdn.jsdelivr.net; "
        "style-src 'self' 'unsafe-inline'; font-src 'self' data:; "
-       "img-src 'self' data: blob: https:; connect-src 'self' data: blob: https: http:; "
+       "img-src 'self' data: blob: https:; connect-src 'self' data: blob: https:; "
        "object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'") % h
 tag = '<meta http-equiv="Content-Security-Policy" content="%s">' % csp
 if '<meta charset="utf-8">' not in s:

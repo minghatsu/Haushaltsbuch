@@ -260,10 +260,17 @@ function httpsPinned(req) {
     r.on("timeout", () => r.destroy(new Error("timeout"))); r.on("error", bad); if (body) r.write(body); r.end();
   });
 }
+function homeHost(h) { return /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|127\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)[0-9.]+$/.test(h) || /^localhost$|\.local$|\.fritz\.box$|\.ts\.net$/i.test(h); }
+ipcMain.on("copySecret", (e, text, sec) => {
+  const { clipboard } = require("electron"); const t = String(text); clipboard.writeText(t);
+  setTimeout(() => { try { if (clipboard.readText() === t) clipboard.writeText(""); } catch (err) {} }, Math.max(10, Math.min(Number(sec) || 60, 600)) * 1000);
+});
 ipcMain.on("http", async (e, req) => {
   let status = 0, text = "";
   try {
     if (!/^https?:\/\//i.test(req.url)) throw new Error("bad url");
+    // unencrypted only inside the home network or Tailscale – never across the internet
+    if (/^http:/i.test(req.url) && !homeHost(new URL(req.url).hostname)) throw new Error("http only at home");
     const headers = { "Content-Type": "application/json" };
     if (req.auth) headers.Authorization = req.auth;
     const post = req.method === "POST";
