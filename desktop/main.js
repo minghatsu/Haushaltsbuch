@@ -310,7 +310,7 @@ function runSmokeTest() {
   win.webContents.once("did-finish-load", async () => {
     try {
       await wait(1500);
-      result.page = await js(`({login: !!document.getElementById("loginBg"), bridge: typeof window.AndroidBridge, version: (document.querySelector('meta[name="hb-version"]')||{}).content, urlField: !document.getElementById("loginUrlRow").hidden})`);
+      result.page = await js(`({login: !!document.getElementById("loginBg"), bridge: typeof window.AndroidBridge, version: (document.querySelector('meta[name="hb-version"]')||{}).content, urlField: !!(document.getElementById("loginUrlRow") && !document.getElementById("loginUrlRow").hidden)})`);
       const server = process.env.SMOKE_SERVER;
       if (server) {
         await js(`localStorage.setItem("haushaltsbuch-server", ${JSON.stringify(server)}); localStorage.removeItem("haushaltsbuch-sync-v1")`);   // like a first start: the sign-in window opens
@@ -319,7 +319,8 @@ function runSmokeTest() {
         await wait(3000);
         result.title = await js(`document.getElementById("loginTitle").textContent`);
       }
-      const ok = result.page.login && result.page.bridge === "object" && result.page.urlField && (!server || result.title === "Passwort festlegen");
+      // since pairing without an account the first window is "Geräte koppeln" (the server address field is gone)
+      const ok = result.page.login && result.page.bridge === "object" && !!result.page.version && (!server || ["Geräte koppeln","Passwort festlegen"].includes(result.title));
       done(ok);
     } catch (err) {
       result.error = String(err);
