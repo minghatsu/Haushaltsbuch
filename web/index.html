@@ -2197,7 +2197,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
-  ["0.7.1","10. November 2026",["Kopplung repariert sich selbst, wenn der Server sie verloren hat – deine Daten werden neu hochgeladen"]],
+  ["0.7.3","10. November 2026",["Kopplung repariert sich selbst, wenn der Server sie verloren hat – deine Daten werden neu hochgeladen","Gekoppelte Geräte melden sich nach einem Server-Problem selbst wieder an"]],
   ["0.7.0","10. November 2026",["Datenschutzerklärung aktualisiert (Verschlüsselung, Tresor, Updates über GitHub, Wechselkurse)","Texterkennung am PC wird per Prüfsumme kontrolliert"]],
   ["0.6.9","10. November 2026",["Beleg-Fotos und „Gemeinsam“-Daten sind jetzt auch auf dem Gerät verschlüsselt","Kopierte Codes verschwinden nach einer Minute aus der Zwischenablage","Unverschlüsselte Verbindungen nur noch ins Heimnetz"]],
   ["0.6.8","10. November 2026",["Backups bei gekoppelten Geräten jetzt verschlüsselt – öffnen mit dem Wiederherstellungs-Code","Bildschirmschutz: keine Screenshots und kein Vorschaubild in der App-Übersicht (unter Sicherheit abschaltbar)","Benachrichtigungen zeigen auf dem Sperrbildschirm keine Beträge mehr"]],
@@ -7389,6 +7389,8 @@ async function checkUpdate(force){
 let syncTimers=false;
 function startSync(){
   renderSyncDot();
+  // coupled devices never need a sign-in: the key is on the device. If an older version signed out after a server problem, come back by itself
+  if (!SYNC.token && MODE==="pair" && pairState() && vaultCan()){ pairToken().then(t=>{ if (t && !SYNC.token){ SYNC.token=t; SYNC.state="pending"; saveSync(); startSync(); } }).catch(()=>{}); return; }
   // the sign-in window opens by itself only once (first start); later it is under Einstellungen → Abgleich
   if (!SYNC.token){ if (!SYNC.skipped && !SYNC.asked && !SYNC.last){ SYNC.asked=true; saveSync(); showLogin(); } return; }
   syncNow();
