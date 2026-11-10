@@ -1144,6 +1144,7 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
 .slipg{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}.slipg .field{min-width:0}.slipg .in{width:100%;min-width:0}.slipg .field label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .smgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
 .smgrid .sm{border:0;border-radius:10px;padding:8px 0;font:700 12px var(--f-body);cursor:pointer;background:var(--accent-soft);color:var(--accent)}
+.smgrid .sm.est{background:var(--sunk);color:var(--fg);box-shadow:inset 0 0 0 1.5px var(--accent-soft)}.smgrid .sm.est small{display:block;font-weight:600;font-size:10px;color:var(--muted)}.mper{display:grid;grid-template-columns:1fr 90px 34px;gap:8px;align-items:center;margin-top:8px}.mper .x{border:0;background:var(--sunk);border-radius:10px;height:40px;font-size:16px;color:var(--muted)}
 .smgrid .sm.miss{background:var(--warn-soft);color:var(--warn)}.smgrid .sm.fut{background:var(--sunk);color:var(--faint)}
 .wkl{display:flex;flex-direction:column;margin-top:12px;border-top:1px solid var(--line)}
 .wkr{display:flex;align-items:center;gap:10px;padding:10px 0}.wkr+.wkr{border-top:1px solid var(--line)}
@@ -1928,7 +1929,12 @@ function yv(y){ y=Number(y)||new Date().getFullYear(); const ks=Object.keys(YV).
 const MJ_NOW = yv().mj;
 const ml2 = v => Number(v).toLocaleString("de-DE",{minimumFractionDigits:2, maximumFractionDigits:2});
 // minimum wage: hours per week × wage × 13/3 weeks per month
-function mindestMonat(y){ const m=S.settings.mindest; if (!m||!m.on||!(Number(m.h)>0)) return 0; return Math.round(yv(y).ml*Number(m.h)*13/3*100)/100; }
+// hours can change over time: periods {ym, h} ("from this month on", h=0 = break)
+const mindPer = () => { const m=S.settings.mindest||{}; return (Array.isArray(m.p)?m.p:[]).filter(x=>/^\d{4}-\d{2}$/.test(x.ym||"")).slice().sort((a,b)=>a.ym.localeCompare(b.ym)); };
+function mindH(ym){ const m=S.settings.mindest||{}; if (!m.on) return 0; const p=mindPer(); if (!p.length) return Number(m.h)||0; let h=0; for (const x of p) if (x.ym<=ym) h=Number(x.h)||0; return h; }
+function mindestYm(ym){ const h=mindH(ym); return h>0 ? Math.round(yv(ym.slice(0,4)).ml*h*13/3*100)/100 : 0; }
+function mindestMonat(y){ const m=S.settings.mindest; if (!m||!m.on) return 0; if (mindPer().length){ const cur=ymOf(new Date()); return mindestYm(String(y)===cur.slice(0,4) ? cur : y+"-12"); } if (!(Number(m.h)>0)) return 0; return Math.round(yv(y).ml*Number(m.h)*13/3*100)/100; }
+const mindYear = y => mindPer().length ? Math.round(Array.from({length:12},(_,i)=>mindestYm(y+"-"+pad(i+1))).reduce((a,b)=>a+b,0)*100)/100 : 0;
 const WORK = [["angestellt","Angestellt","Voll- oder Teilzeit, Gehalt mit Lohnsteuer","job"],["beamte","Beamte","Besoldung mit Lohnsteuer, keine Sozialabgaben","job"],["minijob","Minijob / Midijob",`bis ${MJ_NOW} € im Monat bzw. Übergangsbereich`,"job"],["selbst","Selbstständig","Eigene Rechnungen, kein Job daneben","job"],["beides","Angestellt und selbstständig","Job plus Selbstständigkeit nebenbei","job"],
   ["azubi","Ausbildung","Ausbildungsgehalt, evtl. Berufsausbildungsbeihilfe","edu"],["studium","Studium","BAföG, Nebenjob, Unterstützung der Eltern","edu"],["schule","Schule","Schüler-BAföG, Taschengeld, Ferienjob","edu"],
   ["alg","Arbeitslosengeld (ALG I)","Arbeit suchen, Geld von der Agentur für Arbeit","staat"],["grusi","Grundsicherung (Bürgergeld)","Geld vom Jobcenter","staat"],["eltern","Elternzeit","Elterngeld, Kindergeld","staat"],["krank","Krank / Erwerbsminderung","Krankengeld oder Erwerbsminderungsrente","staat"],
@@ -2077,6 +2083,13 @@ function joblessTop(ym, free, c){
     ${P.tip&&!(S.settings.tipsOff||{})[S.settings.work]?`<div class="notice info jltip"><span>${esc(P.tip)}</span><button class="icon-btn" data-tipoff="1" aria-label="Tipp ausblenden">×</button></div>`:""}
   </div>`;
 }
+document.addEventListener("change", async e=>{ const f=e.target.closest("[data-mper]"); if (!f) return; const [i,k]=f.dataset.mper.split("|"), p=mindPer();
+  if (!p[i]) return; if (k==="ym"){ if (!/^\d{4}-\d{2}$/.test(f.value)) return; p[i].ym=f.value; } else { const v=parseAmt(f.value||"0"); if (!(v>=0 && v<=60)){ toast("Stunden ungültig"); return; } p[i].h=v; }
+  const m=S.settings.mindest={...(S.settings.mindest||{}), p}; m.h=Number(mindH(ymOf(new Date())))||m.h; await saveSettings(); toast("Gespeichert"); });
+document.addEventListener("click", async e=>{
+  if (e.target.closest("[data-mperadd]")){ const m=S.settings.mindest={...(S.settings.mindest||{})}; let p=mindPer(); if (!p.length && Number(m.h)>0) p=[{ym:(UI.ym||ymOf(new Date())).slice(0,4)+"-01", h:Number(m.h)}];
+    p.push({ym:ymOf(new Date()), h:Number(m.h)||0}); m.p=p; await saveSettings(); return; }
+  const d=e.target.closest("[data-mperdel]"); if (d){ const p=mindPer(); p.splice(Number(d.dataset.mperdel),1); S.settings.mindest={...(S.settings.mindest||{}), p}; await saveSettings(); } });
 document.addEventListener("change", e=>{ const t=e.target; if (t.id==="aMind"){ const m=S.settings.mindest={...(S.settings.mindest||{})}; m.on=t.checked; if (m.on&&!m.h) m.h=40; saveSettings(); }
   else if (t.id==="aMindH"){ const v=parseAmt(t.value); if (isFinite(v)){ S.settings.mindest={...(S.settings.mindest||{}), h:Math.min(60,Math.max(0,v))}; saveSettings(); toast("Gespeichert"); } } });
 document.addEventListener("click", e=>{ if (e.target.closest("[data-tipoff]")){ const o=S.settings.tipsOff=S.settings.tipsOff||{}; o[S.settings.work]=1; saveSettings(); } });
@@ -2212,6 +2225,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.9.3","10. November 2026",["Mindestlohn: Stunden pro Woche können sich ändern – mit „ab Monat“ und Pausen","Gehalt & Abrechnungen: Monate ohne Abrechnung werden mit dem Mindestlohn geschätzt, Netto aus deinen Gehaltseingängen"]],
   ["0.9.2","10. November 2026",["Kredite & Schulden: neues Feld „Ursprünglich geliehen“ – der Balken zeigt, wie viel du schon abbezahlt hast","Studienkredit: 16.900 € laut KfW-Kreditportal"]],
   ["0.9.1","10. November 2026",["Kredite & Schulden: deine drei Kredite werden richtig eingetragen"]],
   ["0.9.0","10. November 2026",["Gehalt wird beim Import erkannt, wenn „Lohn“ oder „Gehalt“ im Verwendungszweck steht","Deine RKF-Zahlungen zählen jetzt als Gehalt"]],
@@ -2883,14 +2897,15 @@ function lohnYear(year){
   const mm=mindestMonat(year);
   const monat = mm>0 ? mm : ly.monat!=null && ly.monat!=="" ? Number(ly.monat)||0 : (Number(ly.brutto)>0 ? Math.round((Number(ly.brutto)/12)*100)/100 : 0);
   const legacy = !(mm>0) && ly.monat==null && Number(ly.brutto)>0;   // older version: only the yearly sum was entered
-  const brutto = legacy ? Number(ly.brutto) : Math.round((monat*n+extra)*100)/100;
+  const brutto = legacy ? Number(ly.brutto) : mindYear(year)>0 ? Math.round((mindYear(year)+extra)*100)/100 : Math.round((monat*n+extra)*100)/100;
   const base = { monat, n, urlaub:Number(ly.urlaub)||0, weihnacht:Number(ly.weihnacht)||0, bonus:Number(ly.bonus)||0, extra, brutto, sonderzahl: legacy?0:Math.round((monat*(n-12)+extra)*100)/100, lst:ly.lst };
   // pay slips entered for this year replace the estimate: months with a slip count as they are, the others are estimated
   const sl=slipsOf(year);
   if (sl.length){
     const avg=k=>sum(sl,x=>Number(x[k])||0)/sl.length, miss=12-sl.length, est = monat>0 ? monat : avg("brutto");
     base.slips=sl.length; base.estMonth=est;
-    base.brutto=Math.round((sum(sl,x=>Number(x.brutto)||0)+miss*est)*100)/100; base.sonderzahl=0;
+    const slipYm=new Set(sl.map(x=>x.ym)), estMiss = mindPer().length ? Array.from({length:12},(_,i)=>year+"-"+pad(i+1)).filter(ym=>!slipYm.has(ym)).reduce((a,ym)=>a+mindestYm(ym),0) : miss*est;
+    base.brutto=Math.round((sum(sl,x=>Number(x.brutto)||0)+estMiss)*100)/100; base.sonderzahl=0;
     const r=monat>0&&avg("brutto")>0 ? est/avg("brutto") : 1;     // missing months: tax in proportion
     base.slipLst=Math.round((sum(sl,x=>Number(x.lst)||0)+miss*avg("lst")*r)*100)/100;
     base.slipSoli=Math.round((sum(sl,x=>Number(x.soli)||0)+miss*avg("soli")*r)*100)/100;
@@ -4412,6 +4427,10 @@ async function salaryFix1110(){
     const items=clone(S.txb[b]||{}); for (const t of ts) if (items[t.id]) items[t.id].cat=cat; await safe(()=>put("txb", b, {items})); }
   render(); toast(`${hits.length} Gehaltszahlungen von RKF als „${cat}“ einsortiert`, null, null, 9000);
 }
+async function rkfHours1110(){
+  if (S.settings.fix1110f || !S.tx.some(t=>RKF_RE.test(t.note||""))) return; S.settings.fix1110f=1;
+  const m=S.settings.mindest={...(S.settings.mindest||{})}; m.on=true; m.p=[{ym:"2026-03",h:20},{ym:"2026-06",h:0},{ym:"2026-09",h:25}]; m.h=25; await saveSettings();
+}
 /* ---------- one-time update of Sascha's loans to the state of his 2025 sheet (10.11.2026) – remove again later ---------- */
 const FIX1110_T=[4124,4150,4175,4200,4226,4252,4278,4304,4330,4356,4383,4409,4436,4463,4491,4518,4545,4573,4601,4629,4657,4686,4714,4743,4772,4801,4830,4859,4889,4919,4949,4979,5009,5040,5070,5101,5132,5164,5195,5227,5259,5291,5323,5355,5388,5421,5454,5487,5520,5554,5588,5622,5656,5691,5725,5760,5795,5831,5866,5902,5938,5974,6010,6047,6084,6121,6158,6196,6233,6271,6310,6348,6387,6426,6465,6504,6544,6584,6624,6664,6705,6745,6787,6828,6870,6911,6953,6996,7038,7081,7124,7168,7212,7255,7300,7344,7389,7434,7479,7525,7571,7617,7663,7710,7757,7804,7852,7899,7947,7996,8045,8094,8143,8192,8242,8293,8343,8394,8445,8497,8548,8600,8653,8705,8758,8812,8866,8920,8974,9029,9084,9139,9195,9251,9307,9364,9421,9478,9536,9594,9652,9711,9770,9830,9890,9950,10011,10071,10133,10195,10257,10319,10382,10445,10509,10573,10637,10702,10767,10833,10899,10965,11032,11099,11167,11235,11303,11372,11441,11511,11581,11652,11723,11794,11866,11938,12011,12084,12158,12232,12306,3382], FIX1110_Z=[8278,8252,8227,8202,8176,8150,8124,8098,8072,8046,8019,7993,7966,7939,7911,7884,7857,7829,7801,7773,7745,7716,7688,7659,7630,7601,7572,7543,7513,7483,7453,7423,7393,7362,7332,7301,7270,7238,7207,7175,7143,7111,7079,7047,7014,6981,6948,6915,6882,6848,6814,6780,6746,6711,6677,6642,6607,6571,6536,6500,6464,6428,6392,6355,6318,6281,6244,6206,6169,6131,6092,6054,6015,5976,5937,5898,5858,5818,5778,5738,5697,5657,5615,5574,5532,5491,5449,5406,5364,5321,5278,5234,5190,5147,5102,5058,5013,4968,4923,4877,4831,4785,4739,4692,4645,4598,4550,4503,4455,4406,4357,4308,4259,4210,4160,4109,4059,4008,3957,3905,3854,3802,3749,3697,3644,3590,3536,3482,3428,3373,3318,3263,3207,3151,3095,3038,2981,2924,2866,2808,2750,2691,2632,2572,2512,2452,2391,2331,2269,2207,2145,2083,2020,1957,1893,1829,1765,1700,1635,1569,1503,1437,1370,1303,1235,1167,1099,1030,961,891,821,750,679,608,536,464,391,318,244,170,96,21];
 async function debtOrig1110(){
@@ -4805,15 +4824,21 @@ function slipEditor(){
 }
 function lohnSection(y){
   const sl=slipsOf(y), L=lohnYear(y), map=Object.fromEntries(sl.map(x=>[x.ym,x])), cur=ymOf(new Date());
-  const b=sum(sl,x=>Number(x.brutto)||0), l=sum(sl,x=>(Number(x.lst)||0)+(Number(x.soli)||0)+(Number(x.kist)||0)), n=sum(sl,x=>Number(x.netto)||0);
-  const months=Array.from({length:12},(_,i)=>{ const ym=y+"-"+pad(i+1), has=map[ym], past=ym<cur; return `<button class="sm ${has?"ok":past&&sl.length?"miss":"fut"}" data-slipm="${ym}" aria-label="${MONTHS[i]}">${MONTHS[i].slice(0,3)}${has?" ✓":past&&sl.length?" ?":""}</button>`; }).join("");
+  const lc=incCats().filter(c=>c.art==="lohn").map(c=>c.name), paidIn=S.tx.filter(t=>t.kind==="einnahme" && lc.includes(t.cat) && (t.date||"").startsWith(y+"-"));
+  const estYm=Array.from({length:12},(_,i)=>y+"-"+pad(i+1)).filter(ym=>!map[ym] && ym<=cur && mindestYm(ym)>0), estB=sum(estYm,ym=>mindestYm(ym));
+  const b=sum(sl,x=>Number(x.brutto)||0)+estB, l=sum(sl,x=>(Number(x.lst)||0)+(Number(x.soli)||0)+(Number(x.kist)||0));
+  const n=sl.length && !estYm.length ? sum(sl,x=>Number(x.netto)||0) : sum(paidIn,t=>t.amount);
+  const months=Array.from({length:12},(_,i)=>{ const ym=y+"-"+pad(i+1), has=map[ym], past=ym<cur, e=!has && ym<=cur ? mindestYm(ym) : 0, brk=!has && mindPer().length && ym<=cur && !e;
+    return `<button class="sm ${has?"ok":e?"est":brk?"fut":past&&sl.length?"miss":"fut"}" data-slipm="${ym}" aria-label="${MONTHS[i]}${e?`: geschätzt ${eur0(e)} brutto`:""}">${MONTHS[i].slice(0,3)}${has?" ✓":e?`<small>≈ ${esc(eur0(e))}</small>`:brk?"<small>–</small>":past&&sl.length?" ?":""}</button>`; }).join("");
   const missing=Array.from({length:12},(_,i)=>y+"-"+pad(i+1)).filter(ym=>ym<cur&&!map[ym]);
   const tax=taxCalc(y);
   const md=S.settings.mindest||{}, v=yv(y), nx=YV[Number(y)+1];
   const mindCard=`<div class="card flat mindc"><div class="switch" style="margin:0"><label for="aMind"><b>Ich bekomme Mindestlohn</b><br><span class="small muted">${md.on&&md.h?`${ml2(v.ml)} € × ${numStr(md.h)} Std./Woche = <b>${esc(eur0(mindestMonat(y)))}</b> brutto im Monat${nx?` · ab Januar ${Number(y)+1}: ${ml2(nx.ml)} € → ca. ${esc(eur0(Math.round(nx.ml*md.h*13/3)))}`:""}`:`${y}: ${ml2(v.ml)} € pro Stunde – dein Gehalt steigt dann jedes Jahr automatisch mit`}</span></label><input type="checkbox" id="aMind" ${md.on?"checked":""}></div>
-    ${md.on?`<div class="field" style="margin:10px 0 0"><label for="aMindH">Stunden pro Woche</label><input class="in" id="aMindH" inputmode="decimal" value="${md.h?esc(numStr(md.h)):""}" placeholder="z. B. 40"></div>`:""}</div>`;
+    ${md.on ? (mindPer().length ? `<div style="margin-top:10px"><b class="small">Stunden pro Woche – ab Monat</b>${mindPer().map((x,i)=>`<div class="mper"><input class="in" type="month" data-mper="${i}|ym" value="${esc(x.ym)}" aria-label="ab Monat"><input class="in" data-mper="${i}|h" inputmode="decimal" value="${esc(numStr(Number(x.h)||0))}" aria-label="Stunden pro Woche" placeholder="0 = Pause"><button class="x" data-mperdel="${i}" aria-label="Zeitraum entfernen">×</button></div>`).join("")}<p class="small muted" style="margin:6px 0 0">0 Stunden = Pause. Vor dem ersten Monat zählt die App kein Gehalt.</p></div>`
+      : `<div class="field" style="margin:10px 0 0"><label for="aMindH">Stunden pro Woche</label><input class="in" id="aMindH" inputmode="decimal" value="${md.h?esc(numStr(md.h)):""}" placeholder="z. B. 40"></div>`)
+      + `<button class="link small" data-mperadd="1" style="margin-top:8px">＋ Stunden geändert oder Pause</button>` : ""}</div>`;
   return `${slipEditor()}${mindCard}
-    <div class="kpis k3"><div class="kpi"><small>Brutto bisher</small><b>${esc(eur0(b))}</b><span>${sl.length} ${sl.length===1?"Abrechnung":"Abrechnungen"}</span></div><div class="kpi"><small>Lohnsteuer</small><b>${esc(eur0(l))}</b><span>inkl. Soli/KiSt</span></div><div class="kpi"><small>Netto</small><b>${esc(eur0(n))}</b><span>ausgezahlt</span></div></div>
+    <div class="kpis k3"><div class="kpi"><small>Brutto bisher</small><b>${esc(eur0(b))}</b><span>${sl.length} ${sl.length===1?"Abrechnung":"Abrechnungen"}${estYm.length?` · ${estYm.length} geschätzt`:""}</span></div><div class="kpi"><small>Lohnsteuer</small><b>${esc(eur0(l))}</b><span>inkl. Soli/KiSt</span></div><div class="kpi"><small>Netto</small><b>${esc(eur0(n))}</b><span>${sl.length && !estYm.length ? "ausgezahlt" : `${paidIn.length} Gehaltseingänge`}</span></div></div>
     <div class="card flat"><div class="card-head"><h2>Abrechnungen ${y}</h2><span class="small muted">${sl.length} von 12</span></div>
       <div class="smgrid">${months}</div>
       ${sl.length&&missing.length?`<div class="notice warn" style="margin-top:12px"><span>Für ${missing.slice(0,4).map(ym=>MONTHS[Number(ym.slice(5,7))-1]).join(", ")}${missing.length>4?" …":""} fehlt die Abrechnung – die App schätzt ${missing.length===1?"diesen Monat":"diese Monate"} mit ${esc(eur0(L.estMonth||0))} brutto.</span></div>`:""}
@@ -5782,7 +5807,7 @@ function rebuildTx(){
   for (const t of out) if (t.um && t.kind!=="umbuchung"){ t._k0=t.kind; t.kind="umbuchung"; }   // money only passing through (loan payout, payoff)
   markWithdrawals(out);
   S.tx = out;
-  clearTimeout(rebuildTx.lt); rebuildTx.lt=setTimeout(()=>{ if (typeof debtFix1110==="function") debtFix1110().then(()=>debtOrig1110()).then(()=>kfwOrig1110()).catch(()=>{}); if (typeof salaryFix1110==="function") salaryFix1110().catch(()=>{}); if (typeof loanCheck==="function") loanCheck(); if (typeof recurCheck==="function" && !UI.recur && !UI.loan) setTimeout(recurCheck, 4000); }, 2500);
+  clearTimeout(rebuildTx.lt); rebuildTx.lt=setTimeout(()=>{ if (typeof debtFix1110==="function") debtFix1110().then(()=>debtOrig1110()).then(()=>kfwOrig1110()).catch(()=>{}); if (typeof salaryFix1110==="function") salaryFix1110().then(()=>rkfHours1110()).catch(()=>{}); if (typeof loanCheck==="function") loanCheck(); if (typeof recurCheck==="function" && !UI.recur && !UI.loan) setTimeout(recurCheck, 4000); }, 2500);
 }
 function plainTx(t){ const r={...t}; delete r.id; delete r._b; if (r.kind==="abhebung") r.kind="ausgabe"; if (r.kind==="umbuchung") r.kind=r._k0||"ausgabe"; delete r._k0; return r; }
 async function saveTxDoc(id, doc, old){
