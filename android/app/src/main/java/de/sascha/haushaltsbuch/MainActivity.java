@@ -571,7 +571,8 @@ public class MainActivity extends Activity {
                     text = is == null ? "" : new String(readAll(is), StandardCharsets.UTF_8);
                 } catch (Throwable e) {   // also "out of memory": always answer, so the app does not wait forever
                     code = 0;
-                    text = "";
+                    String m = e.getMessage();   // tell the app what went wrong (timeout, certificate, …) – shown in the sync status
+                    text = "ERR:" + e.getClass().getSimpleName() + (m == null ? "" : ": " + (m.length() > 160 ? m.substring(0, 160) : m));
                 } finally {
                     if (c != null) c.disconnect();
                 }
