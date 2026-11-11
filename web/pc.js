@@ -392,3 +392,54 @@ if (IS_PC){
   const th=$("pcTheme");
   if (th && !$("pcHelp")) th.insertAdjacentHTML("beforebegin", `<button class="roundbtn pchelp" id="pcHelp" data-spgo="hilfe" aria-label="Hilfe" title="Hilfe – Fragen und Antworten"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.9.7c0 1.7-2.5 2.2-2.5 3.8"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg></button>`);
 }
+/* ---------- feedback inbox for the developer (only with the update key): all feedback from the app, with pictures ---------- */
+if (IS_PC){
+  const FB={items:[], open:null, imgs:{}, last:0, busy:false};
+  const devReq=(action, qs, body)=>new Promise((ok,no)=>{
+    const base=pairUrl(); if (!base || !updKey()) return no(new Error("kein Schlüssel"));
+    const id=newId(); httpWaiting[id]=r=>{ let j={}; try{ j=JSON.parse(r.text); }catch(e){} if (r.status>=200 && r.status<300) ok(j); else no(new Error(j.error||("Server "+(r.status||"nicht erreichbar")))); };
+    window.AndroidBridge.http(id, body?"POST":"GET", apiUrl(base, action, qs||""), "Dev "+updKey(), body?JSON.stringify(body):""); });
+  const unread=()=>FB.items.filter(x=>!x.read).length;
+  function fbBtn(){
+    let b=$("pcInbox"); const show=!!updKey();
+    if (!show){ if (b) b.remove(); return; }
+    if (!b){ const h=$("pcHelp")||$("pcTheme"); if (!h) return; h.insertAdjacentHTML("beforebegin", `<button class="roundbtn pcinbox" id="pcInbox" aria-label="Feedback-Eingang" title="Feedback-Eingang"><svg class="i" viewBox="0 0 24 24"><path d="M4 13.5 6.5 5h11l2.5 8.5V18a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18z"/><path d="M4 13.5h4.5l1.2 2h4.6l1.2-2H20"/></svg><span class="badge" hidden>0</span></button>`); b=$("pcInbox"); }
+    const n=unread(), bd=b.querySelector(".badge"), was=Number(bd.textContent)||0; bd.textContent=n; bd.hidden=!n;
+    if (n>was && was>=0 && FB.last) { b.animate([{transform:"rotate(0)"},{transform:"rotate(-14deg) scale(1.12)",offset:.25},{transform:"rotate(10deg)",offset:.5},{transform:"rotate(-6deg)",offset:.75},{transform:"none"}],{duration:700}); }
+  }
+  async function fbLoad(force){
+    if (!updKey() || FB.busy || (!force && Date.now()-FB.last<4*60*1000)) return fbBtn();
+    FB.busy=true; const before=unread();
+    try { const j=await devReq("feedlist"); FB.items=j.items||[]; const n=unread(); if (FB.last && n>before) toast(n-before===1?"Neues Feedback ist da":`${n-before} neue Feedbacks sind da`, ()=>fbOpen(), "Ansehen", 8000); FB.last=Date.now(); }
+    catch(e){ FB.err=e.message; }
+    finally { FB.busy=false; fbBtn(); if (!$("pcFbBg").hidden) fbRender(); }
+  }
+  document.body.insertAdjacentHTML("beforeend", `<div class="backdrop" id="pcFbBg" hidden><div class="sheet pcfbsheet" role="dialog" aria-modal="true" aria-label="Feedback-Eingang"><div class="sheet-head"><h2>Feedback-Eingang</h2><button class="icon-btn" data-pcfbx="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="pcFbBody"></div></div></div>`);
+  const KIND={fehler:["Fehler","#c2410c"], idee:["Idee","#3d63a8"], lob:["Lob","#1a7a5c"]};
+  function fbRender(){
+    const el=$("pcFbBody"); if (!el) return;
+    if (!FB.items.length){ el.innerHTML=`<p class="muted" style="padding:20px 0;text-align:center">${FB.err?esc(FB.err):"Noch kein Feedback angekommen."}</p>`; return; }
+    el.innerHTML=FB.items.map(x=>{ const [kl,kc]=KIND[x.kind]||KIND.idee, op=FB.open===x.id, d=new Date(x.ts*1000), body=String(x.text||"");
+      return `<div class="pcfb ${x.read?"":"new"} ${op?"open":""}" style="--kc:${kc}"><button class="pcfbh" data-pcfb="${esc(x.id)}"><span class="pcfbk">${kl}</span><span class="pcfbt">${esc(body.split("\n")[0].slice(0,120))}</span><small>${d.toLocaleDateString("de-DE")} ${d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}${x.images?` · ${x.images} ${x.images===1?"Bild":"Bilder"}`:""}${x.mailed?" · ✉":""}</small></button>
+        ${op?`<div class="pcfbb"><pre>${esc(body)}</pre>${x.images?`<div class="pcfbimgs">${Array.from({length:x.images},(_,i)=>{ const u=FB.imgs[x.id+"/"+(i+1)]; return u?`<a data-pcfbimg="${esc(u)}"><img src="${esc(u)}" alt="Bild ${i+1}"></a>`:`<span class="ph">…</span>`; }).join("")}</div>`:""}
+          <div class="row-btns" style="justify-content:flex-start;margin-top:10px"><button class="btn" data-pcfbunread="${esc(x.id)}">Als ungelesen markieren</button></div></div>`:""}</div>`; }).join("");
+  }
+  async function fbShow(id){
+    FB.open = FB.open===id ? null : id; const x=FB.items.find(i=>i.id===id); fbRender();
+    if (!x || FB.open!==id) return;
+    if (!x.read){ x.read=true; fbBtn(); devReq("feedread","",{id}).catch(()=>{}); }
+    for (let n=1;n<=x.images;n++){ const k=id+"/"+n; if (FB.imgs[k]) continue; try { const j=await devReq("feedimg", `&id=${encodeURIComponent(id)}&n=${n}`); FB.imgs[k]=j.d; if (FB.open===id) fbRender(); } catch(_){} }
+  }
+  function fbOpen(){ const bg=$("pcFbBg"); bg.hidden=false; requestAnimationFrame(()=>bg.classList.add("show")); fbRender(); fbLoad(true); }
+  const fbClose=()=>{ const bg=$("pcFbBg"); bg.classList.remove("show"); setTimeout(()=>{ bg.hidden=true; },200); };
+  document.addEventListener("click", e=>{
+    if (e.target.closest("#pcInbox")){ fbOpen(); return; }
+    if (e.target.closest("[data-pcfbx]") || e.target===$("pcFbBg")){ fbClose(); return; }
+    const h=e.target.closest("[data-pcfb]"); if (h){ fbShow(h.dataset.pcfb); return; }
+    const u=e.target.closest("[data-pcfbunread]"); if (u){ const x=FB.items.find(i=>i.id===u.dataset.pcfbunread); if (x){ x.read=false; FB.open=null; fbRender(); fbBtn(); devReq("feedread","",{id:x.id, unread:1}).catch(()=>{}); } return; }
+    const im=e.target.closest("[data-pcfbimg]"); if (im){ const w=window.open(""); if (w) w.document.write(`<img src="${im.dataset.pcfbimg}" style="max-width:100%">`); }
+  });
+  document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("pcFbBg").hidden) fbClose(); });
+  setTimeout(()=>fbLoad(true), 5000); setInterval(()=>fbLoad(false), 60*1000);
+  const _r4=render; render = (...a) => { const x=_r4(...a); try { fbBtn(); } catch(e){} return x; };
+}

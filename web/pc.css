@@ -165,3 +165,18 @@ html.pc .pchelp{margin-right:10px}
 html.pc .pchelp svg.i{width:22px;height:22px;transition:transform .35s cubic-bezier(.3,.7,.3,1)}
 html.pc .pchelp:hover svg.i{transform:rotate(-14deg) scale(1.08)}
 html.pc .top .roundbtn{width:50px;height:50px;flex:none}
+/* feedback inbox */
+html.pc .pcinbox{margin-right:10px;position:relative}
+html.pc .pcinbox .badge{position:absolute;top:-3px;right:-3px}
+html.pc .pcfbsheet{max-width:860px;width:min(860px,94vw);max-height:84vh;overflow:auto}
+html.pc .pcfb{border-radius:16px;margin-bottom:8px;background:var(--sunk);overflow:hidden}
+html.pc .pcfb.new{box-shadow:inset 4px 0 0 var(--kc)}
+html.pc .pcfbh{width:100%;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border:0;background:none;padding:12px 14px;text-align:left;cursor:pointer;font:inherit;color:var(--fg)}
+html.pc .pcfb.new .pcfbt{font-weight:800}
+html.pc .pcfbk{background:color-mix(in srgb,var(--kc) 16%,transparent);color:var(--kc);border-radius:8px;padding:3px 9px;font-weight:800;font-size:12px}
+html.pc .pcfbt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.pc .pcfbh small{color:var(--muted);white-space:nowrap}
+html.pc .pcfbb{padding:0 14px 14px}
+html.pc .pcfbb pre{white-space:pre-wrap;font:inherit;margin:0;padding:12px;border-radius:12px;background:var(--surface)}
+html.pc .pcfbimgs{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+html.pc .pcfbimgs img,html.pc .pcfbimgs .ph{width:140px;height:140px;object-fit:cover;border-radius:12px;background:var(--surface);display:grid;place-items:center;cursor:zoom-in}

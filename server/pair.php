@@ -100,6 +100,45 @@ function authVault(): array {
     return $v;
 }
 
+// ---------- e-mail: own mailbox via SMTP (config.php: smtp_host, smtp_port, smtp_secure, smtp_user, smtp_pass), otherwise PHP mail()
+function cfg(): array { static $c = null; if ($c === null) { $c = is_file(__DIR__ . '/config.php') ? (include __DIR__ . '/config.php') : []; if (!is_array($c)) $c = []; } return $c; }
+function smtpSend(string $to, string $subject, string $mime, string $ctype): bool {
+    $c = cfg(); $from = (string)($c['mail_from'] ?? ($c['smtp_user'] ?? 'noreply@localhost'));
+    $fromAddr = preg_match('/<([^>]+)>/', $from, $m) ? $m[1] : $from;
+    $head = "From: $from\r\nTo: $to\r\nSubject: =?UTF-8?B?" . base64_encode($subject) . "?=\r\nDate: " . date('r') . "\r\nMIME-Version: 1.0\r\nContent-Type: $ctype\r\n";
+    if (empty($c['smtp_host'])) return function_exists('mail') && @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $mime, "From: $from\r\nMIME-Version: 1.0\r\nContent-Type: $ctype");
+    $host = (string)$c['smtp_host']; $port = (int)($c['smtp_port'] ?? 465); $sec = (string)($c['smtp_secure'] ?? ($port === 465 ? 'ssl' : 'tls'));
+    $fp = @stream_socket_client(($sec === 'ssl' ? 'ssl://' : 'tcp://') . $host . ':' . $port, $en, $es, 20);
+    if (!$fp) return false; stream_set_timeout($fp, 20);
+    $rd = function () use ($fp) { $o = ''; while (($l = fgets($fp, 1000)) !== false) { $o .= $l; if (strlen($l) < 4 || $l[3] === ' ') break; } return $o; };
+    $cmd = function (string $c, string $ok) use ($fp, $rd) { fwrite($fp, $c . "\r\n"); $r = $rd(); return strncmp($r, $ok, strlen($ok)) === 0; };
+    $rd(); if (!$cmd('EHLO finanz-mami', '250')) { fclose($fp); return false; }
+    if ($sec === 'tls') { if (!$cmd('STARTTLS', '220') || !stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT) || !$cmd('EHLO finanz-mami', '250')) { fclose($fp); return false; } }
+    $ok = $cmd('AUTH LOGIN', '334') && $cmd(base64_encode((string)($c['smtp_user'] ?? '')), '334') && $cmd(base64_encode((string)($c['smtp_pass'] ?? '')), '235')
+       && $cmd("MAIL FROM:<$fromAddr>", '250') && $cmd("RCPT TO:<$to>", '25') && $cmd('DATA', '354');
+    if ($ok) { fwrite($fp, $head . "\r\n" . preg_replace('/^\./m', '..', $mime) . "\r\n.\r\n"); $ok = strncmp($rd(), '250', 3) === 0; }
+    @fwrite($fp, "QUIT\r\n"); fclose($fp); return $ok;
+}
+// ---------- the developer reads the feedback in the PC app: proven by the GitHub key that may read the app's repository
+const DEV_REPO = 'minghatsu/Haushaltsbuch';
+function devCheck(): void {
+    $h = (string)($_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? ''));
+    if (!preg_match('/^Dev\s+([A-Za-z0-9_]{20,255})$/', trim($h), $m)) fail('Kein Entwickler-Schlüssel', 401);
+    $hash = hash('sha256', $m[1]);
+    db()->exec('CREATE TABLE IF NOT EXISTS devkeys (h TEXT PRIMARY KEY, until INTEGER)');
+    $r = q('SELECT until FROM devkeys WHERE h = ?', [$hash])->fetch();
+    if ($r && (int)$r['until'] > time()) return;
+    if (!ipCount('ipfails', 30)) fail('Zu viele Versuche', 429);
+    $ctx = stream_context_create(['http' => ['method' => 'GET', 'timeout' => 15, 'ignore_errors' => true,
+        'header' => "Authorization: Bearer {$m[1]}\r\nUser-Agent: FinanzMAMI-Server\r\nAccept: application/vnd.github+json\r\n"]]);
+    $body = @file_get_contents('https://api.github.com/repos/' . DEV_REPO, false, $ctx);
+    $code = 0; foreach (($http_response_header ?? []) as $l) if (preg_match('#^HTTP/\S+\s+(\d+)#', $l, $mm)) $code = (int)$mm[1];
+    if ($code !== 200 || !$body) { ipBump('ipfails'); fail('Entwickler-Schlüssel ungültig', 401); }
+    q('INSERT OR REPLACE INTO devkeys (h, until) VALUES (?, ?)', [$hash, time() + 3600]);
+}
+function feedDir(): string { return DATA_DIR . '/feedback'; }
+function feedPath(string $id): string { if (!preg_match('/^[0-9A-Za-z_-]{10,80}$/', $id) || !is_dir(feedDir() . '/' . $id)) fail('Nicht gefunden', 404); return feedDir() . '/' . $id; }
+
 try {
     $a = $_GET['a'] ?? '';
     // unused vaults are removed after two years without any device
@@ -128,18 +167,35 @@ try {
         if (!@mkdir($dir, 0700, true)) fail('Feedback konnte nicht gespeichert werden', 500);
         @file_put_contents($dir . '/feedback.txt', $text . "\n");
         foreach ($imgs as $i => [$ext, $bin]) @file_put_contents($dir . '/bild-' . ($i + 1) . '.' . $ext, $bin);
-        $cfg = is_file(__DIR__ . '/config.php') ? (include __DIR__ . '/config.php') : [];
-        $to = is_array($cfg) ? (string)($cfg['feedback_to'] ?? '') : '';
-        if ($to !== '' && function_exists('mail')) {
-            $from = (string)($cfg['mail_from'] ?? 'Finanz MAMI <noreply@localhost>');
+        $to = (string)(cfg()['feedback_to'] ?? '');
+        if ($to !== '') {
             $bd = 'fm' . bin2hex(random_bytes(8));
             $msg = "--$bd\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($text)) . "\r\n";
             foreach ($imgs as $i => [$ext, $bin]) $msg .= "--$bd\r\nContent-Type: image/$ext\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename=\"bild-" . ($i + 1) . ".$ext\"\r\n\r\n" . chunk_split(base64_encode($bin)) . "\r\n";
             $msg .= "--$bd--\r\n";
             $subj = ['fehler' => 'Fehler', 'idee' => 'Idee', 'lob' => 'Lob'][$kind] . ' – Finanz MAMI';
-            @mail($to, '=?UTF-8?B?' . base64_encode($subj) . '?=', $msg, "From: $from\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary=\"$bd\"");
+            if (smtpSend($to, $subj, $msg, "multipart/mixed; boundary=\"$bd\"")) @touch($dir . '/.mailed');
         }
         out(['ok' => true]);
+    }
+    if ($a === 'feedlist') {
+        devCheck(); $list = [];
+        foreach (array_reverse(glob(feedDir() . '/*', GLOB_ONLYDIR) ?: []) as $d) {
+            if (count($list) >= 300) break; $id = basename($d); $p = explode('_', $id);
+            $ts = strtotime(($p[0] ?? '') . ' ' . substr($p[1] ?? '', 0, 2) . ':' . substr($p[1] ?? '', 2, 2) . ':' . substr($p[1] ?? '', 4, 2)) ?: filemtime($d);
+            $list[] = ['id' => $id, 'kind' => $p[2] ?? 'idee', 'ts' => $ts, 'text' => (string)@file_get_contents($d . '/feedback.txt'),
+                'images' => count(glob($d . '/bild-*') ?: []), 'read' => is_file($d . '/.read'), 'mailed' => is_file($d . '/.mailed')];
+        }
+        out(['items' => $list]);
+    }
+    if ($a === 'feedimg') {
+        devCheck(); $d = feedPath((string)($_GET['id'] ?? '')); $n = max(1, (int)($_GET['n'] ?? 1));
+        $f = (glob($d . '/bild-' . $n . '.*') ?: [])[0] ?? null; if (!$f) fail('Nicht gefunden', 404);
+        $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION)); $mime = $ext === 'jpg' ? 'jpeg' : $ext;
+        out(['d' => 'data:image/' . $mime . ';base64,' . base64_encode((string)file_get_contents($f))]);
+    }
+    if ($a === 'feedread') {
+        devCheck(); $d = feedPath((string)(body()['id'] ?? '')); if (!empty(body()['unread'])) @unlink($d . '/.read'); else @touch($d . '/.read'); out(['ok' => true]);
     }
 
     if ($a === 'create') {
