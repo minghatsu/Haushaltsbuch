@@ -2248,6 +2248,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.9.9","11. November 2026",["Gehalt: zeigt die Monate mit Gehalt (Abrechnung, Mindestlohn-Schätzung oder Gehaltseingang) statt „0 von 12“"]],
   ["0.9.8","11. November 2026",["Analyse neu: drei Reiter Auswertung, Planung und Steuer – Übrig mit Verlauf, Kennzahlen und Top-Kategorien direkt sichtbar","Startseite: ein Block erscheint nicht mehr doppelt"]],
   ["0.9.7","11. November 2026",["Feedback: Fehler, Idee und Lob lassen sich wieder antippen","Feedback: bis zu 4 Bilder (z. B. Screenshots) mitschicken"]],
   ["0.9.6","11. November 2026",["Sprache & Währung neu gestaltet: Sprachen mit Flaggen, zweite Währung per Antippen, grüner Umrechner, Kursliste mit Flaggen","Wischen in seitlich scrollbaren Leisten wechselt nicht mehr versehentlich die Seite"]],
@@ -4217,7 +4218,8 @@ function renderYear(){
     ${accRow("kpi","insight","Auf einen Blick", `${mc.net>=0?"Übrig":"Mehr ausgegeben"} ${mc.net>=0?"+":"−"} ${esc(eur0(Math.abs(mc.net)))} · Ø ${esc(eur0(perDay))} pro Tag`, kpisHtml, `${mc.net>=0?"+":"−"} ${eur0(Math.abs(mc.net))}`)}
     ${accRow("calc","cash","So berechnet", `Stand heute ${esc(eur0(ycum.balance))} · frei ${esc(eur0(ycum.balance-ycum.reserveBal))}`, waterfall(ym, ycum, mc, ymain), `frei ${eur0(ycum.balance-ycum.reserveBal)}`)}
     ${accRow("plan","cal","Jahresplan", `${esc(eur0(inc))} rein · ${esc(eur0(exp))} raus`, planQuarters(rows,cur), `${inc-exp>=0?"+":"−"} ${eur0(Math.abs(inc-exp))}`)}
-    ${true?accRow("lohn","wallet","Gehalt &amp; Abrechnungen", (()=>{ const sl=slipsOf(y), L=lohnYear(y); return sl.length?`${sl.length} von 12 Abrechnungen · ${esc(eur0(L.brutto))} brutto`:"Lohnabrechnungen hochladen"; })(), lohnSection(y), `${slipsOf(y).length} von 12`):""}
+    ${true?accRow("lohn","wallet","Gehalt &amp; Abrechnungen", (()=>{ const sl=slipsOf(y), lm=lohnMonths(y), L=lohnYear(y);
+      return lm.size ? `${sl.length?`${sl.length} ${sl.length===1?"Abrechnung":"Abrechnungen"} · `:""}≈ ${esc(eur0(lm.brutto))} brutto bisher` : "Lohnabrechnungen hochladen"; })(), lohnSection(y), (()=>{ const n=lohnMonths(y).size; return n ? `${n} ${n===1?"Monat":"Monate"}` : "0 von 12"; })()):""}
     ${hasJob()||TS.sal||!hasSelf()?accRow("wk","doc","Werbungskosten &amp; Steuererklärung", (()=>{ const w=wkCalc(y); return w.total?`${esc(eur0(w.total))} gesammelt${w.total>TAX26.anPausch?" · über der Pauschale":""}`:"Homeoffice, Fahrten, Arbeitsmittel"; })(), wkSection(y), eur0(wkCalc(y).total)):!hasSelf()?"":accRow("wk","doc","Steuererklärung", "Was du angeben kannst", wkSection(y), "Angaben")}
     ${accRow("tax","receipt",hasSelf()?"Steuer &amp; Selbstständig":"Steuer", `${hasSelf()?`Gewinn ${esc(eur0(tax.gewinn))} · `:""}${tax.due>=0?`Nachzahlung ca. ${esc(eur0(tax.due))}`:`Erstattung ca. ${esc(eur0(-tax.due))}`}`, `<div class="anagrid">${hasSelf()?`<div class="card half"><div class="card-head"><h2>Selbstständig</h2><span class="pill ${st.kleinunternehmer?(kuOver?"bad":"ok"):""}">${st.kleinunternehmer?"Kleinunternehmer":"Mit Umsatzsteuer"}</span></div>
       <div class="kv"><span>Einnahmen netto</span><span>${esc(eur(self))}</span>
@@ -4907,6 +4909,11 @@ function slipEditor(){
     ${mt&&lc?`<div class="switch"><label for="slip-match"><b>Gehaltseingang ${esc(eur(mt.amount))} am ${esc(shortDate(mt.date))}</b><br><span class="small muted">${mt.cat===lc.name?"ist schon als Gehalt gebucht":`„${esc(txPayee(mt)||mt.cat)}“ als ${esc(lc.name)} markieren`}</span></label><input type="checkbox" id="slip-match" data-id="${esc(mt.id)}" ${mt.cat===lc.name?"checked disabled":"checked"}></div>`:""}
     <div class="row-btns" style="justify-content:flex-start"><button class="btn primary" id="slipSave">Übernehmen</button><button class="btn" id="slipCancel">Abbrechen</button>${(S.settings.slips||{})[d.ym]&&!d.auto?`<button class="btn danger" id="slipDel">Entfernen</button>`:""}</div></div>`;
 }
+// months of the year with salary: a payslip, a month estimated from the minimum wage, or (without those) a salary payment
+function lohnMonths(y){ const cur=ymOf(new Date()), sl=slipsOf(y), set=new Set(sl.map(x=>x.ym)); let b=sum(sl,x=>Number(x.brutto)||0);
+  for (let i=1;i<=12;i++){ const ym=y+"-"+pad(i); if (!set.has(ym) && ym<=cur && mindestYm(ym)>0){ set.add(ym); b+=mindestYm(ym); } }
+  if (!set.size){ const lc=incCats().filter(c=>c.art==="lohn").map(c=>c.name); for (const t of S.tx) if (t.kind==="einnahme" && lc.includes(t.cat) && (t.date||"").startsWith(y+"-")) set.add(t.date.slice(0,7)); }
+  set.brutto=Math.round(b); return set; }
 function lohnSection(y){
   const sl=slipsOf(y), L=lohnYear(y), map=Object.fromEntries(sl.map(x=>[x.ym,x])), cur=ymOf(new Date());
   const lc=incCats().filter(c=>c.art==="lohn").map(c=>c.name), paidIn=S.tx.filter(t=>t.kind==="einnahme" && lc.includes(t.cat) && (t.date||"").startsWith(y+"-"));
@@ -4924,7 +4931,7 @@ function lohnSection(y){
       + `<button class="link small" data-mperadd="1" style="margin-top:8px">＋ Stunden geändert oder Pause</button>` : ""}</div>`;
   return `${slipEditor()}${mindCard}
     <div class="kpis k3"><div class="kpi"><small>Brutto bisher</small><b>${esc(eur0(b))}</b><span>${sl.length} ${sl.length===1?"Abrechnung":"Abrechnungen"}${estYm.length?` · ${estYm.length} geschätzt`:""}</span></div><div class="kpi"><small>Lohnsteuer</small><b>${esc(eur0(l))}</b><span>inkl. Soli/KiSt</span></div><div class="kpi"><small>Netto</small><b>${esc(eur0(n))}</b><span>${sl.length && !estYm.length ? "ausgezahlt" : `${paidIn.length} Gehaltseingänge`}</span></div></div>
-    <div class="card flat"><div class="card-head"><h2>Abrechnungen ${y}</h2><span class="small muted">${sl.length} von 12</span></div>
+    <div class="card flat"><div class="card-head"><h2>Abrechnungen ${y}</h2><span class="small muted">${sl.length} von 12 hochgeladen</span></div>
       <div class="smgrid">${months}</div>
       ${sl.length&&missing.length?`<div class="notice warn" style="margin-top:12px"><span>Für ${missing.slice(0,4).map(ym=>MONTHS[Number(ym.slice(5,7))-1]).join(", ")}${missing.length>4?" …":""} fehlt die Abrechnung – die App schätzt ${missing.length===1?"diesen Monat":"diese Monate"} mit ${esc(eur0(L.estMonth||0))} brutto.</span></div>`:""}
       ${!sl.length?`<p class="small muted" style="margin:10px 0 0">Lade deine Lohnabrechnungen als PDF hoch – dann rechnet die Steuerschätzung mit deinem echten Lohn und der echten Lohnsteuer statt mit Schätzwerten.</p>`:""}
