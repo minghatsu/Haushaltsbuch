@@ -2570,7 +2570,7 @@ function devStore(id, data){ const d=devList(); if (data===null) delete d[id]; e
 function devMe(){ const d=devList()[devId()]||{}; return { name: d.name || (devType()==="pc"?"PC":devType()==="phone"?"Handy":"Browser"), type:devType(), ver:curVerShort(), seen:Date.now() }; }
 function devPing(force){ if (!SYNCABLE || !SYNC.token) return; const me=devList()[devId()]; if (!force && me && Date.now()-(me.seen||0)<6*3600e3 && me.ver===curVerShort()) return;
   const d=devMe(); devStore(devId(), d); enqueue("app","dev-"+devId(), d); }
-setTimeout(()=>devPing(), 8000); setInterval(()=>devPing(), 30*60e3);
+setTimeout(()=>devPing(true), 8000); setInterval(()=>devPing(), 30*60e3);   // every start: the other devices always see this one
 function renderGeraete(){ const el=$("geraeteEd"); if (!el) return; if (el.contains(document.activeElement) && document.activeElement.tagName==="INPUT") return;
   const me=devId(), L=Object.entries(devList()); if (!L.some(([id])=>id===me)) L.unshift([me, devMe()]);
   const ago=t=>{ const m=Math.round((Date.now()-t)/60000); return m<2?"gerade eben":m<60?`vor ${m} Min.`:m<1440?`vor ${Math.round(m/60)} Std.`:`vor ${Math.round(m/1440)} Tagen`; };
