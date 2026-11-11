@@ -1,7 +1,8 @@
 /* ---------- PC version: design "Magazin" (only active in the PC app, html.pc) ---------- */
+html.pc{--hw:clamp(420px,26vw,640px)}
 html.pc:not([data-theme="dark"]){--bg:#f3f1ea;--surface:#fffdf8;--sunk:#ece8dd;--line:#e5e1d6}
 html.pc body{padding-left:0!important;background:var(--bg)}
-html.pc .wrap{max-width:1400px;padding-left:40px;padding-right:40px}
+html.pc .wrap{max-width:none;padding-left:40px;padding-right:40px}
 html.pc main.wrap{padding-bottom:120px}
 /* pages as pills on top, in the middle */
 html.pc .tabs{position:fixed;top:14px;left:0;right:0;bottom:auto;margin-inline:auto;transform:none;width:max-content;height:auto;max-width:calc(100vw - 420px);
@@ -32,9 +33,9 @@ html.pc .hello b{font:800 34px/1.1 Georgia,"Times New Roman",serif;letter-spacin
 html.pc .card{border-radius:24px}
 html.pc .roundbtn{background:var(--surface)}
 /* start page: the green panel on the left, everything else on the right */
-html.pc #v-home{padding-left:508px;min-height:calc(100vh - 190px)}
+html.pc #v-home{padding-left:calc(var(--hw) + 28px);min-height:calc(100vh - 190px)}
 html.pc #v-home .homeTop{display:none!important}
-html.pc .pchero{position:fixed;left:calc(max(0px,(100vw - 1400px)/2) + 40px);top:164px;bottom:30px;width:480px;border-radius:32px;color:#fff;padding:34px;
+html.pc .pchero{position:fixed;left:40px;top:164px;bottom:30px;width:var(--hw);border-radius:32px;color:#fff;padding:34px;
   display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(160deg,#1d8a66 0%,#0e5a43 70%);box-shadow:0 18px 40px #0e5a4333}
 html.pc .pchero::after{content:"";position:absolute;right:-90px;top:-90px;width:320px;height:320px;border-radius:50%;background:#ffffff14;pointer-events:none}
 html.pc .pchi{color:#bfe6d4;font-weight:600;font-size:14px}
@@ -56,4 +57,16 @@ html.pc .pcminis b{font-size:19px}
   html.pc .pchero{position:relative;left:auto;top:auto;bottom:auto;width:auto;min-height:420px}
   html.pc .tabs{max-width:calc(100vw - 40px)}
   html.pc .tabs .brand{display:none}
+}
+/* the tiles of the start page fill the whole width: as many columns as fit (4K: many) */
+html.pc #v-home .hcols{display:block;columns:400px auto;column-gap:18px}
+html.pc #v-home .hcols>.hcol{display:contents}
+html.pc #v-home .hcols>.hcol>*{break-inside:avoid;margin-bottom:18px}
+/* the other pages also use the whole width */
+html.pc #v-more{max-width:none}
+html.pc #v-import{max-width:none}
+@media (min-width:2200px){
+  html.pc #v-fix{grid-template-columns:repeat(3,minmax(0,1fr))}
+  html.pc #v-year{grid-template-columns:repeat(3,minmax(0,1fr))}
+  html.pc #v-list{grid-template-columns:420px minmax(0,1fr)}
 }

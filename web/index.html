@@ -8072,7 +8072,7 @@ $("loginGo").onclick = doLogin;
       } finally { nb.hidden = k!==UI.view; } }
     return out;
   }
-  function prep(){ prepT=0; if (on || busy || stage || !ORDER.includes(UI.view) || document.querySelector(".backdrop:not([hidden])")) return;
+  function prep(){ prepT=0; if (IS_PC || on || busy || stage || !ORDER.includes(UI.view) || document.querySelector(".backdrop:not([hidden])")) return;
     if (PREP){ PREP.stage.remove(); PREP=null; }
     try { PREP=build([-1,1], true); } catch(e){ console.warn("cube prep", e); if (stage) stage.remove(); PREP=null; }
     stage=null; cur=null; dirty=false; mo.takeRecords(); }
@@ -8125,7 +8125,7 @@ $("loginGo").onclick = doLogin;
     requestAnimationFrame(()=>requestAnimationFrame(()=>settle(true))); return true;
   };
   document.addEventListener("touchstart", e=>{
-    on=false; if (busy || e.touches.length!==1 || !ORDER.includes(UI.view) || (UI.view==="more" && UI.sp && !spsOpen()) || blocked(e.target)) return;
+    on=false; if (IS_PC || busy || e.touches.length!==1 || !ORDER.includes(UI.view) || (UI.view==="more" && UI.sp && !spsOpen()) || blocked(e.target)) return;
     const x=e.touches[0].clientX; if (x<18 || x>innerWidth-18) return;     // leave the screen edges to Android's back gesture
     x0=lastX=x; y0=e.touches[0].clientY; t0=lastT=Date.now(); vx=0; lock=null; on=true;
   }, {passive:true});
