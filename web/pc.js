@@ -27,7 +27,7 @@ function pcTiles(sec){
 const pcCalm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 function pcGo(k, nav){
   if (PC_ANIM.busy){ PC_ANIM.next=()=>pcGo(k, nav); return true; }   // pressed again during the animation: goes on right after
-  const sec=document.querySelector(`[data-view="${UI.view}"]`), olds=pcCalm()?[]:pcTiles(sec);
+  const sec=document.querySelector(`[data-view="${UI.view}"]`), olds=pcCalm()?[]:[...pcTiles(sec), ...(window.pcDockEls?pcDockEls():[])];
   PC_ANIM.busy=true;
   const outs=olds.map((e,i,a)=>e.animate([{opacity:1,transform:"none"},{opacity:0,transform:`translateY(${Math.round(innerHeight*0.6+i*24)}px) rotate(${i%2?9:-9}deg)`}],
     {duration:300, delay:(a.length-1-i)*22, easing:"cubic-bezier(.55,0,1,.45)", fill:"forwards"}));
@@ -35,7 +35,7 @@ function pcGo(k, nav){
     PC_ANIM.pass=true; try { nav(); } finally { PC_ANIM.pass=false; }
     outs.forEach(a=>{ try { a.cancel(); } catch(_){} });
     requestAnimationFrame(()=>{
-      const news=pcCalm()?[]:pcTiles(document.querySelector(`[data-view="${UI.view}"]`));
+      const news=pcCalm()?[]:[...pcTiles(document.querySelector(`[data-view="${UI.view}"]`)), ...(window.pcDockEls?pcDockEls():[])];
       news.forEach((e,i)=>e.animate([{opacity:0,transform:`translateY(${-Math.round(innerHeight*0.8)}px) rotate(${i%2?-6:6}deg)`},{opacity:1,transform:"translateY(14px) rotate(0)",offset:.6},{transform:"translateY(-6px)",offset:.8},{opacity:1,transform:"none"}],
         {duration:560, delay:i*45, easing:"cubic-bezier(.3,.7,.3,1)", fill:"backwards"}));
       setTimeout(()=>{ PC_ANIM.busy=false; const n=PC_ANIM.next; PC_ANIM.next=null; if (n) n(); }, 160);
@@ -163,32 +163,40 @@ if (IS_PC){
   }
   const _ph=pcHome; pcHome = o => { _ph(o); decorate(); };
   setInterval(dock, 1000);
+  const _render=render; render = (...a) => { const x=_render(...a); try { dock(); } catch(e){} return x; };
+  window.pcDockEls = () => UI.view==='home' && !$("pcDock").hidden ? [...$("pcDock").children] : [];
   const dockSpot=k=>{ const el=document.querySelector(`#pcDock [data-pcrest="${k}"]`); if (el){ const r=el.getBoundingClientRect(); return {x:r.left+r.width/2, y:r.top+r.height/2}; } return {x:innerWidth-50, y:innerHeight/2}; };
 
-  // minimize: the tile shrinks, spins a little and flies into the dock
+  // the other tiles glide to their new places (also when the whole page is drawn anew)
+  const snap=()=>new Map([...document.querySelectorAll("#v-home .hblock")].map(t=>[t.dataset.hb, t.getBoundingClientRect()]));
+  function glide(before, skip){ document.querySelectorAll("#v-home .hblock").forEach(t=>{ if (t.dataset.hb===skip) return; const a=before.get(t.dataset.hb); if (!a) return; const r=t.getBoundingClientRect(), dx=a.left-r.left, dy=a.top-r.top;
+    if (Math.abs(dx)>1 || Math.abs(dy)>1) t.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)"}); }); }
+  // minimize: the tile lifts, spins a little and flies into the dock; the others close the gap
   document.addEventListener("click", e=>{
-    const b=e.target.closest("[data-pcmin]"); if (!b) return; const k=b.dataset.pcmin, tile=b.closest(".hblock"); if (!tile) return;
-    const r=tile.getBoundingClientRect(), h=PCH(); if (!h.min.includes(k)) h.min.push(k);
+    const b=e.target.closest("[data-pcmin]"); if (!b) return; const k=b.dataset.pcmin, tile=b.closest(".hblock"); if (!tile || PC_ANIM.busy) return;
+    const r=tile.getBoundingClientRect(), h=PCH(), before=snap(); if (!h.min.includes(k)) h.min.push(k);
     const fly=tile.cloneNode(true); fly.classList.add("pcfly"); Object.assign(fly.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"}); document.body.appendChild(fly);
-    tile.style.visibility="hidden"; dock(); const t=dockSpot(k), di=document.querySelector(`#pcDock [data-pcrest="${k}"]`); if (di) di.style.opacity="0";
-    const dx=t.x-(r.left+r.width/2), dy=t.y-(r.top+r.height/2), s=Math.max(0.06, 52/Math.max(r.width,r.height));
-    fly.animate([{transform:"none",opacity:1,borderRadius:"24px"},{transform:`translate(${dx*0.35}px,${dy*0.35-30}px) scale(.6) rotate(-6deg)`,opacity:1,offset:.45},{transform:`translate(${dx}px,${dy}px) scale(${s}) rotate(8deg)`,opacity:.2,borderRadius:"50%"}],
-      {duration:620, easing:"cubic-bezier(.5,0,.2,1)"}).finished.then(()=>{
-        fly.remove(); save();
+    tile.remove(); save();                          // draws the page without the tile (and with the dock)
+    glide(before, k);
+    const di=document.querySelector(`#pcDock [data-pcrest="${k}"]`); if (di) di.style.opacity="0";
+    const t=dockSpot(k), dx=t.x-(r.left+r.width/2), dy=t.y-(r.top+r.height/2), sc=Math.max(0.06, 52/Math.max(r.width,r.height));
+    fly.animate([{transform:"none",opacity:1,borderRadius:"24px"},{transform:"translateY(-18px) scale(1.04) rotate(-3deg)",opacity:1,offset:.18},{transform:`translate(${dx*0.4}px,${dy*0.4-40}px) scale(.55) rotate(-8deg)`,opacity:1,offset:.55},{transform:`translate(${dx}px,${dy}px) scale(${sc}) rotate(10deg)`,opacity:.15,borderRadius:"50%"}],
+      {duration:680, easing:"cubic-bezier(.45,0,.2,1)", fill:"forwards"}).finished.then(()=>{
+        fly.remove();
         const d2=document.querySelector(`#pcDock [data-pcrest="${k}"]`); if (d2){ d2.style.opacity=""; d2.animate([{transform:"scale(.3)"},{transform:"scale(1.25)",offset:.6},{transform:"none"}],{duration:420,easing:"cubic-bezier(.3,.7,.3,1)"}); }
       });
   });
-  // restore: the icon pops out of the dock and grows back into its place
+  // restore: the icon pops out of the dock and the tile grows back into its old place; the others make room
   document.addEventListener("click", e=>{
-    const b=e.target.closest("[data-pcrest]"); if (!b) return; const k=b.dataset.pcrest, from=b.getBoundingClientRect(), h=PCH();
-    h.min=h.min.filter(x=>x!==k); b.animate([{transform:"none",opacity:1},{transform:"scale(1.3)",opacity:0}],{duration:180,fill:"forwards"});
-    save(); requestAnimationFrame(()=>{ dock(); const tile=document.querySelector(`#v-home .hblock[data-hb="${k}"]`); if (!tile) return;
-      tile.scrollIntoView({block:"nearest", behavior:"smooth"});
-      const r=tile.getBoundingClientRect(), dx=from.left+from.width/2-(r.left+r.width/2), dy=from.top+from.height/2-(r.top+r.height/2), s=Math.max(0.06, 52/Math.max(r.width,r.height));
-      tile.animate([{transform:`translate(${dx}px,${dy}px) scale(${s}) rotate(10deg)`,opacity:.3,borderRadius:"50%"},{transform:"translate(0,-12px) scale(1.02) rotate(-1deg)",opacity:1,offset:.7},{transform:"none",opacity:1}],
-        {duration:680, easing:"cubic-bezier(.3,.7,.3,1)"}); });
+    const b=e.target.closest("[data-pcrest]"); if (!b || PC_ANIM.busy) return; const k=b.dataset.pcrest, from=b.getBoundingClientRect(), h=PCH(), before=snap();
+    h.min=h.min.filter(x=>x!==k); save();
+    glide(before, k);
+    const tile=document.querySelector(`#v-home .hblock[data-hb="${k}"]`); if (!tile) return;
+    const r=tile.getBoundingClientRect(); if (r.bottom>innerHeight-50 || r.top<120){ tile.scrollIntoView({block:"center"}); }
+    const r2=tile.getBoundingClientRect(), dx=from.left+from.width/2-(r2.left+r2.width/2), dy=from.top+from.height/2-(r2.top+r2.height/2), sc=Math.max(0.06, 52/Math.max(r2.width,r2.height));
+    tile.animate([{transform:`translate(${dx}px,${dy}px) scale(${sc}) rotate(10deg)`,opacity:.3,borderRadius:"50%"},{transform:"translate(0,-14px) scale(1.03) rotate(-1.5deg)",opacity:1,offset:.7},{transform:"none",opacity:1}],
+      {duration:700, easing:"cubic-bezier(.3,.7,.3,1)"});
   });
-
   // drag & drop (mouse, pen and touch): the tile lifts off, the others make room smoothly
   let D=null;
   const tiles=()=>[...document.querySelectorAll("#v-home .hcol > .hblock, #v-home .hlist > .hblock")];
