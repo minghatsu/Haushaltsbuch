@@ -450,6 +450,16 @@ html[dir=rtl] .amount input{text-align:left}
 .cashbtns{display:flex;gap:8px;margin-top:12px}.cashbtns .btn{flex:1;justify-content:center}
 .cashset{display:flex;align-items:center;gap:8px}.cashset .in{flex:1;font-size:20px;font-weight:700}.cashset span{color:var(--muted);font-weight:700}
 .anahead{display:flex;justify-content:flex-end;margin:0 0 10px}
+.atabs{display:flex;background:var(--sunk);border-radius:14px;padding:4px;gap:4px;margin:0 0 10px}.atabs button{flex:1;border:0;background:none;font:700 13.5px var(--f-body);color:var(--muted);padding:9px 2px;border-radius:11px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.atabs button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 4px #0000001f}
+.anahead2{display:flex;justify-content:flex-end;margin:0 0 10px}
+.anet{cursor:pointer}.anet small{display:block;font-weight:800;font-size:12px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase}.anet .big{font:800 34px var(--f-display);letter-spacing:-.02em;margin:2px 0 6px}
+.anet svg{display:block;width:100%;height:auto}.anet .ml{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px}
+.akg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}.akg>div{background:var(--surface);border-radius:16px;padding:12px;box-shadow:var(--shadow-sm,0 1px 3px #0000000d)}.akg small{display:block;font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}.akg b{font:800 18px var(--f-display);font-variant-numeric:tabular-nums}
+.arl{background:var(--surface);border-radius:20px;padding:2px 14px;margin:0 0 12px;box-shadow:var(--shadow-sm,0 1px 3px #0000000d)}
+.arw{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:11px 0;border-bottom:1px solid var(--line);text-align:start;font:inherit;color:inherit;cursor:pointer}.arl>.arw:last-child{border-bottom:0}
+.arw .ai{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:#fff;background:var(--tc,var(--accent));flex:none;font-weight:800}
+.arw .an{flex:1;min-width:0}.arw .an b{display:block;font-size:15px}.arw .an small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arw .av{font-weight:800;font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums}.arw .ch{color:var(--faint);margin-left:2px}
 .anaseg{display:flex;background:var(--sunk);border-radius:12px;padding:3px;gap:3px}.anaseg button{border:0;background:none;font:inherit;font-weight:700;font-size:13.5px;color:var(--muted);padding:8px 18px;border-radius:9px;cursor:pointer}.anaseg button.on{background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
 .astory{position:relative;height:330px;border-radius:26px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
 .sbars{position:absolute;left:14px;right:14px;top:12px;display:flex;gap:4px;z-index:3}.sbars i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.35);overflow:hidden}.sbars b{display:block;height:100%;width:0;background:#fff}
@@ -2238,6 +2248,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.9.8","11. November 2026",["Analyse neu: drei Reiter Auswertung, Planung und Steuer – Übrig mit Verlauf, Kennzahlen und Top-Kategorien direkt sichtbar"]],
   ["0.9.7","11. November 2026",["Feedback: Fehler, Idee und Lob lassen sich wieder antippen","Feedback: bis zu 4 Bilder (z. B. Screenshots) mitschicken"]],
   ["0.9.6","11. November 2026",["Sprache & Währung neu gestaltet: Sprachen mit Flaggen, zweite Währung per Antippen, grüner Umrechner, Kursliste mit Flaggen","Wischen in seitlich scrollbaren Leisten wechselt nicht mehr versehentlich die Seite"]],
   ["0.9.5","10. November 2026",["Buchungen eines Tages stehen in der Reihenfolge, in der sie gebucht wurden – die neueste oben. Für schon importierte Buchungen: Kontoauszug einmal neu importieren"]],
@@ -4274,12 +4285,47 @@ function renderYear(){
   const tileBtn=t=>`<button data-anaopen="${t.k}" data-tk="${t.k}" aria-pressed="${t.k===UI.anaSel}" style="--tc:${userCol("ana",t.k)||themeCol(TL[t.k][1], ord.indexOf(t.k))}"><span>${ic(t.icon,20)}</span>${t.k==="wk"&&!hasJob()?"Steuererkl.":TL[t.k][0]}<small>${esc(t.short||"")}</small></button>`;
   // tiles in groups; the opened one shows right under its own group
   TED.year={}; for (const t of tiles) TED.year[t.k]=[TL[t.k][0], themeCol(TL[t.k][1], ord.indexOf(t.k)), t.icon];
-  $("v-year").innerHTML = tedBar("year") + anaStoryHtml() + `<div class="${UI.tileEdit==="year"?"tediting":""}">` + GRP.map(([g,ks])=>{ const ts=tiles.filter(t=>ks.includes(t.k)); if (!ts.length) return "";
-    return `<div class="sgl">${g}</div><div class="sqk anaq">${ts.map(tileBtn).join("")}</div>`; }).join("") + `</div>`;
-  UI.anaTiles=tiles; TL_=TL; anaStoryRun();
+  $("v-year").innerHTML = anaTabsHtml({tiles, GRP, TL, ord, rows, ym, mc, y, inc, exp});
+  UI.anaTiles=tiles; TL_=TL;
   if (!$("anaBg").hidden && sel) anaFill(sel, false);
   function PANEL_(){ return sel?`<div class="card anapanel" style="--tc:${TL[sel.k][1]}"><div class="aph"><span class="ic">${ic(sel.icon,18)}</span><span class="n"><b>${sel.title}</b><span class="small muted">${sel.sub}</span></span><button class="aphx" data-anaopen="${sel.k}" aria-label="Zuklappen">${ic("up",18)}</button></div><div class="anab">${sel.body}</div></div>`:""; }
 }
+/* ---------- Analyse: three tabs (Auswertung · Planung · Arbeit/Steuer), content shown right away, details open as a sheet ---------- */
+function anaTabsHtml({tiles, GRP, TL, ord, rows, ym, mc, y, inc, exp}){
+  const mode=UI.anaMode||"m", tab=UI.anaTab||"aus", mn=MONTHS[ymParts(ym)[1]-1], cur=ymOf(new Date());
+  const g3=GRP[2]||["Steuer",[]], g3n=/steuer/i.test(g3[0]) ? "Steuer" : String(g3[0]).replace(/&amp;/g,"&").split(/[ &]/)[0];
+  const row=t=>`<button class="arw" data-anaopen="${t.k}" style="--tc:${userCol("ana",t.k)||themeCol(TL[t.k][1], ord.indexOf(t.k))}"><span class="ai">${ic(t.icon,18)}</span><span class="an"><b>${t.k==="wk"&&!hasJob()?"Steuererklärung":TL[t.k][0]}</b><small>${t.sub||""}</small></span><span class="av">${esc(t.short||"")}<span class="ch">›</span></span></button>`;
+  const rowsFor=ks=>{ const ts=tiles.filter(t=>ks.includes(t.k)).sort((a,b)=>ks.indexOf(a.k)-ks.indexOf(b.k)); return ts.length?`<div class="arl">${ts.map(row).join("")}</div>`:""; };
+  const sg=v=>(v>=0?"+ ":"− ")+eur0(Math.abs(v));
+  let body="";
+  if (tab==="aus"){
+    // net per month: last 6 months (month view) or the whole year
+    const pts = mode==="m" ? Array.from({length:6},(_,k)=>{ const m=shiftYm(ym,k-5); return {l:MSHORT[ymParts(m)[1]-1], v:monthCalc(m).net}; })
+                           : rows.map(r=>({l:MSHORT[r.i-1].slice(0,1), v:r.c.net, fut:r.ym>cur}));
+    const vals=pts.filter(p=>!p.fut).map(p=>p.v), mx=Math.max(1,...vals.map(Math.abs)), W=330, H=90, n=pts.length;
+    const X=i=>n>1?i*(W-8)/(n-1)+4:W/2, Y=v=>H/2-(v/mx)*(H/2-8);
+    const shown=pts.map((p,i)=>({x:X(i),y:Y(p.v),fut:p.fut})).filter(p=>!p.fut), line=shown.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+    const net = mode==="m" ? mc.net : inc-exp;
+    const chart = shown.length ? `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><line x1="0" x2="${W}" y1="${H/2}" y2="${H/2}" stroke="var(--line)" stroke-dasharray="3 4"/>
+      <polygon points="${shown[0].x.toFixed(1)},${H/2} ${line} ${shown[shown.length-1].x.toFixed(1)},${H/2}" fill="var(--accent-soft)" opacity=".9"/>
+      <polyline points="${line}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${shown[shown.length-1].x.toFixed(1)}" cy="${shown[shown.length-1].y.toFixed(1)}" r="5" fill="var(--accent)"/></svg>` : "";
+    const txs = mode==="m" ? mc.tx : rows.flatMap(r=>r.c.tx), fixP = mode==="m" ? mc.fixPaid : sum(rows,r=>r.c.fixPaid);
+    const ct=catTotals(txs, fixP), tot=sum(ct,x=>x[1]);
+    const zins = mode==="m" && ym===cur ? sum(S.debts,d=>debtState(d).zinsNow||0) : 0;
+    body = `<div class="card anet" data-anaopen="io"><small>${net>=0?"Übrig":"Mehr ausgegeben"} ${mode==="m"?"im "+esc(mn):esc(String(y))}</small><div class="big ${net>=0?"pos":"neg"}">${esc(sg(net))}</div>${chart}<div class="ml">${pts.map(p=>`<span>${esc(p.l)}</span>`).join("")}</div></div>
+      <div class="akg"><div><small>Einnahmen</small><b class="pos">${esc(eur0(mode==="m"?mc.income:inc))}</b></div><div><small>Ausgaben</small><b>${esc(eur0(mode==="m"?mc.expenses:exp))}</b></div>
+        <div><small>Fixkosten</small><b>${esc(eur0(fixP))}</b></div>${zins>0?`<div><small>Zinsen</small><b class="neg">${esc(eur0(zins))}</b></div>`:`<div><small>Ø pro Tag</small><b>${esc(eur0((mode==="m"?mc.expenses:exp)/Math.max(1, mode==="m" ? (ym===cur?new Date().getDate():daysIn(ym)) : 365)))}</b></div>`}</div>
+      ${ct.length?`<div class="sgl">Top-Kategorien</div><div class="arl">${ct.slice(0,5).map(([c,v])=>`<button class="arw" data-anaopen="cat" style="--tc:${catColor("ausgabe",c)}"><span class="ai">${esc(String(c).trim().slice(0,1).toUpperCase())}</span><span class="an"><b>${esc(c)}</b><small>${tot>0?Math.round(v/tot*100):0} %</small></span><span class="av">${esc(eur0(v))}</span></button>`).join("")}<button class="arw" data-anaopen="cat"><span class="an"><b style="color:var(--accent);font-size:14px">Alle Kategorien</b></span><span class="av"><span class="ch">›</span></span></button></div>`:""}
+      <div class="sgl">Mehr</div>${rowsFor(["kpi","trend","io"])}`;
+  } else if (tab==="plan") body = rowsFor(GRP[1][1]);
+  else { const tx=tiles.find(t=>t.k==="tax");
+    body = (tx?`<div class="card anet" data-anaopen="tax"><small>Steuer ${esc(String(y))}</small><div class="big">${esc(tx.short||"")}</div><div class="small muted">${tx.sub||""}</div></div>`:"") + rowsFor(g3[1]); }
+  return `<div class="atabs" role="tablist" aria-label="Bereich">${[["aus","Auswertung"],["plan","Planung"],["st",g3n]].map(([k,l])=>`<button role="tab" data-anatab="${k}" class="${tab===k?"on":""}" aria-selected="${tab===k}">${esc(l)}</button>`).join("")}</div>
+    ${tab==="st"?"":`<div class="anahead2"><div class="anaseg" role="group" aria-label="Zeitraum"><button data-anamode="m" class="${mode==="m"?"on":""}">Monat</button><button data-anamode="y" class="${mode==="y"?"on":""}">Jahr</button></div></div>`}
+    ${body}`;
+}
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-anatab]"); if (!b) return; UI.anaTab=b.dataset.anatab; renderYear(); window.scrollTo({top:0}); });
 /* ---------- Analyse als Story: Monat oder Jahr in Karten, die von selbst weiterlaufen ---------- */
 const ASTORY={i:0, key:"", t:null};
 function catTotals(txs, fixPaid){ const o={}; for (const t of txs){ if (t.kind!=="ausgabe"&&t.kind!=="betrieb") continue; const k=t.cat||"Sonstiges"; o[k]=(o[k]||0)+t.amount; } if (fixPaid>0) o["Fixkosten"]=(o["Fixkosten"]||0)+fixPaid; return Object.entries(o).sort((a,b)=>b[1]-a[1]); }
