@@ -19,7 +19,7 @@ jobs:
           mkdir pub && cd pub
           gh release download neueste -R "${{ github.repository }}" -D . --clobber
           REL=$(gh api "repos/${{ github.repository }}/releases/tags/neueste")
-          TITLE=$(echo "$REL" | jq -r .name); VERS=$(echo "$REL" | jq -r .body | grep -o 'web=[0-9]* apk=[0-9]* exe=[0-9]*')
+          TITLE=$(echo "$REL" | jq -r .name); VERS=$(echo "$REL" | jq -r .body | grep -o 'web=[0-9]* apk=[0-9]* exe=[0-9]*[ a-z0-9=]*')
           mv Haushaltsbuch.apk Finanz-MAMI.apk; mv Haushaltsbuch-Setup.exe Finanz-MAMI-Setup.exe
           zip -q Finanz-MAMI-Windows.zip Finanz-MAMI-Setup.exe
           NOTES=$(printf '%s\n\n%s\n%s\n%s\n\n%s\n\n%s' \

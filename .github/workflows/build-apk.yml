@@ -23,6 +23,8 @@ jobs:
       android: ${{ steps.need.outputs.android }}
       desktop: ${{ steps.need.outputs.desktop }}
       native: ${{ steps.need.outputs.native }}
+      appv: ${{ steps.build.outputs.appv }}
+      pcv: ${{ steps.build.outputs.pcv }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,6 +33,7 @@ jobs:
         run: |
           python3 -c "import re;s=open('web/index.html',encoding='utf-8').read();open('/tmp/app.js','w',encoding='utf-8').write('\n'.join(re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.S)))"
           node --check /tmp/app.js
+          node --check web/pc.js
       - name: Muss Android/Windows neu gebaut werden?
         id: need
         env:
@@ -47,8 +50,17 @@ jobs:
           if [ "$FORCE" = "true" ] || [ "$APK" != "$RA" ] || [ "$EXE" != "$RE" ]; then echo "native=true" >> $GITHUB_OUTPUT; else echo "native=false" >> $GITHUB_OUTPUT; fi
           echo "Android: $APK (veröffentlicht $RA) · Windows: $EXE (veröffentlicht $RE)"
       - name: app.html bauen
+        id: build
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then PY=python; else PY=python3; fi
+          # own version numbers: the phone counts changes of the shared app and the Android part,
+          # the PC counts the shared app, its own look (web/pc.*) and the Windows part
+          BASE=0e2eef2
+          APPV=$((129 + $(git rev-list --count $BASE..HEAD -- web/index.html android/)))
+          PCV=$((75 + $(git rev-list --count $BASE..HEAD -- web/index.html web/pc.js web/pc.css desktop/)))
+          echo "appv=$APPV" >> $GITHUB_OUTPUT; echo "pcv=$PCV" >> $GITHUB_OUTPUT
+          echo "APPV=$APPV" >> $GITHUB_ENV; echo "PCV=$PCV" >> $GITHUB_ENV
+          echo "Handy-Version $APPV · PC-Version $PCV"
           # Tageskurse der EZB fest einbauen (die App lädt sonst nur auf Knopfdruck neu)
           RATES=$(curl -fsS --max-time 20 https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml 2>/dev/null | $PY -c "import sys,re,json; x=sys.stdin.read(); d=re.search(r\"time=.(\\d{4}-\\d\\d-\\d\\d)\",x); r={c:float(v) for c,v in re.findall(r\"currency=.([A-Z]{3}). rate=.([\\d.]+)\",x)}; print(json.dumps({'d':d.group(1),'r':r},separators=(',',':')) if d and r else '')" 2>/dev/null) || RATES=""
           echo "EZB-Kurse: ${RATES:-keine (App nutzt Näherungswerte)}"
@@ -57,11 +69,13 @@ jobs:
             printf '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
             printf '<meta name="hb-pair" content="https://miracleframe.synology.me/haushaltsbuch/pair.php">'
             printf '<meta name="hb-version" content="%s">' "${{ github.run_number }}"
+            printf '<meta name="hb-ver-app" content="%s"><meta name="hb-ver-pc" content="%s">' "$APPV" "$PCV"
             if [ -n "$RATES" ]; then printf "<meta name=\"hb-rates\" content='%s'>" "$RATES"; fi
             printf '<title>Finanz MAMI</title>'
             printf '<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%%}[hidden]{display:none!important}</style>'
             printf '</head><body>'
-            cat web/index.html
+            # the PC look lives in its own files and is put into the one script / style block of the app
+            $PY -c "import sys;s=open('web/index.html',encoding='utf-8').read();s=s.replace('/*PC-JS*/',open('web/pc.js',encoding='utf-8').read(),1).replace('/*PC-CSS*/',open('web/pc.css',encoding='utf-8').read(),1);sys.stdout.buffer.write(s.encode('utf-8'))"
             printf '</body></html>'
           } > app.html
       - name: Code verkleinern
@@ -113,7 +127,7 @@ jobs:
           gh release delete neueste -y --cleanup-tag || true
           gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html \
             --title "Finanz MAMI · Handy v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · PC v0.$(( (${{ github.run_number }} - 142) / 10 )).$(( (${{ github.run_number }} - 142) % 10 ))" \
-            --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=${{ steps.need.outputs.ra }} exe=${{ steps.need.outputs.re }}"
+            --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=${{ steps.need.outputs.ra }} exe=${{ steps.need.outputs.re }} appv=$APPV pcv=$PCV"
           for t in $(gh api "repos/${{ github.repository }}/releases?per_page=100" --jq '.[].tag_name' | grep '^build-'); do
             gh release delete "$t" -y --cleanup-tag || true
           done
@@ -268,7 +282,7 @@ jobs:
           gh release delete neueste -y --cleanup-tag || true
           gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html \
             --title "Finanz MAMI · Handy v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · PC v0.$(( (${{ github.run_number }} - 142) / 10 )).$(( (${{ github.run_number }} - 142) % 10 ))" \
-            --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=$APK exe=$EXE"
+            --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=$APK exe=$EXE appv=${{ needs.web.outputs.appv }} pcv=${{ needs.web.outputs.pcv }}"
           # remove this and any leftover intermediate releases (from runs that failed halfway)
           for t in $(gh api "repos/${{ github.repository }}/releases?per_page=100" --jq '.[].tag_name' | grep '^build-'); do
             gh release delete "$t" -y --cleanup-tag || true
