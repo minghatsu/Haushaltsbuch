@@ -7684,7 +7684,9 @@ async function syncNow(){
       if (d.col==="app" && d.id.startsWith("rcpt-")){ const k=d.id.slice(5); try { if (d.data && d.data.img) await rcptPut(k, d.data.img, true); else await rcptDel(k, true); } catch(e){} continue; }
       if (d.col==="app" && d.id.startsWith("dev-")){ devStore(d.id.slice(4), d.data); continue; }
       if (d.col==="app" && d.id.startsWith("acct-")){ const k=d.id.slice(5); if (d.data===null) delete memStore.acct[k]; else memStore.acct[k]=d.data; continue; }
-      if (d.col==="app"){ if (d.id==="settings" && d.data){ const m={...clone(DEFAULT_SETTINGS),...d.data}; m.cats={...clone(DEFAULT_SETTINGS.cats),...(d.data.cats||{})}; S.settings=m; } continue; }
+      if (d.col==="app"){ if (d.id==="settings" && d.data){ const m={...clone(DEFAULT_SETTINGS),...d.data}; m.cats={...clone(DEFAULT_SETTINGS.cats),...(d.data.cats||{})};
+          if (!m.updKey && S.settings && S.settings.updKey) m.updKey=S.settings.updKey;   // another device without the update key must not take it away here
+          S.settings=m; } continue; }
       if (!memStore[d.col]) continue;
       if (d.data===null) delete memStore[d.col][d.id]; else memStore[d.col][d.id]=d.data;
     }
