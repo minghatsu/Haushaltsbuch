@@ -15,9 +15,6 @@ defaults:
   run:
     shell: bash
 
-env:
-  PUSH_TOPIC: fm-0f75afa5f38aa960b082   # must match PUSH_TOPIC in the app
-
 jobs:
   web:
     name: Web-App zusammenstellen
@@ -121,10 +118,6 @@ jobs:
             gh release delete "$t" -y --cleanup-tag || true
           done
           rm -f Haushaltsbuch.apk Haushaltsbuch-Setup.exe
-          # instant note on the phone (ntfy app, topic subscribed once from the app); tapping it opens Finanz MAMI and installs
-          V="v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 ))"
-          curl -s -m 20 -H "Title: Finanz MAMI: Update $V" -H "Click: finanzmami://update" -H "Tags: arrow_down" -H "Priority: high" \
-            -d "Neue Version ist fertig – tippen zum Laden" "https://ntfy.sh/${{ env.PUSH_TOPIC }}" >/dev/null || true
 
   android:
     name: Android-App (APK)
@@ -276,10 +269,6 @@ jobs:
           gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html \
             --title "Finanz MAMI · Handy v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · PC v0.$(( (${{ github.run_number }} - 142) / 10 )).$(( (${{ github.run_number }} - 142) % 10 ))" \
             --notes "Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=$APK exe=$EXE"
-          # instant note on the phone (ntfy app, topic subscribed once from the app); tapping it opens Finanz MAMI and installs
-          V="v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 ))"
-          curl -s -m 20 -H "Title: Finanz MAMI: Update $V" -H "Click: finanzmami://update" -H "Tags: arrow_down" -H "Priority: high" \
-            -d "Neue Version ist fertig – tippen zum Laden" "https://ntfy.sh/${{ env.PUSH_TOPIC }}" >/dev/null || true
           # remove this and any leftover intermediate releases (from runs that failed halfway)
           for t in $(gh api "repos/${{ github.repository }}/releases?per_page=100" --jq '.[].tag_name' | grep '^build-'); do
             gh release delete "$t" -y --cleanup-tag || true
