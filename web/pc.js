@@ -335,3 +335,10 @@ if (IS_PC){
   }
   document.addEventListener("click", e=>{ const b=e.target.closest('[data-addpick="pcscan"]'); if (!b) return; e.stopImmediatePropagation(); closeAddMenu(); setTimeout(pcScan, 120); }, true);
 }
+/* profile photo next to the greeting – without a photo the first letter of the name */
+if (IS_PC){
+  const av=()=>{ const ta=$("topAv"); if (!ta) return; if (ta.querySelector("img")) return; const n=String(S.settings.name||"").trim();
+    ta.hidden=false; ta.textContent=(n[0]||"?").toUpperCase(); };
+  const _r2=render; render = (...a) => { const x=_r2(...a); try { av(); } catch(e){} return x; };
+  av();
+}
