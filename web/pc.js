@@ -161,6 +161,8 @@ if (IS_PC){
     "Die Seite ist leer – leg den Beleg mit der Schrift nach unten auf die Glasscheibe und klicke auf „Neu scannen“.":["The page is empty – put the receipt face down on the glass and click “Scan again”.","Sayfa boş – fişi yazılı yüzü aşağı gelecek şekilde cama koy ve “Yeniden tara”ya tıkla.","Страница пустая – положи чек текстом вниз на стекло и нажми «Сканировать снова».","Сторінка порожня – поклади чек текстом донизу на скло й натисни «Сканувати знову».","Strona jest pusta – połóż paragon tekstem do dołu na szybie i kliknij „Skanuj ponownie”.","الصفحة فارغة – ضع الإيصال ووجهه للأسفل على الزجاج واضغط «امسح مرة أخرى».","Pagina e goală – pune bonul cu fața în jos pe sticlă și apasă „Scanează din nou”."],
     "Zieh die gelben Ecken an den Rand des Belegs, dann wird nur der Beleg übernommen.":["Drag the yellow corners to the edge of the receipt, then only the receipt is used.","Sarı köşeleri fişin kenarına sürükle, böylece yalnızca fiş alınır.","Перетащи жёлтые углы к краю чека – тогда возьмётся только чек.","Перетягни жовті кути до краю чека – тоді візьметься лише чек.","Przeciągnij żółte rogi do krawędzi paragonu – wtedy zostanie użyty tylko paragon.","اسحب الزوايا الصفراء إلى حافة الإيصال، فيُؤخذ الإيصال فقط.","Trage colțurile galbene la marginea bonului, apoi se preia doar bonul."],
     "Wirklich endgültig löschen?":["Really delete for good?","Gerçekten kalıcı olarak silinsin mi?","Удалить навсегда?","Видалити назавжди?","Na pewno usunąć na zawsze?","هل تريد الحذف نهائيًا؟","Ștergi definitiv?"],
+    "Aktualisieren":["Refresh","Yenile","Обновить","Оновити","Odśwież","تحديث","Reîmprospătează"],
+    "Aktualisiert":["Updated","Güncellendi","Обновлено","Оновлено","Zaktualizowano","تم التحديث","Actualizat"],
     "Feedback gelöscht":["Feedback deleted","Geri bildirim silindi","Отзыв удалён","Відгук видалено","Opinia usunięta","تم حذف الملاحظات","Feedback șters"],
     "Abgleich aus":["Sync off","Eşitleme kapalı","Синхронизация выкл.","Синхронізацію вимкнено","Synchronizacja wył.","المزامنة متوقفة","Sincronizare oprită"]};
   const LL=["en","tr","ru","uk","pl","ar","ro"];
@@ -393,6 +395,25 @@ if (IS_PC){
 if (IS_PC){
   const th=$("pcTheme");
   if (th && !$("pcHelp")) th.insertAdjacentHTML("beforebegin", `<button class="roundbtn pchelp" id="pcHelp" data-spgo="hilfe" aria-label="Hilfe" title="Hilfe – Fragen und Antworten"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.9.7c0 1.7-2.5 2.2-2.5 3.8"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg></button>`);
+}
+/* refresh: sync with the server, look for an update, redraw */
+if (IS_PC){
+  const hp=$("pcHelp")||$("pcTheme");
+  if (hp && !$("pcRefresh")) hp.insertAdjacentHTML("beforebegin", `<button class="roundbtn pcrefresh" id="pcRefresh" aria-label="Aktualisieren" title="Aktualisieren"><svg class="i" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4h-4"/></svg></button>`);
+  document.addEventListener("click", async e=>{
+    const b=e.target.closest("#pcRefresh"); if (!b || b.classList.contains("busy")) return;
+    b.classList.remove("ok"); b.classList.add("busy"); const t0=Date.now();
+    try {
+      if (typeof syncNow==="function"){ await syncNow(); for (let i=0;i<60 && SYNC.busy;i++) await new Promise(r=>setTimeout(r,250)); }
+      try { UPD.last=0; await ghCheck(false); } catch(_){}
+      render();
+    } catch(_){}
+    await new Promise(r=>setTimeout(r, Math.max(0, 700-(Date.now()-t0))));
+    const bad=SYNC.token && SYNC.state!=="ok"; b.classList.remove("busy"); if (!bad) b.classList.add("ok");
+    try { if (typeof renderSyncInfo==="function") renderSyncInfo(); } catch(_){}
+    toast(bad ? "Aktualisiert – Abgleich gerade nicht möglich" : "Aktualisiert");
+    setTimeout(()=>b.classList.remove("ok"), 1400);
+  });
 }
 /* ---------- feedback inbox for the developer (only with the update key): all feedback from the app, with pictures ---------- */
 if (IS_PC){

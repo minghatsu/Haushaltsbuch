@@ -180,3 +180,14 @@ html.pc .pcfbb{padding:0 14px 14px}
 html.pc .pcfbb pre{white-space:pre-wrap;font:inherit;margin:0;padding:12px;border-radius:12px;background:var(--surface)}
 html.pc .pcfbimgs{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
 html.pc .pcfbimgs img,html.pc .pcfbimgs .ph{width:140px;height:140px;object-fit:cover;border-radius:12px;background:var(--surface);display:grid;place-items:center;cursor:zoom-in}
+
+/* refresh button */
+html.pc .pcrefresh{margin-right:10px;transition:background .3s,color .3s}
+html.pc .pcrefresh svg.i{width:21px;height:21px;transition:transform .35s cubic-bezier(.3,.7,.3,1)}
+html.pc .pcrefresh:hover svg.i{transform:rotate(40deg)}
+html.pc .pcrefresh.busy svg.i{animation:pcRefSpin .8s linear infinite}
+html.pc .pcrefresh.ok{background:var(--accent,#1a7a5c)!important;color:#fff!important}
+html.pc .pcrefresh.ok svg.i{animation:pcRefPop .45s cubic-bezier(.3,.7,.3,1.4)}
+@keyframes pcRefSpin{to{transform:rotate(360deg)}}
+@keyframes pcRefPop{0%{transform:scale(.6)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){html.pc .pcrefresh.busy svg.i,html.pc .pcrefresh.ok svg.i{animation:none}}
