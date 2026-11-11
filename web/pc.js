@@ -160,6 +160,8 @@ if (IS_PC){
     "Ecken an den Beleg ziehen":["Drag the corners to the receipt","Köşeleri fişe sürükle","Перетащи углы к чеку","Перетягни кути до чека","Przeciągnij rogi do paragonu","اسحب الزوايا إلى الإيصال","Trage colțurile la bon"],
     "Die Seite ist leer – leg den Beleg mit der Schrift nach unten auf die Glasscheibe und klicke auf „Neu scannen“.":["The page is empty – put the receipt face down on the glass and click “Scan again”.","Sayfa boş – fişi yazılı yüzü aşağı gelecek şekilde cama koy ve “Yeniden tara”ya tıkla.","Страница пустая – положи чек текстом вниз на стекло и нажми «Сканировать снова».","Сторінка порожня – поклади чек текстом донизу на скло й натисни «Сканувати знову».","Strona jest pusta – połóż paragon tekstem do dołu na szybie i kliknij „Skanuj ponownie”.","الصفحة فارغة – ضع الإيصال ووجهه للأسفل على الزجاج واضغط «امسح مرة أخرى».","Pagina e goală – pune bonul cu fața în jos pe sticlă și apasă „Scanează din nou”."],
     "Zieh die gelben Ecken an den Rand des Belegs, dann wird nur der Beleg übernommen.":["Drag the yellow corners to the edge of the receipt, then only the receipt is used.","Sarı köşeleri fişin kenarına sürükle, böylece yalnızca fiş alınır.","Перетащи жёлтые углы к краю чека – тогда возьмётся только чек.","Перетягни жовті кути до краю чека – тоді візьметься лише чек.","Przeciągnij żółte rogi do krawędzi paragonu – wtedy zostanie użyty tylko paragon.","اسحب الزوايا الصفراء إلى حافة الإيصال، فيُؤخذ الإيصال فقط.","Trage colțurile galbene la marginea bonului, apoi se preia doar bonul."],
+    "Wirklich endgültig löschen?":["Really delete for good?","Gerçekten kalıcı olarak silinsin mi?","Удалить навсегда?","Видалити назавжди?","Na pewno usunąć na zawsze?","هل تريد الحذف نهائيًا؟","Ștergi definitiv?"],
+    "Feedback gelöscht":["Feedback deleted","Geri bildirim silindi","Отзыв удалён","Відгук видалено","Opinia usunięta","تم حذف الملاحظات","Feedback șters"],
     "Abgleich aus":["Sync off","Eşitleme kapalı","Синхронизация выкл.","Синхронізацію вимкнено","Synchronizacja wył.","المزامنة متوقفة","Sincronizare oprită"]};
   const LL=["en","tr","ru","uk","pl","ar","ro"];
   for (const [k,v] of Object.entries(PC_I18N)) if (!I18N_K.includes(k)){ I18N_K.push(k); LL.forEach((l,i)=>{ (I18N_T[l]=I18N_T[l]||[])[I18N_K.length-1]=v[i]; }); }
@@ -422,7 +424,7 @@ if (IS_PC){
     el.innerHTML=FB.items.map(x=>{ const [kl,kc]=KIND[x.kind]||KIND.idee, op=FB.open===x.id, d=new Date(x.ts*1000), body=String(x.text||"");
       return `<div class="pcfb ${x.read?"":"new"} ${op?"open":""}" style="--kc:${kc}"><button class="pcfbh" data-pcfb="${esc(x.id)}"><span class="pcfbk">${kl}</span><span class="pcfbt">${esc(body.split("\n")[0].slice(0,120))}</span><small>${d.toLocaleDateString("de-DE")} ${d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}${x.images?` · ${x.images} ${x.images===1?"Bild":"Bilder"}`:""}${x.mailed?" · ✉":""}</small></button>
         ${op?`<div class="pcfbb"><pre>${esc(body)}</pre>${x.images?`<div class="pcfbimgs">${Array.from({length:x.images},(_,i)=>{ const u=FB.imgs[x.id+"/"+(i+1)]; return u?`<a data-pcfbimg="${esc(u)}"><img src="${esc(u)}" alt="Bild ${i+1}"></a>`:`<span class="ph">…</span>`; }).join("")}</div>`:""}
-          <div class="row-btns" style="justify-content:flex-start;margin-top:10px"><button class="btn" data-pcfbunread="${esc(x.id)}">Als ungelesen markieren</button></div></div>`:""}</div>`; }).join("");
+          <div class="row-btns" style="justify-content:flex-start;margin-top:10px"><button class="btn" data-pcfbunread="${esc(x.id)}">Als ungelesen markieren</button><button class="btn danger" data-pcfbdel="${esc(x.id)}">${FB.delArm===x.id?"Wirklich endgültig löschen?":"Löschen"}</button></div></div>`:""}</div>`; }).join("");
   }
   async function fbShow(id){
     FB.open = FB.open===id ? null : id; const x=FB.items.find(i=>i.id===id); fbRender();
@@ -437,6 +439,13 @@ if (IS_PC){
     if (e.target.closest("[data-pcfbx]") || e.target===$("pcFbBg")){ fbClose(); return; }
     const h=e.target.closest("[data-pcfb]"); if (h){ fbShow(h.dataset.pcfb); return; }
     const u=e.target.closest("[data-pcfbunread]"); if (u){ const x=FB.items.find(i=>i.id===u.dataset.pcfbunread); if (x){ x.read=false; FB.open=null; fbRender(); fbBtn(); devReq("feedread","",{id:x.id, unread:1}).catch(()=>{}); } return; }
+    const dl=e.target.closest("[data-pcfbdel]"); if (dl){ const id=dl.dataset.pcfbdel;
+      if (FB.delArm!==id){ FB.delArm=id; fbRender(); clearTimeout(FB.delT); FB.delT=setTimeout(()=>{ FB.delArm=null; fbRender(); }, 4000); return; }
+      FB.delArm=null; const row=dl.closest(".pcfb");
+      devReq("feeddel","",{id}).then(()=>{ const done=()=>{ FB.items=FB.items.filter(i=>i.id!==id); FB.open=null; fbRender(); fbBtn(); toast("Feedback gelöscht"); };
+        if (row && !pcCalm()) row.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateX(60px) scale(.96)"}],{duration:260,easing:"ease-in"}).finished.then(done,done); else done(); })
+        .catch(err=>toast(/Unbekannte Aktion/i.test(err.message)?"Zum Löschen bitte die neue pair.php auf den Server laden":"Löschen hat nicht geklappt: "+err.message));
+      return; }
     const im=e.target.closest("[data-pcfbimg]"); if (im){ const w=window.open(""); if (w) w.document.write(`<img src="${im.dataset.pcfbimg}" style="max-width:100%">`); }
   });
   document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("pcFbBg").hidden) fbClose(); });

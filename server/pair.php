@@ -15,6 +15,7 @@
  *   POST ?a=push {ops:[{h,b}]}           -> {rev}
  *   POST ?a=wipe                         -> {ok}        löscht den Tresor und alle Daten endgültig
  *   POST ?a=feedback {kind,text,images}  -> {ok}        Feedback aus der App (landet im Datenordner unter feedback/)
+ *   GET  ?a=feedlist / feedimg, POST ?a=feedread / feeddel   Feedback-Eingang (nur mit Entwickler-Schlüssel)
  *
  * Läuft auf normalem PHP 8 mit SQLite, z. B. auf der Synology (Web Station) neben api.php.
  */
@@ -203,6 +204,12 @@ try {
         $f = (glob($d . '/bild-' . $n . '.*') ?: [])[0] ?? null; if (!$f) fail('Nicht gefunden', 404);
         $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION)); $mime = $ext === 'jpg' ? 'jpeg' : $ext;
         out(['d' => 'data:image/' . $mime . ';base64,' . base64_encode((string)file_get_contents($f))]);
+    }
+    if ($a === 'feeddel') {
+        devCheck(); $d = feedPath((string)(body()['id'] ?? ''));
+        foreach (array_merge(glob($d . '/*') ?: [], glob($d . '/.[!.]*') ?: []) as $f) if (is_file($f)) @unlink($f);
+        if (!@rmdir($d)) fail('Konnte nicht gelöscht werden', 500);
+        out(['ok' => true]);
     }
     if ($a === 'feedread') {
         devCheck(); $d = feedPath((string)(body()['id'] ?? '')); if (!empty(body()['unread'])) @unlink($d . '/.read'); else @touch($d . '/.read'); out(['ok' => true]);
