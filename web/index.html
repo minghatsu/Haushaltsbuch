@@ -8388,7 +8388,7 @@ function pairUi(){
       ${hasData?`<div class="notice warn"><span>Die Daten auf <b>diesem</b> Gerät werden durch die des anderen Geräts ersetzt. Mach vorher ein Backup, wenn du unsicher bist.</span></div>`:""}
       <div class="row-btns"><button class="btn" data-pstep="start">Zurück</button><button class="btn primary" id="pairJoin">Koppeln</button></div>`
     : st==="recv" ? `<p class="small" style="margin:0;line-height:1.5">Öffne auf dem Handy <b>Einstellungen › Abgleich › Weiteres Gerät koppeln</b>, tippe auf <b>„QR-Code vom anderen Gerät scannen“</b> und fotografiere diesen Code:</p>
-      <div class="pqr">${UI.precv&&UI.precv.v?qrSvg("HBR1."+UI.precv.v+"."+UI.precv.k,230):`<div class="small muted" style="padding:90px 0">Wird vorbereitet …</div>`}</div>
+      <div class="pqr">${UI.precv&&UI.precv.v?qrSvg("HBR1."+UI.precv.v+"."+UI.precv.k,300):`<div class="small muted" style="padding:90px 0">Wird vorbereitet …</div>`}</div>
       <p class="small" style="margin:0;text-align:center">… oder am Handy diesen Code eintippen:</p>
       <div class="pshort">${UI.precv?esc(shortFmt(UI.precv.code)):"…"}</div>
       <div class="notice info"><span id="pairRecvSt">Warte auf das Handy …</span></div>
@@ -8428,19 +8428,24 @@ async function qrLive(want){
   let stream=null, done=false, det=null;
   const stop=()=>{ done=true; try { stream && stream.getTracks().forEach(t=>t.stop()); } catch(_){} bg.remove(); };
   bg.querySelector("[data-qrstop]").onclick=()=>{ stop(); bg.res && bg.res(null); };
-  try { stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}, width:{ideal:1280}, height:{ideal:720}}, audio:false}); }
+  try { stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}, width:{ideal:1920}, height:{ideal:1080}}, audio:false});
+    // sharp picture: keep refocusing (a QR code on a monitor is close and small)
+    try { const tr=stream.getVideoTracks()[0], cap=tr.getCapabilities?tr.getCapabilities():{}; if ((cap.focusMode||[]).includes("continuous")) await tr.applyConstraints({advanced:[{focusMode:"continuous"}]}); } catch(_){} }
   catch(e){ stop(); throw new Error("Die Kamera konnte nicht geöffnet werden. Erlaube den Kamera-Zugriff für Finanz MAMI."); }
   v.srcObject=stream; try { await v.play(); } catch(_){}
   try { if ("BarcodeDetector" in window) det=new BarcodeDetector({formats:["qr_code"]}); } catch(_){}
-  const c=document.createElement("canvas"), x=c.getContext("2d",{willReadFrequently:true});
+  const c=document.createElement("canvas"), x=c.getContext("2d",{willReadFrequently:true}); let pass=0;
   return await new Promise(res=>{ bg.res=res;
     const tick=async()=>{ if (done) return;
       if (v.videoWidth){ let t=null;
         try { if (det){ const r=await det.detect(v); if (r&&r[0]) t=r[0].rawValue; } } catch(_){ det=null; }
-        if (!t){ const k=Math.min(1, 720/Math.max(v.videoWidth,v.videoHeight)); c.width=Math.round(v.videoWidth*k); c.height=Math.round(v.videoHeight*k); x.drawImage(v,0,0,c.width,c.height);
-          const r=jsQR(x.getImageData(0,0,c.width,c.height).data, c.width, c.height, {inversionAttempts:"dontInvert"}); if (r&&r.data) t=r.data; }
+        // alternately: the whole picture (code held close) and the middle in full sharpness (code small / further away)
+        if (!t){ const W=v.videoWidth, H=v.videoHeight, mid=pass++%2===1;
+          const sw=mid?Math.round(Math.min(W,H)*0.6):W, sh=mid?sw:H, sx=(W-sw)/2, sy=(H-sh)/2, k=Math.min(1, (mid?900:800)/Math.max(sw,sh));
+          c.width=Math.round(sw*k); c.height=Math.round(sh*k); x.drawImage(v,sx,sy,sw,sh,0,0,c.width,c.height);
+          const r=jsQR(x.getImageData(0,0,c.width,c.height).data, c.width, c.height, {inversionAttempts:"attemptBoth"}); if (r&&r.data) t=r.data; }
         if (t && want.test(t)){ try { navigator.vibrate && navigator.vibrate(30); } catch(_){} stop(); res(t); return; } }
-      setTimeout(tick, 220); };
+      setTimeout(tick, 120); };
     tick(); });
 }
 document.addEventListener("click", async e=>{ const b=e.target.closest("[data-qrlive]"); if (!b) return; const kind=b.dataset.qrlive;
