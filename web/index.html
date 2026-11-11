@@ -2248,7 +2248,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
-  ["0.9.8","11. November 2026",["Analyse neu: drei Reiter Auswertung, Planung und Steuer – Übrig mit Verlauf, Kennzahlen und Top-Kategorien direkt sichtbar"]],
+  ["0.9.8","11. November 2026",["Analyse neu: drei Reiter Auswertung, Planung und Steuer – Übrig mit Verlauf, Kennzahlen und Top-Kategorien direkt sichtbar","Startseite: ein Block erscheint nicht mehr doppelt"]],
   ["0.9.7","11. November 2026",["Feedback: Fehler, Idee und Lob lassen sich wieder antippen","Feedback: bis zu 4 Bilder (z. B. Screenshots) mitschicken"]],
   ["0.9.6","11. November 2026",["Sprache & Währung neu gestaltet: Sprachen mit Flaggen, zweite Währung per Antippen, grüner Umrechner, Kursliste mit Flaggen","Wischen in seitlich scrollbaren Leisten wechselt nicht mehr versehentlich die Seite"]],
   ["0.9.5","10. November 2026",["Buchungen eines Tages stehen in der Reihenfolge, in der sie gebucht wurden – die neueste oben. Für schon importierte Buchungen: Kontoauszug einmal neu importieren"]],
@@ -3377,7 +3377,7 @@ $("hintBg").addEventListener("click", e=>{ if (e.target===$("hintBg") || e.targe
 document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("hintBg").hidden) closeHints(); });
 /* ---------- start page blocks: your own order, each can be hidden ---------- */
 const HOME_BLOCKS = [["cash","Bargeld"],["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["debts","Kredite & Schulden"],["gemeinsam","Gemeinsam"],["recent","Letzte Buchungen"]];   // shop offers now have their own page "Einkauf"
-function homeOrder(){ const o=(S.settings.homeOrder||[]).filter(k=>HOME_BLOCKS.some(b=>b[0]===k)); for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; }
+function homeOrder(){ const o=[...new Set(S.settings.homeOrder||[])].filter(k=>HOME_BLOCKS.some(b=>b[0]===k));   // each block only once (a drag could save one twice) for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; }
 function homeBlocks(html){
   const hid=new Set(S.settings.homeHidden||[]), list=homeOrder().filter(k=>!hid.has(k) && html[k] && !(k==="tax"&&!hasSelf()) && !(k==="budgets"&&isJobless())).map(k=>`<div class="hblock" data-hb="${k}">${html[k]}</div>`);
   if (!matchMedia("(min-width:1000px)").matches) return `<div class="hlist">${list.join("")}</div>`;
@@ -3418,7 +3418,7 @@ matchMedia("(min-width:1000px)").addEventListener("change", ()=>{ if (UI.view===
     clearTimeout(timer);
     if (dragging){
       ghost.remove(); ghost=null; src.classList.remove("ph");
-      const dom=[...grid().children].map(e=>e.dataset.hk), all=homeOrder();
+      const dom=[...new Set([...grid().children].map(e=>e.dataset.hk).filter(Boolean))], all=homeOrder();
       S.settings.homeOrder=[...dom, ...all.filter(k=>!dom.includes(k))]; saveSettings(); renderHomeEd(); try{ render(); }catch(e){}
     } else if (src && !moved){
       const k=src.dataset.hk, h=new Set(S.settings.homeHidden||[]); if (h.has(k)) h.delete(k); else h.add(k);
