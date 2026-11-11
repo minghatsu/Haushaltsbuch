@@ -28,7 +28,7 @@ const pcCalm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 function pcGo(k, nav){
   if (PC_ANIM.busy){ PC_ANIM.next=()=>pcGo(k, nav); return true; }   // pressed again during the animation: goes on right after
   const sec=document.querySelector(`[data-view="${UI.view}"]`), olds=pcCalm()?[]:[...pcTiles(sec), ...(window.pcDockEls?pcDockEls():[])];
-  PC_ANIM.busy=true;
+  PC_ANIM.busy=true; if (k==="home") pcHome.intro=true;
   const outs=olds.map((e,i,a)=>e.animate([{opacity:1,transform:"none"},{opacity:0,transform:`translateY(${Math.round(innerHeight*0.6+i*24)}px) rotate(${i%2?9:-9}deg)`}],
     {duration:300, delay:(a.length-1-i)*22, easing:"cubic-bezier(.55,0,1,.45)", fill:"forwards"}));
   const done=()=>{
@@ -69,6 +69,20 @@ document.addEventListener("keydown", e=>{
   const t=e.target; if (t && t.closest && t.closest('input,textarea,select,[contenteditable="true"],.astack,.srail,[role="slider"],.sheet,.backdrop')) return;
   if (pcStep(e.key==="ArrowRight"?1:-1)) e.preventDefault();
 });
+/* the green panel appears: the amounts count up and the ring fills itself */
+function pcHeroIntro(h){
+  if (!h || pcCalm()) return;
+  const ease=t=>1-Math.pow(1-t,3), ring=h.querySelector(".pcring"), P=Number((ring&&ring.style.getPropertyValue("--p"))||0);
+  const nums=[...h.querySelectorAll("[data-cv]")].map(e=>({e, v:Number(e.dataset.cv)||0, f:e.dataset.cf==="eur"?eur:eur0, fin:e.textContent}));
+  const t0=pcHeroIntro.t0, D=1100;
+  const k0=ease(Math.max(0,Math.min(1,(performance.now()-t0)/D)));
+  nums.forEach(n=>{ n.e.textContent=n.f(n.v*k0); }); if (ring) ring.style.setProperty("--p", (P*k0).toFixed(1));
+  const step=now=>{ if (!h.isConnected) return; const t=Math.max(0, Math.min(1,(now-t0)/D)), k=ease(t);
+    nums.forEach(n=>{ n.e.textContent = t>=1 ? n.fin : n.f(n.v*k); });
+    if (ring) ring.style.setProperty("--p", (P*k).toFixed(1));
+    if (t<1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
 function pcHome(o){
   pcOn();
   const {ym, cur, c, accts, mainBal, mainName}=o, [y,m]=ymParts(ym), dim=daysIn(ym);
@@ -79,23 +93,26 @@ function pcHome(o){
   const many=accts.filter(a=>!a.total).length>1;
   const html=`<aside class="pchero" id="pcHero">
     <small class="pchi"><span>${esc(greet)}</span>${first?", "+esc(first):""} · <span>${esc(MONTHS[m-1])} ${y}</span></small>
-    <div class="pcbal">${esc(eur(tot))}</div>
+    <div class="pcbal" data-cv="${tot}" data-cf="eur">${esc(eur(tot))}</div>
     <span class="pcsub">${many?`<span>auf allen Konten</span> · ${esc(mainName||"Hauptkonto")} ${esc(eur(mainBal))}`:"auf deinem Konto"}</span>
     <button class="pcring" data-go="year" style="--p:${Math.round(pct*100)}" aria-label="Analyse öffnen"><span>${isCur
-      ? `<small>noch pro Tag</small><b>${esc(eur0(perDay))}</b><small>${left} ${left===1?"Tag":"Tage"} übrig</small>`
-      : `<small>${c.net>=0?"übrig":"mehr ausgegeben"}</small><b>${esc(eur0(Math.abs(c.net)))}</b><small>im ${esc(MONTHS[m-1])}</small>`}</span></button>
+      ? `<small>noch pro Tag</small><b data-cv="${perDay}">${esc(eur0(perDay))}</b><small>${left} ${left===1?"Tag":"Tage"} übrig</small>`
+      : `<small>${c.net>=0?"übrig":"mehr ausgegeben"}</small><b data-cv="${Math.abs(c.net)}">${esc(eur0(Math.abs(c.net)))}</b><small>im ${esc(MONTHS[m-1])}</small>`}</span></button>
     <div class="pcminis">
-      <button data-go="list"><span>Einnahmen</span><b>${esc(eur0(c.income))}</b></button>
-      <button data-go="list"><span>Ausgaben</span><b>${esc(eur0(c.expenses))}</b></button>
-      <button data-go="fix"><span>Fixkosten offen</span><b>${esc(eur0(c.fixOpen))}</b></button>
+      <button data-go="list"><span>Einnahmen</span><b data-cv="${c.income}">${esc(eur0(c.income))}</b></button>
+      <button data-go="list"><span>Ausgaben</span><b data-cv="${c.expenses}">${esc(eur0(c.expenses))}</b></button>
+      <button data-go="fix"><span>Fixkosten offen</span><b data-cv="${c.fixOpen}">${esc(eur0(c.fixOpen))}</b></button>
     </div>
   </aside>`;
   const v=$("v-home"); if (!v) return; const old=v.querySelector("#pcHero"); if (old) old.remove(); v.insertAdjacentHTML("afterbegin", html);
+  // drawn again while it is still counting (data arriving): the new panel simply goes on counting
+  if (pcHome.intro){ pcHome.intro=false; pcHeroIntro.t0=performance.now()+260; }
+  if (performance.now() < (pcHeroIntro.t0||0)+1100) pcHeroIntro(v.querySelector("#pcHero"));
   // one column of tiles in the original order – the stylesheet spreads them over as many columns as the screen has room for
   const hc=v.querySelector(".hcols"); if (hc && hc.children.length===2){ const [a,b]=[...hc.children], A=[...a.children], B=[...b.children];
     a.replaceChildren(...A.flatMap((x,i)=>B[i]?[x,B[i]]:[x]), ...B.slice(A.length)); b.remove(); }
 }
-if (IS_PC){ pcOn(); try { if (UI.view==="home") renderHome(); } catch(e){} }
+if (IS_PC){ pcOn(); pcHome.intro=true; try { if (UI.view==="home") renderHome(); } catch(e){} }
 /* ---------- footer (status bar): name, version, sync state, help and the legal texts ---------- */
 if (IS_PC){
   // the legal texts live in the footer on the PC, not in the settings
