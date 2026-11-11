@@ -339,7 +339,9 @@ html.touch .kpad{display:grid}
 .tg.on{background:var(--accent)}.tg.on:after{left:21px}
 .hasnew{position:relative}.hasnew:after{content:"neu";position:absolute;top:6px;right:6px;background:#e0902b;color:#fff;font-size:9.5px;font-weight:800;border-radius:6px;padding:1px 5px}
 .clog{padding:12px 0;border-bottom:1px solid var(--line)}.clog.top .clh b{color:var(--accent)}.clh{display:flex;justify-content:space-between;align-items:baseline}.clog ul{margin:6px 0 0;padding-left:18px;line-height:1.55;font-size:14px}
-.fbk{display:flex;gap:8px;margin-bottom:12px}.chip.on{background:var(--accent);color:#fff}
+.fbk{display:flex;gap:8px;margin-bottom:12px}.fbk .chip{flex:1;text-align:center;border:0;border-radius:14px;padding:11px 6px;font:700 14px var(--f-body);background:var(--sunk);color:var(--fg);cursor:pointer}.fbk .chip.on{background:var(--accent);color:#fff}
+.fbimgs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}.fbimgs .t{position:relative;width:72px;height:72px;border-radius:12px;overflow:hidden;background:var(--sunk)}.fbimgs .t img{width:100%;height:100%;object-fit:cover}.fbimgs .t button{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;border:0;background:#000a;color:#fff;font-size:14px;line-height:1;cursor:pointer}
+.fbimgs .add{width:72px;height:72px;border-radius:12px;border:2px dashed var(--line);background:none;color:var(--accent);font:700 11px var(--f-body);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}.fbimgs .add b{font-size:22px;line-height:1}.chip.on{background:var(--accent);color:#fff}
 .abo{padding:12px 0;border-bottom:1px solid var(--line)}.abh{display:flex;align-items:center;gap:10px;margin-bottom:8px}.abh .n{flex:1;display:flex;flex-direction:column}.abh small{color:var(--muted)}.abo .grid2{margin:0}
 .exr{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.exr:last-of-type{border-bottom:0}.exr .n{flex:1;display:flex;flex-direction:column;min-width:0}.exr small{color:var(--muted);font-size:12.5px;line-height:1.4}
 .exi{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none}.exi[style*="background"]{color:#fff}
@@ -2236,6 +2238,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["0.9.7","11. November 2026",["Feedback: Fehler, Idee und Lob lassen sich wieder antippen","Feedback: bis zu 4 Bilder (z. B. Screenshots) mitschicken"]],
   ["0.9.6","11. November 2026",["Sprache & Währung neu gestaltet: Sprachen mit Flaggen, zweite Währung per Antippen, grüner Umrechner, Kursliste mit Flaggen","Wischen in seitlich scrollbaren Leisten wechselt nicht mehr versehentlich die Seite"]],
   ["0.9.5","10. November 2026",["Buchungen eines Tages stehen in der Reihenfolge, in der sie gebucht wurden – die neueste oben. Für schon importierte Buchungen: Kontoauszug einmal neu importieren"]],
   ["0.9.4","10. November 2026",["Startseite: „Noch pro Tag“ – dein Hauptkonto geteilt durch die restlichen Tage im Monat","Die kleine Schulden-Kachel ist weg – die Schulden stehen im eigenen Block"]],
@@ -2376,19 +2379,39 @@ document.addEventListener("click", e=>{ const b=e.target.closest("[data-faq]"); 
 
 function fbText(){ const t=($("fbTxt")||{}).value||""; const info=($("fbInfo")||{}).checked;
   return t.trim() + (info?`\n\n---\nFinanz MAMI ${verName(+((document.querySelector('meta[name="hb-version"]')||{}).content||0))} · ${window.AndroidBridge?(IS_PC?"PC":"Android"):"Browser"} · ${(WORK.find(x=>x[0]===S.settings.work)||[,"–"])[1]}`:""); }
-function renderFeedback(){ const el=$("fbEd"); if (!el) return; if (el.contains(document.activeElement)) return;
+const FB_MAX_IMG=4;
+async function fbShrink(file){   // screenshots get small enough for an e-mail: longest side 1600 px, JPEG
+  const bmp=await createImageBitmap(file), k=Math.min(1, 1600/Math.max(bmp.width,bmp.height)), c=document.createElement("canvas");
+  c.width=Math.round(bmp.width*k); c.height=Math.round(bmp.height*k); c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+  return c.toDataURL("image/jpeg",0.82); }
+function renderFeedback(){ const el=$("fbEd"); if (!el) return; if (document.activeElement && document.activeElement.id==="fbTxt" && el.contains(document.activeElement)) return;
+  const imgs=UI.fbImgs||(UI.fbImgs=[]);
   const kind=UI.fbKind||"idee", mail=IMPRESSUM.mail||FEEDBACK_MAIL;
   el.innerHTML=`<div class="fbk">${[["fehler","Fehler"],["idee","Idee"],["lob","Lob"]].map(([k,l])=>`<button class="chip ${kind===k?"on":""}" data-fbk="${k}" aria-pressed="${kind===k}">${l}</button>`).join("")}</div>
     <div class="field"><label for="fbTxt">${kind==="fehler"?"Was ist passiert? Was hast du davor gemacht?":kind==="lob"?"Was gefällt dir?":"Was wünschst du dir?"}</label><textarea class="in" id="fbTxt" rows="6" placeholder="Schreib einfach drauflos …">${esc(UI.fbDraft||"")}</textarea></div>
-    <label class="lgchk" style="margin:4px 0 12px"><input type="checkbox" id="fbInfo" checked><span>Version, Gerät und Gruppe anhängen (keine Finanzdaten)</span></label>
+    <div class="fbimgs">${imgs.map((u,i)=>`<div class="t"><img src="${u}" alt="Bild ${i+1}"><button data-fbimgdel="${i}" aria-label="Bild ${i+1} entfernen">×</button></div>`).join("")}${imgs.length<FB_MAX_IMG?`<button class="add" id="fbImgAdd"><b>＋</b>Bild</button>`:""}</div>
+    <input type="file" id="fbImgFile" accept="image/*" multiple hidden>
+    <label class="lgchk" style="margin:4px 0 12px"><input type="checkbox" id="fbInfo" ${UI.fbInfo===false?"":"checked"}><span>Version, Gerät und Gruppe anhängen (keine Finanzdaten)</span></label>
     <div class="row-btns" style="justify-content:flex-start">${mail?`<button class="btn primary" id="fbMail">Per E-Mail senden</button>`:""}<button class="btn ${mail?"":"primary"}" id="fbCopy">Text kopieren</button></div>
     ${mail?"":`<p class="small muted" style="margin:10px 0 0">Die Feedback-Adresse wird mit dem Impressum ergänzt. Bis dahin: Text kopieren und an den Entwickler schicken.</p>`}`; }
 document.addEventListener("input", e=>{ if (e.target.id==="fbTxt") UI.fbDraft=e.target.value; });
+document.addEventListener("change", async e=>{ if (e.target.id==="fbInfo"){ UI.fbInfo=e.target.checked; return; }
+  if (e.target.id!=="fbImgFile") return; const files=[...e.target.files].slice(0, FB_MAX_IMG-(UI.fbImgs||[]).length); e.target.value="";
+  for (const f of files){ try { (UI.fbImgs||(UI.fbImgs=[])).push(await fbShrink(f)); } catch(_){ toast("Bild konnte nicht gelesen werden"); } }
+  renderFeedback(); });
 document.addEventListener("click", async e=>{
   const k=e.target.closest("[data-fbk]"); if (k){ UI.fbKind=k.dataset.fbk; renderFeedback(); return; }
+  if (e.target.closest("#fbImgAdd")){ const f=$("fbImgFile"); if (f) f.click(); return; }
+  const di=e.target.closest("[data-fbimgdel]"); if (di){ UI.fbImgs.splice(Number(di.dataset.fbimgdel),1); renderFeedback(); return; }
   if (e.target.closest("#fbCopy")){ const t=fbText(); if (!t.trim()){ toast("Bitte erst etwas schreiben"); return; } try{ await navigator.clipboard.writeText(t); toast("Kopiert"); }catch(_){ toast("Kopieren ging nicht – Text bitte markieren"); } return; }
   if (e.target.closest("#fbMail")){ const t=fbText(); if (!t.trim()){ toast("Bitte erst etwas schreiben"); return; } const subj={fehler:"Fehler",idee:"Idee",lob:"Lob"}[UI.fbKind||"idee"]+" – Finanz MAMI";
-    const u=`mailto:${IMPRESSUM.mail||FEEDBACK_MAIL}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(t)}`; try{ window.open(u,"_blank"); }catch(_){ location.href=u; } }
+    const to=IMPRESSUM.mail||FEEDBACK_MAIL, imgs=UI.fbImgs||[];
+    if (imgs.length && window.AndroidBridge && window.AndroidBridge.sendMail){ try { if (AndroidBridge.sendMail(to, subj, t, JSON.stringify(imgs.map(u=>u.split(",")[1])))) return; } catch(_){} }
+    if (imgs.length && navigator.canShare && !NATIVE){   // browser on a phone: share menu with the pictures
+      try { const files=await Promise.all(imgs.map(async(u,i)=>new File([await (await fetch(u)).blob()], `bild-${i+1}.jpg`, {type:"image/jpeg"})));
+        if (navigator.canShare({files})){ await navigator.share({files, title:subj, text:`An: ${to}\n\n${t}`}); return; } } catch(err){ if (err && err.name==="AbortError") return; } }
+    if (imgs.length) toast(`Dein Mail-Programm öffnet sich – hänge die ${imgs.length===1?"Bild-Datei":imgs.length+" Bilder"} dort bitte selbst an`, null, null, 8000);
+    const u=`mailto:${to}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(t)}`; try{ window.open(u,"_blank"); }catch(_){ location.href=u; } }
 });
 
 // subscriptions & contracts: fixed costs with a renewal date and notice period

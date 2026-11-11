@@ -836,6 +836,39 @@ public class MainActivity extends Activity {
                 return false;
             }
         }
+        /** Feedback mail with screenshots: opens the mail app (share menu) with recipient, subject, text and images (base64 JPEGs, JSON array). */
+        @JavascriptInterface
+        public boolean sendMail(String to, String subject, String body, String imagesJson) {
+            try {
+                java.util.ArrayList<Uri> uris = new java.util.ArrayList<>();
+                File dir = new File(getCacheDir(), "share");
+                if (!dir.exists()) dir.mkdirs();
+                File[] old = dir.listFiles(); if (old != null) for (File o : old) o.delete();
+                org.json.JSONArray arr = new org.json.JSONArray(imagesJson == null || imagesJson.isEmpty() ? "[]" : imagesJson);
+                for (int i = 0; i < arr.length() && i < 6; i++) {
+                    byte[] bytes = Base64.decode(arr.getString(i), Base64.DEFAULT);
+                    File f = new File(dir, "bild-" + (i + 1) + ".jpg");
+                    try (FileOutputStream os = new FileOutputStream(f)) { os.write(bytes); }
+                    uris.add(FileProvider.getUriForFile(MainActivity.this, "de.sascha.haushaltsbuch.files", f));
+                }
+                Intent send;
+                if (uris.isEmpty()) {
+                    send = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"));
+                } else {
+                    send = new Intent(Intent.ACTION_SEND_MULTIPLE).setType("image/jpeg");
+                    send.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+                    send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
+                send.putExtra(Intent.EXTRA_EMAIL, new String[]{ to });
+                send.putExtra(Intent.EXTRA_SUBJECT, subject);
+                send.putExtra(Intent.EXTRA_TEXT, body);
+                final Intent chooser = Intent.createChooser(send, "Feedback senden");
+                runOnUiThread(() -> { try { startActivity(chooser); } catch (Exception ignored) {} });
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
         /** Weekly automatic backup: Downloads/Haushaltsbuch-Backups, only the newest `keep` files stay. */
         @JavascriptInterface
         public boolean autoBackup(String name, String content, int keep) {
