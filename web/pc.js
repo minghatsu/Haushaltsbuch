@@ -342,3 +342,48 @@ if (IS_PC){
   const _r2=render; render = (...a) => { const x=_r2(...a); try { av(); } catch(e){} return x; };
   av();
 }
+/* ---------- month / year change ("Zahlenwalze"): the month name rolls on, every amount runs from the old
+   to the new value, bars grow or shrink, each tile lights up briefly ---------- */
+if (IS_PC){
+  const NUM=/\d{1,3}(?:[.   ,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?/;
+  const parse=s=>{ const m=String(s).match(NUM); if (!m) return null; const t=m[0], dm=t.match(/[.,](\d{1,2})$/), dec=dm && !(dm[1].length===3) ? dm[1].length : 0;
+    const dc=dec ? t[t.length-dec-1] : "", int=dec ? t.slice(0,-dec-1) : t, g=(int.match(/[.   ,]/)||[""])[0];
+    const v=Number(int.replace(/[^\d]/g,"")+(dec?"."+t.slice(-dec):"")); return {t, v, dec, dc, g}; };
+  const fmt=(p,v)=>{ const neg=v<0; v=Math.abs(v); let [i,f]=v.toFixed(p.dec).split("."); if (p.g) i=i.replace(/\B(?=(\d{3})+(?!\d))/g, p.g); return (neg?"-":"")+i+(p.dec?p.dc+f:""); };
+  const amounts=root=>{ const out=new Map(), cnt={};
+    root.querySelectorAll("b,span,strong,div,em,small,text,td").forEach(e=>{ if (e.closest(".cubestage,.pctl")) return; if (e.children.length) return;
+      const s=(e.textContent||"").trim(); if (s.length>22 || !/€/.test(s) || !/\d/.test(s)) return;
+      const a=e.closest("[data-hb],[id]"), key=(a?(a.dataset.hb||a.id):"")+"|"+e.tagName; cnt[key]=(cnt[key]||0)+1; out.set(key+"#"+cnt[key], e); });
+    return out; };
+  const bars=root=>{ const out=new Map(), cnt={};
+    root.querySelectorAll('[style*="width:"],[style*="width :"]').forEach(e=>{ if (e.closest(".cubestage")) return; const w=e.style.width; if (!/%$/.test(w)) return;
+      const a=e.closest("[data-hb],[id]"), key=(a?(a.dataset.hb||a.id):"")+"|bar"; cnt[key]=(cnt[key]||0)+1; out.set(key+"#"+cnt[key], [e, parseFloat(w)]); });
+    return out; };
+  let lastYm=UI.ym, lastView=UI.view;
+  const _r3=render; render = (...a) => {
+    const changed = UI.ym!==lastYm && UI.view===lastView && !pcCalm(), d = UI.ym>lastYm ? 1 : -1;
+    let oldA=null, oldB=null; const sec=document.querySelector(`[data-view="${UI.view}"]`);
+    if (changed && sec){ oldA=new Map([...amounts(sec)].map(([k,e])=>[k, parse(e.textContent)])); oldB=new Map([...bars(sec)].map(([k,[e,w]])=>[k,w])); }
+    lastYm=UI.ym; lastView=UI.view;
+    const x=_r3(...a);
+    if (oldA){ try { pcMonthAnim(sec, oldA, oldB, d); } catch(e){ console.warn("month", e); } }
+    return x;
+  };
+  function pcMonthAnim(sec, oldA, oldB, d){
+    // the month name rolls on in the direction of the change
+    document.querySelectorAll("#monthpill select").forEach(s=>s.animate([{transform:`translateY(${d*18}px)`,opacity:0},{transform:"none",opacity:1}],{duration:380,easing:"cubic-bezier(.2,.8,.2,1)"}));
+    const now=amounts(sec), runs=[];
+    for (const [k,e] of now){ const o=oldA.get(k), n=parse(e.textContent); if (!o || !n || o.v===n.v) continue;
+      runs.push({e, fin:e.textContent, n, a:o.v, b:n.v}); }
+    const t0=performance.now()+60, D=900, ease=t=>1-Math.pow(1-t,3);
+    const step=nowT=>{ const t=Math.max(0,Math.min(1,(nowT-t0)/D)), k=ease(t);
+      for (const r of runs){ if (!r.e.isConnected) continue; r.e.textContent = t>=1 ? r.fin : r.fin.replace(r.n.t, fmt(r.n, r.a+(r.b-r.a)*k)); }
+      if (t<1 && runs.length) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+    // bars: from the old width to the new one
+    for (const [k,[e,w]] of bars(sec)){ const o=oldB.get(k); if (o==null || Math.abs(o-w)<0.5) continue; e.animate([{width:o+"%"},{width:w+"%"}],{duration:800,easing:"cubic-bezier(.2,.8,.2,1)"}); }
+    // every tile lights up briefly, one after another
+    [...sec.querySelectorAll(".pchero, #v-home .hblock > *, :scope > .card, :scope > .cols .card, :scope .card")].filter(e=>!e.closest(".cubestage")).slice(0,16)
+      .forEach((c,i)=>c.animate([{boxShadow:"0 0 0 0 rgba(63,191,138,0)"},{boxShadow:"0 0 0 3px rgba(63,191,138,.45)"},{boxShadow:"0 0 0 0 rgba(63,191,138,0)"}],{duration:900,delay:i*55,easing:"ease-out"}));
+  }
+}
