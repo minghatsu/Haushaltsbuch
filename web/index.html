@@ -2248,6 +2248,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
+  ["1.0.0","11. November 2026",["Tutorial-Tour ausführlicher: bis zu 12 kurze Schritte – Noch pro Tag, Monat wechseln, Schulden, Kassenbon & Kontoauszug, Buchungen, Einkaufen, Hinweise"]],
   ["0.9.9","11. November 2026",["Gehalt: zeigt die Monate mit Gehalt (Abrechnung, Mindestlohn-Schätzung oder Gehaltseingang) statt „0 von 12“"]],
   ["0.9.8","11. November 2026",["Analyse neu: drei Reiter Auswertung, Planung und Steuer – Übrig mit Verlauf, Kennzahlen und Top-Kategorien direkt sichtbar","Startseite: ein Block erscheint nicht mehr doppelt"]],
   ["0.9.7","11. November 2026",["Feedback: Fehler, Idee und Lob lassen sich wieder antippen","Feedback: bis zu 4 Bilder (z. B. Screenshots) mitschicken"]],
@@ -2339,12 +2340,21 @@ function tourSteps(){ const w=S.settings.work, g=workGroup(w);
   const set = g==="job" ? "Unter „Steuer & Einkommen“ stellst du Gehalt und Steuerklasse ein."
     : GPROF[w] ? "Dein Bereich für Betrag, Zahltag und Termine ist hier – passend zu deiner Auswahl."
     : "Hier stellst du alles ein, was zu dir passt.";
-  return [
-    {sel:"#astack", ic:"cash", t:"Dein Kontostand", p:["Hier siehst du, was heute auf dem Konto ist – und was bis Monatsende übrig bleibt.", inc]},
-    {sel:".tabs .tab.plus", ic:"receipt", t:"Alles eintragen", p:["Tippe auf Plus für Ausgaben oder Einnahmen.", "Kassenbon? Einfach fotografieren – Betrag und Laden werden ausgefüllt."]},
+  // one short sentence per step; steps whose spot is not on the screen (e.g. a hidden block) are left out
+  const st=[
+    {sel:"#astack", ic:"cash", t:"Dein Kontostand", p:["Was heute auf dem Konto ist. Wischen zeigt deine Spaces, Antippen trägt den echten Stand ein.", inc]},
+    {sel:".hkpi", ic:"cal", t:"Noch pro Tag", p:["So viel kannst du bis Monatsende jeden Tag ausgeben – dein Hauptkonto geteilt durch die restlichen Tage."]},
+    {sel:".msel", ic:"cal", t:"Monat wechseln", p:["Mit den Pfeilen blätterst du durch die Monate – alle Seiten zeigen dann diesen Monat."]},
+    {sel:'[data-hb="debts"]', ic:"bank", t:"Kredite & Schulden", p:["Was noch offen ist und wann du schuldenfrei bist. Raten aus den Fixkosten werden automatisch abgezogen."]},
+    {sel:".tabs .tab.plus", ic:"receipt", t:"Eintragen", p:["Tippe auf Plus für eine Ausgabe oder Einnahme."]},
+    {sel:".tabs .tab.plus", ic:"camera", t:"Kassenbon & Kontoauszug", p:["Im Plus-Menü kannst du einen Kassenbon fotografieren oder deinen Kontoauszug (CSV) importieren – die App sortiert alles ein."]},
+    {sel:'.tabs .tab[data-go="list"]', ic:"list", t:"Buchungen", p:["Alle Ein- und Ausgaben mit Kalender und Suche. Antippen zum Ändern."]},
     {sel:'.tabs .tab[data-go="fix"]', ic:"repeat", t:"Fixkosten & Termine", p:["Miete, Handy, Abos – einmal anlegen, die App plant sie jeden Monat ein.", fix]},
-    {sel:'.tabs .tab[data-go="year"]', ic:"insight", t:"Analyse", p:[ana]},
-    {sel:'.tabs .tab[data-go="more"]', ic:"sliders", t:"Einstellungen", p:[set, "Diese Tour findest du hier jederzeit wieder unter Hilfe."]} ]; }
+    {sel:'.tabs .tab[data-go="shop"]', ic:"cart", t:"Einkaufen", p:["Deine Einkaufsliste mit Läden und Preisen – auch zum Teilen mit anderen."]},
+    {sel:'.tabs .tab[data-go="year"]', ic:"insight", t:"Analyse", p:[ana, "Oben wählst du Auswertung, Planung oder Steuer."]},
+    {sel:"#bellBtn", ic:"bell", t:"Hinweise", p:["Die Glocke erinnert an Fälliges – z. B. Rechnungen, Fristen oder ein Budget, das knapp wird."]},
+    {sel:'.tabs .tab[data-go="more"]', ic:"sliders", t:"Einstellungen", p:[set, "Diese Tour findest du hier jederzeit wieder unter Hilfe."]} ];
+  return st.filter(x=>[...document.querySelectorAll(x.sel)].some(n=>n.offsetParent!==null || getComputedStyle(n).position==="fixed")); }
 const TOUR={i:-1, steps:[]};
 function tourCard(end){ const el=$("tourBg"); const nm=S.settings.name, wl=(WORK.find(x=>x[0]===S.settings.work)||[])[1];
   el.className="tourbg card"; el.hidden=false; document.body.classList.add("locked");
@@ -2352,11 +2362,11 @@ function tourCard(end){ const el=$("tourBg"); const nm=S.settings.name, wl=(WORK
     ? `<div class="tcard"><span class="ttag">Fertig</span><div class="till">🎉</div><h2>Du bist startklar</h2>
         <p>Die Tour kannst du jederzeit wieder ansehen: Einstellungen › Hilfe › Tutorial ansehen.</p>
         <div class="tbot"><button class="tw" data-tour="close">Los geht's</button></div></div>`
-    : `<div class="tcard"><span class="ttag">Kurze Tour · ca. 1 Minute</span><div class="till">👋</div>
+    : `<div class="tcard"><span class="ttag">Kurze Tour · ca. 2 Minuten</span><div class="till">👋</div>
         <h2>${nm?`Hallo, ${esc(nm)}!`:"Hallo!"}</h2>
-        <p>${wl?`<span>Du hast „${esc(wl)}“ gewählt.</span> `:""}<span>Ich zeig dir in 5 Schritten, wo du was findest – passend zu dir.</span></p>
+        <p>${wl?`<span>Du hast „${esc(wl)}“ gewählt.</span> `:""}<span>Ich zeig dir in ${TOUR.steps.length} kurzen Schritten, wo du was findest – passend zu dir.</span></p>
         <div class="tbot"><button class="tw" data-tour="go">Tour starten</button><button class="tg2" data-tour="close">Später – findest du unter Hilfe</button></div></div>`; }
-function tourOpen(){ TOUR.steps=tourSteps(); TOUR.i=-1; if (typeof spSheetClose==="function") try{ spSheetClose(); }catch(e){} tourCard(false); }
+function tourOpen(){ if (UI.view!=="home"){ UI.view="home"; render(); } TOUR.steps=tourSteps(); TOUR.i=-1; if (typeof spSheetClose==="function") try{ spSheetClose(); }catch(e){} tourCard(false); }
 function tourClose(){ const el=$("tourBg"); el.hidden=true; el.innerHTML=""; TOUR.i=-1; document.body.classList.remove("locked"); }
 function tourGo(i){ const el=$("tourBg");
   if (i>=TOUR.steps.length){ tourCard(true); return; }
