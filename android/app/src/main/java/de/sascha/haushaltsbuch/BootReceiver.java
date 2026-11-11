@@ -9,5 +9,6 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context c, Intent i) {
         Notifier.restore(c);
+        UpdateJob.plan(c);
     }
 }

@@ -165,6 +165,8 @@ public class MainActivity extends Activity {
             }
         });
 
+        updTap = isUpdIntent(getIntent());
+        UpdateJob.plan(this);
         loadApp();
     }
 
@@ -410,7 +412,29 @@ public class MainActivity extends Activity {
     }
 
     /** Called from JavaScript as window.AndroidBridge */
+    /* ---- opened from an update notice (own notification or the push link finanzmami://update) ---- */
+    private volatile boolean updTap;
+
+    private static boolean isUpdIntent(Intent i) {
+        if (i == null) return false;
+        if (i.getBooleanExtra("upd", false)) return true;
+        Uri d = i.getData();
+        return d != null && "finanzmami".equals(d.getScheme());
+    }
+
+    @Override
+    protected void onNewIntent(Intent i) {
+        super.onNewIntent(i);
+        setIntent(i);
+        if (isUpdIntent(i) && web != null) web.evaluateJavascript("window.hbUpdTap && window.hbUpdTap()", null);
+    }
+
     private class Bridge {
+        /** true once if the app was opened by tapping an update notice */
+        @JavascriptInterface
+        public boolean takeUpdTap() { boolean b = updTap; updTap = false; return b; }
+
+
         /** "granted" or "denied" – whether the app may show notifications */
         @JavascriptInterface
         public String notifyState() {
@@ -603,6 +627,8 @@ public class MainActivity extends Activity {
                 String result = "", err = "";
                 try {
                     if (!url.startsWith("https://api.github.com/repos/minghatsu/")) throw new IllegalArgumentException("Adresse nicht erlaubt");
+                    // the background check (UpdateJob) uses the same key
+                    if ("json".equals(kind)) getSharedPreferences("hb-native", MODE_PRIVATE).edit().putString("ghkey", token == null ? "" : token).apply();
                     HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
                     c.setInstanceFollowRedirects(false);
                     c.setConnectTimeout(10000); c.setReadTimeout(120000);
