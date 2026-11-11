@@ -173,7 +173,7 @@ if (IS_PC){
    The PC keeps its own order (S.settings.pcHome), the phone keeps its own. ---------- */
 if (IS_PC){
   const PCH=()=>{ const h=S.settings.pcHome||(S.settings.pcHome={}); h.order=Array.isArray(h.order)?h.order:[]; h.min=Array.isArray(h.min)?h.min:[]; return h; };
-  const BIC={cash:"cash",budgets:"target",fix:"repeat",tax:"shield",goals:"piggy",debts:"bank",recent:"list",gemeinsam:"heart",offers:"cart"};
+  const BIC={cash:"cash",budgets:"target",fix:"repeat",tax:"shield",goals:"piggy",debts:"bank",recent:"list",gemeinsam:"heart",offers:"cart",...HX_IC};
   const name=k=>(HOME_BLOCKS.find(b=>b[0]===k)||[k,k])[1];
   // the settings section "Startseite anpassen" is not needed on the PC – everything happens right on the page
   const _k2=accTabKeys; accTabKeys = t => _k2(t).filter(k=>k!=="start");
