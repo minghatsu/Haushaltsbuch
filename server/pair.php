@@ -129,11 +129,21 @@ function devCheck(): void {
     $r = q('SELECT until FROM devkeys WHERE h = ?', [$hash])->fetch();
     if ($r && (int)$r['until'] > time()) return;
     if (!ipCount('ipfails', 30)) fail('Zu viele Versuche', 429);
-    $ctx = stream_context_create(['http' => ['method' => 'GET', 'timeout' => 15, 'ignore_errors' => true,
-        'header' => "Authorization: Bearer {$m[1]}\r\nUser-Agent: FinanzMAMI-Server\r\nAccept: application/vnd.github+json\r\n"]]);
-    $body = @file_get_contents('https://api.github.com/repos/' . DEV_REPO, false, $ctx);
-    $code = 0; foreach (($http_response_header ?? []) as $l) if (preg_match('#^HTTP/\S+\s+(\d+)#', $l, $mm)) $code = (int)$mm[1];
-    if ($code !== 200 || !$body) { ipBump('ipfails'); fail('Entwickler-Schlüssel ungültig', 401); }
+    // ask GitHub whether this key may read the app's repository (curl if there, otherwise PHP streams)
+    $code = 0; $why = '';
+    $hdr = ["Authorization: Bearer {$m[1]}", 'User-Agent: FinanzMAMI-Server', 'Accept: application/vnd.github+json'];
+    if (function_exists('curl_init')) {
+        $ch = curl_init('https://api.github.com/repos/' . DEV_REPO);
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_HTTPHEADER => $hdr, CURLOPT_TIMEOUT => 15, CURLOPT_CONNECTTIMEOUT => 10]);
+        $body = curl_exec($ch); $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE); if ($body === false) $why = curl_error($ch); curl_close($ch);
+    } elseif (ini_get('allow_url_fopen')) {
+        $ctx = stream_context_create(['http' => ['method' => 'GET', 'timeout' => 15, 'ignore_errors' => true, 'header' => implode("\r\n", $hdr) . "\r\n"]]);
+        $body = @file_get_contents('https://api.github.com/repos/' . DEV_REPO, false, $ctx);
+        foreach (($http_response_header ?? []) as $l) if (preg_match('#^HTTP/\S+\s+(\d+)#', $l, $mm)) $code = (int)$mm[1];
+        if ($body === false) $why = (error_get_last()['message'] ?? 'keine Verbindung');
+    } else $why = 'PHP darf keine Verbindung nach außen aufbauen (curl und allow_url_fopen sind aus)';
+    if ($code === 401 || $code === 403 || $code === 404) { ipBump('ipfails'); fail('Entwickler-Schlüssel ungültig (GitHub ' . $code . ')', 401); }
+    if ($code !== 200) fail('GitHub nicht erreichbar' . ($why !== '' ? ': ' . mb_substr($why, 0, 160) : ' (' . $code . ')'), 502);
     q('INSERT OR REPLACE INTO devkeys (h, until) VALUES (?, ?)', [$hash, time() + 3600]);
 }
 function feedDir(): string { return DATA_DIR . '/feedback'; }
