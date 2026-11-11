@@ -133,3 +133,98 @@ if (IS_PC){
   for (const [k,v] of Object.entries(PC_I18N)) if (!I18N_K.includes(k)){ I18N_K.push(k); LL.forEach((l,i)=>{ (I18N_T[l]=I18N_T[l]||[])[I18N_K.length-1]=v[i]; }); }
   if (LANG!=="de") try { I18N.set(LANG); } catch(e){}
 }
+/* ---------- start page tiles: drag & drop to sort, "minimize" to the dock on the right edge (they can never be deleted).
+   The PC keeps its own order (S.settings.pcHome), the phone keeps its own. ---------- */
+if (IS_PC){
+  const PCH=()=>{ const h=S.settings.pcHome||(S.settings.pcHome={}); h.order=Array.isArray(h.order)?h.order:[]; h.min=Array.isArray(h.min)?h.min:[]; return h; };
+  const BIC={cash:"cash",budgets:"target",fix:"repeat",tax:"shield",goals:"piggy",debts:"bank",recent:"list",gemeinsam:"heart",offers:"cart"};
+  const name=k=>(HOME_BLOCKS.find(b=>b[0]===k)||[k,k])[1];
+  // the settings section "Startseite anpassen" is not needed on the PC – everything happens right on the page
+  const _k2=accTabKeys; accTabKeys = t => _k2(t).filter(k=>k!=="start");
+  homeOrder = () => { const o=[...new Set(PCH().order)].filter(k=>HOME_BLOCKS.some(b=>b[0]===k)); for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; };
+  const _hb=homeBlocks; homeBlocks = html => { const keep=S.settings.homeHidden; S.settings.homeHidden=[...PCH().min]; try { return _hb(html); } finally { S.settings.homeHidden=keep; } };
+  const save=()=>{ try { saveSettings(); } catch(e){} };
+
+  // dock with the minimized tiles
+  document.body.insertAdjacentHTML("beforeend", `<div class="pcdock" id="pcDock" aria-label="Minimierte Kacheln"></div>`);
+  function dock(){
+    const d=$("pcDock"); if (!d) return; const on=UI.view==="home", m=PCH().min.filter(k=>HOME_BLOCKS.some(b=>b[0]===k));
+    document.documentElement.classList.toggle("pcdocked", on && m.length>0);
+    d.hidden=!on || !m.length;
+    const have=[...d.children].map(x=>x.dataset.pcrest).join(","); if (have===m.join(",")) return;
+    d.innerHTML=m.map(k=>`<button class="pcdi" data-pcrest="${k}" aria-label="${esc(name(k))} wieder anzeigen"><span>${ic(BIC[k]||"tag",22)}</span><em>${esc(name(k))}</em></button>`).join("");
+  }
+  // controls on every tile
+  function decorate(){
+    dock();
+    if (UI.view!=="home") return;
+    document.querySelectorAll('#v-home .hblock').forEach(b=>{ if (b.closest(".cubestage") || b.querySelector(":scope > .pctl")) return;
+      b.insertAdjacentHTML("afterbegin", `<div class="pctl"><button class="pcgrip" data-pcgrip="1" aria-label="Kachel verschieben" title="Ziehen zum Verschieben"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/></svg></button><button class="pcmin" data-pcmin="${b.dataset.hb}" aria-label="Kachel minimieren" title="Minimieren">${ic("minus",16)}</button></div>`); });
+  }
+  const _ph=pcHome; pcHome = o => { _ph(o); decorate(); };
+  setInterval(dock, 1000);
+  const dockSpot=k=>{ const el=document.querySelector(`#pcDock [data-pcrest="${k}"]`); if (el){ const r=el.getBoundingClientRect(); return {x:r.left+r.width/2, y:r.top+r.height/2}; } return {x:innerWidth-50, y:innerHeight/2}; };
+
+  // minimize: the tile shrinks, spins a little and flies into the dock
+  document.addEventListener("click", e=>{
+    const b=e.target.closest("[data-pcmin]"); if (!b) return; const k=b.dataset.pcmin, tile=b.closest(".hblock"); if (!tile) return;
+    const r=tile.getBoundingClientRect(), h=PCH(); if (!h.min.includes(k)) h.min.push(k);
+    const fly=tile.cloneNode(true); fly.classList.add("pcfly"); Object.assign(fly.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"}); document.body.appendChild(fly);
+    tile.style.visibility="hidden"; dock(); const t=dockSpot(k), di=document.querySelector(`#pcDock [data-pcrest="${k}"]`); if (di) di.style.opacity="0";
+    const dx=t.x-(r.left+r.width/2), dy=t.y-(r.top+r.height/2), s=Math.max(0.06, 52/Math.max(r.width,r.height));
+    fly.animate([{transform:"none",opacity:1,borderRadius:"24px"},{transform:`translate(${dx*0.35}px,${dy*0.35-30}px) scale(.6) rotate(-6deg)`,opacity:1,offset:.45},{transform:`translate(${dx}px,${dy}px) scale(${s}) rotate(8deg)`,opacity:.2,borderRadius:"50%"}],
+      {duration:620, easing:"cubic-bezier(.5,0,.2,1)"}).finished.then(()=>{
+        fly.remove(); save();
+        const d2=document.querySelector(`#pcDock [data-pcrest="${k}"]`); if (d2){ d2.style.opacity=""; d2.animate([{transform:"scale(.3)"},{transform:"scale(1.25)",offset:.6},{transform:"none"}],{duration:420,easing:"cubic-bezier(.3,.7,.3,1)"}); }
+      });
+  });
+  // restore: the icon pops out of the dock and grows back into its place
+  document.addEventListener("click", e=>{
+    const b=e.target.closest("[data-pcrest]"); if (!b) return; const k=b.dataset.pcrest, from=b.getBoundingClientRect(), h=PCH();
+    h.min=h.min.filter(x=>x!==k); b.animate([{transform:"none",opacity:1},{transform:"scale(1.3)",opacity:0}],{duration:180,fill:"forwards"});
+    save(); requestAnimationFrame(()=>{ dock(); const tile=document.querySelector(`#v-home .hblock[data-hb="${k}"]`); if (!tile) return;
+      tile.scrollIntoView({block:"nearest", behavior:"smooth"});
+      const r=tile.getBoundingClientRect(), dx=from.left+from.width/2-(r.left+r.width/2), dy=from.top+from.height/2-(r.top+r.height/2), s=Math.max(0.06, 52/Math.max(r.width,r.height));
+      tile.animate([{transform:`translate(${dx}px,${dy}px) scale(${s}) rotate(10deg)`,opacity:.3,borderRadius:"50%"},{transform:"translate(0,-12px) scale(1.02) rotate(-1deg)",opacity:1,offset:.7},{transform:"none",opacity:1}],
+        {duration:680, easing:"cubic-bezier(.3,.7,.3,1)"}); });
+  });
+
+  // drag & drop (mouse, pen and touch): the tile lifts off, the others make room smoothly
+  let D=null;
+  const tiles=()=>[...document.querySelectorAll("#v-home .hcol > .hblock, #v-home .hlist > .hblock")];
+  function flip(move){ const els=tiles().filter(t=>t!==D.ph), before=new Map(els.map(t=>[t,t.getBoundingClientRect()])); move();
+    for (const t of els){ const a=before.get(t), b=t.getBoundingClientRect(); const dx=a.left-b.left, dy=a.top-b.top; if (dx||dy) t.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"none"}],{duration:260,easing:"cubic-bezier(.2,.8,.2,1)"}); } }
+  document.addEventListener("pointerdown", e=>{
+    const g=e.target.closest("[data-pcgrip]"); if (!g || e.button>0) return; const tile=g.closest(".hblock"); if (!tile) return;
+    e.preventDefault(); const r=tile.getBoundingClientRect();
+    const ph=document.createElement("div"); ph.className="hblock pcph"; ph.style.height=r.height+"px";
+    const fly=tile.cloneNode(true); fly.classList.add("pcfly","pclift"); Object.assign(fly.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"}); document.body.appendChild(fly);
+    tile.replaceWith(ph); D={tile, ph, fly, ox:e.clientX-r.left, oy:e.clientY-r.top, id:e.pointerId, last:0};
+    fly.animate([{transform:"none"},{transform:"rotate(-2deg) scale(1.03)"}],{duration:180,fill:"forwards",easing:"ease-out"});
+    document.documentElement.classList.add("pcdragging");
+  });
+  document.addEventListener("pointermove", e=>{
+    if (!D || e.pointerId!==D.id) return;
+    D.fly.style.left=(e.clientX-D.ox)+"px"; D.fly.style.top=(e.clientY-D.oy)+"px";
+    // scroll the page when the tile gets near the top or bottom edge
+    if (e.clientY>innerHeight-70) scrollBy(0,14); else if (e.clientY<130) scrollBy(0,-14);
+    const now=Date.now(); if (now-D.last<60) return; D.last=now;
+    const over=document.elementsFromPoint(e.clientX,e.clientY).find(x=>x.matches && x.matches("#v-home .hcol > .hblock, #v-home .hlist > .hblock") && x!==D.ph);
+    if (!over) return; const ro=over.getBoundingClientRect(), after=e.clientY>ro.top+ro.height/2;
+    if ((after && over.nextElementSibling===D.ph) || (!after && over.previousElementSibling===D.ph)) return;
+    flip(()=>over.insertAdjacentElement(after?"afterend":"beforebegin", D.ph));
+  });
+  const drop=e=>{
+    if (!D || (e && e.pointerId!==D.id)) return; const {tile, ph, fly}=D; D=null; document.documentElement.classList.remove("pcdragging");
+    const r=ph.getBoundingClientRect(), f=fly.getBoundingClientRect();
+    fly.getAnimations().forEach(a=>a.cancel());
+    fly.animate([{transform:"rotate(-2deg) scale(1.03)"},{transform:`translate(${r.left-f.left}px,${r.top-f.top}px) rotate(1deg) scale(.99)`,offset:.8},{transform:`translate(${r.left-f.left}px,${r.top-f.top}px)`}],{duration:280,easing:"cubic-bezier(.2,.8,.2,1)",fill:"forwards"})
+      .finished.then(()=>{ ph.replaceWith(tile); fly.remove();
+        tile.animate([{transform:"scale(.98)"},{transform:"scale(1.01)",offset:.5},{transform:"none"}],{duration:260});
+        const dom=tiles().map(t=>t.dataset.hb), min=PCH().min, it=dom[Symbol.iterator]();
+        // minimized tiles keep their place, so they come back where they were
+        PCH().order=homeOrder().map(k=>min.includes(k) || !dom.includes(k) ? k : it.next().value); save(); });
+  };
+  document.addEventListener("pointerup", drop); document.addEventListener("pointercancel", drop);
+  decorate();
+}
