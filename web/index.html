@@ -7732,6 +7732,7 @@ async function ghCheck(manual, auto){
     const ALT = {"Haushaltsbuch.apk":"Finanz-MAMI.apk", "Haushaltsbuch-Setup.exe":"Finanz-MAMI-Setup.exe"};
     const asset = n => (rel.assets||[]).find(a=>a.name===n || a.name===ALT[n]);
     const desk = !!window.AndroidBridge.desktop, mine = +(window.AndroidBridge.nativeRev() || 0), theirs = num(desk ? "exe" : "apk");
+    let apkNew=false;
     if (theirs > mine){
       const a = asset(desk ? "Haushaltsbuch-Setup.exe" : "Haushaltsbuch.apk");
       if (a){
@@ -7745,20 +7746,24 @@ async function ghCheck(manual, auto){
           if (auto) go(); else toast("Neue App-Version ist da", go, "Installieren", 20000);
           UPD.avail={t:"Neue App-Version ist da", s:"Tippe auf Installieren – deine Daten bleiben erhalten.", go};
         }
-        UPD.msg = "Neue Version " + verName(num("web")) + " ist da"; return;
+        UPD.msg = "Neue Version " + verName(num("web")) + " ist da";
+        if (desk) return;   // the PC installer brings the new app content along
+        apkNew=true;
+        // on the phone the new app content still comes right away, even if the new Android app is not installed yet
       }
     }
     if (num("web") > HB_VERSION){
       const a = asset("app.html");
       // "same" = this version was already fetched earlier and is waiting on the device
       if (a && ["saved","same"].includes(await ghFetch(a.url, "app"))){
-        UPD.ready = true; UPD.avail={t:"Neue Version liegt bereit", s:verName(num("web"))+" – wird beim nächsten Öffnen aktiv.", go:()=>window.AndroidBridge.reloadApp(), lbl:"Jetzt laden"};
+        UPD.ready = true; if (apkNew) return;   // the bell keeps "install the new app"; the content becomes active on the next start
+        UPD.avail={t:"Neue Version liegt bereit", s:verName(num("web"))+" – wird beim nächsten Öffnen aktiv.", go:()=>window.AndroidBridge.reloadApp(), lbl:"Jetzt laden"};
         if (auto){ window.AndroidBridge.reloadApp(); return; }
         toast("Neue Version ist da", ()=>window.AndroidBridge.reloadApp(), "Jetzt laden", 15000);
         UPD.msg = verName(num("web")) + " ist bereit – wird beim nächsten Öffnen aktiv"; return;
       }
     }
-    UPD.msg = "Aktuell – " + verName(HB_VERSION);
+    if (!apkNew) UPD.msg = "Aktuell – " + verName(HB_VERSION);
   } catch(e){ UPD.msg = e.message || "Prüfen hat nicht geklappt"; }
   finally { UPD.busy=false; UPD.ts=Date.now(); renderUpd(); updateBell(); }
 }
