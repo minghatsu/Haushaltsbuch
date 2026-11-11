@@ -122,7 +122,7 @@ if (IS_PC){
   const LEG=[["impressum","Impressum"],["datenschutz","Datenschutz"],["agb","Nutzungsbedingungen"],["lizenzen","Lizenzen"]].filter(([k])=>LEGAL[k]);
   document.body.insertAdjacentHTML("beforeend", `<footer class="pcfoot" id="pcFoot"><span class="pcfn"><b>Finanz MAMI</b> · PC <span id="pcVer"></span></span>
     <button class="pcfs" id="pcSync" data-spgo="sync"><i></i><span id="pcSyncT"></span></button>
-    <span class="pcfr"><button data-spgo="neu">Neu in dieser Version</button><button data-spgo="hilfe">Hilfe</button><button data-spgo="feedback">Feedback</button>
+    <span class="pcfr"><button data-spgo="neu">Neu in dieser Version</button><button data-spgo="feedback">Feedback</button>
     ${LEG.map(([k,t])=>`<button data-pclegal="${k}">${t}</button>`).join("")}</span></footer>
     <div class="backdrop" id="pcLegalBg" hidden><div class="sheet pclegal" role="dialog" aria-modal="true"><div class="sheet-head"><h2 id="pcLegalT"></h2><button class="icon-btn" data-pclegalclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="legal" id="pcLegalB"></div></div></div>`);
   const foot=()=>{ const v=$("pcVer"); if (v) v.textContent="v"+curVerShort();
@@ -386,4 +386,9 @@ if (IS_PC){
     [...sec.querySelectorAll(".pchero, #v-home .hblock > *, :scope > .card, :scope > .cols .card, :scope .card")].filter(e=>!e.closest(".cubestage")).slice(0,16)
       .forEach((c,i)=>c.animate([{boxShadow:"0 0 0 0 rgba(63,191,138,0)"},{boxShadow:"0 0 0 3px rgba(63,191,138,.45)"},{boxShadow:"0 0 0 0 rgba(63,191,138,0)"}],{duration:900,delay:i*55,easing:"ease-out"}));
   }
+}
+/* help: a "?" button in the header, next to light / dark */
+if (IS_PC){
+  const th=$("pcTheme");
+  if (th && !$("pcHelp")) th.insertAdjacentHTML("beforebegin", `<button class="roundbtn pchelp" id="pcHelp" data-spgo="hilfe" aria-label="Hilfe" title="Hilfe – Fragen und Antworten"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.9.7c0 1.7-2.5 2.2-2.5 3.8"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg></button>`);
 }
