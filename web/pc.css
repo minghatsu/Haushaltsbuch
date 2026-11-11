@@ -134,3 +134,11 @@ html.pc[data-theme="dark"] .pcsm .pcorb{r:9;fill:#cfe0ff;transform:rotate(-20deg
 html.pc[data-theme="dark"] .pcsm .pccut{cx:17;cy:7}
 html.pc[data-theme="dark"] .pcsm .pcrays{transform:rotate(90deg) scale(.4);opacity:0}
 ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+/* "+" as a big round button like on the phone */
+html.pc .tab.plus{width:72px;height:72px;padding:0;border-radius:50%;justify-content:center;background:var(--accent);color:#fff;box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 45%,transparent);transition:transform .25s cubic-bezier(.3,.7,.3,1),box-shadow .2s}
+html.pc .tab.plus .tlabel{display:none}
+html.pc .tab.plus svg.i{width:32px;height:32px;transition:transform .3s cubic-bezier(.3,.7,.3,1)}
+html.pc .tab.plus:hover{transform:scale(1.06)}
+html.pc .tab.plus.open svg.i{transform:rotate(135deg)}
+html.pc .fan{z-index:42}
+html.pc .fanb{width:68px;height:68px;margin:-34px 0 0 -34px}

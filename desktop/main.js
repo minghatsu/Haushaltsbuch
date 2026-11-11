@@ -340,6 +340,55 @@ ipcMain.on("fetchImage", async (e, req) => {
   e.sender.executeJavaScript(`window.hbImgDone && window.hbImgDone(${JSON.stringify(req.id)}, ${JSON.stringify(data)})`).catch(() => {});
 });
 
+// scanner: Windows Image Acquisition (WIA) – the first scanner found scans one page without any dialog,
+// the picture comes back to the app as JPEG (data URL) and goes into the same check window as a photo
+const WIA_JPEG = "{B96B3CAE-0728-11D3-9D7B-0000F81EF32E}";
+const SCAN_PS = `
+$ErrorActionPreference = "Stop"
+try {
+  $dm = New-Object -ComObject WIA.DeviceManager
+  $dev = $null
+  foreach ($i in $dm.DeviceInfos) { if ($i.Type -eq 1) { $dev = $i.Connect(); break } }
+  if (-not $dev) { Write-Output "ERR:noscanner"; exit }
+  $item = $dev.Items.Item(1)
+  foreach ($p in $item.Properties) {
+    if ($p.PropertyID -eq 6147 -or $p.PropertyID -eq 6148) { try { $p.Value = 300 } catch {} }
+    if ($p.PropertyID -eq 6146) { try { $p.Value = 1 } catch {} }
+  }
+  $img = $item.Transfer("${WIA_JPEG}")
+  if ($img.FormatID -ne "${WIA_JPEG}") {
+    $ip = New-Object -ComObject WIA.ImageProcess
+    $ip.Filters.Add($ip.FilterInfos.Item("Convert").FilterID)
+    $ip.Filters.Item(1).Properties.Item("FormatID").Value = "${WIA_JPEG}"
+    $ip.Filters.Item(1).Properties.Item("Quality").Value = 90
+    $img = $ip.Apply($img)
+  }
+  $f = Join-Path $env:TEMP ("fm-scan-" + [guid]::NewGuid().ToString() + ".jpg")
+  $img.SaveFile($f)
+  Write-Output ("OK:" + $f)
+} catch { Write-Output ("ERR:" + $_.Exception.Message) }
+`;
+let scanBusy = false;
+ipcMain.on("scan", (e, id) => {
+  const done = (data, err) => { if (!e.sender.isDestroyed()) e.sender.executeJavaScript(`window.hbScanDone && window.hbScanDone(${JSON.stringify(String(id))}, ${JSON.stringify(data)}, ${JSON.stringify(err)})`).catch(() => {}); };
+  if (process.platform !== "win32") return done(null, "Scannen geht nur unter Windows");
+  if (scanBusy) return done(null, "Der Scanner arbeitet schon");
+  scanBusy = true;
+  const enc = Buffer.from(SCAN_PS, "utf16le").toString("base64");
+  require("child_process").execFile("powershell.exe", ["-NoProfile", "-NonInteractive", "-STA", "-ExecutionPolicy", "Bypass", "-EncodedCommand", enc],
+    { timeout: 180000, windowsHide: true, maxBuffer: 1024 * 1024 }, (err, stdout) => {
+      scanBusy = false;
+      const out = String(stdout || "").trim().split(/\r?\n/).pop() || "";
+      if (out.startsWith("OK:")) {
+        const f = out.slice(3).trim();
+        try { const b = fs.readFileSync(f); fs.unlink(f, () => {}); return done("data:image/jpeg;base64," + b.toString("base64"), ""); }
+        catch (x) { return done(null, "Der Scan konnte nicht gelesen werden"); }
+      }
+      if (out === "ERR:noscanner") return done(null, "noscanner");
+      done(null, out.startsWith("ERR:") ? out.slice(4) : (err ? String(err.message || err) : "Scannen hat nicht geklappt"));
+    });
+});
+
 // shop offers etc.: a window of its own on top of the app (closes with Esc), instead of the normal browser
 let pageWin = null;
 ipcMain.on("openInApp", (e, url) => {

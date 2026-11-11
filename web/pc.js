@@ -278,3 +278,29 @@ if (IS_PC){
     } else apply();
   });
 }
+/* ---------- "+" : a big round button; it opens the same three circles as on the phone –
+   instead of "Foto" (no camera on the PC) the PC scans straight from the scanner ---------- */
+if (IS_PC){
+  const fan=$("fanBg"), rc=fan && fan.querySelector('[data-addpick="receipt"]');
+  if (rc){ rc.dataset.addpick="pcscan"; rc.innerHTML=`<svg class="i" viewBox="0 0 24 24"><path d="M4 14h16v4.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"/><path d="M6 14 8.5 5.5h7L18 14"/><path d="M7.5 17h3"/></svg><span>Scannen</span>`; }
+  // always the circles (not the list window of the wide layout); they open to the left and upwards, the button sits in the corner
+  openAddMenu = () => { if (!fan.hidden){ fanClose(); return; } fanOpen();
+    const R=140; [180,135,90].forEach((a,i)=>{ const t=a*Math.PI/180, b=fan.children[i]; b.style.setProperty("--dx", Math.round(Math.cos(t)*R)+"px"); b.style.setProperty("--dy", Math.round(-Math.sin(t)*R-14)+"px"); }); };
+  const SCANW={}; window.hbScanDone=(id,data,err)=>{ const f=SCANW[id]; if (f){ delete SCANW[id]; f(data,err); } };
+  const scanNow=()=>new Promise(ok=>{ const id=newId(); SCANW[id]=(d,e)=>ok({d,e}); window.AndroidBridge.scan(id); });
+  async function pcScan(){
+    if (!window.AndroidBridge || !window.AndroidBridge.scan){ toast("Für den Scanner einmal die neue PC-App installieren – bis dahin kannst du ein Bild auswählen", null, null, 7000); return smartScanFallback({}); }
+    toast("Scanner läuft … Beleg bitte auflegen", null, null, 60000);
+    const {d,e}=await scanNow();
+    if (!d){ toast(e==="noscanner" ? "Kein Scanner gefunden – ist er eingeschaltet und angeschlossen?" : "Scannen hat nicht geklappt: "+e, e==="noscanner"?()=>smartScanFallback({}):null, e==="noscanner"?"Bild wählen":null, 9000); return; }
+    toast("Gescannt", null, null, 1200);
+    try {
+      let img=d; try { const blob=await (await fetch(d)).blob(); img=await shrinkImage(new File([blob],"scan.jpg",{type:"image/jpeg"})); } catch(_){}
+      const rv=await docReview(img,{}); if (!rv) return; if (rv.action==="retake") return pcScan(); img=rv.img;
+      scanWorking(true); const lines=await ocrDataUrl(img); scanWorking(false);
+      const im=await loadImg(img), r=docClassify(lines||[], im.naturalHeight/im.naturalWidth);
+      camReview({type:(r&&r.type)||"rcpt", img, lines:lines||[], W:im.naturalWidth, H:im.naturalHeight, noBoxes:false});
+    } catch(x){ scanWorking(false); toast(x.message||"Der Scan konnte nicht gelesen werden"); }
+  }
+  document.addEventListener("click", e=>{ const b=e.target.closest('[data-addpick="pcscan"]'); if (!b) return; e.stopImmediatePropagation(); closeAddMenu(); setTimeout(pcScan, 120); }, true);
+}
