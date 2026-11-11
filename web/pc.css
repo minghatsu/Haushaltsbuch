@@ -9,13 +9,19 @@ html.pc .tabs{position:fixed;top:14px;left:0;right:0;bottom:auto;margin-inline:a
   flex-direction:row;align-items:center;gap:4px;padding:5px;border-radius:999px;border:0;background:var(--surface);box-shadow:0 1px 3px #0000000f,0 8px 24px #13241b0f;overflow:visible;z-index:40}
 html.pc .tabs .brand{position:fixed;left:40px;top:24px;padding:0;font:800 20px Georgia,"Times New Roman",serif;letter-spacing:-.01em;color:var(--fg);transform:none}
 html.pc .tabs .spacer{display:none}
-html.pc .tab{flex:none;height:auto;padding:9px 18px;border-radius:999px;font:600 14.5px var(--f-body);color:var(--muted);background:none;gap:0}
-html.pc .tab:not(.plus) svg.i{display:none}
-html.pc .tab .tname{display:inline}
+html.pc .tab{flex:none;height:auto;min-width:58px;padding:9px 16px;border-radius:999px;font:700 12px var(--f-body);color:var(--muted);background:none;gap:0;flex-direction:column;align-items:center;justify-content:center;transition:background .25s,color .25s,padding .25s,border-radius .25s}
+html.pc .tab:not(.plus) svg.i{display:block;width:22px;height:22px;transition:transform .3s cubic-bezier(.3,.7,.3,1),color .25s}
+html.pc .tab .tname{display:block;max-height:0;max-width:0;opacity:0;overflow:hidden;white-space:nowrap;transition:max-height .25s,max-width .3s,opacity .2s,margin .25s}
 html.pc .tab .tname,html.pc .tab .tname *,html.pc .tab[aria-selected="true"] .tname{font-size:inherit!important;font-weight:inherit}
 html.pc .tab .tlong{display:inline}html.pc .tab .tshort{display:none}
 html.pc .tab:hover{background:var(--sunk);color:var(--fg)}
-html.pc .tab[aria-selected="true"],html.pc .tab[aria-selected="true"] *{background:var(--fg);color:var(--bg)!important}html.pc .tab[aria-selected="true"] *{background:none}
+html.pc .tab[data-go="home"]{--tc:#1a7a5c}html.pc .tab[data-go="list"]{--tc:#3d63a8}html.pc .tab[data-go="fix"]{--tc:#c27c0e}html.pc .tab[data-go="shop"]{--tc:#d14d72}html.pc .tab[data-go="year"]{--tc:#0e8aa0}html.pc .tab[data-go="more"]{--tc:#6b5bb0}
+html.pc[data-theme="dark"] .tab[data-go]{--tc2:color-mix(in srgb,var(--tc) 55%,#fff)}
+html.pc .tab:not(.plus):hover{color:var(--tc,var(--fg));background:color-mix(in srgb,var(--tc,#888) 9%,transparent)}
+html.pc .tab[aria-selected="true"]{background:color-mix(in srgb,var(--tc) 15%,transparent)!important;color:var(--tc2,var(--tc))!important;padding:7px 18px 6px;border-radius:18px}
+html.pc .tab[aria-selected="true"] *{color:inherit!important;background:none!important}
+html.pc .tab[aria-selected="true"] svg.i{transform:translateY(-1px) scale(1.08)}
+html.pc .tab[aria-selected="true"] .tname{max-height:18px;max-width:140px;opacity:1;margin-top:2px}
 html.pc .tab .sdot{top:6px;right:8px}
 html.pc .pcarr{width:38px;height:38px;border:0;border-radius:50%;background:none;color:var(--muted);display:grid;place-items:center;cursor:pointer;flex:none}
 html.pc .pcarr:hover{background:var(--sunk);color:var(--fg)}
@@ -27,7 +33,7 @@ html.pc .tab.plus .tlabel{display:inline}
 html.pc .tab.plus svg.i{width:20px;height:20px;padding:0!important;background:none!important;color:inherit}
 html.pc .toast{left:50%}
 /* header: below the pills, big serif title */
-html.pc .top{padding-top:64px;background:transparent;box-shadow:none}
+html.pc .top{padding-top:76px;background:transparent;box-shadow:none}
 html.pc .top .wrap{padding-block:14px}
 html.pc .hello b{font:800 34px/1.1 Georgia,"Times New Roman",serif;letter-spacing:-.01em}
 html.pc .card{border-radius:24px}
