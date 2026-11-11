@@ -64,6 +64,11 @@ jobs:
             cat web/index.html
             printf '</body></html>'
           } > app.html
+      - name: Code verkleinern
+        run: |
+          npm i --no-save --prefix /tmp/min terser@5.31.6 >/dev/null
+          if [ "$RUNNER_OS" = "Windows" ]; then PY=python; else PY=python3; fi
+          $PY tools/min.py app.html /tmp/min/node_modules/terser/bin/terser
       - name: pdf.js absichern (Prüfsummen, damit kein veränderter Fremdcode läuft)
         run: |
           for f in pdf.min.js pdf.worker.min.js; do
