@@ -33,22 +33,28 @@ function pcGo(k, nav){
     {duration:300, delay:(a.length-1-i)*22, easing:"cubic-bezier(.55,0,1,.45)", fill:"forwards"}));
   const done=()=>{
     PC_ANIM.pass=true; try { nav(); } finally { PC_ANIM.pass=false; }
+    // the new tiles get their animation right away (in the same frame), so the finished page never flashes up first
+    const news0=pcCalm()?[]:[...pcTiles(document.querySelector(`[data-view="${UI.view}"]`)), ...(window.pcDockEls?pcDockEls():[])];
+    news0.forEach(e=>{ e.style.opacity="0"; });
     outs.forEach(a=>{ try { a.cancel(); } catch(_){} });
-    requestAnimationFrame(()=>{
+    { const dk=$("pcDock"); if (dk && !dk.hidden && !pcCalm()) dk.animate([{opacity:0,transform:"translateX(60px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)",fill:"backwards"}); }
+    {
       const news=pcCalm()?[]:[...pcTiles(document.querySelector(`[data-view="${UI.view}"]`)), ...(window.pcDockEls?pcDockEls():[])];
+      news0.forEach(e=>{ e.style.opacity=""; });
       news.forEach((e,i)=>e.animate([{opacity:0,transform:`translateY(${-Math.round(innerHeight*0.8)}px) rotate(${i%2?-6:6}deg)`},{opacity:1,transform:"translateY(14px) rotate(0)",offset:.6},{transform:"translateY(-6px)",offset:.8},{opacity:1,transform:"none"}],
         {duration:560, delay:i*45, easing:"cubic-bezier(.3,.7,.3,1)", fill:"backwards"}));
       setTimeout(()=>{ PC_ANIM.busy=false; const n=PC_ANIM.next; PC_ANIM.next=null; if (n) n(); }, 160);
       clearTimeout(pcGo.t); pcGo.t=setTimeout(()=>{ if (!PC_ANIM.busy) document.documentElement.classList.remove("pcanim"); }, 160+Math.min(14,news.length)*45+600);
-    });
+    }
   };
   if (outs.length) Promise.all(outs.map(a=>a.finished)).then(done, done); else done();
   return true;
 }
 function pcStep(d){
-  if (PC_ANIM.busy){ PC_ANIM.next=()=>pcStep(d); return true; }
+  // pressed several times during an animation: the steps add up and are done in one go afterwards
+  if (PC_ANIM.busy){ PC_ANIM.pend=(PC_ANIM.pend||0)+d; PC_ANIM.next=()=>{ const n=PC_ANIM.pend; PC_ANIM.pend=0; if (n) pcStep(n); }; return true; }
   const i=PC_ORDER.indexOf(UI.view); if (i<0 || (UI.view==="more" && UI.sp) || document.querySelector(".backdrop:not([hidden])")) return false;
-  const b=document.querySelector(`.tabs [data-go="${PC_ORDER[(i+d+PC_ORDER.length)%PC_ORDER.length]}"]`); if (!b) return false;
+  const b=document.querySelector(`.tabs [data-go="${PC_ORDER[((i+d)%PC_ORDER.length+PC_ORDER.length)%PC_ORDER.length]}"]`); if (!b) return false;
   return pcGo(b.dataset.go, ()=>b.click());
 }
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-pcstep]"); if (b) pcStep(Number(b.dataset.pcstep)); });
@@ -505,7 +511,7 @@ if (IS_PC){
     if (!$("pcDet")){ $("v-list").insertAdjacentHTML("beforeend", `<div class="card pcdet" id="pcDet"></div>`); }
     lc.classList.toggle("pcdiary", list.length>0);
     if (list.length){
-      const days={}; for (const t of list) (days[t.date]=days[t.date]||[]).push(t);
+      const days={}; for (const t of list.slice().reverse()) (days[t.date]=days[t.date]||[]).push(t);   // day 1 first
       lc.innerHTML = Object.entries(days).map(([d,ts])=>{ const net=sum(ts,t=>t.kind==="umbuchung"?0:isIn(t)?t.amount:-t.amount), dt=new Date(d+"T12:00");
         return `<div class="pcday"><div class="pcdh"><span class="pcdn">${pad(dt.getDate())}</span><span class="pcdw"><b>${esc(dt.toLocaleDateString(LOCD(),{weekday:"long"}))}</b><small>${esc(MONTHS[dt.getMonth()])}</small></span><b class="pcdnet ${net>=0?"pos":""}">${net>=0?"+":"−"} ${esc(eur(Math.abs(net)))}</b></div>
           ${ts.map(t=>`<button class="pcbr ${isIn(t)?"inc":""} ${B.sel===t.id?"sel":""}" data-pcsel="${esc(t.id)}">${avatar(t)}<span class="grow"><b>${esc(ttl(t))}${hasReceipt(t.id)?" "+clip:""}</b>${sub(t)?`<small>${esc(sub(t))}</small>`:""}</span><b class="amt">${esc(amtTxt(t))}</b></button>`).join("")}</div>`; }).join("") + `<i class="pchl" aria-hidden="true"></i>`;
