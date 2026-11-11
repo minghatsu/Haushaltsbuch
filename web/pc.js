@@ -411,7 +411,7 @@ if (IS_PC){
     if (!updKey() || FB.busy || (!force && Date.now()-FB.last<4*60*1000)) return fbBtn();
     FB.busy=true; const before=unread();
     try { const j=await devReq("feedlist"); FB.items=j.items||[]; const n=unread(); if (FB.last && n>before) toast(n-before===1?"Neues Feedback ist da":`${n-before} neue Feedbacks sind da`, ()=>fbOpen(), "Ansehen", 8000); FB.last=Date.now(); }
-    catch(e){ FB.err=e.message; }
+    catch(e){ FB.err = /Unbekannte Aktion/i.test(e.message) ? "Auf dem Server läuft noch die alte pair.php – bitte die neue in den Ordner „haushaltsbuch“ kopieren." : e.message; }
     finally { FB.busy=false; fbBtn(); if (!$("pcFbBg").hidden) fbRender(); }
   }
   document.body.insertAdjacentHTML("beforeend", `<div class="backdrop" id="pcFbBg" hidden><div class="sheet pcfbsheet" role="dialog" aria-modal="true" aria-label="Feedback-Eingang"><div class="sheet-head"><h2>Feedback-Eingang</h2><button class="icon-btn" data-pcfbx="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="pcFbBody"></div></div></div>`);
