@@ -142,3 +142,7 @@ html.pc .tab.plus:hover{transform:scale(1.06)}
 html.pc .tab.plus.open svg.i{transform:rotate(135deg)}
 html.pc .fan{z-index:42}
 html.pc .fanb{width:68px;height:68px;margin:-34px 0 0 -34px}
+/* page change: falling tiles must not make the page longer (scrollbar popping up and down = everything jumps) */
+html.pc{scrollbar-gutter:stable}
+html.pc.pcanim main.wrap{overflow:clip}
+html.pc.pcanim{overflow-y:hidden}

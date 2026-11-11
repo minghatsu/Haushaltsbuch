@@ -28,7 +28,7 @@ function pcCalm(){ return matchMedia("(prefers-reduced-motion: reduce)").matches
 function pcGo(k, nav){
   if (PC_ANIM.busy){ PC_ANIM.next=()=>pcGo(k, nav); return true; }   // pressed again during the animation: goes on right after
   const sec=document.querySelector(`[data-view="${UI.view}"]`), olds=pcCalm()?[]:[...pcTiles(sec), ...(window.pcDockEls?pcDockEls():[])];
-  PC_ANIM.busy=true; if (k==="home") pcHome.intro=true;
+  PC_ANIM.busy=true; if (k==="home") pcHome.intro=true; document.documentElement.classList.add("pcanim");
   const outs=olds.map((e,i,a)=>e.animate([{opacity:1,transform:"none"},{opacity:0,transform:`translateY(${Math.round(innerHeight*0.6+i*24)}px) rotate(${i%2?9:-9}deg)`}],
     {duration:300, delay:(a.length-1-i)*22, easing:"cubic-bezier(.55,0,1,.45)", fill:"forwards"}));
   const done=()=>{
@@ -39,6 +39,7 @@ function pcGo(k, nav){
       news.forEach((e,i)=>e.animate([{opacity:0,transform:`translateY(${-Math.round(innerHeight*0.8)}px) rotate(${i%2?-6:6}deg)`},{opacity:1,transform:"translateY(14px) rotate(0)",offset:.6},{transform:"translateY(-6px)",offset:.8},{opacity:1,transform:"none"}],
         {duration:560, delay:i*45, easing:"cubic-bezier(.3,.7,.3,1)", fill:"backwards"}));
       setTimeout(()=>{ PC_ANIM.busy=false; const n=PC_ANIM.next; PC_ANIM.next=null; if (n) n(); }, 160);
+      clearTimeout(pcGo.t); pcGo.t=setTimeout(()=>{ if (!PC_ANIM.busy) document.documentElement.classList.remove("pcanim"); }, 160+Math.min(14,news.length)*45+600);
     });
   };
   if (outs.length) Promise.all(outs.map(a=>a.finished)).then(done, done); else done();
