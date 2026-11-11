@@ -198,8 +198,9 @@ html.pc #v-list>*{grid-column:1}
 html.pc #v-list>#listCard{grid-column:1;grid-row:auto}
 html.pc #v-list>#pcDet{grid-column:2;grid-row:1/span 8;position:sticky;top:104px}
 html.pc #v-list #calCard,html.pc #v-list #lseg{display:none!important}
-html.pc #listCard.pcdiary{background:none;box-shadow:none;border:0;padding:0;columns:2 340px;column-gap:14px;position:relative}
-html.pc .pcday{break-inside:avoid;background:var(--surface);border-radius:22px;padding:16px 18px 10px;margin-bottom:14px;box-shadow:var(--shadow)}
+html.pc #listCard.pcdiary{background:none;box-shadow:none;border:0;padding:0;position:relative}
+html.pc .pccols{display:flex;gap:14px;align-items:flex-start}html.pc .pccol{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px}
+html.pc .pcday{background:var(--surface);border-radius:22px;padding:16px 18px 10px;box-shadow:var(--shadow)}
 html.pc .pcdh{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
 html.pc .pcdn{font:800 34px/1 var(--f-display,Georgia,serif);letter-spacing:-.02em}
 html.pc .pcdw{display:flex;flex-direction:column;line-height:1.2}.pcdw small{color:var(--muted);font-size:12px}
@@ -234,3 +235,19 @@ html.pc .pcrc .paper.empty{height:200px;flex-direction:column;gap:8px;color:#9aa
 html.pc .pcdact{display:flex;gap:10px;align-items:center;margin-top:auto;padding-top:18px;flex-wrap:wrap}
 html.pc .pcdact .btn{min-height:40px;padding:8px 16px}
 html.pc .pcdkey{margin-left:auto}
+
+/* folding a day */
+html.pc .pcdh{cursor:pointer;border-radius:14px;align-items:center!important}
+html.pc .pcdh:focus{outline:none}html.pc .pcdh:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+html.pc .pcdn{position:relative;display:inline-block}
+html.pc .pcdbadge{position:absolute;top:-6px;right:-14px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--accent);color:#fff;font-size:11px;font-weight:800;line-height:18px;font-style:normal;text-align:center;letter-spacing:0;display:none;box-shadow:0 0 0 2px var(--surface)}
+html.pc .pcday.closed .pcdbadge{display:block}
+html.pc .pcdmini{display:none;margin-left:6px}.pcday.closed .pcdmini{display:flex}
+html.pc .pcdmini>span{zoom:.62;margin-left:-10px;border-radius:12px;box-shadow:0 0 0 3px var(--surface);display:flex}
+html.pc .pcdmini>span:first-child{margin-left:0}
+html.pc .pcdchev{width:28px;height:28px;border-radius:50%;background:var(--sunk);display:grid;place-items:center;flex:none;transition:transform .45s cubic-bezier(.3,1.4,.5,1)}
+html.pc .pcday.closed .pcdchev{transform:rotate(-90deg)}
+html.pc .pcday.closed{padding-bottom:16px}
+html.pc .pcday.closed .pcdrows{display:none}
+html.pc .pcdrows{padding:0 8px;margin:0 -8px}
+html.pc .pcdrows .pcbr{width:100%;margin-left:0;margin-right:0}

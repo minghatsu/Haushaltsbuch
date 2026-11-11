@@ -184,6 +184,8 @@ if (IS_PC){
     "Art":["Type","Tür","Тип","Тип","Rodzaj","النوع","Tip"],
     "Netto":["Net","Net","Нетто","Нетто","Netto","الصافي","Net"],
     "Text":["Text","Metin","Текст","Текст","Tekst","النص","Text"],
+    "Einklappen":["Collapse","Daralt","Свернуть","Згорнути","Zwiń","طيّ","Restrânge"],
+    "Aufklappen":["Expand","Genişlet","Развернуть","Розгорнути","Rozwiń","توسيع","Extinde"],
     "Ja":["Yes","Evet","Да","Так","Tak","نعم","Da"],"Nein":["No","Hayır","Нет","Ні","Nie","لا","Nu"],
     "Abgleich aus":["Sync off","Eşitleme kapalı","Синхронизация выкл.","Синхронізацію вимкнено","Synchronizacja wył.","المزامنة متوقفة","Sincronizare oprită"]};
   const LL=["en","tr","ru","uk","pl","ar","ro"];
@@ -496,7 +498,10 @@ if (IS_PC){
 }
 /* ---------- Buchungen: diary (one card per day) + the chosen booking big on the right ("Beleg wird gedruckt") ---------- */
 if (IS_PC){
-  const B={sel:null, sig:"", arm:null, armT:0};
+  const B={sel:null, sig:"", arm:null, armT:0, closed:new Set(), busy:new Set(), n:0};
+  try { (JSON.parse(localStorage.getItem("hb-pc-closed")||"[]")||[]).forEach(d=>B.closed.add(d)); } catch(_){}
+  const saveClosed=()=>{ try { localStorage.setItem("hb-pc-closed", JSON.stringify([...B.closed].filter(d=>d>=shiftYm(ymOf(new Date()),-24)))); } catch(_){} };
+  function nCols(){ const lc=$("listCard"), w=lc && lc.clientWidth; return Math.max(1, Math.floor(((w||720)+14)/(330+14))); }
   const isIn=t=>t.kind==="einnahme"||(t.kind==="umbuchung"&&t._k0==="einnahme");
   const ttl=t=>t.note||t.cat||KIND_LABEL[t.kind];
   const amtTxt=(t,v)=>(t.kind==="umbuchung"?"":isIn(t)?"+ ":"− ")+eur(v==null?t.amount:v);
@@ -512,9 +517,14 @@ if (IS_PC){
     lc.classList.toggle("pcdiary", list.length>0);
     if (list.length){
       const days={}; for (const t of list.slice().reverse()) (days[t.date]=days[t.date]||[]).push(t);   // day 1 first
-      lc.innerHTML = Object.entries(days).map(([d,ts])=>{ const net=sum(ts,t=>t.kind==="umbuchung"?0:isIn(t)?t.amount:-t.amount), dt=new Date(d+"T12:00");
-        return `<div class="pcday"><div class="pcdh"><span class="pcdn">${pad(dt.getDate())}</span><span class="pcdw"><b>${esc(dt.toLocaleDateString(LOCD(),{weekday:"long"}))}</b><small>${esc(MONTHS[dt.getMonth()])}</small></span><b class="pcdnet ${net>=0?"pos":""}">${net>=0?"+":"−"} ${esc(eur(Math.abs(net)))}</b></div>
-          ${ts.map(t=>`<button class="pcbr ${isIn(t)?"inc":""} ${B.sel===t.id?"sel":""}" data-pcsel="${esc(t.id)}">${avatar(t)}<span class="grow"><b>${esc(ttl(t))}${hasReceipt(t.id)?" "+clip:""}</b>${sub(t)?`<small>${esc(sub(t))}</small>`:""}</span><b class="amt">${esc(amtTxt(t))}</b></button>`).join("")}</div>`; }).join("") + `<i class="pchl" aria-hidden="true"></i>`;
+      const chev=`<svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m6 9 6 6 6-6"/></svg>`;
+      const card=([d,ts])=>{ const net=sum(ts,t=>t.kind==="umbuchung"?0:isIn(t)?t.amount:-t.amount), dt=new Date(d+"T12:00"), cl=B.closed.has(d);
+        return `<div class="pcday ${cl?"closed":""}" data-pcday="${d}"><div class="pcdh" data-pcfold="${d}" role="button" tabindex="0" aria-expanded="${!cl}" title="${cl?"Aufklappen":"Einklappen"}"><span class="pcdn">${pad(dt.getDate())}<i class="pcdbadge">${ts.length}</i></span><span class="pcdw"><b>${esc(dt.toLocaleDateString(LOCD(),{weekday:"long"}))}</b><small>${esc(MONTHS[dt.getMonth()])}</small></span><span class="pcdmini" aria-hidden="true">${ts.slice(0,5).map(t=>`<span>${avatar(t)}</span>`).join("")}</span><b class="pcdnet ${net>=0?"pos":""}">${net>=0?"+":"−"} ${esc(eur(Math.abs(net)))}</b><span class="pcdchev">${chev}</span></div>
+          <div class="pcdrows">${ts.map(t=>`<button class="pcbr ${isIn(t)?"inc":""} ${B.sel===t.id?"sel":""}" data-pcsel="${esc(t.id)}">${avatar(t)}<span class="grow"><b>${esc(ttl(t))}${hasReceipt(t.id)?" "+clip:""}</b>${sub(t)?`<small>${esc(sub(t))}</small>`:""}</span><b class="amt">${esc(amtTxt(t))}</b></button>`).join("")}</div></div>`; };
+      // fixed columns, filled from top left (day 1) to bottom right (last day) – folding a day never moves cards to another column
+      const ents=Object.entries(days), n=nCols(), w=ents.map(([d,ts])=>B.closed.has(d)?1.3:1.6+ts.length), tot=sum(w,x=>x), cols=[[]]; let acc=0;
+      ents.forEach((e,i)=>{ if (cols.length<n && cols[cols.length-1].length && acc+w[i]/2>tot*cols.length/n) cols.push([]); cols[cols.length-1].push(e); acc+=w[i]; });
+      B.n=n; lc.innerHTML = `<div class="pccols">${cols.map(c=>`<div class="pccol">${c.map(card).join("")}</div>`).join("")}</div><i class="pchl" aria-hidden="true"></i>`;
     }
     if (B.sel && !list.some(t=>t.id===B.sel)) B.sel=null;
     placeHl(false); det(false);
@@ -523,7 +533,7 @@ if (IS_PC){
     const lc=$("listCard"), hl=lc && lc.querySelector(".pchl"); if (!hl) return;
     const r=B.sel && lc.querySelector(`[data-pcsel="${CSS.escape(B.sel)}"]`);
     lc.querySelectorAll(".pcbr").forEach(x=>x.classList.toggle("sel", x===r));
-    if (!r){ hl.style.opacity=0; return; }
+    if (!r || r.closest(".pcday.closed") || !r.offsetHeight){ hl.style.opacity=0; return; }
     const cr=lc.getBoundingClientRect(), b=r.getBoundingClientRect();
     const to={left:b.left-cr.left+"px", top:b.top-cr.top+"px", width:b.width+"px", height:b.height+"px"};
     if (anim && hl.style.opacity==="1" && !pcCalm()){ const fr={left:hl.style.left, top:hl.style.top, width:hl.style.width, height:hl.style.height}; hl.animate([fr,to],{duration:380,easing:"cubic-bezier(.2,.8,.2,1)"}); }
@@ -585,8 +595,44 @@ if (IS_PC){
     if (/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement||{}).tagName||"") || !$("sheetBg").hidden || document.querySelector(".backdrop.show:not([hidden])")) return;
     if (e.key==="Escape"){ if (B.sel){ B.sel=null; placeHl(false); det(true); } return; }
     if (e.key==="Enter"){ const t=B.sel && S.tx.find(x=>x.id===B.sel); if (t){ e.preventDefault(); openSheet(null, t); } return; }
-    const ids=[...document.querySelectorAll("#listCard [data-pcsel]")].map(x=>x.dataset.pcsel); if (!ids.length) return;
+    const ids=[...document.querySelectorAll("#listCard .pcday:not(.closed) [data-pcsel]")].map(x=>x.dataset.pcsel); if (!ids.length) return;
     e.preventDefault(); if (document.activeElement && document.activeElement.closest && document.activeElement.closest(".pcbr")) document.activeElement.blur(); const i=ids.indexOf(B.sel); pick(ids[i<0 ? 0 : Math.max(0, Math.min(ids.length-1, i+(e.key==="ArrowDown"?1:-1)))]);
   });
-  addEventListener("resize", ()=>{ if (UI.view==="list") placeHl(false); });
+  addEventListener("resize", ()=>{ if (UI.view!=="list") return; if (nCols()!==B.n) renderList(); else placeHl(false); });
+  // fold a day: the bookings fly into the big day number (which pulses and gets a counter); unfolding lets them jump out again
+  function follow(ms){ const t0=performance.now(); const st=n=>{ placeHl(false); if (n-t0<ms) requestAnimationFrame(st); }; requestAnimationFrame(st); }
+  async function fold(d){
+    const day=document.querySelector(`#listCard [data-pcday="${d}"]`); if (!day || B.busy.has(d)) return;
+    const close=!day.classList.contains("closed"), body=day.querySelector(".pcdrows"), dn=day.querySelector(".pcdn"), rows=[...body.children];
+    const badge=day.querySelector(".pcdbadge"), minis=[...day.querySelectorAll(".pcdmini>span")], head=day.querySelector(".pcdh");
+    const E="cubic-bezier(.2,.8,.2,1)", st=()=>{ head.setAttribute("aria-expanded", String(!close)); head.title=close?"Aufklappen":"Einklappen"; if (close) B.closed.add(d); else B.closed.delete(d); saveClosed(); };
+    if (pcCalm()){ day.classList.toggle("closed", close); st(); placeHl(false); return; }
+    B.busy.add(d);
+    try {
+      if (close){
+        const h=body.offsetHeight, nb=dn.getBoundingClientRect(), cx=nb.left+nb.width/2, cy=nb.top+nb.height/2;
+        const fl=rows.map((r,i)=>{ const rb=r.getBoundingClientRect();
+          return r.animate([{transform:"none",opacity:1},{transform:`translate(${cx-(rb.left+rb.width/2)}px,${cy-(rb.top+rb.height/2)}px) scale(.08)`,opacity:.15}],{duration:440,delay:Math.min(i,8)*60,easing:"cubic-bezier(.6,0,.4,1)",fill:"forwards"}); });
+        if (rows.some(r=>r.classList.contains("sel"))) $("listCard").querySelector(".pchl").animate([{opacity:1},{opacity:0}],{duration:200});
+        await Promise.all(fl.map(a=>a.finished));
+        day.classList.add("closed"); st();
+        dn.animate([{transform:"scale(1)"},{transform:"scale(1.3)"},{transform:"scale(1)"}],{duration:380,easing:E});
+        badge.animate([{opacity:0,transform:"scale(0)"},{opacity:1,transform:"scale(1.4)",offset:.6},{opacity:1,transform:"none"}],{duration:420,easing:E});
+        minis.forEach((m,i)=>m.animate([{transform:"scale(0)",opacity:0},{transform:"scale(1.25)",opacity:1,offset:.6},{transform:"none",opacity:1}],{duration:380,delay:120+i*60,easing:E,fill:"backwards"}));
+        body.style.display="block"; body.style.overflow="hidden"; const sh=body.animate([{height:h+"px"},{height:"0px"}],{duration:360,easing:"cubic-bezier(.5,0,.2,1)"}); follow(380); await sh.finished; body.style.display=""; body.style.overflow="";
+        fl.forEach(a=>a.cancel());
+      } else {
+        badge.animate([{opacity:1,transform:"none"},{opacity:0,transform:"scale(0)"}],{duration:200,easing:"ease-in"});
+        minis.forEach(m=>m.animate([{transform:"none",opacity:1},{transform:"scale(0)",opacity:0}],{duration:200,easing:"ease-in"}));
+        day.classList.remove("closed"); st();
+        const h=body.offsetHeight; dn.animate([{transform:"scale(1)"},{transform:"scale(1.25)"},{transform:"scale(1)"}],{duration:380,easing:E});
+        body.animate([{height:"0px"},{height:h+"px"}],{duration:420,easing:E}); follow(1100);
+        const nb=dn.getBoundingClientRect(), cx=nb.left+nb.width/2, cy=nb.top+nb.height/2;
+        await Promise.all(rows.map((r,i)=>{ const rb=r.getBoundingClientRect(), dy=cy-(rb.top+rb.height/2)+ (rb.top-body.getBoundingClientRect().top)*0;
+          return r.animate([{transform:`translate(${cx-(rb.left+rb.width/2)}px,${dy}px) scale(.08)`,opacity:.15},{transform:"translate(0,4px) scale(1.02)",opacity:1,offset:.8},{transform:"none",opacity:1}],{duration:520,delay:Math.min(i,8)*80,easing:E,fill:"backwards"}).finished; }));
+      }
+    } finally { B.busy.delete(d); placeHl(false); }
+  }
+  document.addEventListener("click", e=>{ if (UI.view!=="list") return; const h=e.target.closest("[data-pcfold]"); if (h) fold(h.dataset.pcfold); });
+  document.addEventListener("keydown", e=>{ const h=e.target.closest && e.target.closest("[data-pcfold]"); if (h && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); e.stopPropagation(); fold(h.dataset.pcfold); } }, true);
 }
