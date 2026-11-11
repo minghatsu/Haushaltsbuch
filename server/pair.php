@@ -14,6 +14,7 @@
  *   GET  ?a=pull&since=N                 -> {rev, docs:[{h,b,rev}]}      Authorization: Bearer <vault>.<auth>
  *   POST ?a=push {ops:[{h,b}]}           -> {rev}
  *   POST ?a=wipe                         -> {ok}        löscht den Tresor und alle Daten endgültig
+ *   POST ?a=feedback {kind,text,images}  -> {ok}        Feedback aus der App (landet im Datenordner unter feedback/)
  *
  * Läuft auf normalem PHP 8 mit SQLite, z. B. auf der Synology (Web Station) neben api.php.
  */
@@ -73,6 +74,7 @@ function db(): PDO {
     $pdo->exec('CREATE INDEX IF NOT EXISTS docs_rev ON docs(vault, rev)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS ipcreate (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS ipfails (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)');
+    $pdo->exec('CREATE TABLE IF NOT EXISTS ipfeed (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)');
     return $pdo;
 }
 function q(string $sql, array $p = []): PDOStatement { $s = db()->prepare($sql); $s->execute($p); return $s; }
@@ -107,6 +109,38 @@ try {
     }
 
     if ($a === 'status') out(['pair' => true]);
+
+    // feedback straight from the app (no mail program needed): stored here, a copy goes out by mail if the server can send mail
+    if ($a === 'feedback') {
+        if (!ipCount('ipfeed', 10)) fail('Gerade zu viel Feedback von hier – bitte später noch einmal', 429);
+        $b = body();
+        $kind = in_array($b['kind'] ?? '', ['fehler', 'idee', 'lob'], true) ? $b['kind'] : 'idee';
+        $text = trim(mb_substr((string)($b['text'] ?? ''), 0, 8000));
+        if ($text === '') fail('Bitte etwas schreiben', 400);
+        $imgs = [];
+        foreach (array_slice(is_array($b['images'] ?? null) ? $b['images'] : [], 0, 5) as $u) {
+            if (!is_string($u) || !preg_match('#^data:image/(jpeg|png|webp);base64,([A-Za-z0-9+/=]+)$#', $u, $m)) continue;
+            $bin = base64_decode($m[2], true); if ($bin === false || strlen($bin) > 3000000) continue;
+            $imgs[] = [$m[1] === 'jpeg' ? 'jpg' : $m[1], $bin];
+        }
+        ipBump('ipfeed');
+        $dir = DATA_DIR . '/feedback/' . date('Y-m-d_His') . '_' . $kind . '_' . bin2hex(random_bytes(3));
+        if (!@mkdir($dir, 0700, true)) fail('Feedback konnte nicht gespeichert werden', 500);
+        @file_put_contents($dir . '/feedback.txt', $text . "\n");
+        foreach ($imgs as $i => [$ext, $bin]) @file_put_contents($dir . '/bild-' . ($i + 1) . '.' . $ext, $bin);
+        $cfg = is_file(__DIR__ . '/config.php') ? (include __DIR__ . '/config.php') : [];
+        $to = is_array($cfg) ? (string)($cfg['feedback_to'] ?? '') : '';
+        if ($to !== '' && function_exists('mail')) {
+            $from = (string)($cfg['mail_from'] ?? 'Finanz MAMI <noreply@localhost>');
+            $bd = 'fm' . bin2hex(random_bytes(8));
+            $msg = "--$bd\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($text)) . "\r\n";
+            foreach ($imgs as $i => [$ext, $bin]) $msg .= "--$bd\r\nContent-Type: image/$ext\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename=\"bild-" . ($i + 1) . ".$ext\"\r\n\r\n" . chunk_split(base64_encode($bin)) . "\r\n";
+            $msg .= "--$bd--\r\n";
+            $subj = ['fehler' => 'Fehler', 'idee' => 'Idee', 'lob' => 'Lob'][$kind] . ' – Finanz MAMI';
+            @mail($to, '=?UTF-8?B?' . base64_encode($subj) . '?=', $msg, "From: $from\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary=\"$bd\"");
+        }
+        out(['ok' => true]);
+    }
 
     if ($a === 'create') {
         $b = body(); $id = strtolower((string)($b['vault'] ?? '')); $auth = strtolower((string)($b['auth'] ?? ''));
