@@ -2236,7 +2236,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* ---------- settings extras: abos, export, language, what's new, help, feedback, receipts & storage, devices ---------- */
 const CHANGELOG=[
-  ["0.9.6","11. November 2026",["Sprache & Währung neu gestaltet: Sprachen mit Flaggen, zweite Währung per Antippen, grüner Umrechner, Kursliste mit Flaggen"]],
+  ["0.9.6","11. November 2026",["Sprache & Währung neu gestaltet: Sprachen mit Flaggen, zweite Währung per Antippen, grüner Umrechner, Kursliste mit Flaggen","Wischen in seitlich scrollbaren Leisten wechselt nicht mehr versehentlich die Seite"]],
   ["0.9.5","10. November 2026",["Buchungen eines Tages stehen in der Reihenfolge, in der sie gebucht wurden – die neueste oben. Für schon importierte Buchungen: Kontoauszug einmal neu importieren"]],
   ["0.9.4","10. November 2026",["Startseite: „Noch pro Tag“ – dein Hauptkonto geteilt durch die restlichen Tage im Monat","Die kleine Schulden-Kachel ist weg – die Schulden stehen im eigenen Block"]],
   ["0.9.3","10. November 2026",["Mindestlohn: Stunden pro Woche können sich ändern – mit „ab Monat“ und Pausen","Gehalt & Abrechnungen: Monate ohne Abrechnung werden mit dem Mindestlohn geschätzt, Netto aus deinen Gehaltseingängen"]],
@@ -2478,7 +2478,7 @@ function renderSprache(){ const el=$("spracheEd"); if (!el) return;
     <div class="lgt">${LANGS.map(([k,n])=>`<button class="${k===LANG?"on":""}" data-lang="${k}" data-noi18n lang="${k}" dir="${k==="ar"?"rtl":"ltr"}" aria-pressed="${k===LANG}"><span class="fl" aria-hidden="true">${LANG_FLAG[k]||"🌐"}</span>${n}</button>`).join("")}</div>
     <p class="small muted" style="margin:8px 0 0">Steuern, Gesetze und Rechtstexte bleiben deutsch – übersetzt wird nur die Anzeige.</p>
     <div class="section-title" style="font-size:14px">Zweite Währung auf der Übersicht</div>
-    <div class="fxchips" role="radiogroup" aria-label="Zweite Währung"><button class="${!c2?"on":""}" data-cur2="" role="radio" aria-checked="${!c2}">Keine</button>${FX_CODES.map(c=>`<button class="${c===c2?"on":""}" data-cur2="${c}" role="radio" aria-checked="${c===c2}" title="${esc(curName(c))}" data-noi18n>${CUR_FLAG[c]||""} ${c}</button>`).join("")}</div>
+    <div class="fxchips" data-noswipe role="radiogroup" aria-label="Zweite Währung"><button class="${!c2?"on":""}" data-cur2="" role="radio" aria-checked="${!c2}">Keine</button>${FX_CODES.map(c=>`<button class="${c===c2?"on":""}" data-cur2="${c}" role="radio" aria-checked="${c===c2}" title="${esc(curName(c))}" data-noi18n>${CUR_FLAG[c]||""} ${c}</button>`).join("")}</div>
     <p class="small muted" style="margin:2px 0 0">Hauptwährung bleibt Euro (€) – Beträge werden in Euro gespeichert, dein Kontostand erscheint zusätzlich umgerechnet.</p>
     <div class="section-title" style="font-size:14px">Umrechner</div>
     <div class="fxcard"><div class="r"><input id="fxA" inputmode="decimal" autocomplete="off" aria-label="Betrag" value="${esc(u.a)}"><select id="fxFrom" aria-label="Von Währung" data-noi18n>${opts(u.from)}</select></div>
@@ -7965,7 +7965,9 @@ $("loginGo").onclick = doLogin;
 (function(){
   const ORDER=["home","list","fix","shop","year","more"], RENDER={shop:()=>renderShop(), home:()=>renderHome(), list:()=>renderList(), fix:()=>renderFix(), year:()=>renderYear(), ziele:()=>renderZiele(), more:()=>{ renderMore(); renderSpPages(); }};
   const main=document.querySelector("main.wrap");
-  const blocked=t=>t.closest(".sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,#astack,.srail,.bt3,.bubbles,input,select,textarea,.wiz,[data-noswipe]") || document.querySelector(".backdrop:not([hidden])");
+  // a row that scrolls sideways itself (e.g. the currency chips) keeps the swipe – the page must not change
+  const hScroll=t=>{ for (let n=t; n && n!==document.body; n=n.parentElement){ if (n.scrollWidth>n.clientWidth+2){ const ox=getComputedStyle(n).overflowX; if (ox==="auto"||ox==="scroll") return true; } } return false; };
+  const blocked=t=>t.closest(".sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,#astack,.srail,.bt3,.bubbles,.fxchips,input,select,textarea,.wiz,[data-noswipe]") || hScroll(t) || document.querySelector(".backdrop:not([hidden])");
   const sec=k=>document.querySelector(`[data-view="${k}"]`);
   /* Phones drop parts of a long page that is turned in 3D. So we never turn the real pages:
      for the turn we take two screen-sized copies (current page as it is scrolled, next page from its top)
