@@ -3,7 +3,7 @@ html.pc{--hw:clamp(420px,26vw,640px)}
 html.pc:not([data-theme="dark"]){--bg:#f3f1ea;--surface:#fffdf8;--sunk:#ece8dd;--line:#e5e1d6}
 html.pc body{padding-left:0!important;background:var(--bg)}
 html.pc .wrap{max-width:none;padding-left:40px;padding-right:40px}
-html.pc main.wrap{padding-bottom:120px}
+html.pc main.wrap{padding-bottom:56px}
 /* pages as pills on top, in the middle */
 html.pc .tabs{position:fixed;top:14px;left:0;right:0;bottom:auto;margin-inline:auto;transform:none;width:max-content;height:auto;max-width:calc(100vw - 420px);
   flex-direction:row;align-items:center;gap:4px;padding:5px;border-radius:999px;border:0;background:var(--surface);box-shadow:0 1px 3px #0000000f,0 8px 24px #13241b0f;overflow:visible;z-index:40}
@@ -33,7 +33,7 @@ html.pc .hello b{font:800 34px/1.1 Georgia,"Times New Roman",serif;letter-spacin
 html.pc .card{border-radius:24px}
 html.pc .roundbtn{background:var(--surface)}
 /* start page: the green panel on the left, everything else on the right */
-html.pc #v-home{padding-left:calc(var(--hw) + 28px);min-height:calc(100vh - 190px)}
+html.pc #v-home{padding-left:calc(var(--hw) + 28px)}
 html.pc #v-home .homeTop{display:none!important}
 html.pc .pchero{position:fixed;left:40px;top:164px;bottom:30px;width:var(--hw);border-radius:32px;color:#fff;padding:34px;
   display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(160deg,#1d8a66 0%,#0e5a43 70%);box-shadow:0 18px 40px #0e5a4333}
@@ -84,7 +84,7 @@ html.pc .pcfs[data-st="offline"] i,html.pc .pcfs[data-st="err"] i{background:#c2
 html.pc .pcfr{margin-left:auto;display:flex;gap:18px;flex-wrap:nowrap;overflow:hidden}
 html.pc .tab.plus{bottom:58px}
 html.pc .pchero{bottom:58px}
-html.pc main.wrap{padding-bottom:140px}
+html.pc main.wrap{padding-bottom:56px}
 html.pc .toast{bottom:62px}
 html.pc .pclegal{max-width:820px;max-height:82vh;overflow:auto}
 @media (max-width:1100px){ html.pc .pcfoot .pcfr button[data-spgo]{display:none} }
