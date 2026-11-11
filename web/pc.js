@@ -146,6 +146,19 @@ if (IS_PC){
     "Neu in dieser Version":["New in this version","Bu sürümde yeni","Новое в этой версии","Нове в цій версії","Nowości w tej wersji","الجديد في هذا الإصدار","Nou în această versiune"],
     "Abgeglichen {n}:{n}":["Synced {n}:{n}","Eşitlendi {n}:{n}","Синхронизировано {n}:{n}","Синхронізовано {n}:{n}","Zsynchronizowano {n}:{n}","تمت المزامنة {n}:{n}","Sincronizat {n}:{n}"],
     "Wird abgeglichen …":["Syncing …","Eşitleniyor …","Синхронизация …","Синхронізація …","Synchronizacja …","جارٍ المزامنة …","Se sincronizează …"],
+    "Scan prüfen":["Check scan","Taramayı kontrol et","Проверить скан","Перевірити скан","Sprawdź skan","تحقق من المسح","Verifică scanarea"],
+    "Neu scannen":["Scan again","Yeniden tara","Сканировать снова","Сканувати знову","Skanuj ponownie","امسح مرة أخرى","Scanează din nou"],
+    "Scanner":["Scanner","Tarayıcı","Сканер","Сканер","Skaner","الماسح","Scaner"],
+    "Seite leer":["Page empty","Sayfa boş","Страница пустая","Сторінка порожня","Strona pusta","الصفحة فارغة","Pagină goală"],
+    "nichts erkannt":["nothing found","hiçbir şey yok","ничего не найдено","нічого не знайдено","nic nie znaleziono","لم يُعثر على شيء","nimic găsit"],
+    "Gescannt":["Scanned","Tarandı","Отсканировано","Відскановано","Zeskanowano","تم المسح","Scanat"],
+    "{n} dpi":["{n} dpi","{n} dpi","{n} dpi","{n} dpi","{n} dpi","{n} dpi","{n} dpi"],
+    "Beleg":["Receipt","Fiş","Чек","Чек","Paragon","الإيصال","Bon"],
+    "Gefunden":["Found","Bulundu","Найден","Знайдено","Znaleziono","تم العثور عليه","Găsit"],
+    "Nicht gefunden":["Not found","Bulunamadı","Не найден","Не знайдено","Nie znaleziono","لم يُعثر عليه","Negăsit"],
+    "Ecken an den Beleg ziehen":["Drag the corners to the receipt","Köşeleri fişe sürükle","Перетащи углы к чеку","Перетягни кути до чека","Przeciągnij rogi do paragonu","اسحب الزوايا إلى الإيصال","Trage colțurile la bon"],
+    "Die Seite ist leer – leg den Beleg mit der Schrift nach unten auf die Glasscheibe und klicke auf „Neu scannen“.":["The page is empty – put the receipt face down on the glass and click “Scan again”.","Sayfa boş – fişi yazılı yüzü aşağı gelecek şekilde cama koy ve “Yeniden tara”ya tıkla.","Страница пустая – положи чек текстом вниз на стекло и нажми «Сканировать снова».","Сторінка порожня – поклади чек текстом донизу на скло й натисни «Сканувати знову».","Strona jest pusta – połóż paragon tekstem do dołu na szybie i kliknij „Skanuj ponownie”.","الصفحة فارغة – ضع الإيصال ووجهه للأسفل على الزجاج واضغط «امسح مرة أخرى».","Pagina e goală – pune bonul cu fața în jos pe sticlă și apasă „Scanează din nou”."],
+    "Zieh die gelben Ecken an den Rand des Belegs, dann wird nur der Beleg übernommen.":["Drag the yellow corners to the edge of the receipt, then only the receipt is used.","Sarı köşeleri fişin kenarına sürükle, böylece yalnızca fiş alınır.","Перетащи жёлтые углы к краю чека – тогда возьмётся только чек.","Перетягни жовті кути до краю чека – тоді візьметься лише чек.","Przeciągnij żółte rogi do krawędzi paragonu – wtedy zostanie użyty tylko paragon.","اسحب الزوايا الصفراء إلى حافة الإيصال، فيُؤخذ الإيصال فقط.","Trage colțurile galbene la marginea bonului, apoi se preia doar bonul."],
     "Abgleich aus":["Sync off","Eşitleme kapalı","Синхронизация выкл.","Синхронізацію вимкнено","Synchronizacja wył.","المزامنة متوقفة","Sincronizare oprită"]};
   const LL=["en","tr","ru","uk","pl","ar","ro"];
   for (const [k,v] of Object.entries(PC_I18N)) if (!I18N_K.includes(k)){ I18N_K.push(k); LL.forEach((l,i)=>{ (I18N_T[l]=I18N_T[l]||[])[I18N_K.length-1]=v[i]; }); }
@@ -288,6 +301,22 @@ if (IS_PC){
     const R=140; [180,135,90].forEach((a,i)=>{ const t=a*Math.PI/180, b=fan.children[i]; b.style.setProperty("--dx", Math.round(Math.cos(t)*R)+"px"); b.style.setProperty("--dy", Math.round(-Math.sin(t)*R-14)+"px"); }); };
   const SCANW={}; window.hbScanDone=(id,data,err)=>{ const f=SCANW[id]; if (f){ delete SCANW[id]; f(data,err); } };
   const scanNow=()=>new Promise(ok=>{ const id=newId(); SCANW[id]=(d,e)=>ok({d,e}); window.AndroidBridge.scan(id); });
+  // the check window speaks about the scanner, not about a phone camera
+  const PCSCAN={on:false};
+  function pcScanTexts(on){ PCSCAN.on=on; const t=document.querySelector("#docRev .drtop b"), r=$("drRetake"), d=$("docRev");
+    if (t) t.textContent=on?"Scan prüfen":"Foto prüfen"; if (r) r.textContent=on?"Neu scannen":"Neu aufnehmen"; if (d) d.setAttribute("aria-label", on?"Scan prüfen":"Foto prüfen"); }
+  const _dc=drChecks; drChecks = () => {
+    if (!PCSCAN.on) return _dc();
+    const A=DR.A, info=DR.info, blank=A.sharp<8 && A.light>190, R=[];
+    R.push(["Scanner", ...(blank?["bad","Seite leer","nichts erkannt"]:["good","Gescannt","300 dpi"])]);
+    R.push(["Beleg", ...(A.found?["good","Gefunden","4 Ecken"]:["warn","Nicht gefunden","Ecken an den Beleg ziehen"])]);
+    if (info.lines){ const n=info.lines.length, r=n?parseReceipt(info.lines):{}; R.push(["Text", ...(!n?["bad","Kein Text",""]:r.amount==null?["warn",`${n} Zeilen`,"kein Betrag"]:["good",`${n} Zeilen`,"Betrag gefunden"])]); }
+    $("drChecks").innerHTML=R.map(([t,lv,a,b])=>`<div class="drc ${lv}"><i></i><span><small>${t}</small><b>${a}</b>${b?`<em>${b}</em>`:""}</span></div>`).join("");
+    const tips=[];
+    if (blank) tips.push("Die Seite ist leer – leg den Beleg mit der Schrift nach unten auf die Glasscheibe und klicke auf „Neu scannen“.");
+    else if (!A.found) tips.push("Zieh die gelben Ecken an den Rand des Belegs, dann wird nur der Beleg übernommen.");
+    $("drTip").textContent=tips.join(" "); $("drTip").hidden=!tips.length;
+  };
   async function pcScan(){
     if (!window.AndroidBridge || !window.AndroidBridge.scan){ toast("Für den Scanner einmal die neue PC-App installieren – bis dahin kannst du ein Bild auswählen", null, null, 7000); return smartScanFallback({}); }
     toast("Scanner läuft … Beleg bitte auflegen", null, null, 60000);
@@ -296,7 +325,8 @@ if (IS_PC){
     toast("Gescannt", null, null, 1200);
     try {
       let img=d; try { const blob=await (await fetch(d)).blob(); img=await shrinkImage(new File([blob],"scan.jpg",{type:"image/jpeg"})); } catch(_){}
-      const rv=await docReview(img,{}); if (!rv) return; if (rv.action==="retake") return pcScan(); img=rv.img;
+      pcScanTexts(true); let rv; try { rv=await docReview(img,{}); } finally { pcScanTexts(false); }
+      if (!rv) return; if (rv.action==="retake") return pcScan(); img=rv.img;
       scanWorking(true); const lines=await ocrDataUrl(img); scanWorking(false);
       const im=await loadImg(img), r=docClassify(lines||[], im.naturalHeight/im.naturalWidth);
       camReview({type:(r&&r.type)||"rcpt", img, lines:lines||[], W:im.naturalWidth, H:im.naturalHeight, noBoxes:false});
