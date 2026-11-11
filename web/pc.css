@@ -112,3 +112,14 @@ html.pc.pcdocked main.wrap{padding-right:110px}
 html.pc.pcdocked .tab.plus{right:110px}
 /* "Startseite anpassen" lives on the page itself on the PC */
 html.pc #v-home button[data-scroll="homeEd"]{display:none}
+/* accounts and spaces as small tiles in the green panel */
+html.pc .pcaccs{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;max-height:34vh;overflow:auto;scrollbar-width:thin;scrollbar-color:#ffffff40 transparent;flex:none}
+html.pc .pcaccs button{border:1px solid #ffffff22;background:#ffffff1f;color:#fff;border-radius:18px;padding:12px 14px;text-align:left;cursor:pointer;font:inherit;min-width:0;transition:background .15s,transform .15s}
+html.pc .pcaccs button:hover{background:#ffffff33;transform:translateY(-2px)}
+html.pc .pcaccs button.main{grid-column:1/-1;background:#ffffff2e}
+html.pc .pcaccs span{display:block;color:#bfe6d4;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.pc .pcaccs b{font:800 20px var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap}
+html.pc .pcaccs button.main b{font-size:24px}
+html.pc .pcaccs button.add b{color:#bfe6d4}
+html.pc .pcaccs button.add:nth-child(even){grid-column:1/-1}
+html.pc .pcring{width:min(230px,24vh)}

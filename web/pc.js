@@ -24,7 +24,7 @@ function pcTiles(sec){
   }
   return out.filter(e=>{ if (e.hidden || e.closest("[hidden]")) return false; const r=e.getBoundingClientRect(); return r.width>0 && r.height>0 && r.bottom>0 && r.top<innerHeight; }).slice(0,14);
 }
-const pcCalm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+function pcCalm(){ return matchMedia("(prefers-reduced-motion: reduce)").matches; }
 function pcGo(k, nav){
   if (PC_ANIM.busy){ PC_ANIM.next=()=>pcGo(k, nav); return true; }   // pressed again during the animation: goes on right after
   const sec=document.querySelector(`[data-view="${UI.view}"]`), olds=pcCalm()?[]:[...pcTiles(sec), ...(window.pcDockEls?pcDockEls():[])];
@@ -94,7 +94,8 @@ function pcHome(o){
   const html=`<aside class="pchero" id="pcHero">
     <small class="pchi"><span>${esc(greet)}</span>${first?", "+esc(first):""} · <span>${esc(MONTHS[m-1])} ${y}</span></small>
     <div class="pcbal" data-cv="${tot}" data-cf="eur">${esc(eur(tot))}</div>
-    <span class="pcsub">${many?`<span>auf allen Konten</span> · ${esc(mainName||"Hauptkonto")} ${esc(eur(mainBal))}`:"auf deinem Konto"}</span>
+    <span class="pcsub">${many?"auf allen Konten":"auf deinem Konto"}</span>
+    <div class="pcaccs">${accts.filter(a=>!a.total).map(a=>`<button class="${a.main?"main":""}" data-spgo="konten"><span>${esc(a.main?(mainName||"Hauptkonto"):a.name)}</span><b data-cv="${Number(a.bal)||0}" data-cf="eur">${esc(eur(Number(a.bal)||0))}</b></button>`).join("")}<button class="add" data-spgo="konten"><span>+ Space</span><b>anlegen</b></button></div>
     <button class="pcring" data-go="year" style="--p:${Math.round(pct*100)}" aria-label="Analyse öffnen"><span>${isCur
       ? `<small>noch pro Tag</small><b data-cv="${perDay}">${esc(eur0(perDay))}</b><small>${left} ${left===1?"Tag":"Tage"} übrig</small>`
       : `<small>${c.net>=0?"übrig":"mehr ausgegeben"}</small><b data-cv="${Math.abs(c.net)}">${esc(eur0(Math.abs(c.net)))}</b><small>im ${esc(MONTHS[m-1])}</small>`}</span></button>
