@@ -3377,7 +3377,7 @@ $("hintBg").addEventListener("click", e=>{ if (e.target===$("hintBg") || e.targe
 document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("hintBg").hidden) closeHints(); });
 /* ---------- start page blocks: your own order, each can be hidden ---------- */
 const HOME_BLOCKS = [["cash","Bargeld"],["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["debts","Kredite & Schulden"],["gemeinsam","Gemeinsam"],["recent","Letzte Buchungen"]];   // shop offers now have their own page "Einkauf"
-function homeOrder(){ const o=[...new Set(S.settings.homeOrder||[])].filter(k=>HOME_BLOCKS.some(b=>b[0]===k));   // each block only once (a drag could save one twice) for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; }
+function homeOrder(){ const o=[...new Set(S.settings.homeOrder||[])].filter(k=>HOME_BLOCKS.some(b=>b[0]===k));   /* each block only once (a drag could save one twice) */ for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; }
 function homeBlocks(html){
   const hid=new Set(S.settings.homeHidden||[]), list=homeOrder().filter(k=>!hid.has(k) && html[k] && !(k==="tax"&&!hasSelf()) && !(k==="budgets"&&isJobless())).map(k=>`<div class="hblock" data-hb="${k}">${html[k]}</div>`);
   if (!matchMedia("(min-width:1000px)").matches) return `<div class="hlist">${list.join("")}</div>`;
