@@ -265,7 +265,7 @@ html.pc .pcfd.over,html.pc .pcfnone.over{background:color-mix(in srgb,#1a7a5c 16
 html.pc .pcfd .dh{display:flex;justify-content:space-between;align-items:center;padding:0 2px 2px}
 html.pc .pcfd .dh b{font-family:var(--f-display);font-size:19px;font-weight:800;letter-spacing:-.02em}
 html.pc .pcfd .dh span{font-size:12px;color:var(--muted);font-weight:700}
-html.pc .pcfc{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:8px;align-items:center;background:var(--surface);border-radius:11px;padding:6px 8px 6px 7px;font-size:12.5px;font-weight:600;line-height:1.25;
+html.pc .pcfc{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;grid-template-rows:auto auto;column-gap:6px;align-items:center;background:var(--surface);border-radius:11px;padding:6px 8px 6px 7px;font-size:12.5px;font-weight:600;line-height:1.25;
   box-shadow:inset 3px 0 0 var(--c),0 1px 0 #0000000a;cursor:pointer;user-select:none;transition:opacity .2s,transform .15s;min-width:0}
 html.pc .pcfc:hover{transform:translateY(-1px);box-shadow:inset 3px 0 0 var(--c),0 4px 12px #13241b1a}
 html.pc .pcfc:focus-visible{outline:2px solid var(--c);outline-offset:1px}
@@ -274,7 +274,7 @@ html.pc .pcfc .n{grid-column:2;min-width:0;white-space:nowrap;overflow:hidden;te
 html.pc .pcfc .a{grid-column:2;justify-self:start;border:0;font-size:12px;background:none;padding:0;font:inherit;font-weight:700;color:inherit;cursor:text;font-variant-numeric:tabular-nums}
 html.pc .pcfc .a:hover{text-decoration:underline dotted}
 html.pc .pcfc .fxamt-in{grid-column:2;width:84px;padding:2px 6px;height:24px;font-size:12px}
-html.pc .pcfc .ck{grid-column:3;grid-row:1/3;width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--fg) 22%,transparent);display:grid;place-items:center;transition:background .2s,box-shadow .2s}
+html.pc .pcfc .ck{grid-column:4;grid-row:1/3;width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--fg) 22%,transparent);display:grid;place-items:center;transition:background .2s,box-shadow .2s}
 html.pc .pcfc.on{opacity:.55}
 html.pc .pcfc.on .n,html.pc .pcfc.on .a{text-decoration:line-through}
 html.pc .pcfc.on .ck{background:#1a7a5c;box-shadow:none}
@@ -310,18 +310,19 @@ html.pc .pcfhint{padding:0 6px}
   html.pc #v-fix.pcfcal{grid-template-columns:minmax(0,1fr) 300px;gap:16px}
   html.pc .pcfcalc{padding:12px}html.pc .pcfcalc .grid,html.pc .pcfcalc .wd{gap:6px}
   html.pc .pcfd{padding:7px;border-radius:13px}html.pc .pcfd .dh b{font-size:16px}
-  html.pc .pcfc{grid-template-columns:minmax(0,1fr) auto;padding:5px 6px 5px 8px;column-gap:4px;font-size:12px}
-  html.pc .pcfc>:first-child{display:none}html.pc .pcfc .n,html.pc .pcfc .a,html.pc .pcfc .fxamt-in{grid-column:1}html.pc .pcfc .ck{grid-column:2}
+  html.pc .pcfc{grid-template-columns:minmax(0,1fr) auto auto;padding:5px 6px 5px 8px;column-gap:4px;font-size:12px}
+  html.pc .pcfc>:first-child{display:none}html.pc .pcfc .n,html.pc .pcfc .a,html.pc .pcfc .fxamt-in{grid-column:1}html.pc .pcfc .pe{grid-column:2}html.pc .pcfc .ck{grid-column:3}
   html.pc .pcfsum{padding:18px}html.pc .pcfsum .big{font-size:34px}html.pc .pcfsum .pcfring svg{width:88px}html.pc .pcfsum .pcfring b{font-size:20px}
 }
 
 /* pencil on hover, + to add on a day, the editor bubble */
-html.pc .pcfc .pe{position:absolute;right:4px;top:50%;width:26px;height:26px;margin-top:-13px;border:0;border-radius:9px;display:grid;place-items:center;cursor:pointer;color:var(--fg);
-  background:var(--surface);box-shadow:0 2px 8px #13241b26;opacity:0;transform:scale(.6);transition:opacity .15s,transform .2s cubic-bezier(.3,1.5,.5,1);pointer-events:none}
+html.pc .pcfc .pe{grid-column:3;grid-row:1/3;width:24px;height:24px;border:0;border-radius:8px;padding:0;display:grid;place-items:center;cursor:pointer;color:var(--fg);
+  background:color-mix(in srgb,var(--fg) 7%,transparent);opacity:.35;transition:opacity .15s,transform .2s cubic-bezier(.3,1.5,.5,1),background .15s}
 html.pc .pcfc .pe svg{width:14px;height:14px}
-html.pc .pcfc:hover .pe,html.pc .pcfc:focus-visible .pe{opacity:1;transform:none;pointer-events:auto}
-html.pc .pcfc:hover .ck{opacity:0}
-html.pc .pcfc .pe:hover{background:var(--fg);color:var(--bg)}
+html.pc .pcfc:hover .pe,html.pc .pcfc:focus-visible .pe{opacity:1}
+html.pc .pcfc .pe:hover{background:var(--fg);color:var(--bg);transform:scale(1.12) rotate(-8deg)}
+html.pc .pcfc .pe svg{width:13px;height:13px}
+html.pc .pcfc .ck{width:18px;height:18px}
 html.pc .pcfadd{margin-top:auto;align-self:center;width:26px;height:26px;border:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--muted);
   background:color-mix(in srgb,var(--fg) 7%,transparent);opacity:0;transform:scale(.5);transition:opacity .15s,transform .22s cubic-bezier(.3,1.5,.5,1),background .15s}
 html.pc .pcfadd svg{width:15px;height:15px}
@@ -355,3 +356,4 @@ html.pc .pcfpop .pdel.arm{background:#c0392b;color:#fff;animation:pcfshake .35s}
 @media (prefers-reduced-motion:reduce){html.pc .pcfc .pe,html.pc .pcfadd,html.pc .pcfgr .gi{transition:none}html.pc .pcfpop .pdel.arm{animation:none}}
 @media (max-width:1700px){html.pc .pcfgr .gi{width:28px;height:28px;border-radius:9px}}
 html.pc .pcfpop{width:384px}html.pc .pcfpop .pa .btn{padding-inline:14px}
+@media (max-width:1700px){html.pc .pcfc .pe{grid-column:2}html.pc .pcfc .ck{grid-column:3}}
