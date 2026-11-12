@@ -1222,12 +1222,17 @@ if (IS_PC){
         <text x="${(x+cw/2).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="12" font-weight="${on?800:500}" fill="${on?"var(--fg)":"var(--muted)"}">${esc(MSHORT[i].slice(0,1))}</text><title>${esc(MONTHS[i])}: ${esc(eur0(r.c.income))} rein · ${esc(eur0(r.c.expenses))} raus</title></g>`; });
     return s+`</svg>`; };
   const _ath=anaTabsHtml;
+  // the year sits in "Planung" – the analysis on the left is always the month
+  const _ry=renderYear; renderYear=function(...a){ UI.anaMode="m"; return _ry(...a); };
   anaTabsHtml = function(a){
     const {tiles, GRP, TL, ord, rows, ym, mc, y, inc, exp}=a;
-    const mode=UI.anaMode||"m", cur=ymOf(new Date()), [, mi]=ymParts(ym), mn=MONTHS[mi-1];
+    const mode="m", cur=ymOf(new Date()), [, mi]=ymParts(ym), mn=MONTHS[mi-1];
     const g3=GRP[2]||["Steuer",[]], g3n=/steuer/i.test(g3[0]) ? "Steuer" : String(g3[0]).replace(/&amp;/g,"&").split(/[ &]/)[0];
-    const row=t=>`<button class="arw" data-anaopen="${t.k}" style="--tc:${userCol("ana",t.k)||themeCol(TL[t.k][1], ord.indexOf(t.k))}"><span class="ai">${ic(t.icon,18)}</span><span class="an"><b>${t.k==="wk"&&!hasJob()?"Steuererklärung":TL[t.k][0]}</b><small>${t.sub||""}</small></span><span class="av">${esc(t.short||"")}<span class="ch">›</span></span></button>`;
-    const rowsFor=ks=>{ const ts=tiles.filter(t=>ks.includes(t.k)).sort((p,q)=>ks.indexOf(p.k)-ks.indexOf(q.k)); return ts.length?`<div class="card pcarl"><div class="arl">${ts.map(row).join("")}</div></div>`:""; };
+    const row=t=>`<button class="arw" data-anaopen="${t.k}" style="--tc:${userCol("ana",t.k)||themeCol(TL[t.k][1], ord.indexOf(t.k))}"><span class="ai">${ic(t.icon,18)}</span><span class="an"><b>${t.k==="wk"&&!hasJob()?"Steuererklärung":t.k==="fix"?"Fixkosten geplant":TL[t.k][0]}</b><small>${t.sub||""}</small></span><span class="av">${esc(t.short||"")}<span class="ch">›</span></span></button>`;
+    // nothing twice: the big cards already show the year plan and the tax; no empty savings goals; the balance only once
+    const skip=t=>t.k==="plan"||t.k==="tax"||(t.k==="goal"&&/noch kein/i.test(String(t.sub||"").replace(/<[^>]+>/g,"")));
+    for (const t of tiles) if (t.k==="calc"){ const m=String(t.sub||"").match(/^Stand heute (.+?) · frei (.+)$/); if (m && m[1]===m[2]){ t.sub="Stand heute "+m[1]; t.short=String(t.short||"").replace(/^frei\s+/,""); } }
+    const rowsFor=ks=>{ const ts=tiles.filter(t=>ks.includes(t.k)&&!skip(t)).sort((p,q)=>ks.indexOf(p.k)-ks.indexOf(q.k)); return ts.length?`<div class="card pcarl"><div class="arl">${ts.map(row).join("")}</div></div>`:""; };
     // 1 · Auswertung (Monat oder Jahr)
     const M=mode==="m", net=M?mc.net:inc-exp, income=M?mc.income:inc, expn=M?mc.expenses:exp;
     const fixP=M?mc.fixPaid:sum(rows,r=>r.c.fixPaid);
@@ -1239,11 +1244,11 @@ if (IS_PC){
     const zins=M && ym===cur ? sum(S.debts,d=>debtState(d).zinsNow||0) : 0;
     const ct=catTotals(M?mc.tx:rows.flatMap(r=>r.c.tx), fixP), tot=sum(ct,x=>x[1]), top=ct[0]?ct[0][1]:1;
     const k=(l,v,s,cl,open)=>`<div class="card pcak" ${open?`data-anaopen="${open}"`:""}><small>${l}</small><b class="${cl||""}">${v}</b><span>${s}</span></div>`;
-    const col1=`<div class="pcac"><div class="pcah"><h2>Auswertung</h2><span>${M?esc(mn)+" "+y:"Jahr "+y}</span><div class="anaseg" role="group" aria-label="Zeitraum"><button data-anamode="m" class="${M?"on":""}">Monat</button><button data-anamode="y" class="${M?"":"on"}">Jahr</button></div></div>
+    const col1=`<div class="pcac"><div class="pcah"><h2>Auswertung</h2><span>${esc(mn)+" "+y}</span></div>
       <div class="card pcabig" data-anaopen="kpi"><small>${net>=0?"Übrig":"Mehr ausgegeben"}</small><div class="pcan ${net>=0?"pos":"neg"}">${esc(sg(net))}</div>${netBars(pts,onIdx)}</div>
       <div class="pcakg">${k("Einnahmen",esc(eur0(income)),M?"im "+esc(mn):"bisher "+y,"pos","io")}
         ${k("Ausgaben",esc(eur0(expn)),M?(prev.expenses?`${esc(pm)}: ${esc(eur0(prev.expenses))}`:"keine Daten davor"):`Ø ${esc(eur0(expn/Math.max(1,rows.filter(r=>r.c.expenses>0).length)))} / Monat`,"","trend")}
-        ${k("Fixkosten",esc(eur0(fixP)),income?`${Math.round(fixP/income*100)} % der Einnahmen`:"bezahlt","","fix")}
+        ${k("Fixkosten bezahlt",esc(eur0(fixP)),income?`${Math.round(fixP/income*100)} % der Einnahmen`:"bezahlt","","fix")}
         ${zins>0?k("Zinsen",esc(eur0(zins)),"diesen Monat","neg"):k("Ø pro Tag",esc(eur0(expn/days)),"ausgegeben","","kpi")}</div>
       ${ct.length?`<div class="card pcarl"><div class="pcach"><b>Wohin dein Geld fließt</b><button data-anaopen="cat">Alle ›</button></div>${ct.slice(0,5).map(([c,v])=>`<button class="pcacat" data-anaopen="cat" style="--tc:${catColor("ausgabe",c)}"><span class="ai">${esc(String(c).trim().slice(0,1).toUpperCase())}</span><span class="an"><span class="t"><b>${esc(c)}</b><em>${esc(eur0(v))}</em></span><span class="bar"><i style="width:${Math.max(2,v/top*100).toFixed(1)}%"></i></span></span><small>${tot>0?Math.round(v/tot*100):0} %</small></button>`).join("")}</div>`:`<div class="card pcarl muted pcaempty">Im ${M?esc(mn):y} ist noch nichts gebucht.</div>`}</div>`;
     // 2 · Planung (das Jahr)
