@@ -501,7 +501,7 @@ if (IS_PC){
   const B={sel:null, sig:"", arm:null, armT:0, closed:new Set(), busy:new Set(), n:0};
   try { (JSON.parse(localStorage.getItem("hb-pc-closed")||"[]")||[]).forEach(d=>B.closed.add(d)); } catch(_){}
   const saveClosed=()=>{ try { localStorage.setItem("hb-pc-closed", JSON.stringify([...B.closed].filter(d=>d>=shiftYm(ymOf(new Date()),-24)))); } catch(_){} };
-  function nCols(){ const lc=$("listCard"), w=lc && lc.clientWidth; return Math.max(1, Math.floor(((w||720)+14)/(330+14))); }
+  function nCols(){ const lc=$("listCard"), w=lc && lc.clientWidth; return Math.max(1, Math.min(5, Math.floor(((w||720)+14)/(330+14)))); }   // never more than 5 columns
   const isIn=t=>t.kind==="einnahme"||(t.kind==="umbuchung"&&t._k0==="einnahme");
   const ttl=t=>t.note||t.cat||KIND_LABEL[t.kind];
   const amtTxt=(t,v)=>(t.kind==="umbuchung"?"":isIn(t)?"+ ":"− ")+eur(v==null?t.amount:v);
