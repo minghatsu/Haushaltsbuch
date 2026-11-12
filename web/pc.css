@@ -581,3 +581,9 @@ html.pc .pczq input::-webkit-inner-spin-button{display:none}
 html.pc .pczq span{font-size:13px;font-weight:700;color:var(--muted)}
 html.pc .pczq:focus-within{box-shadow:0 0 0 2px var(--accent)}
 html.pc .pczi.done .pczq{opacity:.5}
+html.pc .pcztrip{background:color-mix(in srgb,var(--accent) 10%,var(--surface));border-radius:14px;padding:12px 14px;margin:0 0 12px;display:flex;flex-direction:column;gap:8px}
+html.pc .pczth{display:flex;align-items:center;justify-content:space-between}html.pc .pczth .btn{padding:6px 12px;font-size:13px}
+html.pc .pcztd{display:flex;align-items:center;gap:8px;font-size:13.5px}html.pc .pcztd b{width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.pc .pcztp{flex:1;height:8px;border-radius:5px;background:var(--sunk);overflow:hidden;display:block}html.pc .pcztp i{display:block;height:100%;border-radius:5px;transition:width .4s}
+html.pc .pcztd small{width:52px;text-align:right;color:var(--muted);font-weight:700}
+html.pc .pczi .zdaz{margin-left:4px}

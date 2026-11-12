@@ -1164,6 +1164,27 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .zbon .zbt{flex:1;min-width:0;display:flex;flex-direction:column}.zbon .zbt small{color:var(--muted);font-size:12px}
 .zamt{width:92px;text-align:right;font-weight:800}.zre{border:0;background:none;font-size:18px;color:var(--muted);padding:6px}
 .zgo{width:100%;margin-top:4px}.zgo:disabled{opacity:.45}
+.nobon{display:inline-block;background:#FDE8E3;color:#a3341f;border-radius:5px;font-size:10px;font-weight:900;padding:1px 5px;vertical-align:1px;letter-spacing:.02em}
+.zmini{background:color-mix(in srgb,#FFF4D6 55%,var(--surface));padding:12px 14px}.zmh{display:flex;flex-direction:column;align-items:flex-start;width:100%;border:0;background:none;padding:2px 2px 10px;font:inherit;font-weight:800;font-size:16px;color:inherit;text-align:left}.zmh small{font-weight:500;font-size:13px;color:var(--muted)}
+.zmini .zadd{margin:0}
+.zcard.trip{box-shadow:0 0 0 2px var(--accent)}
+.znew{display:inline-block;background:#FFE9A8;color:#8a5a00;border-radius:5px;font-size:10px;font-weight:900;padding:1px 5px;vertical-align:2px}.zdaz{display:inline-block;background:#FFE0A3;color:#8a5a00;border-radius:5px;font-size:10px;font-weight:900;padding:1px 5px;vertical-align:2px}
+.zr.isnew{background:color-mix(in srgb,#FFE9A8 35%,transparent);border-radius:10px;padding-left:6px;padding-right:6px}
+.zfor{margin-left:6px;font-size:11px;font-weight:700;color:var(--accent)}
+.zfold{display:flex;align-items:center;gap:8px;background:var(--sunk);border-radius:12px;padding:9px 11px;margin-top:10px;font-size:13px;color:var(--muted)}
+.zlnk{display:block;width:100%;border:0;background:none;color:var(--accent);font:inherit;font-weight:800;font-size:13.5px;padding:10px 2px;text-align:center}
+.zxf{background:var(--surface);border-radius:14px;padding:12px;margin-top:10px;display:flex;flex-direction:column;gap:8px}.zxf .zxp{width:80px;flex:none}
+.zdb{display:flex;gap:8px}.zdb .btn{flex:1}
+.zend{width:100%;margin-top:12px}
+.zbon{flex-direction:column;align-items:stretch}.zbr{display:flex;align-items:center;gap:10px}.zbon .zbt b{display:flex;align-items:center;gap:6px}
+.zno{width:42px;height:54px;border-radius:8px;background:#FDE8E3;display:grid;place-items:center;font-size:18px;flex:none}.zbon.none{outline:2px solid #e8a090}
+.zpay{display:flex;gap:6px;margin-top:8px}.zpay button{flex:1;border:0;border-radius:10px;background:var(--sunk);padding:8px 4px;font:inherit;font-weight:700;font-size:13px;color:var(--muted)}.zpay button.on{background:var(--accent);color:#fff}.zpay .zre{flex:none;background:none;color:var(--muted);font-size:12.5px}
+.zex{background:#FFF4D6;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:12.5px}
+.zdlgbg{position:fixed;inset:0;z-index:300;background:rgba(10,20,15,.35);display:grid;place-items:center;opacity:0;transition:opacity .18s}.zdlgbg.show{opacity:1}
+.zdlg{background:var(--surface);border-radius:20px;padding:20px;width:min(460px,92vw);max-height:86vh;overflow:auto;box-shadow:0 30px 70px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:8px}.zdlg h2{margin:0 0 2px;font-size:20px}
+.zdo{display:flex;align-items:center;gap:10px;background:var(--sunk);border-radius:12px;padding:10px 12px;cursor:pointer}.zdo input{width:18px;height:18px;accent-color:var(--accent)}
+.zdl{font-weight:800;font-size:13px;margin-top:10px}.zds{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}.zds .muted{font-size:12.5px}.zds select{margin-left:auto;border:0;background:var(--sunk);border-radius:9px;padding:6px 8px;font:inherit;font-weight:700;color:var(--fg)}
+.zdlg .zdb{margin-top:12px}
 .anaq{margin-bottom:14px}.anaq button{position:relative}
 .spsheet #spBody>.card{box-shadow:none;padding:0;background:none;margin:0 0 12px}.spsheet #spBody>.sphero{margin-bottom:12px}
 .anapanel{border-top:3px solid var(--tc)}.anasheet .sheet-head{align-items:center}.anasheet .aph{flex:1;min-width:0}.anasheet .aph .ic{width:36px;height:36px;border-radius:12px;background:var(--tc);color:#fff;display:grid;place-items:center;flex:none}.anasheet .anab{margin-top:4px}.anasheet .anab>.card-head h2{display:none}.anasheet .anab>.card-head{justify-content:flex-end}.anasheet .kpis{margin:0}.aph{display:flex;align-items:center;gap:12px}.aph .ic{width:36px;height:36px;border-radius:12px;background:var(--tc);color:#fff;display:grid;place-items:center;flex:none}.aph .n{flex:1;min-width:0;display:flex;flex-direction:column}.aph b{font-size:15px}
@@ -1506,7 +1527,7 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
     <input type="file" id="scanFile" accept="image/*" hidden>
     <div class="rcptrow" id="rcptRow" hidden>
       <div id="rcptHave" class="rcpthave"><img id="rcptThumb" alt="Beleg"><span class="grow"><b>Beleg</b><br><span class="small muted" id="rcptInfo"></span></span><span class="rbtns"><button class="btn" id="rcptView">Ansehen</button><button class="btn" id="rcptShare" hidden>Teilen</button><button class="btn" id="rcptReplace">Ersetzen</button><button class="btn" id="rcptRemove" aria-label="Beleg entfernen" style="color:var(--bad)">Entfernen</button></span></div>
-      <div id="rcptAddWrap" class="rcpthave"><span class="grow"><b>Beleg</b><br><span class="small muted">Noch kein Foto an dieser Buchung</span></span><button class="btn" id="rcptAdd">Foto hinzufügen</button><button class="btn" id="rcptGallery" hidden>Galerie</button></div>
+      <div id="rcptAddWrap" class="rcpthave"><span class="grow"><b>Beleg</b><br><span class="small muted">Noch kein Foto an dieser Buchung</span></span><button class="btn" id="rcptNone" hidden>Bon gibt’s nicht</button><button class="btn" id="rcptAdd">Foto hinzufügen</button><button class="btn" id="rcptGallery" hidden>Galerie</button></div>
     </div>
     <div class="seg" id="kindSeg" role="group" aria-label="Art der Buchung">
       <button data-kind="ausgabe" aria-pressed="true">Ausgabe</button>
@@ -2619,14 +2640,15 @@ function devType(){ return IS_PC ? "pc" : window.AndroidBridge ? "phone" : "web"
 function devList(){ try{ return JSON.parse(localStorage.getItem("hb-devs")||"{}"); }catch(e){ return {}; } }
 function devStore(id, data){ const d=devList(); if (data===null) delete d[id]; else d[id]=data; try{ localStorage.setItem("hb-devs", JSON.stringify(d)); }catch(e){} }
 function devMe(){ const d=devList()[devId()]||{}; return { name: d.name || (devType()==="pc"?"PC":devType()==="phone"?"Handy":"Browser"), type:devType(), ver:curVerShort(), seen:Date.now() }; }
-function devPing(force){ if (!SYNCABLE || !SYNC.token) return; const me=devList()[devId()]; if (!force && me && Date.now()-(me.seen||0)<6*3600e3 && me.ver===curVerShort()) return;
+function devPing(force){ if (!SYNCABLE || !SYNC.token || (S.settings.devOut||{})[devId()]) return; const me=devList()[devId()]; if (!force && me && Date.now()-(me.seen||0)<6*3600e3 && me.ver===curVerShort()) return;
   const d=devMe(); devStore(devId(), d); enqueue("app","dev-"+devId(), d); }
-setTimeout(()=>devPing(true), 8000); setInterval(()=>devPing(), 30*60e3);   // every start: the other devices always see this one
+setTimeout(()=>{ try { zTripCheck(); } catch(_){} }, 5000); setTimeout(()=>devPing(true), 8000); setInterval(()=>devPing(), 30*60e3);   // every start: the other devices always see this one
 function renderGeraete(){ const el=$("geraeteEd"); if (!el) return; if (el.contains(document.activeElement) && document.activeElement.tagName==="INPUT") return;
-  const me=devId(), L=Object.entries(devList()); if (!L.some(([id])=>id===me)) L.unshift([me, devMe()]);
+  const me=devId(), out=S.settings.devOut||{}, L=Object.entries(devList()).filter(([id])=>!out[id]); if (!L.some(([id])=>id===me)) L.unshift([me, devMe()]);
   const ago=t=>{ const m=Math.round((Date.now()-t)/60000); return m<2?"gerade eben":m<60?`vor ${m} Min.`:m<1440?`vor ${Math.round(m/60)} Std.`:`vor ${Math.round(m/1440)} Tagen`; };
   el.innerHTML=`${!SYNCABLE||!SYNC.token?`<div class="notice info" style="margin-bottom:12px"><span>Der Abgleich ist aus – andere Geräte siehst du erst, wenn er an ist.</span><button class="btn" data-spgo="sync">Abgleich</button></div>`:""}
-    ${L.sort((a,b)=>(b[0]===me)-(a[0]===me)||(b[1].seen||0)-(a[1].seen||0)).map(([id,d])=>`<div class="exr"><span class="exi">${ic(d.type==="pc"?"tv":d.type==="phone"?"phone":"cloud",20)}</span><span class="n">${id===me?`<input class="in devname" id="devName" value="${esc(d.name||"")}" aria-label="Name dieses Geräts">`:`<b>${esc(d.name||"Gerät")}</b>`}<small>${id===me?"Dieses Gerät · ":""}v${esc(String(d.ver||"?").replace(/^[vV] ?/,""))} · ${id===me?"jetzt aktiv":"zuletzt "+ago(d.seen||0)}</small></span>${id===me?"":`<button class="icon-btn" data-devdel="${esc(id)}" aria-label="Aus der Liste entfernen">×</button>`}</div>`).join("")}
+    ${L.sort((a,b)=>(b[0]===me)-(a[0]===me)||(b[1].seen||0)-(a[1].seen||0)).map(([id,d])=>`<div class="exr"><span class="exi">${ic(d.type==="pc"?"tv":d.type==="phone"?"phone":"cloud",20)}</span><span class="n">${id===me?`<input class="in devname" id="devName" value="${esc(d.name||"")}" aria-label="Name dieses Geräts">`:`<b>${esc(d.name||"Gerät")}</b>`}<small>${id===me?"Dieses Gerät · ":""}v${esc(String(d.ver||"?").replace(/^[vV] ?/,""))} · ${id===me?"jetzt aktiv":"zuletzt "+ago(d.seen||0)}</small></span>${id===me?"":UI.devDelArm===id?`<button class="btn danger" data-devdel="${esc(id)}" style="padding:8px 12px">Wirklich entfernen?</button>`:`<button class="btn" data-devdel="${esc(id)}" style="padding:8px 12px">Entfernen</button>`}</div>`).join("")}
+    <div class="small muted" style="margin:8px 2px 0">${L.length} von höchstens 5 Geräten gekoppelt.</div>
     ${SYNCABLE&&(!SYNC.token||MODE==="pair")?(SYNC.token?`<div class="sacts">
         <button class="sact" id="pairMore">${ic("plusIn",20)}Gerät koppeln</button>
         <button class="sact" id="syncCode">${ic("shield",20)}Wieder&shy;herstellungs-Code</button></div>
@@ -2642,7 +2664,9 @@ document.addEventListener("click", e=>{
   UI.unpairArm=false; pairSave(null); SYNC.token=""; SYNC.queue=[]; SYNC.state="off"; saveSync(); renderSyncInfo(); renderSyncDot();
   toast("Entkoppelt – die Daten bleiben auf diesem Gerät");
 });
-document.addEventListener("click", e=>{ const b=e.target.closest("[data-devdel]"); if (!b) return; const id=b.dataset.devdel; devStore(id, null); if (SYNC.token) enqueue("app","dev-"+id, null); renderGeraete(); });
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-devdel]"); if (!b) return; const id=b.dataset.devdel;
+  if (UI.devDelArm!==id){ UI.devDelArm=id; renderGeraete(); setTimeout(()=>{ if (UI.devDelArm===id){ UI.devDelArm=null; renderGeraete(); } }, 4000); return; }
+  UI.devDelArm=null; S.settings.devOut={...(S.settings.devOut||{}), [id]:Date.now()}; saveSettings(); devStore(id, null); if (SYNC.token) enqueue("app","dev-"+id, null); renderGeraete(); toast(`${zDevName(id)} entfernt – es gleicht nicht mehr ab`); });
 // quick switches on the settings page
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-qsw]"); if (!b) return; const k=b.dataset.qsw;
   if (k==="lock"){ if (spUseSheet()) spSheetOpen("sicherheit"); else { UI.sp="sicherheit"; renderSpPages(); } return; }
@@ -3117,13 +3141,13 @@ function txRow(t, showDate){
   const isIn = t.kind==="einnahme" || (t.kind==="umbuchung" && t._k0==="einnahme");
   const title = t.note || t.cat || KIND_LABEL[t.kind];
   const sub = [t.note ? t.cat : "", t.kind==="betrieb" ? "Betrieblich" : t.kind==="vorauszahlung" ? "aus Rücklage" : t.kind==="umbuchung" ? "Umschuldung · zählt nicht" : "", showDate ? shortDate(t.date) : ""].filter(Boolean).join(" · ");
-  return `<button class="tx" data-edit="${esc(t.id)}">${avatar(t)}<span class="grow"><div class="t">${esc(title)}${hasReceipt(t.id)?`<svg class="i clip" viewBox="0 0 24 24" style="width:14px;height:14px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3.5"/></svg>`:""}</div>${sub?`<div class="s">${esc(sub)}</div>`:""}</span><span class="amt ${isIn?"inc":""}">${isIn?"+":"−"} ${esc(eur(t.amount))}</span></button>`;
+  return `<button class="tx" data-edit="${esc(t.id)}">${avatar(t)}<span class="grow"><div class="t">${esc(title)}${t.nobon&&!hasReceipt(t.id)?` <span class="nobon">BON FEHLT</span>`:""}${hasReceipt(t.id)?`<svg class="i clip" viewBox="0 0 24 24" style="width:14px;height:14px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3.5"/></svg>`:""}</div>${sub?`<div class="s">${esc(sub)}</div>`:""}</span><span class="amt ${isIn?"inc":""}">${isIn?"+":"−"} ${esc(eur(t.amount))}</span></button>`;
 }
 // one booking on the time line (same look as on the start page), with all details
 function tlRow(t, when){
   const isIn=t.kind==="einnahme" || (t.kind==="umbuchung" && t._k0==="einnahme"), title=t.note||t.cat||KIND_LABEL[t.kind];
   const sub=[when||"", t.note?t.cat:"", t.kind==="betrieb"?"Betrieblich":t.kind==="vorauszahlung"?"aus Rücklage":t.kind==="abhebung"?"→ Bargeld":t.kind==="umbuchung"?"Umschuldung · zählt nicht":"", t.pay==="bar"?"💶 bar":"", isIn&&t.net!=null&&Math.abs(t.net-t.amount)>0.004?`netto ${eur(t.net)}`:"", t.acct&&t.acct!=="Hauptkonto"?t.acct:""].filter(Boolean).join(" · ");
-  return `<button class="tlrow ${isIn?"inc":""} k-${esc(t.kind)}" data-edit="${esc(t.id)}"><span class="grow"><b>${esc(title)}${hasReceipt(t.id)?` <svg class="i clip" viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-1px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3.5"/></svg>`:""}</b>${sub?`<span class="small muted">${esc(sub)}</span>`:""}</span><span class="amt ${isIn?"pos":""}">${isIn?"+":"−"} ${esc(eur(t.amount))}</span></button>`;
+  return `<button class="tlrow ${isIn?"inc":""} k-${esc(t.kind)}" data-edit="${esc(t.id)}"><span class="grow"><b>${esc(title)}${t.nobon&&!hasReceipt(t.id)?` <span class="nobon">BON FEHLT</span>`:""}${hasReceipt(t.id)?` <svg class="i clip" viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-1px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3.5"/></svg>`:""}</b>${sub?`<span class="small muted">${esc(sub)}</span>`:""}</span><span class="amt ${isIn?"pos":""}">${isIn?"+":"−"} ${esc(eur(t.amount))}</span></button>`;
 }
 function sortTx(list){ return list.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"") || (b.ts||0)-(a.ts||0)); }
 function emptyState(iconName, title, text, btn){
@@ -3330,6 +3354,7 @@ function renderHome(){
     if (nm<=1 && a && b && ym>=cur){ const md=S.settings.mindest||{};
       if (md.on && md.h && a.ml!==b.ml){ const plus=(a.ml-b.ml)*md.h*13/3; hints.unshift({k:"mindest", lvl:"good", t:`Neu ab ${ny}: Mindestlohn ${ml2(a.ml)} €`, s:`Du bekommst ca. ${eur0(plus)} mehr brutto im Monat. Prüf, ob es auf deiner Abrechnung steht.`}); }
       if (a.mj!==b.mj && (["minijob","studium","schule","alg","grusi"].includes(S.settings.work)||hasExtra("minijob"))) hints.push({k:"mjgrenze", lvl:"warn", t:`Neu ab ${ny}: Minijob-Grenze ${a.mj} €`, s:`vorher ${b.mj} € im Monat`}); } }
+  { const nb=S.tx.filter(t=>t.nobon && !hasReceipt(t.id)).length; if (nb) hints.push({lvl:"warn", t:`${nb} ${nb===1?"Einkauf":"Einkäufe"} ohne Kassenbon`, s:"Öffne die Buchung und fotografier den Bon nach – oder tipp dort „Bon gibt’s nicht“."}); }
   aboHints(hints);
   UI.hints=hints; updateBell();
   if (ym===cur) notifyAlerts(hints);
@@ -3759,7 +3784,7 @@ function goalsRings(){
 }
 /* ---------- Sparen: savings goals, debts and the tax reserve on one page ---------- */
 /* ---------- Einkauf: weekly offers of your shops (used to be a block on the start page) ---------- */
-function renderShop(){ const a=document.activeElement, keep=a&&a.id==="zIn"?a.value:null; $("v-shop").innerHTML = `<div class="zstack">${zettelCard()}${offersCard()}</div>`; initShopRail();
+function renderShop(){ const a=document.activeElement; if (BG_RENDER && a && a.tagName==="INPUT" && a.closest && a.closest(".zcard,.zmini")) return; const keep=a&&a.id==="zIn"?a.value:null; $("v-shop").innerHTML = `<div class="zstack">${zettelCard()}${offersCard()}</div>`; initShopRail();
   if (keep!==null){ const i=$("zIn"); if (i){ i.value=keep; i.focus(); } } }
 /* ---------- Einkaufszettel: shared by PC and phone – departments, where it is cheapest, sorting ---------- */
 const ZDEPTS=[
@@ -3802,11 +3827,29 @@ function zLogo(sh, px){ px=px||22;
 function zList(){ return S.settings.shoplist||[]; }
 const zQ=it=>Math.max(1, Math.min(99, Math.round(Number(it&&it.q)||1)));
 // adds an item; the same thing again (still open, same shop) becomes "2x" instead of a second line
-function zAddTo(list, item){ const k=nrm(item.n), same=list.find(x=>!x.done && nrm(x.n)===k && (!item.s || !x.s || x.s===item.s));
+function zAddTo(list, item){ const k=nrm(item.n), same=!item.done && list.find(x=>!x.done && nrm(x.n)===k && (!item.s || !x.s || x.s===item.s));
   if (same) return {list:list.map(x=>x===same?{...x, q:zQ(x)+zQ(item), ...(item.p>0&&x.p==null?{p:item.p}:{}), ...(item.s&&!x.s?{s:item.s}:{})}:x), id:same.id, more:true};
-  return {list:[...list, item], id:item.id, more:false}; }
+  return {list:[...list, {...item, c:item.c||Date.now()}], id:item.id, more:false}; }
 function zSetQ(id, q){ zSave(zList().map(x=>x.id===id?{...x, q:Math.max(1,Math.min(99,Math.round(Number(q)||1)))}:x)); }
-function zSave(l){ S.settings.shoplist=l; saveSettings(); }
+// every change stamps the item, deleted ones leave a stone – so two phones ticking at the same time do not undo each other
+function zSave(l){ const old=new Map(zList().map(x=>[x.id,x])), now=Date.now(), strip=x=>JSON.stringify({...x, t:0});
+  const out=l.map(x=>{ const o=old.get(x.id); if (!o) return {...x, c:x.c||now, t:now}; return strip(o)!==strip(x) ? {...x, t:now} : x; });
+  const keep=new Set(out.map(x=>x.id)), del={...(S.settings.zdel||{})}; for (const id of old.keys()) if (!keep.has(id)) del[id]=now;
+  for (const k in del) if (now-del[k]>30*864e5) delete del[k];
+  S.settings.shoplist=out; S.settings.zdel=del; saveSettings(); }
+const ZSYNC={push:false};
+function zMerge(loc, rem){
+  if (!loc) return false;
+  const before=JSON.stringify([rem.shoplist||[], rem.zdel||{}, rem.shopTrip||null]);
+  const del={...(rem.zdel||{})}; for (const [k,v] of Object.entries(loc.zdel||{})) if (!(del[k]>=v)) del[k]=v;
+  const by=new Map(); for (const it of (rem.shoplist||[])) by.set(it.id, it);
+  for (const it of (loc.shoplist||[])){ const r=by.get(it.id); if (!r || (it.t||0)>(r.t||0)) by.set(it.id, it); }
+  rem.shoplist=[...by.values()].filter(it=>!(del[it.id]>=(it.t||0))).sort((a,b)=>(a.c||0)-(b.c||0)); rem.zdel=del;
+  const a=loc.shopTrip, b=rem.shopTrip;
+  if (a && b && a.id===b.id){ const n=(a.t||0)>(b.t||0)?a:b; rem.shopTrip=n.end?n:{...n, fin:{...(b.fin||{}), ...(a.fin||{})}}; }
+  else if (a || b) rem.shopTrip=((a&&a.t)||0)>((b&&b.t)||0)?a:b;
+  return JSON.stringify([rem.shoplist, rem.zdel, rem.shopTrip||null])!==before;
+}
 // groups for the list and the PDF: by shop (inside by department), by department, by price or A–Z
 function zGroups(items, mode){
   const W=items.map(it=>({it, w:zWhere(it), d:zDept(it.n)}));
@@ -3848,53 +3891,130 @@ function zPrint(mode){
   f.srcdoc=html; f.onload=()=>{ try { f.contentWindow.focus(); f.contentWindow.print(); } catch(e){ toast("Drucken ging nicht"); } setTimeout(()=>f.remove(), 60000); };
   if (mode==="pdf") toast("Wähle im Druckfenster „Als PDF speichern“ bzw. „Microsoft Print to PDF“", null, null, 6000);
 }
-/* ---- to the phones: the list is synced anyway, a stamp makes the phones say so ---- */
-function zPhones(){ return Object.entries(devList()).filter(([id,d])=>id!==devId() && d && d.type==="phone"); }
-function zSend(){
+/* ---- the trip: planning on all devices, shopping on the phones that got the list ---- */
+function zDevs(){ const out=(S.settings.devOut||{}); return Object.entries(devList()).filter(([id,d])=>d && !out[id]); }
+function zPhones(){ return zDevs().filter(([id,d])=>id!==devId() && d.type==="phone"); }
+function zDevName(id){ if (id===devId()) return devMe().name||"Dieses Gerät"; const d=devList()[id]; return (d&&d.name)||"Gerät"; }
+const ZCOL=["#2f6fd0","#c2410c","#7a5bc2","#0f8a8a","#b5473a","#4d7c0f"];
+function zDevCol(id){ const ids=Object.keys(devList()).sort(); const i=ids.indexOf(id); return ZCOL[(i<0?0:i)%ZCOL.length]; }
+function zWho(id, px){ px=px||16; if (!id) return ""; const n=zDevName(id);
+  return `<span class="zwho" title="${esc(n)}" style="display:inline-grid;place-items:center;width:${px}px;height:${px}px;border-radius:50%;background:${zDevCol(id)};color:#fff;font:900 ${Math.round(px*.56)}px sans-serif;flex:none">${esc(n.trim().slice(0,1).toUpperCase()||"?")}</span>`; }
+const zTrip=()=>{ const t=S.settings.shopTrip; return t && !t.end ? t : null; };
+function zMyTrip(){ const t=zTrip(), me=devId(); if (!t || (t.fin&&t.fin[me])) return null; return (!t.devs||!t.devs.length||t.devs.some(d=>d.id===me)) ? t : null; }
+function zStart(devs, assign){ const t=Date.now(); S.settings.shopTrip={id:newId(), t, at:t, from:devMe().name||"", by:devId(), devs:devs||[], assign:assign||{}, fin:{}}; saveSettings(); }
+function zEnd(){ const t=S.settings.shopTrip; if (!t) return; S.settings.shopTrip={id:t.id, t:Date.now(), end:true}; saveSettings(); }
+// which shop a device takes care of (no split: every device all of them)
+function zMineShop(t, shopId, me){ const a=t&&t.assign||{}; return !a[shopId] || a[shopId]===me; }
+function zStartFromPC(){
   const open=zList().filter(x=>!x.done).length;
   if (!open){ toast("Auf dem Zettel steht nichts Offenes"); return; }
-  if (!SYNCABLE || !SYNC.token || !zPhones().length){ toast("Kein Handy gekoppelt – unter Einstellungen › Geräte kannst du eins koppeln", null, null, 6000); return; }
-  S.settings.shopSent={at:Date.now(), n:open, from:(devMe().name||"PC")}; saveSettings();
-  const ph=zPhones(); toast(`Zettel an ${ph.length===1?(ph[0][1].name||"dein Handy"):ph.length+" Handys"} geschickt`);
+  const ph=zPhones();
+  if (!SYNCABLE || !SYNC.token || !ph.length){ toast("Kein Handy gekoppelt – unter Einstellungen › Geräte kannst du eins koppeln", null, null, 6000); return; }
+  if (ph.length===1){ zStart([{id:ph[0][0], name:ph[0][1].name||"Handy"}], {}); toast(`Einkauf an ${ph[0][1].name||"dein Handy"} geschickt`); return; }
+  zDlgOpen();
 }
-function zSentCheck(){
-  if (IS_PC) return; const s=S.settings.shopSent; if (!s || !s.at) return;
-  let seen=0; try { seen=+localStorage.getItem("hb-zsent")||0; } catch(_){}
-  if (s.at<=seen) return; try { localStorage.setItem("hb-zsent", String(s.at)); } catch(_){}
-  if (Date.now()-s.at>2*864e5) return;
-  const t=`Neuer Einkaufszettel vom ${s.from||"PC"}`, b=`${s.n} ${s.n===1?"Sache":"Sachen"} – tippe, um ihn zu öffnen`;
-  try { if (window.AndroidBridge && AndroidBridge.notifyNow) AndroidBridge.notifyNow(900001, t, b, "einkauf"); } catch(_){}
-  toast(t, ()=>{ UI.view="shop"; render(); window.scrollTo({top:0}); }, "Öffnen", 8000);
+function zDlgOpen(){
+  const ph=zPhones(), gs=zGroups(zList().filter(x=>!x.done),"laden").filter(g=>g.shop);
+  let el=$("zDlg"); if (!el){ el=document.createElement("div"); el.id="zDlg"; el.className="backdrop zdlgbg"; document.body.appendChild(el); }
+  el.innerHTML=`<div class="zdlg" role="dialog" aria-label="Einkauf starten"><h2>Einkauf starten</h2><div class="small muted">An welche Handys?</div>
+    ${ph.map(([id,d])=>`<label class="zdo"><input type="checkbox" data-zdph="${esc(id)}" checked>${zWho(id,20)}<b>${esc(d.name||"Handy")}</b></label>`).join("")}
+    ${gs.length?`<div class="zdl">Wer geht wohin? <span class="muted">(optional)</span></div>${gs.map(g=>`<div class="zds">${zLogo(g.shop,22)}<b>${esc(g.shop.name)}</b><span class="muted">${g.rows.length} ${g.rows.length===1?"Sache":"Sachen"}</span><select data-zdas="${esc(g.k)}"><option value="">alle</option>${ph.map(([id,d])=>`<option value="${esc(id)}">${esc(d.name||"Handy")}</option>`).join("")}</select></div>`).join("")}`:""}
+    <div class="small muted" style="margin-top:8px">Ohne Aufteilen sehen alle alles – wer zuerst abhakt, hakt für alle ab.</div>
+    <div class="zdb"><button class="btn" data-zdx>Abbrechen</button><button class="btn primary" data-zdgo>Schicken</button></div></div>`;
+  el.hidden=false; requestAnimationFrame(()=>el.classList.add("show"));
 }
-/* ---- the list on the phone: sort, tick off, receipts at the end, then everything is booked ---- */
-const ZB={bons:{}, busy:""};
+function zDlgClose(){ const el=$("zDlg"); if (!el) return; el.classList.remove("show"); setTimeout(()=>{ el.hidden=true; el.innerHTML=""; }, 180); }
+document.addEventListener("click", e=>{
+  if (e.target.closest("[data-zdx]") || e.target.id==="zDlg"){ zDlgClose(); return; }
+  if (e.target.closest("[data-zdgo]")){ const ids=[...document.querySelectorAll("[data-zdph]")].filter(x=>x.checked).map(x=>x.dataset.zdph);
+    if (!ids.length){ toast("Wähl mindestens ein Handy"); return; }
+    const assign={}; for (const s of document.querySelectorAll("[data-zdas]")) if (s.value && ids.includes(s.value)) assign[s.dataset.zdas]=s.value;
+    zStart(ids.map(id=>({id, name:zDevName(id)})), assign); zDlgClose(); toast(ids.length===1?`Einkauf an ${zDevName(ids[0])} geschickt`:`Einkauf an ${ids.length} Handys geschickt`); }
+});
+// a phone hears about a new trip once (notification + note in the app)
+function zTripCheck(){
+  if (IS_PC) return; const t=zMyTrip(); if (!t || t.by===devId()) return;
+  let seen=""; try { seen=localStorage.getItem("hb-ztrip")||""; } catch(_){}
+  if (seen===t.id) return; try { localStorage.setItem("hb-ztrip", t.id); } catch(_){}
+  if (Date.now()-t.at>2*864e5) return;
+  const me=devId(), mine=zGroups(zList().filter(x=>!x.done),"laden").filter(g=>!g.shop || zMineShop(t, g.k, me)), n=sum(mine,g=>g.rows.length);
+  const shops=mine.filter(g=>g.shop).map(g=>g.shop.name), split=t.assign && Object.keys(t.assign).length;
+  const ti="🛒 Einkauf gestartet", b=`${split&&shops.length?shops.join(" & ")+" – ":""}${n} ${n===1?"Sache":"Sachen"} · von ${t.from||"PC"}`;
+  try { if (window.AndroidBridge && AndroidBridge.notifyNow) AndroidBridge.notifyNow(900001, ti, b, "einkauf"); } catch(_){}
+  toast(`${ti}: ${b}`, ()=>{ UI.view="shop"; render(); window.scrollTo({top:0}); }, "Öffnen", 8000);
+}
+// removed devices: the device sees it and leaves the coupling
+function zDevOutCheck(){ const out=S.settings.devOut||{}; if (!out[devId()] || !SYNC.token) return;
+  try { pairSave(null); } catch(_){} SYNC.token=""; SYNC.queue=[]; SYNC.state="off"; saveSync();
+  try { localStorage.removeItem("hb-devid"); localStorage.removeItem("hb-devs"); } catch(_){}
+  toast("Dieses Gerät wurde aus der Kopplung entfernt – die Daten hier bleiben erhalten", null, null, 9000); try { renderSyncDot(); } catch(_){} }
+/* ---- the list on the phone ---- */
+const ZB={bons:{}, busy:"", x:null};
 function zSort(){ try { return localStorage.getItem("hb-zsort")||"laden"; } catch(_){ return "laden"; } }
 function zCatFor(sh){ const w={super:"lebensmittel",disc:"lebensmittel",drog:"drogerie",kleid:"kleid",elek:"elektr",bau:"haushalt",moebel:"wohn",tier:"tier",online:"sonst"}[sh&&sh.cat]||"sonst";
   return catByWord("ausgabe", w) || catByWord("ausgabe", w==="lebensmittel"?"haushalt":w==="drogerie"?"haushalt":"sonst") || catByWord("ausgabe","haushalt") || (cats("ausgabe")[0]||""); }
+function zPayOf(lines){ const t=nrm((lines||[]).map(l=>l.t).join(" "));
+  if (/girocard|ec[- ]?karte|ec-cash|kartenzahlung|karte\b|visa|mastercard|maestro|v pay|vpay|kontaktlos|debit|apple pay|google pay|amex/.test(t)) return "karte";
+  if (/\bbar\b|bargeld|rückgeld|rueckgeld|gegeben|zurück/.test(t)) return "bar"; return ""; }
+function zExtras(lines, rows){ const toks=rows.map(x=>priceToks(x.it.n));
+  return receiptItems(lines||[]).filter(r=>{ const tk=priceToks(r.n); return tk.length && !toks.some(t=>sameProduct(t, tk)); }).slice(0,8); }
+function zMiniCard(T){
+  const L=zList(), open=L.filter(x=>!x.done).length, done=L.filter(x=>x.done).length;
+  const txt = T ? `🛒 Einkauf läuft${T.devs&&T.devs.length?" auf "+T.devs.filter(d=>!(T.fin||{})[d.id]).map(d=>esc(zDevName(d.id))).join(" & "):""}` : L.length ? "📝 Einkaufszettel wird geplant" : "📝 Einkaufszettel";
+  const sub = T ? `${done} von ${open+done} abgehakt` : L.length ? `${open} ${open===1?"Sache":"Sachen"} · tippen zum Ansehen` : "noch leer – schreib etwas drauf";
+  return `<div class="card zmini"><button class="zmh" data-zopen>${esc(txt).replace(/&amp;/g,"&")}<small>${sub}</small></button>
+    <div class="zadd"><input class="in" id="zIn" placeholder="Was brauchst du?" autocomplete="off" aria-label="Was brauchst du?"><button class="btn primary" data-zadd aria-label="Hinzufügen">+</button></div></div>`;
+}
 function zettelCard(){
-  const L=zList(); if (!L.length) return "";
-  const mode=zSort(), open=L.filter(x=>!x.done), done=L.filter(x=>x.done);
+  const T=zTrip(), M=zMyTrip(), me=devId();
+  if (!M && !UI.zOpen) return zMiniCard(T);
+  const L=zList(), mode=zSort();
+  // on a trip: first what this phone takes care of, the rest of the others folded below
+  const mineIt=it=>!M || zMineShop(M, (zWhere(it)||{}).s||"", me) || it.by===me;
+  const shown=M ? L.filter(mineIt) : L, others=M ? L.filter(x=>!mineIt(x)) : [];
+  const open=shown.filter(x=>!x.done), done=shown.filter(x=>x.done);
   const est=sum(open,it=>{ const w=zWhere(it); return w&&w.p?w.p*zQ(it):0; });
   const dot=w=>{ const sh=w&&zShopBy(w.s); return `<span title="${sh?esc(sh.name):"Laden offen"}" style="display:flex">${zLogo(sh,22)}</span>`; };
-  const row=x=>`<div class="zr ${x.it.done?"done":""}"><button class="zb" data-zck="${esc(x.it.id)}" aria-label="${esc(x.it.n)} abhaken"></button><input class="zq" type="number" inputmode="numeric" min="1" max="99" value="${zQ(x.it)}" data-zq="${esc(x.it.id)}" aria-label="Menge ${esc(x.it.n)}"><span class="zx">x</span><button class="zn" data-zck="${esc(x.it.id)}">${esc(x.it.n)}</button><b>${x.w&&x.w.p?esc(eur(x.w.p*zQ(x.it))):""}</b>${mode==="laden"?"":dot(x.w)}</div>`;
-  const gs=zGroups(L, mode);
-  const head=g=>mode==="laden"?`<div class="zgh">${zLogo(g.shop,26)}${g.shop?esc(g.shop.name):"Laden offen"}<small>${g.rows.filter(x=>x.it.done).length} von ${g.rows.length}</small></div>`
+  const isNew=it=>M && !it.done && !it.extra && (it.c||0)>M.at;
+  const row=x=>`<div class="zr ${x.it.done?"done":""} ${isNew(x.it)?"isnew":""}"><button class="zb" data-zck="${esc(x.it.id)}" aria-label="${esc(x.it.n)} abhaken"></button><input class="zq" type="number" inputmode="numeric" min="1" max="99" value="${zQ(x.it)}" data-zq="${esc(x.it.id)}" aria-label="Menge ${esc(x.it.n)}"><span class="zx">x</span><button class="zn" data-zck="${esc(x.it.id)}">${esc(x.it.n)}${isNew(x.it)?` <span class="znew">NEU</span>`:""}${x.it.extra?` <span class="zdaz">DAZU</span>`:""}</button><b>${x.w&&x.w.p?esc(eur(x.w.p*zQ(x.it))):""}</b>${x.it.done&&x.it.by&&M&&(M.devs||[]).length>1?zWho(x.it.by,16):""}${mode==="laden"?"":dot(x.w)}</div>`;
+  let gs=zGroups(shown, mode);
+  if (M && mode!=="laden") gs=gs.map(g=>({...g, rows:g.rows.slice().sort((a,b)=>isNew(b.it)-isNew(a.it))}));
+  if (M && mode==="laden") gs=gs.sort((a,b)=>(b.rows.some(x=>isNew(x.it)))-(a.rows.some(x=>isNew(x.it))));
+  const head=g=>mode==="laden"?`<div class="zgh">${zLogo(g.shop,26)}${g.shop?esc(g.shop.name):"Laden offen"}${M&&M.assign&&g.shop&&M.assign[g.k]===me?`<span class="zfor">für dich</span>`:""}<small>${g.rows.filter(x=>x.it.done).length} von ${g.rows.length}</small></div>`
     : mode==="abt"?`<div class="zgh"><span>${g.ic}</span>${esc(g.k)}<small>${g.rows.length}</small></div>`:"";
-  // all ticked off: one receipt per shop, then "Einkauf fertig" books one expense per shop
+  // the others' part of the trip, one line per device
+  let fold="";
+  if (M && others.length){ const byDev={}; for (const it of others){ const s=(zWhere(it)||{}).s||"", d=(M.assign||{})[s]||""; (byDev[d]=byDev[d]||[]).push(it); }
+    fold=Object.entries(byDev).map(([d,its])=>{ const sh=[...new Set(its.map(it=>{ const s=zShopBy((zWhere(it)||{}).s); return s?s.name:"" }).filter(Boolean))], dn=its.filter(x=>x.done).length, fin=d&&(M.fin||{})[d];
+      return `<div class="zfold">${zWho(d,18)}<span>${esc(sh.join(" & ")||"Rest")} macht ${esc(zDevName(d))} · ${fin?"fertig ✓":`${dn} von ${its.length} erledigt`}</span></div>`; }).join(""); }
+  // receipts: for what this phone ticked off, one per shop
   let fin="";
-  if (!open.length && done.length){
-    const shops=zGroups(done,"laden"), all=shops.every(g=>ZB.bons[g.k||"?"]);
-    fin=`<div class="zfin"><b>Alles abgehakt ✓</b><span class="small muted">Fotografier jetzt die Kassenbons – einer pro Laden. Den Betrag liest die App vom Bon.</span>
-      ${shops.map(g=>{ const k=g.k||"?", b=ZB.bons[k], sh=g.shop, guess=sum(g.rows,x=>x.w&&x.w.p?x.w.p*zQ(x.it):0);
-        return `<div class="zbon ${b?"ok":""}">${b?`<img src="${b.img}" alt="">`:`<button class="zcam" data-zbon="${esc(k)}" aria-label="Kassenbon ${esc(sh?sh.name:"")} fotografieren">${ZB.busy===k?"…":"📷"}</button>`}
-          <span class="zbt"><b style="display:flex;align-items:center;gap:6px">${zLogo(sh,20)}${esc(sh?sh.name:(b&&b.shop)||"Laden offen")}</b><small>${b?(b.amount!=null?"vom Bon gelesen":"Betrag bitte prüfen"):"Kassenbon fotografieren"}</small></span>
-          ${b?`<input class="in zamt" inputmode="decimal" data-zamt="${esc(k)}" value="${(()=>{ const v=b.amount!=null?b.amount:guess; return v?esc(v.toFixed(2).replace(".",",")):""; })()}" aria-label="Betrag"><button class="zre" data-zbon="${esc(k)}" aria-label="Neu fotografieren">↻</button>`:""}</div>`; }).join("")}
-      <button class="btn primary zgo" data-zfin ${all?"":"disabled"}>Einkauf fertig</button>${all?"":`<div class="small muted" style="text-align:center">geht erst, wenn alle Bons da sind</div>`}</div>`;
-  }
-  return `<div class="card zcard"><div class="card-head"><h2>Einkaufszettel</h2><span class="small muted">${open.length} offen${est?` · ca. ${esc(eur(est))}`:""}</span></div>
+  const myDone=M ? shown.filter(x=>x.done && (x.by===me || (!x.by && (!(M.devs||[]).length || (M.devs||[]).length===1)))) : [];
+  if (M && myDone.length && (!open.length || UI.zFinNow)){
+    const shops=zGroups(myDone,"laden");
+    const ok=shops.every(g=>{ const b=ZB.bons[g.k||"?"]; return b && (b.img||b.none) && b.pay; });
+    fin=`<div class="zfin"><b>${open.length?"Einkauf beenden":"Alles abgehakt ✓"}</b><span class="small muted">${open.length?`${open.length} ${open.length===1?"Sache bleibt":"Sachen bleiben"} auf dem Zettel. `:""}Fotografier die Kassenbons – einer pro Laden. Den Betrag und ob bar oder Karte liest die App vom Bon.</span>
+      ${shops.map(g=>{ const k=g.k||"?", b=ZB.bons[k], sh=g.shop, guess=sum(g.rows,x=>x.w&&x.w.p?x.w.p*zQ(x.it):0), v=b&&(b.v!=null?b.v:b.amount!=null?b.amount:guess);
+        const pay=b&&b.pay, ex=b&&b.img?zExtras(b.lines, g.rows):[];
+        return `<div class="zbon ${b?"ok":""} ${b&&b.none?"none":""}">
+          <div class="zbr">${b&&b.img?`<img src="${b.img}" alt="">`:b&&b.none?`<span class="zno">✎</span>`:`<button class="zcam" data-zbon="${esc(k)}" aria-label="Kassenbon fotografieren">${ZB.busy===k?"…":"📷"}</button>`}
+          <span class="zbt"><b>${zLogo(sh,20)}${esc(sh?sh.name:(b&&b.shop)||"Laden offen")}</b><small>${!b?"Kassenbon fotografieren":b.none?"ohne Bon – Betrag selbst eintragen":b.amount!=null?"vom Bon gelesen":"Betrag bitte prüfen"}</small></span>
+          ${b?`<input class="in zamt" inputmode="decimal" data-zamt="${esc(k)}" value="${v?esc(Number(v).toFixed(2).replace(".",",")):""}" placeholder="0,00" aria-label="Betrag">`:""}</div>
+          ${b?`<div class="zpay" role="group" aria-label="Bezahlt mit"><button data-zpay="${esc(k)}|karte" class="${pay==="karte"?"on":""}">💳 Karte</button><button data-zpay="${esc(k)}|bar" class="${pay==="bar"?"on":""}">💶 Bar</button>${b.img?`<button class="zre" data-zbon="${esc(k)}">↻ neu</button>`:`<button class="zre" data-zbon="${esc(k)}">📷 doch fotografieren</button>`}</div>`
+            :`<button class="zlnk" data-znobon="${esc(k)}">Bon vergessen? → Betrag selbst eintragen</button>`}
+          ${ex.length?`<div class="zex"><b>Nicht auf dem Zettel:</b> ${ex.map(x=>esc(x.n)+" "+esc(eur(x.p))).join(" · ")}<br><span class="muted">Zählt mit – der ganze Bon ist die Ausgabe.</span></div>`:""}</div>`; }).join("")}
+      <button class="btn primary zgo" data-zfin ${ok?"":"disabled"}>Einkauf fertig</button>${ok?"":`<div class="small muted" style="text-align:center">geht, wenn bei jedem Laden Bon (oder Betrag) und Karte/Bar da sind</div>`}</div>`;
+  } else if (M && myDone.length && open.length) fin=`<button class="btn zend" data-zfinnow>Einkauf beenden (${open.length} offen lassen)</button>`;
+  const xf = M ? (ZB.x ? `<div class="zxf"><b>Noch etwas gekauft?</b><div class="zadd"><input class="in" id="zxN" placeholder="z. B. Chips" value="${esc(ZB.x.n||"")}" aria-label="Was"><input class="in zxp" id="zxP" inputmode="decimal" placeholder="€" value="${esc(ZB.x.p||"")}" aria-label="Preis"></div>
+      <select class="in" id="zxS" aria-label="Laden">${[...new Set(shown.map(it=>(zWhere(it)||{}).s).filter(Boolean))].map(s=>`<option value="${esc(s)}" ${ZB.x.s===s?"selected":""}>${esc((zShopBy(s)||{name:s}).name)}</option>`).join("")}<option value="" ${ZB.x.s===""?"selected":""}>Anderer Laden</option></select>
+      <div class="zdb"><button class="btn" data-zxx>Abbrechen</button><button class="btn primary" data-zxok>Dazu – schon abgehakt</button></div></div>` : `<button class="zlnk" data-zxopen>+ Noch etwas gekauft, was nicht auf dem Zettel stand?</button>`) : "";
+  const title = M ? "Einkaufszettel" : "Einkaufszettel", stat = `${open.length} offen${est?` · ca. ${esc(eur(est))}`:""}`;
+  return `<div class="card zcard ${M?"trip":""}"><div class="card-head"><h2>${M?"🛒 ":""}${title}</h2><span class="small muted">${stat}</span></div>
     <div class="zsort" role="group" aria-label="Sortieren">${[["laden","Laden"],["abt","Abteilung"],["preis","Preis"],["az","A–Z"]].map(([k,l])=>`<button data-zsort="${k}" class="${mode===k?"on":""}">${l}</button>`).join("")}</div>
     <div class="zadd"><input class="in" id="zIn" placeholder="Was brauchst du?" autocomplete="off" aria-label="Was brauchst du?"><button class="btn primary" data-zadd aria-label="Hinzufügen">+</button></div>
-    ${gs.map(g=>`${head(g)}<div class="zgl">${g.rows.map(row).join("")}</div>`).join("")}${fin}</div>`;
+    ${gs.map(g=>`${head(g)}<div class="zgl">${g.rows.map(row).join("")}</div>`).join("")||`<div class="small muted" style="padding:12px 2px">Noch nichts auf dem Zettel.</div>`}
+    ${xf}${fold}${fin}
+    ${M?"":`<div class="zdb" style="margin-top:12px">${L.some(x=>!x.done)?`<button class="btn primary" data-zstart>🛒 Einkauf starten</button>`:""}<button class="btn" data-zclose>Zuklappen</button></div>`}</div>`;
 }
 async function zBon(k){
   ZB.busy=k; renderShop();
@@ -3905,36 +4025,58 @@ async function zBon(k){
     else { const f=await new Promise(r=>{ const inp=$("scanFile"); inp.value=""; inp.onchange=()=>r(inp.files[0]||null); inp.click(); }); if (!f) return;
       img=await shrinkImage(f); try { lines=await scanImageFile(img||f); } catch(_){ lines=[]; } }
     if (!img){ toast("Das Foto konnte nicht übernommen werden"); return; }
-    const r=parseReceipt(lines||[]);
-    ZB.bons[k]={img, lines, amount:r.amount!=null?r.amount:null, date:r.date||"", shop:r.shop||""};
-    toast(r.amount!=null?`Bon gelesen: ${eur(r.amount)}`:"Betrag nicht erkannt – bitte eintragen");
+    const r=parseReceipt(lines||[]), old=ZB.bons[k]||{};
+    ZB.bons[k]={img, lines, amount:r.amount!=null?r.amount:null, v:r.amount!=null?r.amount:old.v, date:r.date||"", shop:r.shop||"", pay:zPayOf(lines)||old.pay||""};
+    toast(r.amount!=null?`Bon gelesen: ${eur(r.amount)}${ZB.bons[k].pay?" · "+(ZB.bons[k].pay==="bar"?"bar":"Karte"):""}`:"Betrag nicht erkannt – bitte eintragen");
   } catch(e){ toast(e.message||"Foto ging nicht"); }
   finally { ZB.busy=""; renderShop(); }
 }
 async function zFinish(){
-  const done=zList().filter(x=>x.done), shops=zGroups(done,"laden"); if (!shops.length) return;
-  for (const g of shops){ const k=g.k||"?", inp=document.querySelector(`[data-zamt="${CSS.escape(k)}"]`), v=parseAmt(inp?inp.value:"");
-    if (!(v>0)){ toast("Bitte bei jedem Laden den Betrag eintragen"); if (inp) inp.focus(); return; } ZB.bons[k].v=v; }
+  const M=zMyTrip(); if (!M) return; const me=devId();
+  const shown=zList().filter(it=>zMineShop(M, (zWhere(it)||{}).s||"", me) || it.by===me);
+  const myDone=shown.filter(x=>x.done && (x.by===me || (!x.by && (M.devs||[]).length<=1))), shops=zGroups(myDone,"laden"); if (!shops.length) return;
+  for (const g of shops){ const k=g.k||"?", b=ZB.bons[k], inp=document.querySelector(`[data-zamt="${CSS.escape(k)}"]`), v=parseAmt(inp?inp.value:"");
+    if (!b || !(b.img||b.none)){ toast("Bitte bei jedem Laden den Bon fotografieren oder „Bon vergessen“ wählen"); return; }
+    if (!(v>0)){ toast("Bitte bei jedem Laden den Betrag eintragen"); if (inp) inp.focus(); return; }
+    if (!b.pay){ toast("Bitte bei jedem Laden Karte oder Bar wählen"); return; } b.v=v; }
   let n=0;
   for (const g of shops){ const k=g.k||"?", b=ZB.bons[k]; let sh=g.shop;
     if (!sh && b.shop) sh=SHOPS.find(x=>x.re.test(nrm(b.shop)))||null;
     const date=b.date && b.date<=isoToday() && b.date>=isoOf(new Date(Date.now()-7*864e5)) ? b.date : isoToday();
     const doc={date, amount:Math.round(b.v*100)/100, kind:"ausgabe", cat:zCatFor(sh), note:sh?sh.name:(b.shop||"Einkauf"), ts:Date.now(), src:"zettel"};
+    if (b.pay==="bar"){ doc.pay="bar"; if (!cashOn()) { try { await cashActivate(date, null); } catch(_){} } }
+    if (!b.img) doc.nobon=true;
     const id=mem?newId():db.collection("tx").doc().id;
-    if (await safe(()=>saveTxDoc(id, doc, null))){ n++; try { await rcptPut(id, b.img); } catch(_){} try { rememberPrices(sh?sh.name:b.shop, date, receiptItems(b.lines||[])); } catch(_){} }
+    if (await safe(()=>saveTxDoc(id, doc, null))){ n++; if (b.img){ try { await rcptPut(id, b.img); } catch(_){} try { rememberPrices(sh?sh.name:b.shop, date, receiptItems(b.lines||[])); } catch(_){} } }
   }
-  ZB.bons={}; zSave(zList().filter(x=>!x.done));
-  toast(n===1?"Einkauf eingetragen – mit Kassenbon":`${n} Einkäufe eingetragen – mit Kassenbons`, null, null, 5000);
+  const ids=new Set(myDone.map(x=>x.id)); ZB.bons={}; ZB.x=null; UI.zFinNow=false;
+  const t=S.settings.shopTrip, fin={...(t.fin||{}), [me]:Date.now()}, devs=(t.devs||[]).map(d=>d.id), all=!devs.length || devs.every(d=>fin[d]);
+  S.settings.shopTrip = all ? {id:t.id, t:Date.now(), end:true} : {...t, fin, t:Date.now()};
+  zSave(zList().filter(x=>!ids.has(x.id)));
+  toast(n===1?"Einkauf eingetragen":`${n} Einkäufe eingetragen`, null, null, 5000);
 }
 document.addEventListener("click", e=>{
   const s=e.target.closest("[data-zsort]"); if (s){ try { localStorage.setItem("hb-zsort", s.dataset.zsort); } catch(_){} renderShop(); return; }
-  const c=e.target.closest("[data-zck]"); if (c){ const id=c.dataset.zck; zSave(zList().map(x=>x.id===id?{...x, done:!x.done}:x)); return; }
-  if (e.target.closest("[data-zadd]")){ const i=$("zIn"), n=(i&&i.value||"").trim(); if (!n) return; const r=zAddTo(zList(), {id:newId(), n:n.slice(0,60), done:false}); zSave(r.list); if (r.more) toast(`${n}: jetzt ${zQ(r.list.find(x=>x.id===r.id))}x`); return; }
+  const c=e.target.closest("[data-zck]"); if (c){ const id=c.dataset.zck, me=devId(); zSave(zList().map(x=>x.id===id?(x.done?{...x, done:false, by:undefined}:{...x, done:true, by:me}):x)); return; }
+  if (e.target.closest("[data-zadd]")){ const i=$("zIn"), n=(i&&i.value||"").trim(); if (!n) return; const r=zAddTo(zList(), {id:newId(), n:n.slice(0,60), done:false}); zSave(r.list); toast(r.more?`${n}: jetzt ${zQ(r.list.find(x=>x.id===r.id))}x`:`Auf dem Zettel: ${n}`); return; }
+  if (e.target.closest("[data-zopen]")){ UI.zOpen=true; renderShop(); return; }
+  if (e.target.closest("[data-zclose]")){ UI.zOpen=false; renderShop(); return; }
+  if (e.target.closest("[data-zstart]")){ zStart([{id:devId(), name:devMe().name||"Handy"}], {}); UI.zOpen=true; toast("Einkauf gestartet – viel Spaß"); return; }
+  if (e.target.closest("[data-zfinnow]")){ UI.zFinNow=true; renderShop(); return; }
   const b=e.target.closest("[data-zbon]"); if (b){ zBon(b.dataset.zbon); return; }
+  const nb=e.target.closest("[data-znobon]"); if (nb){ const k=nb.dataset.znobon; ZB.bons[k]={none:true, pay:"", v:null}; renderShop(); setTimeout(()=>{ const i=document.querySelector(`[data-zamt="${CSS.escape(k)}"]`); if (i) i.focus(); }, 50); return; }
+  const py=e.target.closest("[data-zpay]"); if (py){ const [k,p]=py.dataset.zpay.split("|"); if (ZB.bons[k]){ ZB.bons[k].pay=p; renderShop(); } return; }
+  if (e.target.closest("[data-zxopen]")){ ZB.x={n:"", p:"", s:undefined}; renderShop(); setTimeout(()=>{ const i=$("zxN"); if (i) i.focus(); }, 50); return; }
+  if (e.target.closest("[data-zxx]")){ ZB.x=null; renderShop(); return; }
+  if (e.target.closest("[data-zxok]")){ const n=($("zxN").value||"").trim(), p=parseAmt($("zxP").value||""), sh=$("zxS").value||""; if (!n){ $("zxN").focus(); return; }
+    ZB.x=null; zSave([...zList(), {id:newId(), n:n.slice(0,60), done:true, by:devId(), extra:true, c:Date.now(), ...(sh?{s:sh}:{}), ...(p>0?{p:Math.round(p*100)/100}:{})}]); toast(`Dazu: ${n}`); return; }
   if (e.target.closest("[data-zfin]")){ zFinish(); return; }
 });
 document.addEventListener("change", e=>{ const q=e.target.closest&&e.target.closest("[data-zq]"); if (q) zSetQ(q.dataset.zq, q.value); });
-document.addEventListener("keydown", e=>{ if (e.target && e.target.id==="zIn" && e.key==="Enter"){ e.preventDefault(); const b=document.querySelector("[data-zadd]"); if (b) b.click(); } });
+document.addEventListener("input", e=>{ const a=e.target.closest&&e.target.closest("[data-zamt]"); if (a && ZB.bons[a.dataset.zamt]) ZB.bons[a.dataset.zamt].v=parseAmt(a.value)||null;
+  if (ZB.x && /^zx[NPS]$/.test(e.target.id||"")) ZB.x[{zxN:"n",zxP:"p",zxS:"s"}[e.target.id]]=e.target.value; });
+document.addEventListener("keydown", e=>{ if (e.target && e.target.id==="zIn" && e.key==="Enter"){ e.preventDefault(); const b=e.target.parentElement.querySelector("[data-zadd]"); if (b) b.click(); } });
+
 
 function renderZiele(){
   const ym=UI.ym, goals=S.settings.goals||[];
@@ -6526,11 +6668,14 @@ async function rcptSheetInit(){
   if (id && hasReceipt(id)){ UI.rcpt.state="stored"; renderRcptRow(); const img=await rcptGet(id); if (UI.editId===id && UI.rcpt.state==="stored"){ UI.rcpt.img=img; renderRcptRow(); } }
   else renderRcptRow();
 }
+document.addEventListener("click", async e=>{ if (!e.target.closest("#rcptNone")) return; const t=UI.editId && S.tx.find(x=>x.id===UI.editId); if (!t) return;
+  const d=plainTx(t); delete d.nobon; if (await safe(()=>saveTxDoc(t.id, d, t))){ toast("Ohne Bon gespeichert"); $("rcptNone").hidden=true; } });
 function renderRcptRow(){
   const r=UI.rcpt, has = (r.state==="stored"||r.state==="new");
   $("rcptRow").hidden = !has && !UI.editId;
   $("rcptHave").hidden = !has; $("rcptAddWrap").hidden = has;
   $("rcptGallery").hidden = !NATIVE_SCAN;
+  { const ct=UI.editId && S.tx.find(t=>t.id===UI.editId); $("rcptNone").hidden = !(ct && ct.nobon && !has); }
   $("rcptShare").hidden = !(has && r.img && rcptCanShare());
   $("rcptShare").textContent = window.AndroidBridge && !window.AndroidBridge.shareImage && window.AndroidBridge.saveFileB64 ? "Speichern" : "Teilen";
   if (has){ $("rcptThumb").src = r.img || ""; $("rcptInfo").textContent = r.state==="new" ? "wird mit der Buchung gespeichert" : "gespeichert"; }
@@ -8010,13 +8155,15 @@ async function syncNow(){
       if (d.col==="app" && d.id.startsWith("acct-")){ const k=d.id.slice(5); if (d.data===null) delete memStore.acct[k]; else memStore.acct[k]=d.data; continue; }
       if (d.col==="app"){ if (d.id==="settings" && d.data){ const m={...clone(DEFAULT_SETTINGS),...d.data}; m.cats={...clone(DEFAULT_SETTINGS.cats),...(d.data.cats||{})};
           if (!m.updKey && S.settings && S.settings.updKey) m.updKey=S.settings.updKey;   // another device without the update key must not take it away here
+          try { if (zMerge(S.settings, m)) ZSYNC.push=true; } catch(_){}
           S.settings=m; } continue; }
       if (!memStore[d.col]) continue;
       if (d.data===null) delete memStore[d.col][d.id]; else memStore[d.col][d.id]=d.data;
     }
     SYNC.rev = res.rev || SYNC.rev; SYNC.last = Date.now(); SYNC.err=""; SYNC.state = SYNC.queue.length||(SYNC.rq||[]).length ? "pending" : "ok"; saveSync();
     if (changed){ persistLocal(); BG_RENDER=true; try { rebuildMem(); } finally { BG_RENDER=false; } } else renderSyncDot();
-    if (changed){ try { zSentCheck(); } catch(_){} }
+    if (ZSYNC.push){ ZSYNC.push=false; enqueue("app","settings",S.settings); flushSoon(400); }
+    if (changed){ try { zTripCheck(); zDevOutCheck(); } catch(_){} }
     if (SYNC.queue.length || (SYNC.rq||[]).length || res.more) flushSoon(200);
     checkUpdate();
   } catch(e){
@@ -8852,7 +8999,7 @@ document.addEventListener("click", async e=>{
   if (e.target.closest("#pairCopy")){ try{ await copySecret(pairCode()); toast("Code kopiert – nach einer Minute wird er aus der Zwischenablage gelöscht"); }catch(_){ toast("Bitte den Code markieren und kopieren"); } return; }
   if (e.target.closest("#pairDone")){ UI.pmoreOpen=false; $("loginBg").hidden=true; UI.pstep="start"; renderSyncInfo(); return; }
   if (e.target.closest("#pairShortNew")){ shortDrop(); pairUi(); return; }
-  if (e.target.closest("#pairMore")){ if (SYNC.token && pairState()) pairShow("show"); else showLogin(); return; }
+  if (e.target.closest("#pairMore")){ if (zDevs().length>=5){ toast("Es sind schon 5 Geräte gekoppelt – entferne erst ein altes unter Einstellungen › Geräte", null, null, 7000); return; } if (SYNC.token && pairState()) pairShow("show"); else showLogin(); return; }
   if (e.target.closest("#syncCode")){ UI.pmoreOpen=true; pairShow("show"); return; }
   if (e.target.closest("#pairWipe")){ const b=e.target.closest("#pairWipe"); if (b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Wirklich? Alle gekoppelten Daten auf dem Server löschen"; setTimeout(()=>{ b.dataset.armed=""; renderSyncSec(); },5000); return; }
     try { await api("wipe",{body:{}}); } catch(_){ }

@@ -934,7 +934,7 @@ if (IS_PC){
     return {s:best.s, p:best.p, save:worst.p-best.p, deal:!!best.deal};
   }
   const where=it=>{ if (it.s) return {s:it.s, p:it.p!=null?it.p:null, manual:true}; return bestFor(it.n); };
-  function saveList(l){ S.settings.shoplist=l; saveSettings(); }
+  function saveList(l){ zSave(l); }
   function renderShopPC(){
     const ch=chosen();
     if (!ch.length){ root.classList.remove("pcshop"); root.innerHTML=`<div class="zstack">${offersCard()}</div>`; return; }
@@ -977,11 +977,15 @@ if (IS_PC){
     const row=({it,w})=>{ const so=w&&shopBy(w.s);
       return `<div class="pczi ${it.done?"done":""}" data-pczi="${esc(it.id)}"><button class="cb" data-pczck="${esc(it.id)}" aria-label="${esc(it.n)} ${it.done?"wieder offen":"erledigt"}"></button><label class="pczq" title="Menge ändern"><input type="number" min="1" max="99" value="${zQ(it)}" data-pczq="${esc(it.id)}" aria-label="Menge ${esc(it.n)}"><span>x</span></label><span class="n">${esc(it.n)}</span>
         <label class="ws" title="Laden ändern">${so?badge(so):`<span class="q">?</span>`}<select data-pczshop="${esc(it.id)}" aria-label="Laden für ${esc(it.n)}">${opts(it.s||"")}</select></label>
-        <b class="p">${w&&w.p!=null?esc(eur(w.p*zQ(it))):""}</b><button class="del" data-pczdel="${esc(it.id)}" aria-label="${esc(it.n)} löschen">×</button></div>`; };
+        <b class="p">${w&&w.p!=null?esc(eur(w.p*zQ(it))):""}</b>${it.done&&it.by&&zTrip()?zWho(it.by,18):""}${it.extra?`<span class="zdaz">DAZU</span>`:""}<button class="del" data-pczdel="${esc(it.id)}" aria-label="${esc(it.n)} löschen">×</button></div>`; };
     const tab=UI.pczTab||"zettel", nd=deals.length;
     const pickCard=`${web && K.pick?(K.pick.busy?`<div class="pcwpick busy"><i class="sp"></i><span>Text wird erkannt …</span></div>`:`<div class="pcwpick"><div class="ssh">Erkannt – stimmt das?</div>${K.pick.raw?`<div class="small muted pkraw">Gelesen: ${esc(K.pick.raw)}</div>`:""}<input class="in" id="pkN" value="${esc(K.pick.n||"")}" placeholder="Was?" aria-label="Was"><div class="pr2"><input class="in" id="pkP" inputmode="decimal" value="${K.pick.p!=null?esc(Number(K.pick.p).toFixed(2).replace(".",",")):""}" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pkU" value="${esc(K.pick.u||nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn" data-pkx>Verwerfen</button><button class="btn" data-pkok="deal">Als Angebot</button><button class="btn primary" data-pkok="zettel">Auf den Zettel</button></div></div>`):""}`;
     const tabs=`<div class="pcztabs" role="tablist">${[["zettel","Zettel"],["deals",`Angebote${nd?` (${nd})`:""}`],["buys","Einkäufe"]].map(([k,l])=>`<button role="tab" data-pcztab="${k}" class="${tab===k?"on":""}" aria-selected="${tab===k}">${l}</button>`).join("")}</div>`;
-    const zBody=`<div class="pczact"><button class="btn primary" data-pczsend title="Der Zettel erscheint auf deinen gekoppelten Handys">📱 An Handys</button><button class="btn" data-pczpdf title="Als PDF speichern">📄 PDF</button><button class="btn" data-pczprint title="Drucken">🖨 Drucken</button></div>
+    const T=zTrip(), tripBox=T?(()=>{ const devs=T.devs||[], all=list();
+        const part=d=>{ const mine=all.filter(it=>{ const s0=(where(it)||{}).s||""; return (T.assign||{})[s0]===d.id || (!(T.assign||{})[s0]) || it.by===d.id; }), dn=mine.filter(it=>it.done && (it.by===d.id || devs.length<=1)).length;
+          return `<div class="pcztd">${zWho(d.id,20)}<b>${esc(zDevName(d.id))}</b><i class="pcztp"><i style="width:${mine.length?Math.round(dn/mine.length*100):0}%;background:${zDevCol(d.id)}"></i></i><small>${(T.fin||{})[d.id]?"fertig ✓":`${dn}/${mine.length}`}</small></div>`; };
+        return `<div class="pcztrip"><div class="pczth"><b>🛒 Einkauf läuft …</b><button class="btn" data-pcztripx>Abbrechen</button></div>${devs.map(part).join("")}<div class="small muted">Was du jetzt dazuschreibst, erscheint auf dem Handy oben mit „NEU“.</div></div>`; })():"";
+    const zBody=`${tripBox}<div class="pczact">${T?"":`<button class="btn primary" data-pczsend title="Der Zettel geht auf deine gekoppelten Handys – dort wird eingekauft">📱 Einkauf starten</button>`}<button class="btn" data-pczpdf title="Als PDF speichern">📄 PDF</button><button class="btn" data-pczprint title="Drucken">🖨 Drucken</button></div>
       <div class="pczadd"><input class="in" id="pczIn" placeholder="Was brauchst du?" autocomplete="off" aria-label="Was brauchst du?"><button class="btn primary" data-pczadd aria-label="Hinzufügen">+</button></div>
       <div class="pczl">${open.map(row).join("")||`<div class="small muted pcze">Schreib auf, was du brauchst – die App sagt dir, wo es am günstigsten ist.</div>`}${done.length?`<div class="pczdone">${done.map(row).join("")}</div>`:""}</div>
       ${Object.keys(groups).length?`<div class="pcroute"><div class="ssh">So kaufst du am günstigsten${save>0.004?` <span class="pos">· spart ca. ${esc(eur(save))}</span>`:""}</div>
@@ -1035,13 +1039,14 @@ if (IS_PC){
   root.addEventListener("click", e=>{
     const c=e.target.closest("[data-pcscat]"); if (c){ UI.shopCat=c.dataset.pcscat; renderShopPC(); return; }
     const tb=e.target.closest("[data-pcztab]"); if (tb){ UI.pczTab=tb.dataset.pcztab; renderShopPC(); return; }
-    if (e.target.closest("[data-pczsend]")){ zSend(); return; }
+    if (e.target.closest("[data-pczsend]")){ zStartFromPC(); return; }
+    if (e.target.closest("[data-pcztripx]")){ zEnd(); toast("Einkauf abgebrochen – der Zettel bleibt"); return; }
     if (e.target.closest("[data-pczpdf]")){ zPrint("pdf"); return; }
     if (e.target.closest("[data-pczprint]")){ zPrint("print"); return; }
     const s=e.target.closest("[data-pcshop]"); if (s){ if (K.pg && K.PG.open && K.PG.embed){ const o=shopBy(s.dataset.pcshop); if (o && o.id!==UI.shopSel) K.open(o.url, o); return; } if (UI.shopSel!==s.dataset.pcshop){ UI.shopSel=s.dataset.pcshop; UI.dealAdd=null; K.swap=true; renderShopPC(); } return; }
     if (e.target.closest("[data-pczadd]")){ addItem(); return; }
     const ck=e.target.closest("[data-pczck]"); if (ck){ const id=ck.dataset.pczck, row=ck.closest(".pczi");
-      const go=()=>saveList(list().map(x=>x.id===id?{...x, done:!x.done}:x));
+      const go=()=>saveList(list().map(x=>x.id===id?(x.done?{...x, done:false, by:undefined}:{...x, done:true, by:devId()}):x));
       if (row && !pcCalm() && !row.classList.contains("done")){ row.classList.add("striking"); setTimeout(go, 420); } else go(); return; }
     const dl=e.target.closest("[data-pczdel]"); if (dl){ const id=dl.dataset.pczdel, row=dl.closest(".pczi"), old=list();
       const go=()=>{ saveList(old.filter(x=>x.id!==id)); toast("Gelöscht", ()=>saveList(old), "Rückgängig"); };
