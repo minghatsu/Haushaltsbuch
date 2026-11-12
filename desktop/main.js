@@ -129,6 +129,9 @@ function createWindow() {
   win.setContentProtection(secureOn());   // screenshots and screen sharing show a black window (switch in Sicherheit)
   win.on("close", (e) => {
     saveBounds();
+    // closing the app (also into the tray) closes an open web page inside it as well
+    if (pageView && pageShown) { try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; pickOn = false; pageBase = "";
+      pageView.webContents.loadURL("about:blank").catch(() => {}); win.webContents.executeJavaScript("window.hbPageClose && window.hbPageClose()").catch(() => {}); }
     if (!quitting && !SMOKE && prefs().tray) { e.preventDefault(); win.hide(); }   // keep running in the tray for reminders
   });
   win.on("closed", () => { win = null; });
