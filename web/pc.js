@@ -1123,9 +1123,16 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
     const BAD=/^(uvp|statt|je|grundpreis|ab|nur|aktion|angebot|preis|kg|1 ?kg|1 ?l|100 ?g|\d+ ?%)/i;
     const pr=t=>{ let m=t.match(/(\d{1,4})\s*[.,]\s*(\d{2})(?!\d)/); if (m) return +(m[1]+"."+m[2]); m=t.match(/[-–]\s*[.,]\s*(\d{2})(?!\d)/); if (m) return +("0."+m[1]); m=t.match(/(\d{1,4})\s*[.,]\s*[-–]/); if (m) return +m[1];
       m=t.replace(/\s+/g," ").match(/^\D{0,3}(\d{1,3})\s(\d{2})\D{0,3}$/); if (m) return +(m[1]+"."+m[2]); return null; };   // "1 79" = 1,79 (small cents)
-    const cands=L.filter(l=>!/(uvp|statt|grundpreis|1 ?kg|1 ?l\b|100 ?g|=)/i.test(l.t)).map(l=>({v:pr(l.t), h:l.h})).filter(x=>x.v>0 && x.v<10000).sort((a,b)=>b.h-a.h);
-    const price=cands.length?cands[0].v:null;
-    const name=L.filter(l=>/[a-zäöüß]{3}/i.test(l.t) && pr(l.t)==null && !BAD.test(l.t) && !/^(bis|gültig)/i.test(l.t)).sort((a,b)=>(b.h-a.h)||(b.t.length-a.t.length)).slice(0,2).map(l=>l.t);
+    // the offer price: not the base price ("1 kg = …"), deposit or bonus badges at the top – among the big prices the lowest one in the frame
+    const UNIT=/(=|zzgl|pfand|uvp|statt|grundpreis|\(1|je\s*\d|\bkg\b|\bl\b|100\s*g|%)/i;
+    const cands=L.map((l,i)=>({v:pr(l.t), h:l.h, i, t:l.t})).filter(x=>x.v>0 && x.v<10000 && !UNIT.test(x.t));
+    const mh=Math.max(0,...cands.map(x=>x.h)), big=cands.filter(x=>!mh || x.h>=mh*0.6), pick=(big.length?big:cands).slice(-1)[0];
+    const price=pick?pick.v:null;
+    const clean=t=>t.replace(/^[^A-Za-zÄÖÜäöü0-9]+/,"").replace(/[\s,(]+$/,"").trim();
+    const names=L.map((l,i)=>({t:clean(l.t), h:l.h, i, raw:l.t})).filter(l=>/[a-zäöüß]{3}/i.test(l.raw) && pr(l.raw)==null && !BAD.test(l.raw) && !/^(bis|gültig)/i.test(l.raw) && !UNIT.test(l.raw) && l.t.length>=3);
+    const top=names.slice().sort((a,b)=>(b.h-a.h)||(b.t.length-a.t.length))[0];
+    // a name over two lines ("Bitburger Pils oder" / "alkoholfrei"): the next line in the same size belongs to it
+    const name=top?[top.t]:[]; if (top && top.h){ const nx=names.find(l=>l.i===top.i+1 && Math.abs(l.h-top.h)<=top.h*0.15); if (nx) name.push(nx.t); }
     const u=all.match(/bis\s*(?:[a-z]{2,10}\.?,?\s*)?(\d{1,2})\.(\d{1,2})\.?(\d{2,4})?/i);
     return {n:name.join(" ").replace(/\s+/g," ").slice(0,60), p:price, u:u?untilIso({d:+u[1],m:+u[2],y:u[3]?+u[3]:0}):""}; }
   window.hbPagePick=async res=>{
