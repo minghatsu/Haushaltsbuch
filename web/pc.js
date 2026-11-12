@@ -184,6 +184,17 @@ if (IS_PC){
     "Art":["Type","Tür","Тип","Тип","Rodzaj","النوع","Tip"],
     "Netto":["Net","Net","Нетто","Нетто","Netto","الصافي","Net"],
     "Text":["Text","Metin","Текст","Текст","Tekst","النص","Text"],
+    "überfällig":["overdue","gecikmiş","просрочено","прострочено","po terminie","متأخر","restant"],
+    "Ohne festen Tag":["No fixed day","Sabit gün yok","Без определённого дня","Без визначеного дня","Bez stałego dnia","بدون يوم محدد","Fără zi fixă"],
+    "auf einen Tag im Kalender ziehen":["drag onto a day in the calendar","takvimde bir güne sürükle","перетащите на день в календаре","перетягніть на день у календарі","przeciągnij na dzień w kalendarzu","اسحبه إلى يوم في التقويم","trage pe o zi din calendar"],
+    "hierher ziehen, um den Tag zu entfernen":["drag here to remove the day","günü kaldırmak için buraya sürükle","перетащите сюда, чтобы убрать день","перетягніть сюди, щоб прибрати день","przeciągnij tutaj, aby usunąć dzień","اسحبه إلى هنا لإزالة اليوم","trage aici pentru a elimina ziua"],
+    "In den nächsten 7 Tagen":["In the next 7 days","Önümüzdeki 7 gün","В ближайшие 7 дней","У найближчі 7 днів","W ciągu 7 dni","خلال الأيام السبعة القادمة","În următoarele 7 zile"],
+    "Noch offen":["Still open","Hâlâ açık","Ещё открыто","Ще відкрито","Jeszcze otwarte","لا يزال مفتوحًا","Încă deschis"],
+    "Gruppen":["Groups","Gruplar","Группы","Групи","Grupy","المجموعات","Grupuri"],
+    "Posten":["items","kalem","поз.","поз.","pozycji","بنود","poziții"],
+    "bezahlt · {n} von {n}":["paid · {n} of {n}","ödendi · {n}/{n}","оплачено · {n} из {n}","оплачено · {n} з {n}","zapłacone · {n} z {n}","مدفوع · {n} من {n}","plătit · {n} din {n}"],
+    "Klick = abhaken · Betrag anklicken = nur für {m} ändern · Ziehen = Tag ändern":["Click = tick off · Click the amount = change for {m} only · Drag = change the day","Tıkla = işaretle · Tutara tıkla = yalnızca {m} için değiştir · Sürükle = günü değiştir","Клик = отметить · Клик по сумме = изменить только на {m} · Перетащить = сменить день","Клік = позначити · Клік по сумі = змінити лише на {m} · Перетягнути = змінити день","Klik = odhacz · Klik w kwotę = zmień tylko na {m} · Przeciągnij = zmień dzień","نقرة = تأشير · النقر على المبلغ = تغيير {m} فقط · السحب = تغيير اليوم","Clic = bifează · Clic pe sumă = schimbă doar pentru {m} · Trage = schimbă ziua"],
+    "nichts":["nothing","hiçbir şey","ничего","нічого","nic","لا شيء","nimic"],
     "Einklappen":["Collapse","Daralt","Свернуть","Згорнути","Zwiń","طيّ","Restrânge"],
     "Aufklappen":["Expand","Genişlet","Развернуть","Розгорнути","Rozwiń","توسيع","Extinde"],
     "Ja":["Yes","Evet","Да","Так","Tak","نعم","Da"],"Nein":["No","Hayır","Нет","Ні","Nie","لا","Nu"],
@@ -635,4 +646,67 @@ if (IS_PC){
   }
   document.addEventListener("click", e=>{ if (UI.view!=="list") return; const h=e.target.closest("[data-pcfold]"); if (h) fold(h.dataset.pcfold); });
   document.addEventListener("keydown", e=>{ const h=e.target.closest && e.target.closest("[data-pcfold]"); if (h && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); e.stopPropagation(); fold(h.dataset.pcfold); } }, true);
+}
+/* ---------- Fixkosten: month calendar – every fixed cost sits on its day ---------- */
+if (IS_PC){
+  const F={pop:null, ring:0, drag:null};
+  const FCOL={Wohnen:"#2f7d5b",Schulden:"#b5473a",Auto:"#c27c0e",Versicherung:"#5b7f95","Sparen & Vorsorge":"#3d63a8","Abos & Handy":"#d14d72",Betrieb:"#6b5bb0",Sonstiges:"#0e8aa0"};
+  const col=a=>FCOL[a]||"#0e8aa0";
+  const dayOf=(f,ym)=>{ const D=daysIn(ym); if (f.day>=1) return Math.min(D, f.day|0); const d=fixDay(f,ym); return d>=1?d:null; };
+  const _rf=renderFix;
+  renderFix = function(){
+    if (UI.fixEdit) { $("v-fix").classList.remove("pcfcal"); return _rf(); }
+    if ($("v-fix").contains(document.activeElement) && document.activeElement.id==="fxAmtIn") return;
+    const ym=UI.ym, c=monthCalc(ym), paid=c.paid||{}, cur=ymOf(new Date()), today=ym===cur?new Date().getDate():ym<cur?99:0;
+    const mName=MONTHS[ymParts(ym)[1]-1], D=daysIn(ym), [y,m]=ymParts(ym), first=(new Date(y,m-1,1).getDay()+6)%7;
+    const all=fixedSorted().filter(f=>dueIn(f,ym) || f.id in paid);
+    const amtOf=f=>f.id in paid?Number(paid[f.id])||0:planAmt(f,ym);
+    const total=sum(all,amtOf), pSum=sum(all.filter(f=>f.id in paid),amtOf), nPaid=all.filter(f=>f.id in paid).length;
+    const by={}, none=[]; for (const f of all){ const d=dayOf(f,ym); if (d) (by[d]=by[d]||[]).push(f); else none.push(f); }
+    const chip=f=>{ const on=f.id in paid, a=fixArea(f), d=dayOf(f,ym), late=!on && d && d<today, ed=UI.amtEdit===f.id;
+      return `<div class="pcfc ${on?"on":""} ${late?"late":""}" style="--c:${col(a)}" data-pay="${esc(f.id)}" data-pcfid="${esc(f.id)}" draggable="true" role="checkbox" tabindex="0" aria-checked="${on}" title="${esc(f.name)} · ${esc(a)}${late?" · überfällig":""}">
+        ${brandFor(f.name)?brandBadge(brandFor(f.name)):tile(f.kind==="betrieb"?"betrieb":"fix", f.name)}<span class="n" lang="de">${esc(f.name)}</span>
+        ${ed?`<input class="in fxamt-in" id="fxAmtIn" data-fxamtin="${esc(f.id)}" inputmode="decimal" value="${esc(numStr(amtOf(f)))}" aria-label="Betrag für ${esc(f.name)} im ${esc(mName)}">`
+          :`<button class="a" data-fxamt="${esc(f.id)}" title="Betrag nur für ${esc(mName)} ändern">${esc(eur(amtOf(f)))}</button>`}
+        <i class="ck"></i></div>`; };
+    let cells="";
+    for (let i=0;i<first;i++) cells+=`<div class="pcfd x"></div>`;
+    for (let d=1; d<=D; d++){ const fs=by[d]||[], s=sum(fs,amtOf), wd=(first+d-1)%7;
+      cells+=`<div class="pcfd ${d===today?"today":""} ${wd>4?"we":""}" data-pcfday="${d}"><div class="dh"><b>${pad(d)}</b>${s?`<span>${esc(eur0(s))}</span>`:""}</div>${fs.map(chip).join("")}</div>`; }
+    const wk=["Mo","Di","Mi","Do","Fr","Sa","So"].map(w=>`<span>${w}</span>`).join("");
+    const soon=ym===cur ? all.filter(f=>!(f.id in paid)).map(f=>({f,d:dayOf(f,ym)})).filter(x=>x.d && x.d>=today && x.d<=today+6) : [];
+    const groups={}; for (const f of all) (groups[fixArea(f)]=groups[fixArea(f)]||[]).push(f);
+    const gl=Object.entries(groups).sort((a,b)=>sum(b[1],amtOf)-sum(a[1],amtOf)).map(([a,fs])=>`<div class="gl"><i style="background:${col(a)}"></i><span>${esc(a)}</span><small>${fs.filter(f=>f.id in paid).length}/${fs.length}</small><b>${esc(eur0(sum(fs,amtOf)))}</b></div>`).join("");
+    const R=50, C=2*Math.PI*R, pct=total?pSum/total:0;
+    $("v-fix").classList.add("pcfcal");
+    $("v-fix").innerHTML = !all.length ? `<div class="card">${emptyState("repeat","Noch keine Fixkosten","Trag Miete, Versicherungen und Abos einmal ein.")}<div class="row-btns" style="margin-top:12px"><button class="btn" id="fixEditBtn">Liste bearbeiten</button></div></div>` : `
+      <div class="card pcfcalc"><div class="wd">${wk}</div><div class="grid">${cells}</div></div>
+      <div class="pcfside">
+        <div class="card pcfsum"><span class="small muted">Im ${esc(mName)} fest verplant</span><div class="big">${esc(eur0(total))}</div>
+          <div class="pcfring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${R}" class="bg"/><circle cx="60" cy="60" r="${R}" class="fg" style="stroke-dasharray:${C.toFixed(1)};stroke-dashoffset:${(C*(1-F.ring)).toFixed(1)}" data-to="${(C*(1-pct)).toFixed(1)}"/></svg>
+            <div><b>${esc(eur0(pSum))}</b><span class="small muted">bezahlt · ${nPaid} von ${all.length}</span></div></div>
+          <div class="kv"><span>Noch offen</span><b>${esc(eur0(total-pSum))}</b></div>
+          ${ym===cur?`<div class="kv"><span>In den nächsten 7 Tagen</span><b>${soon.length?`${soon.length} <span>Posten</span> · ${esc(eur0(sum(soon,x=>amtOf(x.f))))}`:"nichts"}</b></div>`:""}
+          <div class="row-btns">${nPaid<all.length?`<button class="btn" id="payAll">Alle abhaken</button>`:""}<button class="btn" id="fixEditBtn">Liste bearbeiten</button></div></div>
+        <div class="card pcfgr"><div class="small muted" style="margin-bottom:6px">Gruppen</div>${gl}</div>
+        <div class="card pcfnone" data-pcfday="0"><div class="small muted"><b>Ohne festen Tag</b> · <span>${none.length?"auf einen Tag im Kalender ziehen":"hierher ziehen, um den Tag zu entfernen"}</span></div>${none.map(chip).join("")}</div>
+        <div class="small muted pcfhint">Klick = abhaken · Betrag anklicken = nur für ${esc(mName)} ändern · Ziehen = Tag ändern</div>
+      </div>`;
+    // ring grows to the new value, the last ticked one pops
+    requestAnimationFrame(()=>{ const r=$("v-fix").querySelector(".pcfring .fg"); if (r){ r.style.strokeDashoffset=r.dataset.to; } F.ring=pct;
+      if (F.pop && !pcCalm()){ const el=$("v-fix").querySelector(`[data-pcfid="${CSS.escape(F.pop)}"]`); if (el) el.animate(el.classList.contains("on")?[{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}]:[{transform:"scale(.94)"},{transform:"scale(1)"}],{duration:360,easing:"cubic-bezier(.3,1.6,.5,1)"}); }
+      F.pop=null; });
+  };
+  // remember which one was ticked (for the pop)
+  $("v-fix").addEventListener("click", e=>{ const p=e.target.closest("[data-pay]"); if (p && !e.target.closest("[data-fxamt],#fxAmtIn")) F.pop=p.dataset.pay; }, true);
+  $("v-fix").addEventListener("keydown", e=>{ const p=e.target.closest && e.target.closest(".pcfc"); if (p && e.target===p && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); p.click(); } });
+  // drag a fixed cost onto another day: it stays on that day from now on
+  $("v-fix").addEventListener("dragstart", e=>{ const c=e.target.closest && e.target.closest(".pcfc"); if (!c) return; F.drag=c.dataset.pcfid; e.dataTransfer.effectAllowed="move"; try { e.dataTransfer.setData("text/plain", F.drag); } catch(_){} setTimeout(()=>c.classList.add("drag"),0); });
+  $("v-fix").addEventListener("dragend", ()=>{ F.drag=null; $("v-fix").querySelectorAll(".drag,.over").forEach(x=>x.classList.remove("drag","over")); });
+  $("v-fix").addEventListener("dragover", e=>{ if (!F.drag) return; const d=e.target.closest("[data-pcfday]"); if (!d || d.classList.contains("x")) return; e.preventDefault(); $("v-fix").querySelectorAll(".over").forEach(x=>x!==d&&x.classList.remove("over")); d.classList.add("over"); });
+  $("v-fix").addEventListener("dragleave", e=>{ const d=e.target.closest("[data-pcfday]"); if (d && !d.contains(e.relatedTarget)) d.classList.remove("over"); });
+  $("v-fix").addEventListener("drop", async e=>{ const d=e.target.closest("[data-pcfday]"), id=F.drag; if (!d || !id) return; e.preventDefault(); F.drag=null;
+    const f=S.fixed.find(x=>x.id===id); if (!f) return; const n=+d.dataset.pcfday, old=f.day||0; if (n===(f.day|0) && (n || !f.day)) { renderFix(); return; }
+    const data={...f}; delete data.id; if (n) data.day=n; else delete data.day; F.pop=id;
+    if (await safe(()=>put("fixed", id, data))) toast(n?`${f.name}: ab jetzt am ${n}.`:`${f.name}: ohne festen Tag`, ()=>{ const b={...data}; if (old) b.day=old; else delete b.day; safe(()=>put("fixed", id, b)); }, "Rückgängig"); });
 }

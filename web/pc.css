@@ -251,3 +251,63 @@ html.pc .pcday.closed{padding-bottom:16px}
 html.pc .pcday.closed .pcdrows{display:none}
 html.pc .pcdrows{padding:0 8px;margin:0 -8px}
 html.pc .pcdrows .pcbr{width:100%;margin-left:0;margin-right:0}
+/* ---------- Fixkosten as a month calendar ---------- */
+html.pc #v-fix.pcfcal{display:grid;grid-template-columns:minmax(0,1fr) clamp(340px,24vw,460px);gap:22px;align-items:start;max-width:none}
+html.pc #v-fix.pcfcal>*{grid-column:auto}
+html.pc .pcfcalc{padding:16px}
+html.pc .pcfcalc .wd{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;padding:0 4px 8px;color:var(--muted);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+html.pc .pcfcalc .grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;grid-auto-rows:minmax(118px,auto)}
+html.pc .pcfd{background:color-mix(in srgb,var(--fg) 4%,transparent);border-radius:16px;padding:9px;display:flex;flex-direction:column;gap:5px;min-width:0;transition:background .15s,box-shadow .15s}
+html.pc .pcfd.we{background:color-mix(in srgb,var(--fg) 6.5%,transparent)}
+html.pc .pcfd.x{background:none}
+html.pc .pcfd.today{box-shadow:inset 0 0 0 2px #c27c0e}
+html.pc .pcfd.over,html.pc .pcfnone.over{background:color-mix(in srgb,#1a7a5c 16%,transparent);box-shadow:inset 0 0 0 2px #1a7a5c}
+html.pc .pcfd .dh{display:flex;justify-content:space-between;align-items:center;padding:0 2px 2px}
+html.pc .pcfd .dh b{font-family:var(--f-display);font-size:19px;font-weight:800;letter-spacing:-.02em}
+html.pc .pcfd .dh span{font-size:12px;color:var(--muted);font-weight:700}
+html.pc .pcfc{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:8px;align-items:center;background:var(--surface);border-radius:11px;padding:6px 8px 6px 7px;font-size:12.5px;font-weight:600;line-height:1.25;
+  box-shadow:inset 3px 0 0 var(--c),0 1px 0 #0000000a;cursor:pointer;user-select:none;transition:opacity .2s,transform .15s;min-width:0}
+html.pc .pcfc:hover{transform:translateY(-1px);box-shadow:inset 3px 0 0 var(--c),0 4px 12px #13241b1a}
+html.pc .pcfc:focus-visible{outline:2px solid var(--c);outline-offset:1px}
+html.pc .pcfc>:first-child{grid-row:1/3;zoom:.7}
+html.pc .pcfc .n{grid-column:2;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.pc .pcfc .a{grid-column:2;justify-self:start;border:0;font-size:12px;background:none;padding:0;font:inherit;font-weight:700;color:inherit;cursor:text;font-variant-numeric:tabular-nums}
+html.pc .pcfc .a:hover{text-decoration:underline dotted}
+html.pc .pcfc .fxamt-in{grid-column:2;width:84px;padding:2px 6px;height:24px;font-size:12px}
+html.pc .pcfc .ck{grid-column:3;grid-row:1/3;width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--fg) 22%,transparent);display:grid;place-items:center;transition:background .2s,box-shadow .2s}
+html.pc .pcfc.on{opacity:.55}
+html.pc .pcfc.on .n,html.pc .pcfc.on .a{text-decoration:line-through}
+html.pc .pcfc.on .ck{background:#1a7a5c;box-shadow:none}
+html.pc .pcfc.on .ck:after{content:"";width:7px;height:4px;border:solid #fff;border-width:0 0 2px 2px;transform:translateY(-1px) rotate(-45deg)}
+html.pc .pcfc.late{box-shadow:inset 3px 0 0 var(--c),inset 0 0 0 1.5px #d9534f}
+html.pc .pcfc.drag{opacity:.3}
+html.pc .pcfside{position:sticky;top:104px;display:flex;flex-direction:column;gap:18px}
+html.pc .pcfsum{padding:24px}
+html.pc .pcfsum .big{font-family:var(--f-display);font-size:44px;font-weight:800;letter-spacing:-.03em;margin:2px 0 14px}
+html.pc .pcfsum .pcfring{display:flex;align-items:center;gap:18px;margin-bottom:12px}
+html.pc .pcfsum .pcfring svg{width:116px;flex:none;transform:rotate(-90deg)}
+html.pc .pcfsum .pcfring circle{fill:none;stroke-width:13}
+html.pc .pcfsum .pcfring .bg{stroke:color-mix(in srgb,var(--fg) 9%,transparent)}
+html.pc .pcfsum .pcfring .fg{stroke:#1a7a5c;stroke-linecap:round;transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1)}
+html.pc .pcfsum .pcfring>div{flex:1;min-width:0}
+html.pc .pcfsum .pcfring b{display:block;font-size:24px;font-weight:800}
+html.pc .pcfsum .kv{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)}
+html.pc .pcfsum .row-btns{margin-top:14px}
+html.pc .pcfgr{padding:20px 22px}
+html.pc .pcfgr .gl{display:flex;align-items:center;gap:10px;padding:7px 0;font-weight:600}
+html.pc .pcfgr .gl i{width:12px;height:12px;border-radius:4px;flex:none}
+html.pc .pcfgr .gl span{flex:1}
+html.pc .pcfgr .gl small{color:var(--muted);font-weight:600}
+html.pc .pcfgr .gl b{min-width:70px;text-align:right}
+html.pc .pcfnone{padding:16px 18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:7px;transition:background .15s,box-shadow .15s}
+html.pc .pcfnone>.small{grid-column:1/-1}
+html.pc .pcfhint{padding:0 6px}
+@media (prefers-reduced-motion:reduce){html.pc .pcfsum .pcfring .fg{transition:none}html.pc .pcfc{transition:none}}
+@media (max-width:1700px){
+  html.pc #v-fix.pcfcal{grid-template-columns:minmax(0,1fr) 300px;gap:16px}
+  html.pc .pcfcalc{padding:12px}html.pc .pcfcalc .grid,html.pc .pcfcalc .wd{gap:6px}
+  html.pc .pcfd{padding:7px;border-radius:13px}html.pc .pcfd .dh b{font-size:16px}
+  html.pc .pcfc{grid-template-columns:minmax(0,1fr) auto;padding:5px 6px 5px 8px;column-gap:4px;font-size:12px}
+  html.pc .pcfc>:first-child{display:none}html.pc .pcfc .n,html.pc .pcfc .a,html.pc .pcfc .fxamt-in{grid-column:1}html.pc .pcfc .ck{grid-column:2}
+  html.pc .pcfsum{padding:18px}html.pc .pcfsum .big{font-size:34px}html.pc .pcfsum .pcfring svg{width:88px}html.pc .pcfsum .pcfring b{font-size:20px}
+}
