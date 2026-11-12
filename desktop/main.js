@@ -455,6 +455,21 @@ const PICK_JS = String.raw`(() => {
     }
     return e;
   }
+  // an offer that is only a picture (leaflet tiles like at tegut): the picture's tile, without growing into the list around it
+  const hasBg = (e) => { try { const b = getComputedStyle(e).backgroundImage; return b && b !== "none" && /url\(/.test(b); } catch (x) { return false; } };
+  const pics = (e) => e.querySelectorAll("img,picture,canvas,svg image").length + (hasBg(e) ? 1 : 0);
+  function imgBox(el) {
+    let e = el && el.nodeType === 1 ? el : el && el.parentElement;
+    for (let i = 0; e && i < 6 && !(e.matches("img,picture,canvas") || hasBg(e)); i++) e = e.parentElement;
+    if (!e || e === document.body || e === document.documentElement) return null;
+    const vw = innerWidth * innerHeight, r0 = e.getBoundingClientRect(); if (r0.width < 60 || r0.height < 40 || r0.width * r0.height > vw * 0.7) return null;
+    while (e.parentElement && e.parentElement !== document.body && e.parentElement !== document.documentElement) {
+      const p = e.parentElement, r = p.getBoundingClientRect();
+      if (pics(p) > Math.max(1, pics(e)) || r.width * r.height > vw * 0.6 || txt(p).length > 300) break;
+      e = p;
+    }
+    return e;
+  }
   function cand(el) {
     let e = el && el.nodeType === 1 ? el : el && el.parentElement, priceOnly = null;
     for (let i = 0; e && e !== document.body && e !== document.documentElement && i < 14; i++, e = e.parentElement) {
@@ -479,14 +494,17 @@ const PICK_JS = String.raw`(() => {
   const send = (o) => console.log("__HBPICK__" + JSON.stringify(o));
   // highlight with inline styles (works on pages that forbid extra style sheets)
   function mark(c) { if (hov === c) return; if (hov) hov.style.cssText = hovOld; hov = c; if (c) { hovOld = c.style.cssText; c.style.setProperty("outline", "3px solid #1a7a5c", "important"); c.style.setProperty("outline-offset", "2px", "important"); c.style.setProperty("box-shadow", "0 10px 30px rgba(26,122,92,.35)", "important"); } }
-  function over(e) { if (mode === "pick") mark(cand(e.target)); }
+  function over(e) { if (mode === "pick") mark(cand(e.target) || (TOP ? imgBox(e.target) : null)); }
   function stop(e) { if (!mode) return; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); }
   function click(e) {
     if (mode !== "pick") return; stop(e);
     if (skip) { skip = false; return; }
     const c = cand(e.target);
-    if (!c) return send({ fail: true, why: "nocard", tag: e.target && e.target.tagName });
+    const photo = (b) => { mark(null); const r = b.getBoundingClientRect(); if (b.animate) b.animate([{ transform: "scale(1)" }, { transform: "scale(.95)" }, { transform: "scale(1)" }], { duration: 420 });
+      setTimeout(() => send({ lasso: { x: Math.max(0, r.left), y: Math.max(0, r.top), w: Math.min(r.width, innerWidth - Math.max(0, r.left)), h: Math.min(r.height, innerHeight - Math.max(0, r.top)) } }), 450); };
+    if (!c) { const b = TOP ? imgBox(e.target) : null; if (b) return photo(b); return send({ fail: true, why: "nocard", tag: e.target && e.target.tagName }); }
     const r = read(c);
+    if (!r.price || !r.name) { const b = TOP ? (imgBox(e.target) || c) : null; if (b && !r.price) return photo(b); }
     if (c.animate) c.animate([{ transform: "scale(1)" }, { transform: "scale(.95)" }, { transform: "scale(1)" }], { duration: 420 });
     if (!r.price || !r.name) return send({ fail: true, why: "noprice", partial: r });
     send(r);
