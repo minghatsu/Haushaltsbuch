@@ -249,6 +249,8 @@ if (IS_PC){
     "Erkannt – stimmt das?":["Recognised – is this right?", "Tanındı – doğru mu?", "Распознано – верно?", "Розпізнано – правильно?", "Rozpoznano – zgadza się?", "تم التعرف – هل هذا صحيح؟", "Recunoscut – e corect?"],
     "Text wird erkannt …":["Recognising text …", "Metin tanınıyor …", "Текст распознаётся …", "Текст розпізнається …", "Rozpoznawanie tekstu …", "جارٍ التعرف على النص …", "Se recunoaște textul …"],
     "Nicht alles erkannt – bitte kurz ergänzen":["Not everything recognised – please complete","Her şey tanınmadı – lütfen tamamla","Распознано не всё – дополни, пожалуйста","Розпізнано не все – доповни, будь ласка","Nie wszystko rozpoznano – uzupełnij","لم يُتعرَّف على كل شيء – أكمل من فضلك","Nu s-a recunoscut tot – completează"],
+    "✎ Rahmen ziehen":["✎ Draw frame","✎ Çerçeve çiz","✎ Обвести рамкой","✎ Обвести рамкою","✎ Narysuj ramkę","✎ ارسم إطارًا","✎ Trage chenar"],
+    "Zieh einen Rahmen um das Angebot":["Draw a frame around the offer","Fırsatın etrafına çerçeve çiz","Обведи акцию рамкой","Обведи акцію рамкою","Narysuj ramkę wokół oferty","ارسم إطارًا حول العرض","Trage un chenar în jurul ofertei"],
     "Verwerfen":["Discard", "Vazgeç", "Отбросить", "Відкинути", "Odrzuć", "تجاهل", "Renunță"],
     "Als Angebot":["As offer", "Fırsat olarak", "Как акцию", "Як акцію", "Jako oferta", "كعرض", "Ca ofertă"],
     "Auf den Zettel":["On the list", "Listeye", "В список", "У список", "Na listę", "إلى القائمة", "Pe listă"],
@@ -973,7 +975,7 @@ if (IS_PC){
         <label class="ws" title="Laden ändern">${so?badge(so):`<span class="q">?</span>`}<select data-pczshop="${esc(it.id)}" aria-label="Laden für ${esc(it.n)}">${opts(it.s||"")}</select></label>
         <b class="p">${w&&w.p!=null?esc(eur(w.p)):""}</b><button class="del" data-pczdel="${esc(it.id)}" aria-label="${esc(it.n)} löschen">×</button></div>`; };
     const zet=`<div class="card pcz"><div class="pczh"><b>Einkaufszettel</b><span class="small muted">${open.length} offen${est?` · ca. ${esc(eur(est))}`:""}</span></div>
-${web && K.pick?(K.pick.busy?`<div class="pcwpick busy"><i class="sp"></i><span>Text wird erkannt …</span></div>`:`<div class="pcwpick"><div class="ssh">Erkannt – stimmt das?</div><input class="in" id="pkN" value="${esc(K.pick.n||"")}" placeholder="Was?" aria-label="Was"><div class="pr2"><input class="in" id="pkP" inputmode="decimal" value="${K.pick.p!=null?esc(numStr(K.pick.p)):""}" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pkU" value="${esc(K.pick.u||nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn" data-pkx>Verwerfen</button><button class="btn" data-pkok="deal">Als Angebot</button><button class="btn primary" data-pkok="zettel">Auf den Zettel</button></div></div>`):""}
+${web && K.pick?(K.pick.busy?`<div class="pcwpick busy"><i class="sp"></i><span>Text wird erkannt …</span></div>`:`<div class="pcwpick"><div class="ssh">Erkannt – stimmt das?</div>${K.pick.raw?`<div class="small muted pkraw">Gelesen: ${esc(K.pick.raw)}</div>`:""}<input class="in" id="pkN" value="${esc(K.pick.n||"")}" placeholder="Was?" aria-label="Was"><div class="pr2"><input class="in" id="pkP" inputmode="decimal" value="${K.pick.p!=null?esc(numStr(K.pick.p)):""}" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pkU" value="${esc(K.pick.u||nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn" data-pkx>Verwerfen</button><button class="btn" data-pkok="deal">Als Angebot</button><button class="btn primary" data-pkok="zettel">Auf den Zettel</button></div></div>`):""}
 ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">· ${esc(sh.name)}</span></div><div class="pccp form"><input class="in" id="pcpDT" placeholder="Was? z. B. ${sh.cat==="kleid"?"Pullover":sh.cat==="elek"?"Kopfhörer":sh.cat==="moebel"?"Regal":"Kaffee 500 g"}" aria-label="Was"><div class="pr2"><input class="in" id="pcpDP" inputmode="decimal" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pcpDU" value="${esc(nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn primary" data-pcpdeal>Merken</button></div></div>
         ${deals.length?`<div class="small muted" style="margin:8px 2px 0">Schon gemerkt: ${deals.map(d=>esc(d.text)+(d.price?" "+esc(eur(d.price)):"")).join(" · ")}</div>`:""}</div>`:""}
       <div class="pczadd"><input class="in" id="pczIn" placeholder="Was brauchst du?" autocomplete="off" aria-label="Was brauchst du?"><button class="btn primary" data-pczadd aria-label="Hinzufügen">+</button></div>
@@ -1036,7 +1038,7 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
   const NB=()=>window.AndroidBridge && window.AndroidBridge.pageOpen ? window.AndroidBridge : null;
   const PG={open:false, url:"", shop:null, st:{}, ro:null, embed:false}; let lastView=UI.view;
   const pg=document.createElement("div"); pg.id="pcPage"; pg.className="pcpage"; pg.hidden=true;
-  pg.innerHTML=`<div class="pcpbar"><button data-pcpnav="back" title="Zurück" aria-label="Zurück">‹</button><button data-pcpnav="fwd" title="Vor" aria-label="Vor">›</button><button data-pcpnav="reload" class="rl" title="Neu laden" aria-label="Neu laden">⟳</button><button data-pcpnav="pick" class="wide pick" title="Angebot anklicken – es kommt auf den Einkaufszettel">🛒 Angebot picken</button>
+  pg.innerHTML=`<div class="pcpbar"><button data-pcpnav="back" title="Zurück" aria-label="Zurück">‹</button><button data-pcpnav="fwd" title="Vor" aria-label="Vor">›</button><button data-pcpnav="reload" class="rl" title="Neu laden" aria-label="Neu laden">⟳</button><button data-pcpnav="pick" class="wide pick" title="Angebot anklicken – es kommt auf den Einkaufszettel">🛒 Angebot picken</button><button data-pcpnav="lasso" class="wide lasso" title="Rahmen um ein Angebot ziehen – für Prospekte, die nur Bilder sind">✎ Rahmen ziehen</button>
     <div class="url" title="Gesperrt: hier geht nur diese eine Webseite"><span class="lk">🔒</span><span class="u"></span><small class="t"></small><em class="only"></em></div><button data-pcpnav="close" class="x" title="Schließen (Esc)" aria-label="Schließen">✕</button></div>
     <div class="pcphole" id="pcpHole"><div class="pcpload"><i></i><span>Seite wird geladen …</span></div></div>`;
   const side=document.createElement("aside"); side.id="pcpSide"; side.className="pcpside"; side.hidden=true;
@@ -1099,6 +1101,10 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
     if (b && b.pagePick) b.pagePick(PG.pick?"pick":""); pg.classList.toggle("picking", PG.pick); pg.classList.remove("lassoing");
     const pb=pg.querySelector(".pick"); if (pb){ pb.textContent=PG.pick?"✓ Picken an – Esc zum Beenden":"🛒 Angebot picken"; if (!pcCalm()) pb.animate([{transform:"scale(.9)"},{transform:"scale(1.06)"},{transform:"none"}],{duration:320}); }
     if (PG.pick) toast("Klick auf ein Angebot – es kommt auf den Einkaufszettel"); }
+  function lassoStart(){ const b=NB(); if (!b || !b.pagePick){ toast("Dafür braucht es die neue PC-App – kommt mit dem nächsten Update"); return; }
+    if (pg.classList.contains("lassoing")){ pickToggle(false); return; }
+    PG.pick=true; b.pagePick("lasso"); pg.classList.add("picking","lassoing"); const pb=pg.querySelector(".pick"); if (pb) pb.textContent="✓ Picken an – Esc zum Beenden";
+    toast("Zieh einen Rahmen um das Angebot"); }
   window.hbPagePickOff=()=>pickToggle(false);
   const untilIso=u=>{ if (!u || !u.d || !u.m) return ""; const now=new Date(); let y=u.y?(u.y<100?2000+u.y:u.y):now.getFullYear(); if (!u.y && u.m<now.getMonth()+1-6) y++; return `${y}-${pad(u.m)}-${pad(u.d)}`; };
   function fly(text, r){ if (pcCalm()) return; const h=$("pcpHole"), z=$("pczIn"); if (!h || !z) return; const hr=h.getBoundingClientRect(), zr=z.getBoundingClientRect();
@@ -1133,8 +1139,8 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
       K.pick={busy:true}; renderShopPC();
       try { let lines=Array.isArray(res.lines)&&res.lines.length?res.lines:null;   // Windows text recognition; otherwise the one in the app
         if (!lines){ await loadTesseract(); const r=await window.Tesseract.recognize(res.img, "deu"); lines=((r.data&&r.data.lines)||[]).map(l=>({t:l.text.trim(), h:l.bbox?l.bbox.y1-l.bbox.y0:0})); }
-        K.pick=readOcr(lines); }
-      catch(e){ K.pick={n:"", p:null, u:""}; toast("Texterkennung ging nicht – bitte selbst eintragen"); }
+        K.pick=readOcr(lines); K.pick.raw=lines.map(l=>l.t).join(" · ").slice(0,160); if (!lines.length) K.pick.raw="(kein Text erkannt)"+(res.ocrErr?" – "+res.ocrErr:""); }
+      catch(e){ K.pick={n:"", p:null, u:"", raw:"(Texterkennung nicht erreichbar"+(res.ocrErr?" – "+res.ocrErr:"")+")"}; toast("Texterkennung ging nicht – bitte selbst eintragen"); }
       K.pick.rect=res.rect; renderShopPC(); const el=$(K.pick.n?"pkP":"pkN"); if (el) el.focus(); return; }
     if (res.name) addPicked(res.name, res.price, untilIso(res.until), res.rect);
   };
@@ -1150,7 +1156,7 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
   window.hbPageClose=pageClose;
   openPage=url=>pageOpen(url);
   pg.addEventListener("click", e=>{ const n=e.target.closest("[data-pcpnav]"); if (!n) return; const c=n.dataset.pcpnav;
-    if (c==="close") return pageClose(); if (c==="pick") return pickToggle(!PG.pick); const b=NB(); if (b) b.pageNav(c); });
+    if (c==="close") return pageClose(); if (c==="pick") return pickToggle(!PG.pick); if (c==="lasso") return lassoStart(); const b=NB(); if (b) b.pageNav(c); });
   side.addEventListener("click", e=>{
     if (e.target.closest("[data-pcpdeal]")){ const text=($("pcpDT").value||"").trim(), pr=parseAmt($("pcpDP").value||""), until=$("pcpDU").value||"";
       if (!text){ $("pcpDT").focus(); return; }

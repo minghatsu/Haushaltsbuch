@@ -456,7 +456,10 @@ const PICK_JS = String.raw`(() => {
     if (!TOP || layer) return;
     layer = document.createElement("div");
     layer.style.cssText = "position:fixed;inset:0;z-index:2147483646;cursor:crosshair;background:rgba(194,124,14,.06)";
-    layer.addEventListener("pointerdown", (e) => { e.preventDefault(); sx = e.clientX; sy = e.clientY; box = document.createElement("div");
+    const tip = document.createElement("div"); tip.textContent = "Zieh einen Rahmen um das Angebot";
+    tip.style.cssText = "position:fixed;left:50%;top:14px;transform:translateX(-50%);background:#c27c0e;color:#fff;font:700 14px system-ui,sans-serif;padding:8px 16px;border-radius:12px;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.2)";
+    layer.appendChild(tip);
+    layer.addEventListener("pointerdown", (e) => { e.preventDefault(); tip.style.display = "none"; sx = e.clientX; sy = e.clientY; box = document.createElement("div");
       box.style.cssText = "position:fixed;z-index:2147483647;border:2.5px dashed #1a7a5c;background:rgba(26,122,92,.10);border-radius:10px;pointer-events:none";
       document.documentElement.appendChild(box); layer.setPointerCapture(e.pointerId); move(e); });
     layer.addEventListener("pointermove", move);
@@ -491,15 +494,18 @@ try {
   $null = [Windows.Storage.StorageFile, Windows.Storage, ContentType = WindowsRuntime]
   $null = [Windows.Media.Ocr.OcrEngine, Windows.Foundation, ContentType = WindowsRuntime]
   $null = [Windows.Graphics.Imaging.BitmapDecoder, Windows.Graphics, ContentType = WindowsRuntime]
+  $null = [Windows.Graphics.Imaging.SoftwareBitmap, Windows.Graphics, ContentType = WindowsRuntime]
+  $null = [Windows.Storage.Streams.IRandomAccessStream, Windows.Storage.Streams, ContentType = WindowsRuntime]
+  $null = [Windows.Globalization.Language, Windows.Globalization, ContentType = WindowsRuntime]
   $asTask = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object { $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation` + "`" + String.raw`1' })[0]
   function Await($op, [Type]$t) { $task = $asTask.MakeGenericMethod($t).Invoke($null, @($op)); $task.Wait() | Out-Null; $task.Result }
   $file = Await ([Windows.Storage.StorageFile]::GetFileFromPathAsync($env:HB_OCR_FILE)) ([Windows.Storage.StorageFile])
   $stream = Await ($file.OpenAsync([Windows.Storage.FileAccessMode]::Read)) ([Windows.Storage.Streams.IRandomAccessStream])
   $dec = Await ([Windows.Graphics.Imaging.BitmapDecoder]::CreateAsync($stream)) ([Windows.Graphics.Imaging.BitmapDecoder])
   $bmp = Await ($dec.GetSoftwareBitmapAsync()) ([Windows.Graphics.Imaging.SoftwareBitmap])
-  $lang = New-Object Windows.Globalization.Language("de-DE")
-  $eng = [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage($lang)
-  if ($eng -eq $null) { $eng = [Windows.Media.Ocr.OcrEngine]::TryCreateFromUserProfileLanguages() }
+  $eng = [Windows.Media.Ocr.OcrEngine]::TryCreateFromUserProfileLanguages()
+  if ($eng -eq $null) { try { $eng = [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage([Windows.Globalization.Language]::new("de-DE")) } catch {} }
+  if ($eng -eq $null) { throw "Keine Texterkennung in Windows installiert" }
   $res = Await ($eng.RecognizeAsync($bmp)) ([Windows.Media.Ocr.OcrResult])
   $out = @()
   foreach ($l in $res.Lines) { $h = 0; foreach ($w in $l.Words) { if ($w.BoundingRect.Height -gt $h) { $h = $w.BoundingRect.Height } }; $out += @{ t = $l.Text; h = [math]::Round($h) } }
@@ -508,6 +514,7 @@ try {
   Write-Output ("OK:" + (ConvertTo-Json -Compress -InputObject @($out)))
 } catch { Write-Output ("ERR:" + $_.Exception.Message) }
 `;
+let lastOcrErr = "";
 function winOcr(png) {
   return new Promise((ok) => {
     if (process.platform !== "win32") return ok(null);
@@ -519,6 +526,7 @@ function winOcr(png) {
         fs.unlink(f, () => {});
         const out = String(stdout || "").trim().split(/\r?\n/).pop() || "";
         if (out.startsWith("OK:")) { try { const a = JSON.parse(out.slice(3)); return ok(Array.isArray(a) ? a : [a]); } catch (e) {} }
+        lastOcrErr = out.startsWith("ERR:") ? out.slice(4) : String(err && err.message || "keine Antwort");
         ok(null);
       });
   });
@@ -533,7 +541,7 @@ function pickResult(o) {
       .then(async (img) => {
         const sz = img.getSize(), big = sz.width < 900 ? img.resize({ width: sz.width * 2, quality: "best" }) : img;   // bigger reads better
         const lines = await winOcr(big.toPNG());
-        out({ img: img.toDataURL(), lines, rect: r });
+        out({ img: img.toDataURL(), lines, ocrErr: lines ? "" : lastOcrErr, rect: r });
       }).catch(() => out({ fail: true, lassoFailed: true }));
     return;
   }

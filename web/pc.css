@@ -506,3 +506,7 @@ html.pc .pcwpick .sp{width:22px;height:22px;border-radius:50%;border:3px solid #
 @keyframes pcpkin{from{opacity:0;transform:translateY(-10px) scale(.96)}to{opacity:1;transform:none}}
 html.pc .pcfly2{position:fixed;z-index:95;background:var(--surface);color:var(--fg);font-weight:800;padding:10px 14px;border-radius:14px;box-shadow:0 16px 36px #13241b40;border:2px solid #1a7a5c;white-space:nowrap;pointer-events:none}
 html.pc .pcpage.picking .pcpbar .pick{background:#1a7a5c!important;color:#fff!important}html.pc .pcpage.lassoing .pcpbar .pick{background:#c27c0e!important;color:#fff!important}
+html.pc .pcpage:not(.embed) .lasso{display:none}
+html.pc .pcpbar .lasso{background:color-mix(in srgb,#c27c0e 14%,transparent);color:#a86a08;white-space:nowrap}
+html.pc .pcpage.lassoing .pcpbar .lasso{background:#c27c0e!important;color:#fff!important}
+html.pc .pcwpick .pkraw{margin:-4px 0 2px;line-height:1.35;word-break:break-word}
