@@ -129,12 +129,12 @@ function createWindow() {
   win.setContentProtection(secureOn());   // screenshots and screen sharing show a black window (switch in Sicherheit)
   win.on("close", (e) => {
     saveBounds();
-    // closing the app (also into the tray) closes an open web page inside it as well
-    if (pageView && pageShown) { try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; pickOn = false; pageBase = "";
-      pageView.webContents.loadURL("about:blank").catch(() => {}); win.webContents.executeJavaScript("window.hbPageClose && window.hbPageClose()").catch(() => {}); }
+    // closing the app (also into the tray) closes an open web page inside it for good
+    if (pageView) { pageDestroy(); win.webContents.executeJavaScript("window.hbPageClose && window.hbPageClose()").catch(() => {}); }
     if (!quitting && !SMOKE && prefs().tray) { e.preventDefault(); win.hide(); }   // keep running in the tray for reminders
   });
-  win.on("closed", () => { win = null; });
+  win.on("closed", () => { pageDestroy(); win = null; });
+  win.on("show", () => { if (!pageView) win.webContents.executeJavaScript("window.hbPageClose && window.hbPageClose()").catch(() => {}); });
 
   // web links open inside the app window (the app shows them with its own bar); other schemes (mailto …) go to Windows
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -396,6 +396,13 @@ ipcMain.on("scan", (e, id) => {
 
 // web pages (shop leaflets, help, imprint …) open INSIDE the app window: a web view placed where the app leaves room for it
 let pageView = null, pageShown = false, pageBase = "", pageFirst = false;
+// the web view is thrown away completely (not only hidden) – so nothing of it keeps the app running or shows up again
+function pageDestroy() {
+  const v = pageView; pageView = null; pageShown = false; pickOn = false; pageBase = ""; pickCssKey = null;
+  if (!v) return;
+  try { if (win && !win.isDestroyed()) win.contentView.removeChildView(v); } catch (e) {}
+  try { if (!v.webContents.isDestroyed()) v.webContents.close(); } catch (e) {}
+}
 // "Angebot picken": a script in the shown page highlights the offer under the mouse and reads name, price and "valid until"
 // from the clicked one (also inside embedded leaflet frames); "lasso" puts a see-through layer over the whole page to draw a frame
 // (for leaflets that are only pictures) – that part is photographed and read with the text recognition of Windows
@@ -805,6 +812,6 @@ if (!SMOKE && !app.requestSingleInstanceLock()) {
     createWindow();
     if (!SMOKE) setInterval(checkPlanned, 30000);
   });
-  app.on("before-quit", () => { quitting = true; });
+  app.on("before-quit", () => { quitting = true; pageDestroy(); });
   app.on("window-all-closed", () => { if (!prefs().tray || SMOKE) app.quit(); });
 }
