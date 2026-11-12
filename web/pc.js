@@ -935,7 +935,8 @@ if (IS_PC){
     const deals=shopDeals(sh.id), prices=shopPrices(sh.id), name=n=>n.charAt(0).toUpperCase()+n.slice(1);
     const recent=S.tx.filter(t=>t.kind==="ausgabe" && sh.re.test(nrm(t.note))).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
     const rmax=Math.max(1,...recent.map(t=>t.amount)), mine=W.filter(x=>x.w && x.w.s===sh.id);
-    const det=`<div class="card pcsd" style="--c:${sh.color};--k:${sh.ink||"#fff"}">
+    const web=!!(K.pg && K.PG.open && K.PG.embed);
+    const det=web ? `<div class="card pcsweb" id="pcsWeb" style="--c:${sh.color}"></div>` : `<div class="card pcsd" style="--c:${sh.color};--k:${sh.ink||"#fff"}">
       <div class="pcsdh"><div class="lg">${badge(sh)}</div><div class="grow"><h2>${esc(sh.name)}</h2><span class="small muted">${esc(CATN[sh.cat]||"")} · ${st.count?`Ø ${esc(eur0(st.sum/6))} im Monat · ${st.count} Einkäufe in 6 Monaten${st.last?` · zuletzt am ${esc(shortDate(st.last))}`:""}`:"zuletzt nicht eingekauft"}</span></div>
         <button class="btn primary" data-openshop="${esc(sh.url)}">${ic("cart",16)} Prospekt</button></div>
       <div class="pcsdc"><div>
@@ -961,15 +962,22 @@ if (IS_PC){
         <label class="ws" title="Laden ändern">${so?badge(so):`<span class="q">?</span>`}<select data-pczshop="${esc(it.id)}" aria-label="Laden für ${esc(it.n)}">${opts(it.s||"")}</select></label>
         <b class="p">${w&&w.p!=null?esc(eur(w.p)):""}</b><button class="del" data-pczdel="${esc(it.id)}" aria-label="${esc(it.n)} löschen">×</button></div>`; };
     const zet=`<div class="card pcz"><div class="pczh"><b>Einkaufszettel</b><span class="small muted">${open.length} offen${est?` · ca. ${esc(eur(est))}`:""}</span></div>
+${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">· ${esc(sh.name)}</span></div><div class="pccp form"><input class="in" id="pcpDT" placeholder="Was? z. B. ${sh.cat==="kleid"?"Pullover":sh.cat==="elek"?"Kopfhörer":sh.cat==="moebel"?"Regal":"Kaffee 500 g"}" aria-label="Was"><div class="pr2"><input class="in" id="pcpDP" inputmode="decimal" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pcpDU" value="${esc(nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn primary" data-pcpdeal>Merken</button></div></div>
+        ${deals.length?`<div class="small muted" style="margin:8px 2px 0">Schon gemerkt: ${deals.map(d=>esc(d.text)+(d.price?" "+esc(eur(d.price)):"")).join(" · ")}</div>`:""}</div>`:""}
       <div class="pczadd"><input class="in" id="pczIn" placeholder="Was brauchst du?" autocomplete="off" aria-label="Was brauchst du?"><button class="btn primary" data-pczadd aria-label="Hinzufügen">+</button></div>
       <div class="pczl">${open.map(row).join("")||`<div class="small muted pcze">Schreib auf, was du brauchst – die App sagt dir, wo es am günstigsten ist.</div>`}${done.length?`<div class="pczdone">${done.map(row).join("")}</div>`:""}</div>
       ${Object.keys(groups).length?`<div class="pcroute"><div class="ssh">So kaufst du am günstigsten${save>0.004?` <span class="pos">· spart ca. ${esc(eur(save))}</span>`:""}</div>
         ${Object.entries(groups).sort((a,b)=>(a[0]==="")-(b[0]==="") || b[1].length-a[1].length).map(([k,xs])=>{ const so=shopBy(k);
           return `<button class="pcstop" ${so?`data-pcshop="${k}"`:""} style="--c:${so?so.color:"#9aa"}">${so?badge(so):`<span class="q">?</span>`}<span class="grow"><b>${so?esc(so.name):"Laden offen"}</b><small class="muted">${xs.map(x=>esc(x.it.n)).join(", ")}</small></span>${sum(xs,x=>x.w&&x.w.p||0)?`<b>${esc(eur(sum(xs,x=>x.w&&x.w.p||0)))}</b>`:""}</button>`; }).join("")}</div>`:""}
-      ${done.length?`<button class="pczclr" data-pczclr>Erledigte löschen (${done.length})</button>`:""}</div>`;
+      ${done.length?`<button class="pczclr" data-pczclr>Erledigte löschen (${done.length})</button>`:""}
+</div>`;
     root.classList.add("pcshop");
     const keep=document.activeElement && document.activeElement.id==="pczIn", val=keep?document.activeElement.value:"";
+    const kept={}; ["pcpDT","pcpDP","pcpDU"].forEach(k=>{ const el=$(k); if (el) kept[k]=el.value; }); const fid=document.activeElement&&root.contains(document.activeElement)?document.activeElement.id:"";
+    if (K.pg && root.contains(K.pg)) document.body.append(K.pg);
     root.innerHTML=left+det+zet;
+    for (const k in kept){ const el=$(k); if (el && kept[k]) el.value=kept[k]; } if (fid && /^pcpD/.test(fid) && $(fid)) $(fid).focus();
+    if (web){ $("pcsWeb").appendChild(K.pg); requestAnimationFrame(()=>K.place()); }
     if (keep){ const i=$("pczIn"); i.value=val; i.focus(); }
     const calm=pcCalm();
     requestAnimationFrame(()=>{ if (calm) { K.fresh=null; K.swap=false; return; }
@@ -993,7 +1001,7 @@ if (IS_PC){
   async function addItem(){ const i=$("pczIn"); const n=(i&&i.value||"").trim(); if (!n) return; const id=newId(); K.fresh=id; i.value=""; saveList([...list(), {id, n:n.slice(0,60), done:false}]); }
   root.addEventListener("click", e=>{
     const c=e.target.closest("[data-pcscat]"); if (c){ UI.shopCat=c.dataset.pcscat; renderShopPC(); return; }
-    const s=e.target.closest("[data-pcshop]"); if (s){ if (UI.shopSel!==s.dataset.pcshop){ UI.shopSel=s.dataset.pcshop; UI.dealAdd=null; K.swap=true; renderShopPC(); } return; }
+    const s=e.target.closest("[data-pcshop]"); if (s){ if (K.pg && K.PG.open && K.PG.embed){ const o=shopBy(s.dataset.pcshop); if (o && o.id!==UI.shopSel) K.open(o.url, o); return; } if (UI.shopSel!==s.dataset.pcshop){ UI.shopSel=s.dataset.pcshop; UI.dealAdd=null; K.swap=true; renderShopPC(); } return; }
     if (e.target.closest("[data-pczadd]")){ addItem(); return; }
     const ck=e.target.closest("[data-pczck]"); if (ck){ const id=ck.dataset.pczck, row=ck.closest(".pczi");
       const go=()=>saveList(list().map(x=>x.id===id?{...x, done:!x.done}:x));
@@ -1003,11 +1011,18 @@ if (IS_PC){
       if (row && !pcCalm()) row.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateX(60px)"}],{duration:240,easing:"ease-in"}).onfinish=go; else go(); return; }
     if (e.target.closest("[data-pczclr]")){ const old=list(), n=old.filter(x=>x.done).length; saveList(old.filter(x=>!x.done)); toast(`${n} erledigte gelöscht`, ()=>saveList(old), "Rückgängig"); return; }
   });
+  function webDeal(){ const t=$("pcpDT"); if (!t || !K.PG || !K.PG.shop) return; const text=(t.value||"").trim(), pr=parseAmt($("pcpDP").value||""), until=$("pcpDU").value||"";
+    if (!text){ t.focus(); return; }
+    const keep=(S.settings.deals||[]).filter(x=>!x.until || x.until>=isoOf(new Date(Date.now()-14*864e5)));
+    S.settings.deals=[...keep, {id:newId(), shop:K.PG.shop.id, text:text.slice(0,60), price:pr>0?Math.round(pr*100)/100:null, until}];
+    t.value=""; $("pcpDP").value=""; saveSettings(); toast("Angebot gemerkt"); }
+  root.addEventListener("click", e=>{ if (e.target.closest("[data-pcpdeal]")) webDeal(); });
+  root.addEventListener("keydown", e=>{ if (e.key==="Enter" && /^pcpD/.test(e.target.id||"")){ e.preventDefault(); webDeal(); } });
   root.addEventListener("change", e=>{ const s=e.target.closest("[data-pczshop]"); if (!s) return; const id=s.dataset.pczshop, v=s.value; saveList(list().map(x=>x.id===id?(v?{...x, s:v}:(({s:_,...r})=>r)(x)):x)); });
   root.addEventListener("keydown", e=>{ if (e.target.id==="pczIn" && e.key==="Enter"){ e.preventDefault(); addItem(); } });
   /* ---- web pages inside the app window: page on the left, for a shop a bar of its own on the right ---- */
   const NB=()=>window.AndroidBridge && window.AndroidBridge.pageOpen ? window.AndroidBridge : null;
-  const PG={open:false, url:"", shop:null, st:{}, ro:null};
+  const PG={open:false, url:"", shop:null, st:{}, ro:null, embed:false}; let lastView=UI.view;
   const pg=document.createElement("div"); pg.id="pcPage"; pg.className="pcpage"; pg.hidden=true;
   pg.innerHTML=`<div class="pcpbar"><button data-pcpnav="back" title="Zurück" aria-label="Zurück">‹</button><button data-pcpnav="fwd" title="Vor" aria-label="Vor">›</button><button data-pcpnav="reload" class="rl" title="Neu laden" aria-label="Neu laden">⟳</button>
     <div class="url" title="Gesperrt: hier geht nur diese eine Webseite"><span class="lk">🔒</span><span class="u"></span><small class="t"></small><em class="only"></em></div><button data-pcpnav="close" class="x" title="Schließen (Esc)" aria-label="Schließen">✕</button></div>
@@ -1043,22 +1058,30 @@ if (IS_PC){
   function place(){ const b=NB(); if (b && PG.open) b.pageBounds(holeRect()); }
   function pageOpen(url, shop){
     if (!NB() && !window.pcPageDemo){ window.open(url, "_blank", "noopener"); return; }
-    const sh=shop!==undefined?shop:shopOf(url), was=PG.open;
-    PG.url=url; PG.shop=sh; PG.st={url}; PG.open=true; bar();
-    pg.classList.toggle("withside", !!sh); pg.classList.remove("ready"); side.hidden=!sh; pg.hidden=false;
-    document.documentElement.classList.add("pcpageon"); if (sh) sideRender();
+    const sh=shop!==undefined?shop:shopOf(url), was=PG.open, wasEmbed=PG.embed;
+    PG.url=url; PG.shop=sh; PG.st={url}; PG.open=true; bar(); pg.classList.remove("ready","withside"); side.hidden=true;
     const go=()=>{ const b=NB(); if (b) b.pageOpen(url, holeRect()); else if (window.pcPageDemo) window.pcPageDemo(url, holeRect()); };
-    if (was || pcCalm()){ go(); return; }
+    if (sh){ // a shop: the browser takes the place of the shop in the middle of the Einkauf page
+      PG.embed=true; pg.classList.add("embed"); pg.hidden=false; document.documentElement.classList.remove("pcpageon");
+      UI.shopSel=sh.id; UI.dealAdd=null; if (!(S.settings.shops||[]).includes(sh.id)) UI.shopCat="";
+      if (UI.view!=="shop"){ UI.view="shop"; lastView="shop"; render(); window.scrollTo({top:0}); } else renderShopPC();
+      if (wasEmbed || pcCalm()){ requestAnimationFrame(go); if (wasEmbed && !pcCalm()) pg.querySelector(".pcphole").animate([{opacity:.3},{opacity:1}],{duration:300}); return; }
+      const w=$("pcsWeb"); if (w) w.animate([{opacity:0,transform:"translateY(14px) scale(.98)",filter:"blur(3px)"},{opacity:1,transform:"none",filter:"blur(0)"}],{duration:340,easing:E2});
+      setTimeout(go, 320); return;
+    }
+    PG.embed=false; pg.classList.remove("embed"); document.body.append(pg); pg.hidden=false; document.documentElement.classList.add("pcpageon");
+    if (wasEmbed) renderShopPC();
+    if (was || pcCalm()){ requestAnimationFrame(go); return; }
     pg.animate([{opacity:0,transform:"translateY(30px) scale(.97)"},{opacity:1,transform:"none"}],{duration:340,easing:E2});
-    if (sh){ side.animate([{opacity:0,transform:"translateX(60px)"},{opacity:1,transform:"none"}],{duration:420,delay:80,easing:E2,fill:"backwards"});
-      side.querySelectorAll(".ssh,.pccp,.pczi,.pczadd").forEach((el,i)=>el.animate([{opacity:0,transform:"translateY(8px)"},{opacity:1,transform:"none"}],{duration:300,delay:220+i*40,easing:E2,fill:"backwards"})); }
     setTimeout(go, 330);
   }
   function pageClose(){ if (!PG.open) return; PG.open=false; const b=NB(); if (b) b.pageNav("close"); else if (window.pcPageDemo) window.pcPageDemo(null);
+    if (PG.embed){ PG.embed=false; pg.hidden=true; document.body.append(pg); pg.classList.remove("embed"); if (UI.view==="shop"){ K.swap=true; renderShopPC(); } return; }
     const done=()=>{ pg.hidden=true; side.hidden=true; side.innerHTML=""; document.documentElement.classList.remove("pcpageon"); };
     if (pcCalm()) return done();
     pg.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateY(24px) scale(.97)"}],{duration:240,easing:"ease-in"}).onfinish=done;
     if (!side.hidden) side.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateX(50px)"}],{duration:220,easing:"ease-in",fill:"forwards"}); }
+  K.PG=PG; K.pg=pg; K.place=place; K.open=pageOpen;
   window.hbPageRequest=url=>pageOpen(url);
   window.hbPageBlocked=()=>{ toast("Andere Webseiten sind hier gesperrt"); const u=pg.querySelector(".url"); if (u && !pcCalm()) u.animate([{transform:"none"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(-3px)"},{transform:"none"}],{duration:320}); };
   window.hbPageClose=pageClose;
@@ -1083,5 +1106,5 @@ if (IS_PC){
   // the page view sits above the app: step aside while a sheet or dialog of the app is open
   new MutationObserver(()=>{ const b=NB(); if (!b || !PG.open) return; b.pageShow(!document.querySelector(".backdrop.show:not([hidden]),#pcFbBg:not([hidden])")); }).observe(document.body, {subtree:true, attributes:true, attributeFilter:["class","hidden"]});
   // the side bar follows the data, the page closes when you go to another app page
-  const _r6=render; let lastView=UI.view; render=(...a)=>{ const x=_r6(...a); if (PG.open){ if (UI.view!==lastView) pageClose(); else sideRender(); } lastView=UI.view; return x; };
+  const _r6=render; render=(...a)=>{ const x=_r6(...a); if (PG.open){ if (UI.view!==lastView) pageClose(); else if (!PG.embed) sideRender(); } lastView=UI.view; return x; };
 }

@@ -481,3 +481,10 @@ html.pc .pcpside .pczl{min-height:0}
 html.pc.pcpageon .toast{z-index:90;left:auto;right:calc(40px + clamp(360px,24vw,475px)/2);transform:translateX(50%) translateY(12px);bottom:70px}
 html.pc.pcpageon .toast.show{transform:translateX(50%)}
 html.pc .pcpbar .url .only{flex:none;font-style:normal;font-size:11.5px;font-weight:700;background:color-mix(in srgb,#1a7a5c 14%,transparent);color:#1a7a5c;padding:3px 9px;border-radius:9px}
+/* the browser fixed in the middle of the Einkauf page */
+html.pc .pcsweb{padding:0;overflow:hidden;position:sticky;top:104px;height:calc(100vh - 150px);min-height:420px;display:flex}
+html.pc .pcsweb:before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:var(--c);z-index:1}
+html.pc .pcpage.embed{position:relative;inset:auto;z-index:auto;flex:1;border-radius:0;box-shadow:none;background:transparent}
+html.pc .pcpage.embed .pcpbar{padding-top:5px;height:63px}
+html.pc .pcz{max-height:calc(100vh - 150px);overflow:auto;scrollbar-width:thin}
+html.pc .pcwdeal{margin:0 0 16px;padding-bottom:14px;border-bottom:1px dashed color-mix(in srgb,var(--fg) 15%,transparent)}html.pc .pcwdeal .ssh{margin-bottom:8px}html.pc .pcwdeal .pccp{margin-bottom:0}
