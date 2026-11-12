@@ -1158,6 +1158,8 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
   });
   root.addEventListener("keydown", e=>{ if (e.key==="Enter" && /^pk[NPU]$/.test(e.target.id||"")){ e.preventDefault(); const b=root.querySelector('[data-pkok="zettel"]'); if (b) b.click(); } });
   K.PG=PG; K.pg=pg; K.place=place; K.open=pageOpen;
+  // after the app restarted (update, F5) a web page from before may still lie over the app: away with it
+  try { const b=NB(); if (b) b.pageNav("close"); } catch(_){}
   window.hbPageRequest=url=>pageOpen(url);
   window.hbPageBlocked=()=>{ toast("Andere Webseiten sind hier gesperrt"); const u=pg.querySelector(".url"); if (u && !pcCalm()) u.animate([{transform:"none"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(-3px)"},{transform:"none"}],{duration:320}); };
   window.hbPageClose=pageClose;

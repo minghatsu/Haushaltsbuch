@@ -154,6 +154,8 @@ function createWindow() {
   });
   win.on("app-command", (e, cmd) => { if (cmd === "browser-backward") goBack(); });
 
+  // the app itself reloads (update, F5): a web page shown above it belongs to the old page – remove it
+  win.webContents.on("did-start-navigation", (e) => { if (e.isMainFrame !== false && pageView && pageShown && !e.isSameDocument) { try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; pickOn = false; } });
   win.loadURL(APP_URL);
   if (SMOKE) runSmokeTest();
 }
