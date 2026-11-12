@@ -1128,17 +1128,22 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
     setTimeout(()=>{ saveList([...list(), {id, n, done:false, s:PG.shop.id, ...(p>0?{p:Math.round(p*100)/100}:{}), ...(until?{u:until}:{})}]); toast(`Auf dem Zettel: ${n}${p?" · "+eur(p):""}`, ()=>saveList(list().filter(x=>x.id!==id)), "Rückgängig"); }, pcCalm()?0:700); }
   // reads name, price and date from recognised lines (h = text height: the price is usually the biggest number)
   function readOcr(lines){
-    const L=(lines||[]).map(l=>({t:String(l.t||"").trim(), h:+l.h||0})).filter(l=>l.t), all=L.map(l=>l.t).join("\n");
-    const BAD=/^(uvp|statt|je|grundpreis|ab|nur|aktion|angebot|preis|kg|1 ?kg|1 ?l|100 ?g|\d+ ?%)/i;
+    const L=(lines||[]).map(l=>({t:String(l.t||"").replace(/[¹²³⁴⁵⁶⁷⁸⁹⁰*]+/g,"").trim(), h:+l.h||0, w:!!l.w})).filter(l=>l.t), all=L.map(l=>l.t).join("\n");
+    const shopN=PG.shop?nrm(PG.shop.name):"";
+    const BAD=/^(uvp|statt|je|grundpreis|ab|nur|aktion|angebot|angebote|preis|kg|1 ?kg|1 ?l|100 ?g|\d+ ?%|wochen|deal|knaller|kauf \d|super|top|neu|sale|tipp)\b/i;
     const pr=t=>{ let m=t.match(/(\d{1,4})\s*[.,]\s*(\d{2})(?!\d)/); if (m) return +(m[1]+"."+m[2]); m=t.match(/[-–]\s*[.,]\s*(\d{2})(?!\d)/); if (m) return +("0."+m[1]); m=t.match(/(\d{1,4})\s*[.,]\s*[-–]/); if (m) return +m[1];
       m=t.replace(/\s+/g," ").match(/^\D{0,3}(\d{1,3})\s(\d{2})\D{0,3}$/); if (m) return +(m[1]+"."+m[2]); return null; };   // "1 79" = 1,79 (small cents)
-    // the offer price: not the base price ("1 kg = …"), deposit or bonus badges at the top – among the big prices the lowest one in the frame
+    // white price circles: "599" written big with small cents = 5,99
+    const prW=t=>{ const v=pr(t); if (v!=null) return v; const m=t.replace(/[oO]/g,"0").match(/^\D{0,2}(\d{3,4})\D{0,8}$/); return m ? +m[1]/100 : null; };
     const UNIT=/(=|zzgl|pfand|uvp|statt|grundpreis|\(1|je\s*\d|\bkg\b|\bl\b|100\s*g|%)/i;
-    const cands=L.map((l,i)=>({v:pr(l.t), h:l.h, i, t:l.t})).filter(x=>x.v>0 && x.v<10000 && !UNIT.test(x.t));
+    let cands=L.map((l,i)=>({v:l.w?prW(l.t):pr(l.t), h:l.h, i, t:l.t, w:l.w})).filter(x=>x.v>0 && x.v<10000 && !UNIT.test(x.t));
     const mh=Math.max(0,...cands.map(x=>x.h)), big=cands.filter(x=>!mh || x.h>=mh*0.6), pick=(big.length?big:cands).slice(-1)[0];
     const price=pick?pick.v:null;
-    const clean=t=>t.replace(/^[^A-Za-zÄÖÜäöü0-9]+/,"").replace(/[\s,(]+$/,"").trim();
-    const names=L.map((l,i)=>({t:clean(l.t), h:l.h, i, raw:l.t})).filter(l=>/[a-zäöüß]{3}/i.test(l.raw) && pr(l.raw)==null && !BAD.test(l.raw) && !/^(bis|gültig)/i.test(l.raw) && !UNIT.test(l.raw) && l.t.length>=3);
+    const clean=t=>t.replace(/^[^A-Za-zÄÖÜäöü0-9]+/,"").replace(/[\s,(.…]+$/,"").trim();
+    // the name: written in normal letters (not a shouting banner), not the shop's own name, not white banner text
+    const noShop=t=>shopN ? t.replace(new RegExp("^"+shopN.replace(/[^a-z0-9]/g,"")+"[\\s.…:-]*","i"),"") : t;
+    const names=L.map((l,i)=>({t:clean(noShop(clean(l.t))), h:l.h, i, raw:noShop(l.t), w:l.w})).filter(l=>!l.w && /[a-zäöüß]{3}/.test(l.raw) && pr(l.raw)==null && !BAD.test(l.raw) && !/^(bis|gültig)/i.test(l.raw) && !UNIT.test(l.raw) && l.t.length>=4
+     );
     const top=names.slice().sort((a,b)=>(b.h-a.h)||(b.t.length-a.t.length))[0];
     // a name over two lines ("Bitburger Pils oder" / "alkoholfrei"): the next line in the same size belongs to it
     const name=top?[top.t]:[]; if (top && top.h){ const nx=names.find(l=>l.i===top.i+1 && Math.abs(l.h-top.h)<=top.h*0.15); if (nx) name.push(nx.t); }

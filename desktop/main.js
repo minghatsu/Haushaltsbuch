@@ -591,6 +591,14 @@ function winOcr(png) {
       });
   });
 }
+function whiteToBlack(img) {
+  const { width, height } = img.getSize(), b = img.toBitmap(), o = Buffer.alloc(b.length);
+  for (let i = 0; i < b.length; i += 4) {
+    const B = b[i], G = b[i + 1], R = b[i + 2], mx = Math.max(R, G, B), mn = Math.min(R, G, B), lum = 0.299 * R + 0.587 * G + 0.114 * B;
+    const v = lum > 200 && mx - mn < 45 ? 0 : 255; o[i] = o[i + 1] = o[i + 2] = v; o[i + 3] = 255;
+  }
+  return nativeImage.createFromBitmap(o, { width, height }).toPNG();
+}
 function pickResult(o) {
   if (!win || win.isDestroyed()) return;
   const out = (x) => win.webContents.executeJavaScript(`window.hbPagePick && window.hbPagePick(${JSON.stringify(x)})`).catch(() => {});
@@ -601,7 +609,10 @@ function pickResult(o) {
       .then(async (img) => {
         const sz = img.getSize(), big = sz.width < 900 ? img.resize({ width: sz.width * 2, quality: "best" }) : img;   // bigger reads better
         const lines = await winOcr(big.toPNG());
-        out({ img: img.toDataURL(), lines, ocrErr: lines ? "" : lastOcrErr, rect: r });
+        // second look for white writing on colour (price circles like "5⁹⁹"): white becomes black, everything else white
+        let white = null; try { white = await winOcr(whiteToBlack(big)); } catch (err) {}
+        const all = (lines || []).concat((white || []).map((l) => ({ ...l, w: 1 })));
+        out({ img: img.toDataURL(), lines: (lines || white) ? all : null, ocrErr: (lines || white) ? "" : lastOcrErr, rect: r });
       }).catch(() => out({ fail: true, lassoFailed: true }));
     return;
   }
