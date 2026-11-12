@@ -18,7 +18,7 @@ const PC_ANIM={busy:false, pass:false};
 function pcTiles(sec){
   if (!sec) return [];
   const out=[];
-  if (sec && ((sec.id==="v-fix" && sec.classList.contains("pcfcal")) || sec.id==="v-list")) return out;   // these pages have their own entrance
+  if (sec && ((sec.id==="v-fix" && sec.classList.contains("pcfcal")) || sec.id==="v-list" || sec.id==="v-shop")) return out;   // these pages have their own entrance
   for (const c of sec.children){
     if (c.matches(".hcols,.cols")) c.querySelectorAll(":scope > .hcol > *, :scope > .col > *").forEach(x=>out.push(x));
     else out.push(c);
@@ -211,6 +211,28 @@ if (IS_PC){
     "Gilt ab {m} {n} für alle folgenden Monate.":["Applies from {m} {n} to all following months.","{m} {n} itibarıyla sonraki tüm aylar için geçerli.","Действует с {m} {n} для всех следующих месяцев.","Діє з {m} {n} для всіх наступних місяців.","Obowiązuje od {m} {n} we wszystkich kolejnych miesiącach.","يسري من {m} {n} لكل الأشهر التالية.","Se aplică din {m} {n} pentru toate lunile următoare."],
     "Wirklich löschen?":["Really delete?","Gerçekten silinsin mi?","Точно удалить?","Справді видалити?","Na pewno usunąć?","هل تريد الحذف فعلًا؟","Sigur ștergi?"],
     "Klick = abhaken · Stift = bearbeiten · Ziehen = Tag ändern · + im Tag = neu eintragen":["Click = tick off · Pencil = edit · Drag = change the day · + in a day = add new","Tıkla = işaretle · Kalem = düzenle · Sürükle = günü değiştir · Günde + = yeni ekle","Клик = отметить · Карандаш = изменить · Перетащить = сменить день · + в дне = добавить","Клік = позначити · Олівець = змінити · Перетягнути = змінити день · + у дні = додати","Klik = odhacz · Ołówek = edytuj · Przeciągnij = zmień dzień · + w dniu = dodaj","نقرة = تأشير · القلم = تعديل · السحب = تغيير اليوم · + في اليوم = إضافة","Clic = bifează · Creion = editează · Trage = schimbă ziua · + în zi = adaugă"],
+    "Ø im Monat":["Ø per month", "Aylık ort.", "Ø в месяц", "Ø на місяць", "Ø miesięcznie", "المتوسط شهريًا", "Ø pe lună"],
+    "+ Läden auswählen":["+ Choose shops", "+ Mağaza seç", "+ Выбрать магазины", "+ Вибрати магазини", "+ Wybierz sklepy", "+ اختر المتاجر", "+ Alege magazine"],
+    "Einkaufszettel":["Shopping list", "Alışveriş listesi", "Список покупок", "Список покупок", "Lista zakupów", "قائمة التسوق", "Listă de cumpărături"],
+    "{n} offen · ca. {n} €":["{n} open · approx. {n} €", "{n} açık · yakl. {n} €", "{n} открыто · ок. {n} €", "{n} відкрито · бл. {n} €", "{n} otwarte · ok. {n} €", "{n} مفتوحة · حوالي {n} €", "{n} deschise · cca. {n} €"],
+    "Schreib auf, was du brauchst – die App sagt dir, wo es am günstigsten ist.":["Write down what you need – the app tells you where it is cheapest.", "Neye ihtiyacın olduğunu yaz – uygulama en ucuz nerede olduğunu söyler.", "Запиши, что нужно – приложение подскажет, где дешевле.", "Запиши, що потрібно – застосунок підкаже, де дешевше.", "Zapisz, czego potrzebujesz – aplikacja powie ci, gdzie jest najtaniej.", "اكتب ما تحتاجه – سيخبرك التطبيق أين هو الأرخص.", "Notează ce îți trebuie – aplicația îți spune unde e cel mai ieftin."],
+    "So kaufst du am günstigsten":["Cheapest way to shop", "En ucuz alışveriş", "Как купить дешевле всего", "Як купити найдешевше", "Najtaniej kupisz tak", "هكذا تتسوق بأرخص سعر", "Cel mai ieftin cumperi așa"],
+    "· spart ca. {n} €":["· saves approx. {n} €", "· yakl. {n} € tasarruf", "· экономия ок. {n} €", "· економія бл. {n} €", "· oszczędzasz ok. {n} €", "· توفير حوالي {n} €", "· economisești cca. {n} €"],
+    "Laden offen":["Shop not set", "Mağaza belirsiz", "Магазин не выбран", "Магазин не вибрано", "Sklep nieustalony", "المتجر غير محدد", "Magazin nestabilit"],
+    "Erledigte löschen ({n})":["Delete done ({n})", "Bitenleri sil ({n})", "Удалить выполненные ({n})", "Видалити виконані ({n})", "Usuń zrobione ({n})", "حذف المنجز ({n})", "Șterge bifatele ({n})"],
+    "Auf deinem Zettel":["On your list", "Listende", "В твоём списке", "У твоєму списку", "Na twojej liście", "في قائمتك", "Pe lista ta"],
+    "Letzte Einkäufe":["Recent purchases", "Son alışverişler", "Последние покупки", "Останні покупки", "Ostatnie zakupy", "آخر المشتريات", "Cumpărături recente"],
+    "Hier hast du in letzter Zeit nichts gekauft.":["You haven't bought anything here lately.", "Son zamanlarda burada bir şey almadın.", "Ты здесь давно ничего не покупал.", "Ти тут давно нічого не купував.", "Ostatnio nic tu nie kupowałeś.", "لم تشترِ شيئًا هنا مؤخرًا.", "N-ai cumpărat nimic aici în ultima vreme."],
+    "automatisch":["automatic", "otomatik", "автоматически", "автоматично", "automatycznie", "تلقائي", "automat"],
+    "Merken":["Save", "Kaydet", "Запомнить", "Запам'ятати", "Zapamiętaj", "حفظ", "Salvează"],
+    "Gemerkte Angebote":["Saved offers", "Kaydedilen fırsatlar", "Сохранённые акции", "Збережені акції", "Zapisane oferty", "العروض المحفوظة", "Oferte salvate"],
+    "Deine Preise hier":["Your prices here", "Buradaki fiyatların", "Твои цены здесь", "Твої ціни тут", "Twoje ceny tutaj", "أسعارك هنا", "Prețurile tale aici"],
+    "· aus Quittungen":["· from receipts", "· fişlerden", "· из чеков", "· з чеків", "· z paragonów", "· من الإيصالات", "· din bonuri"],
+    "+ Angebot merken":["+ Save offer", "+ Fırsatı kaydet", "+ Запомнить акцию", "+ Запам'ятати акцію", "+ Zapisz ofertę", "+ احفظ العرض", "+ Salvează oferta"],
+    "Prospekt":["Leaflet", "Broşür", "Проспект", "Проспект", "Gazetka", "النشرة", "Catalog"],
+    "hier am günstigsten":["cheapest here", "en ucuz burada", "здесь дешевле всего", "тут найдешевше", "tu najtaniej", "الأرخص هنا", "cel mai ieftin aici"],
+    "zuletzt nicht eingekauft":["not shopped here lately", "son zamanlarda alışveriş yok", "давно не покупал", "давно не купував", "ostatnio bez zakupów", "لم تتسوق هنا مؤخرًا", "fără cumpărături recente"],
+    "{n} erledigte gelöscht":["{n} done deleted", "{n} biten silindi", "{n} выполненных удалено", "{n} виконаних видалено", "Usunięto {n} zrobionych", "تم حذف {n} من المنجز", "{n} bifate șterse"],
     "Einklappen":["Collapse","Daralt","Свернуть","Згорнути","Zwiń","طيّ","Restrânge"],
     "Aufklappen":["Expand","Genişlet","Развернуть","Розгорнути","Rozwiń","توسيع","Extinde"],
     "Ja":["Yes","Evet","Да","Так","Tak","نعم","Da"],"Nein":["No","Hayır","Нет","Ні","Nie","لا","Nu"],
@@ -865,4 +887,114 @@ if (IS_PC){
     }
   }
   new MutationObserver(()=>{ if (!root.hidden) requestAnimationFrame(enter); }).observe(root, {attributes:true, attributeFilter:["hidden"]});
+}
+/* ---------- Einkauf: shops on the left, the chosen shop big in the middle, the shopping list on the right ---------- */
+if (IS_PC){
+  const root=$("v-shop"), E="cubic-bezier(.2,.8,.2,1)", BO="cubic-bezier(.3,1.5,.5,1)";
+  const CATN={super:"Supermarkt",disc:"Discounter",drog:"Drogerie",kleid:"Kleidung",elek:"Elektronik",bau:"Baumarkt",moebel:"Möbel",tier:"Tierbedarf",online:"Online"};
+  const badge=sh=>brandBadge({t:sh.name.replace(/ .*/,"").slice(0,1), bg:sh.color, ink:sh.ink||"#fff", domain:SHOP_DOMAINS[sh.id]||""});
+  const shopBy=id=>SHOPS.find(x=>x.id===id);
+  const list=()=>S.settings.shoplist||[];
+  const chosen=()=>(S.settings.shops||[]).map(shopBy).filter(Boolean);
+  const K={fresh:null, gone:null, swap:false, prev:""};
+  // where an item is cheapest: your receipts first, then the offers you noted
+  function bestFor(name){
+    const tk=priceToks(name); if (!tk.length) return null; const mine=new Set(S.settings.shops||[]), by={};
+    for (const e of (S.settings.pricebook||[])) if (sameProduct(tk, priceToks(e.n))){ if (!by[e.s] || by[e.s].d<=e.d) by[e.s]=e; }
+    const td=isoToday();
+    for (const d of (S.settings.deals||[])) if ((!d.until||d.until>=td) && d.price && sameProduct(tk, priceToks(d.text))){ if (!by[d.shop] || d.price<by[d.shop].p) by[d.shop]={s:d.shop,p:d.price,deal:true}; }
+    const all=Object.values(by).filter(x=>shopBy(x.s)); if (!all.length) return null;
+    all.sort((a,b)=>(mine.has(b.s)-mine.has(a.s)) || a.p-b.p);
+    const pool=all.filter(x=>mine.has(x.s)).length?all.filter(x=>mine.has(x.s)):all, best=pool.slice().sort((a,b)=>a.p-b.p)[0], worst=pool.slice().sort((a,b)=>b.p-a.p)[0];
+    return {s:best.s, p:best.p, save:worst.p-best.p, deal:!!best.deal};
+  }
+  const where=it=>{ if (it.s) return {s:it.s, p:null, manual:true}; return bestFor(it.n); };
+  function saveList(l){ S.settings.shoplist=l; saveSettings(); }
+  function renderShopPC(){
+    const ch=chosen();
+    if (!ch.length){ root.classList.remove("pcshop"); root.innerHTML=`<div class="zstack">${offersCard()}</div>`; return; }
+    const cats=[...new Set(ch.map(x=>x.cat))]; if (UI.shopCat && !cats.includes(UI.shopCat)) UI.shopCat="";
+    const shown=UI.shopCat?ch.filter(x=>x.cat===UI.shopCat):ch;
+    if (!ch.some(x=>x.id===UI.shopSel)) UI.shopSel=ch[0].id;
+    const stats=Object.fromEntries(shopStats().map(o=>[o.shop.id,o])), mx=Math.max(1,...ch.map(x=>(stats[x.id]||{}).sum||0));
+    const L=list(), W=L.map(it=>({it, w:where(it)}));
+    const left=`<div class="card pcsl"><div class="pcslh"><b>Deine Läden</b><span class="small muted">Ø im Monat</span></div>
+      ${cats.length>1?`<div class="pcscats">${[["","Alle"],...cats.map(c=>[c,CATN[c]||c])].map(([c,l])=>`<button class="${(UI.shopCat||"")===c?"on":""}" data-pcscat="${c}">${esc(l)}</button>`).join("")}</div>`:""}
+      <div class="pcsls">${shown.map(sh=>{ const st=stats[sh.id]||{sum:0,count:0}, nd=shopDeals(sh.id).length, nz=W.filter(x=>!x.it.done && x.w && x.w.s===sh.id).length;
+        return `<button class="pcsli ${sh.id===UI.shopSel?"on":""}" data-pcshop="${sh.id}" style="--c:${sh.color}">${badge(sh)}<span class="tx"><b>${esc(sh.name)}</b><small>${esc(CATN[sh.cat]||"")}</small><i class="bar"><i style="width:${Math.round(st.sum/mx*100)}%"></i></i></span><span class="r"><b>${esc(eur0(st.sum/6))}</b>${nd||nz?`<small>${nd?`${ic("tag",12)}${nd}`:""}${nz?`${ic("list",12)}${nz}`:""}</small>`:""}</span></button>`; }).join("")}</div>
+      <button class="pcsadd" data-go="more" data-scroll="shopEd">+ Läden auswählen</button></div>`;
+    const sh=shopBy(UI.shopSel), st=stats[sh.id]||{sum:0,count:0,last:""};
+    const deals=shopDeals(sh.id), prices=shopPrices(sh.id), name=n=>n.charAt(0).toUpperCase()+n.slice(1);
+    const recent=S.tx.filter(t=>t.kind==="ausgabe" && sh.re.test(nrm(t.note))).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
+    const rmax=Math.max(1,...recent.map(t=>t.amount)), mine=W.filter(x=>x.w && x.w.s===sh.id);
+    const det=`<div class="card pcsd" style="--c:${sh.color};--k:${sh.ink||"#fff"}">
+      <div class="pcsdh"><div class="lg">${badge(sh)}</div><div class="grow"><h2>${esc(sh.name)}</h2><span class="small muted">${esc(CATN[sh.cat]||"")} · ${st.count?`Ø ${esc(eur0(st.sum/6))} im Monat · ${st.count} Einkäufe in 6 Monaten${st.last?` · zuletzt am ${esc(shortDate(st.last))}`:""}`:"zuletzt nicht eingekauft"}</span></div>
+        <button class="btn primary" data-openshop="${esc(sh.url)}">${ic("cart",16)} Prospekt</button></div>
+      <div class="pcsdc"><div>
+        <div class="ssh">Gemerkte Angebote</div>
+        ${deals.map(d=>`<div class="pccp"><div class="grow"><b>${esc(d.text)}</b><small class="muted">${d.until?`bis ${esc(shortDate(d.until))}`:"ohne Datum"}</small></div>${d.price?`<b class="pp">${esc(eur(d.price))}</b>`:""}<button class="x" data-dealdel="${esc(d.id)}" aria-label="Angebot löschen">×</button></div>`).join("")}
+        ${UI.dealAdd===sh.id?`<div class="pccp form"><input class="in" id="dealText" placeholder="Was? z. B. Kaffee 500 g" aria-label="Was"><div class="pr2"><input class="in" id="dealPrice" inputmode="decimal" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="dealUntil" value="${esc(nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn" data-dealcancel>Abbrechen</button><button class="btn primary" data-dealsave="${esc(sh.id)}">Merken</button></div></div>`
+          :`<button class="pccp add" data-dealadd="${esc(sh.id)}">+ Angebot merken</button>`}
+        ${mine.length?`<div class="ssh" style="margin-top:20px">Auf deinem Zettel</div>${mine.map(({it,w})=>`<div class="pczr ${it.done?"done":""}"><span>${esc(it.n)}</span>${w.p!=null?`<b>${esc(eur(w.p))}</b>`:""}</div>`).join("")}`:""}
+      </div><div>
+        ${prices.length?`<div class="ssh">Deine Preise hier <span class="muted">· aus Quittungen</span></div>
+          ${prices.map(x=>`<div class="pcpr"><span class="grow"><b>${esc(name(x.w))}</b>${x.best?`<small class="warn">bei ${esc((shopBy(x.best.s)||{name:x.best.s}).name)} ${esc(eur(x.best.p))}</small>`:x.cheapest?`<small class="pos">hier am günstigsten</small>`:""}</span><b>${esc(eur(x.e.p))}</b></div>`).join("")}`:""}
+        <div class="ssh" ${prices.length?'style="margin-top:20px"':""}>Letzte Einkäufe</div>
+        ${recent.length?`<div class="pcbars">${recent.slice().reverse().map(t=>`<div><span class="v">${esc(eur0(t.amount))}</span><i style="height:${Math.max(6,Math.round(t.amount/rmax*100))}%"></i><small>${esc(shortDate(t.date))}</small></div>`).join("")}</div>`
+          :`<div class="small muted">Hier hast du in letzter Zeit nichts gekauft.</div>`}
+      </div></div></div>`;
+    // the list: open items first, grouped route below
+    const open=W.filter(x=>!x.it.done), done=W.filter(x=>x.it.done), groups={};
+    for (const x of open){ const k=x.w?x.w.s:""; (groups[k]=groups[k]||[]).push(x); }
+    const save=sum(open,x=>x.w&&x.w.save>0?x.w.save:0), est=sum(open,x=>x.w&&x.w.p?x.w.p:0);
+    const opts=id=>`<option value="">automatisch</option>${ch.map(o=>`<option value="${o.id}" ${o.id===id?"selected":""}>${esc(o.name)}</option>`).join("")}`;
+    const row=({it,w})=>{ const so=w&&shopBy(w.s);
+      return `<div class="pczi ${it.done?"done":""}" data-pczi="${esc(it.id)}"><button class="cb" data-pczck="${esc(it.id)}" aria-label="${esc(it.n)} ${it.done?"wieder offen":"erledigt"}"></button><span class="n">${esc(it.n)}</span>
+        <label class="ws" title="Laden ändern">${so?badge(so):`<span class="q">?</span>`}<select data-pczshop="${esc(it.id)}" aria-label="Laden für ${esc(it.n)}">${opts(it.s||"")}</select></label>
+        <b class="p">${w&&w.p!=null?esc(eur(w.p)):""}</b><button class="del" data-pczdel="${esc(it.id)}" aria-label="${esc(it.n)} löschen">×</button></div>`; };
+    const zet=`<div class="card pcz"><div class="pczh"><b>Einkaufszettel</b><span class="small muted">${open.length} offen${est?` · ca. ${esc(eur(est))}`:""}</span></div>
+      <div class="pczadd"><input class="in" id="pczIn" placeholder="Was brauchst du?" autocomplete="off" aria-label="Was brauchst du?"><button class="btn primary" data-pczadd aria-label="Hinzufügen">+</button></div>
+      <div class="pczl">${open.map(row).join("")||`<div class="small muted pcze">Schreib auf, was du brauchst – die App sagt dir, wo es am günstigsten ist.</div>`}${done.length?`<div class="pczdone">${done.map(row).join("")}</div>`:""}</div>
+      ${Object.keys(groups).length?`<div class="pcroute"><div class="ssh">So kaufst du am günstigsten${save>0.004?` <span class="pos">· spart ca. ${esc(eur(save))}</span>`:""}</div>
+        ${Object.entries(groups).sort((a,b)=>(a[0]==="")-(b[0]==="") || b[1].length-a[1].length).map(([k,xs])=>{ const so=shopBy(k);
+          return `<button class="pcstop" ${so?`data-pcshop="${k}"`:""} style="--c:${so?so.color:"#9aa"}">${so?badge(so):`<span class="q">?</span>`}<span class="grow"><b>${so?esc(so.name):"Laden offen"}</b><small class="muted">${xs.map(x=>esc(x.it.n)).join(", ")}</small></span>${sum(xs,x=>x.w&&x.w.p||0)?`<b>${esc(eur(sum(xs,x=>x.w&&x.w.p||0)))}</b>`:""}</button>`; }).join("")}</div>`:""}
+      ${done.length?`<button class="pczclr" data-pczclr>Erledigte löschen (${done.length})</button>`:""}</div>`;
+    root.classList.add("pcshop");
+    const keep=document.activeElement && document.activeElement.id==="pczIn", val=keep?document.activeElement.value:"";
+    root.innerHTML=left+det+zet;
+    if (keep){ const i=$("pczIn"); i.value=val; i.focus(); }
+    const calm=pcCalm();
+    requestAnimationFrame(()=>{ if (calm) { K.fresh=null; K.swap=false; return; }
+      if (K.swap){ const d=root.querySelector(".pcsd"); d.animate([{opacity:0,transform:"translateY(10px) scale(.985)",filter:"blur(4px)"},{opacity:1,transform:"none",filter:"blur(0)"}],{duration:380,easing:E});
+        const h=d.querySelector(".pcsdh .lg"); if (h) h.animate([{transform:"scale(.4) rotate(-20deg)"},{transform:"scale(1.1) rotate(4deg)",offset:.7},{transform:"none"}],{duration:560,easing:E});
+        d.querySelectorAll(".pccp,.pcpr,.pczr").forEach((el,i)=>el.animate([{opacity:0,transform:"translateX(-10px)"},{opacity:1,transform:"none"}],{duration:320,delay:80+i*40,easing:E,fill:"backwards"}));
+        d.querySelectorAll(".pcbars i").forEach((el,i)=>el.animate([{transform:"scaleY(0)"},{transform:"none"}],{duration:600,delay:150+i*60,easing:BO,fill:"backwards"})); }
+      if (K.fresh){ const el=root.querySelector(`[data-pczi="${CSS.escape(K.fresh)}"]`); if (el) el.animate([{opacity:0,transform:"translateY(-16px) rotate(-2deg)"},{opacity:1,transform:"translateY(2px)",offset:.7},{opacity:1,transform:"none"}],{duration:420,easing:E}); }
+      K.fresh=null; K.swap=false; });
+  }
+  renderShop = renderShopPC;
+  rerenderShopPanel = renderShopPC;
+  // entrance when the page comes into view
+  function enter(){ if (pcCalm() || !root.classList.contains("pcshop")) return;
+    root.querySelectorAll(".pcsli,.pcsadd,.pcscats").forEach((el,i)=>el.animate([{opacity:0,transform:"translateX(-40px)"},{opacity:1,transform:"none"}],{duration:460,delay:i*45,easing:E,fill:"backwards"}));
+    const d=root.querySelector(".pcsd"); if (d){ d.animate([{opacity:0,transform:"translateY(30px) scale(.97)"},{opacity:1,transform:"none"}],{duration:560,delay:120,easing:E,fill:"backwards"});
+      d.querySelectorAll(".pcbars i").forEach((el,i)=>el.animate([{transform:"scaleY(0)"},{transform:"none"}],{duration:700,delay:450+i*70,easing:BO,fill:"backwards"})); }
+    const z=root.querySelector(".pcz"); if (z){ z.animate([{opacity:0,transform:"translateX(60px) rotate(2deg)"},{opacity:1,transform:"none"}],{duration:560,delay:200,easing:E,fill:"backwards"});
+      z.querySelectorAll(".pczi").forEach((el,i)=>el.animate([{opacity:0,clipPath:"inset(0 100% 0 0)"},{opacity:1,clipPath:"inset(0 0 0 0)"}],{duration:420,delay:450+i*60,easing:"ease-out",fill:"backwards"})); } }
+  new MutationObserver(()=>{ if (!root.hidden) requestAnimationFrame(enter); }).observe(root, {attributes:true, attributeFilter:["hidden"]});
+  async function addItem(){ const i=$("pczIn"); const n=(i&&i.value||"").trim(); if (!n) return; const id=newId(); K.fresh=id; i.value=""; saveList([...list(), {id, n:n.slice(0,60), done:false}]); }
+  root.addEventListener("click", e=>{
+    const c=e.target.closest("[data-pcscat]"); if (c){ UI.shopCat=c.dataset.pcscat; renderShopPC(); return; }
+    const s=e.target.closest("[data-pcshop]"); if (s){ if (UI.shopSel!==s.dataset.pcshop){ UI.shopSel=s.dataset.pcshop; UI.dealAdd=null; K.swap=true; renderShopPC(); } return; }
+    if (e.target.closest("[data-pczadd]")){ addItem(); return; }
+    const ck=e.target.closest("[data-pczck]"); if (ck){ const id=ck.dataset.pczck, row=ck.closest(".pczi");
+      const go=()=>saveList(list().map(x=>x.id===id?{...x, done:!x.done}:x));
+      if (row && !pcCalm() && !row.classList.contains("done")){ row.classList.add("striking"); setTimeout(go, 420); } else go(); return; }
+    const dl=e.target.closest("[data-pczdel]"); if (dl){ const id=dl.dataset.pczdel, row=dl.closest(".pczi"), old=list();
+      const go=()=>{ saveList(old.filter(x=>x.id!==id)); toast("Gelöscht", ()=>saveList(old), "Rückgängig"); };
+      if (row && !pcCalm()) row.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateX(60px)"}],{duration:240,easing:"ease-in"}).onfinish=go; else go(); return; }
+    if (e.target.closest("[data-pczclr]")){ const old=list(), n=old.filter(x=>x.done).length; saveList(old.filter(x=>!x.done)); toast(`${n} erledigte gelöscht`, ()=>saveList(old), "Rückgängig"); return; }
+  });
+  root.addEventListener("change", e=>{ const s=e.target.closest("[data-pczshop]"); if (!s) return; const id=s.dataset.pczshop, v=s.value; saveList(list().map(x=>x.id===id?(v?{...x, s:v}:(({s:_,...r})=>r)(x)):x)); });
+  root.addEventListener("keydown", e=>{ if (e.target.id==="pczIn" && e.key==="Enter"){ e.preventDefault(); addItem(); } });
 }
