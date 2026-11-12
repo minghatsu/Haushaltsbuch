@@ -518,3 +518,50 @@ html.pc .pcpbar .pick:hover{transform:translateY(-1px) scale(1.03)!important;box
 @keyframes pcpickcall{0%,100%{box-shadow:0 0 0 4px #1a7a5c2e,0 8px 20px #1a7a5c55}50%{box-shadow:0 0 0 8px #1a7a5c14,0 8px 24px #1a7a5c66}}
 html.pc .pcpage.picking .pcpbar .pick{background:#0f5f46!important;animation:pcpickglow 1.6s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){html.pc .pcpbar .pick{animation:none}}
+/* ---------- Analyse: drei Spalten ---------- */
+html.pc #v-year.pca{display:block;max-width:none}
+html.pc .pcana{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px;align-items:start;padding-bottom:60px}
+html.pc .pcac{display:flex;flex-direction:column;gap:14px;min-width:0}
+html.pc .pcah{display:flex;align-items:baseline;gap:12px;margin:2px 4px -2px;min-height:44px}
+html.pc .pcah h2{font:400 30px/1.1 Georgia,"Times New Roman",serif;letter-spacing:-.01em;margin:0}
+html.pc .pcah>span{color:var(--muted);font-size:14px;font-weight:600}
+html.pc .pcah .anaseg{margin-left:auto;align-self:center}
+html.pc .pcac .card{margin:0}
+html.pc .pcabig{cursor:pointer;padding:22px 24px 16px;transition:transform .18s,box-shadow .18s}
+html.pc .pcabig:hover,html.pc .pcak:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(20,32,27,.08)}
+html.pc .pcabig>small,html.pc .pcak small{display:block;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+html.pc .pcan{font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1.1;margin-top:6px}
+html.pc .pcas{color:var(--muted);font-size:13.5px;margin:2px 0 6px}
+html.pc .pcab{display:block;width:100%;height:auto;margin-top:14px;overflow:visible}
+html.pc .pcabg{cursor:pointer}
+html.pc .pcabg .b{transform-box:fill-box;transform-origin:50% 100%;transition:opacity .15s}
+html.pc .pcabg:hover .b{opacity:1}
+html.pc .pcakg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+html.pc .pcak{padding:14px 18px;cursor:pointer;transition:transform .18s,box-shadow .18s}
+html.pc .pcak b{display:block;font-size:24px;font-weight:800;letter-spacing:-.01em;margin-top:6px}
+html.pc .pcak span{font-size:13px;color:var(--muted)}
+html.pc .pcarl{padding:8px 20px}
+html.pc .pcarl .arl{margin:0;background:none;box-shadow:none;border:0;padding:0;border-radius:0}
+html.pc .pcach{display:flex;align-items:center;justify-content:space-between;padding:10px 0 4px}
+html.pc .pcach b{font-size:16px}
+html.pc .pcach button{background:none;border:0;color:var(--accent);font-weight:700;font-size:14px;cursor:pointer;padding:4px 0}
+html.pc .pcacat{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;border-top:1px solid var(--line);padding:9px 0;cursor:pointer;text-align:left;color:inherit;font:inherit}
+html.pc .pcach+.pcacat{border-top:0}
+html.pc .pcacat .ai{width:34px;height:34px;border-radius:11px;background:var(--tc);color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
+html.pc .pcacat .an{flex:1;min-width:0}
+html.pc .pcacat .t{display:flex;justify-content:space-between;gap:10px}
+html.pc .pcacat .t b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.pc .pcacat .t em{font-style:normal;font-weight:800;font-size:15px}
+html.pc .pcacat .bar{display:block;height:7px;border-radius:5px;background:var(--sunk);margin-top:6px;overflow:hidden}
+html.pc .pcacat .bar i{display:block;height:100%;border-radius:5px;background:var(--tc);transform-origin:0 50%;animation:pcabar .7s cubic-bezier(.2,.8,.2,1) both}
+html.pc .pcacat>small{width:38px;text-align:right;color:var(--muted);font-weight:700;font-size:12.5px}
+html.pc .pcacat:hover .t b{color:var(--accent)}
+html.pc .pcaempty{padding:22px}
+html.pc .pcabox{display:flex;gap:12px;margin-top:14px}
+html.pc .pcabox>div{flex:1;background:var(--sunk);border-radius:14px;padding:12px 14px}
+html.pc .pcabox small{display:block;color:var(--muted);font-size:12.5px}
+html.pc .pcabox b{font-size:18px}
+@keyframes pcabar{from{transform:scaleX(0)}}
+@keyframes pcabarup{from{transform:scaleY(0)}}
+html.pc .pcana .pcabg .b{animation:pcabarup .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*35ms)}
+@media (max-width:1350px){ html.pc .pcana{grid-template-columns:1fr 1fr} html.pc .pcana>.pcac:last-child{grid-column:1/-1} }

@@ -1203,3 +1203,63 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
   // the side bar follows the data, the page closes when you go to another app page
   const _r6=render; render=(...a)=>{ const x=_r6(...a); if (PG.open){ if (UI.view!==lastView) pageClose(); else if (!PG.embed) sideRender(); } lastView=UI.view; return x; };
 }
+/* ---------- Analyse am PC: drei Spalten nebeneinander – Auswertung · Planung · Steuer ---------- */
+if (IS_PC){
+  const sg=v=>(v>=0?"+ ":"− ")+eur0(Math.abs(v));
+  // bars around a middle line: green = money left, red = more spent; the chosen month is full colour
+  const netBars=(pts,onIdx)=>{ const W=520,H=118,n=pts.length,bw=W/n, vals=pts.filter(p=>!p.fut).map(p=>Math.abs(p.v)), mx=Math.max(1,...vals), mid=H/2;
+    let s=`<svg class="pcab" viewBox="0 0 ${W} ${H+24}" role="img" aria-label="Übrig pro Monat"><line x1="0" x2="${W}" y1="${mid}" y2="${mid}" stroke="var(--line)" stroke-dasharray="4 5"/>`;
+    pts.forEach((p,i)=>{ const h=p.fut?0:Math.max(3,Math.abs(p.v)/mx*(mid-6)), x=i*bw+bw*.22, w=bw*.56, y=p.v>=0?mid-h:mid, on=i===onIdx;
+      const c=p.v>=0?"var(--good)":"var(--bad)";
+      s+=`<g class="pcabg" data-pcaym="${p.ym}" style="--i:${i}"><rect x="${i*bw}" y="0" width="${bw}" height="${H+24}" fill="transparent"/>${p.fut?"":`<rect class="b" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(7,w/3).toFixed(1)}" fill="${c}" opacity="${on?1:.38}"/>`}
+        <text x="${(x+w/2).toFixed(1)}" y="${H+18}" text-anchor="middle" font-size="13" font-weight="${on?800:500}" fill="${on?"var(--fg)":"var(--muted)"}">${esc(p.l)}</text><title>${esc(p.t)}: ${esc(p.fut?"–":sg(p.v))}</title></g>`; });
+    return s+`</svg>`; };
+  const yearBars=(rows,ym)=>{ const W=520,H=124,cw=W/12, mx=Math.max(1,...rows.map(r=>Math.max(r.c.income,r.c.expenses)));
+    let s=`<svg class="pcab" viewBox="0 0 ${W} ${H+22}" role="img" aria-label="Einnahmen und Ausgaben pro Monat">`;
+    rows.forEach((r,i)=>{ const x=i*cw, on=r.ym===ym, hi=r.c.income/mx*(H-4), he=r.c.expenses/mx*(H-4), bw=Math.min(10,cw*.3);
+      s+=`<g class="pcabg" data-pcaym="${r.ym}" style="--i:${i}">${on?`<rect x="${x+2}" y="0" width="${cw-4}" height="${H}" rx="9" fill="var(--accent-soft)"/>`:`<rect x="${x}" y="0" width="${cw}" height="${H+22}" fill="transparent"/>`}
+        <rect class="b" x="${(x+cw/2-bw-1.5).toFixed(1)}" y="${(H-hi).toFixed(1)}" width="${bw}" height="${hi.toFixed(1)}" rx="3" fill="var(--good)"/><rect class="b" x="${(x+cw/2+1.5).toFixed(1)}" y="${(H-he).toFixed(1)}" width="${bw}" height="${he.toFixed(1)}" rx="3" fill="var(--bad)" opacity=".55"/>
+        <text x="${(x+cw/2).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="12" font-weight="${on?800:500}" fill="${on?"var(--fg)":"var(--muted)"}">${esc(MSHORT[i].slice(0,1))}</text><title>${esc(MONTHS[i])}: ${esc(eur0(r.c.income))} rein · ${esc(eur0(r.c.expenses))} raus</title></g>`; });
+    return s+`</svg>`; };
+  const _ath=anaTabsHtml;
+  anaTabsHtml = function(a){
+    const {tiles, GRP, TL, ord, rows, ym, mc, y, inc, exp}=a;
+    const mode=UI.anaMode||"m", cur=ymOf(new Date()), [, mi]=ymParts(ym), mn=MONTHS[mi-1];
+    const g3=GRP[2]||["Steuer",[]], g3n=/steuer/i.test(g3[0]) ? "Steuer" : String(g3[0]).replace(/&amp;/g,"&").split(/[ &]/)[0];
+    const row=t=>`<button class="arw" data-anaopen="${t.k}" style="--tc:${userCol("ana",t.k)||themeCol(TL[t.k][1], ord.indexOf(t.k))}"><span class="ai">${ic(t.icon,18)}</span><span class="an"><b>${t.k==="wk"&&!hasJob()?"Steuererklärung":TL[t.k][0]}</b><small>${t.sub||""}</small></span><span class="av">${esc(t.short||"")}<span class="ch">›</span></span></button>`;
+    const rowsFor=ks=>{ const ts=tiles.filter(t=>ks.includes(t.k)).sort((p,q)=>ks.indexOf(p.k)-ks.indexOf(q.k)); return ts.length?`<div class="card pcarl"><div class="arl">${ts.map(row).join("")}</div></div>`:""; };
+    // 1 · Auswertung (Monat oder Jahr)
+    const M=mode==="m", net=M?mc.net:inc-exp, income=M?mc.income:inc, expn=M?mc.expenses:exp;
+    const fixP=M?mc.fixPaid:sum(rows,r=>r.c.fixPaid);
+    const pts=M ? Array.from({length:6},(_,k)=>{ const m=shiftYm(ym,k-5); return {ym:m, l:MSHORT[ymParts(m)[1]-1], t:MONTHS[ymParts(m)[1]-1], v:monthCalc(m).net}; })
+                : rows.map(r=>({ym:r.ym, l:MSHORT[r.i-1].slice(0,1), t:MONTHS[r.i-1], v:r.c.net, fut:r.ym>cur}));
+    const onIdx=M?5:mi-1;
+    const prev=M?monthCalc(shiftYm(ym,-1)):null, pm=M?MONTHS[ymParts(shiftYm(ym,-1))[1]-1]:"";
+    const days=M?(ym===cur?new Date().getDate():daysIn(ym)):Math.max(1, rows.filter(r=>r.ym<=cur&&(r.c.income||r.c.expenses)).length*30.4);
+    const zins=M && ym===cur ? sum(S.debts,d=>debtState(d).zinsNow||0) : 0;
+    const ct=catTotals(M?mc.tx:rows.flatMap(r=>r.c.tx), fixP), tot=sum(ct,x=>x[1]), top=ct[0]?ct[0][1]:1;
+    const k=(l,v,s,cl,open)=>`<div class="card pcak" ${open?`data-anaopen="${open}"`:""}><small>${l}</small><b class="${cl||""}">${v}</b><span>${s}</span></div>`;
+    const col1=`<div class="pcac"><div class="pcah"><h2>Auswertung</h2><span>${M?esc(mn)+" "+y:"Jahr "+y}</span><div class="anaseg" role="group" aria-label="Zeitraum"><button data-anamode="m" class="${M?"on":""}">Monat</button><button data-anamode="y" class="${M?"":"on"}">Jahr</button></div></div>
+      <div class="card pcabig" data-anaopen="kpi"><small>${net>=0?"Übrig":"Mehr ausgegeben"}</small><div class="pcan ${net>=0?"pos":"neg"}">${esc(sg(net))}</div>${netBars(pts,onIdx)}</div>
+      <div class="pcakg">${k("Einnahmen",esc(eur0(income)),M?"im "+esc(mn):"bisher "+y,"pos","io")}
+        ${k("Ausgaben",esc(eur0(expn)),M?(prev.expenses?`${esc(pm)}: ${esc(eur0(prev.expenses))}`:"keine Daten davor"):`Ø ${esc(eur0(expn/Math.max(1,rows.filter(r=>r.c.expenses>0).length)))} / Monat`,"","trend")}
+        ${k("Fixkosten",esc(eur0(fixP)),income?`${Math.round(fixP/income*100)} % der Einnahmen`:"bezahlt","","fix")}
+        ${zins>0?k("Zinsen",esc(eur0(zins)),"diesen Monat","neg"):k("Ø pro Tag",esc(eur0(expn/days)),"ausgegeben","","kpi")}</div>
+      ${ct.length?`<div class="card pcarl"><div class="pcach"><b>Wohin dein Geld fließt</b><button data-anaopen="cat">Alle ›</button></div>${ct.slice(0,5).map(([c,v])=>`<button class="pcacat" data-anaopen="cat" style="--tc:${catColor("ausgabe",c)}"><span class="ai">${esc(String(c).trim().slice(0,1).toUpperCase())}</span><span class="an"><span class="t"><b>${esc(c)}</b><em>${esc(eur0(v))}</em></span><span class="bar"><i style="width:${Math.max(2,v/top*100).toFixed(1)}%"></i></span></span><small>${tot>0?Math.round(v/tot*100):0} %</small></button>`).join("")}</div>`:`<div class="card pcarl muted pcaempty">Im ${M?esc(mn):y} ist noch nichts gebucht.</div>`}</div>`;
+    // 2 · Planung (das Jahr)
+    const col2=`<div class="pcac"><div class="pcah"><h2>Planung</h2><span>Jahr ${y}</span></div>
+      <div class="card pcabig" data-anaopen="plan"><small>Ein &amp; Aus ${y}</small><div class="pcan ${inc-exp>=0?"pos":"neg"}">${esc(sg(inc-exp))}</div><div class="pcas">${esc(eur0(inc))} rein · ${esc(eur0(exp))} raus</div>${yearBars(rows,ym)}</div>
+      ${rowsFor(GRP[1][1])}</div>`;
+    // 3 · Steuer
+    const tt=tiles.find(t=>t.k==="tax"); let tx=null; try { tx=taxCalc(y); } catch(e){}
+    const box=(l,v)=>`<div><small>${l}</small><b>${v}</b></div>`;
+    const col3=`<div class="pcac"><div class="pcah"><h2>${esc(g3n)}</h2><span>${y} · Schätzung</span></div>
+      ${tt?`<div class="card pcabig" data-anaopen="tax"><small>Voraussichtlich</small><div class="pcan">${esc(tt.short||"")}</div><div class="pcas">${tt.sub||""}</div>
+        ${tx?`<div class="pcabox">${box("Zu versteuern",esc(eur0(tx.zve)))}${hasSelf()?box("Rücklage",esc(eur0(tx.resBal||0))):box("Steuern gesamt",esc(eur0((tx.mine?tx.mine.total:0)+(tx.gewst||0))))}</div>`:""}</div>`:""}
+      ${rowsFor(g3[1])}</div>`;
+    return `<div class="pcana">${col1}${col2}${col3}</div>`;
+  };
+  // a click on a month in a chart shows that month
+  document.addEventListener("click", e=>{ const g=e.target.closest("[data-pcaym]"); if (!g || UI.view!=="year") return; e.stopPropagation(); if (g.dataset.pcaym===UI.ym) return; UI.ym=g.dataset.pcaym; render(); }, true);
+  const yv=document.getElementById("v-year"); if (yv) yv.classList.add("pca");
+}
