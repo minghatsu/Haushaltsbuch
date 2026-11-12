@@ -574,3 +574,10 @@ html.pc .pczact{display:flex;gap:8px;margin:0 0 12px}
 html.pc .pczact .btn{flex:1;justify-content:center;padding:11px 6px;font-size:14px;white-space:nowrap}
 html.pc .pczst{display:flex;align-items:center;gap:12px;margin-bottom:12px}html.pc .pczst span{display:flex;flex-direction:column}
 html.pc .pczrl{margin-top:12px}
+/* amount per item: "2x", click to change */
+html.pc .pczq{display:flex;align-items:center;flex:none;background:var(--sunk);border-radius:8px;padding:0 6px 0 2px;height:28px;cursor:text}
+html.pc .pczq input{width:24px;border:0;background:none;text-align:right;font:inherit;font-weight:800;font-size:14px;color:var(--fg);padding:0;-moz-appearance:textfield;outline:none}
+html.pc .pczq input::-webkit-inner-spin-button{display:none}
+html.pc .pczq span{font-size:13px;font-weight:700;color:var(--muted)}
+html.pc .pczq:focus-within{box-shadow:0 0 0 2px var(--accent)}
+html.pc .pczi.done .pczq{opacity:.5}

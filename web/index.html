@@ -1155,9 +1155,9 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .zgh{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px;margin:12px 2px 4px}.zgh small{margin-left:auto;color:var(--muted);font-weight:600}
 .zd{display:inline-block;width:14px;height:14px;border-radius:50%;background:#c7ccc9;flex:none}
 .zgl{background:var(--surface);border-radius:14px;padding:2px 12px}
-.zr{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:11px 0;border-top:1px solid var(--line);font:inherit;font-size:15px;color:inherit;text-align:left}.zr:first-child{border-top:0}
-.zr .zb{width:22px;height:22px;border-radius:7px;border:2px solid var(--faint);flex:none;display:grid;place-items:center}.zr.done .zb{background:var(--accent);border-color:var(--accent)}.zr.done .zb:after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
-.zr .zn{flex:1;min-width:0}.zr b{font-weight:800}.zr.done .zn,.zr.done b{color:var(--faint);text-decoration:line-through}
+.zr{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;padding:9px 0;border-top:1px solid var(--line);font:inherit;font-size:15px;color:inherit;text-align:left}.zr:first-child{border-top:0}
+.zr .zb{width:24px;height:24px;border-radius:7px;border:2px solid var(--faint);flex:none;display:grid;place-items:center;background:none;padding:0}.zr.done .zb{background:var(--accent);border-color:var(--accent)}.zr.done .zb:after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.zr .zn{flex:1;min-width:0;border:0;background:none;padding:4px 0;font:inherit;color:inherit;text-align:left}.zr .zq{width:38px;border:0;border-radius:8px;background:var(--sunk);padding:5px 2px;text-align:center;font:inherit;font-weight:800;font-size:14px;color:var(--fg);-moz-appearance:textfield}.zr .zq::-webkit-inner-spin-button{display:none}.zr .zx{margin-left:-6px;color:var(--muted);font-weight:700;font-size:13px}.zr b{font-weight:800}.zr.done .zn,.zr.done b{color:var(--faint);text-decoration:line-through}
 .zfin{margin-top:14px;background:var(--accent-soft);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:9px}.zfin>b{font-size:17px}
 .zbon{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:14px;padding:9px}.zbon.ok{outline:2px solid var(--accent)}
 .zbon img{width:42px;height:54px;object-fit:cover;border-radius:8px;flex:none}.zcam{width:42px;height:54px;border-radius:8px;border:2px dashed var(--accent);background:var(--accent-soft);font-size:20px;flex:none}
@@ -3790,7 +3790,22 @@ function zBestFor(name){
   return {s:best.s, p:best.p, save:worst.p-best.p, deal:!!best.deal};
 }
 function zWhere(it){ if (it.s) return {s:it.s, p:it.p!=null?it.p:null, manual:true}; return zBestFor(it.n); }
+// a shop logo that stands on its own (no app styles needed – also used in the PDF)
+function zLogo(sh, px){ px=px||22;
+  if (!sh) return `<span style="display:inline-grid;place-items:center;width:${px}px;height:${px}px;border-radius:50%;background:#c7ccc9;color:#fff;font:800 ${Math.round(px*.5)}px sans-serif;flex:none">?</span>`;
+  const dom=SHOP_DOMAINS[sh.id]||"", pk=dom&&LOGOPACK[dom], v=dom&&LOGO.map.get(dom), img=v&&v.data;
+  const box=`display:inline-grid;place-items:center;width:${px}px;height:${px}px;border-radius:50%;flex:none;overflow:hidden;box-shadow:0 0 0 1.5px #fff`;
+  if (pk){ const n=parseInt(pk[0].slice(1),16), lum=(0.299*(n>>16)+0.587*(n>>8&255)+0.114*(n&255))/255;
+    return `<span class="zlg" style="${box};background:${pk[0]}"><svg viewBox="0 0 24 24" width="${Math.round(px*.64)}" height="${Math.round(px*.64)}" aria-hidden="true"><path fill="${lum>0.7?"#1a1a1a":"#fff"}" d="${pk[1]}"/></svg></span>`; }
+  if (img) return `<span class="zlg" style="${box};background:#fff"><img src="${esc(img)}" alt="" style="width:100%;height:100%;object-fit:cover"></span>`;
+  return `<span class="zlg" style="${box};background:${sh.color};color:${sh.ink||"#fff"};font:800 ${Math.round(px*.46)}px sans-serif">${esc(sh.name.slice(0,1))}</span>`; }
 function zList(){ return S.settings.shoplist||[]; }
+const zQ=it=>Math.max(1, Math.min(99, Math.round(Number(it&&it.q)||1)));
+// adds an item; the same thing again (still open, same shop) becomes "2x" instead of a second line
+function zAddTo(list, item){ const k=nrm(item.n), same=list.find(x=>!x.done && nrm(x.n)===k && (!item.s || !x.s || x.s===item.s));
+  if (same) return {list:list.map(x=>x===same?{...x, q:zQ(x)+zQ(item), ...(item.p>0&&x.p==null?{p:item.p}:{}), ...(item.s&&!x.s?{s:item.s}:{})}:x), id:same.id, more:true};
+  return {list:[...list, item], id:item.id, more:false}; }
+function zSetQ(id, q){ zSave(zList().map(x=>x.id===id?{...x, q:Math.max(1,Math.min(99,Math.round(Number(q)||1)))}:x)); }
 function zSave(l){ S.settings.shoplist=l; saveSettings(); }
 // groups for the list and the PDF: by shop (inside by department), by department, by price or A–Z
 function zGroups(items, mode){
@@ -3805,19 +3820,19 @@ function zGroups(items, mode){
 /* ---- PDF and printing: "Laden für Laden, darin Abteilungen" – a shop is never split over two pages ---- */
 function zPrintHtml(){
   const open=zList().filter(x=>!x.done), gs=zGroups(open, "laden"), d=new Date(), ds=d.toLocaleDateString("de-DE",{weekday:"short", day:"numeric", month:"long", year:"numeric"});
-  const est=sum(open,it=>{ const w=zWhere(it); return w&&w.p?w.p:0; }), e=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const est=sum(open,it=>{ const w=zWhere(it); return w&&w.p?w.p*zQ(it):0; }), e=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const money=v=>v.toLocaleString("de-DE",{minimumFractionDigits:2, maximumFractionDigits:2})+" €";
   const block=g=>{ const by={}; for (const x of g.rows) (by[x.d[0]]=by[x.d[0]]||{ic:x.d[1], rows:[]}).rows.push(x);
-    return `<section class="sh">${g.shop?`<div class="bar" style="background:${g.shop.color};color:${g.shop.ink||"#fff"}"><b>${e(g.shop.name)}</b><span>${g.rows.length} ${g.rows.length===1?"Sache":"Sachen"}</span></div>`:`<div class="bar open"><b>Laden noch offen</b><span>${g.rows.length}</span></div>`}
-      ${Object.entries(by).map(([dn,v])=>`<div class="dh">${v.ic} ${e(dn)}</div>${v.rows.map(x=>`<div class="it"><i></i><span>${e(x.it.n)}</span><b>${x.w&&x.w.p?money(x.w.p):""}</b></div>`).join("")}`).join("")}</section>`; };
+    return `<section class="sh">${g.shop?`<div class="bar" style="background:${g.shop.color};color:${g.shop.ink||"#fff"}"><b class="ln">${zLogo(g.shop,22)}${e(g.shop.name)}</b><span>${g.rows.length} ${g.rows.length===1?"Sache":"Sachen"}</span></div>`:`<div class="bar open"><b class="ln">${zLogo(null,22)}Laden noch offen</b><span>${g.rows.length}</span></div>`}
+      ${Object.entries(by).map(([dn,v])=>`<div class="dh">${v.ic} ${e(dn)}</div>${v.rows.map(x=>`<div class="it"><i></i><em>${zQ(x.it)}×</em><span>${e(x.it.n)}</span><b>${x.w&&x.w.p?money(x.w.p*zQ(x.it)):""}</b></div>`).join("")}`).join("")}</section>`; };
   return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Einkaufszettel</title><style>
 @page{size:A4;margin:16mm 15mm 18mm;@top-left{content:"Einkaufszettel – Fortsetzung";font:13pt Georgia,serif;color:#66746E}@bottom-left{content:"Finanz MAMI · Einkaufszettel ${e(d.toLocaleDateString("de-DE"))}";font:8pt "Segoe UI",Arial,sans-serif;color:#9AA6A0}@bottom-right{content:"Seite " counter(page) " von " counter(pages);font:8pt "Segoe UI",Arial,sans-serif;color:#9AA6A0}}
 @page:first{@top-left{content:none}}
 *{box-sizing:border-box}body{margin:0;font:10.5pt "Segoe UI",Inter,Arial,sans-serif;color:#14201B;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2.5pt solid #147A5B;padding-bottom:8pt;margin-bottom:4pt}.hd h1{font:400 24pt Georgia,serif;margin:0}.hd small{color:#66746E;font-size:9.5pt}.hd .r{text-align:right;color:#66746E;font-size:9pt}.hd .r b{display:block;color:#14201B;font-size:13pt}
-.sh{break-inside:avoid;page-break-inside:avoid;margin-top:12pt}.bar{display:flex;justify-content:space-between;align-items:center;border-radius:6pt;padding:5pt 9pt;font-size:11pt}.bar span{font-size:8.5pt;opacity:.9}.bar.open{background:#EDEAE3;color:#14201B}
+.sh{break-inside:avoid;page-break-inside:avoid;margin-top:12pt}.bar{display:flex;justify-content:space-between;align-items:center;border-radius:6pt;padding:5pt 9pt;font-size:11pt}.bar span{font-size:8.5pt;opacity:.9}.bar .ln{display:flex;align-items:center;gap:7pt}.bar .zlg{box-shadow:0 0 0 1.5pt #fff!important}.bar.open{background:#EDEAE3;color:#14201B}
 .dh{font-weight:800;font-size:8.5pt;letter-spacing:.06em;text-transform:uppercase;color:#147A5B;margin:7pt 0 2pt}
-.it{display:flex;align-items:center;gap:7pt;padding:3pt 0;border-bottom:.6pt solid #eee}.it i{width:9pt;height:9pt;border:1.2pt solid #8a9690;border-radius:2pt;flex:none}.it b{margin-left:auto}
+.it{display:flex;align-items:center;gap:7pt;padding:3pt 0;border-bottom:.6pt solid #eee}.it i{width:9pt;height:9pt;border:1.2pt solid #8a9690;border-radius:2pt;flex:none}.it b{margin-left:auto}.it .zlg{margin-left:6pt}.it em{font-style:normal;font-weight:800;min-width:18pt;color:#147A5B}
 .sum{display:flex;justify-content:space-between;margin-top:12pt;padding-top:6pt;border-top:1.8pt solid #14201B;font-weight:800;font-size:12pt;break-inside:avoid}
 </style></head><body><div class="hd"><div><h1>Einkaufszettel</h1><small>${e(ds)} · Laden für Laden</small></div><div class="r">${open.length} ${open.length===1?"Sache":"Sachen"}${est?`<b>ca. ${money(est)}</b>`:""}</div></div>
 ${gs.map(block).join("")}${est?`<div class="sum"><span>Zusammen ca.</span><span>${money(est)}</span></div>`:""}</body></html>`;
@@ -3859,20 +3874,20 @@ function zCatFor(sh){ const w={super:"lebensmittel",disc:"lebensmittel",drog:"dr
 function zettelCard(){
   const L=zList(); if (!L.length) return "";
   const mode=zSort(), open=L.filter(x=>!x.done), done=L.filter(x=>x.done);
-  const est=sum(open,it=>{ const w=zWhere(it); return w&&w.p?w.p:0; });
-  const dot=w=>{ const sh=w&&zShopBy(w.s); return `<i class="zd" style="background:${sh?sh.color:"#c7ccc9"}" title="${sh?esc(sh.name):"Laden offen"}"></i>`; };
-  const row=x=>`<button class="zr ${x.it.done?"done":""}" data-zck="${esc(x.it.id)}"><span class="zb"></span><span class="zn">${esc(x.it.n)}</span><b>${x.w&&x.w.p?esc(eur(x.w.p)):""}</b>${mode==="laden"?"":dot(x.w)}</button>`;
+  const est=sum(open,it=>{ const w=zWhere(it); return w&&w.p?w.p*zQ(it):0; });
+  const dot=w=>{ const sh=w&&zShopBy(w.s); return `<span title="${sh?esc(sh.name):"Laden offen"}" style="display:flex">${zLogo(sh,22)}</span>`; };
+  const row=x=>`<div class="zr ${x.it.done?"done":""}"><button class="zb" data-zck="${esc(x.it.id)}" aria-label="${esc(x.it.n)} abhaken"></button><input class="zq" type="number" inputmode="numeric" min="1" max="99" value="${zQ(x.it)}" data-zq="${esc(x.it.id)}" aria-label="Menge ${esc(x.it.n)}"><span class="zx">x</span><button class="zn" data-zck="${esc(x.it.id)}">${esc(x.it.n)}</button><b>${x.w&&x.w.p?esc(eur(x.w.p*zQ(x.it))):""}</b>${mode==="laden"?"":dot(x.w)}</div>`;
   const gs=zGroups(L, mode);
-  const head=g=>mode==="laden"?`<div class="zgh">${g.shop?`<i class="zd" style="background:${g.shop.color}"></i>${esc(g.shop.name)}`:`<i class="zd"></i>Laden offen`}<small>${g.rows.filter(x=>x.it.done).length} von ${g.rows.length}</small></div>`
+  const head=g=>mode==="laden"?`<div class="zgh">${zLogo(g.shop,26)}${g.shop?esc(g.shop.name):"Laden offen"}<small>${g.rows.filter(x=>x.it.done).length} von ${g.rows.length}</small></div>`
     : mode==="abt"?`<div class="zgh"><span>${g.ic}</span>${esc(g.k)}<small>${g.rows.length}</small></div>`:"";
   // all ticked off: one receipt per shop, then "Einkauf fertig" books one expense per shop
   let fin="";
   if (!open.length && done.length){
     const shops=zGroups(done,"laden"), all=shops.every(g=>ZB.bons[g.k||"?"]);
     fin=`<div class="zfin"><b>Alles abgehakt ✓</b><span class="small muted">Fotografier jetzt die Kassenbons – einer pro Laden. Den Betrag liest die App vom Bon.</span>
-      ${shops.map(g=>{ const k=g.k||"?", b=ZB.bons[k], sh=g.shop, guess=sum(g.rows,x=>x.w&&x.w.p?x.w.p:0);
+      ${shops.map(g=>{ const k=g.k||"?", b=ZB.bons[k], sh=g.shop, guess=sum(g.rows,x=>x.w&&x.w.p?x.w.p*zQ(x.it):0);
         return `<div class="zbon ${b?"ok":""}">${b?`<img src="${b.img}" alt="">`:`<button class="zcam" data-zbon="${esc(k)}" aria-label="Kassenbon ${esc(sh?sh.name:"")} fotografieren">${ZB.busy===k?"…":"📷"}</button>`}
-          <span class="zbt"><b>${esc(sh?sh.name:(b&&b.shop)||"Laden offen")}</b><small>${b?(b.amount!=null?"vom Bon gelesen":"Betrag bitte prüfen"):"Kassenbon fotografieren"}</small></span>
+          <span class="zbt"><b style="display:flex;align-items:center;gap:6px">${zLogo(sh,20)}${esc(sh?sh.name:(b&&b.shop)||"Laden offen")}</b><small>${b?(b.amount!=null?"vom Bon gelesen":"Betrag bitte prüfen"):"Kassenbon fotografieren"}</small></span>
           ${b?`<input class="in zamt" inputmode="decimal" data-zamt="${esc(k)}" value="${(()=>{ const v=b.amount!=null?b.amount:guess; return v?esc(v.toFixed(2).replace(".",",")):""; })()}" aria-label="Betrag"><button class="zre" data-zbon="${esc(k)}" aria-label="Neu fotografieren">↻</button>`:""}</div>`; }).join("")}
       <button class="btn primary zgo" data-zfin ${all?"":"disabled"}>Einkauf fertig</button>${all?"":`<div class="small muted" style="text-align:center">geht erst, wenn alle Bons da sind</div>`}</div>`;
   }
@@ -3914,10 +3929,11 @@ async function zFinish(){
 document.addEventListener("click", e=>{
   const s=e.target.closest("[data-zsort]"); if (s){ try { localStorage.setItem("hb-zsort", s.dataset.zsort); } catch(_){} renderShop(); return; }
   const c=e.target.closest("[data-zck]"); if (c){ const id=c.dataset.zck; zSave(zList().map(x=>x.id===id?{...x, done:!x.done}:x)); return; }
-  if (e.target.closest("[data-zadd]")){ const i=$("zIn"), n=(i&&i.value||"").trim(); if (!n) return; zSave([...zList(), {id:newId(), n:n.slice(0,60), done:false}]); return; }
+  if (e.target.closest("[data-zadd]")){ const i=$("zIn"), n=(i&&i.value||"").trim(); if (!n) return; const r=zAddTo(zList(), {id:newId(), n:n.slice(0,60), done:false}); zSave(r.list); if (r.more) toast(`${n}: jetzt ${zQ(r.list.find(x=>x.id===r.id))}x`); return; }
   const b=e.target.closest("[data-zbon]"); if (b){ zBon(b.dataset.zbon); return; }
   if (e.target.closest("[data-zfin]")){ zFinish(); return; }
 });
+document.addEventListener("change", e=>{ const q=e.target.closest&&e.target.closest("[data-zq]"); if (q) zSetQ(q.dataset.zq, q.value); });
 document.addEventListener("keydown", e=>{ if (e.target && e.target.id==="zIn" && e.key==="Enter"){ e.preventDefault(); const b=document.querySelector("[data-zadd]"); if (b) b.click(); } });
 
 function renderZiele(){

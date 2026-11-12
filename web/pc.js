@@ -972,12 +972,12 @@ if (IS_PC){
     // the list: open items first, grouped route below
     const open=W.filter(x=>!x.it.done), done=W.filter(x=>x.it.done), groups={};
     for (const x of open){ const k=x.w?x.w.s:""; (groups[k]=groups[k]||[]).push(x); }
-    const save=sum(open,x=>x.w&&x.w.save>0?x.w.save:0), est=sum(open,x=>x.w&&x.w.p?x.w.p:0);
+    const save=sum(open,x=>x.w&&x.w.save>0?x.w.save*zQ(x.it):0), est=sum(open,x=>x.w&&x.w.p?x.w.p*zQ(x.it):0);
     const opts=id=>`<option value="">automatisch</option>${ch.map(o=>`<option value="${o.id}" ${o.id===id?"selected":""}>${esc(o.name)}</option>`).join("")}`;
     const row=({it,w})=>{ const so=w&&shopBy(w.s);
-      return `<div class="pczi ${it.done?"done":""}" data-pczi="${esc(it.id)}"><button class="cb" data-pczck="${esc(it.id)}" aria-label="${esc(it.n)} ${it.done?"wieder offen":"erledigt"}"></button><span class="n">${esc(it.n)}</span>
+      return `<div class="pczi ${it.done?"done":""}" data-pczi="${esc(it.id)}"><button class="cb" data-pczck="${esc(it.id)}" aria-label="${esc(it.n)} ${it.done?"wieder offen":"erledigt"}"></button><label class="pczq" title="Menge ändern"><input type="number" min="1" max="99" value="${zQ(it)}" data-pczq="${esc(it.id)}" aria-label="Menge ${esc(it.n)}"><span>x</span></label><span class="n">${esc(it.n)}</span>
         <label class="ws" title="Laden ändern">${so?badge(so):`<span class="q">?</span>`}<select data-pczshop="${esc(it.id)}" aria-label="Laden für ${esc(it.n)}">${opts(it.s||"")}</select></label>
-        <b class="p">${w&&w.p!=null?esc(eur(w.p)):""}</b><button class="del" data-pczdel="${esc(it.id)}" aria-label="${esc(it.n)} löschen">×</button></div>`; };
+        <b class="p">${w&&w.p!=null?esc(eur(w.p*zQ(it))):""}</b><button class="del" data-pczdel="${esc(it.id)}" aria-label="${esc(it.n)} löschen">×</button></div>`; };
     const tab=UI.pczTab||"zettel", nd=deals.length;
     const pickCard=`${web && K.pick?(K.pick.busy?`<div class="pcwpick busy"><i class="sp"></i><span>Text wird erkannt …</span></div>`:`<div class="pcwpick"><div class="ssh">Erkannt – stimmt das?</div>${K.pick.raw?`<div class="small muted pkraw">Gelesen: ${esc(K.pick.raw)}</div>`:""}<input class="in" id="pkN" value="${esc(K.pick.n||"")}" placeholder="Was?" aria-label="Was"><div class="pr2"><input class="in" id="pkP" inputmode="decimal" value="${K.pick.p!=null?esc(Number(K.pick.p).toFixed(2).replace(".",",")):""}" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pkU" value="${esc(K.pick.u||nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn" data-pkx>Verwerfen</button><button class="btn" data-pkok="deal">Als Angebot</button><button class="btn primary" data-pkok="zettel">Auf den Zettel</button></div></div>`):""}`;
     const tabs=`<div class="pcztabs" role="tablist">${[["zettel","Zettel"],["deals",`Angebote${nd?` (${nd})`:""}`],["buys","Einkäufe"]].map(([k,l])=>`<button role="tab" data-pcztab="${k}" class="${tab===k?"on":""}" aria-selected="${tab===k}">${l}</button>`).join("")}</div>`;
@@ -986,7 +986,7 @@ if (IS_PC){
       <div class="pczl">${open.map(row).join("")||`<div class="small muted pcze">Schreib auf, was du brauchst – die App sagt dir, wo es am günstigsten ist.</div>`}${done.length?`<div class="pczdone">${done.map(row).join("")}</div>`:""}</div>
       ${Object.keys(groups).length?`<div class="pcroute"><div class="ssh">So kaufst du am günstigsten${save>0.004?` <span class="pos">· spart ca. ${esc(eur(save))}</span>`:""}</div>
         ${Object.entries(groups).sort((a,b)=>(a[0]==="")-(b[0]==="") || b[1].length-a[1].length).map(([k,xs])=>{ const so=shopBy(k);
-          return `<button class="pcstop" ${so?`data-pcshop="${k}"`:""} style="--c:${so?so.color:"#9aa"}">${so?badge(so):`<span class="q">?</span>`}<span class="grow"><b>${so?esc(so.name):"Laden offen"}</b><small class="muted">${xs.map(x=>esc(x.it.n)).join(", ")}</small></span>${sum(xs,x=>x.w&&x.w.p||0)?`<b>${esc(eur(sum(xs,x=>x.w&&x.w.p||0)))}</b>`:""}</button>`; }).join("")}</div>`:""}
+          return `<button class="pcstop" ${so?`data-pcshop="${k}"`:""} style="--c:${so?so.color:"#9aa"}">${so?badge(so):`<span class="q">?</span>`}<span class="grow"><b>${so?esc(so.name):"Laden offen"}</b><small class="muted">${xs.map(x=>(zQ(x.it)>1?zQ(x.it)+"x ":"")+esc(x.it.n)).join(", ")}</small></span>${sum(xs,x=>(x.w&&x.w.p||0)*zQ(x.it))?`<b>${esc(eur(sum(xs,x=>(x.w&&x.w.p||0)*zQ(x.it))))}</b>`:""}</button>`; }).join("")}</div>`:""}
       ${done.length?`<button class="pczclr" data-pczclr>Erledigte löschen (${done.length})</button>`:""}
 `;
     const dBody=`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">· ${esc(sh.name)}</span></div><div class="pccp form"><input class="in" id="pcpDT" placeholder="Was? z. B. ${sh.cat==="kleid"?"Pullover":sh.cat==="elek"?"Kopfhörer":sh.cat==="moebel"?"Regal":"Kaffee 500 g"}" aria-label="Was"><div class="pr2"><input class="in" id="pcpDP" inputmode="decimal" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pcpDU" value="${esc(nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn primary" data-pcpdeal>Merken</button></div></div></div>
@@ -1031,7 +1031,7 @@ if (IS_PC){
       z.querySelectorAll(".pczi").forEach((el,i)=>el.animate([{opacity:0,clipPath:"inset(0 100% 0 0)"},{opacity:1,clipPath:"inset(0 0 0 0)"}],{duration:420,delay:450+i*60,easing:"ease-out",fill:"backwards"})); } }
   new MutationObserver(()=>{ if (!root.hidden){ requestAnimationFrame(enter); if (K.PG && !K.PG.open) renderShopPC(); } }).observe(root, {attributes:true, attributeFilter:["hidden"]});
   document.addEventListener("visibilitychange", ()=>{ if (document.visibilityState==="visible" && UI.view==="shop" && K.PG && !K.PG.open) renderShopPC(); });
-  async function addItem(){ const i=$("pczIn"); const n=(i&&i.value||"").trim(); if (!n) return; const id=newId(); K.fresh=id; i.value=""; saveList([...list(), {id, n:n.slice(0,60), done:false}]); }
+  async function addItem(){ const i=$("pczIn"); const n=(i&&i.value||"").trim(); if (!n) return; const r=zAddTo(list(), {id:newId(), n:n.slice(0,60), done:false}); K.fresh=r.more?null:r.id; i.value=""; saveList(r.list); if (r.more) toast(`${n}: jetzt ${zQ(r.list.find(x=>x.id===r.id))}x`); }
   root.addEventListener("click", e=>{
     const c=e.target.closest("[data-pcscat]"); if (c){ UI.shopCat=c.dataset.pcscat; renderShopPC(); return; }
     const tb=e.target.closest("[data-pcztab]"); if (tb){ UI.pczTab=tb.dataset.pcztab; renderShopPC(); return; }
@@ -1057,6 +1057,8 @@ if (IS_PC){
   root.addEventListener("keydown", e=>{ if (e.key==="Enter" && /^pcpD/.test(e.target.id||"")){ e.preventDefault(); webDeal(); } });
   root.addEventListener("change", e=>{ const s=e.target.closest("[data-pczshop]"); if (!s) return; const id=s.dataset.pczshop, v=s.value; saveList(list().map(x=>x.id===id?(v?{...x, s:v}:(({s:_,...r})=>r)(x)):x)); });
   root.addEventListener("keydown", e=>{ if (e.target.id==="pczIn" && e.key==="Enter"){ e.preventDefault(); addItem(); } });
+  root.addEventListener("change", e=>{ const q=e.target.closest("[data-pczq]"); if (q) zSetQ(q.dataset.pczq, q.value); });
+  root.addEventListener("focusin", e=>{ if (e.target.matches("[data-pczq]")) e.target.select(); });
   /* ---- web pages inside the app window: page on the left, for a shop a bar of its own on the right ---- */
   const NB=()=>window.AndroidBridge && window.AndroidBridge.pageOpen ? window.AndroidBridge : null;
   const PG={open:false, url:"", shop:null, st:{}, ro:null, embed:false}; let lastView=UI.view;
@@ -1145,7 +1147,7 @@ if (IS_PC){
     if (asDeal){ const keep=(S.settings.deals||[]).filter(x=>!x.until || x.until>=isoOf(new Date(Date.now()-14*864e5)));
       S.settings.deals=[...keep, {id:newId(), shop:PG.shop.id, text:n, price:p>0?Math.round(p*100)/100:null, until:until||nextSat()}]; saveSettings(); toast(`Angebot gemerkt: ${n}`); return; }
     const id=newId(); K.fresh=id; fly(n+(p?" · "+eur(p):""), rect);
-    setTimeout(()=>{ saveList([...list(), {id, n, done:false, s:PG.shop.id, ...(p>0?{p:Math.round(p*100)/100}:{}), ...(until?{u:until}:{})}]); toast(`Auf dem Zettel: ${n}${p?" · "+eur(p):""}`, ()=>saveList(list().filter(x=>x.id!==id)), "Rückgängig"); }, pcCalm()?0:700); }
+    setTimeout(()=>{ const before=list(), r=zAddTo(before, {id, n, done:false, s:PG.shop.id, ...(p>0?{p:Math.round(p*100)/100}:{}), ...(until?{u:until}:{})}); saveList(r.list); toast(r.more?`${n}: jetzt ${zQ(r.list.find(x=>x.id===r.id))}x auf dem Zettel`:`Auf dem Zettel: ${n}${p?" · "+eur(p):""}`, ()=>saveList(before), "Rückgängig"); }, pcCalm()?0:700); }
   // reads name, price and date from recognised lines (h = text height: the price is usually the biggest number)
   function readOcr(lines){
     const L=(lines||[]).map(l=>({t:String(l.t||"").replace(/[¹²³⁴⁵⁶⁷⁸⁹⁰*]+/g,"").trim(), h:+l.h||0, w:!!l.w})).filter(l=>l.t), all=L.map(l=>l.t).join("\n");
@@ -1212,7 +1214,7 @@ if (IS_PC){
     const ck=e.target.closest("[data-pczck]"); if (ck){ const id=ck.dataset.pczck; saveList(list().map(x=>x.id===id?{...x, done:!x.done}:x)); return; }
     const dl=e.target.closest("[data-pczdel]"); if (dl){ const id=dl.dataset.pczdel, old=list(); saveList(old.filter(x=>x.id!==id)); toast("Gelöscht", ()=>saveList(old), "Rückgängig"); return; }
   });
-  function sideAdd(){ const i=$("pcpZ"), n=(i&&i.value||"").trim(); if (!n) return; i.value=""; saveList([...list(), {id:newId(), n:n.slice(0,60), done:false, s:PG.shop.id}]); }
+  function sideAdd(){ const i=$("pcpZ"), n=(i&&i.value||"").trim(); if (!n) return; i.value=""; saveList(zAddTo(list(), {id:newId(), n:n.slice(0,60), done:false, s:PG.shop.id}).list); }
   side.addEventListener("keydown", e=>{ if (e.key==="Enter"){ if (e.target.id==="pcpZ"){ e.preventDefault(); sideAdd(); } else if (/^pcpD/.test(e.target.id)){ e.preventDefault(); side.querySelector("[data-pcpdeal]").click(); } } });
   document.addEventListener("keydown", e=>{ if (e.key==="Escape" && PG.open && !document.querySelector(".backdrop.show:not([hidden])")){ e.preventDefault(); if (PG.pick) pickToggle(false); else if (!PG.embed) pageClose(); } });
   addEventListener("resize", ()=>place());
