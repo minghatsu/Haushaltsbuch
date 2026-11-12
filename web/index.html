@@ -2770,7 +2770,8 @@ async function safe(fn){ try { await fn(); return true; } catch(e){ reportErr(e)
 function fixedSorted(){ return S.fixed.slice().sort((a,b)=>(a.order??999)-(b.order??999) || (b.amount||0)-(a.amount||0)); }
 // Rhythm of a fixed cost: no "months" list = every month, otherwise only in the listed months (1–12)
 const RHYTHMS = [["monatlich","Monatlich"],["quartal","Vierteljährlich"],["halbjahr","Halbjährlich"],["jahr","Jährlich"],["monate","Bestimmte Monate"]];
-function dueIn(f, ym){ return !Array.isArray(f.months) || !f.months.length || f.months.includes(Number(ym.slice(5,7))); }
+function dueIn(f, ym){ if ((f.from && ym<f.from) || (f.until && ym>f.until)) return false;   // added / removed from a month on: other months stay as they were
+  return !Array.isArray(f.months) || !f.months.length || f.months.includes(Number(ym.slice(5,7))); }
 function rhythmMonths(r, start){ const st=Number(start)||1, step={quartal:3,halbjahr:6,jahr:12}[r]; if (!step) return null; const out=[]; for (let k=0;k<12/step;k++) out.push(((st-1+k*step)%12)+1); return out.sort((a,b)=>a-b); }
 function rhythmText(f){
   if (!Array.isArray(f.months)||!f.months.length) return "";

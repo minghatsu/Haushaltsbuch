@@ -195,6 +195,21 @@ if (IS_PC){
     "bezahlt · {n} von {n}":["paid · {n} of {n}","ödendi · {n}/{n}","оплачено · {n} из {n}","оплачено · {n} з {n}","zapłacone · {n} z {n}","مدفوع · {n} من {n}","plătit · {n} din {n}"],
     "Klick = abhaken · Betrag anklicken = nur für {m} ändern · Ziehen = Tag ändern":["Click = tick off · Click the amount = change for {m} only · Drag = change the day","Tıkla = işaretle · Tutara tıkla = yalnızca {m} için değiştir · Sürükle = günü değiştir","Клик = отметить · Клик по сумме = изменить только на {m} · Перетащить = сменить день","Клік = позначити · Клік по сумі = змінити лише на {m} · Перетягнути = змінити день","Klik = odhacz · Klik w kwotę = zmień tylko na {m} · Przeciągnij = zmień dzień","نقرة = تأشير · النقر على المبلغ = تغيير {m} فقط · السحب = تغيير اليوم","Clic = bifează · Clic pe sumă = schimbă doar pentru {m} · Trage = schimbă ziua"],
     "nichts":["nothing","hiçbir şey","ничего","нічого","nic","لا شيء","nimic"],
+    "Fixkoste am {n}. eintragen":["Add a fixed cost on the {n}","{n}. güne sabit gider ekle","Добавить расход на {n}-е","Додати витрату на {n}-те","Dodaj koszt stały na {n}.","أضف تكلفة ثابتة في يوم {n}","Adaugă o cheltuială fixă pe {n}"],
+    "Neue Fixkoste":["New fixed cost","Yeni sabit gider","Новый постоянный расход","Нова постійна витрата","Nowy koszt stały","تكلفة ثابتة جديدة","Cheltuială fixă nouă"],
+    "Betrag ab {m} {n}":["Amount from {m} {n}","{m} {n} itibarıyla tutar","Сумма с {m} {n}","Сума з {m} {n}","Kwota od {m} {n}","المبلغ من {m} {n}","Sumă din {m} {n}"],
+    "ohne":["none","yok","нет","немає","brak","بدون","fără"],
+    "Rhythmus":["Rhythm","Sıklık","Периодичность","Періодичність","Częstotliwość","التكرار","Frecvență"],
+    "Privat":["Private","Özel","Личное","Особисте","Prywatne","خاص","Privat"],
+    "Monatlich":["Monthly","Aylık","Ежемесячно","Щомісяця","Co miesiąc","شهريًا","Lunar"],
+    "Vierteljährlich":["Quarterly","Üç ayda bir","Ежеквартально","Щокварталу","Co kwartał","كل ثلاثة أشهر","Trimestrial"],
+    "Halbjährlich":["Every six months","Altı ayda bir","Раз в полгода","Раз на пів року","Co pół roku","كل ستة أشهر","Semestrial"],
+    "Jährlich":["Yearly","Yıllık","Ежегодно","Щороку","Co rok","سنويًا","Anual"],
+    "Bestimmte Monate":["Certain months","Belirli aylar","Определённые месяцы","Певні місяці","Wybrane miesiące","أشهر محددة","Anumite luni"],
+    "Änderungen gelten ab {m} {n} – frühere Monate bleiben, wie sie waren.":["Changes apply from {m} {n} – earlier months stay as they were.","Değişiklikler {m} {n} itibarıyla geçerli – önceki aylar aynı kalır.","Изменения действуют с {m} {n} – прошлые месяцы не меняются.","Зміни діють з {m} {n} – попередні місяці не змінюються.","Zmiany obowiązują od {m} {n} – wcześniejsze miesiące pozostają bez zmian.","تسري التغييرات من {m} {n} – تبقى الأشهر السابقة كما هي.","Modificările se aplică din {m} {n} – lunile anterioare rămân la fel."],
+    "Gilt ab {m} {n} für alle folgenden Monate.":["Applies from {m} {n} to all following months.","{m} {n} itibarıyla sonraki tüm aylar için geçerli.","Действует с {m} {n} для всех следующих месяцев.","Діє з {m} {n} для всіх наступних місяців.","Obowiązuje od {m} {n} we wszystkich kolejnych miesiącach.","يسري من {m} {n} لكل الأشهر التالية.","Se aplică din {m} {n} pentru toate lunile următoare."],
+    "Wirklich löschen?":["Really delete?","Gerçekten silinsin mi?","Точно удалить?","Справді видалити?","Na pewno usunąć?","هل تريد الحذف فعلًا؟","Sigur ștergi?"],
+    "Klick = abhaken · Stift = bearbeiten · Ziehen = Tag ändern · + im Tag = neu eintragen":["Click = tick off · Pencil = edit · Drag = change the day · + in a day = add new","Tıkla = işaretle · Kalem = düzenle · Sürükle = günü değiştir · Günde + = yeni ekle","Клик = отметить · Карандаш = изменить · Перетащить = сменить день · + в дне = добавить","Клік = позначити · Олівець = змінити · Перетягнути = змінити день · + у дні = додати","Klik = odhacz · Ołówek = edytuj · Przeciągnij = zmień dzień · + w dniu = dodaj","نقرة = تأشير · القلم = تعديل · السحب = تغيير اليوم · + في اليوم = إضافة","Clic = bifează · Creion = editează · Trage = schimbă ziua · + în zi = adaugă"],
     "Einklappen":["Collapse","Daralt","Свернуть","Згорнути","Zwiń","طيّ","Restrânge"],
     "Aufklappen":["Expand","Genişlet","Развернуть","Розгорнути","Rozwiń","توسيع","Extinde"],
     "Ja":["Yes","Evet","Да","Так","Tak","نعم","Da"],"Nein":["No","Hayır","Нет","Ні","Nie","لا","Nu"],
@@ -647,12 +662,21 @@ if (IS_PC){
   document.addEventListener("click", e=>{ if (UI.view!=="list") return; const h=e.target.closest("[data-pcfold]"); if (h) fold(h.dataset.pcfold); });
   document.addEventListener("keydown", e=>{ const h=e.target.closest && e.target.closest("[data-pcfold]"); if (h && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); e.stopPropagation(); fold(h.dataset.pcfold); } }, true);
 }
-/* ---------- Fixkosten: month calendar – every fixed cost sits on its day ---------- */
+/* ---------- Fixkosten: month calendar – every fixed cost sits on its day; move, edit, delete and add right here ---------- */
 if (IS_PC){
-  const F={pop:null, ring:0, drag:null};
+  const F={pop:null, ring:0, drag:null, fresh:null, gone:null, first:true};
   const FCOL={Wohnen:"#2f7d5b",Schulden:"#b5473a",Auto:"#c27c0e",Versicherung:"#5b7f95","Sparen & Vorsorge":"#3d63a8","Abos & Handy":"#d14d72",Betrieb:"#6b5bb0",Sonstiges:"#0e8aa0"};
+  const FIC={Wohnen:"home",Schulden:"bank",Auto:"car",Versicherung:"shield","Sparen & Vorsorge":"piggy","Abos & Handy":"phone",Betrieb:"case",Sonstiges:"dots"};
+  const SV={pen:`<svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4ZM13.5 6.5l4 4"/></svg>`, bin:`<svg class="i" viewBox="0 0 24 24"><path d="M5 7h14M10 11v6M14 11v6M6.5 7l1 12.5h9L17.5 7M9.5 7V4.5h5V7"/></svg>`, x:`<svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>`, plus:`<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>`};
   const col=a=>FCOL[a]||"#0e8aa0";
-  const dayOf=(f,ym)=>{ const D=daysIn(ym); if (f.day>=1) return Math.min(D, f.day|0); const d=fixDay(f,ym); return d>=1?d:null; };
+  const E="cubic-bezier(.2,.8,.2,1)", BO="cubic-bezier(.3,1.5,.5,1)";
+  // the day of a fixed cost: a move applies from its month on, earlier months keep their day
+  const dayOf=(f,ym)=>{ const D=daysIn(ym); let d=null;
+    if (Array.isArray(f.days) && f.days.length){ for (const e of f.days) if (e.from<=ym) d=e.day; }
+    if (d==null && f.day>=1) d=f.day; if (d==null) d=fixDay(f,ym);
+    return d>=1 ? Math.min(D, d|0) : null; };
+  const withDay=(f,ym,day)=>{ const base=Array.isArray(f.days)&&f.days.length ? f.days : f.day>=1 ? [{from:"0000-00", day:f.day|0}] : []; const p=base.filter(e=>e.from<ym); p.push({from:ym, day:day||0}); return p; };
+  const clean=f=>{ const d={...f}; delete d.id; return d; };
   const _rf=renderFix;
   renderFix = function(){
     if (UI.fixEdit) { $("v-fix").classList.remove("pcfcal"); return _rf(); }
@@ -668,18 +692,19 @@ if (IS_PC){
         ${brandFor(f.name)?brandBadge(brandFor(f.name)):tile(f.kind==="betrieb"?"betrieb":"fix", f.name)}<span class="n" lang="de">${esc(f.name)}</span>
         ${ed?`<input class="in fxamt-in" id="fxAmtIn" data-fxamtin="${esc(f.id)}" inputmode="decimal" value="${esc(numStr(amtOf(f)))}" aria-label="Betrag für ${esc(f.name)} im ${esc(mName)}">`
           :`<button class="a" data-fxamt="${esc(f.id)}" title="Betrag nur für ${esc(mName)} ändern">${esc(eur(amtOf(f)))}</button>`}
-        <i class="ck"></i></div>`; };
+        <i class="ck"></i><button class="pe" data-pcfedit="${esc(f.id)}" title="Bearbeiten" aria-label="${esc(f.name)} bearbeiten">${SV.pen}</button></div>`; };
     let cells="";
     for (let i=0;i<first;i++) cells+=`<div class="pcfd x"></div>`;
     for (let d=1; d<=D; d++){ const fs=by[d]||[], s=sum(fs,amtOf), wd=(first+d-1)%7;
-      cells+=`<div class="pcfd ${d===today?"today":""} ${wd>4?"we":""}" data-pcfday="${d}"><div class="dh"><b>${pad(d)}</b>${s?`<span>${esc(eur0(s))}</span>`:""}</div>${fs.map(chip).join("")}</div>`; }
+      cells+=`<div class="pcfd ${d===today?"today":""} ${wd>4?"we":""}" data-pcfday="${d}"><div class="dh"><b>${pad(d)}</b>${s?`<span>${esc(eur0(s))}</span>`:""}</div>${fs.map(chip).join("")}<button class="pcfadd" data-pcfnew="${d}" title="Fixkoste am ${d}. eintragen" aria-label="Fixkoste am ${d}. eintragen">${SV.plus}</button></div>`; }
     const wk=["Mo","Di","Mi","Do","Fr","Sa","So"].map(w=>`<span>${w}</span>`).join("");
     const soon=ym===cur ? all.filter(f=>!(f.id in paid)).map(f=>({f,d:dayOf(f,ym)})).filter(x=>x.d && x.d>=today && x.d<=today+6) : [];
     const groups={}; for (const f of all) (groups[fixArea(f)]=groups[fixArea(f)]||[]).push(f);
-    const gl=Object.entries(groups).sort((a,b)=>sum(b[1],amtOf)-sum(a[1],amtOf)).map(([a,fs])=>`<div class="gl"><i style="background:${col(a)}"></i><span>${esc(a)}</span><small>${fs.filter(f=>f.id in paid).length}/${fs.length}</small><b>${esc(eur0(sum(fs,amtOf)))}</b></div>`).join("");
+    const gl=Object.entries(groups).sort((a,b)=>sum(b[1],amtOf)-sum(a[1],amtOf)).map(([a,fs])=>{ const p=fs.filter(f=>f.id in paid).length;
+      return `<div class="gl" style="--c:${col(a)}"><span class="gi">${ic(FIC[a]||"dots",17)}</span><span class="gn"><span>${esc(a)}</span><i class="gb"><i style="width:${Math.round(p/fs.length*100)}%"></i></i></span><small>${p}/${fs.length}</small><b>${esc(eur0(sum(fs,amtOf)))}</b></div>`; }).join("");
     const R=50, C=2*Math.PI*R, pct=total?pSum/total:0;
     $("v-fix").classList.add("pcfcal");
-    $("v-fix").innerHTML = !all.length ? `<div class="card">${emptyState("repeat","Noch keine Fixkosten","Trag Miete, Versicherungen und Abos einmal ein.")}<div class="row-btns" style="margin-top:12px"><button class="btn" id="fixEditBtn">Liste bearbeiten</button></div></div>` : `
+    $("v-fix").innerHTML = `
       <div class="card pcfcalc"><div class="wd">${wk}</div><div class="grid">${cells}</div></div>
       <div class="pcfside">
         <div class="card pcfsum"><span class="small muted">Im ${esc(mName)} fest verplant</span><div class="big">${esc(eur0(total))}</div>
@@ -687,26 +712,116 @@ if (IS_PC){
             <div><b>${esc(eur0(pSum))}</b><span class="small muted">bezahlt · ${nPaid} von ${all.length}</span></div></div>
           <div class="kv"><span>Noch offen</span><b>${esc(eur0(total-pSum))}</b></div>
           ${ym===cur?`<div class="kv"><span>In den nächsten 7 Tagen</span><b>${soon.length?`${soon.length} <span>Posten</span> · ${esc(eur0(sum(soon,x=>amtOf(x.f))))}`:"nichts"}</b></div>`:""}
-          <div class="row-btns">${nPaid<all.length?`<button class="btn" id="payAll">Alle abhaken</button>`:""}<button class="btn" id="fixEditBtn">Liste bearbeiten</button></div></div>
-        <div class="card pcfgr"><div class="small muted" style="margin-bottom:6px">Gruppen</div>${gl}</div>
-        <div class="card pcfnone" data-pcfday="0"><div class="small muted"><b>Ohne festen Tag</b> · <span>${none.length?"auf einen Tag im Kalender ziehen":"hierher ziehen, um den Tag zu entfernen"}</span></div>${none.map(chip).join("")}</div>
-        <div class="small muted pcfhint">Klick = abhaken · Betrag anklicken = nur für ${esc(mName)} ändern · Ziehen = Tag ändern</div>
+          <div class="row-btns">${all.length&&nPaid<all.length?`<button class="btn" id="payAll">Alle abhaken</button>`:""}<button class="btn" id="fixEditBtn">Liste bearbeiten</button></div></div>
+        ${gl?`<div class="card pcfgr"><div class="small muted" style="margin-bottom:6px">Gruppen</div>${gl}</div>`:""}
+        <div class="card pcfnone" data-pcfday="0"><div class="small muted"><b>Ohne festen Tag</b> · <span>${none.length?"auf einen Tag im Kalender ziehen":"hierher ziehen, um den Tag zu entfernen"}</span></div>${none.map(chip).join("")}<button class="pcfadd wide" data-pcfnew="0">${SV.plus}<span>Neue Fixkoste</span></button></div>
+        <div class="small muted pcfhint">Klick = abhaken · Stift = bearbeiten · Ziehen = Tag ändern · + im Tag = neu eintragen</div>
       </div>`;
-    // ring grows to the new value, the last ticked one pops
-    requestAnimationFrame(()=>{ const r=$("v-fix").querySelector(".pcfring .fg"); if (r){ r.style.strokeDashoffset=r.dataset.to; } F.ring=pct;
-      if (F.pop && !pcCalm()){ const el=$("v-fix").querySelector(`[data-pcfid="${CSS.escape(F.pop)}"]`); if (el) el.animate(el.classList.contains("on")?[{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}]:[{transform:"scale(.94)"},{transform:"scale(1)"}],{duration:360,easing:"cubic-bezier(.3,1.6,.5,1)"}); }
-      F.pop=null; });
+    const calm=pcCalm(), root=$("v-fix");
+    requestAnimationFrame(()=>{ const r=root.querySelector(".pcfring .fg"); if (r) r.style.strokeDashoffset=r.dataset.to; F.ring=pct;
+      if (!calm){
+        if (F.first){ root.querySelectorAll(".pcfd:not(.x)").forEach((el,i)=>el.animate([{opacity:0,transform:"translateY(14px) scale(.96)"},{opacity:1,transform:"none"}],{duration:420,delay:Math.min(i,34)*14,easing:E,fill:"backwards"}));
+          root.querySelectorAll(".pcfgr .gb>i").forEach((el,i)=>el.animate([{width:"0%"},{width:el.style.width}],{duration:800,delay:200+i*70,easing:E,fill:"backwards"})); }
+        const q=id=>root.querySelector(`[data-pcfid="${CSS.escape(id)}"]`);
+        if (F.pop){ const el=q(F.pop); if (el){ el.animate(el.classList.contains("on")?[{transform:"scale(1)"},{transform:"scale(1.09)"},{transform:"scale(1)"}]:[{transform:"scale(.93)"},{transform:"scale(1)"}],{duration:380,easing:BO});
+          const k=el.querySelector(".ck"); if (k && el.classList.contains("on")) k.animate([{transform:"scale(0) rotate(-90deg)"},{transform:"scale(1.25)"},{transform:"none"}],{duration:420,easing:BO}); } }
+        if (F.fresh){ const el=q(F.fresh); if (el){ el.animate([{opacity:0,transform:"translateY(-26px) scale(.7)"},{opacity:1,transform:"translateY(3px) scale(1.03)",offset:.7},{opacity:1,transform:"none"}],{duration:520,easing:E});
+          const cell=el.closest(".pcfd,.pcfnone"); if (cell) cell.animate([{boxShadow:"inset 0 0 0 2px #1a7a5c"},{boxShadow:"inset 0 0 0 2px #1a7a5c00"}],{duration:900,easing:"ease-out"}); } }
+      }
+      F.pop=null; F.fresh=null; F.first=false; });
   };
-  // remember which one was ticked (for the pop)
-  $("v-fix").addEventListener("click", e=>{ const p=e.target.closest("[data-pay]"); if (p && !e.target.closest("[data-fxamt],#fxAmtIn")) F.pop=p.dataset.pay; }, true);
-  $("v-fix").addEventListener("keydown", e=>{ const p=e.target.closest && e.target.closest(".pcfc"); if (p && e.target===p && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); p.click(); } });
-  // drag a fixed cost onto another day: it stays on that day from now on
-  $("v-fix").addEventListener("dragstart", e=>{ const c=e.target.closest && e.target.closest(".pcfc"); if (!c) return; F.drag=c.dataset.pcfid; e.dataTransfer.effectAllowed="move"; try { e.dataTransfer.setData("text/plain", F.drag); } catch(_){} setTimeout(()=>c.classList.add("drag"),0); });
-  $("v-fix").addEventListener("dragend", ()=>{ F.drag=null; $("v-fix").querySelectorAll(".drag,.over").forEach(x=>x.classList.remove("drag","over")); });
-  $("v-fix").addEventListener("dragover", e=>{ if (!F.drag) return; const d=e.target.closest("[data-pcfday]"); if (!d || d.classList.contains("x")) return; e.preventDefault(); $("v-fix").querySelectorAll(".over").forEach(x=>x!==d&&x.classList.remove("over")); d.classList.add("over"); });
-  $("v-fix").addEventListener("dragleave", e=>{ const d=e.target.closest("[data-pcfday]"); if (d && !d.contains(e.relatedTarget)) d.classList.remove("over"); });
-  $("v-fix").addEventListener("drop", async e=>{ const d=e.target.closest("[data-pcfday]"), id=F.drag; if (!d || !id) return; e.preventDefault(); F.drag=null;
-    const f=S.fixed.find(x=>x.id===id); if (!f) return; const n=+d.dataset.pcfday, old=f.day||0; if (n===(f.day|0) && (n || !f.day)) { renderFix(); return; }
-    const data={...f}; delete data.id; if (n) data.day=n; else delete data.day; F.pop=id;
-    if (await safe(()=>put("fixed", id, data))) toast(n?`${f.name}: ab jetzt am ${n}.`:`${f.name}: ohne festen Tag`, ()=>{ const b={...data}; if (old) b.day=old; else delete b.day; safe(()=>put("fixed", id, b)); }, "Rückgängig"); });
+  const _r5=render; render = (...a)=>{ if (UI.view!=="fix") F.first=true; return _r5(...a); };
+  const root=$("v-fix");
+  // ---- tick (pop) · pencil / plus open the editor instead of ticking
+  root.addEventListener("click", e=>{
+    const ed=e.target.closest("[data-pcfedit]"); if (ed){ e.stopPropagation(); e.preventDefault(); popEdit(ed.dataset.pcfedit, ed.closest(".pcfc")); return; }
+    const nw=e.target.closest("[data-pcfnew]"); if (nw){ e.stopPropagation(); e.preventDefault(); popNew(+nw.dataset.pcfnew, nw); return; }
+    const p=e.target.closest("[data-pay]"); if (p && !e.target.closest("[data-fxamt],#fxAmtIn")) F.pop=p.dataset.pay;
+  }, true);
+  root.addEventListener("dblclick", e=>{ const d=e.target.closest(".pcfd:not(.x)"); if (d && !e.target.closest(".pcfc")) popNew(+d.dataset.pcfday, d.querySelector(".dh")); });
+  root.addEventListener("contextmenu", e=>{ const c=e.target.closest(".pcfc"); if (c){ e.preventDefault(); popEdit(c.dataset.pcfid, c); } });
+  root.addEventListener("keydown", e=>{ const p=e.target.closest && e.target.closest(".pcfc"); if (!p || e.target!==p) return;
+    if (e.key==="Enter"||e.key===" "){ e.preventDefault(); p.click(); } else if (e.key==="F2"||e.key==="e"){ e.preventDefault(); popEdit(p.dataset.pcfid, p); } else if (e.key==="Delete"){ e.preventDefault(); popEdit(p.dataset.pcfid, p, true); } });
+  // ---- drag a fixed cost onto another day: it stays there from this month on
+  let ghost=null;
+  root.addEventListener("dragstart", e=>{ const c=e.target.closest && e.target.closest(".pcfc"); if (!c) return; popClose(); F.drag=c.dataset.pcfid; e.dataTransfer.effectAllowed="move"; try { e.dataTransfer.setData("text/plain", F.drag); } catch(_){}
+    ghost=c.cloneNode(true); ghost.classList.add("pcfghost"); ghost.style.width=c.offsetWidth+"px"; document.body.appendChild(ghost); try { e.dataTransfer.setDragImage(ghost, 24, 18); } catch(_){}
+    setTimeout(()=>{ c.classList.add("drag"); root.classList.add("dragging"); },0); });
+  root.addEventListener("dragend", ()=>{ F.drag=null; if (ghost){ ghost.remove(); ghost=null; } root.classList.remove("dragging"); root.querySelectorAll(".drag,.over").forEach(x=>x.classList.remove("drag","over")); });
+  root.addEventListener("dragover", e=>{ if (!F.drag) return; const d=e.target.closest("[data-pcfday]"); if (!d || d.classList.contains("x")) return; e.preventDefault(); root.querySelectorAll(".over").forEach(x=>x!==d&&x.classList.remove("over")); d.classList.add("over"); });
+  root.addEventListener("dragleave", e=>{ const d=e.target.closest("[data-pcfday]"); if (d && !d.contains(e.relatedTarget)) d.classList.remove("over"); });
+  root.addEventListener("drop", async e=>{ const d=e.target.closest("[data-pcfday]"), id=F.drag; if (!d || !id) return; e.preventDefault(); F.drag=null;
+    const f=S.fixed.find(x=>x.id===id); if (!f) return; const n=+d.dataset.pcfday, ym=UI.ym; if ((dayOf(f,ym)||0)===n){ renderFix(); return; }
+    const before=clean(f), data=clean(f); data.days=withDay(f,ym,n); delete data.day; F.fresh=id;
+    if (await safe(()=>put("fixed", id, data))) toast(n?`${f.name}: ab ${monthName(ym)} am ${n}.`:`${f.name}: ohne festen Tag`, ()=>safe(()=>put("fixed", id, before)), "Rückgängig"); });
+  // ---- the editor bubble (edit · delete · new)
+  const pop=document.createElement("div"); pop.id="pcfPop"; pop.className="pcfpop"; pop.hidden=true; document.body.appendChild(pop);
+  let popFor=null;
+  function place(anchor){
+    const r=anchor.getBoundingClientRect(), w=pop.offsetWidth, h=pop.offsetHeight;
+    let x=r.left+r.width/2-w/2, yy=r.bottom+10, up=false; x=Math.max(12, Math.min(innerWidth-w-12, x));
+    if (yy+h>innerHeight-50){ yy=r.top-h-10; up=true; }
+    pop.style.left=x+"px"; pop.style.top=Math.max(12,yy)+"px"; pop.style.setProperty("--ax", (r.left+r.width/2-x)+"px"); pop.classList.toggle("up", up);
+    if (!pcCalm()) pop.animate([{opacity:0,transform:`translateY(${up?8:-8}px) scale(.92)`},{opacity:1,transform:"none"}],{duration:260,easing:BO});
+  }
+  function popClose(){ if (pop.hidden) return; const done=()=>{ pop.hidden=true; pop.innerHTML=""; popFor=null; };
+    if (pcCalm()) return done(); pop.animate([{opacity:1,transform:"none"},{opacity:0,transform:"scale(.94)"}],{duration:150,easing:"ease-in"}).onfinish=done; }
+  const field=(lbl,inner)=>`<label class="pf"><span>${lbl}</span>${inner}</label>`;
+  function form(f, day){
+    const ym=UI.ym, mon=monthName(ym), D=daysIn(ym);
+    return `<div class="ph"><b>${f?esc(f.name):"Neue Fixkoste"}</b><button class="px" data-pfx aria-label="Schließen">${SV.x}</button></div>
+      ${field("Name",`<input class="in" data-pf="name" value="${f?esc(f.name):""}" placeholder="z. B. Miete, Netflix, Versicherung" autocomplete="off">`)}
+      <div class="pr2">${field(`Betrag ab ${esc(mon)}`,`<input class="in" data-pf="amount" inputmode="decimal" value="${f?esc(numStr(listAmt(f,ym))):""}" placeholder="0,00">`)}
+        ${field("Tag",`<select class="in" data-pf="day"><option value="0">ohne</option>${Array.from({length:D},(_,i)=>`<option value="${i+1}" ${day===i+1?"selected":""}>${i+1}.</option>`).join("")}</select>`)}</div>
+      <div class="pr2">${field("Rhythmus",`<select class="in" data-pf="rhythm">${RHYTHMS.filter(r=>r[0]!=="monate").map(([k,l])=>`<option value="${k}" ${(f&&f.rhythm||"monatlich")===k?"selected":""}>${l}</option>`).join("")}${f&&f.rhythm==="monate"?`<option value="monate" selected>Bestimmte Monate</option>`:""}</select>`)}
+        ${field("Art",`<select class="in" data-pf="kind"><option value="privat" ${!f||f.kind!=="betrieb"?"selected":""}>Privat</option><option value="betrieb" ${f&&f.kind==="betrieb"?"selected":""}>Betrieblich</option></select>`)}</div>
+      <div class="small muted pnote">${f?`Änderungen gelten ab ${esc(mon)} – frühere Monate bleiben, wie sie waren.`:`Gilt ab ${esc(mon)} für alle folgenden Monate.`}</div>
+      <div class="pa">${f?`<button class="btn pdel" data-pfdel>${SV.bin}<span>Löschen</span></button>`:""}<span style="flex:1"></span><button class="btn" data-pfx>Abbrechen</button><button class="btn primary" data-pfok>${f?"Speichern":"Eintragen"}</button></div>`;
+  }
+  function popEdit(id, anchor, del){ const f=S.fixed.find(x=>x.id===id); if (!f || !anchor) return; popFor={id, anchor}; pop.innerHTML=form(f, dayOf(f,UI.ym)); pop.hidden=false; place(anchor);
+    const el=pop.querySelector(del?"[data-pfdel]":"[data-pf=name]"); if (el){ el.focus(); if (el.select) el.select(); } }
+  function popNew(day, anchor){ if (!anchor) return; popFor={id:null, day, anchor}; pop.innerHTML=form(null, day); pop.hidden=false; place(anchor); pop.querySelector("[data-pf=name]").focus(); }
+  const val=k=>{ const el=pop.querySelector(`[data-pf="${k}"]`); return el?el.value:""; };
+  async function popSave(){
+    const ym=UI.ym, name=val("name").trim(), v=parseAmt(val("amount")||"0"), day=+val("day")||0, rh=val("rhythm"), kind=val("kind");
+    if (!name){ const n=pop.querySelector("[data-pf=name]"); n.focus(); if (!pcCalm()) n.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(-3px)"},{transform:"none"}],{duration:300}); return; }
+    if (!(v>=0)){ toast("Betrag ungültig"); return; }
+    const nv=Math.round(v*100)/100, cm=Number(ym.slice(5,7));
+    if (!popFor.id){
+      const id=newId(), d={name, amount:nv, kind, order:S.fixed.length, from:ym, days:[{from:ym, day}]};
+      if (rh!=="monatlich"){ d.rhythm=rh; d.months=rhythmMonths(rh, cm); }
+      F.fresh=id; popClose(); if (await safe(()=>put("fixed", id, d))) toast(`${name} eingetragen`, ()=>safe(()=>del("fixed", id)), "Rückgängig"); return;
+    }
+    const f=S.fixed.find(x=>x.id===popFor.id); if (!f){ popClose(); return; }
+    const before=clean(f), d=clean(f); d.name=name; d.kind=kind;
+    if (Math.abs(nv-listAmt(f,ym))>0.004){ const np=withPrice(f, ym, nv); d.amount=np.amount; if (np.prices) d.prices=np.prices; else delete d.prices; }
+    if ((dayOf(f,ym)||0)!==day){ d.days=withDay(f,ym,day); delete d.day; }
+    if (rh!==(f.rhythm||"monatlich")){ if (rh==="monatlich"){ delete d.rhythm; delete d.months; } else if (rh!=="monate"){ d.rhythm=rh; d.months=rhythmMonths(rh, Array.isArray(f.months)&&f.months.length?Math.min(...f.months):cm); } }
+    F.fresh=f.id; popClose();
+    if (await safe(()=>put("fixed", f.id, d))) toast(`${name} gespeichert`, ()=>safe(()=>put("fixed", f.id, before)), "Rückgängig");
+  }
+  async function popDelete(){
+    const f=S.fixed.find(x=>x.id===popFor.id); if (!f) return popClose();
+    const ym=UI.ym, before=clean(f), anchor=popFor.anchor;
+    // earlier months keep it (with their ticks) – it only disappears from this month on
+    const used=Object.keys(S.months).some(k=>k<ym && S.months[k] && S.months[k].paid && f.id in S.months[k].paid) || (f.from && f.from<ym);
+    popClose();
+    // ticks of this and later months go with it (undo brings them back)
+    const ticks=Object.keys(S.months).filter(k=>k>=ym && S.months[k] && S.months[k].paid && f.id in S.months[k].paid).map(k=>[k, clone(S.months[k])]);
+    const unTick=async()=>{ for (const [k,mo] of ticks){ const n=clone(mo); delete n.paid[f.id]; await put("months", k, n); } };
+    const reTick=async()=>{ for (const [k,mo] of ticks) await put("months", k, mo); };
+    const go=async()=>{ if (used){ const d=clean(f); d.until=shiftYm(ym,-1); if (await safe(async()=>{ await unTick(); await put("fixed", f.id, d); })) toast(`${f.name} ab ${monthName(ym)} gelöscht`, ()=>safe(async()=>{ await put("fixed", f.id, before); await reTick(); }), "Rückgängig"); }
+      else if (await safe(async()=>{ await unTick(); await del("fixed", f.id); })) toast(`${f.name} gelöscht`, ()=>safe(async()=>{ await put("fixed", f.id, before); await reTick(); }), "Rückgängig"); };
+    // puff: the chip shrinks, spins a little and is gone
+    if (anchor && anchor.isConnected && !pcCalm()){ anchor.style.pointerEvents="none"; const a=anchor.animate([{opacity:1,transform:"none",filter:"blur(0)"},{opacity:.9,transform:"scale(1.06)",offset:.25},{opacity:0,transform:"scale(.3) rotate(-8deg)",filter:"blur(3px)"}],{duration:380,easing:"cubic-bezier(.5,0,.75,0)",fill:"forwards"}); a.onfinish=go; }
+    else go();
+  }
+  pop.addEventListener("click", e=>{ e.stopPropagation();
+    if (e.target.closest("[data-pfx]")) return popClose();
+    if (e.target.closest("[data-pfok]")) return popSave();
+    const db=e.target.closest("[data-pfdel]"); if (db){ if (db.classList.contains("arm")) return popDelete(); db.classList.add("arm"); db.querySelector("span").textContent="Wirklich löschen?"; setTimeout(()=>{ if (db.isConnected){ db.classList.remove("arm"); db.querySelector("span").textContent="Löschen"; } }, 3500); } });
+  pop.addEventListener("keydown", e=>{ if (e.key==="Escape"){ e.stopPropagation(); popClose(); } else if (e.key==="Enter" && e.target.tagName!=="BUTTON"){ e.preventDefault(); popSave(); } });
+  document.addEventListener("mousedown", e=>{ if (!pop.hidden && !pop.contains(e.target) && !e.target.closest("[data-pcfedit],[data-pcfnew]")) popClose(); }, true);
+  addEventListener("resize", ()=>popClose());
+  document.addEventListener("scroll", ()=>{ if (!pop.hidden && popFor && popFor.anchor && popFor.anchor.isConnected){ const r=popFor.anchor.getBoundingClientRect(); if (r.bottom<0||r.top>innerHeight) popClose(); } }, true);
 }
