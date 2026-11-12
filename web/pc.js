@@ -248,6 +248,7 @@ if (IS_PC){
     "Hier ist kein Text zu lesen – zieh einen Rahmen um das Angebot":["No text to read here – draw a frame around the offer", "Burada okunacak metin yok – fırsatın etrafına çerçeve çiz", "Здесь нет текста – обведи акцию рамкой", "Тут немає тексту – обведи акцію рамкою", "Brak tekstu – narysuj ramkę wokół oferty", "لا يوجد نص هنا – ارسم إطارًا حول العرض", "Aici nu e text – trage un chenar în jurul ofertei"],
     "Erkannt – stimmt das?":["Recognised – is this right?", "Tanındı – doğru mu?", "Распознано – верно?", "Розпізнано – правильно?", "Rozpoznano – zgadza się?", "تم التعرف – هل هذا صحيح؟", "Recunoscut – e corect?"],
     "Text wird erkannt …":["Recognising text …", "Metin tanınıyor …", "Текст распознаётся …", "Текст розпізнається …", "Rozpoznawanie tekstu …", "جارٍ التعرف على النص …", "Se recunoaște textul …"],
+    "Nicht alles erkannt – bitte kurz ergänzen":["Not everything recognised – please complete","Her şey tanınmadı – lütfen tamamla","Распознано не всё – дополни, пожалуйста","Розпізнано не все – доповни, будь ласка","Nie wszystko rozpoznano – uzupełnij","لم يُتعرَّف على كل شيء – أكمل من فضلك","Nu s-a recunoscut tot – completează"],
     "Verwerfen":["Discard", "Vazgeç", "Отбросить", "Відкинути", "Odrzuć", "تجاهل", "Renunță"],
     "Als Angebot":["As offer", "Fırsat olarak", "Как акцию", "Як акцію", "Jako oferta", "كعرض", "Ca ofertă"],
     "Auf den Zettel":["On the list", "Listeye", "В список", "У список", "Na listę", "إلى القائمة", "Pe listă"],
@@ -1110,19 +1111,28 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
       S.settings.deals=[...keep, {id:newId(), shop:PG.shop.id, text:n, price:p>0?Math.round(p*100)/100:null, until:until||nextSat()}]; saveSettings(); toast(`Angebot gemerkt: ${n}`); return; }
     const id=newId(); K.fresh=id; fly(n+(p?" · "+eur(p):""), rect);
     setTimeout(()=>{ saveList([...list(), {id, n, done:false, s:PG.shop.id, ...(p>0?{p:Math.round(p*100)/100}:{}), ...(until?{u:until}:{})}]); toast(`Auf dem Zettel: ${n}${p?" · "+eur(p):""}`, ()=>saveList(list().filter(x=>x.id!==id)), "Rückgängig"); }, pcCalm()?0:700); }
+  // reads name, price and date from recognised lines (h = text height: the price is usually the biggest number)
   function readOcr(lines){
-    const L=lines.map(l=>l.t).filter(Boolean), all=L.join("\n"), am=amountsIn(all);
-    const name=L.filter(t=>/[a-zäöüß]{3}/i.test(t) && !/\d+[.,]\d{2}/.test(t) && !/^(uvp|statt|je|grundpreis|ab|nur|aktion)/i.test(t)).sort((a,b)=>b.length-a.length)[0]||"";
+    const L=(lines||[]).map(l=>({t:String(l.t||"").trim(), h:+l.h||0})).filter(l=>l.t), all=L.map(l=>l.t).join("\n");
+    const BAD=/^(uvp|statt|je|grundpreis|ab|nur|aktion|angebot|preis|kg|1 ?kg|1 ?l|100 ?g|\d+ ?%)/i;
+    const pr=t=>{ let m=t.match(/(\d{1,4})\s*[.,]\s*(\d{2})(?!\d)/); if (m) return +(m[1]+"."+m[2]); m=t.match(/[-–]\s*[.,]\s*(\d{2})(?!\d)/); if (m) return +("0."+m[1]); m=t.match(/(\d{1,4})\s*[.,]\s*[-–]/); if (m) return +m[1];
+      m=t.replace(/\s+/g," ").match(/^\D{0,3}(\d{1,3})\s(\d{2})\D{0,3}$/); if (m) return +(m[1]+"."+m[2]); return null; };   // "1 79" = 1,79 (small cents)
+    const cands=L.filter(l=>!/(uvp|statt|grundpreis|1 ?kg|1 ?l\b|100 ?g|=)/i.test(l.t)).map(l=>({v:pr(l.t), h:l.h})).filter(x=>x.v>0 && x.v<10000).sort((a,b)=>b.h-a.h);
+    const price=cands.length?cands[0].v:null;
+    const name=L.filter(l=>/[a-zäöüß]{3}/i.test(l.t) && pr(l.t)==null && !BAD.test(l.t) && !/^(bis|gültig)/i.test(l.t)).sort((a,b)=>(b.h-a.h)||(b.t.length-a.t.length)).slice(0,2).map(l=>l.t);
     const u=all.match(/bis\s*(?:[a-z]{2,10}\.?,?\s*)?(\d{1,2})\.(\d{1,2})\.?(\d{2,4})?/i);
-    return {n:name.slice(0,60), p:am.length?Math.min(...am):null, u:u?untilIso({d:+u[1],m:+u[2],y:u[3]?+u[3]:0}):""}; }
+    return {n:name.join(" ").replace(/\s+/g," ").slice(0,60), p:price, u:u?untilIso({d:+u[1],m:+u[2],y:u[3]?+u[3]:0}):""}; }
   window.hbPagePick=async res=>{
     if (!res || !PG.open) return;
+    if (res.fail && res.partial && (res.partial.name || res.partial.price)){ K.pick={n:res.partial.name||"", p:res.partial.price||null, u:untilIso(res.partial.until), rect:res.partial.rect}; renderShopPC(); const el=$(K.pick.n?"pkP":"pkN"); if (el) el.focus(); toast("Nicht alles erkannt – bitte kurz ergänzen"); return; }
     if (res.fail){ if (res.lassoFailed){ toast("Das hat nicht geklappt – bitte noch einmal"); return; }
       const b=NB(); if (b && b.pagePick) b.pagePick("lasso"); pg.classList.add("lassoing"); const pb=pg.querySelector(".pick"); if (pb) pb.textContent="✎ Rahmen ziehen – Esc zum Beenden";
       toast("Hier ist kein Text zu lesen – zieh einen Rahmen um das Angebot"); return; }
+    if (res.reading){ pg.classList.remove("lassoing"); const pb=pg.querySelector(".pick"); if (pb) pb.textContent="✓ Picken an – Esc zum Beenden"; K.pick={busy:true}; renderShopPC(); return; }
     if (res.img){ pg.classList.remove("lassoing"); const pb=pg.querySelector(".pick"); if (pb) pb.textContent="✓ Picken an – Esc zum Beenden";
       K.pick={busy:true}; renderShopPC();
-      try { await loadTesseract(); const r=await window.Tesseract.recognize(res.img, "deu"); const lines=((r.data&&r.data.lines)||[]).map(l=>({t:l.text.trim()}));
+      try { let lines=Array.isArray(res.lines)&&res.lines.length?res.lines:null;   // Windows text recognition; otherwise the one in the app
+        if (!lines){ await loadTesseract(); const r=await window.Tesseract.recognize(res.img, "deu"); lines=((r.data&&r.data.lines)||[]).map(l=>({t:l.text.trim(), h:l.bbox?l.bbox.y1-l.bbox.y0:0})); }
         K.pick=readOcr(lines); }
       catch(e){ K.pick={n:"", p:null, u:""}; toast("Texterkennung ging nicht – bitte selbst eintragen"); }
       K.pick.rect=res.rect; renderShopPC(); const el=$(K.pick.n?"pkP":"pkN"); if (el) el.focus(); return; }

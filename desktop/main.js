@@ -391,86 +391,150 @@ ipcMain.on("scan", (e, id) => {
 
 // web pages (shop leaflets, help, imprint …) open INSIDE the app window: a web view placed where the app leaves room for it
 let pageView = null, pageShown = false, pageBase = "";
-// "Angebot picken": a script in the shown page (own isolated world, cannot be seen by the page) highlights offers under the
-// mouse and reads name, price and "valid until" from the clicked one; "lasso" lets you draw a frame (for leaflets that are images)
-let pickOn = false;
-const PICK_JS = `(() => {
+// "Angebot picken": a script in the shown page highlights the offer under the mouse and reads name, price and "valid until"
+// from the clicked one (also inside embedded leaflet frames); "lasso" puts a see-through layer over the whole page to draw a frame
+// (for leaflets that are only pictures) – that part is photographed and read with the text recognition of Windows
+let pickOn = false, pickMode = "";
+const PICK_JS = String.raw`(() => {
   const W = window; if (W.__hbPick) return W.__hbPick;
-  const CUR = "url(\\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34'%3E%3Ccircle cx='17' cy='17' r='15' fill='%231a7a5c' stroke='white' stroke-width='2'/%3E%3Cpath d='M9 11h2.5l2.2 9h8.2l1.8-6.5H12.4' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='14.5' cy='23.5' r='1.4' fill='white'/%3E%3Ccircle cx='21' cy='23.5' r='1.4' fill='white'/%3E%3C/svg%3E\\") 17 17, pointer";
-  const CROSS = "crosshair";
-  const st = document.createElement("style");
-  st.textContent = "html.hbpick,html.hbpick *{cursor:" + CUR + "!important}html.hblasso,html.hblasso *{cursor:" + CROSS + "!important;user-select:none!important}" +
-    ".hbpick-hov{outline:3px solid #1a7a5c!important;outline-offset:2px!important;box-shadow:0 10px 30px rgba(26,122,92,.35)!important;transition:outline-color .1s}" +
-    ".hbpick-done{animation:hbpickpop .45s ease-out}@keyframes hbpickpop{0%{transform:scale(1)}40%{transform:scale(.94)}100%{transform:scale(1)}}" +
-    "#hbpick-box{position:fixed;z-index:2147483647;border:2.5px dashed #1a7a5c;background:rgba(26,122,92,.08);border-radius:10px;pointer-events:none}";
-  const PR = /(\\d{1,4})\\s*[.,]\\s*(\\d{2})(?!\\d)|[-–]\\s*[.,]\\s*(\\d{2})(?!\\d)|(\\d{1,4})\\s*[.,]\\s*[-–]/;
-  const BAD = /^(uvp|statt|je |grundpreis|1 ?kg|100 ?g|1 ?l |\\d+ ?%|-?\\d+ ?%|ab |nur |aktion|angebot|neu|online|in den warenkorb|merken|details)/i;
-  const txt = (e) => (e && (e.innerText || e.textContent) || "").replace(/\\u00a0/g, " ").trim();
+  const TOP = W === W.top;
+  const PR = /(\d{1,4})\s*[.,]\s*(\d{2})(?!\d)|[-–]\s*[.,]\s*(\d{2})(?!\d)|(\d{1,4})\s*[.,]\s*[-–]/;
+  const BAD = /^(uvp|statt|je |grundpreis|1 ?kg|100 ?g|1 ?l |\d+ ?%|-?\d+ ?%|ab |nur |aktion|angebot|neu|online|in den warenkorb|merken|details|zum angebot|mehr)/i;
+  const txt = (e) => (e && (e.innerText || e.textContent) || "").replace(/ /g, " ").trim();
+  // a price written as "1" + small "79" (or data in the markup)
+  function markupPrice(c) {
+    const it = c.querySelector("[itemprop=price]"); if (it) { const v = parseFloat(String(it.getAttribute("content") || txt(it)).replace(",", ".")); if (v > 0) return v; }
+    const pe = c.querySelector("[class*=price i],[data-price],[class*=preis i]");
+    if (pe) { const dp = pe.getAttribute("data-price"); if (dp && +dp > 0) return +dp;
+      const sup = pe.querySelector("sup,small,[class*=cent i],[class*=decimal i],[class*=fraction i]"), t = txt(pe).replace(/\s+/g, "");
+      if (sup) { const whole = t.replace(txt(sup).replace(/\s+/g, ""), "").replace(/[^\d]/g, ""), cents = txt(sup).replace(/[^\d]/g, "").slice(0, 2);
+        if (whole && cents.length === 2) return Number(whole + "." + cents); if (!whole && cents.length === 2) return Number("0." + cents); }
+      const m = t.match(PR); if (m) return price(t); }
+    return null;
+  }
+  function hasPrice(e) { return PR.test(txt(e)) || !!e.querySelector("[itemprop=price],[class*=price i],[class*=preis i],[data-price]"); }
   function cand(el) {
-    let e = el, best = null;
-    for (let i = 0; e && e !== document.body && i < 12; i++, e = e.parentElement) {
-      const t = txt(e); if (t.length > 700) break;
-      // a list of several products (each child with its own name and price): went too far up
-      if ([...e.children].filter((k) => { const kt = txt(k); return kt.length > 12 && PR.test(kt) && /[a-zäöüß]{4}/i.test(kt.replace(PR, "")); }).length >= 2) break;
-      if (PR.test(t)) { const r = e.getBoundingClientRect(); if (r.width > 60 && r.height > 40) { best = e; if (t.split(/\\n+/).filter((x) => /[a-zäöüß]{3}/i.test(x)).length >= 1 && r.height > 80) break; } }
+    let e = el && el.nodeType === 1 ? el : el && el.parentElement, best = null;
+    for (let i = 0; e && e !== document.body && e !== document.documentElement && i < 14; i++, e = e.parentElement) {
+      const t = txt(e); if (t.length > 900) break;
+      if ([...e.children].filter((k) => { const kt = txt(k); return kt.length > 12 && hasPrice(k) && /[a-zäöüß]{4}/i.test(kt.replace(PR, "")); }).length >= 2) break;
+      if (hasPrice(e)) { const r = e.getBoundingClientRect(); if (r.width > 50 && r.height > 30) { best = e; if (/[a-zäöüß]{4}/i.test(t.replace(PR, "")) && r.height > 70) break; } }
     }
     return best;
   }
-  function price(t) {
-    const m = t.match(PR); if (!m) return null;
-    if (m[1]) return Number(m[1] + "." + m[2]); if (m[3]) return Number("0." + m[3]); if (m[4]) return Number(m[4]); return null;
-  }
+  function price(t) { const m = String(t).match(PR); if (!m) return null; if (m[1]) return Number(m[1] + "." + m[2]); if (m[3]) return Number("0." + m[3]); if (m[4]) return Number(m[4]); return null; }
   function read(c) {
-    const t = txt(c), lines = t.split(/\\n+/).map((x) => x.trim()).filter(Boolean);
+    const t = txt(c), lines = t.split(/\n+/).map((x) => x.trim()).filter(Boolean);
     let name = "";
     const h = c.querySelector("h1,h2,h3,h4,h5,[class*=title i],[class*=name i],[class*=headline i],[itemprop=name]");
-    if (h && /[a-zäöüß]{3}/i.test(txt(h)) && txt(h).length < 90) name = txt(h).split(/\\n+/)[0];
+    if (h && /[a-zäöüß]{3}/i.test(txt(h)) && txt(h).length < 90) name = txt(h).split(/\n+/)[0];
+    if (!name) { const img = c.querySelector("img[alt]"); if (img && /[a-zäöüß]{4}/i.test(img.alt) && img.alt.length < 90) name = img.alt.trim(); }
     if (!name) name = lines.filter((x) => /[a-zäöüß]{3}/i.test(x) && !PR.test(x) && !BAD.test(x) && x.length <= 80).sort((a, b) => b.length - a.length)[0] || "";
-    const u = t.match(/(?:bis|gültig bis)\\s*(?:[a-z]{2,10}\\.?,?\\s*)?(\\d{1,2})\\.(\\d{1,2})\\.?(\\d{2,4})?/i);
+    const u = t.match(/(?:bis|gültig bis)\s*(?:[a-z]{2,10}\.?,?\s*)?(\d{1,2})\.(\d{1,2})\.?(\d{2,4})?/i);
     const r = c.getBoundingClientRect();
-    return { name: name.slice(0, 60), price: price(t), until: u ? { d: +u[1], m: +u[2], y: u[3] ? +u[3] : 0 } : null, rect: { x: r.left, y: r.top, w: r.width, h: r.height } };
+    return { name: name.slice(0, 60), price: markupPrice(c) || price(t), until: u ? { d: +u[1], m: +u[2], y: u[3] ? +u[3] : 0 } : null, rect: TOP ? { x: r.left, y: r.top, w: r.width, h: r.height } : null };
   }
-  let hov = null, mode = "", box = null, sx = 0, sy = 0, skip = false;
+  let hov = null, hovOld = "", mode = "", box = null, layer = null, sx = 0, sy = 0, skip = false;
   const send = (o) => console.log("__HBPICK__" + JSON.stringify(o));
-  function over(e) { if (mode !== "pick") return; const c = cand(e.target); if (c === hov) return; if (hov) hov.classList.remove("hbpick-hov"); hov = c; if (c) c.classList.add("hbpick-hov"); }
+  // highlight with inline styles (works on pages that forbid extra style sheets)
+  function mark(c) { if (hov === c) return; if (hov) hov.style.cssText = hovOld; hov = c; if (c) { hovOld = c.style.cssText; c.style.setProperty("outline", "3px solid #1a7a5c", "important"); c.style.setProperty("outline-offset", "2px", "important"); c.style.setProperty("box-shadow", "0 10px 30px rgba(26,122,92,.35)", "important"); } }
+  function over(e) { if (mode === "pick") mark(cand(e.target)); }
   function stop(e) { if (!mode) return; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); }
   function click(e) {
     if (mode !== "pick") return; stop(e);
-    if (skip) { skip = false; return; }   // the click that ends drawing a frame
+    if (skip) { skip = false; return; }
     const c = cand(e.target);
-    if (!c) return send({ fail: true });
-    const r = read(c); c.classList.remove("hbpick-done"); void c.offsetWidth; c.classList.add("hbpick-done");
-    if (!r.price || !r.name) return send({ fail: true, partial: r });
+    if (!c) return send({ fail: true, why: "nocard", tag: e.target && e.target.tagName });
+    const r = read(c);
+    if (c.animate) c.animate([{ transform: "scale(1)" }, { transform: "scale(.95)" }, { transform: "scale(1)" }], { duration: 420 });
+    if (!r.price || !r.name) return send({ fail: true, why: "noprice", partial: r });
     send(r);
   }
-  function down(e) { if (mode !== "lasso") return; stop(e); sx = e.clientX; sy = e.clientY; box = document.createElement("div"); box.id = "hbpick-box"; document.documentElement.appendChild(box); move(e); }
-  function move(e) { if (mode !== "lasso" || !box) return; stop(e); const x = Math.min(sx, e.clientX), y = Math.min(sy, e.clientY); Object.assign(box.style, { left: x + "px", top: y + "px", width: Math.abs(e.clientX - sx) + "px", height: Math.abs(e.clientY - sy) + "px" }); }
-  function up(e) { if (mode !== "lasso" || !box) return; stop(e); const r = box.getBoundingClientRect(); box.remove(); box = null;
-    skip = true; setTimeout(() => { skip = false; }, 400);
-    if (r.width < 20 || r.height < 14) return; set("pick"); send({ lasso: { x: r.left, y: r.top, w: r.width, h: r.height } }); }
-  function set(m) { mode = m; document.documentElement.classList.toggle("hbpick", m === "pick"); document.documentElement.classList.toggle("hblasso", m === "lasso"); if (!m && hov) { hov.classList.remove("hbpick-hov"); hov = null; } }
-  document.documentElement.appendChild(st);
+  function cursor(on) { document.documentElement.style.setProperty("cursor", on ? "copy" : "", on ? "important" : ""); if (document.body) document.body.style.setProperty("cursor", on ? "copy" : "", on ? "important" : ""); }
+  // drawing a frame: a see-through layer over everything (also over embedded leaflet frames)
+  function lassoOn() {
+    if (!TOP || layer) return;
+    layer = document.createElement("div");
+    layer.style.cssText = "position:fixed;inset:0;z-index:2147483646;cursor:crosshair;background:rgba(194,124,14,.06)";
+    layer.addEventListener("pointerdown", (e) => { e.preventDefault(); sx = e.clientX; sy = e.clientY; box = document.createElement("div");
+      box.style.cssText = "position:fixed;z-index:2147483647;border:2.5px dashed #1a7a5c;background:rgba(26,122,92,.10);border-radius:10px;pointer-events:none";
+      document.documentElement.appendChild(box); layer.setPointerCapture(e.pointerId); move(e); });
+    layer.addEventListener("pointermove", move);
+    layer.addEventListener("pointerup", (e) => { if (!box) return; const r = box.getBoundingClientRect(); box.remove(); box = null; skip = true; setTimeout(() => { skip = false; }, 400);
+      if (r.width < 20 || r.height < 14) return; set("pick"); send({ lasso: { x: r.left, y: r.top, w: r.width, h: r.height } }); });
+    document.documentElement.appendChild(layer);
+  }
+  function move(e) { if (!box) return; const x = Math.min(sx, e.clientX), y = Math.min(sy, e.clientY); Object.assign(box.style, { left: x + "px", top: y + "px", width: Math.abs(e.clientX - sx) + "px", height: Math.abs(e.clientY - sy) + "px" }); }
+  function set(m) { mode = m; cursor(m === "pick"); if (m !== "pick") mark(null); if (m === "lasso") lassoOn(); else if (layer) { layer.remove(); layer = null; } }
   ["click", "auxclick", "dblclick", "contextmenu"].forEach((t) => W.addEventListener(t, t === "click" ? click : stop, true));
   W.addEventListener("mouseover", over, true);
-  W.addEventListener("pointerdown", (e) => { if (mode === "lasso") down(e); else if (mode) stop(e); }, true);
-  W.addEventListener("mousedown", (e) => { if (mode) stop(e); }, true);
-  W.addEventListener("pointermove", move, true);
-  W.addEventListener("pointerup", up, true);
+  ["pointerdown", "mousedown", "touchstart"].forEach((t) => W.addEventListener(t, (e) => { if (mode === "pick") stop(e); }, { capture: true, passive: false }));
   W.__hbPick = { set };
   return W.__hbPick;
 })()`;
-function pickSet(mode) {
-  if (!pageView) return; pickOn = !!mode;
-  pageView.webContents.executeJavaScriptInIsolatedWorld(1999, [{ code: PICK_JS + `.set(${JSON.stringify(mode || "")})` }]).catch(() => {});
+const PICK_CSS = "html,html *{cursor:copy!important}";
+let pickCssKey = null;
+async function pickSet(mode) {
+  if (!pageView) return; pickOn = !!mode; pickMode = mode || "";
+  const wc = pageView.webContents, call = PICK_JS + `.set(${JSON.stringify(mode || "")})`;
+  try { if (pickCssKey) { await wc.removeInsertedCSS(pickCssKey); pickCssKey = null; } if (mode === "pick") pickCssKey = await wc.insertCSS(PICK_CSS); } catch (e) {}
+  wc.executeJavaScriptInIsolatedWorld(1999, [{ code: call }]).catch(() => {});
+  // embedded frames (leaflet viewers) get it too; the frame layer for drawing only lives in the top page
+  try { for (const f of wc.mainFrame.framesInSubtree) if (f !== wc.mainFrame) f.executeJavaScript(call).catch(() => {}); } catch (e) {}
 }
 ipcMain.on("pagePick", (e, mode) => pickSet(mode === "pick" || mode === "lasso" ? mode : ""));
+// text recognition of Windows (offline, German) for a frame drawn on a picture leaflet
+const OCR_PS = String.raw`
+$ErrorActionPreference = "Stop"
+try {
+  Add-Type -AssemblyName System.Runtime.WindowsRuntime
+  $null = [Windows.Storage.StorageFile, Windows.Storage, ContentType = WindowsRuntime]
+  $null = [Windows.Media.Ocr.OcrEngine, Windows.Foundation, ContentType = WindowsRuntime]
+  $null = [Windows.Graphics.Imaging.BitmapDecoder, Windows.Graphics, ContentType = WindowsRuntime]
+  $asTask = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object { $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation` + "`" + String.raw`1' })[0]
+  function Await($op, [Type]$t) { $task = $asTask.MakeGenericMethod($t).Invoke($null, @($op)); $task.Wait() | Out-Null; $task.Result }
+  $file = Await ([Windows.Storage.StorageFile]::GetFileFromPathAsync($env:HB_OCR_FILE)) ([Windows.Storage.StorageFile])
+  $stream = Await ($file.OpenAsync([Windows.Storage.FileAccessMode]::Read)) ([Windows.Storage.Streams.IRandomAccessStream])
+  $dec = Await ([Windows.Graphics.Imaging.BitmapDecoder]::CreateAsync($stream)) ([Windows.Graphics.Imaging.BitmapDecoder])
+  $bmp = Await ($dec.GetSoftwareBitmapAsync()) ([Windows.Graphics.Imaging.SoftwareBitmap])
+  $lang = New-Object Windows.Globalization.Language("de-DE")
+  $eng = [Windows.Media.Ocr.OcrEngine]::TryCreateFromLanguage($lang)
+  if ($eng -eq $null) { $eng = [Windows.Media.Ocr.OcrEngine]::TryCreateFromUserProfileLanguages() }
+  $res = Await ($eng.RecognizeAsync($bmp)) ([Windows.Media.Ocr.OcrResult])
+  $out = @()
+  foreach ($l in $res.Lines) { $h = 0; foreach ($w in $l.Words) { if ($w.BoundingRect.Height -gt $h) { $h = $w.BoundingRect.Height } }; $out += @{ t = $l.Text; h = [math]::Round($h) } }
+  $stream.Dispose()
+  [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+  Write-Output ("OK:" + (ConvertTo-Json -Compress -InputObject @($out)))
+} catch { Write-Output ("ERR:" + $_.Exception.Message) }
+`;
+function winOcr(png) {
+  return new Promise((ok) => {
+    if (process.platform !== "win32") return ok(null);
+    const f = path.join(app.getPath("temp"), "hb-pick-" + Date.now() + ".png");
+    try { fs.writeFileSync(f, png); } catch (e) { return ok(null); }
+    const enc = Buffer.from(OCR_PS, "utf16le").toString("base64");
+    require("child_process").execFile("powershell.exe", ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", enc],
+      { timeout: 30000, windowsHide: true, maxBuffer: 1024 * 1024, env: { ...process.env, HB_OCR_FILE: f } }, (err, stdout) => {
+        fs.unlink(f, () => {});
+        const out = String(stdout || "").trim().split(/\r?\n/).pop() || "";
+        if (out.startsWith("OK:")) { try { const a = JSON.parse(out.slice(3)); return ok(Array.isArray(a) ? a : [a]); } catch (e) {} }
+        ok(null);
+      });
+  });
+}
 function pickResult(o) {
   if (!win || win.isDestroyed()) return;
   const out = (x) => win.webContents.executeJavaScript(`window.hbPagePick && window.hbPagePick(${JSON.stringify(x)})`).catch(() => {});
   if (o && o.lasso && pageView) {
     const r = o.lasso, z = pageView.webContents.getZoomFactor();
-    pageView.webContents.capturePage({ x: Math.max(0, Math.round(r.x * z)), y: Math.max(0, Math.round(r.y * z)), width: Math.round(r.w * z), height: Math.round(r.h * z) })
-      .then((img) => out({ img: img.toDataURL(), rect: r })).catch(() => out({ fail: true, lassoFailed: true }));
+    out({ reading: true });
+    pageView.webContents.capturePage({ x: Math.max(0, Math.round(r.x * z)), y: Math.max(0, Math.round(r.y * z)), width: Math.max(1, Math.round(r.w * z)), height: Math.max(1, Math.round(r.h * z)) })
+      .then(async (img) => {
+        const sz = img.getSize(), big = sz.width < 900 ? img.resize({ width: sz.width * 2, quality: "best" }) : img;   // bigger reads better
+        const lines = await winOcr(big.toPNG());
+        out({ img: img.toDataURL(), lines, rect: r });
+      }).catch(() => out({ fail: true, lassoFailed: true }));
     return;
   }
   out(o);
@@ -506,7 +570,8 @@ function pageMake() {
   wc.on("will-redirect", (e, url) => { if (!pageAllowed(url)) { e.preventDefault(); pageBlocked(); } });
   wc.on("will-frame-navigate", (e) => { if (e.isMainFrame && !pageAllowed(e.url)) { e.preventDefault(); pageBlocked(); } });
   ["did-start-loading", "did-stop-loading", "did-navigate", "did-navigate-in-page", "page-title-updated"].forEach((ev) => wc.on(ev, pageSend));
-  wc.on("did-navigate", () => { if (pickOn) setTimeout(() => pickSet("pick"), 400); });   // picking stays on after the page changed
+  wc.on("did-navigate", () => { if (pickOn) setTimeout(() => pickSet(pickMode || "pick"), 400); });
+  wc.on("did-frame-finish-load", (e, isMain) => { if (pickOn && !isMain) pickSet(pickMode || "pick"); });   // picking stays on after the page changed
   wc.on("console-message", (...a) => { const ev = a[0], msg = ev && typeof ev.message === "string" ? ev.message : a[2];
     if (typeof msg === "string" && msg.startsWith("__HBPICK__")) { try { pickResult(JSON.parse(msg.slice(10))); } catch (err) {} } });
   wc.on("before-input-event", (e, input) => {
