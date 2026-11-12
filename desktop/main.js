@@ -401,40 +401,63 @@ const PICK_JS = String.raw`(() => {
   const W = window; if (W.__hbPick) return W.__hbPick;
   const TOP = W === W.top;
   const PR = /(\d{1,4})\s*[.,]\s*(\d{2})(?!\d)|[-–]\s*[.,]\s*(\d{2})(?!\d)|(\d{1,4})\s*[.,]\s*[-–]/;
-  const BAD = /^(uvp|statt|je |grundpreis|1 ?kg|100 ?g|1 ?l |\d+ ?%|-?\d+ ?%|ab |nur |aktion|angebot|neu|online|in den warenkorb|merken|details|zum angebot|mehr)/i;
+  const BAD = /^(uvp|statt|je |grundpreis|1 ?kg|100 ?g|1 ?l |\d+ ?%|-?\d+ ?%|ab |nur |aktion|angebot|knaller|neu|online|in den warenkorb|merken|details|zum angebot|mehr|versch\.|verschiedene|auch )|:$/i;
   const txt = (e) => (e && (e.innerText || e.textContent) || "").replace(/ /g, " ").trim();
-  // a price written as "1" + small "79" (or data in the markup)
-  function markupPrice(c) {
-    const it = c.querySelector("[itemprop=price]"); if (it) { const v = parseFloat(String(it.getAttribute("content") || txt(it)).replace(",", ".")); if (v > 0) return v; }
-    const pe = c.querySelector("[class*=price i],[data-price],[class*=preis i]");
-    if (pe) { const dp = pe.getAttribute("data-price"); if (dp && +dp > 0) return +dp;
-      const sup = pe.querySelector("sup,small,[class*=cent i],[class*=decimal i],[class*=fraction i]"), t = txt(pe).replace(/\s+/g, "");
-      if (sup) { const whole = t.replace(txt(sup).replace(/\s+/g, ""), "").replace(/[^\d]/g, ""), cents = txt(sup).replace(/[^\d]/g, "").slice(0, 2);
-        if (whole && cents.length === 2) return Number(whole + "." + cents); if (!whole && cents.length === 2) return Number("0." + cents); }
-      const m = t.match(PR); if (m) return price(t); }
+  const PRG = new RegExp(PR.source, "g");
+  const UNIT = /(=|zzgl|pfand|uvp|statt|grundpreis|\bje\b|\(1|pro\s|\/\s?(kg|l)\b)/i;
+  const FILL = /\b(aktion|knaller|angebot|angebote|preis|statt|uvp|nur|ab|je|neu|top|deal|super|sale|rabatt|bonus|coupon|app|payback|auch|alkoholfrei)\b|€/gi;
+  const nameish = (t) => /[a-zäöüß]{4}/i.test(String(t).replace(PRG, " ").replace(FILL, " "));
+  const fs = (e) => { try { return parseFloat(getComputedStyle(e).fontSize) || 0; } catch (x) { return 0; } };
+  const maxFs = (e) => { let m = fs(e); for (const k of e.querySelectorAll("*")) m = Math.max(m, fs(k)); return m; };
+  function hasPrice(e) { return PR.test(txt(e)) || !!e.querySelector("[itemprop=price],[class*=price i],[class*=preis i],[data-price]"); }
+  // value of a small price element: "11,99 €", "-.99", "59,-" or "11" + small "99"
+  function valOf(e) {
+    const it = e.matches && e.matches("[itemprop=price]") ? e : null; if (it) { const v = parseFloat(String(it.getAttribute("content") || txt(it)).replace(",", ".")); if (v > 0) return v; }
+    const t = txt(e).replace(/\s+/g, " "); const m = price(t); if (m != null) return m;
+    const sup = e.querySelector("sup,small,[class*=cent i],[class*=decimal i],[class*=fraction i]");
+    if (sup) { const c = txt(sup).replace(/[^\d]/g, "").slice(0, 2), w = t.replace(txt(sup), "").replace(/[^\d]/g, ""); if (c.length === 2) return Number((w || "0") + "." + c); }
     return null;
   }
-  function hasPrice(e) { return PR.test(txt(e)) || !!e.querySelector("[itemprop=price],[class*=price i],[class*=preis i],[data-price]"); }
+  // the offer price in a card: the biggest written price that is not a base price, deposit, UVP or "statt"
+  function cardPrice(c) {
+    const it = c.querySelector("[itemprop=price]"); if (it) { const v = valOf(it); if (v) return v; }
+    const els = [c, ...c.querySelectorAll("*")].filter((e) => { const t = txt(e); return t && t.length <= 24 && !UNIT.test(t) && !UNIT.test(txt(e.parentElement || e).length <= 40 ? txt(e.parentElement || e) : t); });
+    let best = null;
+    for (const e of els) { const v = valOf(e); if (!(v > 0 && v < 100000)) continue; const f = maxFs(e), r = e.getBoundingClientRect();
+      if (!best || f > best.f + 0.5 || (Math.abs(f - best.f) <= 0.5 && r.width * r.height < best.a)) best = { v, f, a: r.width * r.height }; }
+    if (best) return best.v;
+    const all = txt(c).split(/\n+/).filter((l) => !UNIT.test(l)).join("\n"); return price(all);
+  }
+  // the product name: the biggest text in the card that is not a price, a badge word or a detail line
+  function cardName(c) {
+    let best = null;
+    const consider = (t, f) => { t = String(t || "").replace(/\s+/g, " ").trim().replace(/[:\s,(]+$/, ""); if (t.length < 4 || t.length > 90 || PR.test(t) || UNIT.test(t) || BAD.test(t) || !nameish(t)) return;
+      if (!best || f > best.f + 0.5) best = { t, f }; };
+    for (const e of c.querySelectorAll("h1,h2,h3,h4,h5,h6,[class*=title i],[class*=name i],[class*=headline i],[itemprop=name],p,span,div,a,strong,b")) {
+      if ([...e.children].some((k) => txt(k).length > 3 && txt(k) !== txt(e))) continue;   // only the innermost text
+      consider(txt(e).split(/\n+/)[0], fs(e)); }
+    if (!best) { const img = c.querySelector("img[alt]"); if (img) consider(img.alt, 0); }
+    return best ? best.t : "";
+  }
   function cand(el) {
-    let e = el && el.nodeType === 1 ? el : el && el.parentElement, best = null;
+    let e = el && el.nodeType === 1 ? el : el && el.parentElement, priceOnly = null;
     for (let i = 0; e && e !== document.body && e !== document.documentElement && i < 14; i++, e = e.parentElement) {
       const t = txt(e); if (t.length > 900) break;
-      if ([...e.children].filter((k) => { const kt = txt(k); return kt.length > 12 && hasPrice(k) && /[a-zäöüß]{4}/i.test(kt.replace(PR, "")); }).length >= 2) break;
-      if (hasPrice(e)) { const r = e.getBoundingClientRect(); if (r.width > 50 && r.height > 30) { best = e; if (/[a-zäöüß]{4}/i.test(t.replace(PR, "")) && r.height > 70) break; } }
+      // a list of several products (each child with its own name and price): went too far up
+      if ([...e.children].filter((k) => { const kt = txt(k); return kt.length > 12 && hasPrice(k) && nameish(kt); }).length >= 2) break;
+      if (!hasPrice(e)) continue;
+      const r = e.getBoundingClientRect(); if (r.width < 50 || r.height < 24) continue;
+      if (nameish(t)) return e;   // smallest box with a name and a price = the offer
+      if (!priceOnly) priceOnly = e;
     }
-    return best;
+    return priceOnly;
   }
   function price(t) { const m = String(t).match(PR); if (!m) return null; if (m[1]) return Number(m[1] + "." + m[2]); if (m[3]) return Number("0." + m[3]); if (m[4]) return Number(m[4]); return null; }
   function read(c) {
-    const t = txt(c), lines = t.split(/\n+/).map((x) => x.trim()).filter(Boolean);
-    let name = "";
-    const h = c.querySelector("h1,h2,h3,h4,h5,[class*=title i],[class*=name i],[class*=headline i],[itemprop=name]");
-    if (h && /[a-zäöüß]{3}/i.test(txt(h)) && txt(h).length < 90) name = txt(h).split(/\n+/)[0];
-    if (!name) { const img = c.querySelector("img[alt]"); if (img && /[a-zäöüß]{4}/i.test(img.alt) && img.alt.length < 90) name = img.alt.trim(); }
-    if (!name) name = lines.filter((x) => /[a-zäöüß]{3}/i.test(x) && !PR.test(x) && !BAD.test(x) && x.length <= 80).sort((a, b) => b.length - a.length)[0] || "";
+    const t = txt(c);
     const u = t.match(/(?:bis|gültig bis)\s*(?:[a-z]{2,10}\.?,?\s*)?(\d{1,2})\.(\d{1,2})\.?(\d{2,4})?/i);
     const r = c.getBoundingClientRect();
-    return { name: name.slice(0, 60), price: markupPrice(c) || price(t), until: u ? { d: +u[1], m: +u[2], y: u[3] ? +u[3] : 0 } : null, rect: TOP ? { x: r.left, y: r.top, w: r.width, h: r.height } : null };
+    return { name: cardName(c).slice(0, 60), price: cardPrice(c), until: u ? { d: +u[1], m: +u[2], y: u[3] ? +u[3] : 0 } : null, rect: TOP ? { x: r.left, y: r.top, w: r.width, h: r.height } : null };
   }
   let hov = null, hovOld = "", mode = "", box = null, layer = null, sx = 0, sy = 0, skip = false;
   const send = (o) => console.log("__HBPICK__" + JSON.stringify(o));
@@ -479,15 +502,16 @@ const PICK_JS = String.raw`(() => {
 })()`;
 const PICK_CSS = "html,html *{cursor:copy!important}";
 let pickCssKey = null;
+let pickSrc = "";   // the app can bring a newer version of the script along (so fixes need no new installer)
 async function pickSet(mode) {
   if (!pageView) return; pickOn = !!mode; pickMode = mode || "";
-  const wc = pageView.webContents, call = PICK_JS + `.set(${JSON.stringify(mode || "")})`;
+  const wc = pageView.webContents, call = (pickSrc || PICK_JS) + `.set(${JSON.stringify(mode || "")})`;
   try { if (pickCssKey) { await wc.removeInsertedCSS(pickCssKey); pickCssKey = null; } if (mode === "pick") pickCssKey = await wc.insertCSS(PICK_CSS); } catch (e) {}
   wc.executeJavaScriptInIsolatedWorld(1999, [{ code: call }]).catch(() => {});
   // embedded frames (leaflet viewers) get it too; the frame layer for drawing only lives in the top page
   try { for (const f of wc.mainFrame.framesInSubtree) if (f !== wc.mainFrame) f.executeJavaScript(call).catch(() => {}); } catch (e) {}
 }
-ipcMain.on("pagePick", (e, mode) => pickSet(mode === "pick" || mode === "lasso" ? mode : ""));
+ipcMain.on("pagePick", (e, mode, src) => { if (typeof src === "string" && src.length > 200 && src.length < 200000 && /^\(\(\) => \{/.test(src.trim())) pickSrc = src.trim(); pickSet(mode === "pick" || mode === "lasso" ? mode : ""); });
 // text recognition of Windows (offline, German) for a frame drawn on a picture leaflet
 const OCR_PS = String.raw`
 $ErrorActionPreference = "Stop"
