@@ -511,3 +511,10 @@ html.pc .pcpbar .lasso{background:color-mix(in srgb,#c27c0e 14%,transparent);col
 html.pc .pcpage.lassoing .pcpbar .lasso{background:#c27c0e!important;color:#fff!important}
 html.pc .pcwpick .pkraw{margin:-4px 0 2px;line-height:1.35;word-break:break-word}
 html.pc .pcpage.failed .pcpload{opacity:1}html.pc .pcpload b{font-size:17px;color:var(--fg)}
+/* the picker button: the most obvious button in the bar */
+html.pc .pcpbar .pick{height:44px!important;padding:0 20px!important;border-radius:14px!important;background:#1a7a5c!important;color:#fff!important;font-size:15px!important;font-weight:900!important;
+  box-shadow:0 0 0 4px #1a7a5c2e,0 8px 20px #1a7a5c55;animation:pcpickcall 2.4s ease-in-out infinite}
+html.pc .pcpbar .pick:hover{transform:translateY(-1px) scale(1.03)!important;box-shadow:0 0 0 5px #1a7a5c40,0 10px 24px #1a7a5c66}
+@keyframes pcpickcall{0%,100%{box-shadow:0 0 0 4px #1a7a5c2e,0 8px 20px #1a7a5c55}50%{box-shadow:0 0 0 8px #1a7a5c14,0 8px 24px #1a7a5c66}}
+html.pc .pcpage.picking .pcpbar .pick{background:#0f5f46!important;animation:pcpickglow 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){html.pc .pcpbar .pick{animation:none}}

@@ -241,6 +241,7 @@ if (IS_PC){
     "Noch nichts gemerkt.":["Nothing saved yet.", "Henüz bir şey kaydedilmedi.", "Пока ничего не сохранено.", "Поки нічого не збережено.", "Jeszcze nic nie zapisano.", "لم يُحفظ شيء بعد.", "Nimic salvat încă."],
     "Vor":["Forward", "İleri", "Вперёд", "Вперед", "Dalej", "تقدّم", "Înainte"],
     "Neu laden":["Reload", "Yenile", "Обновить", "Оновити", "Odśwież", "إعادة التحميل", "Reîncarcă"],
+    "🛒 Angebote picken":["🛒 Pick offers","🛒 Fırsat seç","🛒 Выбрать акции","🛒 Вибрати акції","🛒 Wybierz oferty","🛒 اختر العروض","🛒 Alege oferte"],
     "🛒 Angebot picken":["🛒 Pick offer", "🛒 Fırsat seç", "🛒 Выбрать акцию", "🛒 Вибрати акцію", "🛒 Wybierz ofertę", "🛒 اختر عرضًا", "🛒 Alege oferta"],
     "✓ Picken an – Esc zum Beenden":["✓ Picking on – Esc to stop", "✓ Seçim açık – bitirmek için Esc", "✓ Выбор включён – Esc для выхода", "✓ Вибір увімкнено – Esc для виходу", "✓ Wybieranie wł. – Esc, aby zakończyć", "✓ الاختيار مفعّل – Esc للإنهاء", "✓ Alegere activă – Esc pentru oprire"],
     "✎ Rahmen ziehen – Esc zum Beenden":["✎ Draw a frame – Esc to stop", "✎ Çerçeve çiz – bitirmek için Esc", "✎ Обведи рамкой – Esc для выхода", "✎ Обведи рамкою – Esc для виходу", "✎ Narysuj ramkę – Esc, aby zakończyć", "✎ ارسم إطارًا – Esc للإنهاء", "✎ Trage un chenar – Esc pentru oprire"],
@@ -1041,7 +1042,7 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
   const NB=()=>window.AndroidBridge && window.AndroidBridge.pageOpen ? window.AndroidBridge : null;
   const PG={open:false, url:"", shop:null, st:{}, ro:null, embed:false}; let lastView=UI.view;
   const pg=document.createElement("div"); pg.id="pcPage"; pg.className="pcpage"; pg.hidden=true;
-  pg.innerHTML=`<div class="pcpbar"><button data-pcpnav="back" title="Zurück" aria-label="Zurück">‹</button><button data-pcpnav="fwd" title="Vor" aria-label="Vor">›</button><button data-pcpnav="reload" class="rl" title="Neu laden" aria-label="Neu laden">⟳</button><button data-pcpnav="pick" class="wide pick" title="Angebot anklicken – es kommt auf den Einkaufszettel">🛒 Angebot picken</button>
+  pg.innerHTML=`<div class="pcpbar"><button data-pcpnav="back" title="Zurück" aria-label="Zurück">‹</button><button data-pcpnav="fwd" title="Vor" aria-label="Vor">›</button><button data-pcpnav="reload" class="rl" title="Neu laden" aria-label="Neu laden">⟳</button><button data-pcpnav="pick" class="wide pick" title="Angebot anklicken – es kommt auf den Einkaufszettel">🛒 Angebote picken</button>
     <div class="url" title="Gesperrt: hier geht nur diese eine Webseite"><span class="lk">🔒</span><span class="u"></span><small class="t"></small><em class="only"></em></div><button data-pcpnav="close" class="x" title="Schließen (Esc)" aria-label="Schließen">✕</button></div>
     <div class="pcphole" id="pcpHole"><div class="pcpload"><i></i><span>Seite wird geladen …</span></div></div>`;
   const side=document.createElement("aside"); side.id="pcpSide"; side.className="pcpside"; side.hidden=true;
@@ -1108,7 +1109,7 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
   PG.pick=false;
   function pickToggle(on){ const b=NB(); PG.pick=!!on && !!(b && b.pagePick); if (on && !PG.pick){ toast("Dafür braucht es die neue PC-App – kommt mit dem nächsten Update"); return; }
     if (b && b.pagePick) b.pagePick(PG.pick?"pick":"", PICK_SRC); pg.classList.toggle("picking", PG.pick); pg.classList.remove("lassoing");
-    const pb=pg.querySelector(".pick"); if (pb){ pb.textContent=PG.pick?"✓ Picken an – Esc zum Beenden":"🛒 Angebot picken"; if (!pcCalm()) pb.animate([{transform:"scale(.9)"},{transform:"scale(1.06)"},{transform:"none"}],{duration:320}); }
+    const pb=pg.querySelector(".pick"); if (pb){ pb.textContent=PG.pick?"✓ Picken an – Esc zum Beenden":"🛒 Angebote picken"; if (!pcCalm()) pb.animate([{transform:"scale(.9)"},{transform:"scale(1.06)"},{transform:"none"}],{duration:320}); }
     if (PG.pick) toast("Klick auf ein Angebot – es kommt auf den Einkaufszettel"); }
   function lassoStart(){ const b=NB(); if (!b || !b.pagePick){ toast("Dafür braucht es die neue PC-App – kommt mit dem nächsten Update"); return; }
     if (pg.classList.contains("lassoing")){ pickToggle(false); return; }
@@ -1159,7 +1160,10 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
       K.pick={busy:true}; renderShopPC();
       try { let lines=Array.isArray(res.lines)&&res.lines.length?res.lines:null;   // Windows text recognition; otherwise the one in the app
         if (!lines){ await loadTesseract(); const r=await window.Tesseract.recognize(res.img, "deu"); lines=((r.data&&r.data.lines)||[]).map(l=>({t:l.text.trim(), h:l.bbox?l.bbox.y1-l.bbox.y0:0})); }
-        K.pick=readOcr(lines); K.pick.raw=lines.map(l=>l.t).join(" · ").slice(0,160); if (!lines.length) K.pick.raw="(kein Text erkannt)"+(res.ocrErr?" – "+res.ocrErr:""); }
+        K.pick=readOcr(lines); K.pick.raw=lines.map(l=>l.t).join(" · ").slice(0,160); if (!lines.length) K.pick.raw="(kein Text erkannt)"+(res.ocrErr?" – "+res.ocrErr:"");
+        // price badges read on their own (biggest first): the most reliable price on picture leaflets
+        for (const t of (res.badges||[])){ const c=String(t).replace(/[oO]/g,"0").replace(/\s+/g,""), m=c.match(/(\d{1,4})[.,](\d{2})/)||c.match(/^\D*(\d{1,3})(\d{2})\D*$/);
+          if (m){ K.pick.p=+(m[1]+"."+m[2]); K.pick.raw="Preis-Kreis: "+m[1]+","+m[2]+" · "+K.pick.raw; break; } } }
       catch(e){ K.pick={n:"", p:null, u:"", raw:"(Texterkennung nicht erreichbar"+(res.ocrErr?" – "+res.ocrErr:"")+")"}; toast("Texterkennung ging nicht – bitte selbst eintragen"); }
       K.pick.rect=res.rect; renderShopPC(); const el=$(K.pick.n?"pkP":"pkN"); if (el) el.focus(); return; }
     if (res.name) addPicked(res.name, res.price, untilIso(res.until), res.rect);

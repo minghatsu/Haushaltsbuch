@@ -591,6 +591,63 @@ function winOcr(png) {
       });
   });
 }
+// finds price badges (white writing on a coloured spot) in a picture and redraws them as one plain line "5.99"
+// input: BGRA buffer (Electron nativeImage.toBitmap()); output: list of {w,h,data(BGRA)} pictures ready for text recognition
+function badgeLines(b, W, H) {
+  const N = W * H, col = new Uint8Array(N), wht = new Uint8Array(N);
+  for (let i = 0, p = 0; i < N; i++, p += 4) {
+    const B = b[p], G = b[p + 1], R = b[p + 2], mx = Math.max(R, G, B), mn = Math.min(R, G, B), lum = 0.299 * R + 0.587 * G + 0.114 * B;
+    if (mx - mn > 90 && mx > 120) col[i] = 1; else if (lum > 200 && mx - mn < 45) wht[i] = 1;
+  }
+  // connected pieces (4-neighbours) of a mask, optionally inside a box
+  function comps(mask, x0, y0, w, h, minA) {
+    const seen = new Uint8Array(w * h), out = [], st = [];
+    for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) {
+      const k = yy * w + xx; if (seen[k] || !mask[(y0 + yy) * W + x0 + xx]) continue;
+      let minx = xx, maxx = xx, miny = yy, maxy = yy, a = 0; const px = []; seen[k] = 1; st.push(k);
+      while (st.length) { const q = st.pop(), qx = q % w, qy = (q - qx) / w; a++; px.push(q);
+        if (qx < minx) minx = qx; if (qx > maxx) maxx = qx; if (qy < miny) miny = qy; if (qy > maxy) maxy = qy;
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = qx + dx, ny = qy + dy; if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue; const nk = ny * w + nx; if (!seen[nk] && mask[(y0 + ny) * W + x0 + nx]) { seen[nk] = 1; st.push(nk); } } }
+      if (a >= minA) out.push({ x: minx, y: miny, w: maxx - minx + 1, h: maxy - miny + 1, a, px });
+    }
+    return out;
+  }
+  const res = [];
+  for (const c of comps(col, 0, 0, W, H, Math.max(60, N * 0.004))) {
+    if (c.a > N * 0.25 || c.w / c.h < 0.5 || c.w / c.h > 2) continue;
+    // white writing inside the spot: white pieces not touching the edge of the spot's box
+    const ink = comps(wht, c.x, c.y, c.w, c.h, 20).filter((g) => g.x > 0 && g.y > 0 && g.x + g.w < c.w && g.y + g.h < c.h);
+    if (!ink.length) continue;
+    const Hm = Math.max(...ink.map((g) => g.h)); if (Hm < 10) continue;
+    const big = ink.filter((g) => g.h >= 0.75 * Hm).sort((p, q) => p.x - q.x); if (!big.length) continue;
+    const top = Math.min(...big.map((g) => g.y)), bot = Math.max(...big.map((g) => g.y + g.h));
+    const small = ink.filter((g) => g.h >= 0.35 * Hm && g.h < 0.75 * Hm && g.y < top + 0.5 * Hm && g.y + g.h <= bot && g.x > big[0].x).sort((p, q) => p.x - q.x);
+    // draw: big digits as they are, a dot, the small (cents) digits grown to full size – black on white
+    const parts = [...big.map((g) => ({ g, s: 1 })), ...(small.length ? [{ dot: 1 }] : []), ...small.map((g) => ({ g, s: Hm / g.h }))];
+    const gap = Math.round(Hm * 0.12), pad = Math.round(Hm * 0.4);
+    let Wd = pad * 2; for (const p of parts) Wd += (p.dot ? Math.round(Hm * 0.25) : Math.round(p.g.w * p.s)) + gap;
+    const Hd = Hm + pad * 2, d = Buffer.alloc(Wd * Hd * 4, 255); let x = pad;
+    for (const p of parts) {
+      if (p.dot) { const r = Math.max(2, Math.round(Hm * 0.09)); for (let yy = Hd - pad - 2 * r; yy < Hd - pad; yy++) for (let xx = x; xx < x + 2 * r; xx++) { const o = (yy * Wd + xx) * 4; d[o] = d[o + 1] = d[o + 2] = 0; } x += Math.round(Hm * 0.25) + gap; continue; }
+      const g = p.g, gw = Math.round(g.w * p.s), gh = Math.round(g.h * p.s), set = new Uint8Array(g.w * g.h);
+      for (const q of g.px) { const qx = q % c.w - g.x, qy = (q - q % c.w) / c.w - g.y; set[qy * g.w + qx] = 1; }
+      for (let yy = 0; yy < gh; yy++) for (let xx = 0; xx < gw; xx++) {
+        if (!set[Math.min(g.h - 1, Math.floor(yy / p.s)) * g.w + Math.min(g.w - 1, Math.floor(xx / p.s))]) continue;
+        const o = ((pad + Hm - gh + yy) * Wd + x + xx) * 4; d[o] = d[o + 1] = d[o + 2] = 0; }
+      x += gw + gap;
+    }
+    res.push({ w: Wd, h: Hd, data: d, cents: small.length, euros: big.length, size: Hm });
+  }
+  return res;
+}
+// all found price badges, biggest first, one below the other in one picture (one run of the text recognition)
+function badgePicture(img) {
+  const { width, height } = img.getSize(), list = badgeLines(img.toBitmap(), width, height).sort((p, q) => q.size - p.size).slice(0, 5);
+  if (!list.length) return null;
+  const W = Math.max(...list.map((x) => x.w)), sp = 30, H = list.reduce((a, x) => a + x.h + sp, sp), o = Buffer.alloc(W * H * 4, 255);
+  let y = sp; for (const x of list) { for (let r = 0; r < x.h; r++) x.data.copy(o, ((y + r) * W) * 4, r * x.w * 4, (r + 1) * x.w * 4); y += x.h + sp; }
+  return nativeImage.createFromBitmap(o, { width: W, height: H }).toPNG();
+}
 function whiteToBlack(img) {
   const { width, height } = img.getSize(), b = img.toBitmap(), o = Buffer.alloc(b.length);
   for (let i = 0; i < b.length; i += 4) {
@@ -611,8 +668,10 @@ function pickResult(o) {
         const lines = await winOcr(big.toPNG());
         // second look for white writing on colour (price circles like "5⁹⁹"): white becomes black, everything else white
         let white = null; try { white = await winOcr(whiteToBlack(big)); } catch (err) {}
+        // price badges ("5⁹⁹" in a coloured circle) redrawn as a plain "5.99" and read on their own
+        let badges = null; try { const bp = badgePicture(img); if (bp) badges = await winOcr(bp); } catch (err) {}
         const all = (lines || []).concat((white || []).map((l) => ({ ...l, w: 1 })));
-        out({ img: img.toDataURL(), lines: (lines || white) ? all : null, ocrErr: (lines || white) ? "" : lastOcrErr, rect: r });
+        out({ img: img.toDataURL(), badges: (badges || []).map((l) => l.t), lines: (lines || white) ? all : null, ocrErr: (lines || white) ? "" : lastOcrErr, rect: r });
       }).catch(() => out({ fail: true, lassoFailed: true }));
     return;
   }
