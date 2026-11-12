@@ -391,6 +391,91 @@ ipcMain.on("scan", (e, id) => {
 
 // web pages (shop leaflets, help, imprint …) open INSIDE the app window: a web view placed where the app leaves room for it
 let pageView = null, pageShown = false, pageBase = "";
+// "Angebot picken": a script in the shown page (own isolated world, cannot be seen by the page) highlights offers under the
+// mouse and reads name, price and "valid until" from the clicked one; "lasso" lets you draw a frame (for leaflets that are images)
+let pickOn = false;
+const PICK_JS = `(() => {
+  const W = window; if (W.__hbPick) return W.__hbPick;
+  const CUR = "url(\\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34'%3E%3Ccircle cx='17' cy='17' r='15' fill='%231a7a5c' stroke='white' stroke-width='2'/%3E%3Cpath d='M9 11h2.5l2.2 9h8.2l1.8-6.5H12.4' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='14.5' cy='23.5' r='1.4' fill='white'/%3E%3Ccircle cx='21' cy='23.5' r='1.4' fill='white'/%3E%3C/svg%3E\\") 17 17, pointer";
+  const CROSS = "crosshair";
+  const st = document.createElement("style");
+  st.textContent = "html.hbpick,html.hbpick *{cursor:" + CUR + "!important}html.hblasso,html.hblasso *{cursor:" + CROSS + "!important;user-select:none!important}" +
+    ".hbpick-hov{outline:3px solid #1a7a5c!important;outline-offset:2px!important;box-shadow:0 10px 30px rgba(26,122,92,.35)!important;transition:outline-color .1s}" +
+    ".hbpick-done{animation:hbpickpop .45s ease-out}@keyframes hbpickpop{0%{transform:scale(1)}40%{transform:scale(.94)}100%{transform:scale(1)}}" +
+    "#hbpick-box{position:fixed;z-index:2147483647;border:2.5px dashed #1a7a5c;background:rgba(26,122,92,.08);border-radius:10px;pointer-events:none}";
+  const PR = /(\\d{1,4})\\s*[.,]\\s*(\\d{2})(?!\\d)|[-–]\\s*[.,]\\s*(\\d{2})(?!\\d)|(\\d{1,4})\\s*[.,]\\s*[-–]/;
+  const BAD = /^(uvp|statt|je |grundpreis|1 ?kg|100 ?g|1 ?l |\\d+ ?%|-?\\d+ ?%|ab |nur |aktion|angebot|neu|online|in den warenkorb|merken|details)/i;
+  const txt = (e) => (e && (e.innerText || e.textContent) || "").replace(/\\u00a0/g, " ").trim();
+  function cand(el) {
+    let e = el, best = null;
+    for (let i = 0; e && e !== document.body && i < 12; i++, e = e.parentElement) {
+      const t = txt(e); if (t.length > 700) break;
+      // a list of several products (each child with its own name and price): went too far up
+      if ([...e.children].filter((k) => { const kt = txt(k); return kt.length > 12 && PR.test(kt) && /[a-zäöüß]{4}/i.test(kt.replace(PR, "")); }).length >= 2) break;
+      if (PR.test(t)) { const r = e.getBoundingClientRect(); if (r.width > 60 && r.height > 40) { best = e; if (t.split(/\\n+/).filter((x) => /[a-zäöüß]{3}/i.test(x)).length >= 1 && r.height > 80) break; } }
+    }
+    return best;
+  }
+  function price(t) {
+    const m = t.match(PR); if (!m) return null;
+    if (m[1]) return Number(m[1] + "." + m[2]); if (m[3]) return Number("0." + m[3]); if (m[4]) return Number(m[4]); return null;
+  }
+  function read(c) {
+    const t = txt(c), lines = t.split(/\\n+/).map((x) => x.trim()).filter(Boolean);
+    let name = "";
+    const h = c.querySelector("h1,h2,h3,h4,h5,[class*=title i],[class*=name i],[class*=headline i],[itemprop=name]");
+    if (h && /[a-zäöüß]{3}/i.test(txt(h)) && txt(h).length < 90) name = txt(h).split(/\\n+/)[0];
+    if (!name) name = lines.filter((x) => /[a-zäöüß]{3}/i.test(x) && !PR.test(x) && !BAD.test(x) && x.length <= 80).sort((a, b) => b.length - a.length)[0] || "";
+    const u = t.match(/(?:bis|gültig bis)\\s*(?:[a-z]{2,10}\\.?,?\\s*)?(\\d{1,2})\\.(\\d{1,2})\\.?(\\d{2,4})?/i);
+    const r = c.getBoundingClientRect();
+    return { name: name.slice(0, 60), price: price(t), until: u ? { d: +u[1], m: +u[2], y: u[3] ? +u[3] : 0 } : null, rect: { x: r.left, y: r.top, w: r.width, h: r.height } };
+  }
+  let hov = null, mode = "", box = null, sx = 0, sy = 0, skip = false;
+  const send = (o) => console.log("__HBPICK__" + JSON.stringify(o));
+  function over(e) { if (mode !== "pick") return; const c = cand(e.target); if (c === hov) return; if (hov) hov.classList.remove("hbpick-hov"); hov = c; if (c) c.classList.add("hbpick-hov"); }
+  function stop(e) { if (!mode) return; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); }
+  function click(e) {
+    if (mode !== "pick") return; stop(e);
+    if (skip) { skip = false; return; }   // the click that ends drawing a frame
+    const c = cand(e.target);
+    if (!c) return send({ fail: true });
+    const r = read(c); c.classList.remove("hbpick-done"); void c.offsetWidth; c.classList.add("hbpick-done");
+    if (!r.price || !r.name) return send({ fail: true, partial: r });
+    send(r);
+  }
+  function down(e) { if (mode !== "lasso") return; stop(e); sx = e.clientX; sy = e.clientY; box = document.createElement("div"); box.id = "hbpick-box"; document.documentElement.appendChild(box); move(e); }
+  function move(e) { if (mode !== "lasso" || !box) return; stop(e); const x = Math.min(sx, e.clientX), y = Math.min(sy, e.clientY); Object.assign(box.style, { left: x + "px", top: y + "px", width: Math.abs(e.clientX - sx) + "px", height: Math.abs(e.clientY - sy) + "px" }); }
+  function up(e) { if (mode !== "lasso" || !box) return; stop(e); const r = box.getBoundingClientRect(); box.remove(); box = null;
+    skip = true; setTimeout(() => { skip = false; }, 400);
+    if (r.width < 20 || r.height < 14) return; set("pick"); send({ lasso: { x: r.left, y: r.top, w: r.width, h: r.height } }); }
+  function set(m) { mode = m; document.documentElement.classList.toggle("hbpick", m === "pick"); document.documentElement.classList.toggle("hblasso", m === "lasso"); if (!m && hov) { hov.classList.remove("hbpick-hov"); hov = null; } }
+  document.documentElement.appendChild(st);
+  ["click", "auxclick", "dblclick", "contextmenu"].forEach((t) => W.addEventListener(t, t === "click" ? click : stop, true));
+  W.addEventListener("mouseover", over, true);
+  W.addEventListener("pointerdown", (e) => { if (mode === "lasso") down(e); else if (mode) stop(e); }, true);
+  W.addEventListener("mousedown", (e) => { if (mode) stop(e); }, true);
+  W.addEventListener("pointermove", move, true);
+  W.addEventListener("pointerup", up, true);
+  W.__hbPick = { set };
+  return W.__hbPick;
+})()`;
+function pickSet(mode) {
+  if (!pageView) return; pickOn = !!mode;
+  pageView.webContents.executeJavaScriptInIsolatedWorld(1999, [{ code: PICK_JS + `.set(${JSON.stringify(mode || "")})` }]).catch(() => {});
+}
+ipcMain.on("pagePick", (e, mode) => pickSet(mode === "pick" || mode === "lasso" ? mode : ""));
+function pickResult(o) {
+  if (!win || win.isDestroyed()) return;
+  const out = (x) => win.webContents.executeJavaScript(`window.hbPagePick && window.hbPagePick(${JSON.stringify(x)})`).catch(() => {});
+  if (o && o.lasso && pageView) {
+    const r = o.lasso, z = pageView.webContents.getZoomFactor();
+    pageView.webContents.capturePage({ x: Math.max(0, Math.round(r.x * z)), y: Math.max(0, Math.round(r.y * z)), width: Math.round(r.w * z), height: Math.round(r.h * z) })
+      .then((img) => out({ img: img.toDataURL(), rect: r })).catch(() => out({ fail: true, lassoFailed: true }));
+    return;
+  }
+  out(o);
+}
+
 // the "base" of a web address: rewe.de for www.rewe.de, shop.rewe.de …; amazon.co.uk keeps three parts
 function baseOf(u) {
   try { const h = new URL(u).hostname.toLowerCase().replace(/\.$/, ""), p = h.split(".");
@@ -421,9 +506,12 @@ function pageMake() {
   wc.on("will-redirect", (e, url) => { if (!pageAllowed(url)) { e.preventDefault(); pageBlocked(); } });
   wc.on("will-frame-navigate", (e) => { if (e.isMainFrame && !pageAllowed(e.url)) { e.preventDefault(); pageBlocked(); } });
   ["did-start-loading", "did-stop-loading", "did-navigate", "did-navigate-in-page", "page-title-updated"].forEach((ev) => wc.on(ev, pageSend));
+  wc.on("did-navigate", () => { if (pickOn) setTimeout(() => pickSet("pick"), 400); });   // picking stays on after the page changed
+  wc.on("console-message", (...a) => { const ev = a[0], msg = ev && typeof ev.message === "string" ? ev.message : a[2];
+    if (typeof msg === "string" && msg.startsWith("__HBPICK__")) { try { pickResult(JSON.parse(msg.slice(10))); } catch (err) {} } });
   wc.on("before-input-event", (e, input) => {
     if (input.type !== "keyDown") return;
-    if (input.key === "Escape") { e.preventDefault(); win.webContents.executeJavaScript("window.hbPageClose && window.hbPageClose()").catch(() => {}); }
+    if (input.key === "Escape") { e.preventDefault(); win.webContents.executeJavaScript(pickOn ? "window.hbPagePickOff && window.hbPagePickOff()" : "window.hbPageClose && window.hbPageClose()").catch(() => {}); }
     else if (input.alt && input.key === "ArrowLeft") { e.preventDefault(); if (wc.canGoBack()) wc.goBack(); }
     else if (input.key === "F5") { e.preventDefault(); wc.reload(); }
   });
@@ -450,7 +538,7 @@ ipcMain.on("pageNav", (e, cmd) => {
   else if (cmd === "fwd" && wc.canGoForward()) wc.goForward();
   else if (cmd === "reload") wc.reload();
   else if (cmd === "external") { const u = wc.getURL(); if (/^https?:\/\//i.test(u)) shell.openExternal(u); }
-  else if (cmd === "close") { try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; pageBase = ""; wc.loadURL("about:blank").catch(() => {}); }
+  else if (cmd === "close") { pickOn = false; try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; pageBase = ""; wc.loadURL("about:blank").catch(() => {}); }
 });
 // older app versions still ask for "openInApp": same place
 ipcMain.on("openInApp", (e, url) => { if (/^https:\/\//i.test(url)) pageRequest(url); });

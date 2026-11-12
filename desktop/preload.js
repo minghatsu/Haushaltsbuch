@@ -22,6 +22,7 @@ contextBridge.exposeInMainWorld("AndroidBridge", {
   pageBounds: (r) => ipcRenderer.send("pageBounds", { x: +r.x || 0, y: +r.y || 0, w: +r.w || 0, h: +r.h || 0 }),
   pageShow: (on) => ipcRenderer.send("pageShow", !!on),
   pageNav: (cmd) => ipcRenderer.send("pageNav", String(cmd)),
+  pagePick: (mode) => ipcRenderer.send("pagePick", String(mode || "")),
   notifyState: () => "granted",
   notifyAsk: () => true,
   notifyNow: (id, title, text) => ipcRenderer.send("notifyNow", String(title), String(text)),

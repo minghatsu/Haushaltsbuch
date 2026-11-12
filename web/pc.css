@@ -488,3 +488,21 @@ html.pc .pcpage.embed{position:relative;inset:auto;z-index:auto;flex:1;border-ra
 html.pc .pcpage.embed .pcpbar{padding-top:5px;height:63px}
 html.pc .pcz{max-height:calc(100vh - 150px);overflow:auto;scrollbar-width:thin}
 html.pc .pcwdeal{margin:0 0 16px;padding-bottom:14px;border-bottom:1px dashed color-mix(in srgb,var(--fg) 15%,transparent)}html.pc .pcwdeal .ssh{margin-bottom:8px}html.pc .pcwdeal .pccp{margin-bottom:0}
+/* picking offers in the shop page */
+html.pc .pcpage:not(.embed) .pick{display:none}
+html.pc .pcpbar .pick{background:color-mix(in srgb,#1a7a5c 14%,transparent);color:#1a7a5c;white-space:nowrap}
+html.pc .pcpage.picking .pick{background:#1a7a5c;color:#fff;animation:pcpickglow 1.6s ease-in-out infinite}
+html.pc .pcpage.lassoing .pick{background:#c27c0e;color:#fff}
+@keyframes pcpickglow{0%,100%{box-shadow:0 0 0 0 #1a7a5c66}50%{box-shadow:0 0 0 6px #1a7a5c00}}
+html.pc .pcpage.picking .pcphole{outline:3px solid #1a7a5c;outline-offset:-3px}
+html.pc .pcpage.lassoing .pcphole{outline:3px dashed #c27c0e;outline-offset:-3px}
+html.pc .pcwpick{background:color-mix(in srgb,#1a7a5c 9%,var(--surface));border:2px solid #1a7a5c;border-radius:16px;padding:14px;margin-bottom:16px;display:flex;flex-direction:column;gap:8px;animation:pcpkin .35s cubic-bezier(.3,1.5,.5,1)}
+html.pc .pcwpick .ssh{margin:0}
+html.pc .pcwpick .pr2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+html.pc .pcwpick .pa{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+html.pc .pcwpick .pa .btn{padding-inline:12px}
+html.pc .pcwpick.busy{flex-direction:row;align-items:center;gap:12px;font-weight:700;color:#1a7a5c}
+html.pc .pcwpick .sp{width:22px;height:22px;border-radius:50%;border:3px solid #1a7a5c33;border-top-color:#1a7a5c;animation:pcpspin .8s linear infinite}
+@keyframes pcpkin{from{opacity:0;transform:translateY(-10px) scale(.96)}to{opacity:1;transform:none}}
+html.pc .pcfly2{position:fixed;z-index:95;background:var(--surface);color:var(--fg);font-weight:800;padding:10px 14px;border-radius:14px;box-shadow:0 16px 36px #13241b40;border:2px solid #1a7a5c;white-space:nowrap;pointer-events:none}
+html.pc .pcpage.picking .pcpbar .pick{background:#1a7a5c!important;color:#fff!important}html.pc .pcpage.lassoing .pcpbar .pick{background:#c27c0e!important;color:#fff!important}

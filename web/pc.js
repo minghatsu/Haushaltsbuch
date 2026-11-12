@@ -241,6 +241,16 @@ if (IS_PC){
     "Noch nichts gemerkt.":["Nothing saved yet.", "Henüz bir şey kaydedilmedi.", "Пока ничего не сохранено.", "Поки нічого не збережено.", "Jeszcze nic nie zapisano.", "لم يُحفظ شيء بعد.", "Nimic salvat încă."],
     "Vor":["Forward", "İleri", "Вперёд", "Вперед", "Dalej", "تقدّم", "Înainte"],
     "Neu laden":["Reload", "Yenile", "Обновить", "Оновити", "Odśwież", "إعادة التحميل", "Reîncarcă"],
+    "🛒 Angebot picken":["🛒 Pick offer", "🛒 Fırsat seç", "🛒 Выбрать акцию", "🛒 Вибрати акцію", "🛒 Wybierz ofertę", "🛒 اختر عرضًا", "🛒 Alege oferta"],
+    "✓ Picken an – Esc zum Beenden":["✓ Picking on – Esc to stop", "✓ Seçim açık – bitirmek için Esc", "✓ Выбор включён – Esc для выхода", "✓ Вибір увімкнено – Esc для виходу", "✓ Wybieranie wł. – Esc, aby zakończyć", "✓ الاختيار مفعّل – Esc للإنهاء", "✓ Alegere activă – Esc pentru oprire"],
+    "✎ Rahmen ziehen – Esc zum Beenden":["✎ Draw a frame – Esc to stop", "✎ Çerçeve çiz – bitirmek için Esc", "✎ Обведи рамкой – Esc для выхода", "✎ Обведи рамкою – Esc для виходу", "✎ Narysuj ramkę – Esc, aby zakończyć", "✎ ارسم إطارًا – Esc للإنهاء", "✎ Trage un chenar – Esc pentru oprire"],
+    "Klick auf ein Angebot – es kommt auf den Einkaufszettel":["Click an offer – it goes on the shopping list", "Bir fırsata tıkla – alışveriş listesine eklenir", "Нажми на акцию – она попадёт в список", "Натисни на акцію – вона потрапить у список", "Kliknij ofertę – trafi na listę zakupów", "انقر على عرض – سيُضاف إلى قائمة التسوق", "Apasă pe o ofertă – ajunge pe listă"],
+    "Hier ist kein Text zu lesen – zieh einen Rahmen um das Angebot":["No text to read here – draw a frame around the offer", "Burada okunacak metin yok – fırsatın etrafına çerçeve çiz", "Здесь нет текста – обведи акцию рамкой", "Тут немає тексту – обведи акцію рамкою", "Brak tekstu – narysuj ramkę wokół oferty", "لا يوجد نص هنا – ارسم إطارًا حول العرض", "Aici nu e text – trage un chenar în jurul ofertei"],
+    "Erkannt – stimmt das?":["Recognised – is this right?", "Tanındı – doğru mu?", "Распознано – верно?", "Розпізнано – правильно?", "Rozpoznano – zgadza się?", "تم التعرف – هل هذا صحيح؟", "Recunoscut – e corect?"],
+    "Text wird erkannt …":["Recognising text …", "Metin tanınıyor …", "Текст распознаётся …", "Текст розпізнається …", "Rozpoznawanie tekstu …", "جارٍ التعرف على النص …", "Se recunoaște textul …"],
+    "Verwerfen":["Discard", "Vazgeç", "Отбросить", "Відкинути", "Odrzuć", "تجاهل", "Renunță"],
+    "Als Angebot":["As offer", "Fırsat olarak", "Как акцию", "Як акцію", "Jako oferta", "كعرض", "Ca ofertă"],
+    "Auf den Zettel":["On the list", "Listeye", "В список", "У список", "Na listę", "إلى القائمة", "Pe listă"],
     "Einklappen":["Collapse","Daralt","Свернуть","Згорнути","Zwiń","طيّ","Restrânge"],
     "Aufklappen":["Expand","Genişlet","Развернуть","Розгорнути","Rozwiń","توسيع","Extinde"],
     "Ja":["Yes","Evet","Да","Так","Tak","نعم","Da"],"Nein":["No","Hayır","Нет","Ні","Nie","لا","Nu"],
@@ -916,7 +926,7 @@ if (IS_PC){
     const pool=all.filter(x=>mine.has(x.s)).length?all.filter(x=>mine.has(x.s)):all, best=pool.slice().sort((a,b)=>a.p-b.p)[0], worst=pool.slice().sort((a,b)=>b.p-a.p)[0];
     return {s:best.s, p:best.p, save:worst.p-best.p, deal:!!best.deal};
   }
-  const where=it=>{ if (it.s) return {s:it.s, p:null, manual:true}; return bestFor(it.n); };
+  const where=it=>{ if (it.s) return {s:it.s, p:it.p!=null?it.p:null, manual:true}; return bestFor(it.n); };
   function saveList(l){ S.settings.shoplist=l; saveSettings(); }
   function renderShopPC(){
     const ch=chosen();
@@ -962,6 +972,7 @@ if (IS_PC){
         <label class="ws" title="Laden ändern">${so?badge(so):`<span class="q">?</span>`}<select data-pczshop="${esc(it.id)}" aria-label="Laden für ${esc(it.n)}">${opts(it.s||"")}</select></label>
         <b class="p">${w&&w.p!=null?esc(eur(w.p)):""}</b><button class="del" data-pczdel="${esc(it.id)}" aria-label="${esc(it.n)} löschen">×</button></div>`; };
     const zet=`<div class="card pcz"><div class="pczh"><b>Einkaufszettel</b><span class="small muted">${open.length} offen${est?` · ca. ${esc(eur(est))}`:""}</span></div>
+${web && K.pick?(K.pick.busy?`<div class="pcwpick busy"><i class="sp"></i><span>Text wird erkannt …</span></div>`:`<div class="pcwpick"><div class="ssh">Erkannt – stimmt das?</div><input class="in" id="pkN" value="${esc(K.pick.n||"")}" placeholder="Was?" aria-label="Was"><div class="pr2"><input class="in" id="pkP" inputmode="decimal" value="${K.pick.p!=null?esc(numStr(K.pick.p)):""}" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pkU" value="${esc(K.pick.u||nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn" data-pkx>Verwerfen</button><button class="btn" data-pkok="deal">Als Angebot</button><button class="btn primary" data-pkok="zettel">Auf den Zettel</button></div></div>`):""}
 ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">· ${esc(sh.name)}</span></div><div class="pccp form"><input class="in" id="pcpDT" placeholder="Was? z. B. ${sh.cat==="kleid"?"Pullover":sh.cat==="elek"?"Kopfhörer":sh.cat==="moebel"?"Regal":"Kaffee 500 g"}" aria-label="Was"><div class="pr2"><input class="in" id="pcpDP" inputmode="decimal" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pcpDU" value="${esc(nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn primary" data-pcpdeal>Merken</button></div></div>
         ${deals.length?`<div class="small muted" style="margin:8px 2px 0">Schon gemerkt: ${deals.map(d=>esc(d.text)+(d.price?" "+esc(eur(d.price)):"")).join(" · ")}</div>`:""}</div>`:""}
       <div class="pczadd"><input class="in" id="pczIn" placeholder="Was brauchst du?" autocomplete="off" aria-label="Was brauchst du?"><button class="btn primary" data-pczadd aria-label="Hinzufügen">+</button></div>
@@ -1024,7 +1035,7 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
   const NB=()=>window.AndroidBridge && window.AndroidBridge.pageOpen ? window.AndroidBridge : null;
   const PG={open:false, url:"", shop:null, st:{}, ro:null, embed:false}; let lastView=UI.view;
   const pg=document.createElement("div"); pg.id="pcPage"; pg.className="pcpage"; pg.hidden=true;
-  pg.innerHTML=`<div class="pcpbar"><button data-pcpnav="back" title="Zurück" aria-label="Zurück">‹</button><button data-pcpnav="fwd" title="Vor" aria-label="Vor">›</button><button data-pcpnav="reload" class="rl" title="Neu laden" aria-label="Neu laden">⟳</button>
+  pg.innerHTML=`<div class="pcpbar"><button data-pcpnav="back" title="Zurück" aria-label="Zurück">‹</button><button data-pcpnav="fwd" title="Vor" aria-label="Vor">›</button><button data-pcpnav="reload" class="rl" title="Neu laden" aria-label="Neu laden">⟳</button><button data-pcpnav="pick" class="wide pick" title="Angebot anklicken – es kommt auf den Einkaufszettel">🛒 Angebot picken</button>
     <div class="url" title="Gesperrt: hier geht nur diese eine Webseite"><span class="lk">🔒</span><span class="u"></span><small class="t"></small><em class="only"></em></div><button data-pcpnav="close" class="x" title="Schließen (Esc)" aria-label="Schließen">✕</button></div>
     <div class="pcphole" id="pcpHole"><div class="pcpload"><i></i><span>Seite wird geladen …</span></div></div>`;
   const side=document.createElement("aside"); side.id="pcpSide"; side.className="pcpside"; side.hidden=true;
@@ -1062,32 +1073,74 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
     PG.url=url; PG.shop=sh; PG.st={url}; PG.open=true; bar(); pg.classList.remove("ready","withside"); side.hidden=true;
     const go=()=>{ const b=NB(); if (b) b.pageOpen(url, holeRect()); else if (window.pcPageDemo) window.pcPageDemo(url, holeRect()); };
     if (sh){ // a shop: the browser takes the place of the shop in the middle of the Einkauf page
-      PG.embed=true; pg.classList.add("embed"); pg.hidden=false; document.documentElement.classList.remove("pcpageon");
+      PG.embed=true; pg.classList.add("embed"); pg.hidden=false; if (PG.pick && !wasEmbed) pickToggle(false); document.documentElement.classList.remove("pcpageon");
       UI.shopSel=sh.id; UI.dealAdd=null; if (!(S.settings.shops||[]).includes(sh.id)) UI.shopCat="";
       if (UI.view!=="shop"){ UI.view="shop"; lastView="shop"; render(); window.scrollTo({top:0}); } else renderShopPC();
       if (wasEmbed || pcCalm()){ requestAnimationFrame(go); if (wasEmbed && !pcCalm()) pg.querySelector(".pcphole").animate([{opacity:.3},{opacity:1}],{duration:300}); return; }
       const w=$("pcsWeb"); if (w) w.animate([{opacity:0,transform:"translateY(14px) scale(.98)",filter:"blur(3px)"},{opacity:1,transform:"none",filter:"blur(0)"}],{duration:340,easing:E2});
       setTimeout(go, 320); return;
     }
-    PG.embed=false; pg.classList.remove("embed"); document.body.append(pg); pg.hidden=false; document.documentElement.classList.add("pcpageon");
+    if (PG.pick) pickToggle(false); PG.embed=false; pg.classList.remove("embed"); document.body.append(pg); pg.hidden=false; document.documentElement.classList.add("pcpageon");
     if (wasEmbed) renderShopPC();
     if (was || pcCalm()){ requestAnimationFrame(go); return; }
     pg.animate([{opacity:0,transform:"translateY(30px) scale(.97)"},{opacity:1,transform:"none"}],{duration:340,easing:E2});
     setTimeout(go, 330);
   }
-  function pageClose(){ if (!PG.open) return; PG.open=false; const b=NB(); if (b) b.pageNav("close"); else if (window.pcPageDemo) window.pcPageDemo(null);
+  function pageClose(){ if (!PG.open) return; if (PG.pick) pickToggle(false); K.pick=null; PG.open=false; const b=NB(); if (b) b.pageNav("close"); else if (window.pcPageDemo) window.pcPageDemo(null);
     if (PG.embed){ PG.embed=false; pg.hidden=true; document.body.append(pg); pg.classList.remove("embed"); if (UI.view==="shop"){ K.swap=true; renderShopPC(); } return; }
     const done=()=>{ pg.hidden=true; side.hidden=true; side.innerHTML=""; document.documentElement.classList.remove("pcpageon"); };
     if (pcCalm()) return done();
     pg.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateY(24px) scale(.97)"}],{duration:240,easing:"ease-in"}).onfinish=done;
     if (!side.hidden) side.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateX(50px)"}],{duration:220,easing:"ease-in",fill:"forwards"}); }
+  /* ---- "Angebot picken": click an offer in the page, it lands on the list; without readable text: draw a frame (text recognition) ---- */
+  PG.pick=false;
+  function pickToggle(on){ const b=NB(); PG.pick=!!on && !!(b && b.pagePick); if (on && !PG.pick){ toast("Dafür braucht es die neue PC-App – kommt mit dem nächsten Update"); return; }
+    if (b && b.pagePick) b.pagePick(PG.pick?"pick":""); pg.classList.toggle("picking", PG.pick); pg.classList.remove("lassoing");
+    const pb=pg.querySelector(".pick"); if (pb){ pb.textContent=PG.pick?"✓ Picken an – Esc zum Beenden":"🛒 Angebot picken"; if (!pcCalm()) pb.animate([{transform:"scale(.9)"},{transform:"scale(1.06)"},{transform:"none"}],{duration:320}); }
+    if (PG.pick) toast("Klick auf ein Angebot – es kommt auf den Einkaufszettel"); }
+  window.hbPagePickOff=()=>pickToggle(false);
+  const untilIso=u=>{ if (!u || !u.d || !u.m) return ""; const now=new Date(); let y=u.y?(u.y<100?2000+u.y:u.y):now.getFullYear(); if (!u.y && u.m<now.getMonth()+1-6) y++; return `${y}-${pad(u.m)}-${pad(u.d)}`; };
+  function fly(text, r){ if (pcCalm()) return; const h=$("pcpHole"), z=$("pczIn"); if (!h || !z) return; const hr=h.getBoundingClientRect(), zr=z.getBoundingClientRect();
+    const x0=Math.min(r?hr.left+r.x+r.w/2:hr.right-60, hr.right-40), y0=r?hr.top+r.y+r.h/2:hr.top+80, x1=zr.left+40, y1=zr.top+zr.height/2;
+    const f=document.createElement("div"); f.className="pcfly2"; f.textContent=text; document.body.appendChild(f);
+    f.animate([{left:x0+"px",top:y0+"px",transform:"translate(-50%,-50%) scale(1)",opacity:1},{left:(x0+x1)/2+"px",top:Math.min(y0,y1)-90+"px",transform:"translate(-50%,-50%) scale(.9) rotate(-6deg)",offset:.5},{left:x1+"px",top:y1+"px",transform:"translate(-50%,-50%) scale(.55)",opacity:.3}],{duration:850,easing:"cubic-bezier(.5,0,.3,1)",fill:"forwards"}).onfinish=()=>f.remove(); }
+  function addPicked(n, p, until, rect, asDeal){
+    if (!PG.shop) return; n=String(n||"").trim().slice(0,60); if (!n) return;
+    if (asDeal){ const keep=(S.settings.deals||[]).filter(x=>!x.until || x.until>=isoOf(new Date(Date.now()-14*864e5)));
+      S.settings.deals=[...keep, {id:newId(), shop:PG.shop.id, text:n, price:p>0?Math.round(p*100)/100:null, until:until||nextSat()}]; saveSettings(); toast(`Angebot gemerkt: ${n}`); return; }
+    const id=newId(); K.fresh=id; fly(n+(p?" · "+eur(p):""), rect);
+    setTimeout(()=>{ saveList([...list(), {id, n, done:false, s:PG.shop.id, ...(p>0?{p:Math.round(p*100)/100}:{}), ...(until?{u:until}:{})}]); toast(`Auf dem Zettel: ${n}${p?" · "+eur(p):""}`, ()=>saveList(list().filter(x=>x.id!==id)), "Rückgängig"); }, pcCalm()?0:700); }
+  function readOcr(lines){
+    const L=lines.map(l=>l.t).filter(Boolean), all=L.join("\n"), am=amountsIn(all);
+    const name=L.filter(t=>/[a-zäöüß]{3}/i.test(t) && !/\d+[.,]\d{2}/.test(t) && !/^(uvp|statt|je|grundpreis|ab|nur|aktion)/i.test(t)).sort((a,b)=>b.length-a.length)[0]||"";
+    const u=all.match(/bis\s*(?:[a-z]{2,10}\.?,?\s*)?(\d{1,2})\.(\d{1,2})\.?(\d{2,4})?/i);
+    return {n:name.slice(0,60), p:am.length?Math.min(...am):null, u:u?untilIso({d:+u[1],m:+u[2],y:u[3]?+u[3]:0}):""}; }
+  window.hbPagePick=async res=>{
+    if (!res || !PG.open) return;
+    if (res.fail){ if (res.lassoFailed){ toast("Das hat nicht geklappt – bitte noch einmal"); return; }
+      const b=NB(); if (b && b.pagePick) b.pagePick("lasso"); pg.classList.add("lassoing"); const pb=pg.querySelector(".pick"); if (pb) pb.textContent="✎ Rahmen ziehen – Esc zum Beenden";
+      toast("Hier ist kein Text zu lesen – zieh einen Rahmen um das Angebot"); return; }
+    if (res.img){ pg.classList.remove("lassoing"); const pb=pg.querySelector(".pick"); if (pb) pb.textContent="✓ Picken an – Esc zum Beenden";
+      K.pick={busy:true}; renderShopPC();
+      try { await loadTesseract(); const r=await window.Tesseract.recognize(res.img, "deu"); const lines=((r.data&&r.data.lines)||[]).map(l=>({t:l.text.trim()}));
+        K.pick=readOcr(lines); }
+      catch(e){ K.pick={n:"", p:null, u:""}; toast("Texterkennung ging nicht – bitte selbst eintragen"); }
+      K.pick.rect=res.rect; renderShopPC(); const el=$(K.pick.n?"pkP":"pkN"); if (el) el.focus(); return; }
+    if (res.name) addPicked(res.name, res.price, untilIso(res.until), res.rect);
+  };
+  root.addEventListener("click", e=>{
+    if (e.target.closest("[data-pkx]")){ K.pick=null; renderShopPC(); return; }
+    const ok=e.target.closest("[data-pkok]"); if (ok && K.pick){ const n=($("pkN").value||"").trim(), p=parseAmt($("pkP").value||""), u=$("pkU").value||"", r=K.pick.rect;
+      if (!n){ $("pkN").focus(); return; } K.pick=null; renderShopPC(); addPicked(n, p>0?p:null, u, r, ok.dataset.pkok==="deal"); }
+  });
+  root.addEventListener("keydown", e=>{ if (e.key==="Enter" && /^pk[NPU]$/.test(e.target.id||"")){ e.preventDefault(); const b=root.querySelector('[data-pkok="zettel"]'); if (b) b.click(); } });
   K.PG=PG; K.pg=pg; K.place=place; K.open=pageOpen;
   window.hbPageRequest=url=>pageOpen(url);
   window.hbPageBlocked=()=>{ toast("Andere Webseiten sind hier gesperrt"); const u=pg.querySelector(".url"); if (u && !pcCalm()) u.animate([{transform:"none"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(-3px)"},{transform:"none"}],{duration:320}); };
   window.hbPageClose=pageClose;
   openPage=url=>pageOpen(url);
   pg.addEventListener("click", e=>{ const n=e.target.closest("[data-pcpnav]"); if (!n) return; const c=n.dataset.pcpnav;
-    if (c==="close") return pageClose(); const b=NB(); if (b) b.pageNav(c); });
+    if (c==="close") return pageClose(); if (c==="pick") return pickToggle(!PG.pick); const b=NB(); if (b) b.pageNav(c); });
   side.addEventListener("click", e=>{
     if (e.target.closest("[data-pcpdeal]")){ const text=($("pcpDT").value||"").trim(), pr=parseAmt($("pcpDP").value||""), until=$("pcpDU").value||"";
       if (!text){ $("pcpDT").focus(); return; }
@@ -1100,7 +1153,7 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
   });
   function sideAdd(){ const i=$("pcpZ"), n=(i&&i.value||"").trim(); if (!n) return; i.value=""; saveList([...list(), {id:newId(), n:n.slice(0,60), done:false, s:PG.shop.id}]); }
   side.addEventListener("keydown", e=>{ if (e.key==="Enter"){ if (e.target.id==="pcpZ"){ e.preventDefault(); sideAdd(); } else if (/^pcpD/.test(e.target.id)){ e.preventDefault(); side.querySelector("[data-pcpdeal]").click(); } } });
-  document.addEventListener("keydown", e=>{ if (e.key==="Escape" && PG.open && !document.querySelector(".backdrop.show:not([hidden])")){ e.preventDefault(); pageClose(); } });
+  document.addEventListener("keydown", e=>{ if (e.key==="Escape" && PG.open && !document.querySelector(".backdrop.show:not([hidden])")){ e.preventDefault(); if (PG.pick) pickToggle(false); else pageClose(); } });
   addEventListener("resize", ()=>place());
   new ResizeObserver(()=>place()).observe($("pcpHole"));
   // the page view sits above the app: step aside while a sheet or dialog of the app is open
