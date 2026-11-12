@@ -1,7 +1,7 @@
 // Haushaltsbuch für Windows.
 // Zeigt dieselbe App wie auf dem Handy. Die Daten liegen auf dem PC und werden mit der Synology abgeglichen.
 // Neue App-Versionen holt sich die App selbst von der Synology (wie die Handy-App).
-const { app, BrowserWindow, protocol, ipcMain, shell, Menu, Tray, Notification, nativeImage } = require("electron");
+const { app, BrowserWindow, WebContentsView, protocol, ipcMain, shell, Menu, Tray, Notification, nativeImage } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
@@ -133,13 +133,13 @@ function createWindow() {
   });
   win.on("closed", () => { win = null; });
 
-  // links in the app open in the normal browser
+  // web links open inside the app window (the app shows them with its own bar); other schemes (mailto …) go to Windows
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (/^https?:\/\//i.test(url)) shell.openExternal(url);
+    if (/^https?:\/\//i.test(url)) pageRequest(url); else if (/^(mailto|tel):/i.test(url)) shell.openExternal(url);
     return { action: "deny" };
   });
   win.webContents.on("will-navigate", (e, url) => {
-    if (!url.startsWith("app://")) { e.preventDefault(); if (/^https?:\/\//i.test(url)) shell.openExternal(url); }
+    if (!url.startsWith("app://")) { e.preventDefault(); if (/^https?:\/\//i.test(url)) pageRequest(url); else if (/^(mailto|tel):/i.test(url)) shell.openExternal(url); }
   });
 
   // keyboard: F5 reload, Ctrl +/-/0 zoom, Alt+Left / mouse back = back
@@ -389,19 +389,55 @@ ipcMain.on("scan", (e, id) => {
     });
 });
 
-// shop offers etc.: a window of its own on top of the app (closes with Esc), instead of the normal browser
-let pageWin = null;
-ipcMain.on("openInApp", (e, url) => {
-  if (!/^https:\/\//i.test(url)) return;
-  if (pageWin && !pageWin.isDestroyed()) { pageWin.loadURL(url); pageWin.focus(); return; }
-  const b = win ? win.getBounds() : { x: undefined, y: undefined, width: 1100, height: 800 };
-  pageWin = new BrowserWindow({ parent: win, x: b.x + 40, y: b.y + 40, width: Math.max(800, b.width - 80), height: Math.max(600, b.height - 80),
-    title: "Angebote", autoHideMenuBar: true, backgroundColor: "#ffffff", webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false } });
-  pageWin.webContents.setWindowOpenHandler(({ url: u }) => { if (/^https?:\/\//i.test(u)) pageWin.loadURL(u); return { action: "deny" }; });
-  pageWin.webContents.on("before-input-event", (ev, input) => { if (input.type === "keyDown" && input.key === "Escape") pageWin.close(); });
-  pageWin.on("closed", () => { pageWin = null; });
-  pageWin.loadURL(url);
+// web pages (shop leaflets, help, imprint …) open INSIDE the app window: a web view placed where the app leaves room for it
+let pageView = null, pageShown = false;
+function pageRequest(url) { if (win && !win.isDestroyed()) win.webContents.executeJavaScript(`window.hbPageRequest && window.hbPageRequest(${JSON.stringify(String(url))})`).catch(() => shell.openExternal(url)); }
+function pageSend() {
+  if (!win || win.isDestroyed() || !pageView) return;
+  const wc = pageView.webContents, nh = wc.navigationHistory;
+  const st = { url: wc.getURL(), title: wc.getTitle(), back: nh ? nh.canGoBack() : wc.canGoBack(), fwd: nh ? nh.canGoForward() : wc.canGoForward(), loading: wc.isLoading() };
+  win.webContents.executeJavaScript(`window.hbPageState && window.hbPageState(${JSON.stringify(st)})`).catch(() => {});
+}
+function pageMake() {
+  if (pageView) return pageView;
+  pageView = new WebContentsView({ webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false, partition: "persist:seiten" } });
+  pageView.setBorderRadius && pageView.setBorderRadius(0);
+  const wc = pageView.webContents;
+  wc.setWindowOpenHandler(({ url }) => { if (/^https?:\/\//i.test(url)) wc.loadURL(url); return { action: "deny" }; });
+  wc.on("will-navigate", (e, url) => { if (!/^https?:\/\//i.test(url)) e.preventDefault(); });
+  ["did-start-loading", "did-stop-loading", "did-navigate", "did-navigate-in-page", "page-title-updated"].forEach((ev) => wc.on(ev, pageSend));
+  wc.on("before-input-event", (e, input) => {
+    if (input.type !== "keyDown") return;
+    if (input.key === "Escape") { e.preventDefault(); win.webContents.executeJavaScript("window.hbPageClose && window.hbPageClose()").catch(() => {}); }
+    else if (input.alt && input.key === "ArrowLeft") { e.preventDefault(); if (wc.canGoBack()) wc.goBack(); }
+    else if (input.key === "F5") { e.preventDefault(); wc.reload(); }
+  });
+  wc.on("render-process-gone", () => { try { win.contentView.removeChildView(pageView); } catch (e) {} pageView = null; pageShown = false; });
+  return pageView;
+}
+// the page tells us where (css pixels of the app) – converted with the app's zoom
+function pageRect(r) { const z = win.webContents.getZoomFactor(); return { x: Math.round(r.x * z), y: Math.round(r.y * z), width: Math.max(1, Math.round(r.w * z)), height: Math.max(1, Math.round(r.h * z)) }; }
+ipcMain.on("pageOpen", (e, url, r) => {
+  if (!win || !/^https?:\/\//i.test(url)) return;
+  const v = pageMake();
+  if (!pageShown) { win.contentView.addChildView(v); pageShown = true; }
+  if (r) v.setBounds(pageRect(r));
+  v.setVisible(true);
+  if (v.webContents.getURL() !== url) v.webContents.loadURL(url).catch(() => {});
+  pageSend();
 });
+ipcMain.on("pageBounds", (e, r) => { if (pageView && pageShown && r) pageView.setBounds(pageRect(r)); });
+ipcMain.on("pageShow", (e, on) => { if (pageView && pageShown) pageView.setVisible(!!on); });
+ipcMain.on("pageNav", (e, cmd) => {
+  if (!pageView) return; const wc = pageView.webContents;
+  if (cmd === "back" && wc.canGoBack()) wc.goBack();
+  else if (cmd === "fwd" && wc.canGoForward()) wc.goForward();
+  else if (cmd === "reload") wc.reload();
+  else if (cmd === "external") { const u = wc.getURL(); if (/^https?:\/\//i.test(u)) shell.openExternal(u); }
+  else if (cmd === "close") { try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; wc.loadURL("about:blank").catch(() => {}); }
+});
+// older app versions still ask for "openInApp": same place
+ipcMain.on("openInApp", (e, url) => { if (/^https:\/\//i.test(url)) pageRequest(url); });
 
 /* ---------- automatic start test for the build (npm run smoke) ---------- */
 function runSmokeTest() {

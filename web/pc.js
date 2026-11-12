@@ -233,6 +233,13 @@ if (IS_PC){
     "hier am günstigsten":["cheapest here", "en ucuz burada", "здесь дешевле всего", "тут найдешевше", "tu najtaniej", "الأرخص هنا", "cel mai ieftin aici"],
     "zuletzt nicht eingekauft":["not shopped here lately", "son zamanlarda alışveriş yok", "давно не покупал", "давно не купував", "ostatnio bez zakupów", "لم تتسوق هنا مؤخرًا", "fără cumpărături recente"],
     "{n} erledigte gelöscht":["{n} done deleted", "{n} biten silindi", "{n} выполненных удалено", "{n} виконаних видалено", "Usunięto {n} zrobionych", "تم حذف {n} من المنجز", "{n} bifate șterse"],
+    "Im Browser öffnen ↗":["Open in browser ↗", "Tarayıcıda aç ↗", "Открыть в браузере ↗", "Відкрити в браузері ↗", "Otwórz w przeglądarce ↗", "افتح في المتصفح ↗", "Deschide în browser ↗"],
+    "Seite wird geladen …":["Loading page …", "Sayfa yükleniyor …", "Страница загружается …", "Сторінка завантажується …", "Wczytywanie strony …", "جارٍ تحميل الصفحة …", "Se încarcă pagina …"],
+    "Prospekt ist offen":["Leaflet is open", "Broşür açık", "Проспект открыт", "Проспект відкрито", "Gazetka jest otwarta", "النشرة مفتوحة", "Catalogul este deschis"],
+    "Angebot aus dem Prospekt merken":["Save an offer from the leaflet", "Broşürden fırsat kaydet", "Запомнить акцию из проспекта", "Запам'ятати акцію з проспекту", "Zapisz ofertę z gazetki", "احفظ عرضًا من النشرة", "Salvează o ofertă din catalog"],
+    "Noch nichts gemerkt.":["Nothing saved yet.", "Henüz bir şey kaydedilmedi.", "Пока ничего не сохранено.", "Поки нічого не збережено.", "Jeszcze nic nie zapisano.", "لم يُحفظ شيء بعد.", "Nimic salvat încă."],
+    "Vor":["Forward", "İleri", "Вперёд", "Вперед", "Dalej", "تقدّم", "Înainte"],
+    "Neu laden":["Reload", "Yenile", "Обновить", "Оновити", "Odśwież", "إعادة التحميل", "Reîncarcă"],
     "Einklappen":["Collapse","Daralt","Свернуть","Згорнути","Zwiń","طيّ","Restrânge"],
     "Aufklappen":["Expand","Genişlet","Развернуть","Розгорнути","Rozwiń","توسيع","Extinde"],
     "Ja":["Yes","Evet","Да","Так","Tak","نعم","Da"],"Nein":["No","Hayır","Нет","Ні","Nie","لا","Nu"],
@@ -997,4 +1004,81 @@ if (IS_PC){
   });
   root.addEventListener("change", e=>{ const s=e.target.closest("[data-pczshop]"); if (!s) return; const id=s.dataset.pczshop, v=s.value; saveList(list().map(x=>x.id===id?(v?{...x, s:v}:(({s:_,...r})=>r)(x)):x)); });
   root.addEventListener("keydown", e=>{ if (e.target.id==="pczIn" && e.key==="Enter"){ e.preventDefault(); addItem(); } });
+  /* ---- web pages inside the app window: page on the left, for a shop a bar of its own on the right ---- */
+  const NB=()=>window.AndroidBridge && window.AndroidBridge.pageOpen ? window.AndroidBridge : null;
+  const PG={open:false, url:"", shop:null, st:{}, ro:null};
+  const pg=document.createElement("div"); pg.id="pcPage"; pg.className="pcpage"; pg.hidden=true;
+  pg.innerHTML=`<div class="pcpbar"><button data-pcpnav="back" title="Zurück" aria-label="Zurück">‹</button><button data-pcpnav="fwd" title="Vor" aria-label="Vor">›</button><button data-pcpnav="reload" class="rl" title="Neu laden" aria-label="Neu laden">⟳</button>
+    <div class="url"><span class="lk">🔒</span><span class="u"></span><small class="t"></small></div><button data-pcpnav="external" class="wide">Im Browser öffnen ↗</button><button data-pcpnav="close" class="x" title="Schließen (Esc)" aria-label="Schließen">✕</button></div>
+    <div class="pcphole" id="pcpHole"><div class="pcpload"><i></i><span>Seite wird geladen …</span></div></div>`;
+  const side=document.createElement("aside"); side.id="pcpSide"; side.className="pcpside"; side.hidden=true;
+  document.body.append(pg, side);
+  const host=u=>{ try { return new URL(u).hostname.replace(/^www\./,""); } catch(_){ return ""; } };
+  const shopOf=u=>{ const h=host(u); if (!h) return null; return SHOPS.find(sh=>sh.url===u) || SHOPS.find(sh=>{ const d=SHOP_DOMAINS[sh.id]||host(sh.url); return d && (h===d || h.endsWith("."+d)); }) || null; };
+  const holeRect=()=>{ const r=$("pcpHole").getBoundingClientRect(); return {x:r.left, y:r.top, w:r.width, h:r.height}; };
+  function bar(){ const st=PG.st||{}, u=st.url||PG.url;
+    pg.querySelector(".u").textContent=host(u)+(()=>{ try { const x=new URL(u); return (x.pathname+x.search).replace(/\/$/,""); } catch(_){ return ""; } })();
+    pg.querySelector(".t").textContent=st.title||"";
+    pg.querySelector('[data-pcpnav="back"]').disabled=!st.back; pg.querySelector('[data-pcpnav="fwd"]').disabled=!st.fwd;
+    pg.querySelector(".rl").classList.toggle("spin", !!st.loading); pg.classList.toggle("ready", st.loading===false); }
+  window.hbPageState=st=>{ PG.st=st||{}; bar(); };
+  function sideHtml(){
+    const sh=PG.shop; if (!sh) return "";
+    const deals=shopDeals(sh.id), mine=list().map(it=>({it, w:where(it)})).filter(x=>x.w && x.w.s===sh.id);
+    return `<div class="sh" style="--c:${sh.color}">${badge(sh)}<div><b>${esc(sh.name)}</b><small class="muted">Prospekt ist offen</small></div></div>
+      <div class="ssh">Angebot aus dem Prospekt merken</div>
+      <div class="pccp form"><input class="in" id="pcpDT" placeholder="Was? z. B. ${sh.cat==="kleid"?"Pullover":sh.cat==="elek"?"Kopfhörer":sh.cat==="moebel"?"Regal":"Kaffee 500 g"}" aria-label="Was"><div class="pr2"><input class="in" id="pcpDP" inputmode="decimal" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pcpDU" value="${esc(nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn primary" data-pcpdeal>Merken</button></div></div>
+      <div class="ssh">Einkaufszettel <span class="muted">· für ${esc(sh.name)}</span></div>
+      <div class="pczl">${mine.map(({it,w})=>`<div class="pczi ${it.done?"done":""}" data-pczi="${esc(it.id)}"><button class="cb" data-pczck="${esc(it.id)}" aria-label="${esc(it.n)}"></button><span class="n">${esc(it.n)}</span><b class="p">${w.p!=null?esc(eur(w.p)):""}</b><button class="del" data-pczdel="${esc(it.id)}" aria-label="${esc(it.n)} löschen">×</button></div>`).join("")}</div>
+      <div class="pczadd"><input class="in" id="pcpZ" placeholder="Was brauchst du bei ${esc(sh.name)}?" autocomplete="off" aria-label="Was brauchst du?"><button class="btn primary" data-pcpzadd aria-label="Hinzufügen">+</button></div>
+      <div class="ssh">Schon gemerkt bei ${esc(sh.name)}</div>
+      ${deals.length?deals.map(d=>`<div class="pccp"><div class="grow"><b>${esc(d.text)}</b><small class="muted">${d.until?`bis ${esc(shortDate(d.until))}`:"ohne Datum"}</small></div>${d.price?`<b class="pp">${esc(eur(d.price))}</b>`:""}<button class="x" data-dealdel="${esc(d.id)}" aria-label="Angebot löschen">×</button></div>`).join(""):`<div class="small muted">Noch nichts gemerkt.</div>`}`;
+  }
+  function sideRender(){ if (!PG.open || !PG.shop) return; const a=document.activeElement, id=a&&side.contains(a)?a.id:"", v=id?a.value:"", keep={};
+    ["pcpDT","pcpDP","pcpDU","pcpZ"].forEach(k=>{ const el=$(k); if (el) keep[k]=el.value; });
+    side.innerHTML=sideHtml(); for (const k in keep){ const el=$(k); if (el) el.value=keep[k]; } if (id){ const el=$(id); if (el){ el.focus(); el.value=v; } } }
+  const E2="cubic-bezier(.2,.8,.2,1)";
+  function place(){ const b=NB(); if (b && PG.open) b.pageBounds(holeRect()); }
+  function pageOpen(url, shop){
+    if (!NB() && !window.pcPageDemo){ window.open(url, "_blank", "noopener"); return; }
+    const sh=shop!==undefined?shop:shopOf(url), was=PG.open;
+    PG.url=url; PG.shop=sh; PG.st={url}; PG.open=true; bar();
+    pg.classList.toggle("withside", !!sh); pg.classList.remove("ready"); side.hidden=!sh; pg.hidden=false;
+    document.documentElement.classList.add("pcpageon"); if (sh) sideRender();
+    const go=()=>{ const b=NB(); if (b) b.pageOpen(url, holeRect()); else if (window.pcPageDemo) window.pcPageDemo(url, holeRect()); };
+    if (was || pcCalm()){ go(); return; }
+    pg.animate([{opacity:0,transform:"translateY(30px) scale(.97)"},{opacity:1,transform:"none"}],{duration:340,easing:E2});
+    if (sh){ side.animate([{opacity:0,transform:"translateX(60px)"},{opacity:1,transform:"none"}],{duration:420,delay:80,easing:E2,fill:"backwards"});
+      side.querySelectorAll(".ssh,.pccp,.pczi,.pczadd").forEach((el,i)=>el.animate([{opacity:0,transform:"translateY(8px)"},{opacity:1,transform:"none"}],{duration:300,delay:220+i*40,easing:E2,fill:"backwards"})); }
+    setTimeout(go, 330);
+  }
+  function pageClose(){ if (!PG.open) return; PG.open=false; const b=NB(); if (b) b.pageNav("close"); else if (window.pcPageDemo) window.pcPageDemo(null);
+    const done=()=>{ pg.hidden=true; side.hidden=true; side.innerHTML=""; document.documentElement.classList.remove("pcpageon"); };
+    if (pcCalm()) return done();
+    pg.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateY(24px) scale(.97)"}],{duration:240,easing:"ease-in"}).onfinish=done;
+    if (!side.hidden) side.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateX(50px)"}],{duration:220,easing:"ease-in",fill:"forwards"}); }
+  window.hbPageRequest=url=>pageOpen(url);
+  window.hbPageClose=pageClose;
+  openPage=url=>pageOpen(url);
+  pg.addEventListener("click", e=>{ const n=e.target.closest("[data-pcpnav]"); if (!n) return; const c=n.dataset.pcpnav;
+    if (c==="close") return pageClose(); const b=NB(); if (b) b.pageNav(c); if (c==="external" && !b) window.open(PG.st.url||PG.url,"_blank","noopener"); });
+  side.addEventListener("click", e=>{
+    if (e.target.closest("[data-pcpdeal]")){ const text=($("pcpDT").value||"").trim(), pr=parseAmt($("pcpDP").value||""), until=$("pcpDU").value||"";
+      if (!text){ $("pcpDT").focus(); return; }
+      const keep=(S.settings.deals||[]).filter(x=>!x.until || x.until>=isoOf(new Date(Date.now()-14*864e5)));
+      S.settings.deals=[...keep, {id:newId(), shop:PG.shop.id, text:text.slice(0,60), price:pr>0?Math.round(pr*100)/100:null, until}];
+      $("pcpDT").value=""; $("pcpDP").value=""; saveSettings(); sideRender(); toast("Angebot gemerkt"); return; }
+    if (e.target.closest("[data-pcpzadd]")) return sideAdd();
+    const ck=e.target.closest("[data-pczck]"); if (ck){ const id=ck.dataset.pczck; saveList(list().map(x=>x.id===id?{...x, done:!x.done}:x)); return; }
+    const dl=e.target.closest("[data-pczdel]"); if (dl){ const id=dl.dataset.pczdel, old=list(); saveList(old.filter(x=>x.id!==id)); toast("Gelöscht", ()=>saveList(old), "Rückgängig"); return; }
+  });
+  function sideAdd(){ const i=$("pcpZ"), n=(i&&i.value||"").trim(); if (!n) return; i.value=""; saveList([...list(), {id:newId(), n:n.slice(0,60), done:false, s:PG.shop.id}]); }
+  side.addEventListener("keydown", e=>{ if (e.key==="Enter"){ if (e.target.id==="pcpZ"){ e.preventDefault(); sideAdd(); } else if (/^pcpD/.test(e.target.id)){ e.preventDefault(); side.querySelector("[data-pcpdeal]").click(); } } });
+  document.addEventListener("keydown", e=>{ if (e.key==="Escape" && PG.open && !document.querySelector(".backdrop.show:not([hidden])")){ e.preventDefault(); pageClose(); } });
+  addEventListener("resize", ()=>place());
+  new ResizeObserver(()=>place()).observe($("pcpHole"));
+  // the page view sits above the app: step aside while a sheet or dialog of the app is open
+  new MutationObserver(()=>{ const b=NB(); if (!b || !PG.open) return; b.pageShow(!document.querySelector(".backdrop.show:not([hidden]),#pcFbBg:not([hidden])")); }).observe(document.body, {subtree:true, attributes:true, attributeFilter:["class","hidden"]});
+  // the side bar follows the data, the page closes when you go to another app page
+  const _r6=render; let lastView=UI.view; render=(...a)=>{ const x=_r6(...a); if (PG.open){ if (UI.view!==lastView) pageClose(); else sideRender(); } lastView=UI.view; return x; };
 }
