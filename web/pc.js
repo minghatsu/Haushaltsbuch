@@ -18,6 +18,7 @@ const PC_ANIM={busy:false, pass:false};
 function pcTiles(sec){
   if (!sec) return [];
   const out=[];
+  if (sec && sec.id==="v-fix" && sec.classList.contains("pcfcal")) return out;   // the fixed-cost calendar has its own entrance
   for (const c of sec.children){
     if (c.matches(".hcols,.cols")) c.querySelectorAll(":scope > .hcol > *, :scope > .col > *").forEach(x=>out.push(x));
     else out.push(c);
@@ -707,7 +708,7 @@ if (IS_PC){
     $("v-fix").innerHTML = `
       <div class="card pcfcalc"><div class="wd">${wk}</div><div class="grid">${cells}</div></div>
       <div class="pcfside">
-        <div class="card pcfsum"><span class="small muted">Im ${esc(mName)} fest verplant</span><div class="big">${esc(eur0(total))}</div>
+        <div class="card pcfsum"><span class="small muted">Im ${esc(mName)} fest verplant</span><div class="big" data-v="${total}">${esc(eur0(total))}</div>
           <div class="pcfring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${R}" class="bg"/><circle cx="60" cy="60" r="${R}" class="fg" style="stroke-dasharray:${C.toFixed(1)};stroke-dashoffset:${(C*(1-F.ring)).toFixed(1)}" data-to="${(C*(1-pct)).toFixed(1)}"/></svg>
             <div><b>${esc(eur0(pSum))}</b><span class="small muted">bezahlt · ${nPaid} von ${all.length}</span></div></div>
           <div class="kv"><span>Noch offen</span><b>${esc(eur0(total-pSum))}</b></div>
@@ -720,18 +721,34 @@ if (IS_PC){
     const calm=pcCalm(), root=$("v-fix");
     requestAnimationFrame(()=>{ const r=root.querySelector(".pcfring .fg"); if (r) r.style.strokeDashoffset=r.dataset.to; F.ring=pct;
       if (!calm){
-        if (F.first){ root.querySelectorAll(".pcfd:not(.x)").forEach((el,i)=>el.animate([{opacity:0,transform:"translateY(14px) scale(.96)"},{opacity:1,transform:"none"}],{duration:420,delay:Math.min(i,34)*14,easing:E,fill:"backwards"}));
-          root.querySelectorAll(".pcfgr .gb>i").forEach((el,i)=>el.animate([{width:"0%"},{width:el.style.width}],{duration:800,delay:200+i*70,easing:E,fill:"backwards"})); }
         const q=id=>root.querySelector(`[data-pcfid="${CSS.escape(id)}"]`);
         if (F.pop){ const el=q(F.pop); if (el){ el.animate(el.classList.contains("on")?[{transform:"scale(1)"},{transform:"scale(1.09)"},{transform:"scale(1)"}]:[{transform:"scale(.93)"},{transform:"scale(1)"}],{duration:380,easing:BO});
           const k=el.querySelector(".ck"); if (k && el.classList.contains("on")) k.animate([{transform:"scale(0) rotate(-90deg)"},{transform:"scale(1.25)"},{transform:"none"}],{duration:420,easing:BO}); } }
         if (F.fresh){ const el=q(F.fresh); if (el){ el.animate([{opacity:0,transform:"translateY(-26px) scale(.7)"},{opacity:1,transform:"translateY(3px) scale(1.03)",offset:.7},{opacity:1,transform:"none"}],{duration:520,easing:E});
           const cell=el.closest(".pcfd,.pcfnone"); if (cell) cell.animate([{boxShadow:"inset 0 0 0 2px #1a7a5c"},{boxShadow:"inset 0 0 0 2px #1a7a5c00"}],{duration:900,easing:"ease-out"}); } }
       }
-      F.pop=null; F.fresh=null; F.first=false; });
+      F.pop=null; F.fresh=null; });
   };
-  const _r5=render; render = (...a)=>{ if (UI.view!=="fix") F.first=true; return _r5(...a); };
   const root=$("v-fix");
+  // ---- coming into the page: the days flip down like calendar pages, week by week
+  function enter(){
+    if (pcCalm() || !root.classList.contains("pcfcal")) return;
+    const cells=[...root.querySelectorAll(".pcfd")], chips=[...root.querySelectorAll(".pcfcalc .pcfc")], side=[...root.querySelectorAll(".pcfside>*")];
+    const cal=root.querySelector(".pcfcalc"), cols=7;
+    const ring=root.querySelector(".pcfring .fg"), bars=[...root.querySelectorAll(".pcfgr .gb>i")], big=root.querySelector(".pcfsum .big");
+    if (cal) cal.animate([{opacity:0},{opacity:1}],{duration:260,easing:"ease-out",fill:"backwards"});
+    { // calendar pages flip down week by week
+      cells.forEach((el,i)=>{ const r=Math.floor(i/cols), c=i%cols; el.style.transformOrigin="50% 0";
+        el.animate([{opacity:0,transform:"perspective(700px) rotateX(-88deg)"},{opacity:1,transform:"perspective(700px) rotateX(8deg)",offset:.7},{opacity:1,transform:"none"}],{duration:560,delay:80+r*90+c*28,easing:E,fill:"backwards"}); });
+      chips.forEach(el=>{ const i=cells.indexOf(el.closest(".pcfd")), r=Math.floor(i/cols), c=i%cols;
+        el.animate([{opacity:0,transform:"translateY(-14px) scale(.85)"},{opacity:1,transform:"none"}],{duration:380,delay:420+r*90+c*28,easing:BO,fill:"backwards"}); });
+    }
+    side.forEach((el,i)=>el.animate([{opacity:0,transform:"translateX(70px)"},{opacity:1,transform:"none"}],{duration:520,delay:120+i*90,easing:E,fill:"backwards"}));
+    if (ring){ const C=ring.style.strokeDasharray; ring.animate([{strokeDashoffset:C},{strokeDashoffset:ring.dataset.to}],{duration:1100,delay:350,easing:E,fill:"backwards"}); }
+    bars.forEach((el,i)=>el.animate([{width:"0%"},{width:el.style.width}],{duration:800,delay:450+i*70,easing:E,fill:"backwards"}));
+    if (big){ const to=Number(big.dataset.v)||0, t0=performance.now()+250, txt=big.textContent; const step=t=>{ const k=Math.min(1,Math.max(0,(t-t0)/900)), e=1-Math.pow(1-k,3); big.textContent=eur0(to*e); if (k<1) requestAnimationFrame(step); else big.textContent=txt; }; requestAnimationFrame(step); }
+  }
+  new MutationObserver(()=>{ if (!root.hidden) requestAnimationFrame(enter); }).observe(root, {attributes:true, attributeFilter:["hidden"]});
   // ---- tick (pop) · pencil / plus open the editor instead of ticking
   root.addEventListener("click", e=>{
     const ed=e.target.closest("[data-pcfedit]"); if (ed){ e.stopPropagation(); e.preventDefault(); popEdit(ed.dataset.pcfedit, ed.closest(".pcfc")); return; }
