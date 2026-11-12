@@ -738,7 +738,6 @@ if (IS_PC){
     const nw=e.target.closest("[data-pcfnew]"); if (nw){ e.stopPropagation(); e.preventDefault(); popNew(+nw.dataset.pcfnew, nw); return; }
     const p=e.target.closest("[data-pay]"); if (p && !e.target.closest("[data-fxamt],#fxAmtIn")) F.pop=p.dataset.pay;
   }, true);
-  root.addEventListener("dblclick", e=>{ const d=e.target.closest(".pcfd:not(.x)"); if (d && !e.target.closest(".pcfc")) popNew(+d.dataset.pcfday, d.querySelector(".dh")); });
   root.addEventListener("contextmenu", e=>{ const c=e.target.closest(".pcfc"); if (c){ e.preventDefault(); popEdit(c.dataset.pcfid, c); } });
   root.addEventListener("keydown", e=>{ const p=e.target.closest && e.target.closest(".pcfc"); if (!p || e.target!==p) return;
     if (e.key==="Enter"||e.key===" "){ e.preventDefault(); p.click(); } else if (e.key==="F2"||e.key==="e"){ e.preventDefault(); popEdit(p.dataset.pcfid, p); } else if (e.key==="Delete"){ e.preventDefault(); popEdit(p.dataset.pcfid, p, true); } });
