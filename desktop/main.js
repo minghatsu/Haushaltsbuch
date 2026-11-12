@@ -426,21 +426,34 @@ const PICK_JS = String.raw`(() => {
     const it = c.querySelector("[itemprop=price]"); if (it) { const v = valOf(it); if (v) return v; }
     const els = [c, ...c.querySelectorAll("*")].filter((e) => { const t = txt(e); return t && t.length <= 24 && !UNIT.test(t) && !UNIT.test(txt(e.parentElement || e).length <= 40 ? txt(e.parentElement || e) : t); });
     let best = null;
-    for (const e of els) { const v = valOf(e); if (!(v > 0 && v < 100000)) continue; const f = maxFs(e), r = e.getBoundingClientRect();
-      if (!best || f > best.f + 0.5 || (Math.abs(f - best.f) <= 0.5 && r.width * r.height < best.a)) best = { v, f, a: r.width * r.height }; }
+    // prices only with the shop's app ("1.11 App") come second – the normal price counts
+    const app = (e) => { for (let x = e, i = 0; x && x !== c && i < 3; i++, x = x.parentElement) if (/\bapp\b/i.test(txt(x)) && txt(x).length < 30) return true; return false; };
+    for (const e of els) { const v = valOf(e); if (!(v > 0 && v < 100000)) continue; const f = maxFs(e), r = e.getBoundingClientRect(), a = app(e) ? 1 : 0;
+      if (!best || a < best.app || (a === best.app && (f > best.f + 0.5 || (Math.abs(f - best.f) <= 0.5 && r.width * r.height < best.a)))) best = { v, f, a: r.width * r.height, app: a }; }
     if (best) return best.v;
     const all = txt(c).split(/\n+/).filter((l) => !UNIT.test(l)).join("\n"); return price(all);
   }
   // the product name: the biggest text in the card that is not a price, a badge word or a detail line
   function cardName(c) {
     let best = null;
-    const consider = (t, f) => { t = String(t || "").replace(/\s+/g, " ").trim().replace(/[:\s,(]+$/, ""); if (t.length < 4 || t.length > 90 || PR.test(t) || UNIT.test(t) || BAD.test(t) || !nameish(t)) return;
+    const consider = (t, f) => { t = String(t || "").replace(/\s+/g, " ").trim().replace(/[:\s,(]+$/, "").replace(/^[^A-Za-zÄÖÜäöü0-9"„]+/, ""); if (t.length < 3 || t.length > 90 || PR.test(t) || UNIT.test(t) || BAD.test(t) || !nameish(t)) return;
       if (!best || f > best.f + 0.5) best = { t, f }; };
-    for (const e of c.querySelectorAll("h1,h2,h3,h4,h5,h6,[class*=title i],[class*=name i],[class*=headline i],[itemprop=name],p,span,div,a,strong,b")) {
-      if ([...e.children].some((k) => txt(k).length > 3 && txt(k) !== txt(e))) continue;   // only the innermost text
-      consider(txt(e).split(/\n+/)[0], fs(e)); }
-    if (!best) { const img = c.querySelector("img[alt]"); if (img) consider(img.alt, 0); }
-    return best ? best.t : "";
+    // every piece of text on its own (also text that sits loose next to other elements), with the size it is written in
+    const tw = document.createTreeWalker(c, NodeFilter.SHOW_TEXT);
+    for (let n = tw.nextNode(); n; n = tw.nextNode()) { const pe = n.parentElement; if (!pe) continue; const st = getComputedStyle(pe); if (st.display === "none" || st.visibility === "hidden") continue; consider(n.nodeValue, fs(pe)); }
+    if (!best) { let e = c; for (let i = 0; e && i < 3 && !best; i++, e = e.parentElement) { const img = e.querySelector("img[alt]"); if (img) consider(img.alt, 0); } }
+    return best ? best.t.replace(/\s+,/g, ",").replace(/(\.\.\.|…)$/, "").trim() : "";
+  }
+  // grows from the found text up to the whole tile of the offer: up to just below the list that holds several offers
+  const isList = (e) => [...e.children].filter((k) => { const kt = txt(k); return kt.length > 12 && hasPrice(k) && nameish(kt); }).length >= 2;
+  function whole(e) {
+    const vw = innerWidth * innerHeight;
+    while (e.parentElement && e.parentElement !== document.body && e.parentElement !== document.documentElement) {
+      const p = e.parentElement, r = p.getBoundingClientRect();
+      if (isList(p) || txt(p).length > 900 || r.width * r.height > vw * 0.6) break;
+      e = p;
+    }
+    return e;
   }
   function cand(el) {
     let e = el && el.nodeType === 1 ? el : el && el.parentElement, priceOnly = null;
@@ -450,7 +463,7 @@ const PICK_JS = String.raw`(() => {
       if ([...e.children].filter((k) => { const kt = txt(k); return kt.length > 12 && hasPrice(k) && nameish(kt); }).length >= 2) break;
       if (!hasPrice(e)) continue;
       const r = e.getBoundingClientRect(); if (r.width < 50 || r.height < 24) continue;
-      if (nameish(t)) return e;   // smallest box with a name and a price = the offer
+      if (nameish(t)) return whole(e);   // the offer – grown to its whole box (picture, badges and all)
       if (!priceOnly) priceOnly = e;
     }
     return priceOnly;
