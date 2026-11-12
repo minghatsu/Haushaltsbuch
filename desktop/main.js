@@ -395,7 +395,7 @@ ipcMain.on("scan", (e, id) => {
 });
 
 // web pages (shop leaflets, help, imprint …) open INSIDE the app window: a web view placed where the app leaves room for it
-let pageView = null, pageShown = false, pageBase = "";
+let pageView = null, pageShown = false, pageBase = "", pageFirst = false;
 // "Angebot picken": a script in the shown page highlights the offer under the mouse and reads name, price and "valid until"
 // from the clicked one (also inside embedded leaflet frames); "lasso" puts a see-through layer over the whole page to draw a frame
 // (for leaflets that are only pictures) – that part is photographed and read with the text recognition of Windows
@@ -617,7 +617,15 @@ function pageMake() {
   // locked to the site that was opened: links to other sites are blocked (no free surfing in the app)
   wc.setWindowOpenHandler(({ url }) => { if (pageAllowed(url)) wc.loadURL(url); else pageBlocked(); return { action: "deny" }; });
   wc.on("will-navigate", (e, url) => { if (!pageAllowed(url)) { e.preventDefault(); pageBlocked(); } });
-  wc.on("will-redirect", (e, url) => { if (!pageAllowed(url)) { e.preventDefault(); pageBlocked(); } });
+  // the shop's own start address may forward to its real site once (e.g. to another domain of the shop) – that one is then allowed
+  wc.on("will-redirect", (e, url) => { if (pageAllowed(url)) return; if (pageFirst && /^https:\/\//i.test(url)) { pageBase = baseOf(url); return; } e.preventDefault(); pageBlocked(); });
+  wc.on("did-stop-loading", () => { pageFirst = false; });
+  wc.on("did-fail-load", (e, code, desc, url, isMain) => {
+    if (!isMain || code === -3 || !win || win.isDestroyed()) return;   // -3 = stopped on purpose
+    pageView.setVisible(false);
+    win.webContents.executeJavaScript(`window.hbPageError && window.hbPageError(${JSON.stringify(String(desc || code))})`).catch(() => {});
+  });
+  wc.on("did-start-loading", () => { if (pageShown) pageView.setVisible(true); });
   wc.on("will-frame-navigate", (e) => { if (e.isMainFrame && !pageAllowed(e.url)) { e.preventDefault(); pageBlocked(); } });
   ["did-start-loading", "did-stop-loading", "did-navigate", "did-navigate-in-page", "page-title-updated"].forEach((ev) => wc.on(ev, pageSend));
   wc.on("did-navigate", () => { if (pickOn) setTimeout(() => pickSet(pickMode || "pick"), 400); });
@@ -637,7 +645,7 @@ function pageMake() {
 function pageRect(r) { const z = win.webContents.getZoomFactor(); return { x: Math.round(r.x * z), y: Math.round(r.y * z), width: Math.max(1, Math.round(r.w * z)), height: Math.max(1, Math.round(r.h * z)) }; }
 ipcMain.on("pageOpen", (e, url, r) => {
   if (!win || !/^https:\/\//i.test(url)) return;
-  pageBase = baseOf(url);   // only this site may be shown until the page is closed
+  pageBase = baseOf(url); pageFirst = true;   // only this site may be shown until the page is closed
   const v = pageMake();
   if (!pageShown) { win.contentView.addChildView(v); pageShown = true; }
   if (r) v.setBounds(pageRect(r));

@@ -251,6 +251,8 @@ if (IS_PC){
     "Nicht alles erkannt – bitte kurz ergänzen":["Not everything recognised – please complete","Her şey tanınmadı – lütfen tamamla","Распознано не всё – дополни, пожалуйста","Розпізнано не все – доповни, будь ласка","Nie wszystko rozpoznano – uzupełnij","لم يُتعرَّف على كل شيء – أكمل من فضلك","Nu s-a recunoscut tot – completează"],
     "✎ Rahmen ziehen":["✎ Draw frame","✎ Çerçeve çiz","✎ Обвести рамкой","✎ Обвести рамкою","✎ Narysuj ramkę","✎ ارسم إطارًا","✎ Trage chenar"],
     "Zieh einen Rahmen um das Angebot":["Draw a frame around the offer","Fırsatın etrafına çerçeve çiz","Обведи акцию рамкой","Обведи акцію рамкою","Narysuj ramkę wokół oferty","ارسم إطارًا حول العرض","Trage un chenar în jurul ofertei"],
+    "Die Seite lädt gerade nicht":["The page is not loading right now","Sayfa şu anda yüklenmiyor","Страница сейчас не загружается","Сторінка зараз не завантажується","Strona teraz się nie ładuje","الصفحة لا تُحمَّل حاليًا","Pagina nu se încarcă acum"],
+    "Noch einmal versuchen":["Try again","Tekrar dene","Попробовать снова","Спробувати ще раз","Spróbuj ponownie","حاول مرة أخرى","Încearcă din nou"],
     "Verwerfen":["Discard", "Vazgeç", "Отбросить", "Відкинути", "Odrzuć", "تجاهل", "Renunță"],
     "Als Angebot":["As offer", "Fırsat olarak", "Как акцию", "Як акцію", "Jako oferta", "كعرض", "Ca ofertă"],
     "Auf den Zettel":["On the list", "Listeye", "В список", "У список", "Na listę", "إلى القائمة", "Pe listă"],
@@ -942,7 +944,7 @@ if (IS_PC){
     const left=`<div class="card pcsl"><div class="pcslh"><b>Deine Läden</b><span class="small muted">Ø im Monat</span></div>
       ${cats.length>1?`<div class="pcscats">${[["","Alle"],...cats.map(c=>[c,CATN[c]||c])].map(([c,l])=>`<button class="${(UI.shopCat||"")===c?"on":""}" data-pcscat="${c}">${esc(l)}</button>`).join("")}</div>`:""}
       <div class="pcsls">${shown.map(sh=>{ const st=stats[sh.id]||{sum:0,count:0}, nd=shopDeals(sh.id).length, nz=W.filter(x=>!x.it.done && x.w && x.w.s===sh.id).length;
-        return `<button class="pcsli ${sh.id===UI.shopSel?"on":""}" data-pcshop="${sh.id}" style="--c:${sh.color}">${badge(sh)}<span class="tx"><b>${esc(sh.name)}</b><small>${esc(CATN[sh.cat]||"")}</small><i class="bar"><i style="width:${Math.round(st.sum/mx*100)}%"></i></i></span><span class="r"><b>${esc(eur0(st.sum/6))}</b>${nd||nz?`<small>${nd?`${ic("tag",12)}${nd}`:""}${nz?`${ic("list",12)}${nz}`:""}</small>`:""}</span></button>`; }).join("")}</div>
+        return `<button class="pcsli ${sh.id===UI.shopSel?"on":""}" data-pcshop="${sh.id}" style="--c:${sh.color}">${badge(sh)}<span class="pcstx"><b>${esc(sh.name)}</b><small>${esc(CATN[sh.cat]||"")}</small><i class="bar"><i style="width:${Math.round(st.sum/mx*100)}%"></i></i></span><span class="r"><b>${esc(eur0(st.sum/6))}</b>${nd||nz?`<small>${nd?`${ic("tag",12)}${nd}`:""}${nz?`${ic("list",12)}${nz}`:""}</small>`:""}</span></button>`; }).join("")}</div>
       <button class="pcsadd" data-go="more" data-scroll="shopEd">+ Läden auswählen</button></div>`;
     const sh=shopBy(UI.shopSel), st=stats[sh.id]||{sum:0,count:0,last:""};
     const deals=shopDeals(sh.id), prices=shopPrices(sh.id), name=n=>n.charAt(0).toUpperCase()+n.slice(1);
@@ -1047,12 +1049,16 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
   const shopOf=u=>{ const h=host(u); if (!h) return null; return SHOPS.find(sh=>sh.url===u) || SHOPS.find(sh=>{ const d=SHOP_DOMAINS[sh.id]||host(sh.url); return d && (h===d || h.endsWith("."+d)); }) || null; };
   const holeRect=()=>{ const r=$("pcpHole").getBoundingClientRect(); return {x:r.left, y:r.top, w:r.width, h:r.height}; };
   function bar(){ const st=PG.st||{}, u=st.url||PG.url;
+    if (st.loading && pg.classList.contains("failed")){ pg.classList.remove("failed"); const l=pg.querySelector(".pcpload"); if (l) l.innerHTML=`<i></i><span>Seite wird geladen …</span>`; }
     pg.querySelector(".u").textContent=host(u)+(()=>{ try { const x=new URL(u); return (x.pathname+x.search).replace(/\/$/,""); } catch(_){ return ""; } })();
     pg.querySelector(".t").textContent=st.title||"";
     pg.querySelector(".only").textContent=(()=>{ const h=host(PG.url).split("."); return h.length>1?"nur "+h.slice(-2).join("."):""; })();
     pg.querySelector('[data-pcpnav="back"]').disabled=!st.back; pg.querySelector('[data-pcpnav="fwd"]').disabled=!st.fwd;
     pg.querySelector(".rl").classList.toggle("spin", !!st.loading); pg.classList.toggle("ready", st.loading===false); }
   window.hbPageState=st=>{ PG.st=st||{}; bar(); };
+  // the page could not be loaded: say so in the browser area (the page view steps aside)
+  window.hbPageError=msg=>{ const l=pg.querySelector(".pcpload"); if (!l) return; pg.classList.remove("ready"); pg.classList.add("failed");
+    l.innerHTML=`<b>Die Seite lädt gerade nicht</b><span class="small muted">${esc(msg||"")}</span><button class="btn" data-pcpnav="reload">Noch einmal versuchen</button>`; };
   function sideHtml(){
     const sh=PG.shop; if (!sh) return "";
     const deals=shopDeals(sh.id), mine=list().map(it=>({it, w:where(it)})).filter(x=>x.w && x.w.s===sh.id);

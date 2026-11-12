@@ -371,9 +371,9 @@ html.pc .pcsli{display:flex;align-items:center;gap:12px;border:0;background:none
 html.pc .pcsli:hover{background:color-mix(in srgb,var(--fg) 5%,transparent);transform:translateX(3px)}
 html.pc .pcsli.on{background:var(--fg);color:var(--bg)}
 html.pc .pcsli>.ictile{flex:none}
-html.pc .pcsli .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-html.pc .pcsli .tx b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-html.pc .pcsli .tx small{font-size:11.5px;opacity:.6}
+html.pc .pcsli .pcstx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+html.pc .pcsli .pcstx b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.pc .pcsli .pcstx small{font-size:11.5px;opacity:.6}
 html.pc .pcsli .bar{display:block;height:5px;border-radius:3px;background:color-mix(in srgb,currentColor 12%,transparent);margin-top:4px}
 html.pc .pcsli .bar>i{display:block;height:100%;border-radius:3px;background:var(--c);transition:width .6s cubic-bezier(.2,.8,.2,1)}
 html.pc .pcsli .r{text-align:right;display:flex;flex-direction:column;gap:2px;white-space:nowrap}
@@ -442,7 +442,7 @@ html.pc .pczclr:hover{color:#c0392b}
 @media (prefers-reduced-motion:reduce){html.pc .pczi .n:after,html.pc .pcsli,html.pc .pcstop,html.pc .pccp{transition:none}}
 html.pc #v-shop.pcshop .grow{flex:1;min-width:0}
 html.pc .pcsli{justify-content:flex-start;min-height:0;height:auto;line-height:1.25}
-html.pc .pcsli .tx{align-items:flex-start;text-align:left}
+html.pc .pcsli .pcstx{align-items:flex-start;text-align:left}
 html.pc .pcsli .r small{display:flex;gap:6px;justify-content:flex-end;align-items:center}
 html.pc .pcsli .r small .i{opacity:.8}
 html.pc .pcsl{max-height:calc(100vh - 150px);overflow:auto;scrollbar-width:thin}
@@ -510,3 +510,4 @@ html.pc .pcpage:not(.embed) .lasso{display:none}
 html.pc .pcpbar .lasso{background:color-mix(in srgb,#c27c0e 14%,transparent);color:#a86a08;white-space:nowrap}
 html.pc .pcpage.lassoing .pcpbar .lasso{background:#c27c0e!important;color:#fff!important}
 html.pc .pcwpick .pkraw{margin:-4px 0 2px;line-height:1.35;word-break:break-word}
+html.pc .pcpage.failed .pcpload{opacity:1}html.pc .pcpload b{font-size:17px;color:var(--fg)}
