@@ -1,7 +1,7 @@
 // Haushaltsbuch für Windows.
 // Zeigt dieselbe App wie auf dem Handy. Die Daten liegen auf dem PC und werden mit der Synology abgeglichen.
 // Neue App-Versionen holt sich die App selbst von der Synology (wie die Handy-App).
-const { app, BrowserWindow, WebContentsView, protocol, ipcMain, shell, Menu, Tray, Notification, nativeImage } = require("electron");
+const { app, BrowserWindow, WebContentsView, protocol, ipcMain, shell, Menu, Tray, Notification, nativeImage, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
@@ -186,6 +186,32 @@ ipcMain.on("saveFileB64", (e, name, b64) => {
   } catch (err) {
     e.returnValue = false;
   }
+});
+
+// shopping list: a PDF to save, or the normal Windows print dialog (the page is rendered in a hidden window without scripts)
+ipcMain.on("printHtml", async (e, id, html, mode) => {
+  const done = (ok, msg) => { if (!e.sender.isDestroyed()) e.sender.executeJavaScript(`window.hbPrintDone && window.hbPrintDone(${JSON.stringify(String(id))}, ${ok ? "true" : "false"}, ${JSON.stringify(String(msg || ""))})`).catch(() => {}); };
+  let pw = null, file = "";
+  try {
+    pw = new BrowserWindow({ show: false, width: 900, height: 1200, webPreferences: { javascript: false, sandbox: true, contextIsolation: true, nodeIntegration: false } });
+    pw.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+    pw.webContents.on("will-navigate", (ev) => ev.preventDefault());
+    file = path.join(app.getPath("temp"), "finanz-mami-zettel-" + Date.now() + ".html");
+    fs.writeFileSync(file, String(html), "utf8");
+    await pw.loadFile(file);
+    if (mode === "pdf") {
+      const pdf = await pw.webContents.printToPDF({ pageSize: "A4", printBackground: true, margins: { marginType: "none" }, preferCSSPageSize: true });
+      const d = new Date(), name = `Einkaufszettel-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}.pdf`;
+      const r = await dialog.showSaveDialog(win, { title: "Einkaufszettel als PDF speichern", defaultPath: path.join(app.getPath("downloads"), name), filters: [{ name: "PDF", extensions: ["pdf"] }] });
+      if (r.canceled || !r.filePath) return done(false, "cancel");
+      fs.writeFileSync(r.filePath, pdf);
+      shell.openPath(r.filePath).catch(() => {});
+      done(true, r.filePath);
+    } else {
+      await new Promise((res) => pw.webContents.print({ silent: false, printBackground: true }, (ok, why) => { done(ok, ok ? "" : (why === "cancelled" ? "cancel" : why || "")); res(); }));
+    }
+  } catch (err) { done(false, String((err && err.message) || err)); }
+  finally { if (pw && !pw.isDestroyed()) pw.destroy(); if (file) { try { fs.unlinkSync(file); } catch (err) {} } }
 });
 
 ipcMain.on("autoBackup", (e, name, text, keep) => {

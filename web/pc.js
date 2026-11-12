@@ -952,7 +952,7 @@ if (IS_PC){
     const deals=shopDeals(sh.id), prices=shopPrices(sh.id), name=n=>n.charAt(0).toUpperCase()+n.slice(1);
     const recent=S.tx.filter(t=>t.kind==="ausgabe" && sh.re.test(nrm(t.note))).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
     const rmax=Math.max(1,...recent.map(t=>t.amount)), mine=W.filter(x=>x.w && x.w.s===sh.id);
-    const web=!!(K.pg && K.PG.open && K.PG.embed);
+    const canWeb=!!((window.AndroidBridge && window.AndroidBridge.pageOpen) || window.pcPageDemo), web=canWeb || !!(K.pg && K.PG.open && K.PG.embed);
     const det=web ? `<div class="card pcsweb" id="pcsWeb" style="--c:${sh.color}"></div>` : `<div class="card pcsd" style="--c:${sh.color};--k:${sh.ink||"#fff"}">
       <div class="pcsdh"><div class="lg">${badge(sh)}</div><div class="grow"><h2>${esc(sh.name)}</h2><span class="small muted">${esc(CATN[sh.cat]||"")} · ${st.count?`Ø ${esc(eur0(st.sum/6))} im Monat · ${st.count} Einkäufe in 6 Monaten${st.last?` · zuletzt am ${esc(shortDate(st.last))}`:""}`:"zuletzt nicht eingekauft"}</span></div>
         <button class="btn primary" data-openshop="${esc(sh.url)}">${ic("cart",16)} Prospekt</button></div>
@@ -978,17 +978,28 @@ if (IS_PC){
       return `<div class="pczi ${it.done?"done":""}" data-pczi="${esc(it.id)}"><button class="cb" data-pczck="${esc(it.id)}" aria-label="${esc(it.n)} ${it.done?"wieder offen":"erledigt"}"></button><span class="n">${esc(it.n)}</span>
         <label class="ws" title="Laden ändern">${so?badge(so):`<span class="q">?</span>`}<select data-pczshop="${esc(it.id)}" aria-label="Laden für ${esc(it.n)}">${opts(it.s||"")}</select></label>
         <b class="p">${w&&w.p!=null?esc(eur(w.p)):""}</b><button class="del" data-pczdel="${esc(it.id)}" aria-label="${esc(it.n)} löschen">×</button></div>`; };
-    const zet=`<div class="card pcz"><div class="pczh"><b>Einkaufszettel</b><span class="small muted">${open.length} offen${est?` · ca. ${esc(eur(est))}`:""}</span></div>
-${web && K.pick?(K.pick.busy?`<div class="pcwpick busy"><i class="sp"></i><span>Text wird erkannt …</span></div>`:`<div class="pcwpick"><div class="ssh">Erkannt – stimmt das?</div>${K.pick.raw?`<div class="small muted pkraw">Gelesen: ${esc(K.pick.raw)}</div>`:""}<input class="in" id="pkN" value="${esc(K.pick.n||"")}" placeholder="Was?" aria-label="Was"><div class="pr2"><input class="in" id="pkP" inputmode="decimal" value="${K.pick.p!=null?esc(Number(K.pick.p).toFixed(2).replace(".",",")):""}" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pkU" value="${esc(K.pick.u||nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn" data-pkx>Verwerfen</button><button class="btn" data-pkok="deal">Als Angebot</button><button class="btn primary" data-pkok="zettel">Auf den Zettel</button></div></div>`):""}
-${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">· ${esc(sh.name)}</span></div><div class="pccp form"><input class="in" id="pcpDT" placeholder="Was? z. B. ${sh.cat==="kleid"?"Pullover":sh.cat==="elek"?"Kopfhörer":sh.cat==="moebel"?"Regal":"Kaffee 500 g"}" aria-label="Was"><div class="pr2"><input class="in" id="pcpDP" inputmode="decimal" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pcpDU" value="${esc(nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn primary" data-pcpdeal>Merken</button></div></div>
-        ${deals.length?`<div class="small muted" style="margin:8px 2px 0">Schon gemerkt: ${deals.map(d=>esc(d.text)+(d.price?" "+esc(eur(d.price)):"")).join(" · ")}</div>`:""}</div>`:""}
+    const tab=UI.pczTab||"zettel", nd=deals.length;
+    const pickCard=`${web && K.pick?(K.pick.busy?`<div class="pcwpick busy"><i class="sp"></i><span>Text wird erkannt …</span></div>`:`<div class="pcwpick"><div class="ssh">Erkannt – stimmt das?</div>${K.pick.raw?`<div class="small muted pkraw">Gelesen: ${esc(K.pick.raw)}</div>`:""}<input class="in" id="pkN" value="${esc(K.pick.n||"")}" placeholder="Was?" aria-label="Was"><div class="pr2"><input class="in" id="pkP" inputmode="decimal" value="${K.pick.p!=null?esc(Number(K.pick.p).toFixed(2).replace(".",",")):""}" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pkU" value="${esc(K.pick.u||nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn" data-pkx>Verwerfen</button><button class="btn" data-pkok="deal">Als Angebot</button><button class="btn primary" data-pkok="zettel">Auf den Zettel</button></div></div>`):""}`;
+    const tabs=`<div class="pcztabs" role="tablist">${[["zettel","Zettel"],["deals",`Angebote${nd?` (${nd})`:""}`],["buys","Einkäufe"]].map(([k,l])=>`<button role="tab" data-pcztab="${k}" class="${tab===k?"on":""}" aria-selected="${tab===k}">${l}</button>`).join("")}</div>`;
+    const zBody=`<div class="pczact"><button class="btn primary" data-pczsend title="Der Zettel erscheint auf deinen gekoppelten Handys">📱 An Handys</button><button class="btn" data-pczpdf title="Als PDF speichern">📄 PDF</button><button class="btn" data-pczprint title="Drucken">🖨 Drucken</button></div>
       <div class="pczadd"><input class="in" id="pczIn" placeholder="Was brauchst du?" autocomplete="off" aria-label="Was brauchst du?"><button class="btn primary" data-pczadd aria-label="Hinzufügen">+</button></div>
       <div class="pczl">${open.map(row).join("")||`<div class="small muted pcze">Schreib auf, was du brauchst – die App sagt dir, wo es am günstigsten ist.</div>`}${done.length?`<div class="pczdone">${done.map(row).join("")}</div>`:""}</div>
       ${Object.keys(groups).length?`<div class="pcroute"><div class="ssh">So kaufst du am günstigsten${save>0.004?` <span class="pos">· spart ca. ${esc(eur(save))}</span>`:""}</div>
         ${Object.entries(groups).sort((a,b)=>(a[0]==="")-(b[0]==="") || b[1].length-a[1].length).map(([k,xs])=>{ const so=shopBy(k);
           return `<button class="pcstop" ${so?`data-pcshop="${k}"`:""} style="--c:${so?so.color:"#9aa"}">${so?badge(so):`<span class="q">?</span>`}<span class="grow"><b>${so?esc(so.name):"Laden offen"}</b><small class="muted">${xs.map(x=>esc(x.it.n)).join(", ")}</small></span>${sum(xs,x=>x.w&&x.w.p||0)?`<b>${esc(eur(sum(xs,x=>x.w&&x.w.p||0)))}</b>`:""}</button>`; }).join("")}</div>`:""}
       ${done.length?`<button class="pczclr" data-pczclr>Erledigte löschen (${done.length})</button>`:""}
-</div>`;
+`;
+    const dBody=`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">· ${esc(sh.name)}</span></div><div class="pccp form"><input class="in" id="pcpDT" placeholder="Was? z. B. ${sh.cat==="kleid"?"Pullover":sh.cat==="elek"?"Kopfhörer":sh.cat==="moebel"?"Regal":"Kaffee 500 g"}" aria-label="Was"><div class="pr2"><input class="in" id="pcpDP" inputmode="decimal" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pcpDU" value="${esc(nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn primary" data-pcpdeal>Merken</button></div></div></div>
+      <div class="ssh" style="margin-top:16px">Gemerkt bei ${esc(sh.name)}</div>
+      ${deals.map(d=>`<div class="pccp"><div class="grow"><b>${esc(d.text)}</b><small class="muted">${d.until?`bis ${esc(shortDate(d.until))}`:"ohne Datum"}</small></div>${d.price?`<b class="pp">${esc(eur(d.price))}</b>`:""}<button class="x" data-dealdel="${esc(d.id)}" aria-label="Angebot löschen">×</button></div>`).join("")||`<div class="small muted">Noch nichts gemerkt – pick ein Angebot im Prospekt oder trag es oben ein.</div>`}
+      ${mine.length?`<div class="ssh" style="margin-top:16px">Auf deinem Zettel</div>${mine.map(({it,w})=>`<div class="pczr ${it.done?"done":""}"><span>${esc(it.n)}</span>${w.p!=null?`<b>${esc(eur(w.p))}</b>`:""}</div>`).join("")}`:""}
+      ${prices.length?`<div class="ssh" style="margin-top:16px">Deine Preise hier <span class="muted">· aus Quittungen</span></div>
+        ${prices.map(x=>`<div class="pcpr"><span class="grow"><b>${esc(name(x.w))}</b>${x.best?`<small class="warn">bei ${esc((shopBy(x.best.s)||{name:x.best.s}).name)} ${esc(eur(x.best.p))}</small>`:x.cheapest?`<small class="pos">hier am günstigsten</small>`:""}</span><b>${esc(eur(x.e.p))}</b></div>`).join("")}`:""}`;
+    const bBody=`<div class="pczst">${badge(sh)}<span><b>${esc(sh.name)}</b><small class="muted">${st.count?`Ø ${esc(eur0(st.sum/6))} im Monat · ${st.count} Einkäufe in 6 Monaten${st.last?` · zuletzt am ${esc(shortDate(st.last))}`:""}`:"zuletzt nicht eingekauft"}</small></span></div>
+      ${recent.length?`<div class="pcbars">${recent.slice().reverse().map(t=>`<div><span class="v">${esc(eur0(t.amount))}</span><i style="height:${Math.max(6,Math.round(t.amount/rmax*100))}%"></i><small>${esc(shortDate(t.date))}</small></div>`).join("")}</div>
+        <div class="pczrl">${recent.map(t=>`<div class="pcpr"><span class="grow"><b>${esc(shortDate(t.date))}</b><small class="muted">${esc(t.cat||"")}${hasReceipt(t.id)?" · 📎 Bon":""}</small></span><b>${esc(eur(t.amount))}</b></div>`).join("")}</div>`
+        :`<div class="small muted">Hier hast du in letzter Zeit nichts gekauft.</div>`}`;
+    const zet=`<div class="card pcz">${pickCard}${tabs}<div class="pczh"><b>${tab==="zettel"?"Einkaufszettel":tab==="deals"?"Angebote":"Einkäufe"}</b><span class="small muted">${tab==="zettel"?`${open.length} offen${est?` · ca. ${esc(eur(est))}`:""}`:esc(sh.name)}</span></div>${tab==="zettel"?zBody:tab==="deals"?dBody:bBody}</div>`;
     root.classList.add("pcshop");
     const keep=document.activeElement && document.activeElement.id==="pczIn", val=keep?document.activeElement.value:"";
     const kept={}; ["pcpDT","pcpDP","pcpDU"].forEach(k=>{ const el=$(k); if (el) kept[k]=el.value; }); const fid=document.activeElement&&root.contains(document.activeElement)?document.activeElement.id:"";
@@ -996,6 +1007,9 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
     root.innerHTML=left+det+zet;
     for (const k in kept){ const el=$(k); if (el && kept[k]) el.value=kept[k]; } if (fid && /^pcpD/.test(fid) && $(fid)) $(fid).focus();
     if (web){ $("pcsWeb").appendChild(K.pg); requestAnimationFrame(()=>K.place()); }
+    // the browser is always open on the Einkauf page: the chosen shop's offers right away
+    if (canWeb && UI.view==="shop" && !root.hidden && document.visibilityState!=="hidden" && !(K.PG.open && K.PG.embed && K.PG.shop && K.PG.shop.id===sh.id))
+      requestAnimationFrame(()=>{ if (UI.view==="shop" && !(K.PG.open && K.PG.shop && K.PG.shop.id===sh.id)) K.open(sh.url, sh); });
     if (keep){ const i=$("pczIn"); i.value=val; i.focus(); }
     const calm=pcCalm();
     requestAnimationFrame(()=>{ if (calm) { K.fresh=null; K.swap=false; return; }
@@ -1015,10 +1029,15 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
       d.querySelectorAll(".pcbars i").forEach((el,i)=>el.animate([{transform:"scaleY(0)"},{transform:"none"}],{duration:700,delay:450+i*70,easing:BO,fill:"backwards"})); }
     const z=root.querySelector(".pcz"); if (z){ z.animate([{opacity:0,transform:"translateX(60px) rotate(2deg)"},{opacity:1,transform:"none"}],{duration:560,delay:200,easing:E,fill:"backwards"});
       z.querySelectorAll(".pczi").forEach((el,i)=>el.animate([{opacity:0,clipPath:"inset(0 100% 0 0)"},{opacity:1,clipPath:"inset(0 0 0 0)"}],{duration:420,delay:450+i*60,easing:"ease-out",fill:"backwards"})); } }
-  new MutationObserver(()=>{ if (!root.hidden) requestAnimationFrame(enter); }).observe(root, {attributes:true, attributeFilter:["hidden"]});
+  new MutationObserver(()=>{ if (!root.hidden){ requestAnimationFrame(enter); if (K.PG && !K.PG.open) renderShopPC(); } }).observe(root, {attributes:true, attributeFilter:["hidden"]});
+  document.addEventListener("visibilitychange", ()=>{ if (document.visibilityState==="visible" && UI.view==="shop" && K.PG && !K.PG.open) renderShopPC(); });
   async function addItem(){ const i=$("pczIn"); const n=(i&&i.value||"").trim(); if (!n) return; const id=newId(); K.fresh=id; i.value=""; saveList([...list(), {id, n:n.slice(0,60), done:false}]); }
   root.addEventListener("click", e=>{
     const c=e.target.closest("[data-pcscat]"); if (c){ UI.shopCat=c.dataset.pcscat; renderShopPC(); return; }
+    const tb=e.target.closest("[data-pcztab]"); if (tb){ UI.pczTab=tb.dataset.pcztab; renderShopPC(); return; }
+    if (e.target.closest("[data-pczsend]")){ zSend(); return; }
+    if (e.target.closest("[data-pczpdf]")){ zPrint("pdf"); return; }
+    if (e.target.closest("[data-pczprint]")){ zPrint("print"); return; }
     const s=e.target.closest("[data-pcshop]"); if (s){ if (K.pg && K.PG.open && K.PG.embed){ const o=shopBy(s.dataset.pcshop); if (o && o.id!==UI.shopSel) K.open(o.url, o); return; } if (UI.shopSel!==s.dataset.pcshop){ UI.shopSel=s.dataset.pcshop; UI.dealAdd=null; K.swap=true; renderShopPC(); } return; }
     if (e.target.closest("[data-pczadd]")){ addItem(); return; }
     const ck=e.target.closest("[data-pczck]"); if (ck){ const id=ck.dataset.pczck, row=ck.closest(".pczi");
@@ -1029,10 +1048,10 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
       if (row && !pcCalm()) row.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateX(60px)"}],{duration:240,easing:"ease-in"}).onfinish=go; else go(); return; }
     if (e.target.closest("[data-pczclr]")){ const old=list(), n=old.filter(x=>x.done).length; saveList(old.filter(x=>!x.done)); toast(`${n} erledigte gelöscht`, ()=>saveList(old), "Rückgängig"); return; }
   });
-  function webDeal(){ const t=$("pcpDT"); if (!t || !K.PG || !K.PG.shop) return; const text=(t.value||"").trim(), pr=parseAmt($("pcpDP").value||""), until=$("pcpDU").value||"";
+  function webDeal(){ const t=$("pcpDT"), wsh=(K.PG&&K.PG.shop)||shopBy(UI.shopSel); if (!t || !wsh) return; const text=(t.value||"").trim(), pr=parseAmt($("pcpDP").value||""), until=$("pcpDU").value||"";
     if (!text){ t.focus(); return; }
     const keep=(S.settings.deals||[]).filter(x=>!x.until || x.until>=isoOf(new Date(Date.now()-14*864e5)));
-    S.settings.deals=[...keep, {id:newId(), shop:K.PG.shop.id, text:text.slice(0,60), price:pr>0?Math.round(pr*100)/100:null, until}];
+    S.settings.deals=[...keep, {id:newId(), shop:wsh.id, text:text.slice(0,60), price:pr>0?Math.round(pr*100)/100:null, until}];
     t.value=""; $("pcpDP").value=""; saveSettings(); toast("Angebot gemerkt"); }
   root.addEventListener("click", e=>{ if (e.target.closest("[data-pcpdeal]")) webDeal(); });
   root.addEventListener("keydown", e=>{ if (e.key==="Enter" && /^pcpD/.test(e.target.id||"")){ e.preventDefault(); webDeal(); } });
@@ -1195,7 +1214,7 @@ ${web?`<div class="pcwdeal"><div class="ssh">Angebot merken <span class="muted">
   });
   function sideAdd(){ const i=$("pcpZ"), n=(i&&i.value||"").trim(); if (!n) return; i.value=""; saveList([...list(), {id:newId(), n:n.slice(0,60), done:false, s:PG.shop.id}]); }
   side.addEventListener("keydown", e=>{ if (e.key==="Enter"){ if (e.target.id==="pcpZ"){ e.preventDefault(); sideAdd(); } else if (/^pcpD/.test(e.target.id)){ e.preventDefault(); side.querySelector("[data-pcpdeal]").click(); } } });
-  document.addEventListener("keydown", e=>{ if (e.key==="Escape" && PG.open && !document.querySelector(".backdrop.show:not([hidden])")){ e.preventDefault(); if (PG.pick) pickToggle(false); else pageClose(); } });
+  document.addEventListener("keydown", e=>{ if (e.key==="Escape" && PG.open && !document.querySelector(".backdrop.show:not([hidden])")){ e.preventDefault(); if (PG.pick) pickToggle(false); else if (!PG.embed) pageClose(); } });
   addEventListener("resize", ()=>place());
   new ResizeObserver(()=>place()).observe($("pcpHole"));
   // the page view sits above the app: step aside while a sheet or dialog of the app is open

@@ -565,3 +565,12 @@ html.pc .pcabox b{font-size:18px}
 @keyframes pcabarup{from{transform:scaleY(0)}}
 html.pc .pcana .pcabg .b{animation:pcabarup .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*35ms)}
 @media (max-width:1350px){ html.pc .pcana{grid-template-columns:1fr 1fr} html.pc .pcana>.pcac:last-child{grid-column:1/-1} }
+/* ---------- Einkauf: browser always open, list column with tabs ---------- */
+html.pc .pcpage.embed [data-pcpnav="close"]{display:none}
+html.pc .pcztabs{display:flex;background:color-mix(in srgb,var(--fg) 7%,transparent);border-radius:12px;padding:4px;margin:0 0 14px}
+html.pc .pcztabs button{flex:1;border:0;background:none;padding:9px 6px;border-radius:9px;font:inherit;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer;justify-content:center}
+html.pc .pcztabs button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+html.pc .pczact{display:flex;gap:8px;margin:0 0 12px}
+html.pc .pczact .btn{flex:1;justify-content:center;padding:11px 6px;font-size:14px;white-space:nowrap}
+html.pc .pczst{display:flex;align-items:center;gap:12px;margin-bottom:12px}html.pc .pczst span{display:flex;flex-direction:column}
+html.pc .pczrl{margin-top:12px}
