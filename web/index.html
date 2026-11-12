@@ -3831,43 +3831,43 @@ document.addEventListener("change", e=>{
 const SHOPS = [
   {cat:"disc", id:"penny",    name:"Penny",     re:/\bpenny\b/,                 color:"#CD1414", url:"https://www.penny.de/angebote"},
   {cat:"super", id:"rewe",     name:"REWE",      re:/\brewe\b/,                  color:"#CC071E", url:"https://www.rewe.de/angebote/"},
-  {cat:"super", id:"edeka",    name:"EDEKA",     re:/\bedeka\b/,                 color:"#1F4B9C", url:"https://www.edeka.de/eh/angebote.jsp"},
+  {cat:"super", id:"edeka",    name:"EDEKA",     re:/\bedeka\b/,                 color:"#1F4B9C", url:"https://www.edeka.de/angebote/"},
   {cat:"disc", id:"aldinord", name:"Aldi Nord", re:/\baldi ?nord\b/,            color:"#00549F", url:"https://www.aldi-nord.de/angebote.html"},
-  {cat:"disc", id:"aldi",     name:"Aldi Süd",  re:/\baldi\b/,                  color:"#00005F", url:"https://www.aldi-sued.de/de/angebote.html"},
-  {cat:"disc", id:"lidl",     name:"Lidl",      re:/\blidl\b/,                  color:"#0050AA", url:"https://www.lidl.de/"},
-  {cat:"super", id:"kaufland", name:"Kaufland",  re:/\bkaufland\b/,              color:"#E10915", url:"https://filiale.kaufland.de/angebote/aktuelle-woche.html"},
+  {cat:"disc", id:"aldi",     name:"Aldi Süd",  re:/\baldi\b/,                  color:"#00005F", url:"https://www.aldi-sued.de/angebote"},
+  {cat:"disc", id:"lidl",     name:"Lidl",      re:/\blidl\b/,                  color:"#0050AA", url:"https://www.lidl.de/c/online-prospekte/s10005610"},
+  {cat:"super", id:"kaufland", name:"Kaufland",  re:/\bkaufland\b/,              color:"#E10915", url:"https://filiale.kaufland.de/angebote/uebersicht.html"},
   {cat:"disc", id:"netto",    name:"Netto",     re:/\bnetto marken|\bnetto\b/,  color:"#FFD400", ink:"#1A1A1A", url:"https://www.netto-online.de/filialangebote"},
-  {cat:"drog", id:"rossmann", name:"Rossmann",  re:/\brossmann\b/,              color:"#C3002D", url:"https://www.rossmann.de/de/angebote"},
+  {cat:"drog", id:"rossmann", name:"Rossmann",  re:/\brossmann\b/,              color:"#C3002D", url:"https://www.rossmann.de/de/angebote/m/angebote"},
   {cat:"drog", id:"dm",       name:"dm",        re:/\bdm\b(?!\s*[0-9])|dm-drogerie|dm drogerie/, color:"#002878", url:"https://www.dm.de/"},
   {cat:"disc", id:"norma",    name:"Norma",     re:/\bnorma\b/,                 color:"#E3000F", url:"https://www.norma-online.de/de/angebote/"},
   {cat:"super", id:"globus",   name:"Globus",    re:/\bglobus\b/,                color:"#00843D", url:"https://www.globus.de/angebote/"}
   ,{cat:"super", id:"hit", name:"HIT", re:/\bhit markt|\bhit\b/, color:"#E2001A", url:"https://www.hit.de/angebote"}
   ,{cat:"super", id:"tegut", name:"tegut", re:/\btegut\b/, color:"#E2001A", url:"https://www.tegut.com/angebote-produkte/angebote.html"}
-  ,{cat:"drog", id:"mueller", name:"Müller", re:/\bmüller\b|\bmueller\b/, color:"#F07D00", url:"https://www.mueller.de/angebote/"}
-  ,{cat:"kleid", id:"hm", name:"H&M", re:/\bh ?& ?m\b|\bh und m\b|hennes/, color:"#E50010", url:"https://www2.hm.com/de_de/sale.html"}
+  ,{cat:"drog", id:"mueller", name:"Müller", re:/\bmüller\b|\bmueller\b/, color:"#F07D00", url:"https://www.mueller.de/prospekte/"}
+  ,{cat:"kleid", id:"hm", name:"H&M", re:/\bh ?& ?m\b|\bh und m\b|hennes/, color:"#E50010", url:"https://www2.hm.com/de_de/index.html"}
   ,{cat:"kleid", id:"zara", name:"Zara", re:/\bzara\b/, color:"#111111", url:"https://www.zara.com/de/"}
   ,{cat:"kleid", id:"cunda", name:"C&A", re:/\bc ?& ?a\b|\bc und a\b/, color:"#004B93", url:"https://www.c-and-a.com/de/de/shop/sale"}
   ,{cat:"kleid", id:"primark", name:"Primark", re:/\bprimark\b/, color:"#0DB2E3", url:"https://www.primark.com/de-de"}
-  ,{cat:"kleid", id:"kik", name:"KiK", re:/\bkik\b/, color:"#E30613", url:"https://www.kik.de/angebote"}
+  ,{cat:"kleid", id:"kik", name:"KiK", re:/\bkik\b/, color:"#E30613", url:"https://www.kik.de/c/s/sale"}
   ,{cat:"kleid", id:"takko", name:"Takko", re:/\btakko\b/, color:"#C8102E", url:"https://www.takko.com/de-de/sale/"}
   ,{cat:"kleid", id:"newyorker", name:"New Yorker", re:/\bnew yorker\b/, color:"#1A1A1A", url:"https://www.newyorker.de/"}
-  ,{cat:"kleid", id:"tkmaxx", name:"TK Maxx", re:/\btk ?maxx\b/, color:"#C8102E", url:"https://www.tkmaxx.de/"}
-  ,{cat:"kleid", id:"deichmann", name:"Deichmann", re:/\bdeichmann\b/, color:"#00843D", url:"https://www.deichmann.com/de-de/sale"}
-  ,{cat:"elek", id:"mediamarkt", name:"MediaMarkt", re:/media ?markt/, color:"#DF0000", url:"https://www.mediamarkt.de/de/campaign/angebote"}
-  ,{cat:"elek", id:"saturn", name:"Saturn", re:/\bsaturn\b/, color:"#F28B00", url:"https://www.saturn.de/de/campaign/angebote"}
-  ,{cat:"elek", id:"expert", name:"expert", re:/\bexpert\b/, color:"#E2001A", url:"https://www.expert.de/angebote"}
+  ,{cat:"kleid", id:"tkmaxx", name:"TK Maxx", re:/\btk ?maxx\b/, color:"#C8102E", url:"https://www.tkmaxx.com/de/de/sale/c/35000000"}
+  ,{cat:"kleid", id:"deichmann", name:"Deichmann", re:/\bdeichmann\b/, color:"#00843D", url:"https://www.deichmann.com/de-de/c/sale-477"}
+  ,{cat:"elek", id:"mediamarkt", name:"MediaMarkt", re:/media ?markt/, color:"#DF0000", url:"https://www.mediamarkt.de/de/campaign/angebote-aktionen"}
+  ,{cat:"elek", id:"saturn", name:"Saturn", re:/\bsaturn\b/, color:"#F28B00", url:"https://www.saturn.de/de/campaign/angebote-aktionen"}
+  ,{cat:"elek", id:"expert", name:"expert", re:/\bexpert\b/, color:"#E2001A", url:"https://www.expert.de/"}
   ,{cat:"bau", id:"obi", name:"OBI", re:/\bobi\b/, color:"#FF7E21", url:"https://www.obi.de/angebote"}
-  ,{cat:"bau", id:"hornbach", name:"Hornbach", re:/\bhornbach\b/, color:"#F7A600", ink:"#1A1A1A", url:"https://www.hornbach.de/angebote/"}
-  ,{cat:"bau", id:"bauhaus", name:"Bauhaus", re:/\bbauhaus\b/, color:"#E30613", url:"https://www.bauhaus.info/angebote"}
-  ,{cat:"bau", id:"toom", name:"toom", re:/\btoom\b/, color:"#C7003C", url:"https://toom.de/angebote"}
+  ,{cat:"bau", id:"hornbach", name:"Hornbach", re:/\bhornbach\b/, color:"#F7A600", ink:"#1A1A1A", url:"https://www.hornbach.de/aktuelles/prospekte-und-kataloge/"}
+  ,{cat:"bau", id:"bauhaus", name:"Bauhaus", re:/\bbauhaus\b/, color:"#E30613", url:"https://www.bauhaus.info/ad/angebote"}
+  ,{cat:"bau", id:"toom", name:"toom", re:/\btoom\b/, color:"#C7003C", url:"https://toom.de/angebote-aktionen/"}
   ,{cat:"moebel", id:"ikea", name:"IKEA", re:/\bikea\b/, color:"#0058A3", url:"https://www.ikea.com/de/de/offers/"}
-  ,{cat:"moebel", id:"jysk", name:"JYSK", re:/\bjysk\b/, color:"#1B4F9C", url:"https://jysk.de/angebote"}
-  ,{cat:"moebel", id:"poco", name:"POCO", re:/\bpoco\b/, color:"#E3000F", url:"https://www.poco.de/angebote"}
+  ,{cat:"moebel", id:"jysk", name:"JYSK", re:/\bjysk\b/, color:"#1B4F9C", url:"https://jysk.de/aktion"}
+  ,{cat:"moebel", id:"poco", name:"POCO", re:/\bpoco\b/, color:"#E3000F", url:"https://www.poco.de/k/sale"}
   ,{cat:"moebel", id:"action", name:"Action", re:/\baction\b/, color:"#0E4C92", url:"https://www.action.com/de-de/wochenangebote/"}
-  ,{cat:"moebel", id:"tedi", name:"TEDi", re:/\btedi\b/, color:"#E2001A", url:"https://www.tedi.com/de/angebote"}
-  ,{cat:"tier", id:"fressnapf", name:"Fressnapf", re:/\bfressnapf\b/, color:"#00843D", url:"https://www.fressnapf.de/angebote/"}
+  ,{cat:"moebel", id:"tedi", name:"TEDi", re:/\btedi\b/, color:"#E2001A", url:"https://www.tedi.com/prospekt"}
+  ,{cat:"tier", id:"fressnapf", name:"Fressnapf", re:/\bfressnapf\b/, color:"#00843D", url:"https://www.fressnapf.de/aktionen-angebote/"}
   ,{cat:"online", id:"amazon", name:"Amazon", re:/\bamazon\b|amzn/, color:"#232F3E", url:"https://www.amazon.de/deals"}
-  ,{cat:"online", id:"zalando", name:"Zalando", re:/\bzalando\b/, color:"#FF6900", url:"https://www.zalando.de/sale/"}
+  ,{cat:"online", id:"zalando", name:"Zalando", re:/\bzalando\b/, color:"#FF6900", url:"https://www.zalando.de/outlet/"}
   ,{cat:"online", id:"otto", name:"OTTO", re:/\botto\b/, color:"#D52B1E", url:"https://www.otto.de/sale/"}
   ,{cat:"online", id:"temu", name:"Temu", re:/\btemu\b/, color:"#FB7701", url:"https://www.temu.com/de"}
 ];

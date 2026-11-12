@@ -410,11 +410,11 @@ let pickOn = false, pickMode = "";
 const PICK_JS = String.raw`(() => {
   const W = window; if (W.__hbPick) return W.__hbPick;
   const TOP = W === W.top;
-  const PR = /(\d{1,4})\s*[.,]\s*(\d{2})(?!\d)|[-–]\s*[.,]\s*(\d{2})(?!\d)|(\d{1,4})\s*[.,]\s*[-–]/;
-  const BAD = /^(uvp|statt|je |grundpreis|1 ?kg|100 ?g|1 ?l |\d+ ?%|-?\d+ ?%|ab |nur |aktion|angebot|knaller|neu|online|in den warenkorb|merken|details|zum angebot|mehr|versch\.|verschiedene|auch )|:$/i;
+  const PR = /(\d{1,4})\s*[.,]\s*(\d{2})(?![\d.]\d|\.(?!\d)|\d|\s?(?:gbit|mbit|gb|tb|mb|mah|ghz|mhz|hz|zoll|cm|mm|kg|ml|kw|w|v|l|m|g)\b|\s?%)|[-–]\s*[.,]\s*(\d{2})(?!\d)|(\d{1,4})\s*[.,]\s*[-–]/i;   // "9.11." and "14.11.2026" are dates, not prices
+  const BAD = /^(uvp|statt|je |grundpreis|1 ?kg|100 ?g|1 ?l |\d+ ?%|-?\d+ ?%|ab |nur |aktion|angebot|knaller|neu|online|in den warenkorb|merken|details|zum angebot|mehr|versch\.|verschiedene|auch |inkl|versand|lieferung|markt ausw|jetzt |spare |bewert|\d+ bewertung)|:$/i;
   const txt = (e) => (e && (e.innerText || e.textContent) || "").replace(/ /g, " ").trim();
   const PRG = new RegExp(PR.source, "g");
-  const UNIT = /(=|zzgl|pfand|uvp|statt|grundpreis|\bje\b|\(1|pro\s|\/\s?(kg|l)\b)/i;
+  const UNIT = /(=|zzgl|pfand|uvp|statt|grundpreis|sparst|ersparnis|spare |rabatt|vorher|bisher|ursprüngl|\bje\b|\(1|pro\s|€\s?\/|\/\s?(kg|l|st|stk|stück|m|m²|qm|lfm|100 ?g|100 ?ml)\b)/i;
   const FILL = /\b(aktion|knaller|angebot|angebote|preis|statt|uvp|nur|ab|je|neu|top|deal|super|sale|rabatt|bonus|coupon|app|payback|auch|alkoholfrei)\b|€/gi;
   const nameish = (t) => /[a-zäöüß]{4}/i.test(String(t).replace(PRG, " ").replace(FILL, " "));
   const fs = (e) => { try { return parseFloat(getComputedStyle(e).fontSize) || 0; } catch (x) { return 0; } };
@@ -424,18 +424,24 @@ const PICK_JS = String.raw`(() => {
   function valOf(e) {
     const it = e.matches && e.matches("[itemprop=price]") ? e : null; if (it) { const v = parseFloat(String(it.getAttribute("content") || txt(it)).replace(",", ".")); if (v > 0) return v; }
     const t = txt(e).replace(/\s+/g, " "); const m = price(t); if (m != null) return m;
-    const sup = e.querySelector("sup,small,[class*=cent i],[class*=decimal i],[class*=fraction i]");
-    if (sup) { const c = txt(sup).replace(/[^\d]/g, "").slice(0, 2), w = t.replace(txt(sup), "").replace(/[^\d]/g, ""); if (c.length === 2) return Number((w || "0") + "." + c); }
+    // cents written on their own: <sup>, or an element called "cent", "decimal", "fraction" (not "text-center")
+    const CENT = /(^|[-_\s])(cents?|decimals?|fraction(al)?|nachkomma)([-_\s]|$)/i;
+    const sup = [...e.querySelectorAll("*")].find((k) => k.matches("sup,small") || CENT.test(String(k.className || "")) || CENT.test(k.getAttribute("data-testid") || ""));
+    if (sup && /^\d{2}$/.test(txt(sup).replace(/[^\d]/g, ""))) { const w = t.replace(txt(sup), "").replace(/[^\d]/g, ""); if (w.length <= 4 && (w || /[-–.,]/.test(t))) return Number((w || "0") + "." + txt(sup).replace(/[^\d]/g, "")); }
     return null;
   }
   // the offer price in a card: the biggest written price that is not a base price, deposit, UVP or "statt"
   function cardPrice(c) {
     const it = c.querySelector("[itemprop=price]"); if (it) { const v = valOf(it); if (v) return v; }
-    const els = [c, ...c.querySelectorAll("*")].filter((e) => { const t = txt(e); return t && t.length <= 24 && !UNIT.test(t) && !UNIT.test(txt(e.parentElement || e).length <= 40 ? txt(e.parentElement || e) : t); });
+    // a unit word right next to the price ("3,99 /kg", "1 kg = 3,99") makes it a base price; a separate line with the base price does not
+    const own = (p) => p ? [...p.childNodes].filter((n) => n.nodeType === 3).map((n) => n.nodeValue).join(" ") : "";
+    const els = [c, ...c.querySelectorAll("*")].filter((e) => { const t = txt(e); return t && t.length <= 24 && !UNIT.test(t) && !UNIT.test(own(e.parentElement)); });
     let best = null;
     // prices only with the shop's app ("1.11 App") come second – the normal price counts
     const app = (e) => { for (let x = e, i = 0; x && x !== c && i < 3; i++, x = x.parentElement) if (/\bapp\b/i.test(txt(x)) && txt(x).length < 30) return true; return false; };
-    for (const e of els) { const v = valOf(e); if (!(v > 0 && v < 100000)) continue; const f = maxFs(e), r = e.getBoundingClientRect(), a = app(e) ? 1 : 0;
+    // crossed-out old prices ("statt") never count
+    const struck = (e) => { for (let x = e, i = 0; x && i < 4; i++, x = x.parentElement) { if (x.matches("s,del,strike")) return true; try { if (/line-through/.test(getComputedStyle(x).textDecorationLine)) return true; } catch (z) {} if (x === c) break; } return false; };
+    for (const e of els) { if (struck(e)) continue; const v = valOf(e); if (!(v > 0 && v < 100000)) continue; const f = maxFs(e), r = e.getBoundingClientRect(), a = app(e) ? 1 : 0;
       if (!best || a < best.app || (a === best.app && (f > best.f + 0.5 || (Math.abs(f - best.f) <= 0.5 && r.width * r.height < best.a)))) best = { v, f, a: r.width * r.height, app: a }; }
     if (best) return best.v;
     const all = txt(c).split(/\n+/).filter((l) => !UNIT.test(l)).join("\n"); return price(all);
@@ -443,16 +449,32 @@ const PICK_JS = String.raw`(() => {
   // the product name: the biggest text in the card that is not a price, a badge word or a detail line
   function cardName(c) {
     let best = null;
-    const consider = (t, f) => { t = String(t || "").replace(/\s+/g, " ").trim().replace(/[:\s,(]+$/, "").replace(/^[^A-Za-zÄÖÜäöü0-9"„]+/, ""); if (t.length < 3 || t.length > 90 || PR.test(t) || UNIT.test(t) || BAD.test(t) || !nameish(t)) return;
-      if (!best || f > best.f + 0.5) best = { t, f }; };
+    const clean = (t) => String(t || "").replace(/\s+/g, " ").trim().replace(/[:\s,(*¹⁴⁵⁶⁷⁸⁹⁰†]+$/, "").replace(/^[^A-Za-zÄÖÜäöü0-9"„]+/, "");
+    const ok = (t) => !(t.length < 3 || t.length > 90 || PR.test(t) || UNIT.test(t) || BAD.test(t) || /bewertung|rezension|sternen?\b|bitte w(ä|ae)hle|entdecken|alle anzeigen|mehr erfahren|zum produkt/i.test(t) || !nameish(t));
+    const consider = (t, f) => { t = clean(t); if (!ok(t)) return; if (!best || f > best.f + 0.5) best = { t, f }; };
     // every piece of text on its own (also text that sits loose next to other elements), with the size it is written in
+    const all = [];
     const tw = document.createTreeWalker(c, NodeFilter.SHOW_TEXT);
-    for (let n = tw.nextNode(); n; n = tw.nextNode()) { const pe = n.parentElement; if (!pe) continue; const st = getComputedStyle(pe); if (st.display === "none" || st.visibility === "hidden") continue; consider(n.nodeValue, fs(pe)); }
+    for (let n = tw.nextNode(); n; n = tw.nextNode()) { const pe = n.parentElement; if (!pe) continue; const st = getComputedStyle(pe); if (st.display === "none" || st.visibility === "hidden") continue;
+      const pr = pe.getBoundingClientRect(); if (pr.width < 3 || pr.height < 3) continue;   // text only for screen readers
+      const t = clean(n.nodeValue); if (!t) continue; all.push({ t, f: fs(pe) }); consider(t, fs(pe)); }
+    // a short brand line ("K-PURLAND") right before a name in the same size belongs to it
+    if (best && best.t.length <= 24) { const i = all.findIndex((a) => a.t === best.t && Math.abs(a.f - best.f) < 0.01), nx = all[i + 1];
+      if (nx && Math.abs(nx.f - best.f) <= 0.5 && ok(nx.t) && best.t.length + nx.t.length < 90) best = { t: best.t + " " + nx.t, f: best.f }; }
     if (!best) { let e = c; for (let i = 0; e && i < 3 && !best; i++, e = e.parentElement) { const img = e.querySelector("img[alt]"); if (img) consider(img.alt, 0); } }
     return best ? best.t.replace(/\s+,/g, ",").replace(/(\.\.\.|…)$/, "").trim() : "";
   }
   // grows from the found text up to the whole tile of the offer: up to just below the list that holds several offers
-  const isList = (e) => [...e.children].filter((k) => { const kt = txt(k); return kt.length > 12 && hasPrice(k) && nameish(kt); }).length >= 2;
+  // a list of offers: at least two children that each have their own picture, name and price (price bubbles like "UVP 10.49 / Angebotspreis 6.49" are not a list)
+  // the tiles of a list look alike (same kind of element, similar size); the parts of one card (name, price, delivery) do not
+  const alike = (a, b) => { if (a.tagName !== b.tagName) return false; const ca = String(a.className || "").split(/\s+/).filter(Boolean), cb = String(b.className || "").split(/\s+/).filter(Boolean);
+    const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(), sim = (x, y) => Math.abs(x - y) <= Math.max(x, y) * 0.3 + 2;
+    if ((ca.length || cb.length) && !ca.some((x) => cb.includes(x))) return false;
+    // same size, or side by side in one row with the same height
+    return sim(ra.height, rb.height) && (sim(ra.width, rb.width) || (Math.abs(ra.top - rb.top) < 12 && Math.abs(ra.left - rb.left) > 20)); };
+  const isList = (e) => { const ks = [...e.children].filter((k) => { const kt = txt(k); return kt.length > 12 && hasPrice(k) && nameish(kt); });
+    if (ks.length >= 3) return ks.filter((k) => k.querySelector("img,picture")).length >= 3 || ks.some((k) => ks.some((o) => o !== k && alike(k, o)));
+    return ks.length === 2 && alike(ks[0], ks[1]) && ks.every((k) => k.querySelector("img,picture,canvas,svg") || hasBg(k)); };
   function whole(e) {
     const vw = innerWidth * innerHeight;
     while (e.parentElement && e.parentElement !== document.body && e.parentElement !== document.documentElement) {
@@ -482,7 +504,7 @@ const PICK_JS = String.raw`(() => {
     for (let i = 0; e && e !== document.body && e !== document.documentElement && i < 14; i++, e = e.parentElement) {
       const t = txt(e); if (t.length > 900) break;
       // a list of several products (each child with its own name and price): went too far up
-      if ([...e.children].filter((k) => { const kt = txt(k); return kt.length > 12 && hasPrice(k) && nameish(kt); }).length >= 2) break;
+      if (isList(e)) break;
       if (!hasPrice(e)) continue;
       const r = e.getBoundingClientRect(); if (r.width < 50 || r.height < 24) continue;
       if (nameish(t)) return whole(e);   // the offer – grown to its whole box (picture, badges and all)
@@ -538,7 +560,7 @@ const PICK_JS = String.raw`(() => {
   ["click", "auxclick", "dblclick", "contextmenu"].forEach((t) => W.addEventListener(t, t === "click" ? click : stop, true));
   W.addEventListener("mouseover", over, true);
   ["pointerdown", "mousedown", "touchstart"].forEach((t) => W.addEventListener(t, (e) => { if (mode === "pick") stop(e); }, { capture: true, passive: false }));
-  W.__hbPick = { set };
+  W.__hbPick = { set, test: { cand, read, imgBox } };   // test: used to check shop pages
   return W.__hbPick;
 })()`;
 const PICK_CSS = "html,html *{cursor:copy!important}";
