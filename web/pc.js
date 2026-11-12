@@ -1010,7 +1010,7 @@ if (IS_PC){
   const PG={open:false, url:"", shop:null, st:{}, ro:null};
   const pg=document.createElement("div"); pg.id="pcPage"; pg.className="pcpage"; pg.hidden=true;
   pg.innerHTML=`<div class="pcpbar"><button data-pcpnav="back" title="Zurück" aria-label="Zurück">‹</button><button data-pcpnav="fwd" title="Vor" aria-label="Vor">›</button><button data-pcpnav="reload" class="rl" title="Neu laden" aria-label="Neu laden">⟳</button>
-    <div class="url" title="Gesperrt: hier geht nur diese eine Webseite"><span class="lk">🔒</span><span class="u"></span><small class="t"></small><em class="only"></em></div><button data-pcpnav="external" class="wide">Im Browser öffnen ↗</button><button data-pcpnav="close" class="x" title="Schließen (Esc)" aria-label="Schließen">✕</button></div>
+    <div class="url" title="Gesperrt: hier geht nur diese eine Webseite"><span class="lk">🔒</span><span class="u"></span><small class="t"></small><em class="only"></em></div><button data-pcpnav="close" class="x" title="Schließen (Esc)" aria-label="Schließen">✕</button></div>
     <div class="pcphole" id="pcpHole"><div class="pcpload"><i></i><span>Seite wird geladen …</span></div></div>`;
   const side=document.createElement("aside"); side.id="pcpSide"; side.className="pcpside"; side.hidden=true;
   document.body.append(pg, side);
@@ -1064,7 +1064,7 @@ if (IS_PC){
   window.hbPageClose=pageClose;
   openPage=url=>pageOpen(url);
   pg.addEventListener("click", e=>{ const n=e.target.closest("[data-pcpnav]"); if (!n) return; const c=n.dataset.pcpnav;
-    if (c==="close") return pageClose(); const b=NB(); if (b) b.pageNav(c); if (c==="external" && !b) window.open(PG.st.url||PG.url,"_blank","noopener"); });
+    if (c==="close") return pageClose(); const b=NB(); if (b) b.pageNav(c); });
   side.addEventListener("click", e=>{
     if (e.target.closest("[data-pcpdeal]")){ const text=($("pcpDT").value||"").trim(), pr=parseAmt($("pcpDP").value||""), until=$("pcpDU").value||"";
       if (!text){ $("pcpDT").focus(); return; }
