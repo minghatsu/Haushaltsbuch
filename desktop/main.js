@@ -390,7 +390,19 @@ ipcMain.on("scan", (e, id) => {
 });
 
 // web pages (shop leaflets, help, imprint …) open INSIDE the app window: a web view placed where the app leaves room for it
-let pageView = null, pageShown = false;
+let pageView = null, pageShown = false, pageBase = "";
+// the "base" of a web address: rewe.de for www.rewe.de, shop.rewe.de …; amazon.co.uk keeps three parts
+function baseOf(u) {
+  try { const h = new URL(u).hostname.toLowerCase().replace(/\.$/, ""), p = h.split(".");
+    const two = /^(co|com|org|net|gov|ac)\.[a-z]{2}$/.test(p.slice(-2).join(".")); return p.slice(two ? -3 : -2).join("."); } catch (e) { return ""; }
+}
+function pageAllowed(u) {
+  if (/^about:blank$/i.test(u)) return true;
+  if (!/^https:\/\//i.test(u)) return false;
+  return !!pageBase && baseOf(u) === pageBase;
+}
+let blockedAt = 0;
+function pageBlocked() { if (Date.now() - blockedAt < 1500 || !win || win.isDestroyed()) return; blockedAt = Date.now(); win.webContents.executeJavaScript("window.hbPageBlocked && window.hbPageBlocked()").catch(() => {}); }
 function pageRequest(url) { if (win && !win.isDestroyed()) win.webContents.executeJavaScript(`window.hbPageRequest && window.hbPageRequest(${JSON.stringify(String(url))})`).catch(() => shell.openExternal(url)); }
 function pageSend() {
   if (!win || win.isDestroyed() || !pageView) return;
@@ -403,8 +415,11 @@ function pageMake() {
   pageView = new WebContentsView({ webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false, partition: "persist:seiten" } });
   pageView.setBorderRadius && pageView.setBorderRadius(0);
   const wc = pageView.webContents;
-  wc.setWindowOpenHandler(({ url }) => { if (/^https?:\/\//i.test(url)) wc.loadURL(url); return { action: "deny" }; });
-  wc.on("will-navigate", (e, url) => { if (!/^https?:\/\//i.test(url)) e.preventDefault(); });
+  // locked to the site that was opened: links to other sites are blocked (no free surfing in the app)
+  wc.setWindowOpenHandler(({ url }) => { if (pageAllowed(url)) wc.loadURL(url); else pageBlocked(); return { action: "deny" }; });
+  wc.on("will-navigate", (e, url) => { if (!pageAllowed(url)) { e.preventDefault(); pageBlocked(); } });
+  wc.on("will-redirect", (e, url) => { if (!pageAllowed(url)) { e.preventDefault(); pageBlocked(); } });
+  wc.on("will-frame-navigate", (e) => { if (e.isMainFrame && !pageAllowed(e.url)) { e.preventDefault(); pageBlocked(); } });
   ["did-start-loading", "did-stop-loading", "did-navigate", "did-navigate-in-page", "page-title-updated"].forEach((ev) => wc.on(ev, pageSend));
   wc.on("before-input-event", (e, input) => {
     if (input.type !== "keyDown") return;
@@ -418,7 +433,8 @@ function pageMake() {
 // the page tells us where (css pixels of the app) – converted with the app's zoom
 function pageRect(r) { const z = win.webContents.getZoomFactor(); return { x: Math.round(r.x * z), y: Math.round(r.y * z), width: Math.max(1, Math.round(r.w * z)), height: Math.max(1, Math.round(r.h * z)) }; }
 ipcMain.on("pageOpen", (e, url, r) => {
-  if (!win || !/^https?:\/\//i.test(url)) return;
+  if (!win || !/^https:\/\//i.test(url)) return;
+  pageBase = baseOf(url);   // only this site may be shown until the page is closed
   const v = pageMake();
   if (!pageShown) { win.contentView.addChildView(v); pageShown = true; }
   if (r) v.setBounds(pageRect(r));
@@ -434,7 +450,7 @@ ipcMain.on("pageNav", (e, cmd) => {
   else if (cmd === "fwd" && wc.canGoForward()) wc.goForward();
   else if (cmd === "reload") wc.reload();
   else if (cmd === "external") { const u = wc.getURL(); if (/^https?:\/\//i.test(u)) shell.openExternal(u); }
-  else if (cmd === "close") { try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; wc.loadURL("about:blank").catch(() => {}); }
+  else if (cmd === "close") { try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; pageBase = ""; wc.loadURL("about:blank").catch(() => {}); }
 });
 // older app versions still ask for "openInApp": same place
 ipcMain.on("openInApp", (e, url) => { if (/^https:\/\//i.test(url)) pageRequest(url); });

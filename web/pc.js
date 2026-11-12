@@ -233,6 +233,7 @@ if (IS_PC){
     "hier am günstigsten":["cheapest here", "en ucuz burada", "здесь дешевле всего", "тут найдешевше", "tu najtaniej", "الأرخص هنا", "cel mai ieftin aici"],
     "zuletzt nicht eingekauft":["not shopped here lately", "son zamanlarda alışveriş yok", "давно не покупал", "давно не купував", "ostatnio bez zakupów", "لم تتسوق هنا مؤخرًا", "fără cumpărături recente"],
     "{n} erledigte gelöscht":["{n} done deleted", "{n} biten silindi", "{n} выполненных удалено", "{n} виконаних видалено", "Usunięto {n} zrobionych", "تم حذف {n} من المنجز", "{n} bifate șterse"],
+    "Andere Webseiten sind hier gesperrt":["Other websites are blocked here","Diğer web siteleri burada engelli","Другие сайты здесь заблокированы","Інші сайти тут заблоковано","Inne strony są tu zablokowane","المواقع الأخرى محظورة هنا","Alte site-uri sunt blocate aici"],
     "Im Browser öffnen ↗":["Open in browser ↗", "Tarayıcıda aç ↗", "Открыть в браузере ↗", "Відкрити в браузері ↗", "Otwórz w przeglądarce ↗", "افتح في المتصفح ↗", "Deschide în browser ↗"],
     "Seite wird geladen …":["Loading page …", "Sayfa yükleniyor …", "Страница загружается …", "Сторінка завантажується …", "Wczytywanie strony …", "جارٍ تحميل الصفحة …", "Se încarcă pagina …"],
     "Prospekt ist offen":["Leaflet is open", "Broşür açık", "Проспект открыт", "Проспект відкрито", "Gazetka jest otwarta", "النشرة مفتوحة", "Catalogul este deschis"],
@@ -1009,7 +1010,7 @@ if (IS_PC){
   const PG={open:false, url:"", shop:null, st:{}, ro:null};
   const pg=document.createElement("div"); pg.id="pcPage"; pg.className="pcpage"; pg.hidden=true;
   pg.innerHTML=`<div class="pcpbar"><button data-pcpnav="back" title="Zurück" aria-label="Zurück">‹</button><button data-pcpnav="fwd" title="Vor" aria-label="Vor">›</button><button data-pcpnav="reload" class="rl" title="Neu laden" aria-label="Neu laden">⟳</button>
-    <div class="url"><span class="lk">🔒</span><span class="u"></span><small class="t"></small></div><button data-pcpnav="external" class="wide">Im Browser öffnen ↗</button><button data-pcpnav="close" class="x" title="Schließen (Esc)" aria-label="Schließen">✕</button></div>
+    <div class="url" title="Gesperrt: hier geht nur diese eine Webseite"><span class="lk">🔒</span><span class="u"></span><small class="t"></small><em class="only"></em></div><button data-pcpnav="external" class="wide">Im Browser öffnen ↗</button><button data-pcpnav="close" class="x" title="Schließen (Esc)" aria-label="Schließen">✕</button></div>
     <div class="pcphole" id="pcpHole"><div class="pcpload"><i></i><span>Seite wird geladen …</span></div></div>`;
   const side=document.createElement("aside"); side.id="pcpSide"; side.className="pcpside"; side.hidden=true;
   document.body.append(pg, side);
@@ -1019,6 +1020,7 @@ if (IS_PC){
   function bar(){ const st=PG.st||{}, u=st.url||PG.url;
     pg.querySelector(".u").textContent=host(u)+(()=>{ try { const x=new URL(u); return (x.pathname+x.search).replace(/\/$/,""); } catch(_){ return ""; } })();
     pg.querySelector(".t").textContent=st.title||"";
+    pg.querySelector(".only").textContent=(()=>{ const h=host(PG.url).split("."); return h.length>1?"nur "+h.slice(-2).join("."):""; })();
     pg.querySelector('[data-pcpnav="back"]').disabled=!st.back; pg.querySelector('[data-pcpnav="fwd"]').disabled=!st.fwd;
     pg.querySelector(".rl").classList.toggle("spin", !!st.loading); pg.classList.toggle("ready", st.loading===false); }
   window.hbPageState=st=>{ PG.st=st||{}; bar(); };
@@ -1058,6 +1060,7 @@ if (IS_PC){
     pg.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateY(24px) scale(.97)"}],{duration:240,easing:"ease-in"}).onfinish=done;
     if (!side.hidden) side.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateX(50px)"}],{duration:220,easing:"ease-in",fill:"forwards"}); }
   window.hbPageRequest=url=>pageOpen(url);
+  window.hbPageBlocked=()=>{ toast("Andere Webseiten sind hier gesperrt"); const u=pg.querySelector(".url"); if (u && !pcCalm()) u.animate([{transform:"none"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(-3px)"},{transform:"none"}],{duration:320}); };
   window.hbPageClose=pageClose;
   openPage=url=>pageOpen(url);
   pg.addEventListener("click", e=>{ const n=e.target.closest("[data-pcpnav]"); if (!n) return; const c=n.dataset.pcpnav;

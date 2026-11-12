@@ -480,3 +480,4 @@ html.pc .pcpside .pczl{min-height:0}
 /* while a web page is open the toast shows over the shop bar (the page itself lies above the app) */
 html.pc.pcpageon .toast{z-index:90;left:auto;right:calc(40px + clamp(360px,24vw,475px)/2);transform:translateX(50%) translateY(12px);bottom:70px}
 html.pc.pcpageon .toast.show{transform:translateX(50%)}
+html.pc .pcpbar .url .only{flex:none;font-style:normal;font-size:11.5px;font-weight:700;background:color-mix(in srgb,#1a7a5c 14%,transparent);color:#1a7a5c;padding:3px 9px;border-radius:9px}
