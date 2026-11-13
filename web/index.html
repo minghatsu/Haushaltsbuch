@@ -7138,7 +7138,16 @@ async function runScan(source, attachOnly, fresh){
     } catch(e){ scanWorking(false); } }
     if (fresh) openSheet("ausgabe");
     if (img){ UI.rcpt={state:"new", img}; renderRcptRow(); }
-    if (attachOnly){ if (!img) toast("Das Foto konnte nicht übernommen werden"); return; }
+    if (attachOnly){ if (!img){ toast("Das Foto konnte nicht übernommen werden"); return; }
+      // a new or replaced photo: read the items too, so the Kassenzettel in the booking is the new one (amount stays as it is)
+      try { let L=lines||[];
+        if (canNativeOcr()){ scanWorking(true); try { const l2=await ocrDataUrl(img); if (l2 && l2.length) L=l2; } catch(e){} scanWorking(false); }
+        else if (!L.length) L=await scanImageFile(img);
+        const its=receiptItems(L||[]);
+        if (its.length){ const pr=parseReceipt(L); UI.scanItems={items:its.map(i=>({r:i.n, p:i.p})), shop:zaShopId(pr.shop||$("fNote").value)}; UI.zbOpen=true; zBonRender();
+          toast(`${its.length} Artikel vom Bon gelesen – wird mit der Buchung gespeichert`, null, null, 4000); }
+      } catch(e){ scanWorking(false); scanBusy(false); }
+      return; }
     const r = parseReceipt(lines||[]);
     if (r.amount==null){ toast("Auf der Quittung wurde kein Betrag gefunden"); return; }
     UI.kind="ausgabe"; if (r.cat) UI.cat=r.cat;
