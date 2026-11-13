@@ -1330,7 +1330,7 @@ if (IS_PC){
 }
 /* ---------- Einstellungen am PC: Liste links, Inhalt rechts (nichts doppelt mit anderen Seiten) ---------- */
 if (IS_PC){
-  const PCSET=[["Geld",()=>["konten","budgets",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]),"abos","export"]],
+  const PCSET=[["Geld",()=>["konten","budgets",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]),"abos","invest","export"]],
     ["Anpassen",()=>["farben","sprache","kategorien","laeden"]],
     ["Sicherheit",()=>["sicherheit",...(SYNCABLE||window.AndroidBridge?["geraete"]:[]),"backup",...(CAN_NOTIFY?["notify"]:[]),"speicher"]]];
   const syncOn=()=>!!(SYNCABLE||window.AndroidBridge), parts=k=>k==="geraete"&&syncOn()?["sync","geraete"]:[k], alias={sync:"geraete"};

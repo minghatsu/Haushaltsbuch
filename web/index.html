@@ -634,6 +634,39 @@ textarea.in{font-family:inherit;line-height:1.45}
 .shopgo{display:inline-flex;align-items:center;gap:2px;color:var(--accent);font-weight:700;font-size:13.5px;white-space:nowrap}
 
 .rcptrow .rcpthave{display:flex;align-items:center;gap:12px;padding:8px 10px;background:var(--sunk);border-radius:16px}
+.invtabs{display:flex;background:var(--sunk);border-radius:14px;padding:4px;gap:4px;margin-bottom:12px}
+.invtabs button{flex:1;border:0;background:none;border-radius:11px;padding:9px 6px;font:700 13px var(--f-body);color:var(--muted);cursor:pointer;transition:background .2s,color .2s}
+.invtabs button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.invsub{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}.invsub button{border:0;background:var(--sunk);border-radius:999px;padding:6px 12px;font:700 12.5px var(--f-body);color:var(--muted);cursor:pointer}
+.invsub button.on{background:var(--accent-soft);color:var(--accent)}.invsub.s{margin:2px 0 8px}.invsub.s button{padding:4px 10px;font-size:11.5px}
+.invgrid{display:grid;gap:14px}.invbody{animation:invin .35s cubic-bezier(.3,.8,.3,1)}@keyframes invin{from{opacity:0;transform:translateY(8px)}}
+.invbig{font:800 30px var(--f-display);letter-spacing:-.02em;line-height:1.15}.invbig small{font:600 14px var(--f-body);color:var(--muted)}.invbig.s{font-size:24px}
+.invch{display:block;width:100%;height:120px;margin:8px 0 4px}.invch.s{height:56px}
+.invch path,.invch polyline{transition:d .35s}
+.invleg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}.invleg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}.invleg b{color:var(--fg)}
+.invsl{margin:4px 0 12px}.invsl label{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:650;margin-bottom:4px}
+.invv{display:flex;align-items:center;gap:4px;color:var(--accent);font-weight:800}
+.invnum{width:84px;border:0;background:var(--sunk);border-radius:8px;padding:4px 8px;text-align:right;font:800 13.5px var(--f-body);color:var(--accent)}.invnum.s{width:52px;padding:2px 6px;font-size:12px}
+.invnum:focus{outline:2px solid var(--accent);background:var(--surface)}
+.invsl input[type=range]{width:100%;accent-color:var(--accent);height:22px;margin:0;outline:none}
+.invrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.invrow>.grow{flex:1;min-width:0}.invreal .btn{background:var(--surface)}.invrow>i{width:6px;height:30px;border-radius:3px;flex:none}.invrow small{display:block;color:var(--muted);font-size:12px}
+.invck{display:flex;gap:8px;align-items:center;font-size:13px;margin:6px 0}
+.invgoal{background:var(--sunk);border-radius:16px;padding:14px;margin-bottom:12px;position:relative}
+.invgh{display:flex;align-items:center;gap:8px;margin-bottom:2px}.invgh b{font-size:15px}
+.invchip{border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:800}.invchip.ok{background:var(--accent-soft);color:var(--accent)}.invchip.warn{background:#fdf0d5;color:#a86b00}
+.invdel{margin-left:auto;border:0;background:none;color:var(--muted);border-radius:8px;padding:4px 6px;cursor:pointer;font:700 12px var(--f-body)}.invdel.arm{background:var(--bad);color:#fff}
+.invmiles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}.invmiles span{font-size:12px;font-weight:700;display:flex;flex-direction:column;gap:1px}.invmiles small{color:var(--muted);font-weight:500}
+.invmiles i{width:10px;height:10px;border-radius:50%;background:var(--line);margin-bottom:3px}.invmiles .on i{background:var(--accent)}
+.invreal{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.invreal .in{width:130px}
+.invnew{width:100%;border:2px dashed var(--line);background:none;border-radius:16px;padding:16px;font:700 14px var(--f-body);color:var(--accent);cursor:pointer}
+.invform label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--muted);margin-top:8px}
+.invnote{margin:14px 0 0}
+@media (min-width:900px){ .invgrid{grid-template-columns:1.1fr 1fr;align-items:start} }
+.invpc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:start}
+.invpc>section{background:var(--surface);border-radius:18px;padding:16px;box-shadow:var(--shadow);animation:invin .45s cubic-bezier(.3,.8,.3,1) both}.invpc>section:nth-child(2){animation-delay:.08s}.invpc>section:nth-child(3){animation-delay:.16s}
+.invpc h3{margin:0 0 10px;font:800 17px var(--f-display)}
+.invpc .invgrid{grid-template-columns:1fr}
+.invpc .invgoal{background:var(--sunk)}
 .flagi{width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:-5px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
 .zbon{position:relative;margin:8px 0 2px}
 .zbh{display:flex;align-items:center;gap:12px;width:100%;border:0;background:var(--sunk);border-radius:16px;padding:10px 12px;text-align:left;color:var(--fg);font:inherit;cursor:pointer}
@@ -1510,6 +1543,7 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
     <div class="card sp" data-sp="amt" id="amtEd" hidden></div>
     <div class="card sp" data-sp="recht" id="rechtEd" hidden></div>
     <div class="card sp" data-sp="abos" id="abosEd" hidden></div>
+    <div class="card sp" data-sp="invest" id="investEd" hidden></div>
     <div class="card sp" data-sp="export" id="exportEd" hidden></div>
     <div class="card sp" data-sp="sprache" id="spracheEd" hidden></div>
     <div class="card sp" data-sp="neu" id="neuEd" hidden></div>
@@ -3441,6 +3475,7 @@ function renderHome(){
       gemeinsam: gemeinsamCard(),
       tax: taxGauge(ym),
       goals: goalsRings() + (UI.goalsOpen||UI.goalEdit?goalsCard():""),
+      invest: invTile(),
       debts: debtRings(),
       recent: recentTimeline(c),
       offers: offersCard(),
@@ -3521,8 +3556,114 @@ document.addEventListener("click", e=>{ const a=e.target.closest("[data-hintact]
 function closeHints(){ $("hintBg").classList.remove("show"); setTimeout(()=>{ $("hintBg").hidden=true; },200); }
 $("hintBg").addEventListener("click", e=>{ if (e.target===$("hintBg") || e.target.closest("[data-hintclose]")) closeHints(); });
 document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("hintBg").hidden) closeHints(); });
+/* ---------- Sparen & Anlegen: Zinseszins-Rechner, Ziel planen, Anlagen vergleichen, Anlage-Ziele mit Fahrplan ----------
+   Pure arithmetic with what you type in – examples, no advice. Kept in S.settings.inv so it is the same on all devices. */
+const INV_DEF={calc:{P:1000,m:100,r:5,y:20}, plan:{T:20000,y:8,r:5,P:0}, cmp:{m:100,y:15,r:[0.5,2.5,7],cost:false,tax:true}, goals:[]};
+function inv(){ const s=S.settings.inv||{}; return {calc:{...INV_DEF.calc,...(s.calc||{})}, plan:{...INV_DEF.plan,...(s.plan||{})}, cmp:{...INV_DEF.cmp,...(s.cmp||{}), r:(s.cmp&&s.cmp.r)||INV_DEF.cmp.r}, goals:s.goals||[]}; }
+let invSaveT=null;
+function invSet(fn, now){ const v=inv(); fn(v); S.settings.inv=v; clearTimeout(invSaveT); invSaveT=setTimeout(()=>{ saveSettings(); }, now?0:700); }
+// month by month: start P, rate m at the end of each month, yearly rate r (%) → per year [paid in, value]
+function invRun(P,m,r,y){ const q=(Number(r)||0)/1200; let s=Number(P)||0, inn=s; const out=[[inn,s]]; for (let k=1;k<=Math.round(y*12);k++){ s=s*(1+q)+(Number(m)||0); inn+=Number(m)||0; if (k%12===0) out.push([inn,s]); } return out; }
+function invRate(T,P,r,months){ const q=(Number(r)||0)/1200, n=Math.max(1,months); if (!q) return Math.max(0,(T-P)/n); const g=Math.pow(1+q,n); return Math.max(0,(T-P*g)*q/(g-1)); }
+// simplified tax when selling at the end: 26,375 % on gains above the 1.000 € allowance; equity funds (ETF) 30 % tax-free
+const invTax=(gain, etf)=>Math.max(0,(gain*(etf?0.7:1))-1000)*0.26375;
+const invE = v => eur0(Math.round(v));
+const invPct = v => String(Math.round(v*10)/10).replace(".",",");
+function invArea(d,W,H){ const mx=Math.max(1,d[d.length-1][1])*1.04, X=i=>i/(d.length-1||1)*W, Y=v=>H-v/mx*H;
+  const pts=k=>d.map((p,i)=>`L${X(i).toFixed(1)} ${Y(p[k]).toFixed(1)}`).join(" ");
+  return `<path d="M0 ${H} ${pts(1)} L${W} ${H} Z" fill="#c98a12" opacity=".78"/><path d="M0 ${H} ${pts(0)} L${W} ${H} Z" fill="var(--accent)"/>`; }
+const INV_COL=["#9ca3af","#3d63a8","var(--accent)"], INV_NAME=["Sparbuch","Tagesgeld","ETF-Sparplan"];
+function invCmpData(c){ return c.r.map((r,i)=>{ const eff=r-(c.cost&&i===2?0.2:0), d=invRun(0,c.m,eff,c.y), L=d[d.length-1]; let end=L[1]; if (c.tax) end-=invTax(L[1]-L[0], i===2); return {i, r, d, end, inn:L[0]}; }); }
+function invLines(D,W,H,withPaid){ const mx=Math.max(1,...D.map(x=>x.d[x.d.length-1][1]))*1.06, X=(i,n)=>i/(n-1||1)*W, Y=v=>H-v/mx*H;
+  return D.map(x=>`<polyline fill="none" stroke="${INV_COL[x.i]}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${x.d.map((p,i)=>`${X(i,x.d.length).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(" ")}"/>`).join("")
+    + (withPaid?`<polyline fill="none" stroke="var(--muted)" stroke-dasharray="3 4" stroke-width="1.5" points="${D[0].d.map((p,i)=>`${X(i,D[0].d.length).toFixed(1)},${Y(p[0]).toFixed(1)}`).join(" ")}"/>`:""); }
+// goals: plan value at a month, where you stand, milestones
+const ymNum = ym => { const [y,m]=ym.split("-").map(Number); return y*12+m-1; };
+const numYm = n => `${Math.floor(n/12)}-${pad(n%12+1)}`;
+function invGoal(g){ const now=ymNum(ymOf(new Date())), s=ymNum(g.from||ymOf(new Date())), e=Math.max(s+1, ymNum(g.until)), n=e-s, m=invRate(g.T, g.P||0, g.r, n);
+  const planAt=k=>{ const q=(Number(g.r)||0)/1200; let v=g.P||0; for (let i=0;i<k;i++) v=v*(1+q)+m; return v; };
+  const real=(g.real||[]).slice().sort((a,b)=>a.d.localeCompare(b.d)), last=real.length?real[real.length-1].v:(g.P||0), passed=Math.max(0,Math.min(n,now-s)), pl=planAt(passed);
+  const miles=[0.25,0.5,0.75,1].map(f=>{ let k=0; while (k<n && planAt(k)<g.T*f) k++; return {v:g.T*f, ym:numYm(s+k), done:last>=g.T*f}; });
+  return {m, n, s, e, planAt, real, last, pl, ok: last>=pl*0.97, miles, left:e-now}; }
+const ymLabel = ym => `${MSHORT[ymParts(ym)[1]-1]} ${ym.slice(0,4)}`;
+function invGoalChart(g,G,W,H){ const mx=g.T*1.08, X=k=>k/G.n*W, Y=v=>H-Math.min(v,mx)/mx*H; let pl=""; for (let k=0;k<=G.n;k+=Math.max(1,Math.round(G.n/40))) pl+=`${X(k).toFixed(1)},${Y(G.planAt(k)).toFixed(1)} `; pl+=`${W},${Y(G.planAt(G.n)).toFixed(1)}`;
+  const rp=[[0,g.P||0],...G.real.map(r=>[Math.max(0,ymNum(r.d.slice(0,7))-G.s),r.v])];
+  return `<line x1="0" x2="${W}" y1="${Y(g.T)}" y2="${Y(g.T)}" stroke="#c98a12" stroke-dasharray="4 4"/><polyline fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4" opacity=".7" points="${pl}"/>${G.real.length?`<polyline fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" points="${rp.map(([k,v])=>`${X(k).toFixed(1)},${Y(v).toFixed(1)}`).join(" ")}"/>`:""}`; }
+
+const invRange=(key,val,min,max,step,unit,label)=>`<div class="invsl"><label><span>${label}</span><span class="invv"><input class="invnum" data-inv="${key}" value="${invPct(val)}" inputmode="decimal" aria-label="${label}"> ${unit}</span></label><input type="range" data-inv="${key}" min="${min}" max="${max}" step="${step}" value="${val}" aria-label="${label}"></div>`;
+function invCalcOut(c){ const d=invRun(c.P,c.m,c.r,c.y), L=d[d.length-1];
+  return `<div class="invbig">${invE(L[1])}</div><div class="small muted">nach ${c.y} ${c.y==1?"Jahr":"Jahren"} bei ${invPct(c.r)} % Zins</div><svg class="invch" viewBox="0 0 300 110" preserveAspectRatio="none">${invArea(d,300,110)}</svg><div class="invleg"><span><i style="background:var(--accent)"></i>eingezahlt <b>${invE(L[0])}</b></span><span><i style="background:#c98a12"></i>Zinsen <b>${invE(L[1]-L[0])}</b></span></div>`; }
+function invPlanOut(p){ const n=Math.round(p.y*12), m=invRate(p.T,p.P,p.r,n), inn=(p.P||0)+m*n;
+  return `<div class="small muted">Dafür brauchst du</div><div class="invbig" style="color:var(--accent)">${invE(m)} <small>im Monat</small></div><div class="small muted">Eingezahlt ${invE(inn)} · Zinsen ${invE(Math.max(0,p.T-inn))}</div><button class="btn small" data-invgoalfrom="1" style="margin-top:10px">+ Als Anlage-Ziel speichern</button>`; }
+function invCmpOut(c){ const D=invCmpData(c);
+  return `<svg class="invch" viewBox="0 0 300 120" preserveAspectRatio="none">${invLines(D,300,120,true)}</svg><div class="small muted" style="margin:2px 0 8px">- - - eingezahlt ${invE(D[0].inn)}</div>${D.map(x=>`<div class="invrow"><i style="background:${INV_COL[x.i]}"></i><span class="grow"><b>${INV_NAME[x.i]}</b><small><input class="invnum s" data-inv="cmp.r.${x.i}" value="${invPct(x.r)}" inputmode="decimal" aria-label="Zins ${INV_NAME[x.i]}"> % pro Jahr</small></span><b>${invE(x.end)}</b></div>`).join("")}`; }
+function invGoalsHtml(v){ const G=v.goals;
+  return `${G.map((g,gi)=>{ const R=invGoal(g);
+    return `<div class="invgoal"><div class="invgh"><b>${esc(g.name||"Anlage-Ziel")}</b><span class="invchip ${R.ok?"ok":"warn"}">${R.ok?"im Plan ✓":"hinter dem Plan"}</span><button class="invdel" data-invgdel="${gi}" aria-label="Ziel löschen">✕</button></div>
+      <div class="small muted">${invE(g.T)} bis ${ymLabel(numYm(R.e))} · ${invPct(g.r)} % Zins · <b style="color:var(--accent)">${invE(R.m)} im Monat</b></div>
+      <svg class="invch" viewBox="0 0 300 90" preserveAspectRatio="none">${invGoalChart(g,R,300,90)}</svg>
+      <div class="invleg"><span>- - Plan</span><span><i style="background:var(--accent)"></i>wirklich angelegt</span></div>
+      <div class="invmiles">${R.miles.map(x=>`<span class="${x.done?"on":""}"><i></i>${invE(x.v)}<small>${ymLabel(x.ym)}</small></span>`).join("")}</div>
+      <div class="invreal"><span class="small muted">Was ist heute drin?</span><input class="in" data-invreal="${gi}" inputmode="decimal" placeholder="${esc(numStr(Math.round(R.last)))}" aria-label="Heutiger Wert"><button class="btn small" data-invrealok="${gi}">Eintragen</button></div></div>`; }).join("")}
+    ${UI.invNewGoal?`<div class="invgoal invform"><b>Neues Anlage-Ziel</b><label>Name<input class="in" id="invgN" placeholder="z. B. Eigenkapital Wohnung" value="${esc(UI.invNewGoal.name||"")}"></label><div class="grid2"><label>Ziel<input class="in" id="invgT" inputmode="decimal" value="${esc(numStr(UI.invNewGoal.T||10000))}"></label><label>Bis<input class="in" id="invgU" type="month" value="${esc(UI.invNewGoal.until||numYm(ymNum(ymOf(new Date()))+60))}"></label><label>Zins % pro Jahr<input class="in" id="invgR" inputmode="decimal" value="${esc(invPct(UI.invNewGoal.r??4))}"></label><label>Schon angelegt<input class="in" id="invgP" inputmode="decimal" value="${esc(numStr(UI.invNewGoal.P||0))}"></label></div><div class="row-btns"><button class="btn" data-invgcancel="1">Abbrechen</button><button class="btn primary" data-invgsave="1">Anlegen</button></div></div>`
+      :`<button class="invnew" data-invgnew="1">+ Anlage-Ziel anlegen</button>`}`; }
+function renderInvest(){
+  const el=$("investEd"); if (!el) return; if (el.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) return;
+  const v=inv(), t=UI.invTab||"calc", sub=UI.invSub||"calc";
+  el.innerHTML=`<div class="invtabs" role="tablist" ${IS_PC?"hidden":""}>${[["calc","Zinseszins"],["cmp","Vergleich"],["goals","Anlage-Ziele"]].map(([k,l])=>`<button role="tab" data-invtab="${k}" aria-selected="${t===k}" class="${t===k?"on":""}">${l}</button>`).join("")}</div>
+    <div class="invbody">${(()=>{ const secCalc=`<div class="invsub">${[["calc","Was wird daraus?"],["plan","Ziel planen"]].map(([k,l])=>`<button data-invsub="${k}" class="${sub===k?"on":""}">${l}</button>`).join("")}</div>
+      ${sub==="calc" ? `<div class="invgrid"><div class="invout" id="invOutA">${invCalcOut(v.calc)}</div><div class="invin">${invRange("calc.P",v.calc.P,0,100000,500,"€","Startbetrag")}${invRange("calc.m",v.calc.m,0,2000,10,"€","Pro Monat")}${invRange("calc.r",v.calc.r,0,12,0.1,"%","Zins pro Jahr")}${invRange("calc.y",v.calc.y,1,50,1,"J.","Jahre")}</div></div>`
+        : `<div class="invgrid"><div class="invout" id="invOutA">${invPlanOut(v.plan)}</div><div class="invin">${invRange("plan.T",v.plan.T,1000,500000,500,"€","Ich möchte")}${invRange("plan.y",v.plan.y,1,40,1,"J.","in Jahren")}${invRange("plan.r",v.plan.r,0,12,0.1,"%","Zins pro Jahr")}${invRange("plan.P",v.plan.P,0,100000,500,"€","Schon vorhanden")}</div></div>`}`;
+      const secCmp=`<div class="invgrid"><div class="invout" id="invOutB">${invCmpOut(v.cmp)}</div><div class="invin">${invRange("cmp.m",v.cmp.m,10,2000,10,"€","Pro Monat")}${invRange("cmp.y",v.cmp.y,1,40,1,"J.","Jahre")}
+          <label class="invck"><input type="checkbox" data-invck="cost" ${v.cmp.cost?"checked":""}> ETF-Kosten 0,2 % pro Jahr abziehen</label><label class="invck"><input type="checkbox" data-invck="tax" ${v.cmp.tax?"checked":""}> Steuer beim Verkauf abziehen (vereinfacht)</label></div></div>`;
+      if (IS_PC) return `<div class="invpc"><section><h3>Zinseszins</h3>${secCalc}</section><section><h3>Anlagen im Vergleich</h3>${secCmp}</section><section><h3>Anlage-Ziele</h3>${invGoalsHtml(v)}</section></div>`;
+      return t==="calc" ? secCalc : t==="cmp" ? secCmp : invGoalsHtml(v); })()}</div>
+    <p class="small muted invnote">Rechenbeispiele ohne Gewähr – keine Anlageberatung. Zinsen und Kurse schwanken, bei Aktien und ETFs sind auch Verluste möglich.</p>`;
+}
+// start page tile: the three views, switchable
+function invTile(){
+  const v=inv(), t=UI.invTileTab || (v.goals.length?"goals":"calc"); let body="";
+  if (t==="goals" && v.goals.length){ const g=v.goals[0], R=invGoal(g);
+    body=`<div class="invgh"><b>${esc(g.name||"Anlage-Ziel")}</b><span class="invchip ${R.ok?"ok":"warn"}">${R.ok?"im Plan ✓":"hinter dem Plan"}</span></div><div class="small muted">${invE(R.last)} von ${invE(g.T)} · ${invE(R.m)} im Monat</div><div class="track" style="margin-top:8px;height:9px"><div class="fill" style="width:${Math.min(100,R.last/g.T*100)}%;background:var(--accent)"></div></div>`; }
+  else if (t==="cmp"){ const D=invCmpData(v.cmp);
+    body=`<div class="small muted">${invE(v.cmp.m)} im Monat · ${v.cmp.y} Jahre</div><div class="invbig s">${invE(Math.min(...D.map(x=>x.end)))} – ${invE(Math.max(...D.map(x=>x.end)))}</div><svg class="invch s" viewBox="0 0 300 60" preserveAspectRatio="none">${invLines(D,300,60,true)}</svg><div class="invleg">${D.map(x=>`<span><i style="background:${INV_COL[x.i]}"></i>${INV_NAME[x.i]}</span>`).join("")}</div>`; }
+  else { const c=v.calc, d=invRun(c.P,c.m,c.r,c.y), L=d[d.length-1];
+    body=`<div class="invbig s">${invE(L[1])}</div><div class="small muted">${invE(c.m)} im Monat · ${c.y} Jahre · ${invPct(c.r)} % · davon ${invE(L[1]-L[0])} Zinsen</div><svg class="invch s" viewBox="0 0 300 56" preserveAspectRatio="none">${invArea(d,300,56)}</svg>`; }
+  return `<div class="card invtile"><div class="card-head"><h2>${hIc("piggy")}Sparen &amp; Anlegen</h2><button class="link" data-invopen="1">Öffnen ${ic("right",16)}</button></div>
+    <div class="invsub s">${[["calc","Zinseszins"],["cmp","Vergleich"],["goals","Ziel"]].map(([k,l])=>`<button data-invtile="${k}" class="${t===k||(k==="calc"&&t==="goals"&&!v.goals.length)?"on":""}">${l}</button>`).join("")}</div>
+    ${t==="goals"&&!v.goals.length?`<p class="small muted" style="margin:6px 0">Noch kein Anlage-Ziel. Leg eins an, dann siehst du hier Plan gegen Wirklichkeit.</p><button class="btn small" data-invopen="goals">+ Ziel anlegen</button>`:body}</div>`;
+}
+function invLive(key, raw){
+  const v=parseAmt(String(raw)); if (!isFinite(v)) return;
+  invSet(o=>{ const [a,b,c]=key.split("."); if (c!=null) o[a][b][+c]=v; else o[a][b]=v; });
+  document.querySelectorAll(`[data-inv="${key}"]`).forEach(x=>{ if (x!==document.activeElement || x.type==="range"){ if (x.type==="range") x.value=v; else if (x!==document.activeElement) x.value=invPct(v); } });
+  const w=inv(), o=$(key.startsWith("cmp")?"invOutB":"invOutA"); if (o) o.innerHTML = key.startsWith("calc") ? invCalcOut(w.calc) : key.startsWith("plan") ? invPlanOut(w.plan) : invCmpOut(w.cmp);
+}
+document.addEventListener("input", e=>{ const k=e.target.dataset && e.target.dataset.inv; if (!k) return; if (e.target.type==="range") invLive(k, e.target.value); else if (!/cmp\.r\./.test(k)) invLive(k, e.target.value); });
+document.addEventListener("change", e=>{ const t=e.target;
+  if (t.dataset && t.dataset.inv){ invLive(t.dataset.inv, t.value); if (t.type!=="range") t.blur(); invSet(()=>{}, true); return; }
+  if (t.dataset && t.dataset.invck){ invSet(o=>{ o.cmp[t.dataset.invck]=t.checked; }, true); const o=$("invOutB"); if (o) o.innerHTML=invCmpOut(inv().cmp); return; } });
+document.addEventListener("click", async e=>{
+  const tb=e.target.closest("[data-invtab]"); if (tb){ UI.invTab=tb.dataset.invtab; renderInvest(); return; }
+  const sb=e.target.closest("[data-invsub]"); if (sb){ UI.invSub=sb.dataset.invsub; renderInvest(); return; }
+  const tt=e.target.closest("[data-invtile]"); if (tt){ UI.invTileTab=tt.dataset.invtile; const c=tt.closest(".invtile"); if (c) c.outerHTML=invTile(); return; }
+  const op=e.target.closest("[data-invopen]"); if (op){ UI.invTab = op.dataset.invopen==="goals" ? "goals" : (UI.invTileTab==="goals"?"goals":UI.invTileTab==="cmp"?"cmp":"calc"); if (op.dataset.invopen==="goals") UI.invNewGoal={}; accGo("invest"); return; }
+  if (e.target.closest("[data-invgnew]")){ UI.invNewGoal={}; renderInvest(); setTimeout(()=>{ const n=$("invgN"); if (n) n.focus(); },30); return; }
+  if (e.target.closest("[data-invgcancel]")){ UI.invNewGoal=null; renderInvest(); return; }
+  if (e.target.closest("[data-invgoalfrom]")){ const p=inv().plan; UI.invTab="goals"; UI.invNewGoal={T:p.T, r:p.r, P:p.P, until:numYm(ymNum(ymOf(new Date()))+Math.round(p.y*12))}; renderInvest(); setTimeout(()=>{ const n=$("invgN"); if (n) n.focus(); },30); return; }
+  if (e.target.closest("[data-invgsave]")){ const T=parseAmt($("invgT").value), r=parseAmt($("invgR").value), P=parseAmt($("invgP").value||"0"), U=$("invgU").value;
+    if (!(T>0)){ toast("Bitte ein Ziel in Euro eingeben"); return; } if (!U || U<=ymOf(new Date())){ toast("Bitte einen Monat in der Zukunft wählen"); return; }
+    const g={id:newId(), name:$("invgN").value.trim()||"Anlage-Ziel", T:Math.round(T*100)/100, until:U, r:isFinite(r)?r:0, P:isFinite(P)?P:0, from:ymOf(new Date()), real:[]};
+    document.activeElement && document.activeElement.blur(); UI.invNewGoal=null; invSet(o=>{ o.goals=[...o.goals, g]; }, true); renderInvest(); toast("Anlage-Ziel angelegt"); return; }
+  const gd=e.target.closest("[data-invgdel]"); if (gd){ if (gd.dataset.armed!=="1"){ gd.dataset.armed="1"; gd.classList.add("arm"); gd.textContent="Löschen?"; setTimeout(()=>{ if (gd.isConnected){ gd.dataset.armed=""; gd.classList.remove("arm"); gd.textContent="✕"; } },3000); return; }
+    const i=+gd.dataset.invgdel; invSet(o=>{ o.goals=o.goals.filter((_,k)=>k!==i); }, true); renderInvest(); toast("Ziel gelöscht"); return; }
+  const ro=e.target.closest("[data-invrealok]"); if (ro){ const i=+ro.dataset.invrealok, inp=document.querySelector(`[data-invreal="${i}"]`), v=parseAmt(inp&&inp.value);
+    if (!isFinite(v)){ toast("Bitte den heutigen Wert eingeben"); return; } inp.blur();
+    invSet(o=>{ const g=o.goals[i]; const d=isoToday(); g.real=[...(g.real||[]).filter(x=>x.d!==d), {d, v:Math.round(v*100)/100}]; }, true); renderInvest(); toast("Eingetragen"); return; }
+});
+document.addEventListener("keydown", e=>{ if (e.key==="Enter" && e.target.dataset && e.target.dataset.invreal!=null){ e.preventDefault(); const b=document.querySelector(`[data-invrealok="${e.target.dataset.invreal}"]`); if (b) b.click(); } if (e.key==="Enter" && e.target.closest && e.target.closest(".invform")){ e.preventDefault(); const b=document.querySelector("[data-invgsave]"); if (b) b.click(); } });
 /* ---------- start page blocks: your own order, each can be hidden ---------- */
-const HOME_BLOCKS = [["cash","Bargeld"],["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["debts","Kredite & Schulden"],["gemeinsam","Gemeinsam"],["recent","Letzte Buchungen"],
+const HOME_BLOCKS = [["cash","Bargeld"],["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["invest","Sparen & Anlegen"],["debts","Kredite & Schulden"],["gemeinsam","Gemeinsam"],["recent","Letzte Buchungen"],
   ["perday","Noch pro Tag"],["week","Diese Woche fällig"],["topcat","Top-Kategorien"],["compare","Vergleich zum Vormonat"],["trend","Kontoverlauf"],["abos","Abos"],["biggest","Größte Ausgaben"],["todo","Zu erledigen"]];
 // tiles added later start switched off (on the phone: hidden, on the PC: minimized), also for people who already use the app
 const HOME_LATER = ["perday","week","topcat","compare","trend","abos","biggest","todo"];
@@ -5919,7 +6060,7 @@ function qrSvg(text, px){
 const SP_PAGES = {
   konten:["Konten & Spaces","wallet"], budgets:["Monatsbudgets","target"], schulden:["Kredite & Schulden","bank"], backup:["Backup","save"],
   profil:["Profil","user"], sync:["Abgleich & Updates","cloud"], notify:["Benachrichtigungen","bell"], steuer:["Steuer & Einkommen","receipt"],
-  start:["Startseite","home"], laeden:["Deine Läden","cart"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"], farben:["Farben","palette"], recht:["Rechtliches","doc"], abos:["Abos & Verträge","repeat"], export:["Export","arrowDown"], sprache:["Sprache & Währung","book"], neu:["Was ist neu","spark"], hilfe:["Hilfe","insight"], feedback:["Feedback","heart"], speicher:["Belege & Speicher","camera"], geraete:["Geräte","phone"], get amt(){ return [(GPROF[S.settings&&S.settings.work]||{}).tile||"Leistung & Amt","cash"]; }
+  start:["Startseite","home"], laeden:["Deine Läden","cart"], sicherheit:["Sicherheit","shield"], kategorien:["Kategorien","tag"], farben:["Farben","palette"], recht:["Rechtliches","doc"], abos:["Abos & Verträge","repeat"], invest:["Sparen & Anlegen","piggy"], export:["Export","arrowDown"], sprache:["Sprache & Währung","book"], neu:["Was ist neu","spark"], hilfe:["Hilfe","insight"], feedback:["Feedback","heart"], speicher:["Belege & Speicher","camera"], geraete:["Geräte","phone"], get amt(){ return [(GPROF[S.settings&&S.settings.work]||{}).tile||"Leistung & Amt","cash"]; }
 };
 function spSummary(k){
   const st=S.settings, y=UI.ym.slice(0,4);
@@ -5949,13 +6090,13 @@ function profStats(){ const n=S.tx.length, c=abCfg(); const bk = c.last ? (()=>{
 var ACC = { tab:"geld", open:new Set(), nodes:{}, built:"", q:"" };
 const ACC_TABS = [["geld","Geld"],["anpassen","Anpassen"],["sicherheit","Sicherheit"],["hilfe","Hilfe"]];
 function accTabKeys(t){
-  if (t==="geld") return ["konten","budgets","schulden", ...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]), "abos","export"];
+  if (t==="geld") return ["konten","budgets","schulden", ...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]), "abos","invest","export"];
   if (t==="anpassen") return ["dark","farben","sprache","kategorien","start","laeden"];
   if (t==="sicherheit") return ["sicherheit", ...(SYNCABLE||window.AndroidBridge?["sync","geraete"]:[]), "backup", ...(CAN_NOTIFY?["notify"]:[]), "speicher"];
   return ["neu","hilfe","wiz","feedback","recht"];
 }
 const accTabOf = k => (ACC_TABS.find(([t])=>accTabKeys(t).includes(k))||["geld"])[0];
-const ACC_COL={konten:"#3d63a8",budgets:"#c27c0e",schulden:"#7a5bc2",steuer:"#d4813a",amt:"#3d63a8",abos:"#0f766e",export:"#047857",dark:"#34413b",farben:"#d14d72",sprache:"#65a30d",kategorien:"#c0497a",start:"#1a7a5c",laeden:"#0f8a8a",sicherheit:"#b23a3a",sync:"#2f7fb8",geraete:"#0e7490",backup:"#2e9c74",notify:"#e0902b",speicher:"#4b5563",neu:"#15803d",hilfe:"#0e7490",wiz:"#1a7a5c",feedback:"#4d7c0f",recht:"#4b5563"};
+const ACC_COL={invest:"#c98a12",konten:"#3d63a8",budgets:"#c27c0e",schulden:"#7a5bc2",steuer:"#d4813a",amt:"#3d63a8",abos:"#0f766e",export:"#047857",dark:"#34413b",farben:"#d14d72",sprache:"#65a30d",kategorien:"#c0497a",start:"#1a7a5c",laeden:"#0f8a8a",sicherheit:"#b23a3a",sync:"#2f7fb8",geraete:"#0e7490",backup:"#2e9c74",notify:"#e0902b",speicher:"#4b5563",neu:"#15803d",hilfe:"#0e7490",wiz:"#1a7a5c",feedback:"#4d7c0f",recht:"#4b5563"};
 function accTitle(k){ return k==="dark" ? "Dunkelmodus" : k==="wiz" ? "Einrichtung & Rundgang" : k==="farben" ? "Farben" : (SP_PAGES[k]||[k])[0]; }
 function accIcon(k){ return k==="dark" ? "spark" : k==="wiz" ? "check" : (SP_PAGES[k]||[,"dots"])[1]; }
 function accSub(k){
@@ -5964,6 +6105,7 @@ function accSub(k){
   if (k==="wiz") return "Noch einmal Schritt für Schritt einrichten";
   if (k==="sync") return !SYNC.token ? "Abgleich aus" : SYNC.state==="ok" ? "Abgeglichen"+(SYNC.last?" · "+new Date(SYNC.last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}):"") : SYNC.state==="pending" ? "wartet" : "nicht erreichbar";
   if (k==="sprache") return `${(LANGS.find(x=>x[0]===LANG)||LANGS[0])[1]} · €${st.cur2?" · "+st.cur2:""}`;
+  if (k==="invest"){ const g=(st.inv&&st.inv.goals)||[]; return g.length ? `${g.length} Anlage-${g.length===1?"Ziel":"Ziele"}` : "Zinseszins · Vergleich · Ziele"; }
   if (k==="abos"){ const n=Object.values(st.abos||{}).filter(a=>a&&a.end).length; return n?`${n} mit Kündigungsfrist`:"Fristen im Blick"; }
   if (k==="export") return "Bericht · Excel";
   if (k==="neu") return "v"+curVerShort();
@@ -5980,7 +6122,7 @@ function accSub(k){
 const liveSp = k => [...document.querySelectorAll(k ? `#v-more [data-sp="${k}"]` : "#v-more [data-sp]")].filter(el=>!el.closest(".cubestage"));
 function accPrep(k){
   if (k==="sync") renderUpd(); if (k==="farben") renderColorEd(); if (k==="amt") renderAmtEd(); if (k==="recht") renderRecht();
-  if (k==="abos") renderAbos(); if (k==="export") renderExport(); if (k==="sprache") renderSprache(); if (k==="neu") renderNeu(); if (k==="hilfe") renderHilfe();
+  if (k==="abos") renderAbos(); if (k==="invest") renderInvest(); if (k==="export") renderExport(); if (k==="sprache") renderSprache(); if (k==="neu") renderNeu(); if (k==="hilfe") renderHilfe();
   if (k==="feedback") renderFeedback(); if (k==="speicher") renderSpeicher(); if (k==="geraete") renderGeraete();
 }
 function accMount(k){

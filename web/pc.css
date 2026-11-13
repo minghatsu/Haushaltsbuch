@@ -680,3 +680,6 @@ html.pc .pcsr .sabody .fxchips{display:grid;grid-template-columns:repeat(8,1fr);
 html.pc .pcsr .sabody .fxchips button{display:flex;align-items:center;justify-content:center;gap:6px}
 html.pc .pcsr .sabody .in{border-radius:10px}
 html.pc .pcsr .sabody .edit-row{border-radius:12px}
+/* Sparen & Anlegen am PC: drei Spalten in einem Fenster, ohne eigene Hintergrundkarte */
+html.pc .pcsr .sabody:has(#investEd){background:none;box-shadow:none;padding:0}
+html.pc .pcsr .sabody #investEd .invnote{margin-top:14px}
