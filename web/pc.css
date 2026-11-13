@@ -686,3 +686,7 @@ html.pc .pcsr .sabody #investEd .invnote{margin-top:14px}
 
 html.pc .pcsnone{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:start}
 html.pc .pcsnone>*{margin:0}
+/* Bewegung am PC: Kacheln heben sich leicht beim Überfahren */
+html.pc #v-home .hblock>.card{transition:transform .2s cubic-bezier(.3,.8,.3,1),box-shadow .2s}
+html.pc #v-home .hblock:not(.drag)>.card:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.10)}
+html.pc .pcsli,html.pc .pcsi{transition:background .15s,transform .15s}html.pc .pcsli:hover{transform:translateX(2px)}

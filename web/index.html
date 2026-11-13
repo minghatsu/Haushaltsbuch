@@ -667,6 +667,16 @@ textarea.in{font-family:inherit;line-height:1.45}
 .invpc h3{margin:0 0 10px;font:800 17px var(--f-display)}
 .invpc .invgrid{grid-template-columns:1fr}
 .invpc .invgoal{background:var(--sunk)}
+@keyframes ain{from{opacity:0;transform:translate(calc(var(--dx,0)*22px),14px) scale(.985)}}
+.ain{animation:ain .48s cubic-bezier(.3,1.15,.5,1) both;animation-delay:calc(var(--ai,0)*55ms)}
+@keyframes rnew{from{opacity:0;transform:translateY(-10px) scale(.96);background:var(--accent-soft)}60%{background:var(--accent-soft)}}
+.rnew{animation:rnew .6s cubic-bezier(.3,1.3,.5,1) both}
+.rghost{transition:transform .45s cubic-bezier(.4,0,.2,1),opacity .4s;background:var(--surface);border-radius:14px;overflow:hidden}
+.rghost.go{transform:translateX(56px);opacity:0}
+@keyframes tpop{0%{transform:scale(1)}35%{transform:scale(1.14)}70%{transform:scale(.97)}100%{transform:scale(1)}}
+.tpop{animation:tpop .42s cubic-bezier(.3,1.6,.5,1)}
+.track .fill,.bar>i{transition:width .8s cubic-bezier(.3,.8,.3,1)}
+@media (prefers-reduced-motion:reduce){.ain,.rnew,.tpop{animation:none!important}.rghost{display:none}}
 .flagi{width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:-5px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
 .zbon{position:relative;margin:8px 0 2px}
 .zbh{display:flex;align-items:center;gap:12px;width:100%;border:0;background:var(--sunk);border-radius:16px;padding:10px 12px;text-align:left;color:var(--fg);font:inherit;cursor:pointer}
@@ -8938,7 +8948,7 @@ $("loginGo").onclick = doLogin;
     const target = go && nbKey;
     p = target ? (dir<0?-1:1) : 0; draw();
     setTimeout(()=>{ const k=nbKey;
-      if (target){ MEM[UI.view]=sY; UI.view=k; render.keep=true; render(); sY=nY; window.scrollTo({top:nY}); }
+      if (target){ MEM[UI.view]=sY; UI.view=k; if (window.ANIM) ANIM.skip=true; render.keep=true; render(); sY=nY; window.scrollTo({top:nY}); }
       // drop the copies only after the real page has been drawn, so nothing flickers
       requestAnimationFrame(()=>{ reset(); busy=false; });
     }, 310);
@@ -9625,6 +9635,67 @@ legalGate();
   db.collection("fixed").onSnapshot(q=>{ S.fixed=q.docs.map(d=>({id:d.id,...d.data()})); render(); }, onErr);
   db.collection("months").onSnapshot(q=>{ const m={}; q.docs.forEach(d=>m[d.id]=d.data()); S.months=m; render(); }, onErr);
   db.collection("debts").onSnapshot(q=>{ S.debts=q.docs.map(d=>({id:d.id,...d.data()})); render(); }, onErr);
+})();
+/* ---------- Bewegung (Stil B „lebendig“): Karten kommen nacheinander, Häkchen ploppen, neue Zeilen erscheinen, gelöschte rutschen raus ----------
+   Only transform/opacity, short; nothing at all with "reduce motion" switched on. */
+(function(){
+  const RM=matchMedia("(prefers-reduced-motion: reduce)");
+  const A={view:null, ym:null, rows:{}, pop:null, ghosts:[], fresh:{}};
+  const ROW="[data-edit],[data-pcsel]", rid=r=>r.dataset.edit||r.dataset.pcsel;
+  window.ANIM=A;
+  const order=["home","list","fix","shop","year","more"];
+  const liveView=()=>[...document.querySelectorAll("#v-"+UI.view)].find(e=>!e.closest(".cubestage"));
+  const vis=el=>el && !el.hidden && el.offsetParent!==null;
+  const outer=el=>!el.parentElement.closest(".hblock,.card,.pcac,.pctk,.invpc>section,.zcard,.pcsl,.pcsr");
+  function stagger(root, dx, tries){
+    const H=innerHeight*1.6, list=[...root.querySelectorAll(".hblock,.card,.pcac,.invpc>section,.zcard")].filter(c=>outer(c) && !c.closest(".cubestage") && c.offsetParent!==null && c.getBoundingClientRect().height>0);
+    // the page may still be on its way in (PC): try again a moment later
+    if (!list.length && (tries||0)<6){ setTimeout(()=>stagger(liveView()||root, dx, (tries||0)+1), 50); return; }
+    let i=0; for (const c of list){ const r=c.getBoundingClientRect(); if (r.top>H) continue; if (getComputedStyle(c).animationName!=="none" && !c.classList.contains("ain")) continue;
+      c.classList.remove("ain"); void c.offsetWidth; c.style.setProperty("--ai", Math.min(i++,10)); c.style.setProperty("--dx", dx); c.classList.add("ain");
+      setTimeout(()=>c.classList.remove("ain"), 1100); } }
+  function before(){
+    if (RM.matches) return; A.ghosts=[];
+    const v=liveView(); if (!vis(v)) return;
+    v.querySelectorAll(ROW).forEach(r=>{ if (r.closest(".sheet")) return; const b=r.getBoundingClientRect(); if (b.height>0 && b.bottom>0 && b.top<innerHeight) A.ghosts.push([rid(r), r, b]); });
+  }
+  function after(){
+    if (RM.matches){ A.view=UI.view; A.ym=UI.ym; return; }
+    const skip=A.skip; A.skip=false;
+    const v=liveView();
+    // page or month changed: the cards come in one after the other (from the side you went to)
+    if (UI.view!==A.view || UI.ym!==A.ym){
+      const dx = UI.view!==A.view ? (order.indexOf(UI.view)>=order.indexOf(A.view)?1:-1) : (A.ym && UI.ym<A.ym?-1:1);
+      const first=A.view===null; A.view=UI.view; A.ym=UI.ym; A.rows={};
+      if (!skip && !first && vis(v)) requestAnimationFrame(()=>stagger(v, UI.view!==A.prevView?dx:dx*0.5));
+      A.prevView=UI.view;
+      if (vis(v)) A.rows[UI.view]=new Set([...v.querySelectorAll(ROW)].map(rid));
+      return; }
+    if (!vis(v)) return;
+    // same page: new bookings pop in, removed ones slide out
+    const now=[...v.querySelectorAll(ROW)], ids=new Set(now.map(rid)), seen=A.rows[UI.view], T=Date.now();
+    if (seen) for (const r of now) if (!seen.has(rid(r))) A.fresh[rid(r)]=T;
+    for (const r of now){ const f=A.fresh[rid(r)]; if (f && T-f<500 && r.offsetParent && !r.classList.contains("rnew")){ r.classList.add("rnew"); setTimeout(()=>r.classList.remove("rnew"),700); } }
+    for (const [id, el, b] of A.ghosts){ if (ids.has(id) || !id) continue; const g=el.cloneNode(true); g.removeAttribute("data-edit"); g.removeAttribute("data-pcsel"); g.classList.add("rghost");
+      Object.assign(g.style,{position:"fixed",left:b.left+"px",top:b.top+"px",width:b.width+"px",height:b.height+"px",margin:0,zIndex:50,pointerEvents:"none"});
+      document.body.appendChild(g); requestAnimationFrame(()=>g.classList.add("go")); setTimeout(()=>g.remove(),520); }
+    A.ghosts=[]; A.rows[UI.view]=ids;
+    popNow(); }
+  // ticks: remember what was tapped, make its new state pop after the redraw
+  const TICK='[data-pay]:not(button.seg *),[data-zck],[data-pcfid],[data-goaltick],[data-jlt]';
+  document.addEventListener("click", e=>{ if (RM.matches) return; const t=e.target.closest(TICK); if (!t) return; const a=[...t.attributes].find(x=>/^data-(pay|zck|pcfid|goaltick|jlt)$/.test(x.name)); if (!a) return;
+    A.pop={sel:`[${a.name}="${CSS.escape(a.value)}"]`, at:Date.now()}; setTimeout(popNow, 60); }, true);
+  function popNow(){ const p=A.pop; if (!p || Date.now()-p.at>1500) return; A.pop=null;
+    document.querySelectorAll(p.sel).forEach(el=>{ if (!el.offsetParent) return; el.classList.remove("tpop"); void el.offsetWidth; el.classList.add("tpop"); setTimeout(()=>el.classList.remove("tpop"),500); }); }
+  // lists are also redrawn without render() (e.g. right after saving): watch them, so new rows pop in there too
+  function rowsCheck(){ if (RM.matches || UI.view!==A.view) return; const v=liveView(); if (!vis(v)) return;
+    const now=[...v.querySelectorAll(ROW)], seen=A.rows[UI.view], T=Date.now(); if (!seen){ A.rows[UI.view]=new Set(now.map(rid)); return; }
+    for (const r of now) if (!seen.has(rid(r))) A.fresh[rid(r)]=T;
+    for (const r of now){ const f=A.fresh[rid(r)]; if (f && T-f<500 && r.offsetParent && !r.classList.contains("rnew")){ r.classList.add("rnew"); setTimeout(()=>r.classList.remove("rnew"),700); } }
+    A.rows[UI.view]=new Set(now.map(rid)); }
+  A.check=rowsCheck;
+  let moT=0; new MutationObserver(()=>{ if (!moT) moT=requestAnimationFrame(()=>{ moT=0; try { rowsCheck(); } catch(_){} }); }).observe(document.body, {childList:true, subtree:true});
+  const _r=render; render=function(...a){ try { before(); } catch(_){} const x=_r.apply(this,a); try { after(); } catch(e){ console.warn("anim", e); } return x; };
 })();
 /*PC-JS*/
 })();
