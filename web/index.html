@@ -1312,7 +1312,7 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
 
 <div class="backdrop" id="addBg" hidden><div class="sheet addsheet" role="dialog" aria-label="Was möchtest du hinzufügen?"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><h2>Was möchtest du hinzufügen?</h2><button class="icon-btn" data-addclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <button class="addopt" data-addpick="hand"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span><span class="grow"><b>Von Hand eintragen</b><span class="small muted">Eine Ausgabe oder Einnahme</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
-  <button class="addopt" data-addpick="receipt"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span class="grow"><b>Quittung fotografieren</b><span class="small muted">Ein Einkauf – Betrag und Laden werden erkannt</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+  <button class="addopt" data-addpick="receipt"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span class="grow"><b>Beleg fotografieren</b><span class="small muted">Quittung, Rechnung oder Kontoauszug – wird erkannt</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
   <button class="addopt" data-addpick="import"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span class="grow"><b>Kontoauszug importieren</b><span class="small muted">CSV oder PDF von deiner Bank – viele Buchungen auf einmal</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
 </div></div>
 <div class="ptr" id="ptr" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg></div>
@@ -7012,6 +7012,11 @@ async function runScan(source, attachOnly, fresh){
       if (img){ const rv=await docReview(img, {}); if (!rv) return; if (rv.action==="retake") return runScan(source, attachOnly, fresh); img=rv.img; }
       if (attachOnly){ lines=[]; } else lines = await scanImageFile(img || f); }
     busy(false);
+    if (!attachOnly && img && typeof camReview==="function"){ try {
+      let L=lines||[], nb=true; if (canNativeOcr()){ scanWorking(true); try { const l2=await ocrDataUrl(img); if (l2 && l2.length){ L=l2; nb=false; } } catch(e){} scanWorking(false); }
+      const im=await loadImg(img), r=docClassify(L, im.naturalHeight/im.naturalWidth);
+      if (r && r.type && r.type!=="rcpt"){ if (!$("sheetBg").hidden) closeSheet(); camReview({type:r.type, img, lines:L, W:im.naturalWidth, H:im.naturalHeight, noBoxes:nb}); return; }
+    } catch(e){ scanWorking(false); } }
     if (fresh) openSheet("ausgabe");
     if (img){ UI.rcpt={state:"new", img}; renderRcptRow(); }
     if (attachOnly){ if (!img) toast("Das Foto konnte nicht übernommen werden"); return; }
@@ -7507,7 +7512,8 @@ function camEl(){
   document.body.appendChild(el); return el; }
 async function smartScan(opts){
   opts=opts||{}; CAM.opts=opts; CAM.forced=opts.type||null; CAM.type=null; CAM.last=null; CAM.info="";
-  if (!canLiveCam()) return smartScanFallback(opts);
+  // Android app: the same camera as "Foto ersetzen" (finds the edges itself), then the type is recognised
+  if (!canLiveCam() || (NATIVE_SCAN && !window.AndroidBridge.desktop)) return smartScanFallback(opts);
   const el=camEl();
   try { CAM.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}, width:{ideal:2560}, height:{ideal:1440}}, audio:false}); }
   catch(e){ toast("Kamera nicht erlaubt – du kannst sie in den Android-Einstellungen freigeben"); return smartScanFallback(opts); }
@@ -7568,8 +7574,10 @@ function scanWorking(on){ let el=$("camWork"); if (!el){ el=document.createEleme
 async function smartScanFallback(opts){
   try {
     let img=null, lines=null, noBoxes=false;
-    if (NATIVE_SCAN && !canNativeOcr()){ const res=await scanNative("camera"); if (!res) return; lines=Array.isArray(res)?res:(res.lines||[]); img=Array.isArray(res)?null:res.img; noBoxes=true;
-      if (img){ const rv=await docReview(img,{lines}); if (!rv) return; if (rv.action==="retake") return smartScanFallback(opts); img=rv.img; } }
+    if (NATIVE_SCAN && !window.AndroidBridge.desktop){ const res=await scanNative("camera"); if (!res) return; lines=Array.isArray(res)?res:(res.lines||[]); img=Array.isArray(res)?null:res.img; noBoxes=true;
+      if (img){ const rv=await docReview(img,{lines}); if (!rv) return; if (rv.action==="retake") return smartScanFallback(opts); img=rv.img;
+        // read the checked photo again, so the marked fields sit on the right lines
+        if (canNativeOcr()){ scanWorking(true); try { const l2=await ocrDataUrl(img); if (l2 && l2.length){ lines=l2; noBoxes=false; } } catch(e){} scanWorking(false); } } }
     else { const f=await new Promise(r=>{ const inp=$("scanFile"); inp.value=""; inp.onchange=()=>r(inp.files[0]||null); inp.click(); }); if (!f) return;
       try { img=await shrinkImage(f); } catch(e){}
       if (img){ const rv=await docReview(img,{}); if (!rv) return; if (rv.action==="retake") return smartScanFallback(opts); img=rv.img; }
