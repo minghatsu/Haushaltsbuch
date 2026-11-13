@@ -516,6 +516,13 @@ if (IS_PC){
     setTimeout(()=>b.classList.remove("ok"), 1400);
   });
 }
+/* header icons in one group, in a sensible order: refresh · light/dark · help · notifications (bell at the far right) */
+if (IS_PC){
+  const w=document.querySelector(".top .wrap");
+  if (w && !$("pcActs")){ const g=document.createElement("div"); g.id="pcActs"; g.className="pcacts";
+    ["pcRefresh","pcHelp","pcTheme","ptourQ","bellBtn"].forEach(id=>{ const e=$(id); if (e) g.appendChild(e); });
+    const st=$("settingsBtn"); if (st && st.parentElement===w) w.insertBefore(g, st); else w.appendChild(g); }
+}
 /* ---------- feedback inbox for the developer (only with the update key): all feedback from the app, with pictures ---------- */
 if (IS_PC){
   const FB={items:[], open:null, imgs:{}, last:0, busy:false};

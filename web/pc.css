@@ -715,7 +715,16 @@ html.pc #v-home .hblock>.card .card-head .link{color:var(--tcol2,var(--tcol,var(
 html.pc #v-home .hblock>.card b[style*="font-size:22px"],html.pc #v-home .hblock .invbig{color:var(--tcol2,var(--tcol,var(--fg)))}
 html.pc #v-home .hblock>.card .fstack div:first-child{background:var(--tcol)}
 
-/* Hilfe-Knopf rechts bei den anderen Symbolen */
-html.pc .top .ptq.roundbtn{width:50px;height:50px;margin:0;vertical-align:0;font-size:19px;background:var(--surface);color:var(--muted);box-shadow:var(--shadow)}
-html.pc .top .ptq.roundbtn:hover{transform:scale(1.06);color:var(--accent)}
-html.pc .top .ptq.roundbtn .badge{top:-2px;right:-2px}
+/* Kopfzeile · Glasleiste: alles in einer schwebenden, durchscheinenden Leiste, die beim Scrollen oben bleibt */
+html.pc .top{position:sticky;top:0;z-index:30;padding-top:12px!important}
+html.pc .top .wrap{margin:0 20px;min-height:72px!important;padding:10px 14px!important;border-radius:26px;background:color-mix(in srgb,var(--surface) 72%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 10px 30px -18px rgba(0,0,0,.35),inset 0 0 0 1px color-mix(in srgb,var(--fg) 7%,transparent)}
+html.pc .tabs{top:22px!important;background:transparent!important;box-shadow:none!important}
+html.pc .top .topav{width:48px!important;height:48px!important}
+html.pc .top #viewTitle{font-size:24px!important}
+html.pc .top .monthpill{box-shadow:none!important;background:var(--sunk)!important;border-radius:16px!important}
+html.pc .pcacts{display:flex;align-items:center;gap:2px;padding:4px;border-radius:18px;background:var(--sunk);flex:none}
+html.pc .pcacts .roundbtn{width:42px!important;height:42px!important;margin:0!important;background:transparent!important;box-shadow:none!important;border-radius:14px!important;transition:background .2s,transform .2s,color .2s}
+html.pc .pcacts .roundbtn:hover{background:var(--surface)!important;transform:none}
+html.pc .pcacts .ptq.roundbtn{font-size:18px;color:var(--muted)}
+html.pc .pcacts .ptq.roundbtn:hover{color:var(--accent)}
+html.pc .pcacts .badge{top:2px!important;right:2px!important}
