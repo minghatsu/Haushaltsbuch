@@ -2518,9 +2518,11 @@ function tourCard(end){ const el=$("tourBg"); const nm=S.settings.name, wl=(WORK
         <p>${wl?`<span>Du hast „${esc(wl)}“ gewählt.</span> `:""}<span>Ich zeig dir in ${TOUR.steps.length} kurzen Schritten, wo du was findest – passend zu dir.</span></p>
         <div class="tbot"><button class="tw" data-tour="go">Tour starten</button><button class="tg2" data-tour="close">Später – findest du unter Hilfe</button></div></div>`; }
 function tourOpen(){ TOUR.page=null; if (UI.view!=="home"){ UI.view="home"; render(); } TOUR.steps=tourSteps(); TOUR.i=-1; if (typeof spSheetClose==="function") try{ spSheetClose(); }catch(e){} tourCard(false); }
-function tourClose(){ const el=$("tourBg"); el.hidden=true; el.innerHTML=""; TOUR.i=-1; if (TOUR.page){ TOUR.page=null; toast("Wieder ansehen: „?“ oben neben dem Titel", null, null, 3500); } document.body.classList.remove("locked"); }
+function tourClose(){ const el=$("tourBg"); el.hidden=true; el.innerHTML=""; TOUR.i=-1; if (TOUR.page){ TOUR.page=null; toast(IS_PC?"Wieder ansehen: „?“ oben rechts":"Wieder ansehen: „?“ oben neben dem Titel", null, null, 3500); } document.body.classList.remove("locked"); }
+// visible = laid out; fixed buttons (the PC "+" button) have no offsetParent but are still on screen
+function tourVis(n){ return n.offsetParent!==null || (n.getClientRects().length>0 && getComputedStyle(n).visibility!=="hidden"); }
 function tourGo(i){ const el=$("tourBg");
-  if (i>=TOUR.steps.length){ if (TOUR.page){ TOUR.page=null; tourClose(); toast("Wieder ansehen: „?“ oben neben dem Titel", null, null, 3500); return; } tourCard(true); return; }
+  if (i>=TOUR.steps.length){ if (TOUR.page){ TOUR.page=null; tourClose(); toast(IS_PC?"Wieder ansehen: „?“ oben rechts":"Wieder ansehen: „?“ oben neben dem Titel", null, null, 3500); return; } tourCard(true); return; }
   const tv=TOUR.page||"home"; if (UI.view!==tv){ UI.view=tv; render(); }
   TOUR.i=i; const s=TOUR.steps[i];
   el.className="tourbg spot"; el.hidden=false; document.body.classList.add("locked");
@@ -2528,12 +2530,12 @@ function tourGo(i){ const el=$("tourBg");
     <div class="tin">${s.p.map(x=>`<p>${esc(x)}</p>`).join("")}<div class="trow"><button class="tskip" data-tour="close">${TOUR.page?"Überspringen":"Beenden"}</button>
     <span class="tdots">${TOUR.steps.map((_,k)=>`<i class="${k===i?"on":""}"></i>`).join("")}</span>
     <span class="tnav">${i>0?`<button class="tback" data-tour="back" aria-label="Zurück">‹</button>`:""}<button class="tnext" data-tour="next">${i===TOUR.steps.length-1?"Fertig":"Weiter"}</button></span></div></div></div>`;
-  const t=[...document.querySelectorAll(s.sel)].find(n=>n.offsetParent!==null);
+  const t=[...document.querySelectorAll(s.sel)].find(tourVis);
   if (t && !t.closest(".tabs")){ const r=t.getBoundingClientRect(), nav=document.querySelector(".tabs"), nb=nav?nav.getBoundingClientRect().height:0;
-    window.scrollTo({top:Math.max(0, scrollY+r.top-Math.max(80,(innerHeight-nb-r.height)/2))}); }
+    window.scrollTo({top:Math.max(0, scrollY+r.top-Math.max(IS_PC?112:80,(innerHeight-nb-r.height)/2))}); }
   requestAnimationFrame(()=>requestAnimationFrame(tourPlace)); }
 function tourPlace(){ if (TOUR.i<0) return; const el=$("tourBg"), s=TOUR.steps[TOUR.i], ring=el.querySelector(".tring"), bub=el.querySelector(".tbub"); if (!ring||!bub) return;
-  const t=[...document.querySelectorAll(s.sel)].find(n=>n.offsetParent!==null);
+  const t=[...document.querySelectorAll(s.sel)].find(tourVis);
   const W=innerWidth, H=innerHeight;
   if (!t){ ring.style.cssText="left:50%;top:50%;width:0;height:0"; bub.style.cssText=`left:16px;right:16px;top:${H/2-120}px`; return; }
   const r=t.getBoundingClientRect(), pad=8, round=t.matches(".tab")?Math.max(r.width,r.height)/2+pad:24;
@@ -2592,13 +2594,13 @@ const PTOUR_FN=()=>({
     {sel:"#setQ", ic:"insight", t:"Suchen", p:["Schneller als blättern: eintippen, was du suchst – z. B. „Backup“ oder „Budget“."]},
     {sel:"#pcsL,#setTabs", ic:"sliders", t:"Bereiche", p:[IS_PC?"Links wählen, rechts erscheint der Inhalt.":"Geld, Anpassen, Sicherheit und Hilfe – darunter klappen die Punkte auf.", "Geld: Konten, Budgets, Abos, Sparen & Anlegen. Anpassen: Farben, Sprache, Kategorien."]},
     {sel:'[data-pcset="geraete"],[data-acctab="sicherheit"]', ic:"phone", t:"Geräte & Sicherheit", p:["Handy und PC koppeln (bis zu 5 Geräte), App-Sperre und Backup findest du hier."]},
-    {sel:'[data-acctab="hilfe"],#pcHelp', ic:"insight", t:"Hilfe", p:["Fragen und Antworten, die große Tour und diese kurzen Seiten-Touren zum erneuten Ansehen."]},
+    {sel:IS_PC?'#ptourQ':'[data-acctab="hilfe"]', ic:"insight", t:"Hilfe", p:[IS_PC?"Das „?“ oben rechts: Tour zu jeder Seite, Fragen und Antworten, Feedback und was neu ist.":"Fragen und Antworten, die große Tour und diese kurzen Seiten-Touren zum erneuten Ansehen."]},
   ]},
 });
 let PTOUR_C=null; const PTOUR=new Proxy({}, {get:(_,k)=>(PTOUR_C||(PTOUR_C=PTOUR_FN()))[k], ownKeys:()=>Reflect.ownKeys(PTOUR_C||(PTOUR_C=PTOUR_FN())), getOwnPropertyDescriptor:(_,k)=>({enumerable:true,configurable:true,value:(PTOUR_C||(PTOUR_C=PTOUR_FN()))[k]})});
 
 const ptSeen = () => { try { return JSON.parse(localStorage.getItem("hb-ptour")||"{}"); } catch(_){ return {}; } };
-function ptourOpen(v){ const P=PTOUR[v]; if (!P) return; const steps=P.s.filter(s=>[...document.querySelectorAll(s.sel)].some(n=>n.offsetParent!==null && !n.closest(".cubestage")));
+function ptourOpen(v){ const P=PTOUR[v]; if (!P) return; const steps=P.s.filter(s=>[...document.querySelectorAll(s.sel)].some(n=>tourVis(n) && !n.closest(".cubestage")));
   if (!steps.length) return; try { const o=ptSeen(); o[v]=1; localStorage.setItem("hb-ptour", JSON.stringify(o)); } catch(_){}
   TOUR.page=v; TOUR.steps=steps; tourGo(0); }
 function ptourAuto(){ if (BG_RUN || TOUR.i>=0 || wizShould() || !PTOUR[UI.view] || ptSeen()[UI.view] || document.querySelector(".backdrop:not([hidden]),#tourBg:not([hidden])")) return;
