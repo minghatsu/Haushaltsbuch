@@ -1187,6 +1187,9 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .zno{width:42px;height:54px;border-radius:8px;background:#FDE8E3;display:grid;place-items:center;font-size:18px;flex:none}.zbon.none{outline:2px solid #e8a090}
 .zpay{display:flex;gap:6px;margin-top:8px}.zpay button{flex:1;border:0;border-radius:10px;background:var(--sunk);padding:8px 4px;font:inherit;font-weight:700;font-size:13px;color:var(--muted)}.zpay button.on{background:var(--accent);color:#fff}.zpay .zre{flex:none;background:none;color:var(--muted);font-size:12.5px}
 .zex{background:#FFF4D6;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:12.5px}
+.ctd{max-width:320px;margin:8px auto 4px}.ctdt{display:flex;justify-content:center;align-items:baseline;gap:6px;font-size:13px;color:var(--muted)}.ctdt b{font:800 18px ui-monospace,monospace;color:var(--fg);font-variant-numeric:tabular-nums}
+.ctdb{height:8px;border-radius:5px;background:var(--sunk);overflow:hidden;margin-top:6px}.ctdb i{display:block;height:100%;width:0;background:var(--accent);border-radius:5px;transition:width 1s linear}
+.ctd.late .ctdt b{color:#c2410c}.ctd.late .ctdb i{background:#c2410c}
 .zdlgbg{position:fixed;inset:0;z-index:300;background:rgba(10,20,15,.35);display:grid;place-items:center;opacity:0;transition:opacity .18s}.zdlgbg.show{opacity:1}
 .zdlg{background:var(--surface);border-radius:20px;padding:20px;width:min(460px,92vw);max-height:86vh;overflow:auto;box-shadow:0 30px 70px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:8px}.zdlg h2{margin:0 0 2px;font-size:20px}
 .zdo{display:flex;align-items:center;gap:10px;background:var(--sunk);border-radius:12px;padding:10px 12px;cursor:pointer}.zdo input{width:18px;height:18px;accent-color:var(--accent)}
@@ -8897,6 +8900,19 @@ async function shortMake(){   // this device is coupled: put its long code into 
   const op={h:b64u((await crypto.subtle.sign("HMAC", K.mac, new TextEncoder().encode("sp\u0000code"))).slice(0,24)), b:await spEnc(K,{i:"code", d:{code:long}})};
   await spRequest(box,"push","",{ops:[op]});
   SHORT={code, box, t0:Date.now()}; SHORT_T=setTimeout(shortDrop, 10*60*1000); return SHORT; }
+/* countdown for every short code: minutes:seconds counting down and a bar that slowly fills up */
+const CTD_LEN=10*60*1000;
+const ctdHtml=(t0,kind)=>`<div class="ctd" data-ctd="${t0||""}" data-ctdk="${kind}" ${t0?"":"hidden"}><div class="ctdt"><span>gilt noch</span><b>10:00</b></div><div class="ctdb"><i></i></div></div>`;
+function ctdTick(){
+  for (const el of document.querySelectorAll("[data-ctd]")){ const t0=+el.dataset.ctd; if (!t0){ el.hidden=true; continue; } el.hidden=false;
+    const left=Math.max(0, CTD_LEN-(Date.now()-t0)), m=Math.floor(left/60000), sec=Math.floor(left/1000)%60;
+    el.querySelector("b").textContent=`${m}:${String(sec).padStart(2,"0")}`; el.querySelector(".ctdb i").style.width=`${Math.min(100,(1-left/CTD_LEN)*100).toFixed(2)}%`;
+    el.classList.toggle("late", left<60000);
+    if (!left && !el.dataset.done){ el.dataset.done="1"; el.querySelector("span").textContent="abgelaufen – neuer Code kommt"; el.querySelector("b").textContent="";
+      if (el.dataset.ctdk==="gm"){ Object.assign(GMS,{code:"",v:"",box:null}); if (UI.view==="gemeinsam") renderGemeinsam(); }
+      else if (el.dataset.ctdk==="pair"){ shortDrop(); try { pairUi(); } catch(_){} } } }
+}
+setInterval(()=>{ if (document.querySelector("[data-ctd]")) ctdTick(); }, 1000);
 // the same for a shared area: the short code opens a mailbox with the area's long code
 const GMS={code:"", v:"", box:null, t0:0, tm:0};
 async function gmShortMake(sp){
@@ -8906,7 +8922,7 @@ async function gmShortMake(sp){
   await spRequest(box,"create","",{vault:K.vault, auth:K.auth});
   const op={h:b64u((await crypto.subtle.sign("HMAC", K.mac, new TextEncoder().encode("sp\u0000code"))).slice(0,24)), b:await spEnc(K,{i:"code", d:{code:spCode(sp)}})};
   await spRequest(box,"push","",{ops:[op]});
-  Object.assign(GMS, {code, v:sp.v, box, t0:Date.now()}); GMS.tm=setTimeout(()=>{ if (GMS.box) spRequest(GMS.box,"wipe","",{}).catch(()=>{}); Object.assign(GMS,{code:"",v:"",box:null}); }, 10*60*1000);
+  Object.assign(GMS, {code, v:sp.v, box, t0:Date.now()}); GMS.tm=setTimeout(()=>{ if (GMS.box) spRequest(GMS.box,"wipe","",{}).catch(()=>{}); }, 10*60*1000);
 }
 function shortDrop(){ clearTimeout(SHORT_T); const s0=SHORT; SHORT=null; if (s0) spRequest(s0.box,"wipe","",{}).catch(()=>{}); }
 async function shortFetch(code){   // the new device: open the mailbox, take the long code, delete the mailbox
@@ -8958,7 +8974,8 @@ function pairUi(){
         <div style="display:flex;gap:8px"><input class="in" id="pairSendCode" placeholder="z. B. 7KF2-QX9M-3T" autocapitalize="characters" autocomplete="off" spellcheck="false" style="font:700 18px var(--f-display);letter-spacing:.06em;text-align:center;flex:1;min-width:0"><button class="btn primary" id="pairSendGo">Koppeln</button></div></div>
       <p class="small" style="margin:12px 0 0;line-height:1.5">Oder öffne auf dem anderen Gerät <b>Einstellungen › Abgleich › Koppeln</b> und tippe diesen Code ein:</p>
       <div class="pshort" id="pairShort">${SHORT?esc(shortFmt(SHORT.code)):"…"}</div>
-      <p class="small muted" style="margin:0;text-align:center">Gilt 10 Minuten · <button class="link small" id="pairShortNew">Neuer Code</button></p>
+      <div id="pairCtd">${ctdHtml(SHORT?SHORT.t0:0,"pair")}</div>
+      <p class="small muted" style="margin:0;text-align:center"><button class="link small" id="pairShortNew">Neuer Code</button></p>
       <details class="pmore" ${UI.pmoreOpen?"open":""}><summary>QR-Code und Wiederherstellungs-Code</summary>
       <div class="pqr">${code?qrSvg(code,230):""}</div>
       <div class="pcode">${esc(code.replace(/(.{5})/g,"$1 ").trim())}</div>
@@ -8968,7 +8985,7 @@ function pairUi(){
   const t=$("loginTitle"); if (t) t.textContent = st==="show" ? "Weiteres Gerät koppeln" : st==="join"||st==="recv" ? "Mit anderem Gerät koppeln" : "Geräte koppeln";
   const sk=$("loginSkip"); if (sk) sk.hidden = !!SYNC.token;   /* already coupled: nothing to skip */
   if (st==="recv") pairRecvRun(); else pairRecvStop();
-  if (st==="show" && !SHORT && !UI.pshortBusy){ UI.pshortBusy=true; shortMake().then(()=>{ const e=$("pairShort"); if (e && SHORT) e.textContent=shortFmt(SHORT.code); }).catch(()=>{ const e=$("pairShort"); if (e) e.textContent="Server nicht erreichbar"; }).finally(()=>{ UI.pshortBusy=false; }); }
+  if (st==="show" && !SHORT && !UI.pshortBusy){ UI.pshortBusy=true; shortMake().then(()=>{ const e=$("pairShort"); if (e && SHORT) e.textContent=shortFmt(SHORT.code); const c=document.querySelector("#pairCtd [data-ctd]"); if (c && SHORT){ c.dataset.ctd=SHORT.t0; delete c.dataset.done; ctdTick(); } }).catch(()=>{ const e=$("pairShort"); if (e) e.textContent="Server nicht erreichbar"; }).finally(()=>{ UI.pshortBusy=false; }); }
 }
 /* Coupling the other way round (for a PC without camera): this device shows a QR code with a short-lived, empty
    mailbox on the server. The phone scans it and drops its pairing code there – encrypted with the key from the QR code.
@@ -9189,9 +9206,9 @@ function renderGemeinsam(){
     <div class="pqr">${qrSvg(spCode(sp),230)}</div>
     <div class="small muted" style="text-align:center;margin-top:12px">Ohne Kamera, z. B. am PC – diesen Code eintippen:</div>
     <div class="pcode gmshort" id="gmShort" style="margin-top:6px;text-align:center;font-size:26px;letter-spacing:.12em;font-family:ui-monospace,monospace">${GMS.code&&GMS.v===sp.v?esc(shortFmt(GMS.code)):"…"}</div>
-    <div class="small muted" id="gmShortT" style="text-align:center">gilt 10 Minuten</div>
+    <div id="gmCtd">${ctdHtml(GMS.code&&GMS.v===sp.v?GMS.t0:0,"gm")}</div>
     <div class="row-btns" style="margin-top:12px"><button class="btn" id="gmCopy">Code kopieren</button><button class="btn primary" data-gmstep="">Fertig</button></div></div>`;
-    if (!(GMS.code && GMS.v===sp.v && Date.now()-GMS.t0<9*60*1000)) gmShortMake(sp).then(()=>{ const e=$("gmShort"); if (e) e.textContent=GMS.code?shortFmt(GMS.code):"– (offline)"; }).catch(()=>{ const e=$("gmShort"); if (e) e.textContent="– (offline)"; });
+    if (!(GMS.code && GMS.v===sp.v && Date.now()-GMS.t0<CTD_LEN-5000)) gmShortMake(sp).then(()=>{ const e=$("gmShort"); if (e) e.textContent=GMS.code?shortFmt(GMS.code):"– (offline)"; const c=document.querySelector("#gmCtd [data-ctd]"); if (c && GMS.code){ c.dataset.ctd=GMS.t0; delete c.dataset.done; ctdTick(); } }).catch(()=>{ const e=$("gmShort"); if (e) e.textContent="– (offline)"; });
     return; }
   const TABS=[["over","Übersicht"],["exp","Ausgaben"],["goal","Sparziele"],["shop","Einkauf"],["share","Freigaben"]];
   const exps=Object.entries(L.docs).filter(([k])=>k.startsWith("x-")).map(([k,x])=>({id:k,...x})).sort((a,b)=>(b.d||"").localeCompare(a.d||""));
