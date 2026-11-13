@@ -2607,6 +2607,7 @@ function ptourAuto(){ if (BG_RUN || TOUR.i>=0 || wizShould() || !PTOUR[UI.view] 
   clearTimeout(ptourAuto.t); const v=UI.view; ptourAuto.t=setTimeout(()=>{ if (UI.view===v && TOUR.i<0 && !document.querySelector(".backdrop:not([hidden])")) ptourOpen(v); }, 900); }
 function ptourBtn(){ const t=$("viewTitle"); if (!t) return; let b=$("ptourQ"); const on=!!PTOUR[UI.view];
   if (!b){ b=document.createElement("button"); b.id="ptourQ"; b.className="ptq"; b.type="button"; b.innerHTML="?<i class=\"badge\" hidden></i>"; b.setAttribute("aria-label","Hilfe"); b.title="Hilfe: Tour, Fragen & Antworten, Feedback"; t.after(b); }
+  { const rf=document.documentElement.classList.contains("pc") && ($("pcRefresh")||$("pcTheme")); if (rf){ if (b.nextElementSibling!==rf) rf.before(b); b.classList.add("roundbtn"); } }
   b.hidden=false; const ib=$("pcInbox"), n=ib?Number((ib.querySelector(".badge")||{}).textContent)||0:0, bd=b.querySelector(".badge"); if (bd){ bd.hidden=!n; bd.textContent=n||""; } }
 // one help button: tour of this page, questions & answers, feedback, what's new (on the PC also the developer inbox)
 function helpMenu(){ let m=$("helpMenu"); if (m && !m.hidden){ m.hidden=true; return; }
