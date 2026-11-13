@@ -677,6 +677,9 @@ textarea.in{font-family:inherit;line-height:1.45}
 .tpop{animation:tpop .42s cubic-bezier(.3,1.6,.5,1)}
 .track .fill,.bar>i{transition:width .8s cubic-bezier(.3,.8,.3,1)}
 @media (prefers-reduced-motion:reduce){.ain,.rnew,.tpop{animation:none!important}.rghost{display:none}}
+.ptlist{margin:10px 0 14px}.ptlist>div{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.ptq{width:24px;height:24px;border-radius:50%;border:0;background:var(--accent-soft);color:var(--accent);font:900 13px var(--f-body);margin-left:8px;vertical-align:middle;cursor:pointer;flex:none;transition:transform .2s}.ptq:hover{transform:scale(1.12)}
+.hello b#viewTitle{display:inline}
 .flagi{width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:-5px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
 .zbon{position:relative;margin:8px 0 2px}
 .zbh{display:flex;align-items:center;gap:12px;width:100%;border:0;background:var(--sunk);border-radius:16px;padding:10px 12px;text-align:left;color:var(--fg);font:inherit;cursor:pointer}
@@ -2458,7 +2461,8 @@ const FAQ=[
   ["Ich habe eine neue Arbeit / bin arbeitslos geworden","Einstellungen › Steuer & Einkommen (oder die Kachel deiner Gruppe) › „Wie verdienst du dein Geld?“. Die App baut sich danach um."],
   ["Wie lösche ich alles?","Einstellungen › Backup › „Alle Daten löschen“."]];
 function renderHilfe(){ const el=$("hilfeEd"); if (!el) return; const o=UI.faqOpen;
-  el.innerHTML = `<button class="tourstart" data-tour="open"><span class="tico">${ic("spark",20)}</span><span><b>Tutorial ansehen</b><small>Kurze Tour durch die App – ca. 1 Minute</small></span></button>` + FAQ.map(([q,a],i)=>`<div class="lgsec ${o===i?"on":""}"><button class="lghd" data-faq="${i}"><b>${esc(q)}</b>${ic(o===i?"up":"down",18)}</button>${o===i?`<p class="small" style="margin:0 0 12px;line-height:1.55">${esc(a)}</p>`:""}</div>`).join("")
+  el.innerHTML = `<button class="tourstart" data-tour="open"><span class="tico">${ic("spark",20)}</span><span><b>Tutorial ansehen</b><small>Kurze Tour durch die App – ca. 1 Minute</small></span></button>`
+    + `<div class="ptlist"><small class="muted">Kurze Touren zu jeder Seite</small><div>${Object.entries(PTOUR).map(([k,o])=>`<button class="chip" data-ptgo="${k}">${esc(o.t)}</button>`).join("")}</div></div>` + FAQ.map(([q,a],i)=>`<div class="lgsec ${o===i?"on":""}"><button class="lghd" data-faq="${i}"><b>${esc(q)}</b>${ic(o===i?"up":"down",18)}</button>${o===i?`<p class="small" style="margin:0 0 12px;line-height:1.55">${esc(a)}</p>`:""}</div>`).join("")
    + `<button class="btn" data-spgo="feedback" style="margin-top:14px">Frage nicht dabei? Schreib uns</button>`; }
 /* ---------- Tutorial: Karte zum Start, Rundgang mit Lichtrahmen in der echten App, Karte zum Schluss ---------- */
 function tourSteps(){ const w=S.settings.work, g=workGroup(w);
@@ -2503,15 +2507,15 @@ function tourCard(end){ const el=$("tourBg"); const nm=S.settings.name, wl=(WORK
         <h2>${nm?`Hallo, ${esc(nm)}!`:"Hallo!"}</h2>
         <p>${wl?`<span>Du hast „${esc(wl)}“ gewählt.</span> `:""}<span>Ich zeig dir in ${TOUR.steps.length} kurzen Schritten, wo du was findest – passend zu dir.</span></p>
         <div class="tbot"><button class="tw" data-tour="go">Tour starten</button><button class="tg2" data-tour="close">Später – findest du unter Hilfe</button></div></div>`; }
-function tourOpen(){ if (UI.view!=="home"){ UI.view="home"; render(); } TOUR.steps=tourSteps(); TOUR.i=-1; if (typeof spSheetClose==="function") try{ spSheetClose(); }catch(e){} tourCard(false); }
-function tourClose(){ const el=$("tourBg"); el.hidden=true; el.innerHTML=""; TOUR.i=-1; document.body.classList.remove("locked"); }
+function tourOpen(){ TOUR.page=null; if (UI.view!=="home"){ UI.view="home"; render(); } TOUR.steps=tourSteps(); TOUR.i=-1; if (typeof spSheetClose==="function") try{ spSheetClose(); }catch(e){} tourCard(false); }
+function tourClose(){ const el=$("tourBg"); el.hidden=true; el.innerHTML=""; TOUR.i=-1; if (TOUR.page){ TOUR.page=null; toast("Wieder ansehen: „?“ oben neben dem Titel", null, null, 3500); } document.body.classList.remove("locked"); }
 function tourGo(i){ const el=$("tourBg");
-  if (i>=TOUR.steps.length){ tourCard(true); return; }
-  if (UI.view!=="home"){ UI.view="home"; render(); }
+  if (i>=TOUR.steps.length){ if (TOUR.page){ TOUR.page=null; tourClose(); toast("Wieder ansehen: „?“ oben neben dem Titel", null, null, 3500); return; } tourCard(true); return; }
+  const tv=TOUR.page||"home"; if (UI.view!==tv){ UI.view=tv; render(); }
   TOUR.i=i; const s=TOUR.steps[i];
   el.className="tourbg spot"; el.hidden=false; document.body.classList.add("locked");
-  el.innerHTML=`<div class="tring"></div><div class="tbub" role="dialog" aria-live="polite"><div class="ttop"><span class="tico">${ic(s.ic,22)}</span><div><small>Schritt ${i+1} von ${TOUR.steps.length}</small><b>${esc(s.t)}</b></div></div>
-    <div class="tin">${s.p.map(x=>`<p>${esc(x)}</p>`).join("")}<div class="trow"><button class="tskip" data-tour="close">Beenden</button>
+  el.innerHTML=`<div class="tring"></div><div class="tbub" role="dialog" aria-live="polite"><div class="ttop"><span class="tico">${ic(s.ic,22)}</span><div><small>${TOUR.page?esc(PTOUR[TOUR.page].t)+" · ":""}Schritt ${i+1} von ${TOUR.steps.length}</small><b>${esc(s.t)}</b></div></div>
+    <div class="tin">${s.p.map(x=>`<p>${esc(x)}</p>`).join("")}<div class="trow"><button class="tskip" data-tour="close">${TOUR.page?"Überspringen":"Beenden"}</button>
     <span class="tdots">${TOUR.steps.map((_,k)=>`<i class="${k===i?"on":""}"></i>`).join("")}</span>
     <span class="tnav">${i>0?`<button class="tback" data-tour="back" aria-label="Zurück">‹</button>`:""}<button class="tnext" data-tour="next">${i===TOUR.steps.length-1?"Fertig":"Weiter"}</button></span></div></div></div>`;
   const t=[...document.querySelectorAll(s.sel)].find(n=>n.offsetParent!==null);
@@ -2528,7 +2532,59 @@ function tourPlace(){ if (TOUR.i<0) return; const el=$("tourBg"), s=TOUR.steps[T
   const below = r.top+r.height/2 < H/2;
   bub.style.cssText=`left:${left}px;width:${bw}px;`+(below?`top:${Math.min(H-40, r.bottom+pad+14)}px`:`bottom:${Math.max(16, H-r.top+pad+14)}px`);
   // a wide side rail on the PC: put the bubble next to the target instead
-  if (r.width<120 && r.left<200 && W>=1000){ bub.style.cssText=`left:${r.right+pad+16}px;width:${bw}px;top:${Math.max(16, Math.min(H-280, r.top-40))}px`; } }
+  if (r.width<120 && r.left<200 && W>=1000){ bub.style.cssText=`left:${r.right+pad+16}px;width:${bw}px;top:${Math.max(16, Math.min(H-280, r.top-40))}px`; }
+  // big targets (a whole calendar or column): the bubble sits on top of them, always inside the screen
+  const b=bub.getBoundingClientRect(); if (b.bottom>H-8 || b.top<8){ bub.style.top=""; bub.style.bottom="24px"; if (r.height>H*.5 && W>=1000){ bub.style.left=Math.max(16,Math.min(W-bw-16, r.right-bw-24))+"px"; } } }
+/* ---------- kurze Tour für jede Seite: beim ersten Besuch von selbst, später über das „?“ neben dem Seitentitel ---------- */
+const PTOUR_FN=()=>({
+  home:{t:"Übersicht", s:[
+    {sel:"#astack,.pcbal,.cashcard,.hkpi", ic:"wallet", t:"Dein Geld", p:["Oben steht, was auf deinen Konten ist und was im Monat übrig bleibt."]},
+    {sel:".tabs .tab.plus,.pcfab,[data-addmenu]", ic:"plus", t:"Neu eintragen", p:["Mit dem Plus trägst du Ausgaben ein, fotografierst einen Beleg oder importierst einen Kontoauszug."]},
+    {sel:'#v-home .hblock[data-hb="budgets"],#v-home .hblock', ic:"target", t:"Deine Kacheln", p:[IS_PC?"Kacheln am Griff ziehen = sortieren, Minus = zur Seite legen.":"Unten unter „Startseite anpassen“ blendest du Kacheln ein oder aus und sortierst sie."]},
+  ]},
+  list:{t:"Buchungen", s:[
+    {sel:"#v-list .search", ic:"insight", t:"Suchen", p:["Tipp einen Laden, Betrag oder Text – die Liste filtert sofort."]},
+    {sel:"#filters", ic:"tag", t:"Filter", p:["Nur Ausgaben, Einnahmen, Betriebliches oder Buchungen mit Beleg anzeigen."]},
+    {sel:"#listCard", ic:"receipt", t:"Antippen = bearbeiten", p:[IS_PC?"Klick öffnet die Buchung rechts – mit Beleg, Kassenzettel und Ändern.":"Eine Buchung antippen zum Ändern. Auch der Kassenzettel mit allen Artikeln steht dort."]},
+  ]},
+  fix:{t:"Fixkosten", s:[
+    {sel:".pcfsum,.fsum", ic:"repeat", t:"Fest verplant", p:["Was diesen Monat sicher abgeht – und wie viel davon schon bezahlt ist."]},
+    {sel:".pcfcalc,.fgroup", ic:"check", t:"Abhaken", p:[IS_PC?"Posten anklicken = bezahlt. Ziehen = anderer Tag, Stift = bearbeiten.":"Kachel antippen = bezahlt. Betrag antippen = nur für diesen Monat ändern."]},
+    {sel:"#fixEditBtn", ic:"sliders", t:"Liste bearbeiten", p:["Neue Fixkosten anlegen, Beträge und Rhythmus ändern."]},
+  ]},
+  shop:{t:"Einkauf", s:[
+    {sel:"#zIn", ic:"cart", t:"Einkaufszettel", p:["Eintippen, was du brauchst. Zweimal dasselbe = 2x. Der Zettel ist auf allen gekoppelten Geräten gleich."]},
+    {sel:".zmini,.zcard", ic:"spark", t:"Sortieren & los", p:["Nach Laden, Abteilung oder Preis sortieren. „Einkauf starten“ schickt den Zettel aufs Handy."]},
+    {sel:"#v-shop .card:not(.zmini):not(.zcard)", ic:"cart", t:"Angebote", p:["Wähl deine Läden – dann siehst du hier ihre Wochenangebote."]},
+  ]},
+  year:{t:"Analyse", s:IS_PC?[
+    {sel:".pcac", ic:"chart", t:"Verlauf", p:["Deine Ausgaben der letzten 12 Monate – Punkte und Balken anfahren zeigt die Zahlen."]},
+    {sel:".pcac:nth-child(2)", ic:"insight", t:"Kategorien im Vergleich", p:["Wo du diesen Monat mehr oder weniger als sonst ausgibst."]},
+    {sel:".pcac:nth-child(3)", ic:"receipt", t:"Steuer", p:["Die Schätzung für dieses Jahr und was du zurücklegen solltest."]},
+  ]:[
+    {sel:".atabs", ic:"chart", t:"Drei Bereiche", p:["Auswertung, Planung und Steuer – oben umschalten."]},
+    {sel:".anaseg", ic:"cal", t:"Monat oder Jahr", p:["Zwischen dem gewählten Monat und dem ganzen Jahr wechseln."]},
+    {sel:".anet", ic:"insight", t:"Übrig im Monat", p:["Was am Ende übrig bleibt – antippen für Details."]},
+  ]},
+  more:{t:"Einstellungen", s:[
+    {sel:"#setQ", ic:"insight", t:"Suchen", p:["Schneller als blättern: einfach eintippen, was du suchst."]},
+    {sel:"#pcsL,#setTabs", ic:"sliders", t:"Bereiche", p:[IS_PC?"Links wählen, rechts erscheint der Inhalt.":"Geld, Anpassen, Sicherheit und Hilfe – darunter klappen die Punkte auf."]},
+  ]},
+});
+let PTOUR_C=null; const PTOUR=new Proxy({}, {get:(_,k)=>(PTOUR_C||(PTOUR_C=PTOUR_FN()))[k], ownKeys:()=>Reflect.ownKeys(PTOUR_C||(PTOUR_C=PTOUR_FN())), getOwnPropertyDescriptor:(_,k)=>({enumerable:true,configurable:true,value:(PTOUR_C||(PTOUR_C=PTOUR_FN()))[k]})});
+
+const ptSeen = () => { try { return JSON.parse(localStorage.getItem("hb-ptour")||"{}"); } catch(_){ return {}; } };
+function ptourOpen(v){ const P=PTOUR[v]; if (!P) return; const steps=P.s.filter(s=>[...document.querySelectorAll(s.sel)].some(n=>n.offsetParent!==null && !n.closest(".cubestage")));
+  if (!steps.length) return; try { const o=ptSeen(); o[v]=1; localStorage.setItem("hb-ptour", JSON.stringify(o)); } catch(_){}
+  TOUR.page=v; TOUR.steps=steps; tourGo(0); }
+function ptourAuto(){ if (BG_RUN || TOUR.i>=0 || wizShould() || !PTOUR[UI.view] || ptSeen()[UI.view] || document.querySelector(".backdrop:not([hidden]),#tourBg:not([hidden])")) return;
+  // the first start already has the big tour for the overview
+  if (UI.view==="home" && !S.tx.length) return;
+  clearTimeout(ptourAuto.t); const v=UI.view; ptourAuto.t=setTimeout(()=>{ if (UI.view===v && TOUR.i<0 && !document.querySelector(".backdrop:not([hidden])")) ptourOpen(v); }, 900); }
+function ptourBtn(){ const t=$("viewTitle"); if (!t) return; let b=$("ptourQ"); const on=!!PTOUR[UI.view];
+  if (!b){ b=document.createElement("button"); b.id="ptourQ"; b.className="ptq"; b.type="button"; b.textContent="?"; b.setAttribute("aria-label","Kurze Tour zu dieser Seite"); b.title="Kurze Tour zu dieser Seite"; t.after(b); }
+  b.hidden=!on; }
+document.addEventListener("click", e=>{ const pg=e.target.closest("[data-ptgo]"); if (pg){ const v=pg.dataset.ptgo; try{ if (spsOpen()) spSheetClose(); }catch(_){} UI.view=v; render(); window.scrollTo({top:0}); setTimeout(()=>ptourOpen(v), 500); return; } if (e.target.closest("#ptourQ")){ e.preventDefault(); ptourOpen(UI.view); } });
 addEventListener("resize", ()=>{ if (TOUR.i>=0) tourPlace(); });
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-tour]"); if (!b) return; const a=b.dataset.tour;
   if (a==="open"){ tourOpen(); return; }
@@ -3231,6 +3287,7 @@ function render(){
   else if (UI.view!=="more" && spsOpen()){ $("spBg").hidden=true; $("spBg").classList.remove("show"); spSheetRestore(); SPS.open=null; UI.sp=null; }
   notifyPlanSoon();
   if (wizShould()) setTimeout(()=>{ if (wizShould()) wizOpen(); }, 400);
+  try { ptourBtn(); ptourAuto(); } catch(e){ console.warn('ptour', e); }
 }
 
 function txRow(t, showDate){
