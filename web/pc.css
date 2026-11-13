@@ -730,3 +730,16 @@ html.pc .pcacts .ptq.roundbtn:hover{color:var(--accent)}
 html.pc .pcacts .badge{top:2px!important;right:2px!important}
 html.pc{scroll-padding-top:112px}
 html.pc .pcfhint{padding-right:96px}
+/* schmalere Fenster: Seiten-Leiste als zweite Reihe in der Glasleiste, damit Monat und Symbole nicht darunter verschwinden */
+@media (max-width:1420px){
+  html.pc .top .wrap{padding-bottom:76px!important}
+  html.pc .tabs{top:86px!important;max-width:calc(100vw - 64px)!important}
+  html.pc{scroll-padding-top:190px}
+  html.pc .pchero{top:180px}
+  html.pc #v-list>#pcDet,html.pc .pcfside,html.pc .pcsl,html.pc .pcsd,html.pc .pcz,html.pc .pcsweb{top:180px}
+  html.pc .pcpage,html.pc .pcpside{top:172px}
+  html.pc .pcdet{min-height:min(640px,calc(100vh - 266px));max-height:calc(100vh - 266px)}
+  html.pc .pcsl,html.pc .pcz{max-height:calc(100vh - 226px)}
+  html.pc .pcsweb{height:calc(100vh - 226px)}
+}
+@media (max-width:1100px){ html.pc .pchero{top:auto;bottom:auto} }
