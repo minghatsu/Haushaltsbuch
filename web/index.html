@@ -8897,6 +8897,17 @@ async function shortMake(){   // this device is coupled: put its long code into 
   const op={h:b64u((await crypto.subtle.sign("HMAC", K.mac, new TextEncoder().encode("sp\u0000code"))).slice(0,24)), b:await spEnc(K,{i:"code", d:{code:long}})};
   await spRequest(box,"push","",{ops:[op]});
   SHORT={code, box, t0:Date.now()}; SHORT_T=setTimeout(shortDrop, 10*60*1000); return SHORT; }
+// the same for a shared area: the short code opens a mailbox with the area's long code
+const GMS={code:"", v:"", box:null, t0:0, tm:0};
+async function gmShortMake(sp){
+  if (GMS.box) spRequest(GMS.box,"wipe","",{}).catch(()=>{}); clearTimeout(GMS.tm);
+  const r=crypto.getRandomValues(new Uint8Array(10)), code=[...r].map(x=>SC_ABC[x&31]).join("");
+  const box=await shortBox(code), K=await spKeys(box);
+  await spRequest(box,"create","",{vault:K.vault, auth:K.auth});
+  const op={h:b64u((await crypto.subtle.sign("HMAC", K.mac, new TextEncoder().encode("sp\u0000code"))).slice(0,24)), b:await spEnc(K,{i:"code", d:{code:spCode(sp)}})};
+  await spRequest(box,"push","",{ops:[op]});
+  Object.assign(GMS, {code, v:sp.v, box, t0:Date.now()}); GMS.tm=setTimeout(()=>{ if (GMS.box) spRequest(GMS.box,"wipe","",{}).catch(()=>{}); Object.assign(GMS,{code:"",v:"",box:null}); }, 10*60*1000);
+}
 function shortDrop(){ clearTimeout(SHORT_T); const s0=SHORT; SHORT=null; if (s0) spRequest(s0.box,"wipe","",{}).catch(()=>{}); }
 async function shortFetch(code){   // the new device: open the mailbox, take the long code, delete the mailbox
   const box=await shortBox(code), K=await spKeys(box); let res;
@@ -9165,7 +9176,7 @@ function renderGemeinsam(){
       ${!list.length&&!step?`<p class="small muted" style="margin:0 0 12px;line-height:1.5">Teile mit Partner, Familie oder WG nur das, was ihr gemeinsam habt: Ausgaben mit automatischem Ausgleich, Sparziele, eine Einkaufsliste – und auf Wunsch einzelne Budgets oder Fixkosten. Konten und alles andere bleiben privat. Ende-zu-Ende verschlüsselt, ohne Konto.</p>`:""}
       <div class="field"><label for="gmMe">Dein Name (sehen die anderen)</label><input class="in" id="gmMe" value="${esc(m.name||S.settings.name||"")}" placeholder="z. B. Sascha"></div>
       ${join?`${canQrLive()?`<button class="btn primary block" style="justify-content:center;gap:8px" data-qrlive="gm">${ic("camera",18)} QR-Code scannen</button>`:`<label class="btn primary block" style="justify-content:center;gap:8px">${ic("camera",18)} Bild mit QR-Code auswählen<input type="file" accept="image/*" id="gmCam" hidden></label>`}
-        <div class="field"><label for="gmCode">… oder Code einfügen</label><textarea class="in" id="gmCode" rows="3" placeholder="HBS1.…" autocapitalize="off" spellcheck="false"></textarea></div>
+        <div class="field"><label for="gmCode">… oder Code eintippen</label><input class="in" id="gmCode" placeholder="z. B. 7KF2-QX9M-3T" autocapitalize="characters" autocomplete="off" spellcheck="false" style="font-family:ui-monospace,monospace;letter-spacing:.08em;font-size:18px;text-align:center"></div>
         <div class="row-btns"><button class="btn" data-gmstep="">Zurück</button><button class="btn primary" id="gmJoinGo">Beitreten</button></div>`
       :step==="new"?`<div class="field"><label for="gmName">Name des Bereichs</label><input class="in" id="gmName" placeholder="z. B. Wir zwei, WG, Familie"></div>
         <div class="row-btns"><button class="btn" data-gmstep="">Zurück</button><button class="btn primary" id="gmNewGo">Anlegen</button></div>`
@@ -9175,8 +9186,13 @@ function renderGemeinsam(){
   const mem=Object.keys(L.docs).filter(k=>k.startsWith("m-")).map(k=>k.slice(2)), net=spBalance(L), mine=net[m.id]||0;
   const chips=`<div class="gmchips">${list.map(x=>`<button class="chip ${x.v===sp.v?"on":""}" data-gmsel="${esc(x.v)}">${esc(x.n||"Gemeinsam")}</button>`).join("")}<button class="chip" data-gmstep="new">+ Neu</button><button class="chip" data-gmstep="join">Beitreten</button></div>`;
   if (step==="invite"){ el.innerHTML=chips+`<div class="card"><h2 style="margin:0 0 6px">Jemanden einladen</h2><p class="small" style="margin:0 0 10px;line-height:1.5">Die andere Person öffnet <b>Gemeinsam › Beitreten</b> und fotografiert diesen Code. Sie sieht danach nur diesen Bereich – nichts von deinen anderen Daten.</p>
-    <div class="pqr">${qrSvg(spCode(sp),230)}</div><div class="pcode" style="margin-top:10px">${esc(spCode(sp).replace(/(.{5})/g,"$1 ").trim())}</div>
-    <div class="row-btns" style="margin-top:12px"><button class="btn" id="gmCopy">Code kopieren</button><button class="btn primary" data-gmstep="">Fertig</button></div></div>`; return; }
+    <div class="pqr">${qrSvg(spCode(sp),230)}</div>
+    <div class="small muted" style="text-align:center;margin-top:12px">Ohne Kamera, z. B. am PC – diesen Code eintippen:</div>
+    <div class="pcode gmshort" id="gmShort" style="margin-top:6px;text-align:center;font-size:26px;letter-spacing:.12em;font-family:ui-monospace,monospace">${GMS.code&&GMS.v===sp.v?esc(shortFmt(GMS.code)):"…"}</div>
+    <div class="small muted" id="gmShortT" style="text-align:center">gilt 10 Minuten</div>
+    <div class="row-btns" style="margin-top:12px"><button class="btn" id="gmCopy">Code kopieren</button><button class="btn primary" data-gmstep="">Fertig</button></div></div>`;
+    if (!(GMS.code && GMS.v===sp.v && Date.now()-GMS.t0<9*60*1000)) gmShortMake(sp).then(()=>{ const e=$("gmShort"); if (e) e.textContent=GMS.code?shortFmt(GMS.code):"– (offline)"; }).catch(()=>{ const e=$("gmShort"); if (e) e.textContent="– (offline)"; });
+    return; }
   const TABS=[["over","Übersicht"],["exp","Ausgaben"],["goal","Sparziele"],["shop","Einkauf"],["share","Freigaben"]];
   const exps=Object.entries(L.docs).filter(([k])=>k.startsWith("x-")).map(([k,x])=>({id:k,...x})).sort((a,b)=>(b.d||"").localeCompare(a.d||""));
   const goals=Object.entries(L.docs).filter(([k])=>k.startsWith("g-")).map(([k,x])=>({id:k,...x})), contr=Object.entries(L.docs).filter(([k])=>k.startsWith("c-")).map(([k,x])=>({id:k,...x}));
@@ -9227,8 +9243,11 @@ document.addEventListener("click", async e=>{
   const saveMe=()=>{ const n=($("gmMe")||{}).value; if (n!=null){ const mm=me(); mm.name=n.trim().slice(0,30); S.settings.me=mm; } };
   if (t.closest("#gmNewGo")){ const n=$("gmName").value.trim()||"Gemeinsam"; saveMe(); if (!me().name){ err("Bitte deinen Namen eintragen"); return; } t.closest("#gmNewGo").disabled=true;
     try { await spCreate(n.slice(0,40)); UI.gmStep="invite"; render(); } catch(x){ err("Server nicht erreichbar – bist du online?"); t.closest("#gmNewGo").disabled=false; } return; }
-  if (t.closest("#gmJoinGo")){ const code=$("gmCode").value; saveMe(); if (!me().name){ err("Bitte deinen Namen eintragen"); return; } try { await spJoin(code); UI.gmStep=""; render(); toast("Beigetreten"); } catch(x){ err(x.message); } return; }
-  if (t.closest("#gmCopy")&&sp){ try{ await copySecret(spCode(sp)); toast("Code kopiert – nach einer Minute wird er aus der Zwischenablage gelöscht"); }catch(_){ toast("Bitte markieren und kopieren"); } return; }
+  if (t.closest("#gmJoinGo")){ let code=$("gmCode").value; saveMe(); if (!me().name){ err("Bitte deinen Namen eintragen"); return; }
+    try { if (!spParse(code) && shortOk(code)){ const b=t.closest("#gmJoinGo"); b.disabled=true; b.textContent="Wird geholt …"; try { code=await shortFetch(code); } finally { b.disabled=false; b.textContent="Beitreten"; } }
+      if (!spParse(code)) throw new Error("Das ist kein Code für einen gemeinsamen Bereich.");
+      await spJoin(code); UI.gmStep=""; render(); toast("Beigetreten"); } catch(x){ err(String(x.message||x).replace("Lass dir am Handy einen neuen zeigen.","Lass dir einen neuen zeigen.")); } return; }
+  if (t.closest("#gmCopy")&&sp){ const c=GMS.code&&GMS.v===sp.v?shortFmt(GMS.code):spCode(sp); try{ await copySecret(c); toast(GMS.code?"Code kopiert – er gilt 10 Minuten":"Code kopiert – nach einer Minute wird er aus der Zwischenablage gelöscht"); }catch(_){ toast("Bitte markieren und kopieren"); } return; }
   if (!sp) return;
   if (t.closest("#gxAdd")){ const a=parseAmt($("gxA").value); if (!(a>0)){ toast("Bitte einen Betrag eintragen"); return; } spPut(sp,"x-"+newId(),{t:$("gxT").value.trim().slice(0,60)||"Ausgabe", a:Math.round(a*100)/100, p:$("gxP").value, d:$("gxD").value||isoToday(), by:me().id}); toast("Eingetragen"); renderGemeinsam(); return; }
   const stl=t.closest("[data-gmsettle]"); if (stl){ spPut(sp,"x-"+newId(),{settle:true, a:Number(stl.dataset.amt), p:me().id, to:stl.dataset.gmsettle, d:isoToday(), by:me().id}); toast("Ausgleich eingetragen"); renderGemeinsam(); return; }
