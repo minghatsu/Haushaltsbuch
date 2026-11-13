@@ -1338,8 +1338,9 @@ if (IS_PC){
   const col=k=>themeCol(ACC_COL[k]||"#1a7a5c");
   let shown="";
   const showPane=(k,anim)=>{ const r=$("pcsR"); if (!r) return; accRestoreAll(); const ks=parts(k);
-    r.innerHTML=`<div class="pcsp${anim?" pcsanim":""}"><div class="pcsph"><span class="saic" style="background:${col(k)}">${ic(accIcon(k),20)}</span><h2>${esc(title(k))}</h2></div>${ks.map(x=>`<div class="sabody" id="sab-${x}"></div>`).join("")}</div>`;
-    ks.forEach(x=>{ try{ accMount(x); }catch(e){ console.warn("pcset",x,e); } });
+    const tp=window.pcTilePane && window.pcTilePane(k);
+    r.innerHTML=`<div class="pcsp${anim?" pcsanim":""}"><div class="pcsph"><span class="saic" style="background:${col(k)}">${ic(accIcon(k),20)}</span><h2>${esc(title(k))}</h2></div>${tp || ks.map(x=>`<div class="sabody" id="sab-${x}"></div>`).join("")}</div>`;
+    if (!tp) ks.forEach(x=>{ try{ accMount(x); }catch(e){ console.warn("pcset",x,e); } });
     shown=k; };
   const moveHl=()=>{ const L=$("pcsL"), hl=L&&L.querySelector(".pcshl"), b=L&&L.querySelector(".pcsi.on"); if (!hl) return;
     if (!b){ hl.style.opacity=0; return; } hl.style.opacity=1; hl.style.top=b.offsetTop+"px"; hl.style.height=b.offsetHeight+"px"; };
@@ -1359,6 +1360,7 @@ if (IS_PC){
     const cur=alias[UI.pcset]||UI.pcset;
     its.querySelectorAll(".pcsi").forEach(b=>b.classList.toggle("on",b.dataset.pcset===cur));
     if (shown!==cur || !$("pcsR").children.length) showPane(cur, !!shown);
+    else if (window.pcTileRepaint) window.pcTileRepaint();
     requestAnimationFrame(moveHl);
   };
   accGo=function(k){
@@ -1371,9 +1373,87 @@ if (IS_PC){
   };
   // old way in (e.g. "Schuld hinzufügen" on the start page): a page key in UI.sp → show that page on the right
   const _rsp=renderSpPages; renderSpPages=function(...a){ if (UI.sp && !spsOpen() && UI.sp!=="profil" && SP_PAGES[UI.sp]) UI.pcset=alias[UI.sp]||UI.sp; return _rsp.apply(this,a); };
-  document.addEventListener("click", e=>{ const b=e.target.closest("[data-pcset]"); if (!b) return; UI.pcset=b.dataset.pcset; renderSetHome(); });
+  document.addEventListener("click", e=>{ const b=e.target.closest("[data-pcset]"); if (!b) return; UI.pcset=b.dataset.pcset; UI.pctAdd=""; renderSetHome(); });
   addEventListener("resize", ()=>requestAnimationFrame(moveHl));
   // Farben: the bar at the bottom only exists on the phone
   const _rce=renderColorEd; renderColorEd=function(...a){ const r=_rce.apply(this,a);
     document.querySelectorAll(".colsec").forEach(s=>{ const h=s.querySelector("h3"); if (h && /^(Leiste unten|Bottom bar)$/i.test(h.textContent.trim())) s.hidden=true; }); return r; };
+}
+/* ---------- Einstellungen am PC, Variante A: Kacheln für Konten, Budgets und Abos – anlegen und löschen direkt hier ---------- */
+if (IS_PC){
+  const PT={};   // pane renderers: key → html
+  const trash=`<svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M4.5 7h15M9.5 7V4.8h5V7M6.5 7l.9 12.2h9.2l.9-12.2M10.2 10.5v5.5M13.8 10.5v5.5"/></svg>`;
+  const ring=(p,c)=>{ const q=Math.max(0,Math.min(1,p)); return `<svg class="pctring" viewBox="0 0 48 48"><circle cx="24" cy="24" r="19" fill="none" stroke="var(--sunk)" stroke-width="6"/><circle class="pcta" cx="24" cy="24" r="19" fill="none" stroke="${p>1?"var(--bad)":c}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(q*119.4).toFixed(1)} 200" transform="rotate(-90 24 24)"/><text x="24" y="28" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--fg)">${Math.round(p*100)}%</text></svg>`; };
+  const delBtn=(attr,v)=>`<button class="pctdel" ${attr}="${esc(v)}" aria-label="Löschen" title="Löschen">${trash}</button>`;
+  const armed=b=>{ if (b.dataset.armed==="1") return true; b.dataset.armed="1"; b.classList.add("arm"); b.innerHTML=`<b>Wirklich löschen?</b>`; setTimeout(()=>{ if (b.isConnected){ b.dataset.armed=""; b.classList.remove("arm"); b.innerHTML=trash; } },3000); return false; };
+  UI.pctAdd=UI.pctAdd||"";
+
+  // Monatsbudgets
+  PT.budgets=()=>{ const b=S.settings.budgets||{}, ym=ymOf(new Date()), mc=monthCalc(ym), spent=Object.fromEntries(catTotals(mc.tx, mc.fixPaid));
+    const ks=Object.keys(b).filter(k=>b[k]>0), free=cats("ausgabe").filter(c=>!(b[c]>0));
+    const tot=sum(ks,k=>b[k]), used=sum(ks,k=>spent[k]||0);
+    return `<p class="pcthint">${ks.length?`${esc(eur0(used))} von ${esc(eur0(tot))} im ${esc(MONTHS[ymParts(ym)[1]-1])} ausgegeben. Betrag antippen zum Ändern.`:"Leg fest, wie viel du pro Monat für eine Kategorie ausgeben willst – die Startseite zeigt dann, wie du liegst."}</p>
+      <div class="pctg">${ks.map((k,i)=>{ const s=spent[k]||0, c=catColor("ausgabe",k), col=c.startsWith("#")?c:cssVar(c);
+        return `<div class="pctk" style="--i:${i}">${delBtn("data-pcbdel",k)}<div class="pctrow">${ring(s/b[k], col)}<div class="pctt"><b>${esc(k)}</b><small>${esc(eur0(s))} von <input class="pctin" data-pcbset="${esc(k)}" value="${esc(numStr(b[k]))}" inputmode="decimal" aria-label="Budget ${esc(k)}"> €</small><small class="${s>b[k]?"bad":""}">${s>b[k]?`${esc(eur0(s-b[k]))} drüber`:`noch ${esc(eur0(b[k]-s))}`}</small></div></div></div>`; }).join("")}
+      ${UI.pctAdd==="budgets"?`<div class="pctk pctform" style="--i:${ks.length}"><b>Neues Budget</b><label>Kategorie<select class="in" id="pcbCat">${free.map(c=>`<option>${esc(c)}</option>`).join("")}</select></label><label>Pro Monat<input class="in" id="pcbAmt" inputmode="decimal" placeholder="z. B. 150"></label><div class="pctbtns"><button class="btn" data-pctcancel>Abbrechen</button><button class="btn primary" data-pcbadd>Anlegen</button></div></div>`
+        : free.length?`<button class="pctk pctnew" data-pctnew="budgets" style="--i:${ks.length}">+ Budget anlegen</button>`:""}</div>`; };
+
+  // Konten & Spaces
+  const acctList=()=>{ const A=S.settings.accountAnchors||{}, sp=S.settings.spaces||[];
+    return [...new Set([...Object.keys(A), ...accountNames(), ...sp])].sort((a,b)=>(b==="Hauptkonto")-(a==="Hauptkonto")||a.localeCompare(b,"de")); };
+  PT.konten=()=>{ const today=isoToday(), names=acctList(), A=S.settings.accountAnchors||{}, imp=new Set(accountNames()), sp=new Set(S.settings.spaces||[]);
+    const y=new Date().getFullYear(), sb=(S.settings.startBalance||{})[y];
+    return `<p class="pcthint">Trag einmal ein, was heute auf einem Konto ist – die App rechnet von da an mit deinen Buchungen weiter. Geld zwischen diesen Konten zählt als Umbuchung, nicht als Ausgabe.</p>
+      <div class="pctg">${names.map((n,i)=>{ const bal=accountBalance(n,today);
+        return `<div class="pctk" style="--i:${i}">${n==="Hauptkonto"?"":delBtn("data-pcadel",n)}<small class="muted">${esc(n)}${imp.has(n)?" · aus Kontoauszug":sp.has(n)?" · Space":""}</small><div class="pctbig"><input class="pctin big" data-pcaset="${esc(n)}" value="${bal==null?"":esc(numStr(Math.round(bal*100)/100))}" placeholder="Stand eintragen" inputmode="decimal" aria-label="Stand ${esc(n)}"> <span>€</span></div><small class="muted">${A[n]?`Stand heute${A[n].date!==today?` · eingetragen am ${esc(shortDate(A[n].date))}`:""}`:"noch kein Stand"}</small></div>`; }).join("")}
+      <div class="pctk" style="--i:${names.length}"><small class="muted">Kontostand am 1. Januar ${y}</small><div class="pctbig"><input class="pctin big" data-pcstart="${y}" value="${sb!=null?esc(numStr(sb)):""}" placeholder="0,00" inputmode="decimal" aria-label="Kontostand Jahresanfang"> <span>€</span></div><small class="muted">damit die Jahresrechnung stimmt</small></div>
+      ${UI.pctAdd==="konten"?`<div class="pctk pctform" style="--i:${names.length+1}"><b>Neues Konto oder Space</b><label>Name<input class="in" id="pcaName" placeholder="z. B. Urlaub"></label><label>Stand heute<input class="in" id="pcaBal" inputmode="decimal" placeholder="0,00"></label><div class="pctbtns"><button class="btn" data-pctcancel>Abbrechen</button><button class="btn primary" data-pcaadd>Anlegen</button></div></div>`
+        :`<button class="pctk pctnew" data-pctnew="konten" style="--i:${names.length+1}">+ Konto oder Space</button>`}</div>`; };
+
+  // Abos & Verträge (only what is a subscription or contract – not rent or loans)
+  const aboList=()=>{ const A=aboCfg(); return S.fixed.filter(f=>!debtFor(f.id) && (fixArea(f)==="Abos & Handy" || A[f.id])).sort((x,y)=>(aboDeadline(A[x.id])||"9999").localeCompare(aboDeadline(A[y.id])||"9999")||String(x.name).localeCompare(String(y.name))); };
+  const NOT=[[0,"jederzeit"],[0.5,"2 Wochen"],[1,"1 Monat"],[2,"2 Monate"],[3,"3 Monate"],[6,"6 Monate"]];
+  PT.abos=()=>{ const A=aboCfg(), today=isoToday(), L=aboList(), ym=ymOf(new Date());
+    const perM=sum(L,f=>{ const a=planAmt(f,ym), r=f.rhythm||"monatlich"; return r==="monatlich"?a:r==="quartal"?a/3:r==="halbjahr"?a/6:r==="jahr"?a/12:a; });
+    return `<p class="pcthint">${L.length?`${L.length} Abos und Verträge · zusammen etwa ${esc(eur0(perM))} im Monat. Die App erinnert dich 30 Tage vor der Kündigungsfrist.`:"Noch keine Abos. Leg hier Streaming, Handy, Fitnessstudio & Co. an."}</p>
+      <div class="pctg">${L.map((f,i)=>{ const a=A[f.id]||{}, dl=aboDeadline(a), d=dl?Math.round((new Date(dl+"T12:00")-new Date(today+"T12:00"))/864e5):null, b=brandFor(f.name);
+        return `<div class="pctk" style="--i:${i}">${delBtn("data-pcodel",f.id)}<div class="pctrow">${b?brandBadge(b):tile("ausgabe",f.cat||f.name)}<div class="pctt"><b>${esc(f.name)}</b><small>${esc(eur(listAmt(f,ym)))} · ${esc(f.rhythm==="jahr"?"jährlich":f.rhythm==="quartal"?"vierteljährlich":f.rhythm==="halbjahr"?"halbjährlich":"monatlich")}</small></div></div>
+          <div class="pctab"><label>Läuft bis<input class="in" type="date" data-aboend="${esc(f.id)}" value="${esc(a.end||"")}"></label><label>Frist<select class="in" data-abonot="${esc(f.id)}">${NOT.map(([v,l])=>`<option value="${v}" ${Number(a.notice||0)===v?"selected":""}>${l}</option>`).join("")}</select></label></div>
+          <small class="${d!=null&&d<=30?"warn":"muted"}">${dl?(d<0?"Frist vorbei – verlängert sich":d===0?"Heute letzter Tag zum Kündigen":`kündigen bis ${esc(new Date(dl+"T12:00").toLocaleDateString("de-DE"))}`):"ohne Laufzeit eingetragen"}</small></div>`; }).join("")}
+      ${UI.pctAdd==="abos"?`<div class="pctk pctform" style="--i:${L.length}"><b>Neues Abo</b><label>Name<input class="in" id="pcoName" placeholder="z. B. Netflix"></label><div class="pctab"><label>Betrag<input class="in" id="pcoAmt" inputmode="decimal" placeholder="0,00"></label><label>Rhythmus<select class="in" id="pcoRh"><option value="monatlich">monatlich</option><option value="jahr">jährlich</option><option value="quartal">vierteljährlich</option></select></label></div><div class="pctbtns"><button class="btn" data-pctcancel>Abbrechen</button><button class="btn primary" data-pcoadd>Anlegen</button></div><small class="muted">Steht danach auch bei den Fixkosten.</small></div>`
+        :`<button class="pctk pctnew" data-pctnew="abos" style="--i:${L.length}">+ Abo anlegen</button>`}</div>`; };
+
+  window.pcTilePane=k=>PT[k]?`<div class="pctpane" data-pctk="${k}">${PT[k]()}</div>`:null;
+  const repaint=()=>{ const el=document.querySelector("#pcsR .pctpane"); if (!el) return; if (el.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) return; const k=el.dataset.pctk; el.innerHTML=PT[k](); el.classList.add("still"); };
+  window.pcTileRepaint=repaint;
+  const after=(msg)=>{ UI.pctAdd=""; try { document.activeElement && document.activeElement.blur(); } catch(_){} if (msg) toast(msg); repaint(); };
+
+  document.addEventListener("click", async e=>{
+    const n=e.target.closest("[data-pctnew]"); if (n){ UI.pctAdd=n.dataset.pctnew; repaint(); setTimeout(()=>{ const f=document.querySelector("#pcsR .pctform input, #pcsR .pctform select"); if (f) f.focus(); },30); return; }
+    if (e.target.closest("[data-pctcancel]")){ after(); return; }
+    // budgets
+    let b=e.target.closest("[data-pcbdel]"); if (b){ if (!armed(b)) return; const B={...(S.settings.budgets||{})}; delete B[b.dataset.pcbdel]; S.settings.budgets=B; await saveSettings(); after("Budget gelöscht"); return; }
+    if (e.target.closest("[data-pcbadd]")){ const c=$("pcbCat").value, v=parseAmt($("pcbAmt").value); if (!(v>0)){ toast("Bitte einen Betrag eingeben"); $("pcbAmt").focus(); return; }
+      S.settings.budgets={...(S.settings.budgets||{}), [c]:Math.round(v*100)/100}; await saveSettings(); after(`Budget für ${c} angelegt`); return; }
+    // accounts
+    b=e.target.closest("[data-pcadel]"); if (b){ if (!armed(b)) return; const n2=b.dataset.pcadel, A={...(S.settings.accountAnchors||{})}; delete A[n2]; S.settings.accountAnchors=A; S.settings.spaces=(S.settings.spaces||[]).filter(x=>x!==n2); await saveSettings(); after(`${n2} entfernt`); return; }
+    if (e.target.closest("[data-pcaadd]")){ const nm=$("pcaName").value.trim(), raw=$("pcaBal").value.trim(); if (!nm){ toast("Bitte einen Namen eingeben"); $("pcaName").focus(); return; }
+      if (nm!=="Hauptkonto" && !(S.settings.spaces||[]).includes(nm)) S.settings.spaces=[...(S.settings.spaces||[]), nm];
+      if (raw){ const v=parseAmt(raw); if (!isFinite(v)){ toast("Bitte eine Zahl eingeben"); return; } S.settings.accountAnchors={...(S.settings.accountAnchors||{}), [nm]:{date:isoToday(), balance:Math.round(v*100)/100}}; }
+      await saveSettings(); after(`${nm} angelegt`); return; }
+    // abos
+    b=e.target.closest("[data-pcodel]"); if (b){ if (!armed(b)) return; const id=b.dataset.pcodel, f=S.fixed.find(x=>x.id===id); const A={...(S.settings.abos||{})}; delete A[id]; S.settings.abos=A;
+      if (await safe(()=>del("fixed", id))){ await saveSettings(); after(`${f?f.name:"Abo"} gelöscht`); } return; }
+    if (e.target.closest("[data-pcoadd]")){ const nm=$("pcoName").value.trim(), v=parseAmt($("pcoAmt").value), rh=$("pcoRh").value; if (!nm){ toast("Bitte einen Namen eingeben"); $("pcoName").focus(); return; } if (!(v>0)){ toast("Bitte einen Betrag eingeben"); $("pcoAmt").focus(); return; }
+      const id=newId(), doc={name:nm, amount:Math.round(v*100)/100, kind:"privat", order:S.fixed.length}; if (rh!=="monatlich") doc.rhythm=rh;
+      if (await safe(()=>put("fixed", id, doc))){ S.settings.abos={...(S.settings.abos||{}), [id]:{abo:1}}; await saveSettings(); after(`${nm} angelegt`); } return; }
+  });
+  document.addEventListener("change", async e=>{
+    const t=e.target;
+    if (t.dataset.pcbset){ const v=parseAmt(t.value); const B={...(S.settings.budgets||{})}; if (!(v>0)){ toast("Bitte einen Betrag eingeben"); t.value=numStr(B[t.dataset.pcbset]||""); return; } B[t.dataset.pcbset]=Math.round(v*100)/100; S.settings.budgets=B; t.blur(); await saveSettings(); toast("Budget gespeichert"); repaint(); return; }
+    if (t.dataset.pcaset){ const raw=t.value.trim(); if (!raw) return; const v=parseAmt(raw); if (!isFinite(v)){ toast("Bitte eine Zahl eingeben"); return; } S.settings.accountAnchors={...(S.settings.accountAnchors||{}), [t.dataset.pcaset]:{date:isoToday(), balance:Math.round(v*100)/100}}; t.blur(); await saveSettings(); toast("Stand gespeichert"); repaint(); return; }
+    if (t.dataset.pcstart){ const y=t.dataset.pcstart, raw=t.value.trim(), sb={...(S.settings.startBalance||{})}; if (!raw) delete sb[y]; else { const v=parseAmt(raw); if (!isFinite(v)){ toast("Bitte eine Zahl eingeben"); return; } sb[y]=Math.round(v*100)/100; } S.settings.startBalance=sb; t.blur(); await saveSettings(); toast("Gespeichert"); repaint(); return; }
+    if ((t.dataset.aboend!=null || t.dataset.abonot!=null) && t.closest(".pctpane")) setTimeout(repaint, 50);
+  });
+  document.addEventListener("keydown", e=>{ if (e.key==="Enter" && e.target.closest(".pctform")){ e.preventDefault(); const ok=e.target.closest(".pctform").querySelector(".btn.primary"); if (ok) ok.click(); } if (e.key==="Escape" && e.target.closest(".pctform")){ e.stopPropagation(); after(); } }, true);
 }

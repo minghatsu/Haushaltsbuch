@@ -635,3 +635,48 @@ html.pc .pcsr .sabody{display:flex;flex-direction:column;gap:14px;margin-bottom:
 html.pc .pcsr .sabody>[data-sp]{margin:0}
 html.pc .pcsr .sabody{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:20px 22px}
 html.pc .pcsr .sabody>.card,html.pc .pcsr .sabody>[data-sp]{background:none;box-shadow:none;padding:0;border:0}
+/* Einstellungen am PC · Kacheln (Variante A) */
+html.pc .pcthint{margin:-4px 0 14px;color:var(--muted);font-size:13.5px;max-width:760px}
+html.pc .pctg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;align-items:start}
+html.pc .pctk{position:relative;background:var(--surface);border-radius:18px;padding:16px 16px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;transition:transform .18s,box-shadow .18s;animation:pctin .45s cubic-bezier(.3,.8,.3,1) both;animation-delay:calc(var(--i,0)*45ms)}
+html.pc .pctpane.still .pctk{animation:none}
+@keyframes pctin{from{opacity:0;transform:translateY(12px) scale(.98)}}
+html.pc .pctk:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.12)}
+html.pc .pctrow{display:flex;align-items:center;gap:14px}
+html.pc .pctt{display:flex;flex-direction:column;min-width:0;gap:1px}
+html.pc .pctt b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:26px}
+html.pc .pctt small,html.pc .pctk>small{font-size:12.5px;color:var(--muted)}
+html.pc .pctk small.bad{color:var(--bad);font-weight:700} html.pc .pctk small.warn{color:#c98a12;font-weight:700}
+html.pc .pctring{width:54px;height:54px;flex:none}
+html.pc .pctring .pcta{animation:pctra .9s cubic-bezier(.3,.8,.3,1) both}
+@keyframes pctra{from{stroke-dasharray:0 200}}
+html.pc .pctin{border:0;background:var(--sunk);border-radius:8px;padding:2px 6px;width:70px;font:700 12.5px var(--f-body);color:var(--fg);text-align:right}
+html.pc .pctin:focus{outline:2px solid var(--accent);background:var(--surface)}
+html.pc .pctin.big{width:150px;font-size:22px;padding:4px 8px;text-align:left;font-family:var(--f-display)}
+html.pc .pctin.big::placeholder{font-size:14px;font-family:var(--f-body);font-weight:600}
+html.pc .pctbig{display:flex;align-items:baseline;gap:4px;font:800 20px var(--f-display)}
+html.pc .pctdel{position:absolute;top:10px;right:10px;border:0;background:none;color:var(--muted);width:30px;height:30px;border-radius:9px;display:grid;place-items:center;cursor:pointer;opacity:0;transition:opacity .15s,background .15s,color .15s}
+html.pc .pctk:hover .pctdel,html.pc .pctdel:focus{opacity:1}
+html.pc .pctdel:hover{background:#fbe9e7;color:var(--bad)}
+html.pc .pctdel.arm{opacity:1;width:auto;padding:0 10px;background:var(--bad);color:#fff;font-size:12px}
+html.pc .pctnew{border:2px dashed var(--line);background:transparent;box-shadow:none;min-height:110px;align-items:center;justify-content:center;font:700 14px var(--f-body);color:var(--accent);cursor:pointer}
+html.pc .pctnew:hover{border-color:var(--accent);background:var(--accent-soft)}
+html.pc .pctform{outline:2px solid var(--accent)}
+html.pc .pctform label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--muted)}
+html.pc .pctform .in,html.pc .pctab .in{width:100%}
+html.pc .pctab{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+html.pc .pctab label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;font-weight:700;color:var(--muted)}
+html.pc .pctab .in{padding:6px 8px;font-size:13px}
+html.pc .pctbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+/* every other window: calmer, card-like */
+html.pc .pcsr .sabody .field>label,html.pc .pcsr .sabody .section-title,html.pc .pcsr .sabody .colsec h3{font-size:11.5px!important;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+html.pc .pcsr .sabody .colsec:first-child h3,html.pc .pcsr .sabody>[data-sp]>.field:first-child>label{margin-top:0}
+html.pc .pcsr .sabody .colpkg{grid-template-columns:repeat(5,1fr);gap:10px}
+html.pc .pcsr .sabody .colpkg button{transition:transform .15s}html.pc .pcsr .sabody .colpkg button:hover{transform:translateY(-2px)}
+html.pc .pcsr .sabody .colpkg button i{height:22px}
+html.pc .pcsr .sabody .lgt{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+html.pc .pcsr .sabody .lgt button{display:flex;align-items:center;gap:10px;justify-content:flex-start}
+html.pc .pcsr .sabody .fxchips{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+html.pc .pcsr .sabody .fxchips button{display:flex;align-items:center;justify-content:center;gap:6px}
+html.pc .pcsr .sabody .in{border-radius:10px}
+html.pc .pcsr .sabody .edit-row{border-radius:12px}
