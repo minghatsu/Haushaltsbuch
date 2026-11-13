@@ -42,7 +42,7 @@ jobs:
           # only build the native apps when their part changed since the published release (saves Actions minutes)
           APK=$(git rev-list --count HEAD -- android/); EXE=$(git rev-list --count HEAD -- desktop/)
           BODY=$(gh release view neueste --json body --jq .body 2>/dev/null || echo "")
-          RA=$(echo "$BODY" | grep -o 'apk=[0-9]*' | cut -d= -f2); RE=$(echo "$BODY" | grep -o 'exe=[0-9]*' | cut -d= -f2)
+          RA=$(echo "$BODY" | grep -o 'apk=[0-9]*' | cut -d= -f2 || true); RE=$(echo "$BODY" | grep -o 'exe=[0-9]*' | cut -d= -f2 || true)
           FORCE=${{ github.event_name == 'workflow_dispatch' }}
           if [ "$FORCE" = "true" ] || [ "$APK" != "$RA" ]; then echo "android=true" >> $GITHUB_OUTPUT; else echo "android=false" >> $GITHUB_OUTPUT; fi
           if [ "$FORCE" = "true" ] || [ "$EXE" != "$RE" ]; then echo "desktop=true" >> $GITHUB_OUTPUT; else echo "desktop=false" >> $GITHUB_OUTPUT; fi
