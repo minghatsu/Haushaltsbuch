@@ -1328,3 +1328,52 @@ if (IS_PC){
   document.addEventListener("click", e=>{ const g=e.target.closest("[data-pcaym]"); if (!g || UI.view!=="year") return; e.stopPropagation(); if (g.dataset.pcaym===UI.ym) return; UI.ym=g.dataset.pcaym; render(); }, true);
   const yv=document.getElementById("v-year"); if (yv) yv.classList.add("pca");
 }
+/* ---------- Einstellungen am PC: Liste links, Inhalt rechts (nichts doppelt mit anderen Seiten) ---------- */
+if (IS_PC){
+  const PCSET=[["Geld",()=>["konten","budgets",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]),"abos","export"]],
+    ["Anpassen",()=>["farben","sprache","kategorien","laeden"]],
+    ["Sicherheit",()=>["sicherheit",...(SYNCABLE||window.AndroidBridge?["geraete"]:[]),"backup",...(CAN_NOTIFY?["notify"]:[]),"speicher"]]];
+  const syncOn=()=>!!(SYNCABLE||window.AndroidBridge), parts=k=>k==="geraete"&&syncOn()?["sync","geraete"]:[k], alias={sync:"geraete"};
+  const title=k=>k==="geraete"&&syncOn()?"Geräte & Abgleich":accTitle(k), sub=k=>accSub(k);
+  const col=k=>themeCol(ACC_COL[k]||"#1a7a5c");
+  let shown="";
+  const showPane=(k,anim)=>{ const r=$("pcsR"); if (!r) return; accRestoreAll(); const ks=parts(k);
+    r.innerHTML=`<div class="pcsp${anim?" pcsanim":""}"><div class="pcsph"><span class="saic" style="background:${col(k)}">${ic(accIcon(k),20)}</span><h2>${esc(title(k))}</h2></div>${ks.map(x=>`<div class="sabody" id="sab-${x}"></div>`).join("")}</div>`;
+    ks.forEach(x=>{ try{ accMount(x); }catch(e){ console.warn("pcset",x,e); } });
+    shown=k; };
+  const moveHl=()=>{ const L=$("pcsL"), hl=L&&L.querySelector(".pcshl"), b=L&&L.querySelector(".pcsi.on"); if (!hl) return;
+    if (!b){ hl.style.opacity=0; return; } hl.style.opacity=1; hl.style.top=b.offsetTop+"px"; hl.style.height=b.offsetHeight+"px"; };
+  renderSetHome=function(){
+    const el=$("setHome"); if (!el) return;
+    if (!$("pcsL")){ accRestoreAll(); shown="";
+      el.innerHTML=`<div class="pcset"><nav class="pcsl" id="pcsL"><label class="pcss"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="setQ" type="search" placeholder="Einstellung suchen …" autocomplete="off" aria-label="Einstellung suchen"></label><div class="pcsits"><div class="pcshl"></div><div id="pcsItems"></div></div></nav><section class="pcsr" id="pcsR"></section></div>`; }
+    const q=(ACC.q||"").trim().toLowerCase(), its=$("pcsItems"), groups=PCSET.map(([g,f])=>[g,f()]);
+    const want=JSON.stringify([q,groups]);
+    if (its.dataset.w!==want){ its.dataset.w=want;
+      const hit=k=>!q||(title(k)+" "+sub(k)+" "+parts(k).map(x=>liveSp(x).map(e=>e.textContent).join(" ")).join(" ")).toLowerCase().includes(q);
+      const html=groups.map(([g,ks])=>{ ks=ks.filter(hit); return ks.length?`<div class="pcsg">${esc(I18N.tr?I18N.tr(g):g)}</div>`+ks.map(k=>`<button class="pcsi" data-pcset="${k}"><span class="saic" style="background:${col(k)}">${ic(accIcon(k),16)}</span><span class="sat"><b>${esc(title(k))}</b><small data-pcsub="${k}">${esc(sub(k))}</small></span></button>`).join(""):""; }).join("");
+      its.innerHTML=html||`<p class="small muted" style="padding:10px 12px">Nichts gefunden für „${esc(ACC.q)}“.</p>`;
+      if (q){ const first=its.querySelector("[data-pcset]"); if (first && !its.querySelector(`[data-pcset="${alias[UI.pcset]||UI.pcset}"]`)) UI.pcset=first.dataset.pcset; }
+    } else its.querySelectorAll("[data-pcsub]").forEach(s=>{ const t=sub(s.dataset.pcsub); if (s.textContent!==t) s.textContent=t; });
+    if (!UI.pcset || !SP_PAGES[alias[UI.pcset]||UI.pcset]) UI.pcset="konten";
+    const cur=alias[UI.pcset]||UI.pcset;
+    its.querySelectorAll(".pcsi").forEach(b=>b.classList.toggle("on",b.dataset.pcset===cur));
+    if (shown!==cur || !$("pcsR").children.length) showPane(cur, !!shown);
+    requestAnimationFrame(moveHl);
+  };
+  accGo=function(k){
+    if (k==="profil"){ spSheetOpen("profil"); return; }
+    if (!SP_PAGES[k]) return;
+    ACC.q=""; const q=$("setQ"); if (q) q.value="";
+    UI.pcset=alias[k]||k;
+    if (UI.view!=="more"){ UI.view="more"; render(); }
+    renderSetHome(); window.scrollTo({top:0});
+  };
+  // old way in (e.g. "Schuld hinzufügen" on the start page): a page key in UI.sp → show that page on the right
+  const _rsp=renderSpPages; renderSpPages=function(...a){ if (UI.sp && !spsOpen() && UI.sp!=="profil" && SP_PAGES[UI.sp]) UI.pcset=alias[UI.sp]||UI.sp; return _rsp.apply(this,a); };
+  document.addEventListener("click", e=>{ const b=e.target.closest("[data-pcset]"); if (!b) return; UI.pcset=b.dataset.pcset; renderSetHome(); });
+  addEventListener("resize", ()=>requestAnimationFrame(moveHl));
+  // Farben: the bar at the bottom only exists on the phone
+  const _rce=renderColorEd; renderColorEd=function(...a){ const r=_rce.apply(this,a);
+    document.querySelectorAll(".colsec").forEach(s=>{ const h=s.querySelector("h3"); if (h && /^(Leiste unten|Bottom bar)$/i.test(h.textContent.trim())) s.hidden=true; }); return r; };
+}

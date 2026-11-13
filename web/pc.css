@@ -609,3 +609,29 @@ html.pc .pcaln{stroke-dasharray:1400;stroke-dashoffset:1400;animation:pcaln 1.1s
 #pctt .r.m{color:var(--muted)} #pctt .r.m b{font-size:13px;font-weight:700}
 #pctt .f{margin-top:6px;font-weight:800}
 html.pc .pcabg:hover circle{r:6px;stroke:var(--surface);stroke-width:3px}
+/* Einstellungen am PC: Liste links, Inhalt rechts */
+html.pc .pcset{display:grid;grid-template-columns:320px minmax(0,1fr);gap:20px;align-items:start}
+html.pc .pcsl{position:sticky;top:96px;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:12px;max-height:calc(100vh - 150px);overflow:auto}
+html.pc .pcss{display:flex;align-items:center;gap:8px;background:var(--sunk);border-radius:12px;padding:9px 12px;margin-bottom:6px}
+html.pc .pcss input{border:0;background:none;outline:none;font:inherit;color:var(--fg);flex:1;min-width:0}
+html.pc .pcss .i{width:17px;height:17px;color:var(--muted)}
+html.pc .pcsits{position:relative}
+html.pc .pcshl{position:absolute;left:0;right:0;top:0;height:0;border-radius:12px;background:var(--accent-soft);transition:top .35s cubic-bezier(.3,.8,.3,1),height .35s cubic-bezier(.3,.8,.3,1),opacity .2s;pointer-events:none}
+html.pc .pcsg{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:12px 12px 4px;position:relative}
+html.pc .pcsi{position:relative;display:flex;align-items:center;gap:11px;width:100%;border:0;background:none;padding:8px 10px;border-radius:12px;text-align:left;cursor:pointer;color:var(--fg);font:inherit;transition:background .15s}
+html.pc .pcsi:not(.on):hover{background:var(--sunk)}
+html.pc .pcsi .saic{width:32px;height:32px;border-radius:10px;flex:none;display:grid;place-items:center;color:#fff}
+html.pc .pcsi .sat{display:flex;flex-direction:column;min-width:0}
+html.pc .pcsi .sat b{font-size:14px}
+html.pc .pcsi .sat small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.pc .pcsi.on .sat b{color:var(--accent)}
+html.pc .pcsr{min-width:0}
+html.pc .pcsp.pcsanim{animation:pcsin .38s cubic-bezier(.3,.8,.3,1) both}
+@keyframes pcsin{from{opacity:0;transform:translateY(14px)}}
+html.pc .pcsph{display:flex;align-items:center;gap:12px;margin:2px 0 14px}
+html.pc .pcsph .saic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;color:#fff}
+html.pc .pcsph h2{margin:0;font:800 24px var(--f-display)}
+html.pc .pcsr .sabody{display:flex;flex-direction:column;gap:14px;margin-bottom:14px}
+html.pc .pcsr .sabody>[data-sp]{margin:0}
+html.pc .pcsr .sabody{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:20px 22px}
+html.pc .pcsr .sabody>.card,html.pc .pcsr .sabody>[data-sp]{background:none;box-shadow:none;padding:0;border:0}
