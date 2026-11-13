@@ -634,6 +634,26 @@ textarea.in{font-family:inherit;line-height:1.45}
 .shopgo{display:inline-flex;align-items:center;gap:2px;color:var(--accent);font-weight:700;font-size:13.5px;white-space:nowrap}
 
 .rcptrow .rcpthave{display:flex;align-items:center;gap:12px;padding:8px 10px;background:var(--sunk);border-radius:16px}
+.zbon{position:relative;margin:8px 0 2px}
+.zbh{display:flex;align-items:center;gap:12px;width:100%;border:0;background:var(--sunk);border-radius:16px;padding:10px 12px;text-align:left;color:var(--fg);font:inherit;cursor:pointer}
+.zbh small{display:block;color:var(--muted);font-size:12.5px}.zbh small em{font-style:normal;color:#c98a12;font-weight:700}
+.zbic{width:34px;height:34px;border-radius:10px;background:var(--surface);display:grid;place-items:center;font-size:18px;flex:none}
+.zbch{margin-left:auto;color:var(--muted);transition:transform .35s}.zbh[aria-expanded="true"] .zbch{transform:rotate(180deg)}
+.zbpaper{display:grid;grid-template-rows:0fr;margin:0 8px;background:#fffef9;color:#1d2420;font-family:ui-monospace,"SF Mono",Consolas,"Roboto Mono",monospace;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.12);position:relative;clip-path:inset(0 0 100% 0);max-height:0;padding:0 16px;transition:clip-path .8s cubic-bezier(.3,.8,.3,1),max-height .8s cubic-bezier(.3,.8,.3,1),padding .3s}
+.zbpaper.on{clip-path:inset(0 0 -12px 0);max-height:2400px;padding:14px 16px 18px;margin-bottom:12px}
+.zbpaper:after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:8px;background:linear-gradient(-45deg,transparent 6px,#fffef9 0) 0 0/12px 8px,linear-gradient(45deg,transparent 6px,#fffef9 0) 0 0/12px 8px}
+.zbhd{text-align:center;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.zbit{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:3px 0}
+.zbit button{border:0;background:none;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.zbit button.u{text-decoration:underline dashed #c98a12 1.5px;text-underline-offset:4px}
+.zbit span{font-variant-numeric:tabular-nums;white-space:nowrap}
+.zbsum{border-top:1px dashed #999;margin-top:6px;padding-top:6px;font-weight:800}
+.zbtip{display:block;margin-top:10px;font-family:var(--f-body,system-ui);color:#7b8079;font-size:11.5px;text-align:center}
+.zbbub{position:absolute;left:10px;right:10px;z-index:5;background:#1d2420;color:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 10px 28px rgba(0,0,0,.35);opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s}
+.zbbub.on{opacity:1;transform:none}.zbbub small{opacity:.8;font-size:12px}
+.zbbub .in{width:100%;margin:6px 0;background:#fff;color:#1d2420}
+.zbbr{display:flex;align-items:center;justify-content:space-between;gap:8px}.zbbr span{display:flex;gap:6px}
+.zbbub [data-zbno]{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}
 .rcptrow img{width:46px;height:46px;object-fit:cover;border-radius:10px;background:var(--surface);cursor:zoom-in}
 .rcptrow .grow{flex:1;min-width:0}
 .rcptviewer{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px}
@@ -1539,6 +1559,7 @@ main.wrap{touch-action:pan-y}.cubing,.cubing *{will-change:auto!important;backdr
       <div id="rcptHave" class="rcpthave"><img id="rcptThumb" alt="Beleg"><span class="grow"><b>Beleg</b><br><span class="small muted" id="rcptInfo"></span></span><span class="rbtns"><button class="btn" id="rcptView">Ansehen</button><button class="btn" id="rcptShare" hidden>Teilen</button><button class="btn" id="rcptReplace">Ersetzen</button><button class="btn" id="rcptRemove" aria-label="Beleg entfernen" style="color:var(--bad)">Entfernen</button></span></div>
       <div id="rcptAddWrap" class="rcpthave"><span class="grow"><b>Beleg</b><br><span class="small muted">Noch kein Foto an dieser Buchung</span></span><button class="btn" id="rcptNone" hidden>Bon gibt’s nicht</button><button class="btn" id="rcptAdd">Foto hinzufügen</button><button class="btn" id="rcptGallery" hidden>Galerie</button></div>
     </div>
+    <div class="zbon" id="zBonBox" hidden></div>
     <div class="seg" id="kindSeg" role="group" aria-label="Art der Buchung">
       <button data-kind="ausgabe" aria-pressed="true">Ausgabe</button>
       <button data-kind="einnahme" aria-pressed="false">Einnahme</button>
@@ -6274,6 +6295,7 @@ function dateFromSelects(){
 
 /* ---------- sheet ---------- */
 function openSheet(kind, tx){
+  UI.scanItems=null;
   $("fWk").checked = !!(tx && tx.wk);
   UI.pay = tx ? (tx.pay||"karte") : null;
   if (tx){ UI.editId=tx.id; UI.kind=tx.kind==="abhebung"?"ausgabe":tx.kind==="umbuchung"?(tx._k0||"ausgabe"):tx.kind; UI.cat=tx.cat; $("fAmount").value=numStr(tx.amount); $("fNote").value=tx.note||""; $("fDate").value=tx.date; }
@@ -6420,7 +6442,8 @@ async function saveTx(){
   if (doc.pay==="bar" && !cashOn()) await cashActivate(date<isoToday()?date:isoToday(), null);
   const editing = UI.editId, id = editing || (mem ? newId() : db.collection("tx").doc().id);
   const old = editing ? S.tx.find(t=>t.id===id) : null;
-  if (old){ if (old.ts) doc.ts=old.ts; if (old.importKey) doc.importKey=old.importKey; if (old.source) doc.source=old.source; if (old.um) doc.um=old.um; }
+  if (old){ if (old.ts) doc.ts=old.ts; if (old.importKey) doc.importKey=old.importKey; if (old.source) doc.source=old.source; if (old.um) doc.um=old.um; if (old.items) doc.items=old.items; if (old.ishop) doc.ishop=old.ishop; }
+  if (UI.scanItems && UI.scanItems.items){ doc.items=UI.scanItems.items; if (UI.scanItems.shop) doc.ishop=UI.scanItems.shop; }
   if (doc.kind==="ausgabe" && hasJob() && $("fWk").checked) doc.wk=true;
   // self-employed income: the amount is what came in (incl. VAT), taxes use the net amount
   if (doc.kind==="einnahme" && incArt(doc.cat)==="selbst" && !S.settings.kleinunternehmer){
@@ -6739,7 +6762,42 @@ function renderRcptRow(){
   $("rcptShare").hidden = !(has && r.img && rcptCanShare());
   $("rcptShare").textContent = window.AndroidBridge && !window.AndroidBridge.shareImage && window.AndroidBridge.saveFileB64 ? "Speichern" : "Teilen";
   if (has){ $("rcptThumb").src = r.img || ""; $("rcptInfo").textContent = r.state==="new" ? "wird mit der Buchung gespeichert" : "gespeichert"; }
+  try { zBonRender(); } catch(e){}
 }
+/* ---------- der Kassenzettel in der Buchung: rollt sich aus, mit ausgeschriebenen Namen; Unklares antippen und benennen ---------- */
+function zBonSrc(){
+  if (UI.scanItems && UI.scanItems.items && UI.scanItems.items.length) return UI.scanItems;
+  const t=UI.editId && S.tx.find(x=>x.id===UI.editId);
+  return t && t.items && t.items.length ? {items:t.items, shop:t.ishop||zaShopId(t.note)} : null;
+}
+const zbEur = v => (Math.round(v*100)/100).toFixed(2).replace(".",",");
+function zBonRender(keepBub){
+  const el=$("zBonBox"); if (!el) return; const src=zBonSrc();
+  if (!src){ el.hidden=true; el.innerHTML=""; return; }
+  const sh=SHOPS.find(x=>x.id===src.shop), its=src.items.map(i=>({...i, ...zaName(i.r, src.shop)})), unk=its.filter(i=>!i.sure).length, open=!!UI.zbOpen;
+  el.hidden=false;
+  el.innerHTML=`<button class="zbh" data-zbtg="1" aria-expanded="${open}"><span class="zbic">🧾</span><span class="grow"><b>Kassenzettel</b><small>${its.length} Artikel${unk?` · <em>${unk} unklar</em>`:""} · antippen zum ${open?"Einrollen":"Ausrollen"}</small></span><span class="zbch">▾</span></button>
+    <div class="zbpaper${open?" on":""}"><div class="zbhd">${esc(sh?sh.name:"Kassenzettel")}</div>${its.map((i,k)=>`<div class="zbit"><button class="${i.sure?"":"u"}" data-zbi="${k}" aria-label="${esc(i.n)} – Namen ändern">${esc(i.n)}</button><span>${zbEur(i.p)}</span></div>`).join("")}<div class="zbit zbsum"><span>SUMME</span><span>${zbEur(its.reduce((a,i)=>a+i.p,0))}</span></div><small class="zbtip">${unk?"Unterstrichenes antippen und richtig benennen – gilt dann immer.":"Namen antippen, um ihn zu ändern."}</small></div>
+    <div class="zbbub" id="zbBub" hidden></div>`;
+}
+function zBonAsk(k){
+  const src=zBonSrc(), it=src&&src.items[k]; if (!it) return; const b=$("zbBub"), row=document.querySelector(`#zBonBox [data-zbi="${k}"]`);
+  const sh=SHOPS.find(x=>x.id===src.shop), cur=zaName(it.r, src.shop);
+  b.innerHTML=`<small>Auf dem Bon: <b>${esc(it.r)}</b></small><input class="in" id="zbIn" value="${esc(cur.n)}" autocomplete="off" enterkeyhint="done" aria-label="Richtiger Name"><div class="zbbr"><small>${sh?`Für ${esc(sh.name)} merken`:"Für alle Läden merken"} ✓</small><span><button class="btn small" data-zbno="1">Abbrechen</button><button class="btn small primary" data-zbok="${k}">Merken</button></span></div>`;
+  b.hidden=false; const box=$("zBonBox").getBoundingClientRect(), rr=row.getBoundingClientRect();
+  b.style.top=(rr.bottom-box.top+6)+"px"; requestAnimationFrame(()=>b.classList.add("on"));
+  const inp=$("zbIn"); setTimeout(()=>{ inp.focus(); inp.select(); },60);
+}
+function zBonSave(k){ const src=zBonSrc(), it=src&&src.items[k], v=($("zbIn")||{}).value; if (!it) return;
+  zaTeach(it.r, src.shop, (v||"").trim()); toast("Gemerkt – gilt ab jetzt auf allen Geräten"); zBonRender(); }
+document.addEventListener("click", e=>{
+  if (e.target.closest("[data-zbtg]")){ UI.zbOpen=!UI.zbOpen; const p=document.querySelector("#zBonBox .zbpaper"), h=document.querySelector("#zBonBox .zbh");
+    if (p){ p.classList.toggle("on", UI.zbOpen); h.setAttribute("aria-expanded", UI.zbOpen); const sm=h.querySelector("small"); if (sm) sm.innerHTML=sm.innerHTML.replace(/Einrollen|Ausrollen/, UI.zbOpen?"Einrollen":"Ausrollen"); } return; }
+  const i=e.target.closest("[data-zbi]"); if (i){ zBonAsk(+i.dataset.zbi); return; }
+  const ok=e.target.closest("[data-zbok]"); if (ok){ zBonSave(+ok.dataset.zbok); return; }
+  if (e.target.closest("[data-zbno]")){ const b=$("zbBub"); if (b){ b.hidden=true; b.classList.remove("on"); } return; }
+});
+document.addEventListener("keydown", e=>{ if (e.target.id==="zbIn" && e.key==="Enter"){ e.preventDefault(); const ok=document.querySelector("[data-zbok]"); if (ok) ok.click(); } if (e.target.id==="zbIn" && e.key==="Escape"){ e.stopPropagation(); const b=$("zbBub"); if (b) b.hidden=true; } }, true);
 async function rcptSaveFor(id){
   const r=UI.rcpt;
   try { if (r.state==="new" && r.img) await rcptPut(id, r.img); else if (r.state==="removed" && hasReceipt(id)) await rcptDel(id); }
@@ -6804,10 +6862,56 @@ function receiptItems(lines){
   }
   return out.slice(0,60);
 }
+/* ---------- Kassenbon-Kürzel: eingebautes Wörterbuch + was du der App beigebracht hast ----------
+   Receipts cut names to ~20 letters ("SCHWARZW. SCHINK"). Known short forms are written out; what stays unclear is asked once
+   and kept per shop in S.settings.zabbr (synced to all devices). */
+const ZAB = (()=>{ const o={}; `
+SCHWARZW Schwarzwälder|SCHWARZWAELD Schwarzwälder|SCHINK Schinken|SCHINKN Schinken|KOCHSCH Kochschinken|KOCHSCHINK Kochschinken|SALAMI Salami|LEBERW Leberwurst|LEBERWU Leberwurst|TEEW Teewurst|BIERSCH Bierschinken|WIENER Wiener|WUERSTCH Würstchen|WUERST Würstchen|BRATW Bratwurst|BRATWU Bratwurst|BRATWURST Bratwurst|HAEHNCH Hähnchen|HAEHN Hähnchen|HAEHNCHENBR Hähnchenbrust|HAEHNCHBR Hähnchenbrust|HAEHNBR Hähnchenbrust|PUTENBR Putenbrust|PUTENBRU Putenbrust|PUTE Pute|SCHNITZ Schnitzel|HACKFL Hackfleisch|HACKFLEI Hackfleisch|GEMISCHT gemischt|RIND Rind|RINDERHACK Rinderhack|SCHWEIN Schwein|SCHWEINEFL Schweinefleisch|AUFSCHN Aufschnitt|AUFSCHNITT Aufschnitt|FLEISCHW Fleischwurst|GEFL Geflügel|GEFLUEG Geflügel|
+PROTEINK Proteinkäse|KAESE Käse|KAES Käse|KSE Käse|SCHEIB Scheiben|SCHB Scheiben|SCHEIBEN Scheiben|GOUDA Gouda|EMMENT Emmentaler|EMMENTAL Emmentaler|MOZZAR Mozzarella|MOZZ Mozzarella|PARMES Parmesan|FRISCHK Frischkäse|FRISCHKAE Frischkäse|SCHMELZK Schmelzkäse|HUETTENK Hüttenkäse|QUARK Quark|MAGERQ Magerquark|MAGERQU Magerquark|SPEISEQ Speisequark|JOGH Joghurt|JOGHU Joghurt|JOGHURT Joghurt|NAT Natur|NATUR Natur|SAHNE Sahne|SCHLAGS Schlagsahne|SCHLAGSAH Schlagsahne|SCHMAND Schmand|CREME Crème|FRAICHE fraîche|MILCH Milch|H-MILCH H-Milch|HMILCH H-Milch|VOLLM Vollmilch|VOLLMI Vollmilch|FETTARM fettarm|FETTA fettarm|BUTT Butter|BUTTER Butter|MARGAR Margarine|PFLANZ pflanzlich|PFLANZL pflanzlich|EIER Eier|FREIL Freiland|FREILAND Freiland|BODENH Bodenhaltung|
+BROETCH Brötchen|BROETCHEN Brötchen|BROETCHE Brötchen|SONNTAGSBROETCHE Sonntagsbrötchen|SONNTAGSBR Sonntagsbrötchen|BROT Brot|VOLLKORNBR Vollkornbrot|VOLLK Vollkorn|VOLLKORN Vollkorn|TOAST Toast|TOASTBR Toastbrot|LAUGENBR Laugenbrezel|BREZ Brezel|CROISS Croissant|BAGUET Baguette|DINKEL Dinkel|ROGGEN Roggen|WEIZEN Weizen|MEHL Mehl|DINKELMEHL Dinkelmehl|HAFERFL Haferflocken|HAFERFLO Haferflocken|HAFERFLOCK Haferflocken|ZART zart|KERN kernig|KERNIG kernig|MUESLI Müsli|MUSLI Müsli|CORNFL Cornflakes|NUDELN Nudeln|SPAGH Spaghetti|SPAGHET Spaghetti|PENNE Penne|REIS Reis|BASMATIR Basmatireis|ZUCK Zucker|ZUCKER Zucker|
+APFELMUS Apfelmus|APF Apfel|AEPFEL Äpfel|BANAN Bananen|BANANE Bananen|BIRN Birnen|TRAUB Trauben|TRAUBEN Trauben|ERDBEER Erdbeeren|HEIDELB Heidelbeeren|ZITRON Zitronen|ORANG Orangen|MANDAR Mandarinen|KARTOFF Kartoffeln|KART Kartoffeln|SPEISEKART Speisekartoffeln|MEHLIGK mehligkochend|FESTK festkochend|ZWIEB Zwiebeln|ZWIEBEL Zwiebeln|KNOBL Knoblauch|TOMAT Tomaten|TOM Tomaten|STRAUCHTOM Strauchtomaten|CHERRYTOM Cherrytomaten|GURK Gurke|SALATGURKE Salatgurke|PAPRIK Paprika|ZUCCHINI Zucchini|KAROTT Karotten|MOEHR Möhren|MOEHREN Möhren|SALAT Salat|EISBERGS Eisbergsalat|BROKK Brokkoli|CHAMP Champignons|CHAMPIGN Champignons|GRUEN grün|GRU grün|ROT rot|GELB gelb|BIO Bio|
+CASHEWK Cashewkerne|CASHEWKERNE Cashewkerne|ERDN Erdnüsse|ERDNUESSE Erdnüsse|WALN Walnüsse|MANDELN Mandeln|GEMUESECHIPS Gemüsechips|CHIPS Chips|PAPRCHIPS Paprika-Chips|SCHOKO Schoko|SCHOKOL Schokolade|SCHOKOTROEPFCHEN Schokotröpfchen|VOLLMILCHSCH Vollmilchschokolade|ZARTB Zartbitter|ZARTBITT Zartbitter|KEKS Kekse|GUMMIB Gummibärchen|RAMA Rama|REIN rein|MILD mild|
+MINERALW Mineralwasser|MINERALWAS Mineralwasser|MIN Mineral|WASS Wasser|WASSER Wasser|SPRUDEL Sprudel|STILL still|MEDIUM medium|APFELSCH Apfelschorle|SCHORLE Schorle|ORANGENS Orangensaft|ORANGENSAFT Orangensaft|APFELS Apfelsaft|SAFT Saft|DIREKTS Direktsaft|COLA Cola|LIMO Limonade|BIER Bier|PILS Pils|KAFFEE Kaffee|KAFF Kaffee|BOHNE Bohnen|BOHN Bohnen|GEMAHL gemahlen|TEE Tee|
+TOILETTENP Toilettenpapier|TOILPAP Toilettenpapier|KUECHENR Küchenrolle|KUECHENROL Küchenrolle|TASCHENT Taschentücher|SPUELM Spülmittel|SPUELMITT Spülmittel|WASCHM Waschmittel|WASCHMITT Waschmittel|WEICHSP Weichspüler|DUSCHG Duschgel|DUSCHGEL Duschgel|SHAMP Shampoo|ZAHNP Zahnpasta|ZAHNCR Zahncreme|ZAHNBUER Zahnbürste|DEO Deo|MUELLB Müllbeutel|MUELLBEUT Müllbeutel|
+TK Tiefkühl|TIEFK Tiefkühl|PIZZA Pizza|PIZ Pizza|FISCHST Fischstäbchen|LACHS Lachs|THUNF Thunfisch|THUNFISCH Thunfisch|HERING Hering|POMMES Pommes|PFANDFL Pfandflasche|
+JA ja!|GUT gut|GUENSTIG günstig|KNUSPR Knusper|KNUSP Knusper|K-CLASSIC K-Classic|STK Stück|ST Stück|PCK Packung|PKG Packung|PACK Packung|FL Flasche|FLA Flasche|DS Dose|GL Glas|BTL Beutel|KG kg|G g|L l|ML ml|GR groß|KL klein|FR frisch|FRI frisch|GEW gewürfelt|GER gerieben|GESCHN geschnitten|GERAEUCH geräuchert|GEKOCHT gekocht|LEICHT leicht|LIGHT light|ORIG Original|ORIGINAL Original|KLASS klassisch|NATURTR naturtrüb|`.split("|").forEach(e=>{ const m=e.trim().match(/^(\S+)\s+(.+)$/); if (m) o[m[1]]=m[2]; }); return o; })();
+// words that are complete as they are (so only real short forms count as unclear)
+const ZAB_FULL = new Set(Object.values(ZAB).map(v=>v.toUpperCase().replace(/Ä/g,"AE").replace(/Ö/g,"OE").replace(/Ü/g,"UE").replace(/ß/g,"SS")));
+const zaUml = w => w.replace(/(?<![EQ])UE(?!$)/g,"Ü").replace(/(?<!E)AE/g,"Ä").replace(/OE(?!N\b)/g,"Ö");
+// one token (upper case, without the dot) → written out, plus whether that was a guess
+function zaWord(tok, first){
+  const t=tok.replace(/[^A-ZÄÖÜ0-9\-%]/gi,"").toUpperCase(); if (!t) return {w:tok, ok:true};
+  if (/^\d/.test(t)) return {w:tok.toLowerCase(), ok:true};
+  const a=t.replace(/Ä/g,"AE").replace(/Ö/g,"OE").replace(/Ü/g,"UE");
+  if (ZAB[a]){ const v=ZAB[a]; return {w: first ? v[0].toUpperCase()+v.slice(1) : v, ok:true, hit:true}; }
+  const u=zaUml(a); const w=u[0]+u.slice(1).toLowerCase();
+  return {w, ok:false};
+}
+// "SCHWARZW. SCHINK" → {n:"Schwarzwälder Schinken", sure:true}; shopId for what you taught the app
+function zaName(raw, shopId){
+  const r=String(raw||"").replace(/\s+/g," ").trim(), L=S.settings.zabbr||{};
+  const k=r.toUpperCase();
+  if (shopId && L[shopId+"|"+k]) return {n:L[shopId+"|"+k], sure:true, taught:true};
+  if (L["*|"+k]) return {n:L["*|"+k], sure:true, taught:true};
+  const toks=r.split(" "), long=r.length>=15;
+  let sure=true; const out=toks.map((tk,i)=>{ const z=zaWord(tk, i===0);
+    // unclear: a cut-off word (ends with a dot, or the last word of a full-width line) that is not in the dictionary
+    const cut=/\.$/.test(tk) || (long && i===toks.length-1 && tk.length>=4);
+    if (!z.ok && cut) sure=false;
+    if (!z.ok && tk.replace(/\W/g,"").length<=3 && /[A-Z]/i.test(tk)) sure=false;
+    return z.w; });
+  return {n: out.join(" ").replace(/\s+-\s+/g,"-"), sure};
+}
+function zaTeach(raw, shopId, full){
+  const k=String(raw||"").replace(/\s+/g," ").trim().toUpperCase(), v=String(full||"").trim(); if (!k) return;
+  const L={...(S.settings.zabbr||{})}; if (v) L[(shopId||"*")+"|"+k]=v.slice(0,60); else delete L[(shopId||"*")+"|"+k];
+  S.settings.zabbr=L; saveSettings();
+}
+const zaShopId = text => { const sh=SHOPS.find(x=>x.re.test(nrm(text||""))); return sh?sh.id:""; };
 function rememberPrices(shopText, date, items){
   const sh=SHOPS.find(x=>x.re.test(nrm(shopText||""))); if (!sh || !items.length) return 0;
   const d=date||isoToday(), book=(S.settings.pricebook||[]).filter(e=>!(e.s===sh.id && e.d===d));   // the same receipt scanned twice counts once
-  for (const it of items) book.push({n:it.n, p:it.p, s:sh.id, d});
+  for (const it of items) book.push({n:zaName(it.n, sh.id).n, p:it.p, s:sh.id, d});
   S.settings.pricebook=book.sort((a,b)=>a.d.localeCompare(b.d)).slice(-400); saveSettings();
   return items.length;
 }
@@ -7042,7 +7146,7 @@ async function runScan(source, attachOnly, fresh){
     if (r.date) $("fDate").value=r.date;
     if (r.shop && !$("fNote").value.trim()) $("fNote").value=r.shop;
     renderSheet();
-    let nItems=0; try { nItems=rememberPrices(r.shop, r.date, receiptItems(lines||[])); } catch(e){}
+    let nItems=0; try { const its=receiptItems(lines||[]); nItems=rememberPrices(r.shop, r.date, its); UI.scanItems=its.length?{items:its.map(i=>({r:i.n, p:i.p})), shop:zaShopId(r.shop)}:null; zBonRender(); } catch(e){}
     toast(`Erkannt: ${eur(r.amount)}${r.date?" am "+shortDate(r.date):""}${nItems?` · ${nItems} Preise gemerkt`:""} – bitte kurz prüfen`, null, null, 4000);
   } catch(e){ busy(false); toast(e.message||"Quittung konnte nicht gelesen werden"); }
 }
@@ -7698,6 +7802,7 @@ async function camConfirm(){
       id = mem ? newId() : db.collection("tx").doc().id;
       const doc={date, amount:Math.round(amount*100)/100, kind:"ausgabe", cat:g("cat")||"", note:R.type==="inv" ? [shop, nr?"Rechnung "+nr:"Rechnung"].filter(Boolean).join(" · ") : shop, ts:Date.now()};
       if (R.type==="rcpt" && g("pay")==="bar"){ doc.pay="bar"; if (!cashOn()) await cashActivate(date<isoToday()?date:isoToday(), null); }
+      if (R.type==="rcpt") try { const its=receiptItems(R.lines); if (its.length){ doc.items=its.map(i=>({r:i.n, p:i.p})); const sid=zaShopId(shop); if (sid) doc.ishop=sid; } } catch(e){}
       if (!(await safe(()=>saveTxDoc(id, doc, null)))) return;
       try { await rcptPut(id, R.img); } catch(e){}
       if (R.type==="rcpt") try { rememberPrices(shop, date, receiptItems(R.lines)); } catch(e){} }
