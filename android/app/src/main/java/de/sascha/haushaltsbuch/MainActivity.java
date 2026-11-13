@@ -716,6 +716,19 @@ public class MainActivity extends Activity {
             } catch (Exception e) { return "{}"; }
         }
 
+        /** the phone's own name as it shows it ("Galaxy S23"), not the model code */
+        @JavascriptInterface
+        public String deviceName() {
+            String n = null;
+            try { n = android.provider.Settings.Global.getString(getContentResolver(), "device_name"); } catch (Exception ignored) {}
+            if (n == null || n.trim().isEmpty()) try { n = android.provider.Settings.Secure.getString(getContentResolver(), "bluetooth_name"); } catch (Exception ignored) {}
+            if (n == null || n.trim().isEmpty()) {
+                String m = android.os.Build.MODEL == null ? "" : android.os.Build.MODEL, b = android.os.Build.MANUFACTURER == null ? "" : android.os.Build.MANUFACTURER;
+                n = m.toLowerCase().startsWith(b.toLowerCase()) || b.isEmpty() ? m : (b.substring(0, 1).toUpperCase() + b.substring(1) + " " + m);
+            }
+            return n == null ? "" : n.trim();
+        }
+
         @JavascriptInterface
         public String nativeRev() {
             try (InputStream is = getAssets().open("native.txt")) { return new String(readAll(is), StandardCharsets.UTF_8).trim(); }

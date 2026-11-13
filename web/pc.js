@@ -101,7 +101,7 @@ function pcHome(o){
   const tot=(accts.find(a=>a.total)||{bal:mainBal}).bal, isCur=ym===cur;
   const left=isCur ? Math.max(1, dim-new Date().getDate()) : 0, perDay=isCur ? Math.max(0, mainBal/left) : 0;
   const pct=isCur ? left/dim : ym>cur ? 1 : 0;
-  const first=String(S.settings.name||"").trim().split(/\s+/)[0], greet=(($("greet")||{}).textContent||"Hallo").trim();
+  const first=String(S.settings.name||"").trim().split(/\s+/)[0], greet=first ? (I18N.tr ? I18N.tr("Hallo") : "Hallo") : devModel();
   const many=accts.filter(a=>!a.total).length>1;
   const html=`<aside class="pchero" id="pcHero">
     <small class="pchi"><span>${esc(greet)}</span>${first?", "+esc(first):""} · <span>${esc(MONTHS[m-1])} ${y}</span></small>
@@ -442,8 +442,7 @@ if (IS_PC){
 }
 /* profile photo next to the greeting – without a photo the first letter of the name */
 if (IS_PC){
-  const av=()=>{ const ta=$("topAv"); if (!ta) return; if (ta.querySelector("img")) return; const n=String(S.settings.name||"").trim();
-    ta.hidden=false; if (n) ta.textContent=n[0].toUpperCase(); else ta.innerHTML=ic("user",22); };
+  const av=()=>{ try { renderAvatar(); } catch(_){} };   // photo, first letter or the device symbol (shared with the phone)
   const _r2=render; render = (...a) => { const x=_r2(...a); try { av(); } catch(e){} return x; };
   av();
 }
