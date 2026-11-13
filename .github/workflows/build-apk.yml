@@ -125,7 +125,7 @@ jobs:
         run: |
           gh release download neueste -p Haushaltsbuch.apk -p Haushaltsbuch-Setup.exe -D . --clobber
           # update the existing release instead of deleting it first (a GitHub hiccup must never leave the apps without updates)
-          TITLE="Finanz MAMI · Handy v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · PC v0.$(( (${{ github.run_number }} - 142) / 10 )).$(( (${{ github.run_number }} - 142) % 10 ))"
+          TITLE="Finanz MAMI · Handy v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · PC v0.$(( (${{ github.run_number }} - 142) / 10 )).$(( (${{ github.run_number }} - 142) % 10 )) · Tablet v0.$(( (${{ github.run_number }} - 115) / 10 )).$(( (${{ github.run_number }} - 115) % 10 ))"
           NOTES="Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=${{ steps.need.outputs.ra }} exe=${{ steps.need.outputs.re }} appv=$APPV pcv=$PCV"
           if gh release view neueste >/dev/null 2>&1; then
             gh release upload neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --clobber
@@ -310,7 +310,7 @@ jobs:
             echo "Windows-Build fehlt – bisheriger Installer bleibt (exe=$EXE)"
           fi
           # update the existing release instead of deleting it first (a GitHub hiccup must never leave the apps without updates)
-          TITLE="Finanz MAMI · Handy v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · PC v0.$(( (${{ github.run_number }} - 142) / 10 )).$(( (${{ github.run_number }} - 142) % 10 ))"
+          TITLE="Finanz MAMI · Handy v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · PC v0.$(( (${{ github.run_number }} - 142) / 10 )).$(( (${{ github.run_number }} - 142) % 10 )) · Tablet v0.$(( (${{ github.run_number }} - 115) / 10 )).$(( (${{ github.run_number }} - 115) % 10 ))"
           NOTES="Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=$APK exe=$EXE appv=${{ needs.web.outputs.appv }} pcv=${{ needs.web.outputs.pcv }}"
           if gh release view neueste >/dev/null 2>&1; then
             gh release upload neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --clobber

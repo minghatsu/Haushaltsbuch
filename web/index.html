@@ -2475,7 +2475,9 @@ const CHANGELOG=[
   ["0.4.6", "9. November 2026", ["Analyse: überall 4 Kacheln pro Bereich – neu Sparziele und Fixkosten", "Eigene Kacheln für jede Gruppe, z. B. BAföG-Rückzahlung, Töpfe, Stundenlohn, 78-Wochen-Grenze, Zuzahlungen", "Einstellungen neu: Profil mit Zahlen, Schnell-Schalter, Abos & Verträge, Export, Hilfe, Feedback, Belege & Speicher, Geräte", "Datenschutz, Nutzungsbedingungen und Impressum", "Schrift und Laden-Logos eingebaut – nichts mehr an Google", "Mindestlohn-Automatik: Gehalt steigt jedes Jahr mit", "Werte pro Jahr (Mindestlohn, Minijob-Grenze)", "Eigene Startseite für Studium, Schule, Ausbildung, Rente, Elternzeit, Krankengeld und Beamte", "Steuer-Kachel passend zu jeder Gruppe", "Neu: Beamte", "Keine Steuer-Kacheln mehr bei Grundsicherung"]]];
 // own number per device type: the PC only counts changes that reach the PC, the phone only those that reach the phone
 const verNum = x => "0."+Math.floor(x/10)+"."+(x%10);
-function curVerShort(){ const pc=!!(window.AndroidBridge&&window.AndroidBridge.desktop), own=+((document.querySelector(`meta[name="hb-ver-${pc?"pc":"app"}"]`)||{}).content||0); if (own) return verNum(own);
+function curVerShort(){ const pc=!!(window.AndroidBridge&&window.AndroidBridge.desktop), mv=k=>+((document.querySelector(`meta[name="hb-ver-${k}"]`)||{}).content||0);
+  if (typeof IS_TAB!=="undefined" && IS_TAB && mv("app") && mv("pc")) return verNum(Math.round((mv("app")+mv("pc"))/2));   // tablet: right between phone and PC
+  const own=mv(pc?"pc":"app"); if (own) return verNum(own);
   const n=+((document.querySelector('meta[name="hb-version"]')||{}).content||0); return n ? verName(n).replace(/^v/,"") : CHANGELOG[0][0]; }
 function neuUnseen(){ try{ return localStorage.getItem("hb-seenlog")!==CHANGELOG[0][0]; }catch(e){ return false; } }
 function renderNeu(){ const el=$("neuEd"); if (!el) return; try{ localStorage.setItem("hb-seenlog", CHANGELOG[0][0]); }catch(e){}
@@ -2654,7 +2656,7 @@ document.addEventListener("click", e=>{ const b=e.target.closest("[data-tour]");
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-faq]"); if (!b) return; const i=+b.dataset.faq; UI.faqOpen = UI.faqOpen===i ? null : i; renderHilfe(); });
 
 function fbText(){ const t=($("fbTxt")||{}).value||""; const info=($("fbInfo")||{}).checked;
-  return t.trim() + (info?`\n\n---\nFinanz MAMI ${verName(+((document.querySelector('meta[name="hb-version"]')||{}).content||0))} · ${window.AndroidBridge?(IS_PC?"PC":"Android"):"Browser"} · ${(WORK.find(x=>x[0]===S.settings.work)||[,"–"])[1]}`:""); }
+  return t.trim() + (info?`\n\n---\nFinanz MAMI ${verName(+((document.querySelector('meta[name="hb-version"]')||{}).content||0))} · ${window.AndroidBridge?(IS_DESK?"PC":IS_TAB?"Tablet":"Android"):"Browser"} · ${(WORK.find(x=>x[0]===S.settings.work)||[,"–"])[1]}`:""); }
 const FB_MAX_IMG=4;
 async function fbShrink(file){   // screenshots get small enough for an e-mail: longest side 1600 px, JPEG
   const bmp=await createImageBitmap(file), k=Math.min(1, 1600/Math.max(bmp.width,bmp.height)), c=document.createElement("canvas");
@@ -8732,9 +8734,9 @@ async function syncNow(){
 }
 /* ---------- self-update straight from the GitHub release (works anywhere, no Server needed) ---------- */
 // shown version "v0.5.4": phone/app count from build 88, the PC version has its own numbering from build 142 (build 143 = v0.0.1)
-const VER_BASE = {app:88, pc:142};
+const VER_BASE = {app:88, pc:142, tab:115};   // tablet: right between phone and PC
 const mneg = v => Math.abs(+v||0)<0.005 ? esc(eur(0)) : "− "+esc(eur(v));   // "− 0,00 €" looks like an error
-function verName(n, pc){ n=n|0; if (!n) return "Testversion"; if (pc===undefined) pc=IS_DESK; const m=Math.max(0, n-(pc?VER_BASE.pc:VER_BASE.app)); return `v0.${Math.floor(m/10)}.${m%10}`; }
+function verName(n, pc){ n=n|0; if (!n) return "Testversion"; const tab=pc===undefined && IS_TAB; if (pc===undefined) pc=IS_DESK; const m=Math.max(0, n-(pc?VER_BASE.pc:tab?VER_BASE.tab:VER_BASE.app)); return `v0.${Math.floor(m/10)}.${m%10}`; }
 const GH_REL = "https://api.github.com/repos/minghatsu/Haushaltsbuch/releases/tags/neueste";
 const GH_REL_PUB = "https://api.github.com/repos/minghatsu/finanz-mami/releases/tags/neueste";   // public download repo for testers – no key needed
 const UPD = {msg:"", ts:0, busy:false, last:0, started:Date.now()};
@@ -8754,7 +8756,7 @@ async function ghCheck(manual, auto){
     const ALT = {"Haushaltsbuch.apk":"Finanz-MAMI.apk", "Haushaltsbuch-Setup.exe":"Finanz-MAMI-Setup.exe"};
     const asset = n => (rel.assets||[]).find(a=>a.name===n || a.name===ALT[n]);
     const desk = !!window.AndroidBridge.desktop, mine = +(window.AndroidBridge.nativeRev() || 0), theirs = num(desk ? "exe" : "apk");
-    const rv = () => { const x=num(desk?"pcv":"appv"); return x ? "v"+verNum(x) : verName(num("web")); };   // the version as this device counts it
+    const rv = () => { const x=IS_TAB&&num("appv")&&num("pcv") ? Math.round((num("appv")+num("pcv"))/2) : num(desk?"pcv":"appv"); return x ? "v"+verNum(x) : verName(num("web")); };   // the version as this device counts it
     UPD.relName = rv();
     let apkNew=false;
     if (theirs > mine){
