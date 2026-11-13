@@ -9815,7 +9815,9 @@ legalGate();
     if (UI.view!==A.view || UI.ym!==A.ym){
       const dx = UI.view!==A.view ? (order.indexOf(UI.view)>=order.indexOf(A.view)?1:-1) : (A.ym && UI.ym<A.ym?-1:1);
       const first=A.view===null; A.view=UI.view; A.ym=UI.ym; A.rows={};
-      if (!skip && !first && vis(v)) requestAnimationFrame(()=>stagger(v, UI.view!==A.prevView?dx:dx*0.5));
+      // on the PC most pages already fall in with their own animation – only list, Fixkosten and Einkauf use this one
+      const own = IS_PC && UI.view!==A.prevView && !["list","fix","shop"].includes(UI.view);
+      if (!skip && !first && !own && vis(v)) requestAnimationFrame(()=>stagger(v, UI.view!==A.prevView?dx:dx*0.5));
       A.prevView=UI.view;
       if (vis(v)) A.rows[UI.view]=new Set([...v.querySelectorAll(ROW)].map(rid));
       return; }

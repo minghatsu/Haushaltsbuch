@@ -422,6 +422,7 @@ ipcMain.on("scan", (e, id) => {
 
 // web pages (shop leaflets, help, imprint …) open INSIDE the app window: a web view placed where the app leaves room for it
 let pageView = null, pageShown = false, pageBase = "", pageFirst = false;
+let pageEditing = false;
 // the web view is thrown away completely (not only hidden) – so nothing of it keeps the app running or shows up again
 function pageDestroy() {
   const v = pageView; pageView = null; pageShown = false; pickOn = false; pageBase = ""; pickCssKey = null;
@@ -754,6 +755,7 @@ function pageSend() {
 }
 function pageMake() {
   if (pageView) return pageView;
+  pageEditing = false;
   pageView = new WebContentsView({ webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false, partition: "persist:seiten" } });
   pageView.setBorderRadius && pageView.setBorderRadius(0);
   const wc = pageView.webContents;
@@ -774,11 +776,17 @@ function pageMake() {
   wc.on("did-navigate", () => { if (pickOn) setTimeout(() => pickSet(pickMode || "pick"), 400); });
   wc.on("did-frame-finish-load", (e, isMain) => { if (pickOn && !isMain) pickSet(pickMode || "pick"); });   // picking stays on after the page changed
   wc.on("console-message", (...a) => { const ev = a[0], msg = ev && typeof ev.message === "string" ? ev.message : a[2];
+    if (typeof msg === "string" && msg.startsWith("__HBEDIT__")) { pageEditing = msg.slice(10) === "1"; return; }
     if (typeof msg === "string" && msg.startsWith("__HBPICK__")) { try { pickResult(JSON.parse(msg.slice(10))); } catch (err) {} } });
+  // know whether a text field of the page has the focus (then the arrow keys stay with the page)
+  wc.on("dom-ready", () => { pageEditing = false; wc.executeJavaScript(`(()=>{ const f=()=>{ const a=document.activeElement; console.log("__HBEDIT__"+(a&&(a.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))?"1":"0")); }; addEventListener("focusin",f,true); addEventListener("focusout",()=>setTimeout(f,0),true); })()`).catch(() => {}); });
   wc.on("before-input-event", (e, input) => {
     if (input.type !== "keyDown") return;
     if (input.key === "Escape") { e.preventDefault(); win.webContents.executeJavaScript(pickOn ? "window.hbPagePickOff && window.hbPagePickOff()" : "window.hbPageClose && window.hbPageClose()").catch(() => {}); }
     else if (input.alt && input.key === "ArrowLeft") { e.preventDefault(); if (wc.canGoBack()) wc.goBack(); }
+    // plain ← / →: flip the app's pages (as everywhere else) – unless you are typing in a field of the shop's page
+    else if ((input.key === "ArrowLeft" || input.key === "ArrowRight") && !input.alt && !input.control && !input.meta && !input.shift && !pageEditing) {
+      e.preventDefault(); win.webContents.executeJavaScript(`window.pcStep && window.pcStep(${input.key === "ArrowRight" ? 1 : -1})`).catch(() => {}); }
     else if (input.key === "F5") { e.preventDefault(); wc.reload(); }
   });
   wc.on("render-process-gone", () => { try { win.contentView.removeChildView(pageView); } catch (e) {} pageView = null; pageShown = false; });

@@ -15,12 +15,15 @@ const PC_ORDER=["home","list","fix","shop","year","more"];
 /* page change "Fallen & Springen": the tiles of the old page drop away slightly tilted, one after another,
    the tiles of the new page fall in from above and bounce into place */
 const PC_ANIM={busy:false, pass:false};
-function pcTiles(sec){
+function pcTiles(sec, leaving){
   if (!sec) return [];
   const out=[];
-  if (sec && ((sec.id==="v-fix" && sec.classList.contains("pcfcal")) || sec.id==="v-list" || sec.id==="v-shop")) return out;   // these pages have their own entrance
+  // these pages have their own entrance – but they fall away like all the others when you leave them
+  if (!leaving && ((sec.id==="v-fix" && sec.classList.contains("pcfcal")) || sec.id==="v-list" || sec.id==="v-shop")) return out;
   for (const c of sec.children){
     if (c.matches(".hcols,.cols")) c.querySelectorAll(":scope > .hcol > *, :scope > .col > *").forEach(x=>out.push(x));
+    else if (leaving && c.matches("#setHome")) c.querySelectorAll(".pcsl, .pcsr .pcsph, .pcsr .sabody, .pcsr .pctk, .pcsr .invpc > section").forEach(x=>out.push(x));
+    else if (leaving && c.matches(".pcset,.pcana,.pcshop,.pcsnone,.zstack")) [...c.querySelectorAll(":scope > *")].forEach(x=>{ if (x.matches(".pcsr,.pcana > .pcac")) [...x.children].forEach(y=>out.push(y)); else out.push(x); });
     else out.push(c);
   }
   return out.filter(e=>{ if (e.hidden || e.closest("[hidden]")) return false; const r=e.getBoundingClientRect(); return r.width>0 && r.height>0 && r.bottom>0 && r.top<innerHeight; }).slice(0,40);
@@ -28,7 +31,7 @@ function pcTiles(sec){
 function pcCalm(){ return matchMedia("(prefers-reduced-motion: reduce)").matches; }
 function pcGo(k, nav){
   if (PC_ANIM.busy){ PC_ANIM.next=()=>pcGo(k, nav); return true; }   // pressed again during the animation: goes on right after
-  const sec=document.querySelector(`[data-view="${UI.view}"]`), olds=pcCalm()?[]:[...pcTiles(sec), ...(window.pcDockEls?pcDockEls():[])];
+  const sec=document.querySelector(`[data-view="${UI.view}"]`), olds=pcCalm()?[]:[...pcTiles(sec, true), ...(window.pcDockEls&&UI.view==="home"?pcDockEls():[])];
   PC_ANIM.busy=true; if (k==="home") pcHome.intro=true; document.documentElement.classList.add("pcanim");
   const outs=olds.map((e,i,a)=>e.animate([{opacity:1,transform:"none"},{opacity:0,transform:`translateY(${Math.round(innerHeight*0.6+i*24)}px) rotate(${i%2?9:-9}deg)`}],
     {duration:300, delay:(a.length-1-i)*22, easing:"cubic-bezier(.55,0,1,.45)", fill:"forwards"}));
@@ -58,6 +61,7 @@ function pcStep(d){
   const b=document.querySelector(`.tabs [data-go="${PC_ORDER[((i+d)%PC_ORDER.length+PC_ORDER.length)%PC_ORDER.length]}"]`); if (!b) return false;
   return pcGo(b.dataset.go, ()=>b.click());
 }
+window.pcStep=pcStep;   // the shop page shown inside the app passes ← / → on to here
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-pcstep]"); if (b) pcStep(Number(b.dataset.pcstep)); });
 // a click on a page (pills, the tiles of the green panel …) gets the same animation
 document.addEventListener("click", e=>{
