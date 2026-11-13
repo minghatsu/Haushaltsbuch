@@ -421,7 +421,7 @@ html.pc .pczi.done .n,html.pc .pczi.striking .n{opacity:.5}
 html.pc .pczi.done .n:after,html.pc .pczi.striking .n:after{width:100%}
 html.pc .pczi.done .cb,html.pc .pczi.striking .cb{background:#1a7a5c;border-color:#1a7a5c}
 html.pc .pczi.done .cb:after,html.pc .pczi.striking .cb:after{content:"";width:8px;height:4px;border:solid #fff;border-width:0 0 2px 2px;transform:translateY(-1px) rotate(-45deg)}
-html.pc .pczi .ws{position:relative;flex:none;zoom:.72;cursor:pointer;transition:transform .2s}
+html.pc .pczi .ws{position:relative;flex:none;zoom:.72;cursor:pointer;transition:transform .2s;border:0;background:none;padding:0}
 html.pc .pczi .ws:hover{transform:scale(1.12)}
 html.pc .pczi .ws select{position:absolute;inset:0;opacity:0;cursor:pointer}
 html.pc .pczi .q,html.pc .pcstop .q{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--muted);font-weight:800}

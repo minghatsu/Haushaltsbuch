@@ -1171,7 +1171,11 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .znew{display:inline-block;background:#FFE9A8;color:#8a5a00;border-radius:5px;font-size:10px;font-weight:900;padding:1px 5px;vertical-align:2px}.zdaz{display:inline-block;background:#FFE0A3;color:#8a5a00;border-radius:5px;font-size:10px;font-weight:900;padding:1px 5px;vertical-align:2px}
 .zr.isnew{background:color-mix(in srgb,#FFE9A8 35%,transparent);border-radius:10px;padding-left:6px;padding-right:6px}
 .zfor{margin-left:6px;font-size:11px;font-weight:700;color:var(--accent)}
-.zsh{position:relative;display:flex;flex:none;cursor:pointer}.zsh select{position:absolute;inset:-8px;opacity:0;width:auto;height:auto;font-size:16px;cursor:pointer}
+.zsh{display:flex;flex:none;border:0;background:none;padding:2px;cursor:pointer;border-radius:50%}.zsh:active{transform:scale(.92)}
+.zpk h2{font-size:18px}.zpkg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.zpko{display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:var(--sunk);border-radius:14px;padding:12px 6px;font:inherit;color:inherit;cursor:pointer;text-align:center}
+.zpko b{font-size:13px;line-height:1.2}.zpko small{font-size:11px;color:var(--muted);line-height:1.25}.zpko.on{background:var(--accent-soft);box-shadow:0 0 0 2px var(--accent)}
+.zpkq{width:44px;height:44px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-size:20px}
 .zaway{background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:13.5px;border-radius:12px;padding:9px 12px;margin-bottom:10px}
 .zfold{display:flex;align-items:center;gap:8px;background:var(--sunk);border-radius:12px;padding:9px 11px;margin-top:10px;font-size:13px;color:var(--muted)}
 .zlnk{display:block;width:100%;border:0;background:none;color:var(--accent);font:inherit;font-weight:800;font-size:13.5px;padding:10px 2px;text-align:center}
@@ -3950,6 +3954,24 @@ function zDevOutCheck(){ const out=S.settings.devOut||{}; if (!out[devId()] || !
   try { pairSave(null); } catch(_){} SYNC.token=""; SYNC.queue=[]; SYNC.state="off"; saveSync();
   try { localStorage.removeItem("hb-devid"); localStorage.removeItem("hb-devs"); } catch(_){}
   toast("Dieses Gerät wurde aus der Kopplung entfernt – die Daten hier bleiben erhalten", null, null, 9000); try { renderSyncDot(); } catch(_){} }
+/* ---- choosing the shop of an item: the shop logos to tap ---- */
+function zPickOpen(id){
+  const it=zList().find(x=>x.id===id); if (!it) return;
+  const w=zBestFor(it.n), auto=w&&zShopBy(w.s), mine=(S.settings.shops||[]).map(zShopBy).filter(Boolean), cur=it.s||"";
+  if (cur && !mine.some(o=>o.id===cur) && zShopBy(cur)) mine.push(zShopBy(cur));
+  let el=$("zPick"); if (!el){ el=document.createElement("div"); el.id="zPick"; el.className="backdrop zdlgbg"; document.body.appendChild(el); }
+  el.innerHTML=`<div class="zdlg zpk" role="dialog" aria-label="Laden wählen"><h2>Wo kaufst du ${esc(it.n)}?</h2>
+    <div class="zpkg"><button class="zpko ${cur?"":"on"}" data-zpk="">${auto?zLogo(auto,44):`<span class="zpkq">✨</span>`}<b>Automatisch</b><small>${auto?"am günstigsten: "+esc(auto.name):"wo es am günstigsten ist"}</small></button>
+    ${mine.map(o=>`<button class="zpko ${o.id===cur?"on":""}" data-zpk="${o.id}">${zLogo(o,44)}<b>${esc(o.name)}</b></button>`).join("")}</div>
+    <div class="zdb"><button class="btn" data-zpkx>Abbrechen</button></div></div>`;
+  el.dataset.item=id; el.hidden=false; requestAnimationFrame(()=>el.classList.add("show"));
+}
+function zPickClose(){ const el=$("zPick"); if (!el) return; el.classList.remove("show"); setTimeout(()=>{ el.hidden=true; el.innerHTML=""; }, 180); }
+document.addEventListener("click", e=>{
+  const o=e.target.closest("[data-zpick]"); if (o){ e.preventDefault(); e.stopPropagation(); zPickOpen(o.dataset.zpick); return; }
+  if (e.target.closest("[data-zpkx]") || e.target.id==="zPick"){ zPickClose(); return; }
+  const k=e.target.closest("[data-zpk]"); if (k){ const id=$("zPick").dataset.item, v=k.dataset.zpk; zSave(zList().map(x=>x.id===id?(v?{...x, s:v}:(({s:_,...r})=>r)(x)):x)); zPickClose(); return; }
+}, true);
 /* ---- the list on the phone ---- */
 const ZB={bons:{}, busy:"", x:null};
 function zSort(){ try { return localStorage.getItem("hb-zsort")||"laden"; } catch(_){ return "laden"; } }
@@ -3976,9 +3998,7 @@ function zettelCard(){
   const shown=M ? L.filter(mineIt) : L, others=M ? L.filter(x=>!mineIt(x)) : [];
   const open=shown.filter(x=>!x.done), done=shown.filter(x=>x.done);
   const est=sum(open,it=>{ const w=zWhere(it); return w&&w.p?w.p*zQ(it):0; });
-  const myShops=(S.settings.shops||[]).map(zShopBy).filter(Boolean);
-  const dot=(w,it)=>{ const sh=w&&zShopBy(w.s), cur=it.s||"", extra=cur&&!myShops.some(o=>o.id===cur)?[zShopBy(cur)].filter(Boolean):[];
-    return `<label class="zsh" title="${sh?esc(sh.name):"Laden wählen"}">${zLogo(sh,24)}<select data-zshop="${esc(it.id)}" aria-label="Laden für ${esc(it.n)}"><option value="">automatisch${w&&!it.s&&sh?" ("+esc(sh.name)+")":""}</option>${[...myShops,...extra].map(o=>`<option value="${o.id}" ${o.id===cur?"selected":""}>${esc(o.name)}</option>`).join("")}</select></label>`; };
+  const dot=(w,it)=>{ const sh=w&&zShopBy(w.s); return `<button class="zsh" data-zpick="${esc(it.id)}" title="${sh?esc(sh.name):"Laden wählen"}" aria-label="Laden für ${esc(it.n)} wählen">${zLogo(sh,24)}</button>`; };
   const isNew=it=>M && !it.done && !it.extra && (it.c||0)>M.at;
   const row=x=>`<div class="zr ${x.it.done?"done":""} ${isNew(x.it)?"isnew":""}"><button class="zb" data-zck="${esc(x.it.id)}" aria-label="${esc(x.it.n)} abhaken"></button><input class="zq" type="number" inputmode="numeric" min="1" max="99" value="${zQ(x.it)}" data-zq="${esc(x.it.id)}" aria-label="Menge ${esc(x.it.n)}"><span class="zx">x</span><button class="zn" data-zck="${esc(x.it.id)}">${esc(x.it.n)}${isNew(x.it)?` <span class="znew">NEU</span>`:""}${x.it.extra?` <span class="zdaz">DAZU</span>`:""}</button><b>${x.w&&x.w.p?esc(eur(x.w.p*zQ(x.it))):""}</b>${x.it.done&&x.it.by&&M&&(M.devs||[]).length>1?zWho(x.it.by,16):""}${dot(x.w,x.it)}</div>`;
   let gs=zGroups(shown, mode);
