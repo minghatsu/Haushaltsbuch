@@ -1230,6 +1230,28 @@ if (IS_PC){
   const _r6=render; render=(...a)=>{ const x=_r6(...a); if (PG.open){ if (UI.view!==lastView) pageClose(); else if (!PG.embed) sideRender(); } lastView=UI.view; return x; };
 }
 /* ---------- Analyse am PC: drei Spalten nebeneinander – Auswertung · Planung · Steuer ---------- */
+/* ---------- Hover-Kasten für Punkte und Balken: sofort, mit Zahl (Variante B) ---------- */
+const TT=o=>` data-tt="${esc(JSON.stringify(o))}"`;
+if (IS_PC){
+  const box=document.createElement("div"); box.id="pctt"; box.setAttribute("role","tooltip"); document.body.appendChild(box);
+  let cur=null;
+  const hide=()=>{ cur=null; box.classList.remove("on"); };
+  document.addEventListener("mouseover",e=>{
+    const g=e.target.closest&&e.target.closest("[data-tt]"); if (!g){ if (cur) hide(); return; }
+    if (g===cur) return; cur=g; let o; try{ o=JSON.parse(g.dataset.tt); }catch(_){ return hide(); }
+    box.style.setProperty("--ttc",o.c||"var(--accent)");
+    box.innerHTML=`<div class="h">${esc(o.h||"")}</div>${(o.r||[]).map(r=>`<div class="r${r[3]?" m":""}"><i style="background:${r[2]||"var(--accent)"}"></i><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join("")}${o.f?`<div class="f" style="color:${o.fc||"var(--fg)"}">${esc(o.f)}</div>`:""}`;
+    // anchor: the top of the visible mark (point or bar), else the column
+    const marks=[...g.querySelectorAll("circle,.b")], rs=(marks.length?marks:[g]).map(m=>m.getBoundingClientRect()), gr=g.getBoundingClientRect();
+    const cx=marks.length?(Math.min(...rs.map(r=>r.left))+Math.max(...rs.map(r=>r.right)))/2:gr.left+gr.width/2, top=Math.min(...rs.map(r=>r.top));
+    box.classList.add("on"); const bw=box.offsetWidth, bh=box.offsetHeight;
+    let x=Math.max(8,Math.min(innerWidth-bw-8,cx-bw/2)), y=top-bh-12, below=false;
+    if (y<8){ y=Math.max(...rs.map(r=>r.bottom))+12; below=true; }
+    box.classList.toggle("below",below); box.style.left=x+"px"; box.style.top=y+"px"; box.style.setProperty("--ax",Math.max(14,Math.min(bw-14,cx-x))+"px");
+  });
+  addEventListener("scroll",hide,true); addEventListener("blur",hide);
+  document.addEventListener("click",()=>setTimeout(hide,0));
+}
 if (IS_PC){
   const sg=v=>(v>=0?"+ ":"− ")+eur0(Math.abs(v));
   // bars around a middle line: green = money left, red = more spent; the chosen month is full colour
@@ -1238,14 +1260,14 @@ if (IS_PC){
     pts.forEach((p,i)=>{ const h=p.fut?0:Math.max(3,Math.abs(p.v)/mx*(mid-6)), x=i*bw+bw*.22, w=bw*.56, y=p.v>=0?mid-h:mid, on=i===onIdx;
       const c=p.v>=0?"var(--good)":"var(--bad)";
       s+=`<g class="pcabg" data-pcaym="${p.ym}" style="--i:${i}"><rect x="${i*bw}" y="0" width="${bw}" height="${H+24}" fill="transparent"/>${p.fut?"":`<rect class="b" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(7,w/3).toFixed(1)}" fill="${c}" opacity="${on?1:.38}"/>`}
-        <text x="${(x+w/2).toFixed(1)}" y="${H+18}" text-anchor="middle" font-size="13" font-weight="${on?800:500}" fill="${on?"var(--fg)":"var(--muted)"}">${esc(p.l)}</text><title>${esc(p.t)}: ${esc(p.fut?"–":sg(p.v))}</title></g>`; });
+        <text x="${(x+w/2).toFixed(1)}" y="${H+18}" text-anchor="middle" font-size="13" font-weight="${on?800:500}" fill="${on?"var(--fg)":"var(--muted)"}">${esc(p.l)}</text></g>`.replace('<g class="pcabg"', `<g class="pcabg"${TT({h:p.t+" "+p.ym.slice(0,4), c:p.fut?"var(--line)":c, r:[[p.v>=0?"Übrig":"Mehr ausgegeben", p.fut?"–":sg(p.v), c]]})}`); });
     return s+`</svg>`; };
   const yearBars=(rows,ym)=>{ const W=520,H=124,cw=W/12, mx=Math.max(1,...rows.map(r=>Math.max(r.c.income,r.c.expenses)));
     let s=`<svg class="pcab" viewBox="0 0 ${W} ${H+22}" role="img" aria-label="Einnahmen und Ausgaben pro Monat">`;
     rows.forEach((r,i)=>{ const x=i*cw, on=r.ym===ym, hi=r.c.income/mx*(H-4), he=r.c.expenses/mx*(H-4), bw=Math.min(10,cw*.3);
       s+=`<g class="pcabg" data-pcaym="${r.ym}" style="--i:${i}">${on?`<rect x="${x+2}" y="0" width="${cw-4}" height="${H}" rx="9" fill="var(--accent-soft)"/>`:`<rect x="${x}" y="0" width="${cw}" height="${H+22}" fill="transparent"/>`}
         <rect class="b" x="${(x+cw/2-bw-1.5).toFixed(1)}" y="${(H-hi).toFixed(1)}" width="${bw}" height="${hi.toFixed(1)}" rx="3" fill="var(--good)"/><rect class="b" x="${(x+cw/2+1.5).toFixed(1)}" y="${(H-he).toFixed(1)}" width="${bw}" height="${he.toFixed(1)}" rx="3" fill="var(--bad)" opacity=".55"/>
-        <text x="${(x+cw/2).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="12" font-weight="${on?800:500}" fill="${on?"var(--fg)":"var(--muted)"}">${esc(MSHORT[i].slice(0,1))}</text><title>${esc(MONTHS[i])}: ${esc(eur0(r.c.income))} rein · ${esc(eur0(r.c.expenses))} raus</title></g>`; });
+        <text x="${(x+cw/2).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="12" font-weight="${on?800:500}" fill="${on?"var(--fg)":"var(--muted)"}">${esc(MSHORT[i].slice(0,1))}</text></g>`.replace('<g class="pcabg"', `<g class="pcabg"${TT({h:MONTHS[i]+" "+r.ym.slice(0,4), c:"var(--accent)", r:[["Einnahmen",eur0(r.c.income),"var(--good)"],["Ausgaben",eur0(r.c.expenses),"var(--bad)"]], f:(r.c.income-r.c.expenses>=0?"Übrig ":"Mehr ausgegeben ")+eur0(Math.abs(r.c.income-r.c.expenses)), fc:r.c.income-r.c.expenses>=0?"var(--good)":"var(--bad)"})}`); });
     return s+`</svg>`; };
   const _ath=anaTabsHtml;
   // the year sits in "Planung" – the analysis on the left is always the month
@@ -1270,7 +1292,7 @@ if (IS_PC){
       let d="", on=false; pts2.forEach(p=>{ if (!p){ on=false; return; } d+=(on?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)+" "; on=true; });
       return `<svg class="pcab" viewBox="0 0 ${W} ${H+22}" role="img" aria-label="Ausgaben der letzten 12 Monate">${avg?`<line x1="0" x2="${W}" y1="${Y(avg).toFixed(1)}" y2="${Y(avg).toFixed(1)}" stroke="var(--faint)" stroke-dasharray="4 5"/><text x="${W-2}" y="${(Y(avg)-6).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--muted)">Ø ${esc(eur0(avg))}</text>`:""}
         <path d="${d}" fill="none" stroke="var(--bad)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" class="pcaln"/>
-        ${hist.map((h,i)=>`<g class="pcabg" data-pcaym="${h.ym}"><rect x="${(X(i)-(W-20)/(n-1)/2).toFixed(1)}" y="0" width="${((W-20)/(n-1)).toFixed(1)}" height="${H+22}" fill="transparent"/>${h.has?`<circle cx="${X(i).toFixed(1)}" cy="${Y(h.v).toFixed(1)}" r="${h.ym===ym?6:3.5}" fill="var(--bad)"/>`:""}<text x="${X(i).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="11" font-weight="${h.ym===ym?800:500}" fill="${h.ym===ym?"var(--fg)":"var(--muted)"}">${esc(MSHORT[h.i-1].slice(0,1))}</text><title>${esc(MONTHS[h.i-1])}: ${esc(eur0(h.v))}</title></g>`).join("")}</svg>`; })();
+        ${hist.map((h,i)=>`<g class="pcabg" data-pcaym="${h.ym}"><rect x="${(X(i)-(W-20)/(n-1)/2).toFixed(1)}" y="0" width="${((W-20)/(n-1)).toFixed(1)}" height="${H+22}" fill="transparent"/>${h.has?`<circle cx="${X(i).toFixed(1)}" cy="${Y(h.v).toFixed(1)}" r="${h.ym===ym?6:3.5}" fill="var(--bad)"/>`:""}<text x="${X(i).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="11" font-weight="${h.ym===ym?800:500}" fill="${h.ym===ym?"var(--fg)":"var(--muted)"}">${esc(MSHORT[h.i-1].slice(0,1))}</text></g>`.replace('<g class="pcabg"', `<g class="pcabg"${(()=>{ const pp=avg&&h.has?Math.round((h.v-avg)/avg*100):null; return TT({h:MONTHS[h.i-1]+" "+h.ym.slice(0,4), c:"var(--bad)", r:[["Ausgaben",h.has?eur0(h.v):"–","var(--bad)"],...(avg?[["Ø",eur0(avg),"var(--faint)",1]]:[])], f:pp==null?"":pp===0?"genau im Ø":(pp>0?"+":"−")+Math.abs(pp)+" % "+(pp>0?"über":"unter")+" Ø", fc:pp>0?"var(--bad)":"var(--good)"}); })()}`)).join("")}</svg>`; })();
     const dAvg=avg?Math.round((expn-avg)/avg*100):null;
     const chip=(p,inv)=>p==null?"":`<span class="pcachg ${(inv?-p:p)>0?"up":"dn"}">${p>0?"+":p<0?"−":"±"}${Math.abs(p)} %</span>`;
     const col1=`<div class="pcac"><div class="pcah"><h2>Verlauf</h2><span>letzte 12 Monate</span></div>
@@ -1286,7 +1308,7 @@ if (IS_PC){
     const cmp=(()=>{ const W=520,H=120,cw=W/12, mx=Math.max(1,...lastY,...rows.map(r=>r.c.expenses));
       return `<svg class="pcab" viewBox="0 0 ${W} ${H+22}" role="img" aria-label="${y} gegen ${y-1}">${rows.map((r,i)=>{ const x=i*cw, hb=lastY[i]/mx*(H-4), ha=r.ym>cur?0:r.c.expenses/mx*(H-4);
         return `<g class="pcabg" data-pcaym="${r.ym}" style="--i:${i}"><rect x="${x}" y="0" width="${cw}" height="${H+22}" fill="transparent"/><rect class="b" x="${(x+cw/2-10).toFixed(1)}" y="${(H-hb).toFixed(1)}" width="9" height="${hb.toFixed(1)}" rx="3" fill="var(--faint)" opacity=".55"/>${ha?`<rect class="b" x="${(x+cw/2+1).toFixed(1)}" y="${(H-ha).toFixed(1)}" width="9" height="${ha.toFixed(1)}" rx="3" fill="var(--bad)"/>`:""}
-          <text x="${(x+cw/2).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="11" font-weight="${r.ym===ym?800:500}" fill="${r.ym===ym?"var(--fg)":"var(--muted)"}">${esc(MSHORT[i].slice(0,1))}</text><title>${esc(MONTHS[i])}: ${esc(eur0(r.c.expenses))} (${y}) · ${esc(eur0(lastY[i]))} (${y-1})</title></g>`; }).join("")}</svg>`; })();
+          <text x="${(x+cw/2).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="11" font-weight="${r.ym===ym?800:500}" fill="${r.ym===ym?"var(--fg)":"var(--muted)"}">${esc(MSHORT[i].slice(0,1))}</text></g>`.replace('<g class="pcabg"', `<g class="pcabg"${(()=>{ const fut=r.ym>cur, pp=!fut&&lastY[i]>0?Math.round((r.c.expenses-lastY[i])/lastY[i]*100):null; return TT({h:MONTHS[i], c:"var(--bad)", r:[[String(y),fut?"–":eur0(r.c.expenses),"var(--bad)"],[String(y-1),eur0(lastY[i]),"var(--faint)",1]], f:pp==null?"":pp===0?"gleich wie "+(y-1):(pp>0?"+":"−")+Math.abs(pp)+" % zu "+(y-1), fc:pp>0?"var(--bad)":"var(--good)"}); })()}`); }).join("")}</svg>`; })();
     const ytd=sum(rows.filter(r=>r.ym<=ym),r=>r.c.expenses), ytdL=sum(lastY.slice(0,mi),v=>v), dY=ytdL>0?Math.round((ytd-ytdL)/ytdL*100):null;
     const col2=`<div class="pcac"><div class="pcah"><h2>Kategorien im Vergleich</h2></div>
       ${ct.length?`<div class="card pcarl"><div class="pcach"><b>${esc(mn)} gegen deinen Schnitt</b><button data-anaopen="cat">Alle ›</button></div>${catRows}</div>`:`<div class="card pcarl muted pcaempty">Im ${esc(mn)} ist noch nichts gebucht.</div>`}
