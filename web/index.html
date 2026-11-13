@@ -1155,7 +1155,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .zgh{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px;margin:12px 2px 4px}.zgh small{margin-left:auto;color:var(--muted);font-weight:600}
 .zd{display:inline-block;width:14px;height:14px;border-radius:50%;background:#c7ccc9;flex:none}
 .zgl{background:var(--surface);border-radius:14px;padding:2px 12px}
-.zr{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;padding:9px 0;border-top:1px solid var(--line);font:inherit;font-size:15px;color:inherit;text-align:left}.zr:first-child{border-top:0}
+.zr{display:flex;align-items:center;gap:8px;width:100%;border:0;background:var(--surface);padding:9px 0;position:relative;transition:transform .22s cubic-bezier(.2,.8,.2,1);font:inherit;font-size:15px;color:inherit;text-align:left}.zrw{position:relative;overflow:hidden;border-top:1px solid var(--line)}.zrw:first-child{border-top:0}.zrw.drag .zr{transition:none}
+.zdel{position:absolute;top:0;right:0;bottom:0;width:84px;border:0;background:#d9443a;color:#fff;display:grid;place-items:center;transition:width .15s}.zrw.far .zdel{width:100%}.zdel{visibility:hidden}.zrw.open .zdel,.zrw.drag .zdel{visibility:visible}
 .zr .zb{width:24px;height:24px;border-radius:7px;border:2px solid var(--faint);flex:none;display:grid;place-items:center;background:none;padding:0}.zr.done .zb{background:var(--accent);border-color:var(--accent)}.zr.done .zb:after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
 .zr .zn{flex:1;min-width:0;border:0;background:none;padding:4px 0;font:inherit;color:inherit;text-align:left}.zr .zq{width:38px;border:0;border-radius:8px;background:var(--sunk);padding:5px 2px;text-align:center;font:inherit;font-weight:800;font-size:14px;color:var(--fg);-moz-appearance:textfield}.zr .zq::-webkit-inner-spin-button{display:none}.zr .zx{margin-left:-6px;color:var(--muted);font-weight:700;font-size:13px}.zr b{font-weight:800}.zr.done .zn,.zr.done b{color:var(--faint);text-decoration:line-through}
 .zfin{margin-top:14px;background:var(--accent-soft);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:9px}.zfin>b{font-size:17px}
@@ -1169,7 +1170,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .zmini .zadd{margin:0}
 .zcard.trip{box-shadow:0 0 0 2px var(--accent)}
 .znew{display:inline-block;background:#FFE9A8;color:#8a5a00;border-radius:5px;font-size:10px;font-weight:900;padding:1px 5px;vertical-align:2px}.zdaz{display:inline-block;background:#FFE0A3;color:#8a5a00;border-radius:5px;font-size:10px;font-weight:900;padding:1px 5px;vertical-align:2px}
-.zr.isnew{background:color-mix(in srgb,#FFE9A8 35%,transparent);border-radius:10px;padding-left:6px;padding-right:6px}
+.zr.isnew{background:color-mix(in srgb,#FFE9A8 35%,var(--surface));border-radius:10px;padding-left:6px;padding-right:6px}
 .zfor{margin-left:6px;font-size:11px;font-weight:700;color:var(--accent)}
 .zsh{display:flex;flex:none;border:0;background:none;padding:2px;cursor:pointer;border-radius:50%}.zsh:active{transform:scale(.92)}
 .zpk h2{font-size:18px}.zpkg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
@@ -3954,6 +3955,23 @@ function zDevOutCheck(){ const out=S.settings.devOut||{}; if (!out[devId()] || !
   try { pairSave(null); } catch(_){} SYNC.token=""; SYNC.queue=[]; SYNC.state="off"; saveSync();
   try { localStorage.removeItem("hb-devid"); localStorage.removeItem("hb-devs"); } catch(_){}
   toast("Dieses Gerät wurde aus der Kopplung entfernt – die Daten hier bleiben erhalten", null, null, 9000); try { renderSyncDot(); } catch(_){} }
+/* ---- swipe a line to the left: the bin shows up; far enough and it is gone ---- */
+const ZTRASH='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg>';
+function zDel(id){ const before=zList(), it=before.find(x=>x.id===id); if (!it) return; zSave(before.filter(x=>x.id!==id)); toast(`${it.n} gelöscht`, ()=>zSave([...zList(), it].sort((a,b)=>(a.c||0)-(b.c||0))), "Rückgängig", 5000); }
+(()=>{ let st=null; const W=84;
+  const closeAll=ex=>document.querySelectorAll(".zrw.open").forEach(r=>{ if (r!==ex){ r.classList.remove("open"); r.querySelector(".zr").style.transform=""; } });
+  document.addEventListener("touchstart", e=>{ const w=e.target.closest(".zrw"); if (!w || e.target.closest(".zdel")){ if (!w) closeAll(); return; }
+    const t=e.touches[0]; st={w, x:t.clientX, y:t.clientY, dx:0, on:false, base:w.classList.contains("open")?-W:0}; }, {passive:true});
+  document.addEventListener("touchmove", e=>{ if (!st) return; const t=e.touches[0], dx=t.clientX-st.x, dy=t.clientY-st.y;
+    if (!st.on){ if (Math.abs(dx)<8 && Math.abs(dy)<8) return; if (Math.abs(dy)>Math.abs(dx)){ st=null; return; } st.on=true; closeAll(st.w); st.w.classList.add("drag"); }
+    st.dx=dx; const x=Math.min(0, st.base+dx); st.w.querySelector(".zr").style.transform=`translateX(${x}px)`; st.w.classList.toggle("far", x<-180); }, {passive:true});
+  document.addEventListener("touchend", ()=>{ if (!st) return; const s0=st; st=null; if (!s0.on) return; const r=s0.w.querySelector(".zr"), x=Math.min(0, s0.base+s0.dx); s0.w.classList.remove("drag","far");
+    if (x<-180){ r.style.transform="translateX(-110%)"; setTimeout(()=>zDel(s0.w.dataset.zrow), 160); return; }
+    if (x<-W/2){ s0.w.classList.add("open"); r.style.transform=`translateX(${-W}px)`; } else { s0.w.classList.remove("open"); r.style.transform=""; }
+    // a swipe is not a tap on the checkbox
+    const stop=ev=>{ ev.stopPropagation(); ev.preventDefault(); }; document.addEventListener("click", stop, {capture:true, once:true}); setTimeout(()=>document.removeEventListener("click", stop, {capture:true}), 350); });
+  document.addEventListener("click", e=>{ const d=e.target.closest("[data-zdel]"); if (d){ zDel(d.dataset.zdel); return; } if (!e.target.closest(".zrw.open")) closeAll(); });
+})();
 /* ---- choosing the shop of an item: the shop logos to tap ---- */
 function zPickOpen(id){
   const it=zList().find(x=>x.id===id); if (!it) return;
@@ -4000,7 +4018,7 @@ function zettelCard(){
   const est=sum(open,it=>{ const w=zWhere(it); return w&&w.p?w.p*zQ(it):0; });
   const dot=(w,it)=>{ const sh=w&&zShopBy(w.s); return `<button class="zsh" data-zpick="${esc(it.id)}" title="${sh?esc(sh.name):"Laden wählen"}" aria-label="Laden für ${esc(it.n)} wählen">${zLogo(sh,24)}</button>`; };
   const isNew=it=>M && !it.done && !it.extra && (it.c||0)>M.at;
-  const row=x=>`<div class="zr ${x.it.done?"done":""} ${isNew(x.it)?"isnew":""}"><button class="zb" data-zck="${esc(x.it.id)}" aria-label="${esc(x.it.n)} abhaken"></button><input class="zq" type="number" inputmode="numeric" min="1" max="99" value="${zQ(x.it)}" data-zq="${esc(x.it.id)}" aria-label="Menge ${esc(x.it.n)}"><span class="zx">x</span><button class="zn" data-zck="${esc(x.it.id)}">${esc(x.it.n)}${isNew(x.it)?` <span class="znew">NEU</span>`:""}${x.it.extra?` <span class="zdaz">DAZU</span>`:""}</button><b>${x.w&&x.w.p?esc(eur(x.w.p*zQ(x.it))):""}</b>${x.it.done&&x.it.by&&M&&(M.devs||[]).length>1?zWho(x.it.by,16):""}${dot(x.w,x.it)}</div>`;
+  const row=x=>`<div class="zrw" data-zrow="${esc(x.it.id)}"><button class="zdel" data-zdel="${esc(x.it.id)}" aria-label="${esc(x.it.n)} löschen" tabindex="-1">${ZTRASH}</button><div class="zr ${x.it.done?"done":""} ${isNew(x.it)?"isnew":""}"><button class="zb" data-zck="${esc(x.it.id)}" aria-label="${esc(x.it.n)} abhaken"></button><input class="zq" type="number" inputmode="numeric" min="1" max="99" value="${zQ(x.it)}" data-zq="${esc(x.it.id)}" aria-label="Menge ${esc(x.it.n)}"><span class="zx">x</span><button class="zn" data-zck="${esc(x.it.id)}">${esc(x.it.n)}${isNew(x.it)?` <span class="znew">NEU</span>`:""}${x.it.extra?` <span class="zdaz">DAZU</span>`:""}</button><b>${x.w&&x.w.p?esc(eur(x.w.p*zQ(x.it))):""}</b>${x.it.done&&x.it.by&&M&&(M.devs||[]).length>1?zWho(x.it.by,16):""}${dot(x.w,x.it)}</div></div>`;
   let gs=zGroups(shown, mode);
   if (M && mode!=="laden") gs=gs.map(g=>({...g, rows:g.rows.slice().sort((a,b)=>isNew(b.it)-isNew(a.it))}));
   if (M && mode==="laden") gs=gs.sort((a,b)=>(b.rows.some(x=>isNew(x.it)))-(a.rows.some(x=>isNew(x.it))));
@@ -4037,7 +4055,7 @@ function zettelCard(){
   return `<div class="card zcard ${M?"trip":""}"><div class="card-head"><h2>${M?"🛒 ":""}${title}</h2><span class="small muted">${stat}</span></div>${away}
     <div class="zsort" role="group" aria-label="Sortieren">${[["laden","Laden"],["abt","Abteilung"],["preis","Preis"],["az","A–Z"]].map(([k,l])=>`<button data-zsort="${k}" class="${mode===k?"on":""}">${l}</button>`).join("")}</div>
     <div class="zadd"><input class="in" id="zIn" placeholder="Was brauchst du?" autocomplete="off" aria-label="Was brauchst du?"><button class="btn primary" data-zadd aria-label="Hinzufügen">+</button></div>
-    ${gs.map(g=>`${head(g)}<div class="zgl">${g.rows.map(row).join("")}</div>`).join("")||`<div class="small muted" style="padding:12px 2px">Noch nichts auf dem Zettel.</div>`}
+    ${gs.map(g=>`${head(g)}<div class="zgl" data-noswipe>${g.rows.map(row).join("")}</div>`).join("")||`<div class="small muted" style="padding:12px 2px">Noch nichts auf dem Zettel.</div>`}
     ${xf}${fold}${fin}
     ${M||T?"":L.some(x=>!x.done)?`<div class="zdb" style="margin-top:12px"><button class="btn primary" data-zstart>🛒 Einkauf starten</button></div>`:""}</div>`;
 }
