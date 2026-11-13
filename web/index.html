@@ -310,6 +310,18 @@ html.touch .kpad{display:grid}
 .lgsec .legal{padding:0 2px 12px;max-height:46vh;overflow:auto}
 .legalbg{position:fixed;inset:0;z-index:400;background:color-mix(in srgb,var(--bg) 70%,#000);display:grid;place-items:end center;overflow:auto;padding:16px}
 .legalbox{background:var(--surface);border-radius:26px;padding:22px 18px 18px;width:100%;max-width:520px;box-shadow:0 20px 50px -20px rgba(0,0,0,.5);margin:auto 0 0}
+.actin{width:100%;font:800 26px ui-monospace,Consolas,monospace;letter-spacing:.18em;text-align:center;text-transform:uppercase;padding:14px;border-radius:16px;border:2px solid var(--line);background:var(--bg);color:var(--fg)}.actin:focus{outline:none;border-color:var(--accent)}
+.actin::placeholder{font-size:18px;letter-spacing:.06em;text-transform:none}
+.actbox .btn.primary{width:100%;justify-content:center}
+.invbg{position:fixed;inset:0;z-index:350;background:var(--bg);overflow:auto;display:flex;justify-content:center;animation:invin .32s cubic-bezier(.3,1.2,.5,1)}
+@keyframes invin{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.invbox{width:100%;max-width:440px;padding:calc(18px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
+.invhd{display:flex;align-items:center;gap:12px;font-size:19px}.invhd .iconbtn{width:38px;height:38px;border-radius:12px;background:var(--surface);font-size:24px;line-height:1}
+.invmid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:26px 0}
+.invqr{background:#fff;border-radius:24px;padding:16px;box-shadow:0 14px 40px -16px rgba(0,0,0,.35)}.invqr svg{display:block;width:min(64vw,260px);height:auto}
+.invurl{margin-top:16px;border:2px dashed var(--accent);color:var(--accent);border-radius:12px;padding:8px 14px;font:800 14px ui-monospace,Consolas,monospace;word-break:break-all}
+.invcode{margin-top:10px;font-size:14px;color:var(--muted)}.invcode b{font:800 18px ui-monospace,Consolas,monospace;letter-spacing:.14em;color:var(--fg);margin-left:4px}
+html.pc .invbg{background:color-mix(in srgb,var(--bg) 70%,#000a);align-items:center}html.pc .invbox{background:var(--bg);border-radius:28px;max-height:92vh;box-shadow:0 30px 80px -20px #000a}
 .legalbox h2{margin:10px 0 4px;font-family:var(--f-display);font-size:22px}.lgic{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;background:var(--accent-soft);color:var(--accent)}
 .lgl{margin:0 0 10px;padding-left:18px;line-height:1.6;font-size:14px}.lgchk{display:flex;gap:10px;align-items:flex-start;margin:14px 0;font-size:13.5px;line-height:1.45}.lgchk input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--accent)}
 .legalbox .btn{width:100%;justify-content:center}.legalbox .btn:disabled{opacity:.45}
@@ -2681,6 +2693,77 @@ async function fbPost(body){
   let j={}; try{ j=JSON.parse(r.text); }catch(e){}
   if (r.status<200 || r.status>=300){ throw new Error(j.error || "Server antwortet mit "+r.status); }
   return j; }
+/* ---------- Einladungen: wer die App schon hatte, bekommt einen QR-Code für max. 20 neue Geräte; Eingeladene können nicht weiter einladen ---------- */
+const INV_PAGE = "https://miracleframe.synology.me/mami/";
+function actGet(){ try{ return JSON.parse(localStorage.getItem("hb-act")||"null"); }catch(e){ return {k:"root"}; } }
+function actSet(o){ try{ localStorage.setItem("hb-act", JSON.stringify(o)); }catch(e){} }
+(function(){ try{ if (!localStorage.getItem("hb-act") && localStorage.getItem("hb-legal")) actSet({k:"root"}); }catch(e){} })();   // used the app before invitations existed
+const actNeed = () => !actGet() && !window.claude && !!pairUrl();
+const canInvite = () => { const a=actGet(); return !!(a && a.k==="root") && !!pairUrl(); };
+const invCode = s => { const m=String(s||"").toUpperCase().match(/[?&]I=([A-Z0-9]{6})\b/) || String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"").match(/^([A-Z0-9]{6})$/); return m?m[1]:""; };
+const invLink = c => INV_PAGE+"?i="+c;
+async function pairCall(action, qs, body){
+  const base=pairUrl(); if (!base) throw new Error("Kein Server eingestellt");
+  const url=apiUrl(base, action, qs||""), js=body?JSON.stringify(body):"", auth=(MODE==="pair" && SYNC.token) ? "Bearer "+SYNC.token : ""; let r;
+  if (NATIVE && window.AndroidBridge && window.AndroidBridge.http){ r=await new Promise(res=>{ const id=newId(); httpWaiting[id]=res; setTimeout(()=>{ if (httpWaiting[id]){ delete httpWaiting[id]; res({status:0}); } }, 30000); window.AndroidBridge.http(id, body?"POST":"GET", url, auth, js); }); if (!r.status) throw new Error("Keine Verbindung – bist du online?"); }
+  else { let f; try { f=await fetch(url,{method:body?"POST":"GET", headers:Object.assign({"Content-Type":"application/json"}, auth?{Authorization:auth}:{}), body:body?js:undefined, cache:"no-store"}); } catch(_){ throw new Error("Keine Verbindung – bist du online?"); } r={status:f.status, text:await f.text()}; }
+  let j={}; try{ j=JSON.parse(r.text); }catch(e){}
+  if (r.status<200 || r.status>=300) throw new Error(j.error || "Server antwortet mit "+r.status);
+  return j; }
+// first start of a new installation: unlock with an invitation code
+function actGate(){
+  let el=$("actBg"); if (!el){ el=document.createElement("div"); el.id="actBg"; el.className="legalbg"; document.body.appendChild(el); }
+  el.hidden=false; document.body.classList.add("locked");
+  const A=UI.act||(UI.act={c:"", err:"", busy:false});
+  el.innerHTML=`<div class="legalbox actbox" role="dialog" aria-modal="true" aria-labelledby="actT">
+    <span class="lgic">${ic("user",26)}</span>
+    <h2 id="actT">Willkommen bei Finanz MAMI</h2>
+    <p class="small muted" style="margin:0 0 14px">Die App ist gerade nur auf Einladung nutzbar. Gib den Code ein, den du bekommen hast – er steht auch auf der Download-Seite.</p>
+    <input id="actCode" class="actin" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="z. B. K7P2QX" value="${esc(A.c)}" data-noi18n>
+    ${canQrLive()?`<button class="btn block" style="justify-content:center;gap:8px;margin-top:10px" data-actscan>${ic("camera",18)} QR-Code der Einladung scannen</button>`:""}
+    <p class="small" id="actErr" style="color:var(--bad);min-height:1.2em;margin:10px 0 6px">${esc(A.err)}</p>
+    <button class="btn primary" id="actOk" ${A.busy?"disabled":""}>${A.busy?"Wird geprüft …":"Freischalten"}</button>
+  </div>`;
+}
+async function actTry(){
+  const A=UI.act; const c=invCode(A.c); if (!c){ A.err="Der Code hat 6 Zeichen, z. B. K7P2QX."; actGate(); return; }
+  A.busy=true; A.err=""; actGate();
+  try { await pairCall("activate", "", {c, dev:devId()}); actSet({k:"inv", c}); UI.act=null;
+    const el=$("actBg"); if (el) el.hidden=true; document.body.classList.remove("locked"); legalGate(); toast("Freigeschaltet – willkommen!"); }
+  catch(e){ A.busy=false; A.err=e.message||"Das hat nicht geklappt."; actGate(); } }
+document.addEventListener("input", e=>{ if (e.target.id==="actCode" && UI.act){ UI.act.c=e.target.value; } });
+document.addEventListener("keydown", e=>{ if (e.key==="Enter" && e.target.id==="actCode") actTry(); });
+document.addEventListener("click", async e=>{
+  if (e.target.closest("#actOk")){ actTry(); return; }
+  if (e.target.closest("[data-actscan]")){ try { const t=await qrLive(/[?&]i=[A-Za-z0-9]{6}|^\s*[A-Za-z0-9]{6}\s*$/); if (!t) return; UI.act.c=invCode(t); actTry(); } catch(x){ toast(x.message); } return; }
+  if (e.target.closest("[data-invopen]")){ invOpen(); return; }
+  if (e.target.closest("[data-invclose]")){ const el=$("invBg"); if (el) el.remove(); return; }
+  if (e.target.closest("[data-invcopy]")){ const I=UI.inv; if (!I||!I.code) return; const l=invLink(I.code);
+    try { if (navigator.share && !NATIVE && !IS_DESK){ await navigator.share({title:"Finanz MAMI", text:"Hol dir Finanz MAMI – Einladungscode "+I.code, url:l}); return; } } catch(err){ if (err && err.name==="AbortError") return; }
+    try { await navigator.clipboard.writeText(l); toast("Link kopiert – füg ihn z. B. in WhatsApp ein"); } catch(_){ toast(l); } return; }
+});
+// "App weitergeben": big QR code that leads to the download page with this device's invitation code
+function invRender(){
+  const el=$("invBg"); if (!el) return; const I=UI.inv||{};
+  const body = I.err ? `<p class="small" style="color:var(--bad);margin:30px 0">${esc(I.err)}</p><button class="btn" data-invopen>Nochmal versuchen</button>`
+    : !I.code ? `<p class="muted" style="margin:60px 0">Einladung wird geladen …</p>`
+    : `<p class="muted" style="margin:0 0 12px">Lass das scannen</p>
+       <div class="invqr">${qrSvg(invLink(I.code), 236)}</div>
+       <div class="invurl" data-noi18n>${esc(INV_PAGE.replace(/^https?:\/\//,"").replace(/\/$/,""))}</div>
+       <div class="invcode">Code <b data-noi18n>${esc(I.code)}</b></div>
+       <p class="small muted" style="margin:8px 0 0">${I.left>0?`Noch <b>${I.left}</b> von ${I.max} Geräten frei`:`Alle ${I.max} Plätze sind vergeben`}</p>`;
+  el.innerHTML=`<div class="invbox" role="dialog" aria-modal="true" aria-labelledby="invT">
+    <div class="invhd"><button class="iconbtn" data-invclose aria-label="Zurück">‹</button><b id="invT">App weitergeben</b></div>
+    <div class="invmid">${body}</div>
+    ${I.code?`<button class="btn block" style="justify-content:center;gap:8px" data-invcopy>${ic("arrowUp",18)} Link stattdessen teilen</button>
+    <p class="small muted" style="margin:10px 4px 0;text-align:center">Wer scannt, kann die App am Handy laden oder sich den Link für den PC selbst schicken.</p>`:""}
+  </div>`; }
+async function invOpen(){
+  let el=$("invBg"); if (!el){ el=document.createElement("div"); el.id="invBg"; el.className="invbg"; document.body.appendChild(el); }
+  UI.inv={}; invRender();
+  try { const r=await pairCall("invmake", "", {dev:devId()}); UI.inv={code:r.code, max:r.max, left:Math.max(0,r.max-r.used)}; }
+  catch(e){ UI.inv={err:e.message||"Server nicht erreichbar"}; }
+  invRender(); }
 document.addEventListener("input", e=>{ if (e.target.id==="fbTxt") UI.fbDraft=e.target.value; });
 document.addEventListener("change", async e=>{ if (e.target.id==="fbInfo"){ UI.fbInfo=e.target.checked; return; }
   if (e.target.id!=="fbImgFile") return; const files=[...e.target.files].slice(0, FB_MAX_IMG-(UI.fbImgs||[]).length); e.target.value="";
@@ -6286,16 +6369,17 @@ function accTabKeys(t){
   if (t==="geld") return ["konten","budgets","schulden", ...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]), "invest","export"];
   if (t==="anpassen") return ["dark","farben","sprache","kategorien","start","laeden"];
   if (t==="sicherheit") return ["sicherheit", ...(SYNCABLE||window.AndroidBridge?["sync","geraete"]:[]), "backup", ...(CAN_NOTIFY?["notify"]:[]), "speicher"];
-  return ["neu","hilfe","wiz","feedback","recht"];
+  return ["neu","hilfe","wiz", ...(canInvite()?["weiter"]:[]), "feedback","recht"];
 }
 const accTabOf = k => (ACC_TABS.find(([t])=>accTabKeys(t).includes(k))||["geld"])[0];
 const ACC_COL={invest:"#c98a12",konten:"#3d63a8",budgets:"#c27c0e",schulden:"#7a5bc2",steuer:"#d4813a",amt:"#3d63a8",abos:"#0f766e",export:"#047857",dark:"#34413b",farben:"#d14d72",sprache:"#65a30d",kategorien:"#c0497a",start:"#1a7a5c",laeden:"#0f8a8a",sicherheit:"#b23a3a",sync:"#2f7fb8",geraete:"#0e7490",backup:"#2e9c74",notify:"#e0902b",speicher:"#4b5563",neu:"#15803d",hilfe:"#0e7490",wiz:"#1a7a5c",feedback:"#4d7c0f",recht:"#4b5563"};
-function accTitle(k){ return k==="dark" ? "Dunkelmodus" : k==="wiz" ? "Einrichtung & Rundgang" : k==="farben" ? "Farben" : (SP_PAGES[k]||[k])[0]; }
-function accIcon(k){ return k==="dark" ? "spark" : k==="wiz" ? "check" : (SP_PAGES[k]||[,"dots"])[1]; }
+function accTitle(k){ return k==="weiter" ? "App weitergeben" : k==="dark" ? "Dunkelmodus" : k==="wiz" ? "Einrichtung & Rundgang" : k==="farben" ? "Farben" : (SP_PAGES[k]||[k])[0]; }
+function accIcon(k){ return k==="weiter" ? "phone" : k==="dark" ? "spark" : k==="wiz" ? "check" : (SP_PAGES[k]||[,"dots"])[1]; }
 function accSub(k){
   const st=S.settings;
   if (k==="dark") return document.documentElement.dataset.theme==="dark" ? "an" : "aus";
   if (k==="wiz") return "Noch einmal Schritt für Schritt einrichten";
+  if (k==="weiter") return "QR-Code für bis zu 20 Geräte";
   if (k==="sync") return !SYNC.token ? "Abgleich aus" : SYNC.state==="ok" ? "Abgeglichen"+(SYNC.last?" · "+new Date(SYNC.last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}):"") : SYNC.state==="pending" ? "wartet" : "nicht erreichbar";
   if (k==="sprache") return `${(LANGS.find(x=>x[0]===LANG)||LANGS[0])[1]} · €${st.cur2?" · "+st.cur2:""}`;
   if (k==="invest"){ const g=(st.inv&&st.inv.goals)||[]; return g.length ? `${g.length} Anlage-${g.length===1?"Ziel":"Ziele"}` : "Zinseszins · Vergleich · Ziele"; }
@@ -6327,11 +6411,11 @@ function accMount(k){
 }
 function accUnmount(k){ (ACC.nodes[k]||[]).forEach(([el,ph])=>{ el.hidden=true; if (ph.parentNode) ph.replaceWith(el); }); delete ACC.nodes[k]; }
 function accRestoreAll(){ Object.keys(ACC.nodes).forEach(accUnmount); }
-const accHasBody = k => !["dark","wiz"].includes(k);
+const accHasBody = k => !["dark","wiz","weiter"].includes(k);
 function accItem(k){
   const open=ACC.open.has(k), col=themeCol(ACC_COL[k]||"#1a7a5c"), dark=document.documentElement.dataset.theme==="dark";
   const right = k==="dark" ? `<button class="tg ${dark?"on":""}" data-qdark="1" role="switch" aria-checked="${dark}" aria-label="Dunkelmodus"></button>`
-    : k==="wiz" ? `<button class="btn small" data-qwiz="1">Starten</button>` : `<span class="sach">${ic(open?"up":"down",18)}</span>`;
+    : k==="wiz" ? `<button class="btn small" data-qwiz="1">Starten</button>` : k==="weiter" ? `<button class="btn small" data-invopen="1">Öffnen</button>` : `<span class="sach">${ic(open?"up":"down",18)}</span>`;
   const head=`<span class="saic" style="background:${col}">${ic(accIcon(k),18)}</span><span class="sat"><b>${esc(accTitle(k))}</b><small data-accsub="${k}">${esc(accSub(k))}</small></span>${right}`;
   return `<div class="sacc ${open?"open":""}" data-acc="${k}">${accHasBody(k)?`<button class="sahd" data-acctg="${k}" aria-expanded="${open}">${head}</button><div class="sabody" id="sab-${k}" ${open?"":"hidden"}></div>`:`<div class="sahd">${head}</div>`}</div>`; }
 function accBuild(){
@@ -6365,6 +6449,7 @@ function renderSetHome(){
 // open one setting from anywhere: right tab, section open, scrolled into view
 function accGo(k){
   if (k==="profil"){ spSheetOpen("profil"); return; }
+  if (k==="weiter"){ invOpen(); return; }
   if (!SP_PAGES[k] && !["dark","wiz"].includes(k)) return;
   ACC.q=""; const q=$("setQ"); if (q) q.value="";
   ACC.tab=accTabOf(k); if (accHasBody(k)) ACC.open.add(k);
@@ -9792,7 +9877,7 @@ document.addEventListener("keydown", e=>{ if (e.key==="Enter" && e.target.id==="
 
 /* ---------- boot ---------- */
 render();
-legalGate();
+if (actNeed()) actGate(); else legalGate();
 (async () => {
   try { db = window.claude && window.claude.use ? await window.claude.use("db") : null; } catch(e){ db=null; }
   if (LOCAL){

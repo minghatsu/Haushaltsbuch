@@ -1494,7 +1494,7 @@ if (IS_TAB){
   const GROUPS=()=>[["Geld","#6b8e23",["konten","budgets","schulden",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]),"invest","export"]],
     ["Anpassen","#1a7a5c",["farben","sprache","kategorien","start","laeden"]],
     ["Sicherheit","#3d63a8",["sicherheit",...(SYNCABLE||window.AndroidBridge?["geraete"]:[]),"backup",...(CAN_NOTIFY?["notify"]:[]),"speicher"]],
-    ["Hilfe","#c27c0e",["neu","hilfe","feedback","recht"]]];
+    ["Hilfe","#c27c0e",["neu","hilfe",...(canInvite()?["weiter"]:[]),"feedback","recht"]]];
   const tTitle=k=>k==="geraete"&&(SYNCABLE||window.AndroidBridge)?"Geräte & Abgleich":accTitle(k);
   function tabSetHTML(){
     const n=String(S.settings.name||"").trim(), p=S.settings.photo, f=devForm(), badge=`<span class="avdev">${devIc(f,11)}</span>`;
@@ -1502,7 +1502,7 @@ if (IS_TAB){
     const sw=[["dark","Dunkel",H.dataset.theme==="dark"],["sicherheit","App-Sperre",!!lockCfg()],["notify","Benachrichtigungen",!!notifyCfg().on],["geraete","Abgleich",!!SYNC.token]].filter(([k])=>k!=="notify"||CAN_NOTIFY);
     return `<div class="card tsprof"><button class="topav ${!p&&!n?"devav":""}" data-tsprof="1" aria-label="Profil">${av}</button><div style="min-width:0"><b>${esc(n||devModel())}</b><small>${esc([n?devModel():"",SYNC.token?"Abgleich an":"Abgleich aus","v"+curVerShort()].filter(Boolean).join(" · "))}</small></div><span style="flex:1"></span><button class="btn" data-tsprof="1">Profil bearbeiten</button></div>
       <div class="tssw">${sw.map(([k,l,on])=>`<button class="${on?"on":""}" data-tssw="${k}" role="switch" aria-checked="${on}"><span>${esc(l)}</span><i></i></button>`).join("")}</div>
-      <div class="tsgr">${GROUPS().map(([g,c,ks])=>`<div class="card tsg" style="--gc:${c}"><h3><span class="saic" style="background:${c}">${ic(accIcon(ks[0]),16)}</span>${esc(I18N.tr?I18N.tr(g):g)}</h3>${ks.filter(k=>SP_PAGES[k]).map(k=>`<button data-tsgo="${k}"><span class="saic" style="background:${themeCol(ACC_COL[k]||c)};width:28px;height:28px;border-radius:9px">${ic(accIcon(k),14)}</span>${esc(tTitle(k))}<small>${esc(accSub(k)||"")} ›</small></button>`).join("")}</div>`).join("")}</div>`;
+      <div class="tsgr">${GROUPS().map(([g,c,ks])=>`<div class="card tsg" style="--gc:${c}"><h3><span class="saic" style="background:${c}">${ic(accIcon(ks[0]),16)}</span>${esc(I18N.tr?I18N.tr(g):g)}</h3>${ks.filter(k=>SP_PAGES[k]||k==="weiter").map(k=>`<button data-tsgo="${k}"><span class="saic" style="background:${themeCol(ACC_COL[k]||c)};width:28px;height:28px;border-radius:9px">${ic(accIcon(k),14)}</span>${esc(tTitle(k))}<small>${esc(accSub(k)||"")} ›</small></button>`).join("")}</div>`).join("")}</div>`;
   }
   const _rsh=renderSetHome;
   renderSetHome=function(...a){
@@ -1516,7 +1516,7 @@ if (IS_TAB){
   };
   const _ag=accGo; accGo=function(k){ if (k!=="profil") UI.tabOpen=1; return _ag(k); };
   document.addEventListener("click", e=>{
-    const g=e.target.closest("[data-tsgo]"); if (g){ const k=g.dataset.tsgo; UI.tabOpen=1; UI.pcset=k; renderSetHome(); window.scrollTo({top:0});
+    const g=e.target.closest("[data-tsgo]"); if (g){ const k=g.dataset.tsgo; if (k==="weiter"){ invOpen(); return; } UI.tabOpen=1; UI.pcset=k; renderSetHome(); window.scrollTo({top:0});
       const pn=document.querySelector("#setHome .pcsr"); if (pn && !calm()) pn.animate([{opacity:0,transform:"translateX(60px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.9,.3,1.2)"}); return; }
     if (e.target.closest("[data-tsback]")){ UI.tabOpen=0; renderSetHome(); window.scrollTo({top:0});
       const m=$("tabSet"); if (m && !calm()) [...m.querySelectorAll(".card,.tssw>button")].forEach((x,i)=>x.animate([{opacity:0,transform:"translateY(26px) scale(.97)"},{opacity:1,transform:"none"}],{duration:480,delay:i*35,easing:"cubic-bezier(.3,1.3,.5,1)",fill:"backwards"})); return; }

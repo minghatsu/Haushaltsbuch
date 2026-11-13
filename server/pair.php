@@ -16,6 +16,7 @@
  *   POST ?a=wipe                         -> {ok}        löscht den Tresor und alle Daten endgültig
  *   POST ?a=feedback {kind,text,images}  -> {ok}        Feedback aus der App (landet im Datenordner unter feedback/)
  *   GET  ?a=feedlist / feedimg, POST ?a=feedread / feeddel   Feedback-Eingang (nur mit Entwickler-Schlüssel)
+ *   POST ?a=invmake {dev} / GET ?a=invinfo&c= / POST ?a=activate {c,dev}   Einladungen (max. 20 neue Geräte pro Code)
  *
  * Läuft auf normalem PHP 8 mit SQLite, z. B. auf der Synology (Web Station) neben api.php.
  */
@@ -36,6 +37,7 @@ const MAX_CREATE_PER_HOUR = 20;    // new vaults per IP address and hour
 const MAX_CREATE_ALL_HOUR = 200;   // new vaults per hour from all addresses together
 const MAX_TOTAL = 20000000000;     // all vaults together at most ~20 GB
 const MIN_FREE = 2000000000;       // always leave at least ~2 GB free on the disk
+const INV_MAX = 20;                // new devices per invitation QR code
 
 // data folder with a random name, so the database can't be guessed and downloaded
 define('DATA_DIR', (function (): string {
@@ -162,6 +164,47 @@ try {
     }
 
     if ($a === 'status') out(['pair' => true]);
+
+    // ---------- invitations: every QR code activates at most INV_MAX new devices; invited devices cannot invite further
+    if ($a === 'invmake' || $a === 'invinfo' || $a === 'activate') {
+        db()->exec('CREATE TABLE IF NOT EXISTS invites (code TEXT PRIMARY KEY, owner TEXT UNIQUE, max INTEGER, created INTEGER)');
+        db()->exec('CREATE TABLE IF NOT EXISTS acts (code TEXT NOT NULL, dev TEXT NOT NULL, t INTEGER, PRIMARY KEY (code, dev))');
+        db()->exec('CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)');
+        q('INSERT OR IGNORE INTO meta (k, v) VALUES (?, ?)', ['inv_start', (string)time()]);
+        $start = (int)q('SELECT v FROM meta WHERE k = ?', ['inv_start'])->fetchColumn();
+        $used = fn(string $c): int => (int)q('SELECT COUNT(*) FROM acts WHERE code = ?', [$c])->fetchColumn();
+        $b = body(); $dev = (string)($b['dev'] ?? '');
+        if ($a === 'invmake') {
+            if (!preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev)) fail('Gerät fehlt', 400);
+            $r = q('SELECT code, max FROM invites WHERE owner = ?', [$dev])->fetch(PDO::FETCH_ASSOC);
+            if (!$r) {
+                // who may invite: devices that used the app before invitations existed (first 30 days), an old vault, or the developer
+                $ok = time() < $start + 30 * 86400;
+                $h = trim((string)($_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '')));
+                if (!$ok && preg_match('/^Bearer\s+([a-f0-9]{32})\./i', $h)) { $v = authVault(); $ok = (int)$v['created'] < $start; }
+                if (!$ok && preg_match('/^Dev\s/', $h)) { devCheck(); $ok = true; }
+                if (!$ok) fail('Dieses Gerät darf keine Einladungen verschicken', 403);
+                if (!ipCount('ipcreate', MAX_CREATE_PER_HOUR)) fail('Zu viele Versuche – bitte später noch einmal', 429);
+                ipBump('ipcreate');
+                $abc = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+                do { $c = ''; for ($i = 0; $i < 6; $i++) $c .= $abc[random_int(0, strlen($abc) - 1)]; } while (q('SELECT 1 FROM invites WHERE code = ?', [$c])->fetch());
+                q('INSERT INTO invites (code, owner, max, created) VALUES (?, ?, ?, ?)', [$c, $dev, INV_MAX, time()]);
+                $r = ['code' => $c, 'max' => INV_MAX];
+            }
+            out(['code' => $r['code'], 'max' => (int)$r['max'], 'used' => $used($r['code'])]);
+        }
+        $c = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)($b['c'] ?? ($_GET['c'] ?? ''))));
+        if (!ipCount('ipfails', 60)) fail('Zu viele falsche Versuche – bitte später noch einmal', 429);
+        $r = $c !== '' ? q('SELECT code, max FROM invites WHERE code = ?', [$c])->fetch(PDO::FETCH_ASSOC) : null;
+        if (!$r) { ipBump('ipfails'); fail('Diesen Einladungscode gibt es nicht', 404); }
+        $max = (int)$r['max']; $n = $used($c);
+        if ($a === 'invinfo') out(['ok' => true, 'max' => $max, 'left' => max(0, $max - $n)]);
+        if (!preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev)) fail('Gerät fehlt', 400);
+        if (q('SELECT 1 FROM acts WHERE code = ? AND dev = ?', [$c, $dev])->fetch()) out(['ok' => true, 'left' => max(0, $max - $n)]);   // same device again
+        if ($n >= $max) fail('Diese Einladung ist schon aufgebraucht – frag nach einem neuen Code', 403);
+        q('INSERT INTO acts (code, dev, t) VALUES (?, ?, ?)', [$c, $dev, time()]);
+        out(['ok' => true, 'left' => $max - $n - 1]);
+    }
 
     // feedback straight from the app (no mail program needed): stored here, a copy goes out by mail if the server can send mail
     if ($a === 'feedback') {
