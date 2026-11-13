@@ -5,6 +5,7 @@ function pcOn(){
   if (pcOn.done || !IS_PC) return; pcOn.done=true;
   const st=document.getElementById("pcCss"); if (st) st.media="all";
   document.documentElement.classList.add("pc");
+  if (IS_TAB){ const h=document.documentElement; h.classList.add("istab"); const o=()=>h.classList.toggle("tabp", innerHeight>innerWidth); o(); addEventListener("resize", o); }
   const tabs=document.querySelector(".tabs"), first=tabs && tabs.querySelector('.tab[data-go="home"]'), last=tabs && tabs.querySelector(".tab.tset");
   if (first && !tabs.querySelector(".pcarr")){
     first.insertAdjacentHTML("beforebegin", `<button class="pcarr" data-pcstep="-1" aria-label="Vorherige Seite (Pfeil links)"><svg class="i" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>`);
@@ -127,7 +128,7 @@ function pcHome(o){
 }
 if (IS_PC){ pcOn(); pcHome.intro=true; try { if (UI.view==="home") renderHome(); } catch(e){} }
 /* ---------- footer (status bar): name, version, sync state, help and the legal texts ---------- */
-if (IS_PC){
+if (IS_DESK){   // the tablet has the dock down there – it keeps the legal texts in the settings
   // the legal texts live in the footer on the PC, not in the settings
   const _keys=accTabKeys; accTabKeys = t => _keys(t).filter(k=>k!=="recht");
   const LEG=[["impressum","Impressum"],["datenschutz","Datenschutz"],["agb","Nutzungsbedingungen"],["lizenzen","Lizenzen"]].filter(([k])=>LEGAL[k]);
@@ -401,7 +402,7 @@ if (IS_PC){
    instead of "Foto" (no camera on the PC) the PC scans straight from the scanner ---------- */
 if (IS_PC){
   const fan=$("fanBg"), rc=fan && fan.querySelector('[data-addpick="receipt"]');
-  if (rc){ rc.dataset.addpick="pcscan"; rc.innerHTML=`<svg class="i" viewBox="0 0 24 24"><path d="M4 14h16v4.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"/><path d="M6 14 8.5 5.5h7L18 14"/><path d="M7.5 17h3"/></svg><span>Scannen</span>`; }
+  if (rc && IS_DESK){   /* the tablet keeps its camera */ rc.dataset.addpick="pcscan"; rc.innerHTML=`<svg class="i" viewBox="0 0 24 24"><path d="M4 14h16v4.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"/><path d="M6 14 8.5 5.5h7L18 14"/><path d="M7.5 17h3"/></svg><span>Scannen</span>`; }
   // always the circles (not the list window of the wide layout); they open to the left and upwards, the button sits in the corner
   openAddMenu = () => { if (!fan.hidden){ fanClose(); return; } fanOpen();
     const R=140; [180,135,90].forEach((a,i)=>{ const t=a*Math.PI/180, b=fan.children[i]; b.style.setProperty("--dx", Math.round(Math.cos(t)*R)+"px"); b.style.setProperty("--dy", Math.round(-Math.sin(t)*R-14)+"px"); }); };
@@ -746,7 +747,7 @@ if (IS_PC){
     const total=sum(all,amtOf), pSum=sum(all.filter(f=>f.id in paid),amtOf), nPaid=all.filter(f=>f.id in paid).length;
     const by={}, none=[]; for (const f of all){ const d=dayOf(f,ym); if (d) (by[d]=by[d]||[]).push(f); else none.push(f); }
     const chip=f=>{ const on=f.id in paid, a=fixArea(f), d=dayOf(f,ym), late=!on && d && d<today, ed=UI.amtEdit===f.id;
-      return `<div class="pcfc ${on?"on":""} ${late?"late":""}" style="--c:${col(a)}" data-pay="${esc(f.id)}" data-pcfid="${esc(f.id)}" draggable="true" role="checkbox" tabindex="0" aria-checked="${on}" title="${esc(f.name)} · ${esc(a)}${late?" · überfällig":""}">
+      return `<div class="pcfc ${on?"on":""} ${late?"late":""}" style="--c:${col(a)}" data-pay="${esc(f.id)}" data-pcfid="${esc(f.id)}" draggable="${ed?"false":"true"}" role="checkbox" tabindex="0" aria-checked="${on}" title="${esc(f.name)} · ${esc(a)}${late?" · überfällig":""}">
         ${brandFor(f.name)?brandBadge(brandFor(f.name)):tile(f.kind==="betrieb"?"betrieb":"fix", f.name)}<span class="n" lang="de">${esc(f.name)}</span>
         ${ed?`<input class="in fxamt-in" id="fxAmtIn" data-fxamtin="${esc(f.id)}" inputmode="decimal" value="${esc(numStr(amtOf(f)))}" aria-label="Betrag für ${esc(f.name)} im ${esc(mName)}">`
           :`<button class="a" data-fxamt="${esc(f.id)}" title="Betrag nur für ${esc(mName)} ändern">${esc(eur(amtOf(f)))}</button>`}
@@ -817,7 +818,7 @@ if (IS_PC){
     if (e.key==="Enter"||e.key===" "){ e.preventDefault(); p.click(); } else if (e.key==="F2"||e.key==="e"){ e.preventDefault(); popEdit(p.dataset.pcfid, p); } else if (e.key==="Delete"){ e.preventDefault(); popEdit(p.dataset.pcfid, p, true); } });
   // ---- drag a fixed cost onto another day: it stays there from this month on
   let ghost=null;
-  root.addEventListener("dragstart", e=>{ const c=e.target.closest && e.target.closest(".pcfc"); if (!c) return; popClose(); F.drag=c.dataset.pcfid; e.dataTransfer.effectAllowed="move"; try { e.dataTransfer.setData("text/plain", F.drag); } catch(_){}
+  root.addEventListener("dragstart", e=>{ const c=e.target.closest && e.target.closest(".pcfc"); if (!c) return; if (e.target.closest("input,textarea,select") || c.querySelector("#fxAmtIn")){ e.preventDefault(); return; } popClose(); F.drag=c.dataset.pcfid; e.dataTransfer.effectAllowed="move"; try { e.dataTransfer.setData("text/plain", F.drag); } catch(_){}
     ghost=c.cloneNode(true); ghost.classList.add("pcfghost"); ghost.style.width=c.offsetWidth+"px"; document.body.appendChild(ghost); try { e.dataTransfer.setDragImage(ghost, 24, 18); } catch(_){}
     setTimeout(()=>{ c.classList.add("drag"); root.classList.add("dragging"); },0); });
   root.addEventListener("dragend", ()=>{ F.drag=null; if (ghost){ ghost.remove(); ghost=null; } root.classList.remove("dragging"); root.querySelectorAll(".drag,.over").forEach(x=>x.classList.remove("drag","over")); });
@@ -1471,4 +1472,103 @@ if (IS_PC){
     if ((t.dataset.aboend!=null || t.dataset.abonot!=null) && t.closest(".pctpane")) setTimeout(repaint, 50);
   });
   document.addEventListener("keydown", e=>{ if (e.key==="Enter" && e.target.closest(".pctform")){ e.preventDefault(); const ok=e.target.closest(".pctform").querySelector(".btn.primary"); if (ok) ok.click(); } if (e.key==="Escape" && e.target.closest(".pctform")){ e.stopPropagation(); after(); } }, true);
+}
+
+/* =================== TABLET: Dock unten, Einstellungen-Übersicht, Wischen mit dem Finger, Drehen („Wirbel ins Plus") =================== */
+if (IS_TAB){
+  const H=document.documentElement, calm=()=>pcCalm();
+  /* ---- Dock: farbige Blase gleitet zur gewählten Seite, das Plus sitzt rechts daneben ---- */
+  const dock=document.querySelector(".tabs"), plus=dock && dock.querySelector(".tab.plus");
+  let bub=null;
+  function dockPlace(){
+    if (!dock) return;
+    if (!bub){ bub=document.createElement("i"); bub.className="tabbub"; dock.prepend(bub); }
+    const on=dock.querySelector('.tab[aria-selected="true"]');
+    if (on){ bub.style.left=on.offsetLeft+"px"; bub.style.top=on.offsetTop+"px"; bub.style.width=on.offsetWidth+"px"; bub.style.height=on.offsetHeight+"px";
+      bub.style.setProperty("--bubc", getComputedStyle(on).getPropertyValue("--tc")||"#1a7a5c"); bub.style.opacity=1; } else bub.style.opacity=0;
+  }
+  const _rd=render; render=(...a)=>{ const x=_rd(...a); if (UI.view!=="more") UI.tabOpen=0; requestAnimationFrame(dockPlace); return x; };
+  addEventListener("resize", ()=>requestAnimationFrame(dockPlace)); setTimeout(dockPlace, 60); setTimeout(dockPlace, 600);
+
+  /* ---- Einstellungen: oben Profil, darunter Schnellschalter, darunter je Bereich eine Karte ---- */
+  const GROUPS=()=>[["Geld","#6b8e23",["konten","budgets","schulden",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]),"invest","export"]],
+    ["Anpassen","#1a7a5c",["farben","sprache","kategorien","start","laeden"]],
+    ["Sicherheit","#3d63a8",["sicherheit",...(SYNCABLE||window.AndroidBridge?["geraete"]:[]),"backup",...(CAN_NOTIFY?["notify"]:[]),"speicher"]],
+    ["Hilfe","#c27c0e",["neu","hilfe","feedback","recht"]]];
+  const tTitle=k=>k==="geraete"&&(SYNCABLE||window.AndroidBridge)?"Geräte & Abgleich":accTitle(k);
+  function tabSetHTML(){
+    const n=String(S.settings.name||"").trim(), p=S.settings.photo, f=devForm(), badge=`<span class="avdev">${devIc(f,11)}</span>`;
+    const av=p?`<img src="${esc(p)}" alt="">${badge}`:n?`<span class="avl">${esc(n[0].toUpperCase())}</span>${badge}`:devIc(f,24);
+    const sw=[["dark","Dunkel",H.dataset.theme==="dark"],["sicherheit","App-Sperre",!!lockCfg()],["notify","Benachrichtigungen",!!notifyCfg().on],["geraete","Abgleich",!!SYNC.token]].filter(([k])=>k!=="notify"||CAN_NOTIFY);
+    return `<div class="card tsprof"><button class="topav ${!p&&!n?"devav":""}" data-tsprof="1" aria-label="Profil">${av}</button><div style="min-width:0"><b>${esc(n||devModel())}</b><small>${esc([n?devModel():"",SYNC.token?"Abgleich an":"Abgleich aus","v"+curVerShort()].filter(Boolean).join(" · "))}</small></div><span style="flex:1"></span><button class="btn" data-tsprof="1">Profil bearbeiten</button></div>
+      <div class="tssw">${sw.map(([k,l,on])=>`<button class="${on?"on":""}" data-tssw="${k}" role="switch" aria-checked="${on}"><span>${esc(l)}</span><i></i></button>`).join("")}</div>
+      <div class="tsgr">${GROUPS().map(([g,c,ks])=>`<div class="card tsg" style="--gc:${c}"><h3><span class="saic" style="background:${c}">${ic(accIcon(ks[0]),16)}</span>${esc(I18N.tr?I18N.tr(g):g)}</h3>${ks.filter(k=>SP_PAGES[k]).map(k=>`<button data-tsgo="${k}"><span class="saic" style="background:${themeCol(ACC_COL[k]||c)};width:28px;height:28px;border-radius:9px">${ic(accIcon(k),14)}</span>${esc(tTitle(k))}<small>${esc(accSub(k)||"")} ›</small></button>`).join("")}</div>`).join("")}</div>`;
+  }
+  const _rsh=renderSetHome;
+  renderSetHome=function(...a){
+    const r=_rsh.apply(this,a), el=$("setHome"); if (!el) return r;
+    const ps=el.querySelector(".pcset"); if (!ps) return r;
+    let mix=$("tabSet"); if (!mix){ ps.insertAdjacentHTML("beforebegin", `<div id="tabSet"></div>`); mix=$("tabSet"); }
+    const open=!!UI.tabOpen; mix.hidden=open; ps.hidden=!open;
+    if (!open){ const h=tabSetHTML(); if (mix.dataset.h!==h){ mix.dataset.h=h; mix.innerHTML=h; } }
+    else { const ph=ps.querySelector(".pcsph"); if (ph && !ph.querySelector("[data-tsback]")) ph.insertAdjacentHTML("beforebegin", `<button class="tsback" data-tsback="1"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m15 6-6 6 6 6"/></svg> Einstellungen</button>`); }
+    return r;
+  };
+  const _ag=accGo; accGo=function(k){ if (k!=="profil") UI.tabOpen=1; return _ag(k); };
+  document.addEventListener("click", e=>{
+    const g=e.target.closest("[data-tsgo]"); if (g){ const k=g.dataset.tsgo; UI.tabOpen=1; UI.pcset=k; renderSetHome(); window.scrollTo({top:0});
+      const pn=document.querySelector("#setHome .pcsr"); if (pn && !calm()) pn.animate([{opacity:0,transform:"translateX(60px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.9,.3,1.2)"}); return; }
+    if (e.target.closest("[data-tsback]")){ UI.tabOpen=0; renderSetHome(); window.scrollTo({top:0});
+      const m=$("tabSet"); if (m && !calm()) [...m.querySelectorAll(".card,.tssw>button")].forEach((x,i)=>x.animate([{opacity:0,transform:"translateY(26px) scale(.97)"},{opacity:1,transform:"none"}],{duration:480,delay:i*35,easing:"cubic-bezier(.3,1.3,.5,1)",fill:"backwards"})); return; }
+    if (e.target.closest("[data-tsprof]")){ accGo("profil"); return; }
+    const w=e.target.closest("[data-tssw]"); if (w){ const k=w.dataset.tssw;
+      if (k==="dark"){ const t=$("pcTheme"); if (t) t.click(); setTimeout(renderSetHome, 50); return; }
+      UI.tabOpen=1; UI.pcset=k; renderSetHome(); window.scrollTo({top:0}); }
+  });
+
+  /* ---- Wischen: die Seite folgt dem Finger, beim Loslassen fliegt sie weg (wie am PC) oder federt zurück ---- */
+  { let x0=null, y0=0, t0=0, dx=0, sec=null, horiz=null;
+    const blocked=t=>t.closest("input,textarea,select,.sheet,.backdrop,.astack,.srail,.table-wrap,.fxchips,.tabs,.pcfcalc,[draggable=true],.pcsweb,.leaflet-container");
+    document.addEventListener("touchstart", e=>{ if (e.touches.length!==1 || blocked(e.target) || PC_ANIM.busy || (UI.view==="more" && UI.tabOpen) || document.querySelector(".backdrop:not([hidden])")){ x0=null; return; }
+      x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now(); dx=0; horiz=null; sec=document.querySelector(`[data-view="${UI.view}"]`); }, {passive:true, capture:true});
+    document.addEventListener("touchmove", e=>{ if (x0===null || !sec) return; const t=e.touches[0]; dx=t.clientX-x0; const dy=t.clientY-y0;
+      if (horiz===null && (Math.abs(dx)>12 || Math.abs(dy)>12)) horiz=Math.abs(dx)>Math.abs(dy)*1.4;
+      if (horiz && !calm()){ const k=dx/innerWidth; sec.style.transition="none"; sec.style.transform=`translateX(${dx*0.55}px) rotate(${k*3}deg) scale(${1-Math.abs(k)*0.06})`; sec.style.opacity=String(1-Math.abs(k)*0.5); } }, {passive:true, capture:true});
+    document.addEventListener("touchend", e=>{ if (x0===null || !sec) return; const s=sec, go=horiz && Math.abs(dx)>80 && Date.now()-t0<1200; x0=null;
+      if (horiz && !calm()){ s.style.transition="transform .45s cubic-bezier(.3,1.5,.5,1), opacity .3s"; s.style.transform=""; s.style.opacity=""; setTimeout(()=>{ s.style.transition=""; }, 460); }
+      if (go){ e.stopImmediatePropagation(); pcStep(dx<0?1:-1); } }, {passive:true, capture:true});
+  }
+
+  /* ---- Drehen: „Wirbel ins Plus" – die Kacheln schrumpfen zu bunten Punkten, wirbeln ins Plus und springen an ihre neuen Plätze ---- */
+  { const pick=()=>{ const v=document.querySelector(`[data-view="${UI.view}"]`); if (!v) return [];
+      const l=[...v.querySelectorAll(".hblock>.card, #pcHero, .pcday, #pcDet, .pcfcalc, .pcfside>.card, .pcac>*, .pcana>*, #tabSet>*, .tsgr>.card, .tssw>button, .pcsr>*, .zstack>*, .pcshop>*, .card")]
+        .filter((x,i,a)=>a.indexOf(x)===i && !a.some(y=>y!==x && y.contains(x)));
+      return l.filter(x=>{ const r=x.getBoundingClientRect(); return r.width>20 && r.height>20 && r.bottom>0 && r.top<innerHeight; }).slice(0,24); };
+    const keyOf=(x,i)=>{ const hb=x.closest("[data-hb]"); return x.id || (hb&&"hb:"+hb.dataset.hb) || (x.dataset.pcday&&"d:"+x.dataset.pcday) || (x.dataset.tssw&&"s:"+x.dataset.tssw) || (x.dataset.tsgo&&"g:"+x.dataset.tsgo) || (x.className+"#"+i); };
+    let snap=new Map(), plusR=null, lastPortrait=innerHeight>innerWidth;
+    const take=()=>{ if (H.classList.contains("tabrot") || H.classList.contains("tabpre")) return; snap=new Map(pick().map((x,i)=>[keyOf(x,i),x.getBoundingClientRect()])); plusR=plus?plus.getBoundingClientRect():null; };
+    setInterval(()=>{ if (!document.hidden && !PC_ANIM.busy) take(); }, 400); addEventListener("scroll", ()=>{ clearTimeout(take.t); take.t=setTimeout(take, 120); }, {passive:true});
+    const color=x=>{ const c=getComputedStyle(x), t=c.getPropertyValue("--tcol").trim(); if (t) return t; const b=c.borderTopColor; return b && !/rgba?\(0, 0, 0, 0\)/.test(b) && c.borderTopWidth!=="0px" ? b : "#1a7a5c"; };
+    function whirl(){
+      if (calm() || !snap.size || !plus){ take(); return; }
+      H.classList.add("tabrot"); dockPlace(); window.scrollTo({top:0});
+      const P0=plusR||plus.getBoundingClientRect(), P1=plus.getBoundingClientRect();
+      const c0=[P0.left+P0.width/2, P0.top+P0.height/2], c1=[P1.left+P1.width/2, P1.top+P1.height/2];
+      plus.animate([{transform:"rotate(0) scale(1)", translate:`${c0[0]-c1[0]}px ${c0[1]-c1[1]}px`},{transform:"rotate(180deg) scale(1.3)", translate:`${c0[0]-c1[0]}px ${c0[1]-c1[1]}px`, offset:.45},{transform:"rotate(360deg) scale(1.3)", translate:"0 0", offset:.6},{transform:"rotate(360deg) scale(1)", translate:"0 0"}],{duration:1500,easing:"cubic-bezier(.45,0,.2,1)"});
+      let i=0;
+      pick().forEach((x,j)=>{ const n=x.getBoundingClientRect(); if (n.width<20) return;
+        const o=snap.get(keyOf(x,j)) || {left:c0[0]-13,top:c0[1]-13,width:26,height:26};
+        const nc=[n.left+n.width/2, n.top+n.height/2], oc=[o.left+o.width/2, o.top+o.height/2], d=26, sx=d/n.width, sy=d/n.height, col=color(x), dl=i*45; i++;
+        const T=(c,scx,scy)=>`translate(${c[0]-nc[0]}px,${c[1]-nc[1]}px) scale(${scx},${scy})`, br=getComputedStyle(x).borderRadius||"18px";
+        x.animate([{transform:T(oc,o.width/n.width,o.height/n.height),borderRadius:br},{transform:T(oc,sx,sy),borderRadius:"50%",offset:.25},{transform:T(c0,sx*.75,sy*.75),borderRadius:"50%",offset:.48},{transform:T(c1,sx*.75,sy*.75),borderRadius:"50%",offset:.6},{transform:T(nc,sx,sy),borderRadius:"50%",offset:.75},{transform:"none",borderRadius:br}],
+          {duration:1500, delay:dl, easing:"cubic-bezier(.45,0,.2,1)", fill:"backwards"});
+        const ov=document.createElement("i"); ov.style.cssText=`position:absolute;inset:0;border-radius:inherit;background:${col};pointer-events:none;z-index:9;opacity:0`;
+        if (getComputedStyle(x).position==="static") x.style.position="relative"; x.appendChild(ov);
+        ov.animate([{opacity:0},{opacity:1,offset:.18},{opacity:1,offset:.8},{opacity:0}],{duration:1500,delay:dl,fill:"backwards"}).finished.then(()=>ov.remove(),()=>ov.remove());
+      });
+      setTimeout(()=>{ H.classList.remove("tabrot"); take(); }, 1500+i*45+50);
+    }
+    // wait until the page has been drawn new for the other format, then let the tiles whirl from their old places
+    addEventListener("resize", ()=>{ const p=innerHeight>innerWidth; if (p===lastPortrait) return; lastPortrait=p; if (!calm() && snap.size) H.classList.add("tabpre"); clearTimeout(whirl.t); whirl.t=setTimeout(()=>requestAnimationFrame(()=>{ whirl(); H.classList.remove("tabpre"); }), 140); });
+  }
 }

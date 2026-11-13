@@ -806,14 +806,14 @@ ipcMain.on("pageOpen", (e, url, r) => {
   pageSend();
 });
 ipcMain.on("pageBounds", (e, r) => { if (pageView && pageShown && r) pageView.setBounds(pageRect(r)); });
-ipcMain.on("pageShow", (e, on) => { if (pageView && pageShown) pageView.setVisible(!!on); });
+ipcMain.on("pageShow", (e, on) => { if (pageView && pageShown) pageView.setVisible(!!on); if (!on && win) win.webContents.focus(); });   // keyboard back to the app (e.g. a window opens over the shop page)
 ipcMain.on("pageNav", (e, cmd) => {
   if (!pageView) return; const wc = pageView.webContents;
   if (cmd === "back" && wc.canGoBack()) wc.goBack();
   else if (cmd === "fwd" && wc.canGoForward()) wc.goForward();
   else if (cmd === "reload") wc.reload();
   else if (cmd === "external") { const u = wc.getURL(); if (/^https?:\/\//i.test(u)) shell.openExternal(u); }
-  else if (cmd === "close") { pickOn = false; try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; pageBase = ""; wc.loadURL("about:blank").catch(() => {}); }
+  else if (cmd === "close") { pickOn = false; try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; pageBase = ""; wc.loadURL("about:blank").catch(() => {}); try { win.webContents.focus(); } catch (err) {} }
 });
 // older app versions still ask for "openInApp": same place
 ipcMain.on("openInApp", (e, url) => { if (/^https:\/\//i.test(url)) pageRequest(url); });

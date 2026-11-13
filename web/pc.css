@@ -743,3 +743,67 @@ html.pc .pcfhint{padding-right:96px}
   html.pc .pcsweb{height:calc(100vh - 226px)}
 }
 @media (max-width:1100px){ html.pc .pchero{top:auto;bottom:auto} }
+
+/* =================== TABLET (Android-App auf großem Bildschirm): PC-Aufbau, für Finger gemacht =================== */
+/* Dock unten mit Symbolen UND Namen, das Plus rechts daneben */
+html.pc.istab .tabs{top:auto!important;bottom:calc(14px + env(safe-area-inset-bottom));left:0;right:0;margin-inline:auto;transform:translateX(-42px);max-width:calc(100vw - 140px)!important;
+  padding:6px!important;border-radius:24px!important;background:color-mix(in srgb,var(--surface) 88%,transparent)!important;-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);
+  box-shadow:0 14px 34px -14px rgba(0,0,0,.45),inset 0 0 0 1px color-mix(in srgb,var(--fg) 7%,transparent)!important;z-index:45;gap:2px}
+html.pc.istab .pcarr{display:none!important}
+html.pc.istab .tab:not(.plus){min-width:76px;padding:8px 10px 7px!important;border-radius:18px!important;position:relative;z-index:1;transition:color .25s,transform .25s cubic-bezier(.3,1.6,.5,1)}
+html.pc.istab .tab:not(.plus) .tname{max-height:18px!important;max-width:140px!important;opacity:1!important;margin-top:3px!important;font-size:11px!important}
+html.pc.istab .tab[aria-selected="true"]{background:none!important}
+html.pc.istab .tab:not(.plus):active{transform:scale(.92)}
+html.pc.istab .tab:hover{background:none}
+html.pc.istab .tabbub{position:absolute;z-index:0;border-radius:18px;background:color-mix(in srgb,var(--bubc,#1a7a5c) 16%,transparent);transition:left .45s cubic-bezier(.3,1.35,.45,1),width .45s cubic-bezier(.3,1.35,.45,1),background .3s;pointer-events:none}
+html.pc.istab .tab.plus{position:absolute!important;left:calc(100% + 12px)!important;right:auto!important;top:50%!important;bottom:auto!important;margin-top:-32px!important;width:64px!important;height:64px!important;border-radius:20px!important;z-index:46}
+html.pc.istab #toast{bottom:calc(100px + env(safe-area-inset-bottom))!important}
+html.pc.istab .tab.plus:active{transform:scale(.9)}
+/* Kopfzeile: einreihig (die Seiten sind ja unten), keine Fußzeile – dafür Platz fürs Dock */
+html.pc.istab .top .wrap{padding-bottom:10px!important}
+html.pc.istab{scroll-padding-top:112px;scroll-padding-bottom:110px}
+html.pc.istab main.wrap{padding-bottom:120px!important}
+@media (min-width:1101px){ html.pc.istab .pchero{top:104px;bottom:104px} }
+html.pc.istab #v-list>#pcDet,html.pc.istab .pcsl,html.pc.istab .pcsd,html.pc.istab .pcz,html.pc.istab .pcsweb{top:104px}
+html.pc.istab .pcdet{max-height:calc(100vh - 230px);min-height:min(560px,calc(100vh - 230px))}
+html.pc.istab .pcsl,html.pc.istab .pcz{max-height:calc(100vh - 230px)}
+html.pc.istab .pcsweb{height:calc(100vh - 230px)}
+html.pc.istab .pcdock{bottom:110px}
+/* Finger statt Maus: alles etwas größer zum Antippen, Drück-Feedback statt Hover */
+html.pc.istab .pctl{opacity:1!important;transform:none!important;pointer-events:auto!important}
+html.pc.istab .card:not(.hero):active{transition:transform .12s}
+html.pc.istab button:active{transform:scale(.97)}
+html.pc.istab #v-home .hblock>.card:active{transform:scale(.985)}
+/* Fixkosten: Kalender ganz oben über die volle Breite, darunter Summe, Gruppen und „ohne festen Tag" nebeneinander */
+html.pc.istab #v-fix.pcfcal{grid-template-columns:minmax(0,1fr)!important}
+html.pc.istab .pcfside{position:static!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+html.pc.istab.tabp .pcfside{grid-template-columns:repeat(2,minmax(0,1fr))}
+html.pc.istab.tabp .pcfside>.pcfsum{grid-column:1/-1}
+/* Buchungen hochkant: die gewählte Buchung kommt als Blatt von unten */
+html.pc.istab.tabp #v-list{grid-template-columns:minmax(0,1fr)!important}
+html.pc.istab.tabp #v-list>#pcDet{position:fixed!important;left:12px;right:12px;top:auto!important;bottom:96px;z-index:44;max-height:68vh;min-height:0;border-radius:26px;box-shadow:0 -10px 50px rgba(0,0,0,.28)!important;
+  transform:translateY(0);transition:transform .45s cubic-bezier(.3,1.25,.45,1),opacity .3s}
+html.pc.istab.tabp #v-list>#pcDet.empty{transform:translateY(120%);opacity:0;pointer-events:none}
+/* Einstellungen: Profil · Schnellschalter · Bereiche als Karten */
+html.pc.istab #tabSet{display:flex;flex-direction:column;gap:14px}
+html.pc.istab .tsprof{display:flex;align-items:center;gap:16px;padding:16px 18px}
+html.pc.istab .tsprof .topav{margin:0;width:58px;height:58px;font-size:22px}
+html.pc.istab .tsprof b{font-size:17px}html.pc.istab .tsprof small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+html.pc.istab .tssw{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+html.pc.istab.tabp .tssw{grid-template-columns:repeat(2,minmax(0,1fr))}
+html.pc.istab .tssw button{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border:0;border-radius:18px;background:var(--surface);box-shadow:var(--shadow);font:700 14px var(--f-body);color:var(--fg);text-align:left}
+html.pc.istab .tssw i{flex:none;width:46px;height:28px;border-radius:14px;background:color-mix(in srgb,var(--fg) 18%,transparent);position:relative;transition:background .25s}
+html.pc.istab .tssw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25);transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+html.pc.istab .tssw .on i{background:var(--accent)}html.pc.istab .tssw .on i::after{transform:translateX(18px)}
+html.pc.istab .tsgr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+html.pc.istab.tabp .tsgr{grid-template-columns:minmax(0,1fr)}
+html.pc.istab .tsg{padding:16px 18px 8px;border-top:5px solid var(--gc)}
+html.pc.istab .tsg h3{display:flex;align-items:center;gap:10px;margin:0 0 6px;font:800 16px var(--f-body)}
+html.pc.istab .tsg h3 .saic{width:30px;height:30px;border-radius:10px}
+html.pc.istab .tsg button{display:flex;align-items:center;gap:12px;width:100%;padding:11px 2px;border:0;border-top:1px solid color-mix(in srgb,var(--fg) 8%,transparent);background:none;font:700 14px var(--f-body);color:var(--fg);text-align:left}
+html.pc.istab .tsg button:first-of-type{border-top:0}
+html.pc.istab .tsg button small{margin-left:auto;color:var(--muted);font-weight:500;font-size:12.5px;max-width:55%;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.pc.istab .tsback{display:inline-flex;align-items:center;gap:6px;border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:14px;padding:10px 14px;font:700 14px var(--f-body);color:var(--fg);margin-bottom:12px}
+html.pc.istab #setHome .pcset{grid-template-columns:minmax(0,1fr)!important}
+html.pc.istab #setHome .pcsl{display:none!important}
+html.pc.istab.tabpre main [data-view]{opacity:0}

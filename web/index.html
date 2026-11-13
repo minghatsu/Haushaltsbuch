@@ -2107,13 +2107,13 @@ const DEV_SVG={phone:'<path d="M8.5 2.5h7a1.8 1.8 0 0 1 1.8 1.8v15.4a1.8 1.8 0 0
   laptop:'<path d="M5.5 5h13a1.5 1.5 0 0 1 1.5 1.5V15H4V6.5A1.5 1.5 0 0 1 5.5 5Z"/><path d="M2.5 18.5h19"/>'};
 function devIc(form, size){ return `<svg class="i" viewBox="0 0 24 24" style="width:${size||20}px;height:${size||20}px" aria-hidden="true">${DEV_SVG[form]||DEV_SVG.phone}</svg>`; }
 function devForm(){ const ua=navigator.userAgent||"";
-  if (IS_PC) return /Mac/.test(ua) ? "laptop" : "pc";
+  if (IS_DESK) return /Mac/.test(ua) ? "laptop" : "pc";
   if (/iPad/.test(ua)) return "tablet";
   return Math.min(screen.width||0, screen.height||0) >= 600 ? "tablet" : "phone"; }
 function devModel(){ if (devModel.v) return devModel.v; const ua=navigator.userAgent||""; let n="";
   try { const B=window.AndroidBridge; if (B && typeof B.deviceName==="function") n=String(B.deviceName()||""); } catch(_){}
   n=n.replace(/[\u0000-\u001f]/g,"").replace(/\s+/g," ").trim().slice(0,40);
-  if (!n){ if (IS_PC) n=/Mac/.test(ua)?"Mac":/Linux/.test(ua)?"Linux-PC":"Windows-PC";
+  if (!n){ if (IS_DESK) n=/Mac/.test(ua)?"Mac":/Linux/.test(ua)?"Linux-PC":"Windows-PC";
     else if (/iPhone/.test(ua)) n="iPhone"; else if (/iPad/.test(ua)) n="iPad";
     else if (/Android/.test(ua)) n=devForm()==="tablet"?"Android-Tablet":"Android-Handy";
     else n="Browser"; }
@@ -2850,7 +2850,7 @@ document.addEventListener("click", async e=>{ if (!e.target.closest("#logoClear"
 
 // devices: every device announces itself through the sync (col "app", id "dev-…")
 function devId(){ let id=null; try{ id=localStorage.getItem("hb-devid"); if (!id){ id=newId(); localStorage.setItem("hb-devid", id); } }catch(e){ id="local"; } return id; }
-function devType(){ return IS_PC ? "pc" : window.AndroidBridge ? "phone" : "web"; }
+function devType(){ return IS_DESK ? "pc" : window.AndroidBridge ? "phone" : "web"; }
 function devList(){ try{ return JSON.parse(localStorage.getItem("hb-devs")||"{}"); }catch(e){ return {}; } }
 function devStore(id, data){ const d=devList(); if (data===null) delete d[id]; else d[id]=data; try{ localStorage.setItem("hb-devs", JSON.stringify(d)); }catch(e){} }
 function devMe(){ const d=devList()[devId()]||{}; return { name: d.name || (devType()==="pc"?"PC":devType()==="phone"?"Handy":"Browser"), model:devModel(), form:devForm(), type:devType(), ver:curVerShort(), seen:Date.now() }; }
@@ -5501,7 +5501,11 @@ function planEditor(d, plan){
 /* ---------- Benachrichtigungen (Android: auch bei geschlossener App) ---------- */
 const NOTIFY_DEF = { on:false, budget:true, minus:true, reserve:true, debt:true, goal:true, fix:"3,25", daily:"", imp:"14", tax:true, week:false, month:true, hour:"9" };
 const CAN_NOTIFY = !!(window.AndroidBridge && window.AndroidBridge.notifySchedule);
-const IS_PC = !!(window.AndroidBridge && window.AndroidBridge.desktop);
+const IS_DESK = !!(window.AndroidBridge && window.AndroidBridge.desktop);
+/* tablet: the Android app on a big screen gets the PC layout, adapted for fingers (dock at the bottom, no hover) */
+const IS_TAB = !IS_DESK && (()=>{ try { if (localStorage.getItem("hb-forcetab")==="1") return true; } catch(_){}
+  return !!window.AndroidBridge && Math.min(screen.width||0, screen.height||0) >= 600; })();
+const IS_PC = IS_DESK || IS_TAB;
 document.addEventListener("change", e=>{ if ((e.target.id==="pcTray"||e.target.id==="pcAuto") && IS_PC){ try{ AndroidBridge.pcPrefs(JSON.stringify(e.target.id==="pcTray"?{tray:e.target.checked}:{autostart:e.target.checked})); }catch(_){} toast("Gespeichert"); } });
 function notifyCfg(){ let c={}; try{ c=JSON.parse(localStorage.getItem("hb-notify")||"{}"); }catch(e){} return {...NOTIFY_DEF, ...c}; }
 function notifySave(c){ try{ localStorage.setItem("hb-notify", JSON.stringify(c)); }catch(e){} notifyPlanSoon(); }
@@ -5580,7 +5584,7 @@ function renderNotifyEd(){
   const sel=(k,t,d,opts)=>`<div class="nrow nsel">${nic(k)}<div class="nsl"><label for="nf-${k}"><b>${t}</b></label>${d?`<span class="small muted">${d}</span>`:""}<select class="in" id="nf-${k}" data-nf="${k}" ${on?"":"disabled"}>${opts.map(([v,l])=>`<option value="${v}" ${String(c[k])===v?"selected":""}>${l}</option>`).join("")}</select></div></div>`;
   el.innerHTML = `
     <div class="card nmaster"><div class="switch nrow"><span class="nic big" style="--tc:var(--accent)">${ic("bell",22)}</span><label for="nf-on"><b>Benachrichtigungen</b><br><span class="small muted">${IS_PC?"Kommen als Windows-Meldung unten rechts – auch wenn das Fenster zu ist, solange Finanz MAMI unten in der Taskleiste läuft.":perm==="granted"?"Kommen als Popup aufs Handy, auch wenn die App geschlossen ist.":"Die App fragt einmal nach der Erlaubnis von Android."}</span></label><input type="checkbox" id="nf-on" ${on?"checked":""}></div>
-    ${c.on&&perm!=="granted"?`<div class="notice warn"><span>${IS_PC?"Windows":"Android"} blockiert die Benachrichtigungen gerade.</span><button class="btn" id="nfSys">Erlauben</button></div>`:""}
+    ${c.on&&perm!=="granted"?`<div class="notice warn"><span>${IS_DESK?"Windows":"Android"} blockiert die Benachrichtigungen gerade.</span><button class="btn" id="nfSys">Erlauben</button></div>`:""}
     </div>
     <div class="pc-sect">Warnungen <span>Kommen sofort, sobald die App es bemerkt – jede nur einmal.</span></div>
     <div class="card ngrp">
@@ -5600,15 +5604,15 @@ function renderNotifyEd(){
     ${sw("week","Wochenrückblick","Sonntags um 18 Uhr")}
     ${sel("hour","Uhrzeit für Erinnerungen","Gilt für Fixkosten, Kontoauszug, Steuer und Monatsrückblick.",[["8","8 Uhr"],["9","9 Uhr"],["10","10 Uhr"],["12","12 Uhr"],["17","17 Uhr"],["19","19 Uhr"]])}
     </div>
-    ${!IS_PC && !AndroidBridge.batteryState ? `<div class="notice warn"><span><b>Für Benachrichtigungen bei geschlossener App</b> einmal die neue App installieren (Einstellungen › Geräte & Abgleich › Updates).</span></div>` : ""}
-    ${!IS_PC && AndroidBridge.batteryState ? (()=>{ const bs=AndroidBridge.batteryState(), last=Number(AndroidBridge.bgLast&&AndroidBridge.bgLast())||0, ago=last?Math.round((Date.now()-last)/60000):null;
+    ${!IS_DESK && !AndroidBridge.batteryState ? `<div class="notice warn"><span><b>Für Benachrichtigungen bei geschlossener App</b> einmal die neue App installieren (Einstellungen › Geräte & Abgleich › Updates).</span></div>` : ""}
+    ${!IS_DESK && AndroidBridge.batteryState ? (()=>{ const bs=AndroidBridge.batteryState(), last=Number(AndroidBridge.bgLast&&AndroidBridge.bgLast())||0, ago=last?Math.round((Date.now()-last)/60000):null;
       return `<div class="pc-sect">Bei geschlossener App</div><div class="card ngrp">
       <div class="nrow">${nic("hour")}<div class="nsl"><b>Hintergrund-Prüfung</b><span class="small muted">${last?`Zuletzt vor ${ago<60?ago+" Min.":Math.round(ago/60)+" Std."}`:"Lief noch nie – Android hat sie bisher nicht gestartet."}</span></div></div>
       ${bs==="free"?`<div class="notice ok"><span>Android lässt Finanz MAMI im Hintergrund laufen ✓</span></div>`:`<div class="notice warn"><span><b>Android bremst Finanz MAMI im Hintergrund.</b> Dann kommen Benachrichtigungen erst, wenn du die App öffnest. Tippe auf „Erlauben“ und wähle „Zulassen“.</span><button class="btn" id="nfBat">Erlauben</button></div>`}
       <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="nfSoon" ${on?"":"disabled"}>Test mit geschlossener App</button></div>
       <span class="small muted">Tippe auf Test, schließ die App (nach oben wegwischen) und warte 1–2 Minuten.</span></div>`; })() : ""}
     <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="nfTest" ${on?"":"disabled"}>Test-Benachrichtigung</button><button class="btn" id="nfSys2">${IS_PC?"Windows-Einstellungen":"Android-Einstellungen"}</button></div>
-    ${IS_PC&&AndroidBridge.pcPrefs?(()=>{ let p={}; try{ p=JSON.parse(AndroidBridge.pcPrefs("")); }catch(_){} return `<div class="pc-sect">PC</div><div class="card ngrp">
+    ${IS_DESK&&AndroidBridge.pcPrefs?(()=>{ let p={}; try{ p=JSON.parse(AndroidBridge.pcPrefs("")); }catch(_){} return `<div class="pc-sect">PC</div><div class="card ngrp">
     <div class="switch"><label for="pcTray"><b>Im Hintergrund weiterlaufen</b><br><span class="small muted">Schließen legt Finanz MAMI unten rechts in die Taskleiste – nötig für Erinnerungen. Ganz beenden: Rechtsklick aufs Symbol › Beenden.</span></label><input type="checkbox" id="pcTray" ${p.tray!==false?"checked":""}></div>
     <div class="switch"><label for="pcAuto"><b>Mit Windows starten</b><br><span class="small muted">Startet unsichtbar im Hintergrund, damit Erinnerungen auch nach einem Neustart kommen.</span></label><input type="checkbox" id="pcAuto" ${p.autostart?"checked":""}></div></div>`; })():""}`;
 }
@@ -6134,9 +6138,9 @@ function tfaHtml(){
   if (st==="pw") return head+`<span class="small muted">Beim Anmelden eines Geräts brauchst du dann zusätzlich einen 6-stelligen Code aus einer App wie Google Authenticator oder Microsoft Authenticator.</span>
     <div class="field"><label for="tfaPw">Dein Passwort für den Abgleich</label><input class="in" type="password" id="tfaPw" autocomplete="current-password"></div><span class="small" id="tfaErr" style="color:var(--bad)"></span>
     <div class="bkb"><button class="btn primary" id="tfaGo">Weiter</button><button class="btn" id="tfaCancel">Abbrechen</button></div>`;
-  if (st==="scan") return head+`<span class="small">1. Öffne deine Authenticator-App und scanne diesen Code${IS_PC?" mit dem Handy":""}:</span>
+  if (st==="scan") return head+`<span class="small">1. Öffne deine Authenticator-App und scanne diesen Code${IS_DESK?" mit dem Handy":""}:</span>
     <div class="tfaqr">${qrSvg(UI.tfaUri,200)}</div>
-    ${!IS_PC&&NATIVE?`<a class="btn" href="${esc(UI.tfaUri)}">Direkt in der Authenticator-App öffnen</a>`:""}
+    ${!IS_DESK&&NATIVE?`<a class="btn" href="${esc(UI.tfaUri)}">Direkt in der Authenticator-App öffnen</a>`:""}
     <span class="small muted">Oder den Schlüssel von Hand eintragen: <b class="tfakey">${esc(UI.tfaSecret.replace(/(.{4})/g,"$1 ").trim())}</b></span>
     <div class="field"><label for="tfaCode">2. Den 6-stelligen Code aus der App eingeben</label><input class="in" id="tfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="letter-spacing:.2em;text-align:center"></div><span class="small" id="tfaErr" style="color:var(--bad)"></span>
     <div class="bkb"><button class="btn primary" id="tfaOn">Einschalten</button><button class="btn" id="tfaCancel">Abbrechen</button></div>`;
@@ -8730,7 +8734,7 @@ async function syncNow(){
 // shown version "v0.5.4": phone/app count from build 88, the PC version has its own numbering from build 142 (build 143 = v0.0.1)
 const VER_BASE = {app:88, pc:142};
 const mneg = v => Math.abs(+v||0)<0.005 ? esc(eur(0)) : "− "+esc(eur(v));   // "− 0,00 €" looks like an error
-function verName(n, pc){ n=n|0; if (!n) return "Testversion"; if (pc===undefined) pc=IS_PC; const m=Math.max(0, n-(pc?VER_BASE.pc:VER_BASE.app)); return `v0.${Math.floor(m/10)}.${m%10}`; }
+function verName(n, pc){ n=n|0; if (!n) return "Testversion"; if (pc===undefined) pc=IS_DESK; const m=Math.max(0, n-(pc?VER_BASE.pc:VER_BASE.app)); return `v0.${Math.floor(m/10)}.${m%10}`; }
 const GH_REL = "https://api.github.com/repos/minghatsu/Haushaltsbuch/releases/tags/neueste";
 const GH_REL_PUB = "https://api.github.com/repos/minghatsu/finanz-mami/releases/tags/neueste";   // public download repo for testers – no key needed
 const UPD = {msg:"", ts:0, busy:false, last:0, started:Date.now()};
@@ -9260,7 +9264,7 @@ let HERO_KEY="", HERO_T=0;
 function renderHero(force){
   const el=$("syncHero"); if (!el) return; const h=heroState(), key=JSON.stringify(h);
   if (!force && key===HERO_KEY) return; HERO_KEY=key;
-  const me=IS_PC?["PC",SVG_PC]:["Handy",SVG_PHONE], other=IS_PC?["Handy",SVG_PHONE]:["PC",SVG_PC];
+  const me=IS_DESK?["PC",SVG_PC]:["Handy",SVG_PHONE], other=IS_DESK?["Handy",SVG_PHONE]:["PC",SVG_PC];
   el.className=`shero s-${h.k}${h.busy?" busy":""}`;
   el.innerHTML=`<div class="hic">${h.ic}</div><b>${esc(h.t)}</b><span class="hsub">${esc(h.s||"")}</span>
     <div class="chain" aria-hidden="true"><span class="nd on">${me[1]}${esc(me[0])}</span><span class="ln l1"><i></i><i></i></span><span class="nd">${SVG_SRV}Server</span><span class="ln l2"><i></i><i></i></span><span class="nd">${other[1]}${esc(other[0])}</span></div>`;
@@ -9490,7 +9494,7 @@ function pairUi(){
    This device picks it up, couples itself and deletes the mailbox. */
 let PRECV_T=0;
 /* scanning a QR code: on the phone the camera opens right away and reads the code live; the PC has no camera, there you pick a picture */
-const canQrLive = () => !IS_PC && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) && (!!window.AndroidBridge || /Android|iPhone|iPad/i.test(navigator.userAgent));
+const canQrLive = () => !IS_DESK && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) && (!!window.AndroidBridge || /Android|iPhone|iPad/i.test(navigator.userAgent));
 function qrBtn(kind, primary){
   const cls=`btn ${primary?"primary ":""}block`, st='style="justify-content:center;gap:8px"';
   if (canQrLive()) return `<button class="${cls}" ${st} data-qrlive="${kind}">${ic("camera",18)} QR-Code vom anderen Gerät scannen</button>`;
