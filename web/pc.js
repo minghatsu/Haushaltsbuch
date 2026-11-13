@@ -1256,31 +1256,43 @@ if (IS_PC){
     const g3=GRP[2]||["Steuer",[]], g3n=/steuer/i.test(g3[0]) ? "Steuer" : String(g3[0]).replace(/&amp;/g,"&").split(/[ &]/)[0];
     const row=t=>`<button class="arw" data-anaopen="${t.k}" style="--tc:${userCol("ana",t.k)||themeCol(TL[t.k][1], ord.indexOf(t.k))}"><span class="ai">${ic(t.icon,18)}</span><span class="an"><b>${t.k==="wk"&&!hasJob()?"Steuererklärung":t.k==="fix"?"Fixkosten geplant":TL[t.k][0]}</b><small>${t.sub||""}</small></span><span class="av">${esc(t.short||"")}<span class="ch">›</span></span></button>`;
     // nothing twice: the big cards already show the year plan and the tax; no empty savings goals; the balance only once
-    const skip=t=>t.k==="plan"||t.k==="tax"||(t.k==="goal"&&/noch kein/i.test(String(t.sub||"").replace(/<[^>]+>/g,"")));
+    const skip=t=>t.k==="tax"||(t.k==="goal"&&/noch kein/i.test(String(t.sub||"").replace(/<[^>]+>/g,"")));
     for (const t of tiles) if (t.k==="calc"){ const m=String(t.sub||"").match(/^Stand heute (.+?) · frei (.+)$/); if (m && m[1]===m[2]){ t.sub="Stand heute "+m[1]; t.short=String(t.short||"").replace(/^frei\s+/,""); } }
     const rowsFor=ks=>{ const ts=tiles.filter(t=>ks.includes(t.k)&&!skip(t)).sort((p,q)=>ks.indexOf(p.k)-ks.indexOf(q.k)); return ts.length?`<div class="card pcarl"><div class="arl">${ts.map(row).join("")}</div></div>`:""; };
-    // 1 · Auswertung (Monat oder Jahr)
-    const M=mode==="m", net=M?mc.net:inc-exp, income=M?mc.income:inc, expn=M?mc.expenses:exp;
-    const fixP=M?mc.fixPaid:sum(rows,r=>r.c.fixPaid);
-    const pts=M ? Array.from({length:6},(_,k)=>{ const m=shiftYm(ym,k-5); return {ym:m, l:MSHORT[ymParts(m)[1]-1], t:MONTHS[ymParts(m)[1]-1], v:monthCalc(m).net}; })
-                : rows.map(r=>({ym:r.ym, l:MSHORT[r.i-1].slice(0,1), t:MONTHS[r.i-1], v:r.c.net, fut:r.ym>cur}));
-    const onIdx=M?5:mi-1;
-    const prev=M?monthCalc(shiftYm(ym,-1)):null, pm=M?MONTHS[ymParts(shiftYm(ym,-1))[1]-1]:"";
-    const days=M?(ym===cur?new Date().getDate():daysIn(ym)):Math.max(1, rows.filter(r=>r.ym<=cur&&(r.c.income||r.c.expenses)).length*30.4);
-    const zins=M && ym===cur ? sum(S.debts,d=>debtState(d).zinsNow||0) : 0;
-    const ct=catTotals(M?mc.tx:rows.flatMap(r=>r.c.tx), fixP), tot=sum(ct,x=>x[1]), top=ct[0]?ct[0][1]:1;
-    const k=(l,v,s,cl,open)=>`<div class="card pcak" ${open?`data-anaopen="${open}"`:""}><small>${l}</small><b class="${cl||""}">${v}</b><span>${s}</span></div>`;
-    const col1=`<div class="pcac"><div class="pcah"><h2>Auswertung</h2><span>${esc(mn)+" "+y}</span></div>
-      <div class="card pcabig" data-anaopen="kpi"><small>${net>=0?"Übrig":"Mehr ausgegeben"}</small><div class="pcan ${net>=0?"pos":"neg"}">${esc(sg(net))}</div>${netBars(pts,onIdx)}</div>
-      <div class="pcakg">${k("Einnahmen",esc(eur0(income)),M?"im "+esc(mn):"bisher "+y,"pos","io")}
-        ${k("Ausgaben",esc(eur0(expn)),M?(prev.expenses?`${esc(pm)}: ${esc(eur0(prev.expenses))}`:"keine Daten davor"):`Ø ${esc(eur0(expn/Math.max(1,rows.filter(r=>r.c.expenses>0).length)))} / Monat`,"","trend")}
-        ${k("Fixkosten bezahlt",esc(eur0(fixP)),income?`${Math.round(fixP/income*100)} % der Einnahmen`:"bezahlt","","fix")}
-        ${zins>0?k("Zinsen",esc(eur0(zins)),"diesen Monat","neg"):k("Ø pro Tag",esc(eur0(expn/days)),"ausgegeben","","kpi")}</div>
-      ${ct.length?`<div class="card pcarl"><div class="pcach"><b>Wohin dein Geld fließt</b><button data-anaopen="cat">Alle ›</button></div>${ct.slice(0,5).map(([c,v])=>`<button class="pcacat" data-anaopen="cat" style="--tc:${catColor("ausgabe",c)}"><span class="ai">${esc(String(c).trim().slice(0,1).toUpperCase())}</span><span class="an"><span class="t"><b>${esc(c)}</b><em>${esc(eur0(v))}</em></span><span class="bar"><i style="width:${Math.max(2,v/top*100).toFixed(1)}%"></i></span></span><small>${tot>0?Math.round(v/tot*100):0} %</small></button>`).join("")}</div>`:`<div class="card pcarl muted pcaempty">Im ${M?esc(mn):y} ist noch nichts gebucht.</div>`}</div>`;
-    // 2 · Planung (das Jahr)
-    const col2=`<div class="pcac"><div class="pcah"><h2>Planung</h2><span>Jahr ${y}</span></div>
-      <div class="card pcabig" data-anaopen="plan"><small>Ein &amp; Aus ${y}</small><div class="pcan ${inc-exp>=0?"pos":"neg"}">${esc(sg(inc-exp))}</div><div class="pcas">${esc(eur0(inc))} rein · ${esc(eur0(exp))} raus</div>${yearBars(rows,ym)}</div>
-      ${rowsFor(GRP[1][1])}</div>`;
+    // only what the overview does not show: how it develops, how this month compares, the year against last year
+    const M=true, net=mc.net, expn=mc.expenses;
+    const pts=Array.from({length:6},(_,k)=>{ const m=shiftYm(ym,k-5); return {ym:m, l:MSHORT[ymParts(m)[1]-1], t:MONTHS[ymParts(m)[1]-1], v:monthCalc(m).net}; });
+    // 1 · Verlauf: spending of the last 12 months against the average
+    const hist=Array.from({length:12},(_,k)=>{ const m=shiftYm(ym,k-11), c=monthCalc(m); return {ym:m, i:ymParts(m)[1], v:c.expenses, has:c.tx.length>0||c.expenses>0}; });
+    const withData=hist.filter(h=>h.has), avg=withData.length?sum(withData,h=>h.v)/withData.length:0;
+    const line=(()=>{ const W=520,H=140, n=hist.length, mx=Math.max(1,...hist.map(h=>h.v), avg)*1.08, X=i=>10+i*(W-20)/(n-1), Y=v=>H-v/mx*(H-8);
+      const pts2=hist.map((h,i)=>h.has?[X(i),Y(h.v)]:null);
+      let d="", on=false; pts2.forEach(p=>{ if (!p){ on=false; return; } d+=(on?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)+" "; on=true; });
+      return `<svg class="pcab" viewBox="0 0 ${W} ${H+22}" role="img" aria-label="Ausgaben der letzten 12 Monate">${avg?`<line x1="0" x2="${W}" y1="${Y(avg).toFixed(1)}" y2="${Y(avg).toFixed(1)}" stroke="var(--faint)" stroke-dasharray="4 5"/><text x="${W-2}" y="${(Y(avg)-6).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--muted)">Ø ${esc(eur0(avg))}</text>`:""}
+        <path d="${d}" fill="none" stroke="var(--bad)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" class="pcaln"/>
+        ${hist.map((h,i)=>`<g class="pcabg" data-pcaym="${h.ym}"><rect x="${(X(i)-(W-20)/(n-1)/2).toFixed(1)}" y="0" width="${((W-20)/(n-1)).toFixed(1)}" height="${H+22}" fill="transparent"/>${h.has?`<circle cx="${X(i).toFixed(1)}" cy="${Y(h.v).toFixed(1)}" r="${h.ym===ym?6:3.5}" fill="var(--bad)"/>`:""}<text x="${X(i).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="11" font-weight="${h.ym===ym?800:500}" fill="${h.ym===ym?"var(--fg)":"var(--muted)"}">${esc(MSHORT[h.i-1].slice(0,1))}</text><title>${esc(MONTHS[h.i-1])}: ${esc(eur0(h.v))}</title></g>`).join("")}</svg>`; })();
+    const dAvg=avg?Math.round((expn-avg)/avg*100):null;
+    const chip=(p,inv)=>p==null?"":`<span class="pcachg ${(inv?-p:p)>0?"up":"dn"}">${p>0?"+":p<0?"−":"±"}${Math.abs(p)} %</span>`;
+    const col1=`<div class="pcac"><div class="pcah"><h2>Verlauf</h2><span>letzte 12 Monate</span></div>
+      <div class="card pcabig" data-anaopen="trend"><small>Ausgaben im ${esc(mn)}</small><div style="display:flex;align-items:baseline;gap:10px"><div class="pcan">${esc(eur0(expn))}</div>${dAvg!=null?chip(dAvg)+`<span class="pcas" style="margin:0">zum Ø</span>`:""}</div>${line}</div>
+      <div class="card pcabig" data-anaopen="kpi"><small>${net>=0?"Übrig":"Mehr ausgegeben"} pro Monat</small>${netBars(pts,5)}</div></div>`;
+    // 2 · Kategorien: this month against the average of the 6 months before; then this year against last year
+    const prevM=Array.from({length:6},(_,k)=>monthCalc(shiftYm(ym,-(k+1)))).filter(c=>c.tx.length||c.expenses>0), avgOf={};
+    for (const c of prevM) for (const [n,v] of catTotals(c.tx, c.fixPaid)) avgOf[n]=(avgOf[n]||0)+v/prevM.length;
+    const ct=catTotals(mc.tx, mc.fixPaid).slice(0,6);
+    const catRows=ct.map(([c,v])=>{ const a0=avgOf[c]||0, p=a0>0?Math.round((v-a0)/a0*100):null;
+      return `<button class="pcacat" data-anaopen="cat" style="--tc:${catColor("ausgabe",c)}"><span class="ai">${esc(String(c).trim().slice(0,1).toUpperCase())}</span><span class="an"><span class="t"><b>${esc(c)}</b></span><small class="muted">${a0>0?`Ø ${esc(eur0(a0))} im Monat`:"vorher nichts"}</small></span>${p==null?`<span class="pcachg nw">neu</span>`:chip(p)}<em class="pcav">${esc(eur0(v))}</em></button>`; }).join("");
+    const lastY=Array.from({length:12},(_,i)=>monthCalc(`${y-1}-${String(i+1).padStart(2,"0")}`).expenses), hasLast=lastY.some(v=>v>0);
+    const cmp=(()=>{ const W=520,H=120,cw=W/12, mx=Math.max(1,...lastY,...rows.map(r=>r.c.expenses));
+      return `<svg class="pcab" viewBox="0 0 ${W} ${H+22}" role="img" aria-label="${y} gegen ${y-1}">${rows.map((r,i)=>{ const x=i*cw, hb=lastY[i]/mx*(H-4), ha=r.ym>cur?0:r.c.expenses/mx*(H-4);
+        return `<g class="pcabg" data-pcaym="${r.ym}" style="--i:${i}"><rect x="${x}" y="0" width="${cw}" height="${H+22}" fill="transparent"/><rect class="b" x="${(x+cw/2-10).toFixed(1)}" y="${(H-hb).toFixed(1)}" width="9" height="${hb.toFixed(1)}" rx="3" fill="var(--faint)" opacity=".55"/>${ha?`<rect class="b" x="${(x+cw/2+1).toFixed(1)}" y="${(H-ha).toFixed(1)}" width="9" height="${ha.toFixed(1)}" rx="3" fill="var(--bad)"/>`:""}
+          <text x="${(x+cw/2).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="11" font-weight="${r.ym===ym?800:500}" fill="${r.ym===ym?"var(--fg)":"var(--muted)"}">${esc(MSHORT[i].slice(0,1))}</text><title>${esc(MONTHS[i])}: ${esc(eur0(r.c.expenses))} (${y}) · ${esc(eur0(lastY[i]))} (${y-1})</title></g>`; }).join("")}</svg>`; })();
+    const ytd=sum(rows.filter(r=>r.ym<=ym),r=>r.c.expenses), ytdL=sum(lastY.slice(0,mi),v=>v), dY=ytdL>0?Math.round((ytd-ytdL)/ytdL*100):null;
+    const col2=`<div class="pcac"><div class="pcah"><h2>Kategorien im Vergleich</h2></div>
+      ${ct.length?`<div class="card pcarl"><div class="pcach"><b>${esc(mn)} gegen deinen Schnitt</b><button data-anaopen="cat">Alle ›</button></div>${catRows}</div>`:`<div class="card pcarl muted pcaempty">Im ${esc(mn)} ist noch nichts gebucht.</div>`}
+      <div class="card pcabig" data-anaopen="io"><small>${y} gegen ${y-1}</small><div style="display:flex;align-items:baseline;gap:10px;margin-top:4px"><b style="font-size:22px">${esc(eur0(ytd))}</b>${hasLast&&dY!=null?chip(dY)+`<span class="pcas" style="margin:0">zu ${y-1} bis ${esc(mn)}</span>`:`<span class="pcas" style="margin:0">ausgegeben bis ${esc(mn)}</span>`}</div>
+        <div class="pcalg"><span><i style="background:var(--bad)"></i>${y}</span><span><i style="background:var(--faint);opacity:.55"></i>${y-1}</span></div>${cmp}</div>
+      ${rowsFor(["calc","plan"])}</div>`;
     // 3 · Steuer
     const tt=tiles.find(t=>t.k==="tax"); let tx=null; try { tx=taxCalc(y); } catch(e){}
     const box=(l,v)=>`<div><small>${l}</small><b>${v}</b></div>`;
