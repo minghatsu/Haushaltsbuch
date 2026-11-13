@@ -1171,6 +1171,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .znew{display:inline-block;background:#FFE9A8;color:#8a5a00;border-radius:5px;font-size:10px;font-weight:900;padding:1px 5px;vertical-align:2px}.zdaz{display:inline-block;background:#FFE0A3;color:#8a5a00;border-radius:5px;font-size:10px;font-weight:900;padding:1px 5px;vertical-align:2px}
 .zr.isnew{background:color-mix(in srgb,#FFE9A8 35%,transparent);border-radius:10px;padding-left:6px;padding-right:6px}
 .zfor{margin-left:6px;font-size:11px;font-weight:700;color:var(--accent)}
+.zsh{position:relative;display:flex;flex:none;cursor:pointer}.zsh select{position:absolute;inset:-8px;opacity:0;width:auto;height:auto;font-size:16px;cursor:pointer}
+.zaway{background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:13.5px;border-radius:12px;padding:9px 12px;margin-bottom:10px}
 .zfold{display:flex;align-items:center;gap:8px;background:var(--sunk);border-radius:12px;padding:9px 11px;margin-top:10px;font-size:13px;color:var(--muted)}
 .zlnk{display:block;width:100%;border:0;background:none;color:var(--accent);font:inherit;font-weight:800;font-size:13.5px;padding:10px 2px;text-align:center}
 .zxf{background:var(--surface);border-radius:14px;padding:12px;margin-top:10px;display:flex;flex-direction:column;gap:8px}.zxf .zxp{width:80px;flex:none}
@@ -3967,16 +3969,18 @@ function zMiniCard(T){
 }
 function zettelCard(){
   const T=zTrip(), M=zMyTrip(), me=devId();
-  if (!M && !UI.zOpen) return zMiniCard(T);
+  if (!M && !zList().length) return zMiniCard(T);
   const L=zList(), mode=zSort();
   // on a trip: first what this phone takes care of, the rest of the others folded below
   const mineIt=it=>!M || zMineShop(M, (zWhere(it)||{}).s||"", me) || it.by===me;
   const shown=M ? L.filter(mineIt) : L, others=M ? L.filter(x=>!mineIt(x)) : [];
   const open=shown.filter(x=>!x.done), done=shown.filter(x=>x.done);
   const est=sum(open,it=>{ const w=zWhere(it); return w&&w.p?w.p*zQ(it):0; });
-  const dot=w=>{ const sh=w&&zShopBy(w.s); return `<span title="${sh?esc(sh.name):"Laden offen"}" style="display:flex">${zLogo(sh,22)}</span>`; };
+  const myShops=(S.settings.shops||[]).map(zShopBy).filter(Boolean);
+  const dot=(w,it)=>{ const sh=w&&zShopBy(w.s), cur=it.s||"", extra=cur&&!myShops.some(o=>o.id===cur)?[zShopBy(cur)].filter(Boolean):[];
+    return `<label class="zsh" title="${sh?esc(sh.name):"Laden wählen"}">${zLogo(sh,24)}<select data-zshop="${esc(it.id)}" aria-label="Laden für ${esc(it.n)}"><option value="">automatisch${w&&!it.s&&sh?" ("+esc(sh.name)+")":""}</option>${[...myShops,...extra].map(o=>`<option value="${o.id}" ${o.id===cur?"selected":""}>${esc(o.name)}</option>`).join("")}</select></label>`; };
   const isNew=it=>M && !it.done && !it.extra && (it.c||0)>M.at;
-  const row=x=>`<div class="zr ${x.it.done?"done":""} ${isNew(x.it)?"isnew":""}"><button class="zb" data-zck="${esc(x.it.id)}" aria-label="${esc(x.it.n)} abhaken"></button><input class="zq" type="number" inputmode="numeric" min="1" max="99" value="${zQ(x.it)}" data-zq="${esc(x.it.id)}" aria-label="Menge ${esc(x.it.n)}"><span class="zx">x</span><button class="zn" data-zck="${esc(x.it.id)}">${esc(x.it.n)}${isNew(x.it)?` <span class="znew">NEU</span>`:""}${x.it.extra?` <span class="zdaz">DAZU</span>`:""}</button><b>${x.w&&x.w.p?esc(eur(x.w.p*zQ(x.it))):""}</b>${x.it.done&&x.it.by&&M&&(M.devs||[]).length>1?zWho(x.it.by,16):""}${mode==="laden"?"":dot(x.w)}</div>`;
+  const row=x=>`<div class="zr ${x.it.done?"done":""} ${isNew(x.it)?"isnew":""}"><button class="zb" data-zck="${esc(x.it.id)}" aria-label="${esc(x.it.n)} abhaken"></button><input class="zq" type="number" inputmode="numeric" min="1" max="99" value="${zQ(x.it)}" data-zq="${esc(x.it.id)}" aria-label="Menge ${esc(x.it.n)}"><span class="zx">x</span><button class="zn" data-zck="${esc(x.it.id)}">${esc(x.it.n)}${isNew(x.it)?` <span class="znew">NEU</span>`:""}${x.it.extra?` <span class="zdaz">DAZU</span>`:""}</button><b>${x.w&&x.w.p?esc(eur(x.w.p*zQ(x.it))):""}</b>${x.it.done&&x.it.by&&M&&(M.devs||[]).length>1?zWho(x.it.by,16):""}${dot(x.w,x.it)}</div>`;
   let gs=zGroups(shown, mode);
   if (M && mode!=="laden") gs=gs.map(g=>({...g, rows:g.rows.slice().sort((a,b)=>isNew(b.it)-isNew(a.it))}));
   if (M && mode==="laden") gs=gs.sort((a,b)=>(b.rows.some(x=>isNew(x.it)))-(a.rows.some(x=>isNew(x.it))));
@@ -4009,12 +4013,13 @@ function zettelCard(){
       <select class="in" id="zxS" aria-label="Laden">${[...new Set(shown.map(it=>(zWhere(it)||{}).s).filter(Boolean))].map(s=>`<option value="${esc(s)}" ${ZB.x.s===s?"selected":""}>${esc((zShopBy(s)||{name:s}).name)}</option>`).join("")}<option value="" ${ZB.x.s===""?"selected":""}>Anderer Laden</option></select>
       <div class="zdb"><button class="btn" data-zxx>Abbrechen</button><button class="btn primary" data-zxok>Dazu – schon abgehakt</button></div></div>` : `<button class="zlnk" data-zxopen>+ Noch etwas gekauft, was nicht auf dem Zettel stand?</button>`) : "";
   const title = M ? "Einkaufszettel" : "Einkaufszettel", stat = `${open.length} offen${est?` · ca. ${esc(eur(est))}`:""}`;
-  return `<div class="card zcard ${M?"trip":""}"><div class="card-head"><h2>${M?"🛒 ":""}${title}</h2><span class="small muted">${stat}</span></div>
+  const away = T && !M ? `<div class="zaway">🛒 Einkauf läuft${T.devs&&T.devs.length?" auf "+T.devs.filter(d=>!(T.fin||{})[d.id]).map(d=>esc(zDevName(d.id))).join(" & "):""} · ${L.filter(x=>x.done).length} von ${L.length} abgehakt</div>` : "";
+  return `<div class="card zcard ${M?"trip":""}"><div class="card-head"><h2>${M?"🛒 ":""}${title}</h2><span class="small muted">${stat}</span></div>${away}
     <div class="zsort" role="group" aria-label="Sortieren">${[["laden","Laden"],["abt","Abteilung"],["preis","Preis"],["az","A–Z"]].map(([k,l])=>`<button data-zsort="${k}" class="${mode===k?"on":""}">${l}</button>`).join("")}</div>
     <div class="zadd"><input class="in" id="zIn" placeholder="Was brauchst du?" autocomplete="off" aria-label="Was brauchst du?"><button class="btn primary" data-zadd aria-label="Hinzufügen">+</button></div>
     ${gs.map(g=>`${head(g)}<div class="zgl">${g.rows.map(row).join("")}</div>`).join("")||`<div class="small muted" style="padding:12px 2px">Noch nichts auf dem Zettel.</div>`}
     ${xf}${fold}${fin}
-    ${M?"":`<div class="zdb" style="margin-top:12px">${L.some(x=>!x.done)?`<button class="btn primary" data-zstart>🛒 Einkauf starten</button>`:""}<button class="btn" data-zclose>Zuklappen</button></div>`}</div>`;
+    ${M||T?"":L.some(x=>!x.done)?`<div class="zdb" style="margin-top:12px"><button class="btn primary" data-zstart>🛒 Einkauf starten</button></div>`:""}</div>`;
 }
 async function zBon(k){
   ZB.busy=k; renderShop();
@@ -4072,7 +4077,8 @@ document.addEventListener("click", e=>{
     ZB.x=null; zSave([...zList(), {id:newId(), n:n.slice(0,60), done:true, by:devId(), extra:true, c:Date.now(), ...(sh?{s:sh}:{}), ...(p>0?{p:Math.round(p*100)/100}:{})}]); toast(`Dazu: ${n}`); return; }
   if (e.target.closest("[data-zfin]")){ zFinish(); return; }
 });
-document.addEventListener("change", e=>{ const q=e.target.closest&&e.target.closest("[data-zq]"); if (q) zSetQ(q.dataset.zq, q.value); });
+document.addEventListener("change", e=>{ const q=e.target.closest&&e.target.closest("[data-zq]"); if (q) zSetQ(q.dataset.zq, q.value);
+  const sh=e.target.closest&&e.target.closest("[data-zshop]"); if (sh){ const id=sh.dataset.zshop, v=sh.value; zSave(zList().map(x=>x.id===id?(v?{...x, s:v}:(({s:_,...r})=>r)(x)):x)); } });
 document.addEventListener("input", e=>{ const a=e.target.closest&&e.target.closest("[data-zamt]"); if (a && ZB.bons[a.dataset.zamt]) ZB.bons[a.dataset.zamt].v=parseAmt(a.value)||null;
   if (ZB.x && /^zx[NPS]$/.test(e.target.id||"")) ZB.x[{zxN:"n",zxP:"p",zxS:"s"}[e.target.id]]=e.target.value; });
 document.addEventListener("keydown", e=>{ if (e.target && e.target.id==="zIn" && e.key==="Enter"){ e.preventDefault(); const b=e.target.parentElement.querySelector("[data-zadd]"); if (b) b.click(); } });
