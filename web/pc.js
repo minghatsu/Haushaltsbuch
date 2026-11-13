@@ -197,7 +197,7 @@ if (IS_PC){
     "Klick = abhaken · Betrag anklicken = nur für {m} ändern · Ziehen = Tag ändern":["Click = tick off · Click the amount = change for {m} only · Drag = change the day","Tıkla = işaretle · Tutara tıkla = yalnızca {m} için değiştir · Sürükle = günü değiştir","Клик = отметить · Клик по сумме = изменить только на {m} · Перетащить = сменить день","Клік = позначити · Клік по сумі = змінити лише на {m} · Перетягнути = змінити день","Klik = odhacz · Klik w kwotę = zmień tylko na {m} · Przeciągnij = zmień dzień","نقرة = تأشير · النقر على المبلغ = تغيير {m} فقط · السحب = تغيير اليوم","Clic = bifează · Clic pe sumă = schimbă doar pentru {m} · Trage = schimbă ziua"],
     "nichts":["nothing","hiçbir şey","ничего","нічого","nic","لا شيء","nimic"],
     "Fixkoste am {n}. eintragen":["Add a fixed cost on the {n}","{n}. güne sabit gider ekle","Добавить расход на {n}-е","Додати витрату на {n}-те","Dodaj koszt stały na {n}.","أضف تكلفة ثابتة في يوم {n}","Adaugă o cheltuială fixă pe {n}"],
-    "Neue Fixkoste":["New fixed cost","Yeni sabit gider","Новый постоянный расход","Нова постійна витрата","Nowy koszt stały","تكلفة ثابتة جديدة","Cheltuială fixă nouă"],
+    "Neue Fixkosten":["New fixed cost","Yeni sabit gider","Новый постоянный расход","Нова постійна витрата","Nowy koszt stały","تكلفة ثابتة جديدة","Cheltuială fixă nouă"],
     "Betrag ab {m} {n}":["Amount from {m} {n}","{m} {n} itibarıyla tutar","Сумма с {m} {n}","Сума з {m} {n}","Kwota od {m} {n}","المبلغ من {m} {n}","Sumă din {m} {n}"],
     "ohne":["none","yok","нет","немає","brak","بدون","fără"],
     "Rhythmus":["Rhythm","Sıklık","Периодичность","Періодичність","Częstotliwość","التكرار","Frecvență"],
@@ -762,7 +762,7 @@ if (IS_PC){
           ${ym===cur?`<div class="kv"><span>In den nächsten 7 Tagen</span><b>${soon.length?`${soon.length} <span>Posten</span> · ${esc(eur0(sum(soon,x=>amtOf(x.f))))}`:"nichts"}</b></div>`:""}
           <div class="row-btns">${all.length&&nPaid<all.length?`<button class="btn" id="payAll">Alle abhaken</button>`:""}<button class="btn" id="fixEditBtn">Liste bearbeiten</button></div></div>
         ${gl?`<div class="card pcfgr"><div class="small muted" style="margin-bottom:6px">Gruppen</div>${gl}</div>`:""}
-        <div class="card pcfnone" data-pcfday="0"><div class="small muted"><b>Ohne festen Tag</b> · <span>${none.length?"auf einen Tag im Kalender ziehen":"hierher ziehen, um den Tag zu entfernen"}</span></div>${none.map(chip).join("")}<button class="pcfadd wide" data-pcfnew="0">${SV.plus}<span>Neue Fixkoste</span></button></div>
+        <div class="card pcfnone" data-pcfday="0"><div class="small muted"><b>Ohne festen Tag</b> · <span>${none.length?"auf einen Tag im Kalender ziehen":"hierher ziehen, um den Tag zu entfernen"}</span></div>${none.map(chip).join("")}<button class="pcfadd wide" data-pcfnew="0">${SV.plus}<span>Neue Fixkosten</span></button></div>
         <div class="small muted pcfhint">Klick = abhaken · Stift = bearbeiten · Ziehen = Tag ändern · + im Tag = neu eintragen</div>
       </div>`;
     const calm=pcCalm(), root=$("v-fix");
@@ -832,7 +832,7 @@ if (IS_PC){
   const field=(lbl,inner)=>`<label class="pf"><span>${lbl}</span>${inner}</label>`;
   function form(f, day){
     const ym=UI.ym, mon=monthName(ym), D=daysIn(ym);
-    return `<div class="ph"><b>${f?esc(f.name):"Neue Fixkoste"}</b><button class="px" data-pfx aria-label="Schließen">${SV.x}</button></div>
+    return `<div class="ph"><b>${f?esc(f.name):"Neue Fixkosten"}</b><button class="px" data-pfx aria-label="Schließen">${SV.x}</button></div>
       ${field("Name",`<input class="in" data-pf="name" value="${f?esc(f.name):""}" placeholder="z. B. Miete, Netflix, Versicherung" autocomplete="off">`)}
       <div class="pr2">${field(`Betrag ab ${esc(mon)}`,`<input class="in" data-pf="amount" inputmode="decimal" value="${f?esc(numStr(listAmt(f,ym))):""}" placeholder="0,00">`)}
         ${field("Tag",`<select class="in" data-pf="day"><option value="0">ohne</option>${Array.from({length:D},(_,i)=>`<option value="${i+1}" ${day===i+1?"selected":""}>${i+1}.</option>`).join("")}</select>`)}</div>
