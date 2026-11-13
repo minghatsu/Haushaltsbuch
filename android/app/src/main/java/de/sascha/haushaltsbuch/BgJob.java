@@ -44,6 +44,17 @@ public class BgJob extends JobService {
         try { js.schedule(ji); } catch (Exception ignored) {}
     }
 
+    static final int JOB_SOON = 4713;
+    /** one extra check after a delay (test button) */
+    static void soon(Context c, long ms) {
+        JobScheduler js = c.getSystemService(JobScheduler.class);
+        if (js == null) return;
+        JobInfo ji = new JobInfo.Builder(JOB_SOON, new ComponentName(c, BgJob.class))
+                .setMinimumLatency(ms).setOverrideDeadline(ms + 60_000)
+                .build();
+        try { js.schedule(ji); } catch (Exception ignored) {}
+    }
+
     private final Handler main = new Handler(Looper.getMainLooper());
     private WebView web;
     private JobParameters params;
@@ -65,6 +76,7 @@ public class BgJob extends JobService {
     }
 
     private void run() {
+        getSharedPreferences("hb-bg", MODE_PRIVATE).edit().putLong("last", System.currentTimeMillis()).apply();
         if (MainActivity.fg) { finish(); return; }          // app is open: it syncs and notifies by itself
         MainActivity a = MainActivity.live;
         if (a != null) { a.runBg(() -> main.post(this::finish)); return; }

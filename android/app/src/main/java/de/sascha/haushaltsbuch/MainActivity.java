@@ -502,6 +502,32 @@ public class MainActivity extends Activity {
         /** false: this is the visible app (the background check has its own bridge) */
         @JavascriptInterface
         public boolean bgMode() { return false; }
+        /** "free" if Android does not slow the app down in the background (battery optimisation off) */
+        @JavascriptInterface
+        public String batteryState() {
+            try {
+                android.os.PowerManager pm = getSystemService(android.os.PowerManager.class);
+                return pm != null && pm.isIgnoringBatteryOptimizations(getPackageName()) ? "free" : "limited";
+            } catch (Exception e) { return "unknown"; }
+        }
+        /** asks Android to let the app run in the background (system dialog) */
+        @JavascriptInterface
+        public void batteryAsk() {
+            runOnUiThread(() -> {
+                try {
+                    Intent i = new Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:" + getPackageName()));
+                    startActivity(i);
+                } catch (Exception e) {
+                    try { startActivity(new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)); } catch (Exception ignored) {}
+                }
+            });
+        }
+        /** runs the background check right now in about a minute (for testing with the app closed) */
+        /** when the phone last ran the background check (ms), 0 = never */
+        @JavascriptInterface
+        public long bgLast() { return getSharedPreferences("hb-bg", MODE_PRIVATE).getLong("last", 0); }
+        @JavascriptInterface
+        public void bgSoon() { BgJob.soon(MainActivity.this, 60_000); }
         /** the page finished a background check it was asked for */
         @JavascriptInterface
         public void bgDone() { runOnUiThread(MainActivity.this::finishBg); }

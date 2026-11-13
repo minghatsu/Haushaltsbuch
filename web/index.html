@@ -5394,6 +5394,7 @@ function notifyPlan(){
     if (c.week){ for (let k=0;k<3;k++){ const d=new Date(now); d.setDate(d.getDate()+((7-d.getDay())%7)+7*k); add("week:"+isoOf(d), at(d,18), "Dein Wochenrückblick", "Schau dir an, wie deine Woche gelaufen ist."); } }
     if (c.month){ const [y,m]=ymParts(nxt); add("month:"+nxt, at(new Date(y,m-1,1),H), `Dein ${MONTHS[(m+10)%12]} ist abgeschlossen`, "Sieh dir an, wie viel übrig geblieben ist."); }
   }
+  { let t=0; try{ t=Number(localStorage.getItem("hb-nftest"))||0; }catch(_){} if (t>Date.now()) list.push({id:nid("bgtest"), at:t, title:"Test geklappt ✓", text:"Benachrichtigungen kommen auch bei geschlossener App.", ch:"hinweise"}); }
   list.sort((a,b)=>a.at-b.at);
   try{ AndroidBridge.notifySchedule(JSON.stringify(list.slice(0,60))); }catch(e){}
 }
@@ -5440,6 +5441,13 @@ function renderNotifyEd(){
     ${sw("week","Wochenrückblick","Sonntags um 18 Uhr")}
     ${sel("hour","Uhrzeit für Erinnerungen","Gilt für Fixkosten, Kontoauszug, Steuer und Monatsrückblick.",[["8","8 Uhr"],["9","9 Uhr"],["10","10 Uhr"],["12","12 Uhr"],["17","17 Uhr"],["19","19 Uhr"]])}
     </div>
+    ${!IS_PC && !AndroidBridge.batteryState ? `<div class="notice warn"><span><b>Für Benachrichtigungen bei geschlossener App</b> einmal die neue App installieren (Einstellungen › Geräte & Abgleich › Updates).</span></div>` : ""}
+    ${!IS_PC && AndroidBridge.batteryState ? (()=>{ const bs=AndroidBridge.batteryState(), last=Number(AndroidBridge.bgLast&&AndroidBridge.bgLast())||0, ago=last?Math.round((Date.now()-last)/60000):null;
+      return `<div class="pc-sect">Bei geschlossener App</div><div class="card ngrp">
+      <div class="nrow">${nic("hour")}<div class="nsl"><b>Hintergrund-Prüfung</b><span class="small muted">${last?`Zuletzt vor ${ago<60?ago+" Min.":Math.round(ago/60)+" Std."}`:"Lief noch nie – Android hat sie bisher nicht gestartet."}</span></div></div>
+      ${bs==="free"?`<div class="notice ok"><span>Android lässt Finanz MAMI im Hintergrund laufen ✓</span></div>`:`<div class="notice warn"><span><b>Android bremst Finanz MAMI im Hintergrund.</b> Dann kommen Benachrichtigungen erst, wenn du die App öffnest. Tippe auf „Erlauben“ und wähle „Zulassen“.</span><button class="btn" id="nfBat">Erlauben</button></div>`}
+      <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="nfSoon" ${on?"":"disabled"}>Test mit geschlossener App</button></div>
+      <span class="small muted">Tippe auf Test, schließ die App (nach oben wegwischen) und warte 1–2 Minuten.</span></div>`; })() : ""}
     <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="nfTest" ${on?"":"disabled"}>Test-Benachrichtigung</button><button class="btn" id="nfSys2">${IS_PC?"Windows-Einstellungen":"Android-Einstellungen"}</button></div>
     ${IS_PC&&AndroidBridge.pcPrefs?(()=>{ let p={}; try{ p=JSON.parse(AndroidBridge.pcPrefs("")); }catch(_){} return `<div class="pc-sect">PC</div><div class="card ngrp">
     <div class="switch"><label for="pcTray"><b>Im Hintergrund weiterlaufen</b><br><span class="small muted">Schließen legt Finanz MAMI unten rechts in die Taskleiste – nötig für Erinnerungen. Ganz beenden: Rechtsklick aufs Symbol › Beenden.</span></label><input type="checkbox" id="pcTray" ${p.tray!==false?"checked":""}></div>
@@ -5452,6 +5460,8 @@ document.addEventListener("change", e=>{
 });
 document.addEventListener("click", e=>{
   if (e.target.closest("#nfTest")){ try{ AndroidBridge.notifyNow(nid("test"+Date.now()), "So sieht eine Benachrichtigung aus", "Finanz MAMI meldet sich hier, auch wenn die App geschlossen ist.", "hinweise"); }catch(_){} }
+  if (e.target.closest("#nfBat")){ try{ AndroidBridge.batteryAsk(); }catch(_){} return; }
+  if (e.target.closest("#nfSoon")){ try{ localStorage.setItem("hb-nftest", String(Date.now()+70000)); }catch(_){} notifyPlan(); try{ AndroidBridge.bgSoon&&AndroidBridge.bgSoon(); }catch(_){} toast("Jetzt die App schließen – in ca. 1 Minute kommt eine Test-Meldung", null, null, 6000); return; }
   if (e.target.closest("#nfSys,#nfSys2")){ try{ AndroidBridge.notifySettings(); }catch(_){} }
 });
 
@@ -6865,7 +6875,7 @@ $("pinDots").addEventListener("click", ()=>{ if (LOCK.mode==="set" && !LOCK.firs
 function lockIfNeeded(){ if (lockCfg() && !LOCK.mode && LOCK.hiddenAt && Date.now()-LOCK.hiddenAt>60000) lockShow("unlock"); LOCK.hiddenAt=0; }
 document.addEventListener("visibilitychange", ()=>{ if (document.visibilityState==="hidden") LOCK.hiddenAt=Date.now(); else lockIfNeeded(); });
 window.hbPaused=()=>{ LOCK.hiddenAt=Date.now(); try{ notifyPlan(); }catch(e){} };
-window.hbResumed=()=>lockIfNeeded();
+window.hbResumed=()=>{ lockIfNeeded(); try { if ($("notifyEd") && $("notifyEd").offsetParent) renderNotifyEd(); } catch(_){} };
 if (lockCfg()) lockShow("unlock");
 function renderLockEd(){
   const el=$("lockEd"); if (!el) return; const cfg=lockCfg();
