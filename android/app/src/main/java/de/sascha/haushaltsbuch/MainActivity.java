@@ -167,6 +167,8 @@ public class MainActivity extends Activity {
 
         updTap = isUpdIntent(getIntent());
         UpdateJob.plan(this);
+        BgJob.plan(this);
+        live = this;
         loadApp();
     }
 
@@ -213,13 +215,16 @@ public class MainActivity extends Activity {
     }
 
     /** The downloaded version if it is newer than the one inside the APK, otherwise null (= use the APK's copy). */
-    private byte[] newestApp() {
+    private byte[] newestApp() { return newestApp(this); }
+
+    /** also used by the background check (BgJob), which has no activity */
+    static byte[] newestApp(android.content.Context ctx) {
         try {
-            File f = cachedAppFile();
+            File f = new File(ctx.getFilesDir(), "app.html");
             if (!f.exists()) return null;
             byte[] cached = readAll(new java.io.FileInputStream(f));
             if (!signedByBuild(cached)) { f.delete(); return null; }   // changed or unsigned: never run it
-            byte[] bundled = readAll(getAssets().open("index.html"));
+            byte[] bundled = readAll(ctx.getAssets().open("index.html"));
             return versionOf(cached) > versionOf(bundled) ? cached : null;
         } catch (Exception e) {
             return null;
@@ -371,12 +376,14 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        fg = false;
         if (web != null) web.evaluateJavascript("window.hbPaused && window.hbPaused()", null);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        fg = true;
         if (web != null) web.evaluateJavascript("window.hbResumed && window.hbResumed()", null);
     }
 
@@ -429,7 +436,76 @@ public class MainActivity extends Activity {
         if (isUpdIntent(i) && web != null) web.evaluateJavascript("window.hbUpdTap && window.hbUpdTap()", null);
     }
 
+    /* ---- background check (BgJob): while the app sits in the background, its own page does the check ---- */
+    static volatile MainActivity live;
+    static volatile boolean fg;
+    private volatile Runnable bgCb;
+
+    void runBg(Runnable done) {
+        bgCb = done;
+        if (web == null) { finishBg(); return; }
+        web.evaluateJavascript("window.hbBg ? window.hbBg() : (window.AndroidBridge && AndroidBridge.bgDone())", null);
+    }
+    private void finishBg() { Runnable r = bgCb; bgCb = null; if (r != null) r.run(); }
+
+    @Override
+    protected void onDestroy() {
+        if (live == this) live = null;
+        finishBg();
+        super.onDestroy();
+    }
+
+    /** one request (also used by BgJob): {code, text} */
+    static Object[] httpCall(String method, String url, String auth, String body, String certHost) {
+        int code = 0;
+        String text = "";
+        HttpURLConnection c = null;
+        try {
+            if (!url.startsWith("http://") && !url.startsWith("https://")) throw new IllegalArgumentException();
+            URL u0 = new URL(url);
+            // unencrypted only inside the home network or Tailscale – never across the internet
+            if (url.startsWith("http://") && !homeHost(u0.getHost())) throw new IllegalArgumentException("http only at home");
+            c = (HttpURLConnection) u0.openConnection();
+            final boolean pin = certHost != null && !certHost.isEmpty();
+            if (pin) {
+                if (!(c instanceof javax.net.ssl.HttpsURLConnection)
+                        || !u0.getHost().matches("^(192\\.168\\.|10\\.|172\\.(1[6-9]|2\\d|3[01])\\.)[0-9.]+$")
+                        || !certHost.matches("^[a-z0-9.-]+$")) throw new IllegalArgumentException();
+                final String want = certHost;
+                ((javax.net.ssl.HttpsURLConnection) c).setHostnameVerifier((h, ses) -> javax.net.ssl.HttpsURLConnection.getDefaultHostnameVerifier().verify(want, ses));
+                c.setInstanceFollowRedirects(false);
+            }
+            c.setConnectTimeout(pin ? 4000 : 8000);
+            c.setReadTimeout(30000);
+            c.setUseCaches(false);
+            c.setRequestMethod("POST".equals(method) ? "POST" : "GET");
+            c.setRequestProperty("Content-Type", "application/json");
+            if (auth != null && !auth.isEmpty()) c.setRequestProperty("Authorization", auth);
+            if ("POST".equals(method)) {
+                c.setDoOutput(true);
+                try (OutputStream os = c.getOutputStream()) { os.write((body == null ? "" : body).getBytes(StandardCharsets.UTF_8)); }
+            }
+            code = c.getResponseCode();
+            InputStream is = code >= 400 ? c.getErrorStream() : c.getInputStream();
+            text = is == null ? "" : new String(readAll(is), StandardCharsets.UTF_8);
+        } catch (Throwable e) {   // also "out of memory": always answer, so the app does not wait forever
+            code = 0;
+            String m = e.getMessage();
+            text = "ERR:" + e.getClass().getSimpleName() + (m == null ? "" : ": " + (m.length() > 160 ? m.substring(0, 160) : m));
+        } finally {
+            if (c != null) c.disconnect();
+        }
+        return new Object[]{code, text};
+    }
+
     private class Bridge {
+        /** false: this is the visible app (the background check has its own bridge) */
+        @JavascriptInterface
+        public boolean bgMode() { return false; }
+        /** the page finished a background check it was asked for */
+        @JavascriptInterface
+        public void bgDone() { runOnUiThread(MainActivity.this::finishBg); }
+
         /** true once if the app was opened by tapping an update notice */
         @JavascriptInterface
         public boolean takeUpdTap() { boolean b = updTap; updTap = false; return b; }

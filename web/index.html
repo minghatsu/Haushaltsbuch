@@ -1873,6 +1873,8 @@ const WIDE = matchMedia("(min-width:1000px)");   // desktop layout with sidebar
 const UI = { view:"home", ym: ymOf(new Date()), kind:"ausgabe", cat:null, editId:null, fixEdit:false, debtEdit:false, filter:"alle", q:"", get wide(){ return WIDE.matches; } };
 let db = null, mem = false;
 const NATIVE = !!window.AndroidBridge;   // running inside the Android APK
+// started without a window by the phone (BgJob): only sync and notify, never ask anything
+const BG_RUN = (()=>{ try { return !!(window.AndroidBridge && window.AndroidBridge.bgMode && window.AndroidBridge.bgMode()); } catch(e){ return false; } })();
 /* ---------- the stored data is encrypted on the device: the key sits in the Android Keystore (on the PC: locked by Windows) ----------
    Only these entries are sealed; reading old unencrypted ones still works and they are encrypted right away. */
 const sealedKey = k => SEALED.has(k) || String(k).startsWith("hb-sp-");
@@ -5199,6 +5201,17 @@ function notifyPlan(){
   list.sort((a,b)=>a.at-b.at);
   try{ AndroidBridge.notifySchedule(JSON.stringify(list.slice(0,60))); }catch(e){}
 }
+// the phone asks about every 15 minutes while the app is closed (or only in the background):
+// sync, then notify what is new – shopping trip from the PC, warnings, and plan the reminders again
+window.hbBg = async () => {
+  const done=()=>{ try { AndroidBridge.bgDone(); } catch(_){} };
+  try {
+    if (SYNC.token){ for (let i=0;i<60 && SYNC.busy;i++) await new Promise(r=>setTimeout(r,250)); try { await syncNow(); } catch(_){} }
+    try { zTripCheck(); zDevOutCheck(); } catch(_){}
+    try { const v=UI.ym; UI.ym=ymOf(new Date()); renderHome(); UI.ym=v; } catch(_){}
+    try { notifyPlan(); } catch(_){}
+  } finally { setTimeout(done, 400); }
+};
 let notifyT=null; function notifyPlanSoon(){ clearTimeout(notifyT); notifyT=setTimeout(notifyPlan, 1500); }
 window.hbNotifyPerm = ok => { const c=notifyCfg(); c.on=!!ok; notifySave(c); if (!ok) toast("Ohne Erlaubnis kann die App keine Benachrichtigungen zeigen"); if (UI.view==="more") renderMore(); };
 function renderNotifyEd(){
@@ -5591,7 +5604,7 @@ document.addEventListener("input", e=>{ if (e.target.id!=="bankOther") return; c
 setTimeout(function bankAskLater(){ if (bankAskShould()) bankAskOpen(); else if (!(S.settings&&S.settings.bank)) setTimeout(bankAskLater, 4000); }, 2500);
 
 function wizShould(){
-  if (S.settings.wizDone || UI.wiz) return false;
+  if (BG_RUN || S.settings.wizDone || UI.wiz) return false;
   try{ if (localStorage.getItem("hb-wiz-skip")) return false; }catch(e){}
   if (S.tx.length || S.fixed.length) return false;
   if ($("loginBg") && !$("loginBg").hidden) return false;       // first the Server question
@@ -6930,7 +6943,8 @@ function docReview(imgSrc, info){
     const el=$("docRev"); el.hidden=false; requestAnimationFrame(()=>el.classList.add("show"));
     $("drImg").src=imgSrc; await new Promise(r=>{ if ($("drImg").complete) r(); else $("drImg").onload=r; });
     $("drCon").value=DR.contrast; $("drSha").value=DR.sharpen;
-    drLayout(); drChecks(); drMode("frame");
+    // the checks and the tip take room first – only then measure the space for the photo (else it ran over the chips)
+    drChecks(); drMode("frame"); drLayout(); requestAnimationFrame(()=>{ drLayout(); setTimeout(drLayout, 120); });
   });
 }
 function drFinish(res){ const el=$("docRev"); el.classList.remove("show"); setTimeout(()=>{ el.hidden=true; },200); const d=DR.done; DR.done=null; if (d) d(res); }
@@ -6996,6 +7010,7 @@ function drPreview(){
       drFinish({action:"ok", img:c.toDataURL("image/jpeg",0.8)});
     } catch(e){ drFinish({action:"ok", img:DR.im.src}); } $("drUse").disabled=false; }, 20); };
   addEventListener("resize", ()=>{ if (!$("docRev").hidden) { drLayout(); if (DR.mode==="result") drPreview(); } });
+  try { new ResizeObserver(()=>{ if (!$("docRev").hidden && DR.im) drLayout(); }).observe(st); } catch(_){}
 })();
 
 async function runScan(source, attachOnly, fresh){
@@ -8392,6 +8407,7 @@ function loginModeUi(){
   if (!cloud){ $("loginRCodeRow").hidden=true; $("loginPwRow").hidden=false; $("loginPwLbl").textContent="Passwort"; $("loginGo").textContent="Verbinden"; }
 }
 async function showLogin(){
+  if (BG_RUN) return;
   if (MODE==="pair"){ pairShow("start"); return; }
   const bg=$("loginBg"); bg.hidden=false; $("loginErr").textContent="";
   loginModeUi();
