@@ -17,11 +17,15 @@ android {
 
     signingConfigs {
         release {
-            // fixed key, so updates install over the previous version without losing data
-            storeFile file('../keystore/haushaltsbuch.jks')
-            storePassword 'haushaltsbuch'
+            // fixed key, so updates install over the previous version without losing data.
+            // The key comes from the GitHub secrets HB_KEYSTORE / HB_KEYSTORE_PASS (the build writes it to a temporary file);
+            // the copy in the repository is only used as long as those secrets are not set up yet.
+            def ks = System.getenv('HB_KEYSTORE_FILE')
+            def pw = System.getenv('HB_KEYSTORE_PASS')
+            storeFile file(ks ?: '../keystore/haushaltsbuch.jks')
+            storePassword pw ?: 'haushaltsbuch'
             keyAlias 'haushaltsbuch'
-            keyPassword 'haushaltsbuch'
+            keyPassword pw ?: 'haushaltsbuch'
         }
     }
 

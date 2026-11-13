@@ -154,7 +154,22 @@ jobs:
         with:
           gradle-version: '8.9'
       - name: APK bauen
+        env:
+          HB_KEYSTORE: ${{ secrets.HB_KEYSTORE }}
+          HB_KEYSTORE_PASS: ${{ secrets.HB_KEYSTORE_PASS }}
         run: |
+          # signing key from the secrets (never stored in the repository)
+          if [ -n "$HB_KEYSTORE" ]; then
+            printf '%s' "$HB_KEYSTORE" | tr -d ' \r\n' | base64 -d > "$RUNNER_TEMP/hb.jks"
+            export HB_KEYSTORE_FILE="$RUNNER_TEMP/hb.jks"
+            [ -n "$HB_KEYSTORE_PASS" ] || { echo "::error::Secret HB_KEYSTORE_PASS fehlt"; exit 1; }
+            echo "Signierschlüssel aus den Secrets"
+          elif [ ! -f android/keystore/haushaltsbuch.jks ]; then
+            echo "::error::Secret HB_KEYSTORE fehlt (Signierschlüssel fürs Handy)"; exit 1
+          else
+            echo "::warning::Signierschlüssel noch aus dem Projekt – bitte die Secrets HB_KEYSTORE und HB_KEYSTORE_PASS anlegen"
+            unset HB_KEYSTORE_PASS
+          fi
           mkdir -p android/app/src/main/assets
           cp app.html android/app/src/main/assets/index.html
           # version of the Android part: the app compares it with the release to know when a new APK is needed
@@ -166,6 +181,14 @@ jobs:
             exit 1
           fi
           cp app/build/outputs/apk/release/app-release.apk ../Haushaltsbuch.apk
+          rm -f "$RUNNER_TEMP/hb.jks"
+          # the APK must carry the same signature as always, otherwise phones refuse the update (e.g. a wrong secret)
+          SIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
+          if [ -n "$SIGNER" ]; then
+            FP=$("$SIGNER" verify --print-certs ../Haushaltsbuch.apk | grep -i 'SHA-256 digest' | head -1 | awk '{print $NF}' | tr 'A-F' 'a-f')
+            if [ "$FP" != "49c1cb354a39f64972cce694034d6b68e977ff6f90423604d33fbabab8ded971" ]; then echo "::error::APK ist mit einem anderen Schlüssel signiert ($FP) – Secret HB_KEYSTORE prüfen"; exit 1; fi
+            echo "APK-Signatur stimmt"
+          else echo "::warning::apksigner nicht gefunden – Signatur nicht geprüft"; fi
       - name: APK ablegen
         env:
           GH_TOKEN: ${{ github.token }}
