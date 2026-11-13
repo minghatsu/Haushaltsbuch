@@ -130,6 +130,8 @@ jobs:
           if gh release view neueste >/dev/null 2>&1; then
             gh release upload neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --clobber
             gh release edit neueste --title "$TITLE" --notes "$NOTES" --latest
+            # the tag follows the newest build (no old commits stay reachable through it)
+            git tag -f neueste ${{ github.sha }} && git push -f origin refs/tags/neueste || true
           else
             gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --title "$TITLE" --notes "$NOTES" --latest
           fi
@@ -313,6 +315,8 @@ jobs:
           if gh release view neueste >/dev/null 2>&1; then
             gh release upload neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --clobber
             gh release edit neueste --title "$TITLE" --notes "$NOTES" --latest
+            # the tag follows the newest build (no old commits stay reachable through it)
+            git tag -f neueste ${{ github.sha }} && git push -f origin refs/tags/neueste || true
           else
             gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --title "$TITLE" --notes "$NOTES" --latest
           fi
