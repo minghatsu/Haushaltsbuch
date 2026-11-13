@@ -593,8 +593,9 @@ const PICK_JS = String.raw`(() => {
 const PICK_CSS = "html,html *{cursor:copy!important}";
 let pickCssKey = null;
 let pickSrc = "";   // the app can bring a newer version of the script along (so fixes need no new installer)
+let pickOffAt = 0;
 async function pickSet(mode) {
-  if (!pageView) return; pickOn = !!mode; pickMode = mode || "";
+  if (!pageView) return; if (pickOn && !mode) pickOffAt = Date.now(); pickOn = !!mode; pickMode = mode || "";
   const wc = pageView.webContents, call = (pickSrc || PICK_JS) + `.set(${JSON.stringify(mode || "")})`;
   try { if (pickCssKey) { await wc.removeInsertedCSS(pickCssKey); pickCssKey = null; } if (mode === "pick") pickCssKey = await wc.insertCSS(PICK_CSS); } catch (e) {}
   wc.executeJavaScriptInIsolatedWorld(1999, [{ code: call }]).catch(() => {});
@@ -777,7 +778,7 @@ function pageMake() {
   wc.on("did-frame-finish-load", (e, isMain) => { if (pickOn && !isMain) pickSet(pickMode || "pick"); });   // picking stays on after the page changed
   wc.on("console-message", (...a) => { const ev = a[0], msg = ev && typeof ev.message === "string" ? ev.message : a[2];
     if (typeof msg === "string" && msg.startsWith("__HBEDIT__")) { pageEditing = msg.slice(10) === "1"; return; }
-    if (typeof msg === "string" && msg.startsWith("__HBPICK__")) { try { pickResult(JSON.parse(msg.slice(10))); } catch (err) {} } });
+    if ((pickOn || Date.now() - pickOffAt < 3000) && typeof msg === "string" && msg.startsWith("__HBPICK__")) { try { pickResult(JSON.parse(msg.slice(10))); } catch (err) {} } });
   // know whether a text field of the page has the focus (then the arrow keys stay with the page)
   wc.on("dom-ready", () => { pageEditing = false; wc.executeJavaScript(`(()=>{ const f=()=>{ const a=document.activeElement; console.log("__HBEDIT__"+(a&&(a.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))?"1":"0")); }; addEventListener("focusin",f,true); addEventListener("focusout",()=>setTimeout(f,0),true); })()`).catch(() => {}); });
   wc.on("before-input-event", (e, input) => {
@@ -863,6 +864,11 @@ if (!SMOKE && !app.requestSingleInstanceLock()) {
     if (process.platform === "win32") app.setAppUserModelId("de.sascha.haushaltsbuch");
     // the app never needs camera, microphone, location etc. in the PC version
     require("electron").session.defaultSession.setPermissionRequestHandler((wc, perm, cb) => cb(perm === "notifications" || perm === "clipboard-sanitized-write"));
+    // shop pages opened inside the app: no camera, microphone, location, notifications … and no downloads
+    const shops = require("electron").session.fromPartition("persist:seiten");
+    shops.setPermissionRequestHandler((wc, perm, cb) => cb(false));
+    shops.setPermissionCheckHandler(() => false);
+    shops.on("will-download", (ev) => ev.preventDefault());
     loadPlanned();
     applyPrefs(prefs());
     createWindow();

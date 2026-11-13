@@ -145,6 +145,9 @@ function devCheck(): void {
     } else $why = 'PHP darf keine Verbindung nach außen aufbauen (curl und allow_url_fopen sind aus)';
     if ($code === 401 || $code === 403 || $code === 404) { ipBump('ipfails'); fail('Entwickler-Schlüssel ungültig (GitHub ' . $code . ')', 401); }
     if ($code !== 200) fail('GitHub nicht erreichbar' . ($why !== '' ? ': ' . mb_substr($why, 0, 160) : ' (' . $code . ')'), 502);
+    // a private repository can only be read with a key that was given access; if it ever becomes public, reading is not enough anymore
+    $rj = is_string($body ?? null) ? (json_decode($body, true) ?: []) : []; $perm = $rj['permissions'] ?? [];
+    if (empty($rj['private']) && empty($perm['admin']) && empty($perm['maintain']) && empty($perm['push'])) { ipBump('ipfails'); fail('Entwickler-Schlüssel ungültig (keine Rechte an der App)', 401); }
     q('INSERT OR REPLACE INTO devkeys (h, until) VALUES (?, ?)', [$hash, time() + 3600]);
 }
 function feedDir(): string { return DATA_DIR . '/feedback'; }
@@ -174,6 +177,11 @@ try {
             $imgs[] = [$m[1] === 'jpeg' ? 'jpg' : $m[1], $bin];
         }
         ipBump('ipfeed');
+        // never let feedback fill the disk: at most ~500 MB in total, and always the reserve left free
+        $used = 0; foreach (glob(feedDir() . '/*/*') ?: [] as $f) $used += (int)@filesize($f);
+        $need = strlen($text); foreach ($imgs as [, $bin]) $need += strlen($bin);
+        $free = function_exists('disk_free_space') ? @disk_free_space(DATA_DIR) : false;
+        if ($used + $need > 500000000 || ($free !== false && $free - $need < MIN_FREE)) fail('Feedback kann gerade nicht gespeichert werden – bitte per E-Mail schicken', 507);
         $dir = DATA_DIR . '/feedback/' . date('Y-m-d_His') . '_' . $kind . '_' . bin2hex(random_bytes(3));
         if (!@mkdir($dir, 0700, true)) fail('Feedback konnte nicht gespeichert werden', 500);
         @file_put_contents($dir . '/feedback.txt', $text . "\n");

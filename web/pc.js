@@ -550,7 +550,7 @@ if (IS_PC){
   function fbRender(){
     const el=$("pcFbBody"); if (!el) return;
     if (!FB.items.length){ el.innerHTML=`<p class="muted" style="padding:20px 0;text-align:center">${FB.err?esc(FB.err):"Noch kein Feedback angekommen."}</p>`; return; }
-    el.innerHTML=FB.items.map(x=>{ const [kl,kc]=KIND[x.kind]||KIND.idee, op=FB.open===x.id, d=new Date(x.ts*1000), body=String(x.text||"");
+    el.innerHTML=FB.items.map(x=>{ const [kl,kc]=KIND[x.kind]||KIND.idee, op=FB.open===x.id, d=new Date(x.ts*1000), body=String(x.text||""); x.images=Math.max(0,Math.min(5,parseInt(x.images,10)||0));
       return `<div class="pcfb ${x.read?"":"new"} ${op?"open":""}" style="--kc:${kc}"><button class="pcfbh" data-pcfb="${esc(x.id)}"><span class="pcfbk">${kl}</span><span class="pcfbt">${esc(body.split("\n")[0].slice(0,120))}</span><small>${d.toLocaleDateString("de-DE")} ${d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}${x.images?` · ${x.images} ${x.images===1?"Bild":"Bilder"}`:""}${x.mailed?" · ✉":""}</small></button>
         ${op?`<div class="pcfbb"><pre>${esc(body)}</pre>${x.images?`<div class="pcfbimgs">${Array.from({length:x.images},(_,i)=>{ const u=FB.imgs[x.id+"/"+(i+1)]; return u?`<a data-pcfbimg="${esc(u)}"><img src="${esc(u)}" alt="Bild ${i+1}"></a>`:`<span class="ph">…</span>`; }).join("")}</div>`:""}
           <div class="row-btns" style="justify-content:flex-start;margin-top:10px"><button class="btn" data-pcfbunread="${esc(x.id)}">Als ungelesen markieren</button><button class="btn danger" data-pcfbdel="${esc(x.id)}">${FB.delArm===x.id?"Wirklich endgültig löschen?":"Löschen"}</button></div></div>`:""}</div>`; }).join("");
