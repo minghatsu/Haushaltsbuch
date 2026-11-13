@@ -24,7 +24,7 @@ jobs:
           zip -q Finanz-MAMI-Windows.zip Finanz-MAMI-Setup.exe
           NOTES=$(printf '%s\n\n%s\n%s\n%s\n\n%s\n\n%s' \
             "**Testversion – danke fürs Ausprobieren!**" \
-            "📱 **Android:** Finanz-MAMI.apk herunterladen und öffnen. Beim ersten Mal fragt Android, ob Apps aus dieser Quelle erlaubt sind – einmal zulassen." \
+            "📱 **Android (Handy & Tablet):** Finanz-MAMI.apk herunterladen und öffnen. Beim ersten Mal fragt Android, ob Apps aus dieser Quelle erlaubt sind – einmal zulassen." \
             "💻 **Windows:** Finanz-MAMI-Windows.zip herunterladen, entpacken und Finanz-MAMI-Setup.exe starten. Meldet Windows „Unbekannter Herausgeber“: „Weitere Informationen“ › „Trotzdem ausführen“." \
             "🔄 Updates kommen danach automatisch." \
             "Feedback: in der App unter Einstellungen › Feedback oder an kontakt@miracleframe.de" \
