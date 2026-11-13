@@ -156,6 +156,12 @@ function createWindow() {
     else if (input.alt && input.key === "ArrowLeft") { goBack(); e.preventDefault(); }
   });
   win.on("app-command", (e, cmd) => { if (cmd === "browser-backward") goBack(); });
+  // back from another program: the keyboard goes back to where it was – to the app itself unless a shop page is open and was used last
+  win.webContents.on("focus", () => { lastFocus = "app"; });
+  win.on("focus", () => { setTimeout(() => { try {
+    if (lastFocus === "page" && pageView && pageShown && !pageView.webContents.isDestroyed()) pageView.webContents.focus();
+    else win.webContents.focus();
+  } catch (err) {} }, 0); });
 
   // the app itself reloads (update, F5): a web page shown above it belongs to the old page – remove it
   win.webContents.on("did-start-navigation", (e) => { if (e.isMainFrame !== false && pageView && pageShown && !e.isSameDocument) { try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; pickOn = false; } });
@@ -433,7 +439,7 @@ function pageDestroy() {
 // "Angebot picken": a script in the shown page highlights the offer under the mouse and reads name, price and "valid until"
 // from the clicked one (also inside embedded leaflet frames); "lasso" puts a see-through layer over the whole page to draw a frame
 // (for leaflets that are only pictures) – that part is photographed and read with the text recognition of Windows
-let pickOn = false, pickMode = "";
+let pickOn = false, pickMode = "", lastFocus = "app";
 const PICK_JS = String.raw`(() => {
   const W = window; if (W.__hbPick) return W.__hbPick;
   const TOP = W === W.top;
@@ -758,6 +764,7 @@ function pageMake() {
   if (pageView) return pageView;
   pageEditing = false;
   pageView = new WebContentsView({ webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false, partition: "persist:seiten" } });
+  pageView.webContents.on("focus", () => { lastFocus = "page"; });
   pageView.setBorderRadius && pageView.setBorderRadius(0);
   const wc = pageView.webContents;
   // locked to the site that was opened: links to other sites are blocked (no free surfing in the app)
@@ -813,7 +820,7 @@ ipcMain.on("pageNav", (e, cmd) => {
   else if (cmd === "fwd" && wc.canGoForward()) wc.goForward();
   else if (cmd === "reload") wc.reload();
   else if (cmd === "external") { const u = wc.getURL(); if (/^https?:\/\//i.test(u)) shell.openExternal(u); }
-  else if (cmd === "close") { pickOn = false; try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; pageBase = ""; wc.loadURL("about:blank").catch(() => {}); try { win.webContents.focus(); } catch (err) {} }
+  else if (cmd === "close") { pickOn = false; try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; pageBase = ""; wc.loadURL("about:blank").catch(() => {}); lastFocus = "app"; try { win.webContents.focus(); } catch (err) {} }
 });
 // older app versions still ask for "openInApp": same place
 ipcMain.on("openInApp", (e, url) => { if (/^https:\/\//i.test(url)) pageRequest(url); });
