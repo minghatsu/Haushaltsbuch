@@ -4115,6 +4115,7 @@ async function zFinish(){
     const doc={date, amount:Math.round(b.v*100)/100, kind:"ausgabe", cat:zCatFor(sh), note:sh?sh.name:(b.shop||"Einkauf"), ts:Date.now(), src:"zettel"};
     if (b.pay==="bar"){ doc.pay="bar"; if (!cashOn()) { try { await cashActivate(date, null); } catch(_){} } }
     if (!b.img) doc.nobon=true;
+    try { const its=receiptItems(b.lines||[]); if (its.length){ doc.items=its.map(i=>({r:i.n, p:i.p})); const sid=sh?sh.id:zaShopId(b.shop); if (sid) doc.ishop=sid; } } catch(_){}
     const id=mem?newId():db.collection("tx").doc().id;
     if (await safe(()=>saveTxDoc(id, doc, null))){ n++; if (b.img){ try { await rcptPut(id, b.img); } catch(_){} try { rememberPrices(sh?sh.name:b.shop, date, receiptItems(b.lines||[])); } catch(_){} } }
   }
@@ -6748,7 +6749,7 @@ async function shrinkImage(file){
 UI.rcpt = {state:"none", img:null};
 async function rcptSheetInit(){
   const id=UI.editId; UI.rcpt={state:"none", img:null};
-  if (id && hasReceipt(id)){ UI.rcpt.state="stored"; renderRcptRow(); const img=await rcptGet(id); if (UI.editId===id && UI.rcpt.state==="stored"){ UI.rcpt.img=img; renderRcptRow(); } }
+  if (id && hasReceipt(id)){ UI.rcpt.state="stored"; renderRcptRow(); const img=await rcptGet(id); if (UI.editId===id && UI.rcpt.state==="stored"){ UI.rcpt.img=img; renderRcptRow(); zBonFromStored(id, img); } }
   else renderRcptRow();
 }
 document.addEventListener("click", async e=>{ if (!e.target.closest("#rcptNone")) return; const t=UI.editId && S.tx.find(x=>x.id===UI.editId); if (!t) return;
@@ -6765,6 +6766,20 @@ function renderRcptRow(){
   try { zBonRender(); } catch(e){}
 }
 /* ---------- der Kassenzettel in der Buchung: rollt sich aus, mit ausgeschriebenen Namen; Unklares antippen und benennen ---------- */
+// bookings whose photo was taken before the app kept the items: read the stored photo once and keep the items
+const ZB_TRIED=new Set();
+async function zBonFromStored(id, img){
+  const t=S.tx.find(x=>x.id===id); if (!t || !img || (t.items&&t.items.length) || t.kind!=="ausgabe" || ZB_TRIED.has(id)) return; ZB_TRIED.add(id);
+  try { scanWorking(true);
+    const L = canNativeOcr() ? await ocrDataUrl(img) : await scanImageFile(img);
+    scanWorking(false); try { scanBusy(false); } catch(_){}
+    const its=receiptItems(L||[]); if (!its.length) return;
+    const t2=S.tx.find(x=>x.id===id); if (!t2) return;
+    const doc={...plainTx(t2), items:its.map(i=>({r:i.n, p:i.p}))}, sid=zaShopId(parseReceipt(L).shop||t2.note); if (sid) doc.ishop=sid;
+    await saveTxDoc(id, doc, t2);
+    if (UI.editId===id && !UI.scanItems){ UI.zbOpen=true; zBonRender(); }
+    toast(`${its.length} Artikel aus dem gespeicherten Bon gelesen`, null, null, 4000);
+  } catch(e){ scanWorking(false); try { scanBusy(false); } catch(_){} } }
 function zBonSrc(){
   if (UI.scanItems && UI.scanItems.items && UI.scanItems.items.length) return UI.scanItems;
   const t=UI.editId && S.tx.find(x=>x.id===UI.editId);
