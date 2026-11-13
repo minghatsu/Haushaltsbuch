@@ -678,8 +678,18 @@ textarea.in{font-family:inherit;line-height:1.45}
 .track .fill,.bar>i{transition:width .8s cubic-bezier(.3,.8,.3,1)}
 @media (prefers-reduced-motion:reduce){.ain,.rnew,.tpop{animation:none!important}.rghost{display:none}}
 .ptlist{margin:10px 0 14px}.ptlist>div{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.helpmenu{position:fixed;z-index:120;background:var(--surface);border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.22);padding:6px;min-width:250px;animation:hmin .18s cubic-bezier(.3,1.2,.5,1)}@keyframes hmin{from{opacity:0;transform:translateY(-6px) scale(.97)}}
+.helpmenu button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:10px 12px;border-radius:11px;font:600 14px var(--f-body);color:var(--fg);text-align:left;cursor:pointer}.helpmenu button:hover{background:var(--sunk)}
+.helpmenu .hmb{margin-left:auto;background:var(--bad);color:#fff;border-radius:999px;padding:0 7px;font-size:11px}
+.ptq{position:relative}.ptq .badge{position:absolute;top:-4px;right:-6px;min-width:16px;height:16px;border-radius:8px;background:var(--bad);color:#fff;font-size:10px;display:grid;place-items:center;padding:0 4px;font-style:normal}
 .ptq{width:24px;height:24px;border-radius:50%;border:0;background:var(--accent-soft);color:var(--accent);font:900 13px var(--f-body);margin-left:8px;vertical-align:middle;cursor:pointer;flex:none;transition:transform .2s}.ptq:hover{transform:scale(1.12)}
 .hello b#viewTitle{display:inline}
+.hkpi button{position:relative}.hkavg{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;padding-left:10px;border-left:1px solid var(--line)}.hkavg b{font-size:15px}
+.fxsec{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 4px}
+.fxconadd{grid-column:1/-1;justify-self:start;border:0;background:none;color:var(--accent);font:700 12.5px var(--f-body);padding:2px 0 8px;cursor:pointer}
+.fxcon{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end;margin:2px 0 8px}.fxcon label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;font-weight:700;color:var(--muted)}.fxcon small{grid-column:1/-1}
+.jar.inv .w{background:linear-gradient(#e7b850,#c98a12)}.jz{background:#fdf0d5;color:#a86b00;border-radius:6px;padding:0 4px;font-weight:800}
+.goalnew{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;animation:invin .3s}.goalnew .btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px 12px}.goalnew .btn small{font-weight:500;color:var(--muted);font-size:11.5px}
 .flagi{width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:-5px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
 .zbon{position:relative;margin:8px 0 2px}
 .zbh{display:flex;align-items:center;gap:12px;width:100%;border:0;background:var(--sunk);border-radius:16px;padding:10px 12px;text-align:left;color:var(--fg);font:inherit;cursor:pointer}
@@ -2596,9 +2606,21 @@ function ptourAuto(){ if (BG_RUN || TOUR.i>=0 || wizShould() || !PTOUR[UI.view] 
   if (UI.view==="home" && !S.tx.length) return;
   clearTimeout(ptourAuto.t); const v=UI.view; ptourAuto.t=setTimeout(()=>{ if (UI.view===v && TOUR.i<0 && !document.querySelector(".backdrop:not([hidden])")) ptourOpen(v); }, 900); }
 function ptourBtn(){ const t=$("viewTitle"); if (!t) return; let b=$("ptourQ"); const on=!!PTOUR[UI.view];
-  if (!b){ b=document.createElement("button"); b.id="ptourQ"; b.className="ptq"; b.type="button"; b.textContent="?"; b.setAttribute("aria-label","Kurze Tour zu dieser Seite"); b.title="Kurze Tour zu dieser Seite"; t.after(b); }
-  b.hidden=!on; }
-document.addEventListener("click", e=>{ const pg=e.target.closest("[data-ptgo]"); if (pg){ const v=pg.dataset.ptgo; try{ if (spsOpen()) spSheetClose(); }catch(_){} UI.view=v; render(); window.scrollTo({top:0}); setTimeout(()=>ptourOpen(v), 500); return; } if (e.target.closest("#ptourQ")){ e.preventDefault(); ptourOpen(UI.view); } });
+  if (!b){ b=document.createElement("button"); b.id="ptourQ"; b.className="ptq"; b.type="button"; b.innerHTML="?<i class=\"badge\" hidden></i>"; b.setAttribute("aria-label","Hilfe"); b.title="Hilfe: Tour, Fragen & Antworten, Feedback"; t.after(b); }
+  b.hidden=false; const ib=$("pcInbox"), n=ib?Number((ib.querySelector(".badge")||{}).textContent)||0:0, bd=b.querySelector(".badge"); if (bd){ bd.hidden=!n; bd.textContent=n||""; } }
+// one help button: tour of this page, questions & answers, feedback, what's new (on the PC also the developer inbox)
+function helpMenu(){ let m=$("helpMenu"); if (m && !m.hidden){ m.hidden=true; return; }
+  if (!m){ m=document.createElement("div"); m.id="helpMenu"; m.className="helpmenu"; m.setAttribute("role","menu"); document.body.appendChild(m); }
+  const inbox=$("pcInbox"), nIn=inbox?Number((inbox.querySelector(".badge")||{}).textContent)||0:0;
+  m.innerHTML=[PTOUR[UI.view]?["tour","🧭","Tour zu dieser Seite"]:null,["faq","❓","Fragen & Antworten"],["fb","✉️","Feedback schreiben"],inbox?["inbox","📥","Feedback-Eingang"+(nIn?` <span class="hmb">${nIn}</span>`:"")]:null,["neu","✨","Neu in dieser Version"],["big","🎓","Große Tour durch die App"]].filter(Boolean)
+    .map(([k,i,l])=>`<button role="menuitem" data-help="${k}"><span>${i}</span>${l}</button>`).join("");
+  const b=$("ptourQ").getBoundingClientRect(); m.hidden=false; m.style.top=(b.bottom+8)+"px"; m.style.left=Math.max(8,Math.min(innerWidth-m.offsetWidth-8, b.left-8))+"px"; }
+document.addEventListener("click", e=>{ const h=e.target.closest("[data-help]"), m=$("helpMenu");
+  if (!h){ if (m && !m.hidden && !e.target.closest("#helpMenu,#ptourQ")) m.hidden=true; return; }
+  m.hidden=true; const k=h.dataset.help;
+  if (k==="tour") ptourOpen(UI.view); else if (k==="faq") accGo("hilfe"); else if (k==="fb") accGo("feedback"); else if (k==="neu") accGo("neu"); else if (k==="big") tourOpen(); else if (k==="inbox"){ const ib=$("pcInbox"); if (ib) ib.click(); } });
+document.addEventListener("keydown", e=>{ const m=$("helpMenu"); if (e.key==="Escape" && m && !m.hidden) m.hidden=true; });
+document.addEventListener("click", e=>{ const pg=e.target.closest("[data-ptgo]"); if (pg){ const v=pg.dataset.ptgo; try{ if (spsOpen()) spSheetClose(); }catch(_){} UI.view=v; render(); window.scrollTo({top:0}); setTimeout(()=>ptourOpen(v), 500); return; } if (e.target.closest("#ptourQ")){ e.preventDefault(); helpMenu(); } });
 addEventListener("resize", ()=>{ if (TOUR.i>=0) tourPlace(); });
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-tour]"); if (!b) return; const a=b.dataset.tour;
   if (a==="open"){ tourOpen(); return; }
@@ -2675,7 +2697,7 @@ function renderAbos(){ const el=$("abosEd"); if (!el) return; if (el.contains(do
 document.addEventListener("change", e=>{ const t=e.target; const id=t.dataset&&(t.dataset.aboend||t.dataset.abonot); if (!id) return;
   const A=S.settings.abos={...(S.settings.abos||{})}; const a=A[id]={...(A[id]||{})};
   if (t.dataset.aboend!=null) a.end=t.value||""; else a.notice=Number(t.value)||0;
-  if (!a.end && !a.notice && !a.abo) delete A[id]; t.blur(); saveSettings(); renderAbos(); });
+  if (!a.end && !a.notice && !a.abo) delete A[id]; t.blur(); saveSettings(); renderAbos(); if (UI.view==="fix") render(); });
 function aboHints(hints){ const A=aboCfg(), today=isoToday();
   for (const f of S.fixed){ const dl=aboDeadline(A[f.id]); if (!dl) continue; const d=Math.round((new Date(dl+"T12:00")-new Date(today+"T12:00"))/864e5);
     if (d>=0 && d<=30) hints.push({k:"abo", lvl:"warn", t:`${f.name}: kündigen bis ${new Date(dl+"T12:00").toLocaleDateString("de-DE")}`, s:d===0?"Heute ist der letzte Tag.":`Noch ${d} ${d===1?"Tag":"Tage"} – sonst verlängert sich der Vertrag.`}); } }
@@ -2706,6 +2728,7 @@ function renderExport(){ const el=$("exportEd"); if (!el) return; const ym=UI.ym
     <div class="exr"><span class="exi">${ic("chart",20)}</span><span class="n"><b>Buchungen ${esc(MONTHS[m-1])} ${y}</b><small>Als Tabelle für Excel (CSV)</small></span><button class="btn" data-exp="month">Speichern</button></div>
     <div class="exr"><span class="exi">${ic("cal",20)}</span><span class="n"><b>Buchungen ganzes Jahr ${y}</b><small>Als Tabelle für Excel (CSV)</small></span><button class="btn" data-exp="year">Speichern</button></div>
     ${hasSelf()?`<div class="exr"><span class="exi">${ic("receipt",20)}</span><span class="n"><b>EÜR ${y}</b><small>Für Steuerbüro oder ELSTER</small></span><button class="btn" id="euerBtn" data-year="${y}">Speichern</button></div>`:""}
+    <div class="exr"><span class="exi">${ic("camera",20)}</span><span class="n"><b>Belege ${y} als ZIP</b><small>Alle ${S.tx.filter(t=>t.date&&t.date.startsWith(String(y))&&hasReceipt(t.id)).length} Belegfotos des Jahres${hasSelf()?", sortiert nach privat und betrieblich,":""} mit einer Liste${hasSelf()?" für den Steuerberater":""}</small></span><button class="btn" id="belZip">Speichern</button></div>
     <p class="small muted" style="margin:10px 0 0">Monat und Jahr richten sich nach dem Monat oben in der App. Ein komplettes Backup gibt es unter „Backup“.</p>`; }
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-exp]"); if (!b) return; const ym=UI.ym, y=ym.slice(0,4), k=b.dataset.exp;
   if (k==="report"){ saveTextFile(`Monatsbericht-${ym}.html`, reportHtml(ym), "text/html", "Monatsbericht gespeichert"); return; }
@@ -2797,7 +2820,7 @@ async function renderSpeicher(){ const el=$("speicherEd"); if (!el) return;
     <div class="exr"><span class="exi" style="background:#c27c0e">${ic("cart",20)}</span><span class="n"><b>Geladene Logos</b><small>${lc} · ${mb(lb)}</small></span>${lc?`<button class="btn" id="logoClear">Leeren</button>`:""}</div>
     ${est&&est.quota?`<p class="small muted" style="margin:10px 0 0">Frei für die App: ca. ${mb(Math.max(0,est.quota-est.usage))}</p>`:""}`;
 }
-document.addEventListener("click", e=>{ if (!e.target.closest("#spBelege")) return; try{ if (spsOpen()) spSheetClose(); }catch(_){} UI.sp=null; UI.view="belege"; render(); window.scrollTo({top:0}); });
+document.addEventListener("click", e=>{ if (!e.target.closest("#spBelege")) return; try{ if (spsOpen()) spSheetClose(); }catch(_){} UI.sp=null; UI.filter="mitbeleg"; UI.view="list"; render(); window.scrollTo({top:0}); });
 document.addEventListener("click", async e=>{ if (!e.target.closest("#logoClear")) return; try{ await logoStore("readwrite", st=>st.clear()); LOGO.map.clear(); toast("Logo-Speicher geleert"); }catch(_){ } renderSpeicher(); render(); });
 
 // devices: every device announces itself through the sync (col "app", id "dev-…")
@@ -2943,6 +2966,18 @@ async function runMigrations(){
       } catch(e){ console.error(e); } finally { migrating=false; }
     }
   }
+  // two income categories that meant the same: "Sonstige Einnahme" + "Erstattungen & Sonstiges" → one
+  if (!S.settings.migIncMerge){ const c=clone(S.settings.cats||DEFAULT_SETTINGS.cats), inc=(c.einnahme||[]).map(x=>typeof x==="string"?{name:x,art:"sonstige"}:x);
+    const OLD=["Sonstige Einnahme","Erstattungen & Sonstiges"], NEW="Sonstiges & Erstattungen", has=inc.filter(x=>OLD.includes(x.name));
+    if (has.length>=2){ migrating=true;
+      try {
+        const at=inc.findIndex(x=>OLD.includes(x.name)); const rest=inc.filter(x=>!OLD.includes(x.name)); rest.splice(Math.min(at,rest.length),0,{name:NEW, art:"sonstige"}); c.einnahme=rest; S.settings.cats=c;
+        const byB={};
+        for (const x of S.tx.filter(t=>t.kind==="einnahme" && OLD.includes(t.cat))){ const doc=plainTx(x); doc.cat=NEW; if (x._b) (byB[x._b]=byB[x._b]||{})[x.id]=doc; else await put("tx", x.id, doc); }
+        for (const [b,docs] of Object.entries(byB)){ const items=clone(S.txb[b]||{}); Object.assign(items, docs); await put("txb", b, {items}); }
+        const col=S.settings.colors&&S.settings.colors.cat; if (col){ for (const o of OLD){ if (col["einnahme|"+o] && !col["einnahme|"+NEW]) col["einnahme|"+NEW]=col["einnahme|"+o]; delete col["einnahme|"+o]; } }
+      } catch(e){ console.error(e); } finally { migrating=false; } }
+    S.settings.migIncMerge=1; await saveSettings(); }
   const t = S.tx.find(x=>x.importKey==="k1uhc12s2g" && x.kind==="vorauszahlung" && Math.abs(x.amount-25101)<0.01);
   if (!t) return;
   migrating=true;
@@ -3541,7 +3576,7 @@ function renderHome(){
       ${accts.length>1?`<div class="adots" id="adots">${accts.map((_,i)=>`<button data-cdot="${i}" aria-label="Karte ${i+1}"><i></i></button>`).join("")}</div>`:""}
       <div class="hkpi one">
         ${ym===cur ? (()=>{ const left=Math.max(1, daysIn(ym)-new Date().getDate()), v=Math.max(0, mainBal/left);   /* nothing left to spend: 0 */   // what is on the main account, spread over the days still left
-          return `<button data-go="year" aria-label="Noch ${eur0(v)} pro Tag für ${left} Tage"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small><span>Noch pro Tag</span> · <span>${left} ${left===1?"Tag":"Tage"}</span></small><b>${esc(eur0(v))}</b></span></button>`; })()
+          return `<button data-go="year" aria-label="Noch ${eur0(v)} pro Tag für ${left} Tage"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small><span>Noch pro Tag</span> · <span>${left} ${left===1?"Tag":"Tage"}</span></small><b>${esc(eur0(v))}</b></span>${(()=>{ const d=new Date().getDate(), sp=sum(c.tx.filter(hxOut),t=>t.amount); return `<span class="hkavg"><small>bisher Ø</small><b>${esc(eur0(sp/Math.max(1,d)))}</b><small>pro Tag</small></span>`; })()}</button>`; })()
         : `<button data-go="year"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small>Ø pro Tag ausgegeben</small><b>${esc(eur0(c.expenses/Math.max(1, daysIn(ym))))}</b></span></button>`}
       </div>
     </div>
@@ -3707,7 +3742,7 @@ function renderInvest(){
 }
 // start page tile: the three views, switchable
 function invTile(){
-  const v=inv(), t=UI.invTileTab || (v.goals.length?"goals":"calc"); let body="";
+  const v=inv(), t=UI.invTileTab==="goals"?"calc":(UI.invTileTab||"calc"); let body="";
   if (t==="goals" && v.goals.length){ const g=v.goals[0], R=invGoal(g);
     body=`<div class="invgh"><b>${esc(g.name||"Anlage-Ziel")}</b><span class="invchip ${R.ok?"ok":"warn"}">${R.ok?"im Plan ✓":"hinter dem Plan"}</span></div><div class="small muted">${invE(R.last)} von ${invE(g.T)} · ${invE(R.m)} im Monat</div><div class="track" style="margin-top:8px;height:9px"><div class="fill" style="width:${Math.min(100,R.last/g.T*100)}%;background:var(--accent)"></div></div>`; }
   else if (t==="cmp"){ const D=invCmpData(v.cmp);
@@ -3715,7 +3750,7 @@ function invTile(){
   else { const c=v.calc, d=invRun(c.P,c.m,c.r,c.y), L=d[d.length-1];
     body=`<div class="invbig s">${invE(L[1])}</div><div class="small muted">${invE(c.m)} im Monat · ${c.y} Jahre · ${invPct(c.r)} % · davon ${invE(L[1]-L[0])} Zinsen</div><svg class="invch s" viewBox="0 0 300 56" preserveAspectRatio="none">${invArea(d,300,56)}</svg>`; }
   return `<div class="card invtile"><div class="card-head"><h2>${hIc("piggy")}Sparen &amp; Anlegen</h2><button class="link" data-invopen="1">Öffnen ${ic("right",16)}</button></div>
-    <div class="invsub s">${[["calc","Zinseszins"],["cmp","Vergleich"],["goals","Ziel"]].map(([k,l])=>`<button data-invtile="${k}" class="${t===k||(k==="calc"&&t==="goals"&&!v.goals.length)?"on":""}">${l}</button>`).join("")}</div>
+    <div class="invsub s">${[["calc","Zinseszins"],["cmp","Vergleich"]].map(([k,l])=>`<button data-invtile="${k}" class="${t===k||(k==="calc"&&t==="goals"&&!v.goals.length)?"on":""}">${l}</button>`).join("")}</div>
     ${t==="goals"&&!v.goals.length?`<p class="small muted" style="margin:6px 0">Noch kein Anlage-Ziel. Leg eins an, dann siehst du hier Plan gegen Wirklichkeit.</p><button class="btn small" data-invopen="goals">+ Ziel anlegen</button>`:body}</div>`;
 }
 const INV_LIM={P:[0,10000000], m:[0,100000], r:[0,30], y:[1,60], T:[1,100000000]};
@@ -3751,10 +3786,10 @@ document.addEventListener("click", async e=>{
 });
 document.addEventListener("keydown", e=>{ if (e.key==="Enter" && e.target.dataset && e.target.dataset.invreal!=null){ e.preventDefault(); const b=document.querySelector(`[data-invrealok="${e.target.dataset.invreal}"]`); if (b) b.click(); } if (e.key==="Enter" && e.target.closest && e.target.closest(".invform")){ e.preventDefault(); const b=document.querySelector("[data-invgsave]"); if (b) b.click(); } });
 /* ---------- start page blocks: your own order, each can be hidden ---------- */
-const HOME_BLOCKS = [["cash","Bargeld"],["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Sparziele"],["invest","Sparen & Anlegen"],["debts","Kredite & Schulden"],["gemeinsam","Gemeinsam"],["recent","Letzte Buchungen"],
-  ["perday","Noch pro Tag"],["week","Diese Woche fällig"],["topcat","Top-Kategorien"],["compare","Vergleich zum Vormonat"],["trend","Kontoverlauf"],["abos","Abos"],["biggest","Größte Ausgaben"],["todo","Zu erledigen"]];
+const HOME_BLOCKS = [["cash","Bargeld"],["budgets","Budgets"],["fix","Fixkosten"],["tax","Steuer-Rücklage"],["goals","Ziele"],["invest","Sparen & Anlegen"],["debts","Kredite & Schulden"],["gemeinsam","Gemeinsam"],["recent","Letzte Buchungen"],
+  ["topcat","Top-Kategorien"],["compare","Vergleich zum Vormonat"],["trend","Kontoverlauf"],["biggest","Größte Ausgaben"],["todo","Zu erledigen"]];
 // tiles added later start switched off (on the phone: hidden, on the PC: minimized), also for people who already use the app
-const HOME_LATER = ["perday","week","topcat","compare","trend","abos","biggest","todo"];
+const HOME_LATER = ["perday","week","topcat","compare","trend","abos","biggest","todo"];   // perday, week, abos: now inside the account card and the Fixkosten tile
 function homeMig(){ const st=S.settings; if (!st) return; const seen=new Set(st.homeSeen||[]), add=HOME_LATER.filter(k=>!seen.has(k)); if (!add.length) return;
   st.homeHidden=[...new Set([...(st.homeHidden||[]), ...add])];
   const ph=st.pcHome=st.pcHome||{}; ph.min=[...new Set([...(Array.isArray(ph.min)?ph.min:[]), ...add])];
@@ -3931,6 +3966,14 @@ function taxGauge(ym){
 /* ---------- fixed costs: where the fixed money goes ---------- */
 const FIX_AREAS = [["Wohnen",/miete|wohnung|nebenkosten|strom|gas\b|wasser|heiz|rundfunk|gez|grundsteuer|müll|hausgeld|garage|stellplatz/],["Schulden",null],["Auto",/auto|kfz|tank|leasing|werkstatt|tüv|parken|stellplatz|adac|car/],["Versicherung",/versicher|haftpflicht|allianz|huk|ergo|axa|debeka|signal|devk|r\+v|kranken|bu\b/],["Sparen & Vorsorge",/\betf\b|spar|depot|rente|altersvorsorge|ksk|künstlersozial|kuenstlersozial|bausparen|vwl|fonds/],["Abos & Handy",/handy|mobil|telekom|vodafone|o2|1&1|internet|dsl|netflix|spotify|disney|prime|amazon|apple|google|youtube|abo|zeitung|fitness|gym|icloud|dazn|sky/]];
 function fixArea(f){ if (debtFor(f.id)) return "Schulden"; const n=nrm(f.name); for (const [a,re] of FIX_AREAS) if (re && re.test(n)) return a; return f.kind==="betrieb"?"Betrieb":"Sonstiges"; }
+// a contract (Laufzeit + Kündigungsfrist) belongs to its fixed cost – formerly its own settings page "Abos & Verträge"
+const ABO_NOT=[[0,"jederzeit"],[0.5,"2 Wochen"],[1,"1 Monat"],[2,"2 Monate"],[3,"3 Monate"],[6,"6 Monate"]];
+function fxContract(f){ if (debtFor(f.id)) return ""; const a=aboCfg()[f.id]||{}, isAbo=fixArea(f)==="Abos & Handy"||!!aboCfg()[f.id]||UI.fxCon===f.id;
+  if (!isAbo) return `<button class="fxconadd" data-fxcon="${esc(f.id)}">+ Laufzeit / Kündigungsfrist</button>`;
+  const dl=aboDeadline(a);
+  return `<div class="fxcon"><label><span>Läuft bis</span><input class="in" type="date" data-aboend="${esc(f.id)}" value="${esc(a.end||"")}"></label><label><span>Frist</span><select class="in" data-abonot="${esc(f.id)}">${ABO_NOT.map(([v,l])=>`<option value="${v}" ${Number(a.notice||0)===v?"selected":""}>${l}</option>`).join("")}</select></label>${dl?`<small class="muted">kündigen bis ${esc(new Date(dl+"T12:00").toLocaleDateString("de-DE"))}</small>`:""}</div>`; }
+document.addEventListener("click", e=>{ if (e.target.closest("[data-goalnew]")){ UI.goalNew=!UI.goalNew; render(); return; } if (e.target.closest("#goalAddRing,#goalFirst,[data-invopen]")) UI.goalNew=false; });
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-fxcon]"); if (!b) return; UI.fxCon=b.dataset.fxcon; render(); });
 function fixedAreas(ym){
   if (!S.fixed.length) return `<div class="card" style="order:5"><div class="card-head"><h2>${hIc("repeat")}Fixkosten</h2><button class="link" data-go="fix">Eintragen ${ic("right",16)}</button></div><span class="small muted">Trag Miete, Versicherungen und Abos einmal ein – dann siehst du hier, wohin dein festes Geld geht.</span></div>`;
   const c=monthCalc(ym), list=S.fixed.filter(f=>dueIn(f,ym)), total=sum(list,f=>planAmt(f,ym));
@@ -3942,6 +3985,15 @@ function fixedAreas(ym){
     <div class="meta-row" style="margin-bottom:8px"><span class="small muted">Im ${esc(MONTHS[ymParts(ym)[1]-1])} fest verplant</span><b style="font-family:var(--f-display);font-size:22px;font-weight:800;letter-spacing:-.02em">${esc(eur0(total))}</b></div>
     <div class="fstack">${areas.map(([a,v],i)=>`<div style="flex:${v};background:${cols[i%cols.length]}" title="${esc(a)}: ${esc(eur(v))}">${v/total>0.16?esc(a):""}</div>`).join("")}</div>
     <div class="fleg">${areas.map(([a,v],i)=>`<div><i style="background:${cols[i%cols.length]}"></i><span>${esc(a)}</span><b>${esc(eur0(v))}</b></div>`).join("")}</div>
+    ${(()=>{ // what is due next and the subscriptions – formerly two tiles of their own
+      const cur=ymOf(new Date()), today=new Date().getDate(), open=list.filter(f=>!(f.id in c.paid)).map(f=>({f, d:fixDay(f,ym), v:planAmt(f,ym)}));
+      const next=(ym===cur?open.filter(x=>x.d!=null && x.d>=today):open).sort((a,b)=>(a.d||99)-(b.d||99)).slice(0,3);
+      const when=d=>ym!==cur||d==null?"":d===today?"heute":d===today+1?"morgen":`in ${d-today} Tagen`;
+      const A=aboCfg(), per={monatlich:1,quartal:1/3,halbjahr:1/6,jahr:1/12};
+      const ab=S.fixed.filter(f=>!debtFor(f.id) && (fixArea(f)==="Abos & Handy" || A[f.id])), abM=sum(ab,f=>planAmt(f,cur)*(per[f.rhythm||"monatlich"]??1));
+      const dl=ab.map(f=>({f,d:aboDeadline(A[f.id])})).filter(x=>x.d && x.d>=isoToday()).sort((a,b)=>a.d.localeCompare(b.d))[0];
+      return `${next.length?`<div class="fxsec">Als Nächstes fällig</div><div class="hxlist">${next.map(x=>`<div class="hxrow"><span class="hxd">${x.d?`<b>${x.d}.</b>`:"–"}</span><span class="grow"><b>${esc(x.f.name)}</b>${when(x.d)?`<small class="muted">${when(x.d)}</small>`:""}</span><b>${esc(eur(x.v))}</b></div>`).join("")}</div>`:""}
+        ${ab.length?`<div class="fxsec">Abos</div><div class="hxrow"><span class="grow"><b>${ab.length} ${ab.length===1?"Abo":"Abos"}</b><small class="muted">${esc(ab.slice(0,3).map(f=>f.name).join(", "))}${ab.length>3?" …":""}${dl?` · kündigen bis ${esc(new Date(dl.d+"T12:00").toLocaleDateString("de-DE"))} (${esc(dl.f.name)})`:""}</small></span><span style="text-align:right"><b>${esc(eur0(abM))} / Monat</b><small class="muted" style="display:block">${esc(eur0(abM*12))} / Jahr</small></span></div>`:""}`; })()}
     <div class="tipline" style="margin-top:12px;padding:10px 12px"><span class="e" style="width:30px;height:30px">${ic("spark",17)}</span><span>${inc>0?`<b>${Math.round(total/inc*100)} % deiner Einnahmen</b> sind fest verplant – `:""}${paidN} von ${list.length} ${list.length===1?"ist":"sind"} abgehakt.</span></div>
   </div>`;
 }
@@ -4054,11 +4106,14 @@ function goalIcon(n){ n=nrm(n);
   return /urlaub|reise|flug|ferien/.test(n)?"plane":/auto|wagen|motorrad|führerschein/.test(n)?"car":/hochzeit|liebe|geschenk|geburtstag|weihnacht/.test(n)?"gift":/haus|wohnung|umzug|möbel|kaution/.test(n)?"home":/not|reserve|puffer|sicher/.test(n)?"shield":"piggy"; }
 function goalsRings(){
   const goals=S.settings.goals||[];
-  return `<div class="card rcard" style="order:7"><div class="card-head"><h2>${hIc("piggy")}Sparziele</h2>${goals.length?`<button class="link" data-goalsopen="1">${UI.goalsOpen||UI.goalEdit?"Weniger":"Alle anzeigen"} ${ic(UI.goalsOpen||UI.goalEdit?"chevron":"right",16)}</button>`:""}</div>
+  const ig=(S.settings.inv&&S.settings.inv.goals)||[];
+  return `<div class="card rcard" style="order:7"><div class="card-head"><h2>${hIc("piggy")}Ziele</h2>${goals.length?`<button class="link" data-goalsopen="1">${UI.goalsOpen||UI.goalEdit?"Weniger":"Alle anzeigen"} ${ic(UI.goalsOpen||UI.goalEdit?"chevron":"right",16)}</button>`:""}</div>
     <div class="jars">${goals.map(g=>{ const sv=goalSaved(g), t=Number(g.target)||0, pct=t?Math.max(0,Math.min(1,sv.v/t)):0, done=t>0&&sv.v>=t;
       return `<button class="jarb" data-goalsopen="1" aria-label="${esc(g.name)}: ${esc(eur(sv.v))} von ${esc(eur(t))}"><span class="jar ${done?"done":""}"><span class="w" style="height:${Math.round(pct*82)}%"></span><span class="goal"></span><span class="ji">${ic(goalIcon(g.name),18)}</span><span class="jp ${pct<0.3?"low":""}">${done?"✓":Math.round(pct*100)+" %"}</span></span><b>${esc(g.name)}</b><small>${esc(eur0(sv.v).replace(/\s?€/,""))} / ${esc(eur0(t))}</small></button>`; }).join("")}
-      <button class="jarb" id="${goals.length?"goalAddRing":"goalFirst"}" aria-label="Sparziel hinzufügen"><span class="jar add">${ic("plusIn",24)}</span><b>${goals.length?"Neu":"Sparziel anlegen"}</b><small>&nbsp;</small></button>
-    </div></div>`;
+      ${ig.map(g=>{ const R=invGoal(g), pct=Math.max(0,Math.min(1,R.last/(g.T||1))), done=R.last>=g.T;
+        return `<button class="jarb" data-invopen="goals" aria-label="${esc(g.name)}: ${esc(eur(R.last))} von ${esc(eur(g.T))}, ${invPct(g.r)} % Zins"><span class="jar inv ${done?"done":""}"><span class="w" style="height:${Math.round(pct*82)}%"></span><span class="goal"></span><span class="ji">${ic("chart",18)}</span><span class="jp ${pct<0.3?"low":""}">${Math.round(pct*100)} %</span></span><b>${esc(g.name)}</b><small><span class="jz">${invPct(g.r)} %</span> ${esc(eur0(R.last))} / ${esc(eur0(g.T))}</small></button>`; }).join("")}
+      <button class="jarb" data-goalnew="1" aria-label="Ziel hinzufügen"><span class="jar add">${ic("plusIn",24)}</span><b>${goals.length||ig.length?"Neu":"Ziel anlegen"}</b><small>&nbsp;</small></button>
+    </div>${UI.goalNew?`<div class="goalnew"><button class="btn" id="${goals.length?"goalAddRing":"goalFirst"}">${ic("piggy",16)} Sparziel<small>Geld zur Seite legen</small></button><button class="btn" data-invopen="goals">${ic("chart",16)} Mit Zinsen<small>Anlage, z. B. ETF</small></button></div>`:""}</div>`;
 }
 /* ---------- Sparen: savings goals, debts and the tax reserve on one page ---------- */
 /* ---------- Einkauf: weekly offers of your shops (used to be a block on the start page) ---------- */
@@ -4720,9 +4775,11 @@ document.addEventListener("click", e=>{
   const b=e.target.closest("[data-scroll]"); if (!b) return;
   setTimeout(()=>{ const el=$(b.dataset.scroll); if (el) el.scrollIntoView({block:"center", behavior:"smooth"}); }, 60);
 });
+// "Mit Beleg" / "Ohne Beleg" (formerly the page "Belege"); "Ohne Beleg" = expenses without a photo
+function txFilter(l){ const f=UI.filter; if (f==="alle") return l; if (f==="mitbeleg") return l.filter(t=>hasReceipt(t.id)); if (f==="ohnebeleg") return l.filter(t=>(t.kind==="ausgabe"||t.kind==="betrieb") && !hasReceipt(t.id)); return l.filter(t=>t.kind===f); }
 function renderList(){
   const filters = [["alle","Alle"],["ausgabe","Ausgaben"],["einnahme","Einnahmen"],["betrieb","Betrieblich"],["vorauszahlung","Steuer"]].filter(([k])=>hasSelf()||(k!=="betrieb"&&k!=="vorauszahlung")||UI.filter===k);
-  $("filters").innerHTML = filters.map(([k,l])=>`<button class="fchip" data-filter="${k}" aria-pressed="${UI.filter===k}">${l}</button>`).join("") + `<button class="fchip" data-go="belege" style="display:inline-flex;align-items:center;gap:5px">${ic("clip",14)} Belege</button>`;
+  $("filters").innerHTML = filters.map(([k,l])=>`<button class="fchip" data-filter="${k}" aria-pressed="${UI.filter===k}">${l}</button>`).join("") + [["mitbeleg","📎 Mit Beleg"],["ohnebeleg","Ohne Beleg"]].map(([k,l])=>`<button class="fchip" data-filter="${k}" aria-pressed="${UI.filter===k}">${l}</button>`).join("");
   let list = monthCalc(UI.ym).tx;
   const cal = true;   // the calendar is always shown above the list
   document.querySelectorAll("[data-lmode]").forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.lmode===(cal?"cal":"list"))));
@@ -4738,7 +4795,7 @@ function renderList(){
       <div class="calleg"><span>wenig</span><i></i><span>viel ausgegeben</span></div>`;
     if (UI.calDay) list = list.filter(t=>t.date===UI.calDay);
   }
-  if (UI.filter!=="alle") list = list.filter(t=>t.kind===UI.filter);
+  list = txFilter(list);
   const q = UI.q.trim().toLowerCase();
   if (q) list = list.filter(t=>((t.note||"")+" "+(t.cat||"")+" "+KIND_LABEL[t.kind]).toLowerCase().includes(q));
   if (!list.length && cal && UI.calDay){ $("listCard").innerHTML = emptyState("receipt","An diesem Tag nichts gebucht","Tipp auf einen anderen Tag oder noch einmal auf den Tag, um alle zu sehen."); return; }
@@ -4762,7 +4819,8 @@ function renderFix(){
       <p class="small muted" style="margin:-4px 0 10px">Trag am besten am Jahresanfang alle Fixkosten ein. Ändert sich ein Preis, gilt der neue Betrag <b>ab ${esc(monthName(UI.ym))}</b> für alle folgenden Monate – frühere Monate und schon abgehakte Beträge bleiben, wie sie waren. Ab einem anderen Monat ändern: oben erst den Monat wechseln. Bei „Vierteljährlich“, „Halbjährlich“, „Jährlich“ oder „Bestimmte Monate“ tippst du an, in welchen Monaten der Posten fällig ist.</p>
       ${fx.map(f=>`<div class="edit-row" data-fid="${esc(f.id)}"><input class="in" id="fxn-${esc(f.id)}" data-fxf="name" value="${esc(f.name)}" aria-label="Name"><input class="in" id="fxa-${esc(f.id)}" data-fxf="amount" inputmode="decimal" value="${esc(numStr(listAmt(f,UI.ym)))}" aria-label="Betrag ab ${esc(monthName(UI.ym))}"><select class="in" id="fxr-${esc(f.id)}" data-fxf="rhythm" aria-label="Rhythmus">${RHYTHMS.map(([k,l])=>`<option value="${k}" ${(f.rhythm||"monatlich")===k?"selected":""}>${l}</option>`).join("")}</select><select class="in" id="fxk-${esc(f.id)}" data-fxf="kind" aria-label="Art"><option value="privat" ${f.kind!=="betrieb"?"selected":""}>Privat</option><option value="betrieb" ${f.kind==="betrieb"?"selected":""}>Betrieblich</option></select><button class="icon-btn" data-fxdel="${esc(f.id)}" aria-label="${esc(f.name)} löschen"><svg class="i" viewBox="0 0 24 24"><path d="M5 7h14M10 11v6M14 11v6M6.5 7l1 12.5h9L17.5 7M9.5 7V4.5h5V7"/></svg></button>
         ${priceNote(f)?`<div class="small muted" style="grid-column:1/-1;margin:-2px 0 6px">${esc(priceNote(f))}</div>`:""}
-        ${(f.rhythm||"monatlich")!=="monatlich"?`<div class="mchips" role="group" aria-label="Monate für ${esc(f.name)}">${MSHORT.map((n,i)=>`<button class="mchip" data-fxmon="${esc(f.id)}|${i+1}" aria-pressed="${(f.months||[]).includes(i+1)}">${n}</button>`).join("")}</div>`:""}</div>`).join("")}
+        ${(f.rhythm||"monatlich")!=="monatlich"?`<div class="mchips" role="group" aria-label="Monate für ${esc(f.name)}">${MSHORT.map((n,i)=>`<button class="mchip" data-fxmon="${esc(f.id)}|${i+1}" aria-pressed="${(f.months||[]).includes(i+1)}">${n}</button>`).join("")}</div>`:""}
+        ${fxContract(f)}</div>`).join("")}
       <button class="btn" id="fixAdd" style="margin-top:12px">+ Fixkosten hinzufügen</button></div>`;
     return;
   }
@@ -5093,6 +5151,7 @@ function renderYear(){
 }
 /* ---------- Analyse: three tabs (Auswertung · Planung · Arbeit/Steuer), content shown right away, details open as a sheet ---------- */
 function anaTabsHtml({tiles, GRP, TL, ord, rows, ym, mc, y, inc, exp}){
+  if (UI.anaTab==="plan") UI.anaTab="aus";   // "Planung" is now part of "Auswertung"
   const mode=UI.anaMode||"m", tab=UI.anaTab||"aus", mn=MONTHS[ymParts(ym)[1]-1], cur=ymOf(new Date());
   const g3=GRP[2]||["Steuer",[]], g3n=/steuer/i.test(g3[0]) ? "Steuer" : String(g3[0]).replace(/&amp;/g,"&").split(/[ &]/)[0];
   const row=t=>`<button class="arw" data-anaopen="${t.k}" style="--tc:${userCol("ana",t.k)||themeCol(TL[t.k][1], ord.indexOf(t.k))}"><span class="ai">${ic(t.icon,18)}</span><span class="an"><b>${t.k==="wk"&&!hasJob()?"Steuererklärung":TL[t.k][0]}</b><small>${t.sub||""}</small></span><span class="av">${esc(t.short||"")}<span class="ch">›</span></span></button>`;
@@ -5118,11 +5177,11 @@ function anaTabsHtml({tiles, GRP, TL, ord, rows, ym, mc, y, inc, exp}){
       <div class="akg"><div><small>Einnahmen</small><b class="pos">${esc(eur0(mode==="m"?mc.income:inc))}</b></div><div><small>Ausgaben</small><b>${esc(eur0(mode==="m"?mc.expenses:exp))}</b></div>
         <div><small>Fixkosten</small><b>${esc(eur0(fixP))}</b></div>${zins>0?`<div><small>Zinsen</small><b class="neg">${esc(eur0(zins))}</b></div>`:`<div><small>Ø pro Tag</small><b>${esc(eur0((mode==="m"?mc.expenses:exp)/Math.max(1, mode==="m" ? (ym===cur?new Date().getDate():daysIn(ym)) : 365)))}</b></div>`}</div>
       ${ct.length?`<div class="sgl">Top-Kategorien</div><div class="arl">${ct.slice(0,5).map(([c,v])=>`<button class="arw" data-anaopen="cat" style="--tc:${catColor("ausgabe",c)}"><span class="ai">${esc(String(c).trim().slice(0,1).toUpperCase())}</span><span class="an"><b>${esc(c)}</b><small>${tot>0?Math.round(v/tot*100):0} %</small></span><span class="av">${esc(eur0(v))}</span></button>`).join("")}<button class="arw" data-anaopen="cat"><span class="an"><b style="color:var(--accent);font-size:14px">Alle Kategorien</b></span><span class="av"><span class="ch">›</span></span></button></div>`:""}
-      <div class="sgl">Mehr</div>${rowsFor(["kpi","trend","io"])}`;
+      <div class="sgl">Mehr</div>${rowsFor(["kpi","trend","io","calc","plan"])}`;
   } else if (tab==="plan") body = rowsFor(GRP[1][1]);
   else { const tx=tiles.find(t=>t.k==="tax");
     body = (tx?`<div class="card anet" data-anaopen="tax"><small>Steuer ${esc(String(y))}</small><div class="big">${esc(tx.short||"")}</div><div class="small muted">${tx.sub||""}</div></div>`:"") + rowsFor(g3[1]); }
-  return `<div class="atabs" role="tablist" aria-label="Bereich">${[["aus","Auswertung"],["plan","Planung"],["st",g3n]].map(([k,l])=>`<button role="tab" data-anatab="${k}" class="${tab===k?"on":""}" aria-selected="${tab===k}">${esc(l)}</button>`).join("")}</div>
+  return `<div class="atabs" role="tablist" aria-label="Bereich">${[["aus","Auswertung"],["st",g3n]].map(([k,l])=>`<button role="tab" data-anatab="${k}" class="${tab===k?"on":""}" aria-selected="${tab===k}">${esc(l)}</button>`).join("")}</div>
     ${tab==="st"?"":`<div class="anahead2"><div class="anaseg" role="group" aria-label="Zeitraum"><button data-anamode="m" class="${mode==="m"?"on":""}">Monat</button><button data-anamode="y" class="${mode==="y"?"on":""}">Jahr</button></div></div>`}
     ${body}`;
 }
@@ -5589,7 +5648,8 @@ async function belegeZip(year){
   await saveBinary(`Belege-${year}.zip`, makeZip(files), `${files.length-1} Belege gespeichert`);
 }
 UI.belegF = UI.belegF || "alle";
-function renderBelege(){
+function renderBelege(){ UI.view="list"; UI.filter="mitbeleg"; setTimeout(render,0); return; }
+function renderBelegeOld(){
   const ym=UI.ym, y=ym.slice(0,4);
   const tx=monthCalc(ym).tx.filter(t=>t.kind!=="vorauszahlung");
   const withR=tx.filter(t=>hasReceipt(t.id)), betNo=tx.filter(t=>t.kind==="betrieb"&&!hasReceipt(t.id));
@@ -6188,7 +6248,7 @@ function profStats(){ const n=S.tx.length, c=abCfg(); const bk = c.last ? (()=>{
 var ACC = { tab:"geld", open:new Set(), nodes:{}, built:"", q:"" };
 const ACC_TABS = [["geld","Geld"],["anpassen","Anpassen"],["sicherheit","Sicherheit"],["hilfe","Hilfe"]];
 function accTabKeys(t){
-  if (t==="geld") return ["konten","budgets","schulden", ...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]), "abos","invest","export"];
+  if (t==="geld") return ["konten","budgets","schulden", ...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]), "invest","export"];
   if (t==="anpassen") return ["dark","farben","sprache","kategorien","start","laeden"];
   if (t==="sicherheit") return ["sicherheit", ...(SYNCABLE||window.AndroidBridge?["sync","geraete"]:[]), "backup", ...(CAN_NOTIFY?["notify"]:[]), "speicher"];
   return ["neu","hilfe","wiz","feedback","recht"];
@@ -6261,7 +6321,7 @@ function renderSetHome(){
     el.innerHTML=`<div class="settop"><label class="setsrch"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="setQ" type="search" placeholder="Einstellung suchen …" autocomplete="off" aria-label="Einstellung suchen"></label><button class="setav" data-spgo="profil" aria-label="Profil" id="setAv"></button></div>
       <div class="settabs" role="tablist" id="setTabs"></div><div id="setList"></div>`; ACC.built=""; }
   const name=S.settings.name||"", av=$("setAv");
-  if (av) av.innerHTML = S.settings.photo ? `<img src="${esc(S.settings.photo)}" alt="">` : esc((name.trim()[0]||"?").toUpperCase());
+  if (av) av.innerHTML = S.settings.photo ? `<img src="${esc(S.settings.photo)}" alt="">` : name.trim() ? esc(name.trim()[0].toUpperCase()) : ic("user",20);
   $("setTabs").innerHTML = ACC_TABS.map(([t,l])=>`<button role="tab" data-acctab="${t}" aria-selected="${!ACC.q && ACC.tab===t}" class="${!ACC.q && ACC.tab===t?"on":""}">${l}</button>`).join("");
   const want = ACC.q.trim() ? "q:"+ACC.q.trim().toLowerCase() : ACC.tab;
   if (ACC.built!==want || !$("setList").children.length) accBuild();

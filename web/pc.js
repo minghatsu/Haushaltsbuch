@@ -105,7 +105,7 @@ function pcHome(o){
     <span class="pcsub">${many?"auf allen Konten":"auf deinem Konto"}</span>
     <div class="pcaccs">${accts.filter(a=>!a.total).map(a=>`<button class="${a.main?"main":""}" data-spgo="konten"><span>${esc(a.main?(mainName||"Hauptkonto"):a.name)}</span><b data-cv="${Number(a.bal)||0}" data-cf="eur">${esc(eur(Number(a.bal)||0))}</b></button>`).join("")}<button class="add" data-spgo="konten"><span>+ Space</span><b>anlegen</b></button></div>
     <button class="pcring" data-go="year" style="--p:${Math.round(pct*100)}" aria-label="Analyse öffnen"><span>${isCur
-      ? `<small>noch pro Tag</small><b data-cv="${perDay}">${esc(eur0(perDay))}</b><small>${left} ${left===1?"Tag":"Tage"} übrig</small>`
+      ? `<small>noch pro Tag</small><b data-cv="${perDay}">${esc(eur0(perDay))}</b><small>${left} ${left===1?"Tag":"Tage"} übrig</small><small class="pcravg">bisher Ø ${esc(eur0(c.expenses/Math.max(1,new Date().getDate())))} / Tag</small>`
       : `<small>${c.net>=0?"übrig":"mehr ausgegeben"}</small><b data-cv="${Math.abs(c.net)}">${esc(eur0(Math.abs(c.net)))}</b><small>im ${esc(MONTHS[m-1])}</small>`}</span></button>
     <div class="pcminis">
       <button data-go="list"><span>Einnahmen</span><b data-cv="${c.income}">${esc(eur0(c.income))}</b></button>
@@ -439,7 +439,7 @@ if (IS_PC){
 /* profile photo next to the greeting – without a photo the first letter of the name */
 if (IS_PC){
   const av=()=>{ const ta=$("topAv"); if (!ta) return; if (ta.querySelector("img")) return; const n=String(S.settings.name||"").trim();
-    ta.hidden=false; ta.textContent=(n[0]||"?").toUpperCase(); };
+    ta.hidden=false; if (n) ta.textContent=n[0].toUpperCase(); else ta.innerHTML=ic("user",22); };
   const _r2=render; render = (...a) => { const x=_r2(...a); try { av(); } catch(e){} return x; };
   av();
 }
@@ -580,7 +580,7 @@ if (IS_PC){
   const ttl=t=>t.note||t.cat||KIND_LABEL[t.kind];
   const amtTxt=(t,v)=>(t.kind==="umbuchung"?"":isIn(t)?"+ ":"− ")+eur(v==null?t.amount:v);
   const clip=`<svg class="i" viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-1px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3"/></svg>`;
-  function shown(){ let l=monthCalc(UI.ym).tx; if (UI.filter!=="alle") l=l.filter(t=>t.kind===UI.filter);
+  function shown(){ let l=txFilter(monthCalc(UI.ym).tx);
     const q=(UI.q||"").trim().toLowerCase(); if (q) l=l.filter(t=>((t.note||"")+" "+(t.cat||"")+" "+KIND_LABEL[t.kind]).toLowerCase().includes(q)); return sortTx(l); }
   function sub(t){ return [t.note?t.cat:"", t.kind==="betrieb"?"Betrieblich":t.kind==="vorauszahlung"?"aus Rücklage":t.kind==="umbuchung"?"Umschuldung · zählt nicht":"", t.pay==="bar"?"💶 bar":""].filter(Boolean).join(" · "); }
   const _rl=renderList;
@@ -838,6 +838,7 @@ if (IS_PC){
         ${field("Tag",`<select class="in" data-pf="day"><option value="0">ohne</option>${Array.from({length:D},(_,i)=>`<option value="${i+1}" ${day===i+1?"selected":""}>${i+1}.</option>`).join("")}</select>`)}</div>
       <div class="pr2">${field("Rhythmus",`<select class="in" data-pf="rhythm">${RHYTHMS.filter(r=>r[0]!=="monate").map(([k,l])=>`<option value="${k}" ${(f&&f.rhythm||"monatlich")===k?"selected":""}>${l}</option>`).join("")}${f&&f.rhythm==="monate"?`<option value="monate" selected>Bestimmte Monate</option>`:""}</select>`)}
         ${field("Art",`<select class="in" data-pf="kind"><option value="privat" ${!f||f.kind!=="betrieb"?"selected":""}>Privat</option><option value="betrieb" ${f&&f.kind==="betrieb"?"selected":""}>Betrieblich</option></select>`)}</div>
+      ${(()=>{ const a=f&&aboCfg()[f.id]||{}; return `<div class="pfsec">Vertrag <small>(optional – Erinnerung 30 Tage vor der Frist)</small></div><div class="pr2">${field("Läuft bis",`<input class="in" type="date" data-pf="aboend" value="${esc(a.end||"")}">`)}${field("Kündigungsfrist",`<select class="in" data-pf="abonot">${ABO_NOT.map(([v,l])=>`<option value="${v}" ${Number(a.notice||0)===v?"selected":""}>${l}</option>`).join("")}</select>`)}</div>`; })()}
       <div class="small muted pnote">${f?`Änderungen gelten ab ${esc(mon)} – frühere Monate bleiben, wie sie waren.`:`Gilt ab ${esc(mon)} für alle folgenden Monate.`}</div>
       <div class="pa">${f?`<button class="btn pdel" data-pfdel>${SV.bin}<span>Löschen</span></button>`:""}<span style="flex:1"></span><button class="btn" data-pfx>Abbrechen</button><button class="btn primary" data-pfok>${f?"Speichern":"Eintragen"}</button></div>`;
   }
@@ -853,9 +854,10 @@ if (IS_PC){
     if (!popFor.id){
       const id=newId(), d={name, amount:nv, kind, order:S.fixed.length, from:ym, days:[{from:ym, day}]};
       if (rh!=="monatlich"){ d.rhythm=rh; d.months=rhythmMonths(rh, cm); }
-      F.fresh=id; popClose(); if (await safe(()=>put("fixed", id, d))) toast(`${name} eingetragen`, ()=>safe(()=>del("fixed", id)), "Rückgängig"); return;
+      F.fresh=id; const ae=val("aboend"), an=Number(val("abonot"))||0; popClose(); if (ae||an){ S.settings.abos={...(S.settings.abos||{}), [id]:{end:ae, notice:an}}; saveSettings(); } if (await safe(()=>put("fixed", id, d))) toast(`${name} eingetragen`, ()=>safe(()=>del("fixed", id)), "Rückgängig"); return;
     }
     const f=S.fixed.find(x=>x.id===popFor.id); if (!f){ popClose(); return; }
+    { const ae=val("aboend"), an=Number(val("abonot"))||0, A={...(S.settings.abos||{})}, o=A[f.id]||{}; if ((o.end||"")!==ae || Number(o.notice||0)!==an){ if (ae||an||o.abo) A[f.id]={...o, end:ae, notice:an}; else delete A[f.id]; S.settings.abos=A; saveSettings(); } }
     const before=clean(f), d=clean(f); d.name=name; d.kind=kind;
     if (Math.abs(nv-listAmt(f,ym))>0.004){ const np=withPrice(f, ym, nv); d.amount=np.amount; if (np.prices) d.prices=np.prices; else delete d.prices; }
     if ((dayOf(f,ym)||0)!==day){ d.days=withDay(f,ym,day); delete d.day; }
@@ -1333,7 +1335,7 @@ if (IS_PC){
 }
 /* ---------- Einstellungen am PC: Liste links, Inhalt rechts (nichts doppelt mit anderen Seiten) ---------- */
 if (IS_PC){
-  const PCSET=[["Geld",()=>["konten","budgets",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]),"abos","invest","export"]],
+  const PCSET=[["Geld",()=>["konten","budgets",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]),"invest","export"]],
     ["Anpassen",()=>["farben","sprache","kategorien","laeden"]],
     ["Sicherheit",()=>["sicherheit",...(SYNCABLE||window.AndroidBridge?["geraete"]:[]),"backup",...(CAN_NOTIFY?["notify"]:[]),"speicher"]]];
   const syncOn=()=>!!(SYNCABLE||window.AndroidBridge), parts=k=>k==="geraete"&&syncOn()?["sync","geraete"]:[k], alias={sync:"geraete"};
