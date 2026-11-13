@@ -683,3 +683,6 @@ html.pc .pcsr .sabody .edit-row{border-radius:12px}
 /* Sparen & Anlegen am PC: drei Spalten in einem Fenster, ohne eigene Hintergrundkarte */
 html.pc .pcsr .sabody:has(#investEd){background:none;box-shadow:none;padding:0}
 html.pc .pcsr .sabody #investEd .invnote{margin-top:14px}
+
+html.pc .pcsnone{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:start}
+html.pc .pcsnone>*{margin:0}

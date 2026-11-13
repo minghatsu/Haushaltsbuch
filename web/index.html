@@ -622,7 +622,7 @@ textarea.in{font-family:inherit;line-height:1.45}
 .goaled{display:flex;flex-direction:column;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
 .card-head + .goaled{border-top:0}
 .toast{max-width:calc(100vw - 24px);box-sizing:border-box}
-.toast #toastText{min-width:0}
+.toast #toastText{min-width:0;white-space:normal;line-height:1.25;padding:4px 0}.toast button{flex:none}.toast{border-radius:22px}
 .shops{display:grid;gap:8px}
 .shopchip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .shopchip[aria-pressed="true"] .muted{color:inherit;opacity:.8}
@@ -2580,8 +2580,8 @@ function aboCfg(){ return S.settings.abos||{}; }
 function aboDeadline(a){ if (!a||!a.end) return null; const d=new Date(a.end+"T12:00"); d.setMonth(d.getMonth()-(Number(a.notice)||0)); return isoOf(d); }
 function renderAbos(){ const el=$("abosEd"); if (!el) return; if (el.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) return;
   const A=aboCfg(), today=isoToday();
-  const list=S.fixed.filter(f=>!debtFor(f.id)).map(f=>({f,a:A[f.id]||{},dl:aboDeadline(A[f.id])})).sort((x,y)=>(x.dl||"9999").localeCompare(y.dl||"9999")||String(x.f.name).localeCompare(String(y.f.name)));
-  if (!list.length){ el.innerHTML=`<p class="small muted">Noch keine Fixkosten. Leg zuerst unter „Fixkosten“ deine Abos und Verträge an – hier trägst du dann Laufzeit und Kündigungsfrist ein.</p>`; return; }
+  const list=S.fixed.filter(f=>!debtFor(f.id) && (fixArea(f)==="Abos & Handy" || A[f.id])).map(f=>({f,a:A[f.id]||{},dl:aboDeadline(A[f.id])})).sort((x,y)=>(x.dl||"9999").localeCompare(y.dl||"9999")||String(x.f.name).localeCompare(String(y.f.name)));
+  if (!list.length){ el.innerHTML=`<p class="small muted">Noch keine Abos. Leg sie unter „Fixkosten“ an (z. B. Netflix, Handy, Fitnessstudio) – hier trägst du dann Laufzeit und Kündigungsfrist ein.</p>`; return; }
   const sumM=sum(S.fixed,f=>{ const a=planAmt(f, ymOf(new Date())); return (f.rhythm||"monatlich")==="monatlich"?a:0; });
   el.innerHTML=`<p class="small muted" style="margin:0 0 10px">Trag ein, bis wann ein Vertrag läuft und wie lange vorher du kündigen musst. Die App erinnert dich 30 Tage vor der Frist.</p>
     ${list.map(({f,a,dl})=>{ const days=dl?Math.round((new Date(dl+"T12:00")-new Date(today+"T12:00"))/864e5):null;

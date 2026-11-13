@@ -937,7 +937,8 @@ if (IS_PC){
   function saveList(l){ zSave(l); }
   function renderShopPC(){
     const ch=chosen();
-    if (!ch.length){ root.classList.remove("pcshop"); root.innerHTML=`<div class="zstack">${offersCard()}</div>`; return; }
+    // no shops chosen yet: the shopping list still works – it is the main thing here
+    if (!ch.length){ root.classList.remove("pcshop"); root.innerHTML=`<div class="pcsnone">${zettelCard()}${offersCard()}</div>`; return; }
     const cats=[...new Set(ch.map(x=>x.cat))]; if (UI.shopCat && !cats.includes(UI.shopCat)) UI.shopCat="";
     const shown=UI.shopCat?ch.filter(x=>x.cat===UI.shopCat):ch;
     if (!ch.some(x=>x.id===UI.shopSel)) UI.shopSel=ch[0].id;
@@ -1293,10 +1294,12 @@ if (IS_PC){
       return `<svg class="pcab" viewBox="0 0 ${W} ${H+22}" role="img" aria-label="Ausgaben der letzten 12 Monate">${avg?`<line x1="0" x2="${W}" y1="${Y(avg).toFixed(1)}" y2="${Y(avg).toFixed(1)}" stroke="var(--faint)" stroke-dasharray="4 5"/><text x="${W-2}" y="${(Y(avg)-6).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--muted)">Ø ${esc(eur0(avg))}</text>`:""}
         <path d="${d}" fill="none" stroke="var(--bad)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" class="pcaln"/>
         ${hist.map((h,i)=>`<g class="pcabg" data-pcaym="${h.ym}"><rect x="${(X(i)-(W-20)/(n-1)/2).toFixed(1)}" y="0" width="${((W-20)/(n-1)).toFixed(1)}" height="${H+22}" fill="transparent"/>${h.has?`<circle cx="${X(i).toFixed(1)}" cy="${Y(h.v).toFixed(1)}" r="${h.ym===ym?6:3.5}" fill="var(--bad)"/>`:""}<text x="${X(i).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="11" font-weight="${h.ym===ym?800:500}" fill="${h.ym===ym?"var(--fg)":"var(--muted)"}">${esc(MSHORT[h.i-1].slice(0,1))}</text></g>`.replace('<g class="pcabg"', `<g class="pcabg"${(()=>{ const pp=avg&&h.has?Math.round((h.v-avg)/avg*100):null; return TT({h:MONTHS[h.i-1]+" "+h.ym.slice(0,4), c:"var(--bad)", r:[["Ausgaben",h.has?eur0(h.v):"–","var(--bad)"],...(avg?[["Ø",eur0(avg),"var(--faint)",1]]:[])], f:pp==null?"":pp===0?"genau im Ø":(pp>0?"+":"−")+Math.abs(pp)+" % "+(pp>0?"über":"unter")+" Ø", fc:pp>0?"var(--bad)":"var(--good)"}); })()}`)).join("")}</svg>`; })();
-    const dAvg=avg?Math.round((expn-avg)/avg*100):null;
+    // the running month is only partly over: compare with the average of the other months up to the same day
+    const isCur=ym===cur, past=withData.filter(h=>h.ym!==ym), avgP=past.length?sum(past,h=>h.v)/past.length:0, frac=isCur?Math.min(1,new Date().getDate()/daysIn(ym)):1;
+    const dAvg=avgP&&(!isCur||new Date().getDate()>=3)?Math.round((expn-avgP*frac)/(avgP*frac)*100):null;
     const chip=(p,inv)=>p==null?"":`<span class="pcachg ${(inv?-p:p)>0?"up":"dn"}">${p>0?"+":p<0?"−":"±"}${Math.abs(p)} %</span>`;
     const col1=`<div class="pcac"><div class="pcah"><h2>Verlauf</h2><span>letzte 12 Monate</span></div>
-      <div class="card pcabig" data-anaopen="trend"><small>Ausgaben im ${esc(mn)}</small><div style="display:flex;align-items:baseline;gap:10px"><div class="pcan">${esc(eur0(expn))}</div>${dAvg!=null?chip(dAvg)+`<span class="pcas" style="margin:0">zum Ø</span>`:""}</div>${line}</div>
+      <div class="card pcabig" data-anaopen="trend"><small>Ausgaben im ${esc(mn)}</small><div style="display:flex;align-items:baseline;gap:10px"><div class="pcan">${esc(eur0(expn))}</div>${dAvg!=null?chip(dAvg)+`<span class="pcas" style="margin:0">${isCur?"zum Ø bis heute":"zum Ø"}</span>`:""}</div>${line}</div>
       <div class="card pcabig" data-anaopen="kpi"><small>${net>=0?"Übrig":"Mehr ausgegeben"} pro Monat</small>${netBars(pts,5)}</div></div>`;
     // 2 · Kategorien: this month against the average of the 6 months before; then this year against last year
     const prevM=Array.from({length:6},(_,k)=>monthCalc(shiftYm(ym,-(k+1)))).filter(c=>c.tx.length||c.expenses>0), avgOf={};
