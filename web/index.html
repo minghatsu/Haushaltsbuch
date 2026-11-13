@@ -4302,7 +4302,7 @@ async function zFinish(){
 document.addEventListener("click", e=>{
   const s=e.target.closest("[data-zsort]"); if (s){ try { localStorage.setItem("hb-zsort", s.dataset.zsort); } catch(_){} renderShop(); return; }
   const c=e.target.closest("[data-zck]"); if (c){ const id=c.dataset.zck, me=devId(); zSave(zList().map(x=>x.id===id?(x.done?{...x, done:false, by:undefined}:{...x, done:true, by:me}):x)); return; }
-  if (e.target.closest("[data-zadd]")){ const i=$("zIn"), n=(i&&i.value||"").trim(); if (!n) return; const r=zAddTo(zList(), {id:newId(), n:n.slice(0,60), done:false}); zSave(r.list); toast(r.more?`${n}: jetzt ${zQ(r.list.find(x=>x.id===r.id))}x`:`Auf dem Zettel: ${n}`); return; }
+  if (e.target.closest("[data-zadd]")){ const i=$("zIn"), n=(i&&i.value||"").trim(); if (!n) return; i.value="";   /* empty before the redraw, else the typed word stays in the field */ const r=zAddTo(zList(), {id:newId(), n:n.slice(0,60), done:false}); zSave(r.list); toast(r.more?`${n}: jetzt ${zQ(r.list.find(x=>x.id===r.id))}x`:`Auf dem Zettel: ${n}`); return; }
   if (e.target.closest("[data-zopen]")){ UI.zOpen=true; renderShop(); return; }
   if (e.target.closest("[data-zclose]")){ UI.zOpen=false; renderShop(); return; }
   if (e.target.closest("[data-zstart]")){ zStart([{id:devId(), name:devMe().name||"Handy"}], {}); UI.zOpen=true; toast("Einkauf gestartet – viel Spaß"); return; }
