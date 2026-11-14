@@ -82,7 +82,7 @@ h1{font:800 24px Georgia,serif;margin:26px 0 4px}.mu{color:var(--mu);font-size:1
   fetch(PAIR + "?a=invinfo&c=" + code, { cache: "no-store" }).then(function(r){ return r.json().then(function(j){ return [r.status, j]; }); }).then(function(x){
     var s = x[0], j = x[1];
     if (s === 404){ $("dl").hidden = true; $("noInv").hidden = false; $("noInv").textContent = "Diesen Einladungscode gibt es nicht. Scann den QR-Code bitte noch einmal."; return; }
-    if (j && j.ok){ if (j.left <= 0){ $("dl").hidden = true; $("full").hidden = false; } else $("left").textContent = "Noch " + j.left + " von " + j.max + " Plätzen frei."; }
+    if (j && j.ok && j.left >= 0){ if (j.left === 0){ $("dl").hidden = true; $("full").hidden = false; } else $("left").textContent = "Noch " + j.left + " von " + j.max + " Plätzen frei."; }
   }).catch(function(){});
 })();
 </script>
