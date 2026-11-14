@@ -1551,11 +1551,9 @@ if (IS_TAB){
   function tabSetHTML(){
     const n=String(S.settings.name||"").trim(), p=S.settings.photo, f=devForm(), badge=`<span class="avdev">${devIc(f,11)}</span>`;
     const av=p?`<img src="${esc(p)}" alt="">${badge}`:n?`<span class="avl">${esc(n[0].toUpperCase())}</span>${badge}`:devIc(f,24);
-    const sw=[["dark","Dunkel",H.dataset.theme==="dark"],["sicherheit","App-Sperre",!!lockCfg()],["notify","Benachrichtigungen",!!notifyCfg().on],["geraete","Abgleich",!!SYNC.token]].filter(([k])=>k!=="notify"||CAN_NOTIFY);
+    
     return `<div class="card tsprof"><button class="topav ${!p&&!n?"devav":""}" data-tsprof="1" aria-label="Profil">${av}</button><div style="min-width:0"><b>${esc(n||devModel())}</b><small>${esc([n?devModel():"",SYNC.token?"Abgleich an":"Abgleich aus",verFull()].filter(Boolean).join(" · "))}</small></div><span style="flex:1"></span><button class="btn" data-tsprof="1">Profil bearbeiten</button></div>
-      <div class="tssw">${sw.map(([k,l,on])=>k==="dark"
-        ? `<button class="${on?"on":""}" data-tssw="${k}" role="switch" aria-checked="${on}"><span>${esc(l)}</span><i></i></button>`
-        : `<button class="nav ${on?"on":""}" data-tssw="${k}"><span>${esc(l)}<small>${on?"an":"aus"}</small></span><em><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="m9 6 6 6-6 6"/></svg></em></button>`).join("")}</div>
+      <div class="tssw">${quickSw().map(([k,l,on,sub])=>`<button class="${on?"on":""}" ${k==="dark"?'data-tssw="dark"':`data-phsw="${k}"`} role="switch" aria-checked="${on}"><span>${esc(l)}<small>${esc(sub)}</small></span><i></i></button>`).join("")}</div>
       <div class="tsgr">${GROUPS().map(([g,c,ks])=>`<div class="card tsg" style="--gc:${c}"><h3><span class="saic" style="background:${c}">${ic(accIcon(ks[0]),16)}</span>${esc(I18N.tr?I18N.tr(g):g)}</h3>${ks.filter(k=>SP_PAGES[k]||k==="weiter").map(k=>`<button data-tsgo="${k}"><span class="saic" style="background:${themeCol(ACC_COL[k]||c)};width:28px;height:28px;border-radius:9px">${ic(accIcon(k),14)}</span>${esc(tTitle(k))}<small>${esc(accSub(k)||"")} ›</small></button>`).join("")}</div>`).join("")}</div>`;
   }
   const _rsh=renderSetHome;

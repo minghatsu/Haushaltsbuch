@@ -830,3 +830,4 @@ html.pc .pcdsk{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px
 html.pc .pcdsr{display:flex;gap:8px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}html.pc .pcdsr b{flex:none}html.pc .pcdsr span{flex:1;color:var(--muted);font-family:ui-monospace,monospace;font-size:12.5px}html.pc .pcdsr em{font-style:normal;font-weight:700}
 html.pc.istab .tssw button.nav>span{display:flex;flex-direction:column;text-align:left}html.pc.istab .tssw button.nav small{font-size:12px;font-weight:600;color:var(--muted)}html.pc.istab .tssw button.nav.on small{color:var(--accent);font-weight:800}
 html.pc.istab .tssw button.nav em{font-style:normal;color:var(--faint);display:grid;place-items:center}
+html.pc.istab .tssw button>span{display:flex;flex-direction:column;text-align:left}html.pc.istab .tssw button small{font-size:12px;font-weight:600;color:var(--muted)}html.pc.istab .tssw button.on small{color:var(--accent)}

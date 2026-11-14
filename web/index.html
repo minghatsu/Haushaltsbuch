@@ -6490,7 +6490,7 @@ function accSub(k){
   if (k==="feedback") return "Fehler oder Wunsch melden";
   if (k==="recht") return "Datenschutz · Impressum · Lizenzen";
   if (k==="speicher") return RCPT.ids.size+" Belegfotos";
-  if (k==="geraete"){ const n=Math.max(1,Object.keys(devList()).length); return n===1?"1 Gerät":n+" Geräte"; }
+  if (k==="geraete"){ const n=Math.max(1,Object.keys(devList()).length); return (SYNC.token?"Abgleich an":"Abgleich aus")+" · "+(n===1?"1 Gerät":n+" Geräte"); }
   if (k==="backup"){ try { return abCfg().on && CAN_AUTOBK ? "wöchentlich"+(backupEnc()?" · verschlüsselt":"") : "Datei sichern oder laden"; } catch(e){ return "Datei"; } }
   return spSummary(k) || "";
 }
@@ -6537,22 +6537,29 @@ function accBuild(){
 /* ---------- Handy: Einstellungen wie am Tablet – Profil, Schnellwahl, Bereiche als Kästen; jede Zeile öffnet ihre eigene Seite ---------- */
 const PH_SYNC = () => accTabKeys("sicherheit").includes("sync");
 const phPageKeys = k => k==="geraete" && PH_SYNC() ? ["sync","geraete"] : [k];
-const phTitle = k => k==="geraete" && PH_SYNC() ? "Geräte & Abgleich" : accTitle(k);
+const phTitle = k => k==="geraete" && PH_SYNC() ? "Geräte & Abgleich" : k==="sicherheit" ? "App-Sperre & Sicherheit" : accTitle(k);
 const PH_GROUPS = () => [["Geld","#6b8e23",accTabKeys("geld")],["Anpassen","#1a7a5c",accTabKeys("anpassen").filter(k=>k!=="dark")],
   ["Sicherheit & Geräte","#3d63a8",accTabKeys("sicherheit").filter(k=>k!=="sync"&&k!=="notify")],["Hilfe","#c27c0e",accTabKeys("hilfe")]];
 const CHEV='<svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="m9 6 6 6-6 6"/></svg>';
 function phRow(k, c){ const col=themeCol(ACC_COL[k]||c);
   const act = k==="wiz" ? `data-qwiz="1"` : k==="weiter" ? `data-invopen="1"` : `data-accgo="${k}"`;
   return `<button class="phr" ${act}><span class="saic" style="background:${col}">${ic(accIcon(k),18)}</span><span class="sat"><b>${esc(phTitle(k))}</b><small data-accsub="${k}">${esc(accSub(k))}</small></span><span class="phch">${CHEV}</span></button>`; }
+/* quick switches that really switch right here (App-Sperre and Abgleich need their page – they sit in the list below) */
+function quickSw(){ const dark=document.documentElement.dataset.theme==="dark", sec=lsGet("hb-scrsec")!=="0", nf=CAN_NOTIFY&&!!notifyCfg().on, lg=S.settings.logos===true;
+  return [["dark","Dunkel",dark,dark?"an":"aus"],
+    ...(CAN_NOTIFY?[["notify","Erinnerungen",nf,nf?"an":"aus"]]:[]),
+    ...(window.AndroidBridge && typeof window.AndroidBridge.setSecure==="function" ? [["secure","Bildschirmschutz",sec,sec?"keine Screenshots":"aus"]] : []),
+    ["logos","Läden-Logos laden",lg,lg?"an":"aus"]]; }
+function quickToggle(k){
+  if (k==="notify"){ const c=notifyCfg(); if (c.on){ c.on=false; notifySave(c); toast("Erinnerungen aus"); } else { c.on=true; notifySave(c); try { AndroidBridge.notifyAsk(); if (AndroidBridge.desktop) window.hbNotifyPerm(true); } catch(_){} toast("Erinnerungen an"); } }
+  else if (k==="secure"){ const on=lsGet("hb-scrsec")==="0"; try{ localStorage.setItem("hb-scrsec", on?"1":"0"); }catch(_){} try{ window.AndroidBridge.setSecure(on); }catch(_){} toast(on?"Bildschirmschutz an":"Bildschirmschutz aus – Screenshots sind jetzt möglich"); }
+  else if (k==="logos"){ S.settings.logos=!(S.settings.logos===true); saveSettings(); toast(S.settings.logos?"Läden-Logos werden online geladen":"Läden-Logos nur noch eingebaute"); }
+  renderSetHome(); try { const sl=$("sLogos"); if (sl) sl.checked=S.settings.logos===true; } catch(_){} }
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-phsw]"); if (b) quickToggle(b.dataset.phsw); });
 function phHomeHtml(){
   const n=String(S.settings.name||"").trim(), p=S.settings.photo, f=devForm(), dark=document.documentElement.dataset.theme==="dark";
   const av=p?`<img src="${esc(p)}" alt="">`:n?`<b>${esc(n[0].toUpperCase())}</b>`:devIc(f,26);
-  // Dunkel switches right here; App-Sperre, Abgleich and Hinweise lead to their page – so they look like buttons, not like switches
-  const nav=(k,l,on,txt)=>`<button class="phq nav ${on?"on":""}" data-accgo="${k}"><span><b>${l}</b><small>${txt}</small></span><span class="phch">${CHEV}</span></button>`;
-  const q=[`<button class="phq ${dark?"on":""}" data-qdark="1" role="switch" aria-checked="${dark}"><span><b>Dunkel</b><small>${dark?"an":"aus"}</small></span><i class="tg ${dark?"on":""}"></i></button>`,
-    nav("sicherheit","App-Sperre",!!lockCfg(),lockCfg()?"an":"aus"),
-    ...(SYNCABLE||window.AndroidBridge?[nav("geraete","Abgleich",!!SYNC.token,SYNC.token?"an":"aus")]:[]),
-    ...(CAN_NOTIFY?[nav("notify","Hinweise",!!notifyCfg().on,notifyCfg().on?"an":"aus")]:[])];
+  const q=quickSw().map(([k,l,on,sub])=>`<button class="phq ${on?"on":""}" ${k==="dark"?'data-qdark="1"':`data-phsw="${k}"`} role="switch" aria-checked="${on}"><span><b>${l}</b><small>${sub}</small></span><i class="tg ${on?"on":""}"></i></button>`);
   return `<div class="card phprof"><button class="phav" data-spgo="profil" aria-label="Profil">${av}<span class="avdev">${devIc(f,11)}</span></button><div class="sat"><b>${esc(n||devModel())}</b><small>${esc([n?devModel():"", verFull()].filter(Boolean).join(" · "))}</small></div><button class="btn small" data-spgo="profil">Profil</button></div>
     <div class="phqs">${q.join("")}</div>
     ${PH_GROUPS().map(([g,c,ks])=>`<div class="card phg" style="--gc:${c}"><h3><span class="saic" style="background:${c}">${ic(accIcon(ks[0]),15)}</span>${esc(g)}</h3>${ks.map(k=>phRow(k,c)).join("")}</div>`).join("")}
