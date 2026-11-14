@@ -2862,7 +2862,7 @@ function verPing(){ try { if (window.claude || !window.AndroidBridge || !pairUrl
   pairCall("ping","",{dev:devId(), ver:curVerShort(), form:devForm(), role:verRole()}).then(()=>{ try { localStorage.setItem("hb-ping", day+"|"+curVerShort()); } catch(_){} }).catch(()=>{}); } catch(_){} }
 setTimeout(verPing, 15000); setInterval(verPing, 6*3600e3);
 /* Einladungen */
-const INV_PAGE = "https://miracleframe.synology.me/mami/";
+const INV_PAGE = "https://miracleframe.synology.me/haushaltsbuch/einladung.html";
 function actGet(){ try{ return JSON.parse(localStorage.getItem("hb-act")||"null"); }catch(e){ return {k:"root"}; } }
 function actSet(o){ try{ localStorage.setItem("hb-act", JSON.stringify(o)); }catch(e){} }
 (function(){ try{ if (!localStorage.getItem("hb-act") && localStorage.getItem("hb-legal")) actSet({k:"root"}); }catch(e){} })();
