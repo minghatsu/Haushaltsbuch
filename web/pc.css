@@ -912,3 +912,6 @@ html.pc.istab:not(.tabp) .pcfd .dh b{font-size:14px}
 html.pc.istab:not(.tabp) #v-fix.pcfcal{height:calc(100vh - 212px);overflow:hidden;align-items:stretch!important}
 html.pc.istab:not(.tabp) #v-fix.pcfcal>.pcfcalc,html.pc.istab:not(.tabp) #v-fix.pcfcal>.pcfside{max-height:100%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;position:relative!important;top:auto!important}
 html.pc.istab:not(.tabp) #v-fix.pcfcal>.pcfcalc{align-self:start}
+/* shopping list in dark mode: dark paper with a warm hint instead of the light yellow note */
+html.pc[data-theme="dark"] .pcz{background-color:color-mix(in srgb,#ffd36b 7%,var(--surface))!important}
+@media (prefers-color-scheme: dark){html.pc:not([data-theme="light"]) .pcz{background-color:color-mix(in srgb,#ffd36b 7%,var(--surface))!important}}
