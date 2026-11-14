@@ -345,7 +345,13 @@ html.pc .invbg{background:color-mix(in srgb,var(--bg) 70%,#000a);align-items:cen
 .tg.on{background:var(--accent)}.tg.on:after{left:21px}
 .hasnew{position:relative}.hasnew:after{content:"neu";position:absolute;top:6px;right:6px;background:#e0902b;color:#fff;font-size:9.5px;font-weight:800;border-radius:6px;padding:1px 5px}
 .clog{padding:12px 0;border-bottom:1px solid var(--line)}.clog.top .clh b{color:var(--accent)}.clh{display:flex;justify-content:space-between;align-items:baseline}.clog ul{margin:6px 0 0;padding-left:18px;line-height:1.55;font-size:14px}
-.fbk{display:flex;gap:8px;margin-bottom:12px}.fbk .chip{flex:1;text-align:center;border:0;border-radius:14px;padding:11px 6px;font:700 14px var(--f-body);background:var(--sunk);color:var(--fg);cursor:pointer}.fbk .chip.on{background:var(--accent);color:#fff}
+.fbk{display:flex;gap:8px;margin-bottom:12px}.fbpgh{font-weight:700;font-size:14px;margin:2px 0 8px}.fbpgh span{font-weight:500;color:var(--muted)}
+.fbpg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.fbpg button{position:relative;border:0;border-radius:16px;padding:12px 6px 10px;background:var(--sunk);color:var(--fg);font:700 12.5px var(--f-body);display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:background .15s,transform .15s}
+.fbpg button svg{width:24px;height:24px}
+.fbpg button.on{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+.fbpg button.on::after{content:"✓";position:absolute;top:6px;right:8px;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;display:grid;place-items:center}
+.fbpg button:active{transform:scale(.96)}.fbk .chip{flex:1;text-align:center;border:0;border-radius:14px;padding:11px 6px;font:700 14px var(--f-body);background:var(--sunk);color:var(--fg);cursor:pointer}.fbk .chip.on{background:var(--accent);color:#fff}
 .fbimgs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}.fbimgs .t{position:relative;width:72px;height:72px;border-radius:12px;overflow:hidden;background:var(--sunk)}.fbimgs .t img{width:100%;height:100%;object-fit:cover}.fbimgs .t button{position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:50%;border:0;background:#000a;color:#fff;font-size:14px;line-height:1;cursor:pointer}
 .fbimgs .add{width:72px;height:72px;border-radius:12px;border:2px dashed var(--line);background:none;color:var(--accent);font:700 11px var(--f-body);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}.fbimgs .add b{font-size:22px;line-height:1}.chip.on{background:var(--accent);color:#fff}
 .abo{padding:12px 0;border-bottom:1px solid var(--line)}.abh{display:flex;align-items:center;gap:10px;margin-bottom:8px}.abh .n{flex:1;display:flex;flex-direction:column}.abh small{color:var(--muted)}.abo .grid2{margin:0}
@@ -2726,7 +2732,7 @@ function fbQuickBtn(){ let b=$("fbQuick"); const q=$("ptourQ");
   if (!fbQuickOn() || !q){ if (b) b.remove(); return; }
   if (!b){ b=document.createElement("button"); b.id="fbQuick"; b.type="button"; b.className="ptq fbq roundbtn"; b.setAttribute("aria-label","Feedback geben"); b.title="Feedback geben – Fehler, Ideen, Fragen";
     b.innerHTML=`<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M12 8v4M12 15.5v.01"/></svg>`;
-    b.onclick=()=>accGo("feedback"); }
+    b.onclick=()=>{ if (FB_PAGES.some(p=>p[0]===UI.view) && !(UI.fbDraft||"").trim()) UI.fbPages=[UI.view]; accGo("feedback"); }; }
   if (!document.documentElement.classList.contains("pc")){ b.className="fbtab"; b.innerHTML=`<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M12 8v4M12 15.5v.01"/></svg><span>Feedback</span>`; if (b.parentElement!==document.body) document.body.appendChild(b); return; }
   if (q.classList.contains("ptqph")) b.classList.add("ptqph"); else b.classList.remove("ptqph");
   if (b.nextElementSibling!==q) q.before(b); }
@@ -2767,8 +2773,9 @@ document.addEventListener("click", e=>{ const b=e.target.closest("[data-tour]");
 
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-faq]"); if (!b) return; const i=+b.dataset.faq; UI.faqOpen = UI.faqOpen===i ? null : i; renderHilfe(); });
 
-function fbText(){ const t=($("fbTxt")||{}).value||""; const info=($("fbInfo")||{}).checked;
-  return t.trim() + (info?`\n\n---\nFinanz MAMI ${verFull()} · ${window.AndroidBridge?(IS_DESK?"PC":IS_TAB?"Tablet":"Android"):"Browser"} · ${(WORK.find(x=>x[0]===S.settings.work)||[,"–"])[1]}`:""); }
+const FB_PAGES=[["home","Start"],["list","Buchungen"],["fix","Fixkosten"],["shop","Einkauf"],["year","Analyse"],["more","Einstellungen"]];
+function fbText(){ const t=($("fbTxt")||{}).value||""; const info=($("fbInfo")||{}).checked; const pg=(UI.fbPages||[]).map(k=>(FB_PAGES.find(p=>p[0]===k)||[,k])[1]);
+  return (t.trim()?"📍 "+(pg.length?pg.join(", "):"allgemein")+"\n":"") + t.trim() + (info?`\n\n---\nFinanz MAMI ${verFull()} · ${window.AndroidBridge?(IS_DESK?"PC":IS_TAB?"Tablet":"Android"):"Browser"} · ${(WORK.find(x=>x[0]===S.settings.work)||[,"–"])[1]}`:""); }
 const FB_MAX_IMG=4;
 async function fbShrink(file){
   const bmp=await createImageBitmap(file), k=Math.min(1, 1600/Math.max(bmp.width,bmp.height)), c=document.createElement("canvas");
@@ -2777,7 +2784,10 @@ async function fbShrink(file){
 function renderFeedback(){ const el=$("fbEd"); if (!el) return; if (document.activeElement && document.activeElement.id==="fbTxt" && el.contains(document.activeElement)) return;
   const imgs=UI.fbImgs||(UI.fbImgs=[]);
   const kind=UI.fbKind||"idee", mail=IMPRESSUM.mail||FEEDBACK_MAIL;
+  const pgs=UI.fbPages||(UI.fbPages=[]);
   el.innerHTML=`<div class="fbk">${[["fehler","Fehler"],["idee","Idee"],["lob","Lob"]].map(([k,l])=>`<button class="chip ${kind===k?"on":""}" data-fbk="${k}" aria-pressed="${kind===k}">${l}</button>`).join("")}</div>
+    <div class="fbpgh">Wo ist es? <span>(mehrere möglich)</span></div>
+    <div class="fbpg">${FB_PAGES.map(([k,l])=>{ const on=pgs.includes(k), sv=document.querySelector(`.tabs .tab[data-go="${k}"] svg`); return `<button type="button" class="${on?"on":""}" data-fbpg="${k}" aria-pressed="${on}">${sv?sv.outerHTML:""}<span>${l}</span></button>`; }).join("")}</div>
     <div class="field"><label for="fbTxt">${kind==="fehler"?"Was ist passiert? Was hast du davor gemacht?":kind==="lob"?"Was gefällt dir?":"Was wünschst du dir?"}</label><textarea class="in" id="fbTxt" rows="6" placeholder="Schreib einfach drauflos …">${esc(UI.fbDraft||"")}</textarea></div>
     <div class="fbimgs">${imgs.map((u,i)=>`<div class="t"><img src="${u}" alt="Bild ${i+1}"><button data-fbimgdel="${i}" aria-label="Bild ${i+1} entfernen">×</button></div>`).join("")}${imgs.length<FB_MAX_IMG?`<button class="add" id="fbImgAdd"><b>＋</b>Bild</button>`:""}</div>
     <input type="file" id="fbImgFile" accept="image/*" multiple hidden>
@@ -2892,12 +2902,13 @@ document.addEventListener("change", async e=>{ if (e.target.id==="fbInfo"){ UI.f
   renderFeedback(); });
 document.addEventListener("click", async e=>{
   const k=e.target.closest("[data-fbk]"); if (k){ UI.fbKind=k.dataset.fbk; renderFeedback(); return; }
+  const pgb=e.target.closest("[data-fbpg]"); if (pgb){ const a=UI.fbPages||(UI.fbPages=[]), k2=pgb.dataset.fbpg, i=a.indexOf(k2); if (i<0) a.push(k2); else a.splice(i,1); a.sort((x,y)=>FB_PAGES.findIndex(p=>p[0]===x)-FB_PAGES.findIndex(p=>p[0]===y)); renderFeedback(); return; }
   if (e.target.closest("#fbImgAdd")){ const f=$("fbImgFile"); if (f) f.click(); return; }
   const di=e.target.closest("[data-fbimgdel]"); if (di){ UI.fbImgs.splice(Number(di.dataset.fbimgdel),1); renderFeedback(); return; }
   if (e.target.closest("#fbCopy")){ const t=fbText(); if (!t.trim()){ toast("Bitte erst etwas schreiben"); return; } try{ await navigator.clipboard.writeText(t); toast("Kopiert"); }catch(_){ toast("Kopieren ging nicht – Text bitte markieren"); } return; }
   if (e.target.closest("#fbSend")){ const t=fbText(); if (!(UI.fbDraft||"").trim()){ toast("Bitte erst etwas schreiben"); return; } if (UI.fbBusy) return;
     UI.fbBusy=true; renderFeedback();
-    try { await fbPost({kind:UI.fbKind||"idee", text:t, images:UI.fbImgs||[]}); UI.fbDraft=""; UI.fbImgs=[]; toast("Danke! Dein Feedback ist angekommen", null, null, 5000); }
+    try { await fbPost({kind:UI.fbKind||"idee", text:t, images:UI.fbImgs||[]}); UI.fbDraft=""; UI.fbImgs=[]; UI.fbPages=[]; toast("Danke! Dein Feedback ist angekommen", null, null, 5000); }
     catch(err){ toast("Senden hat nicht geklappt"+(err&&err.message?" – "+err.message:""), ()=>{ const b=$("fbMail"); if (b) b.click(); }, "Per E-Mail", 9000); }
     finally { UI.fbBusy=false; renderFeedback(); }
     return; }
