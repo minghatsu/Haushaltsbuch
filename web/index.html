@@ -7063,7 +7063,8 @@ async function saveTx(){
   const editing = UI.editId, id = editing || (mem ? newId() : db.collection("tx").doc().id);
   const old = editing ? S.tx.find(t=>t.id===id) : null;
   if (old){ if (old.ts) doc.ts=old.ts; if (old.importKey) doc.importKey=old.importKey; if (old.source) doc.source=old.source; if (old.um) doc.um=old.um; if (old.items) doc.items=old.items; if (old.ishop) doc.ishop=old.ishop; }
-  if (UI.scanItems && UI.scanItems.items){ doc.items=UI.scanItems.items; if (UI.scanItems.shop) doc.ishop=UI.scanItems.shop; }
+  if (UI.scanItems && UI.scanItems.cleared){ delete doc.items; delete doc.ishop; }
+  else if (UI.scanItems && UI.scanItems.items){ doc.items=UI.scanItems.items; if (UI.scanItems.shop) doc.ishop=UI.scanItems.shop; }
   if (doc.kind==="ausgabe" && hasJob() && $("fWk").checked) doc.wk=true;
   if (doc.kind==="einnahme" && incArt(doc.cat)==="selbst" && !S.settings.kleinunternehmer){
     if (old && old.net!=null && Math.abs(old.amount-doc.amount)<0.005 && old.cat===doc.cat) doc.net=old.net;
@@ -7379,14 +7380,32 @@ async function zBonFromStored(id, img){
   try { scanWorking(true);
     const L = canNativeOcr() ? await ocrDataUrl(img) : await scanImageFile(img);
     scanWorking(false); try { scanBusy(false); } catch(_){}
-    const its=receiptItems(L||[]); if (!its.length) return;
+    const its=receiptItems(L||[]); if (!its.length){ if (UI.editId===id) toast("Auf dem gespeicherten Bon wurden keine Artikel erkannt", null, null, 4000); return; }
     const t2=S.tx.find(x=>x.id===id); if (!t2) return;
     const doc={...plainTx(t2), items:its.map(i=>({r:i.n, p:i.p}))}, sid=zaShopId(parseReceipt(L).shop||t2.note); if (sid) doc.ishop=sid;
     await saveTxDoc(id, doc, t2);
     if (UI.editId===id && !UI.scanItems){ UI.zbOpen=true; zBonRender(); }
     toast(`${its.length} Artikel aus dem gespeicherten Bon gelesen`, null, null, 4000);
   } catch(e){ scanWorking(false); try { scanBusy(false); } catch(_){} } }
+async function zBonBackfill(){
+  if (BG_RUN || zBonBackfill.on) return; zBonBackfill.on=true; let done={}; try{ done=JSON.parse(localStorage.getItem("hb-zbtried")||"{}"); }catch(_){}
+  const todo=S.tx.filter(t=>t.kind==="ausgabe" && hasReceipt(t.id) && !(t.items&&t.items.length) && !done[t.id] && !ZB_TRIED.has(t.id)).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,40);
+  let n=0;
+  for (const t of todo){ if (document.hidden) await new Promise(r=>setTimeout(r,5000)); ZB_TRIED.add(t.id); done[t.id]=1; try{ localStorage.setItem("hb-zbtried", JSON.stringify(done)); }catch(_){}
+    try { const img=await rcptGet(t.id); if (!img) continue;
+      const L = canNativeOcr() ? await ocrDataUrl(img) : await (async()=>{ await loadTesseract(); const r=await window.Tesseract.recognize(img,"deu"); return ((r.data&&r.data.lines)||[]).map(l=>({t:l.text.trim(), x:l.bbox.x0, y:l.bbox.y0, w:l.bbox.x1-l.bbox.x0, h:l.bbox.y1-l.bbox.y0})).filter(l=>l.t); })();
+      const its=receiptItems(L||[]); if (!its.length) continue;
+      const t2=S.tx.find(x=>x.id===t.id); if (!t2 || (t2.items&&t2.items.length)) continue;
+      const doc={...plainTx(t2), items:its.map(i=>({r:i.n, p:i.p}))}, sid=zaShopId(parseReceipt(L).shop||t2.note); if (sid) doc.ishop=sid;
+      if (await saveTxDoc(t.id, doc, t2).then(()=>true,()=>false)) n++;
+    } catch(e){}
+    await new Promise(r=>setTimeout(r,400)); }
+  zBonBackfill.on=false;
+  if (n) toast(`${n} ${n===1?"alter Kassenzettel wurde":"alte Kassenzettel wurden"} digital angelegt`, null, null, 5000);
+}
+setTimeout(()=>{ try { zBonBackfill(); } catch(_){} }, 25000);
 function zBonSrc(){
+  if (UI.scanItems && UI.scanItems.cleared) return null;
   if (UI.scanItems && UI.scanItems.items && UI.scanItems.items.length) return UI.scanItems;
   const t=UI.editId && S.tx.find(x=>x.id===UI.editId);
   return t && t.items && t.items.length ? {items:t.items, shop:t.ishop||zaShopId(t.note)} : null;
@@ -7421,7 +7440,7 @@ document.addEventListener("click", e=>{
 document.addEventListener("keydown", e=>{ if (e.target.id==="zbIn" && e.key==="Enter"){ e.preventDefault(); const ok=document.querySelector("[data-zbok]"); if (ok) ok.click(); } if (e.target.id==="zbIn" && e.key==="Escape"){ e.stopPropagation(); const b=$("zbBub"); if (b) b.hidden=true; } }, true);
 async function rcptSaveFor(id){
   const r=UI.rcpt;
-  try { if (r.state==="new" && r.img) await rcptPut(id, r.img); else if (r.state==="removed" && hasReceipt(id)) await rcptDel(id); }
+  try { if (r.state==="new" && r.img){ await rcptPut(id, r.img); render(); } else if (r.state==="removed" && hasReceipt(id)){ await rcptDel(id); render(); } }
   catch(e){ toast("Beleg konnte nicht gespeichert werden"); }
 }
 function rcptView(img){ if (!img) return; $("rcptBig").src=img; $("rcptViewer").hidden=false; }
@@ -7467,19 +7486,29 @@ function receiptItems(lines){
   const rows=[]; const L=lines.map(l=>({...l}));
   if (L.some(l=>l.y!=null)){
     L.sort((a,b)=>(a.y||0)-(b.y||0));
-    for (const l of L){ const r=rows.find(r=>Math.abs(((r.y+r.h/2))-((l.y||0)+(l.h||0)/2)) < Math.max(r.h,l.h||0)*0.6); if (r){ r.parts.push(l); } else rows.push({y:l.y||0, h:l.h||10, parts:[l]}); }
+    for (const l of L){ const r=rows.find(r=>Math.abs(((r.y+r.h/2))-((l.y||0)+(l.h||0)/2)) < Math.min(r.h,l.h||r.h)*0.55); if (r){ r.parts.push(l); } else rows.push({y:l.y||0, h:l.h||10, parts:[l]}); }
     rows.forEach(r=>{ r.parts.sort((a,b)=>(a.x||0)-(b.x||0)); r.t=r.parts.map(p=>p.t).join("  "); });
   } else L.forEach(l=>rows.push({t:l.t}));
-  const out=[], STOP=/summe|gesamt|zu zahlen|total|zahlbetrag|bar\b|karte|girocard|ec-|mwst|ust|netto|brutto|rückgeld|rueckgeld|pfand|leergut|rabatt|coupon|bonus|punkte|payback|steuer|datum|uhrzeit|kasse|bon|beleg|tse|signatur|vielen dank|www|tel\.|filiale/;
+  const out=[], STOP=/summe|gesamt|zu zahlen|total|zahlbetrag|\bbar\b|\bkarte\b|kartenzahlung|girocard|\bec\b|\bec-|mwst|\bust\b|netto|brutto|rückgeld|rueckgeld|\bpfand|leergut|rabatt|coupon|\bbonus|punkte|payback|steuer|datum|uhrzeit|\bkasse\b|kassenbon|\bbon\b|bon-nr|\bbeleg|\btse\b|signatur|vielen dank|www|tel\.|filiale|\beur\s*$|^\s*eur\b|posten|artikel\s*:|anzahl artikel|transaktion|terminal|kundenbeleg/;
+  const PRICE=/\s(-?\d{1,3}[,.]\d{2})\s*(?:€|eur)?\s*(?:[A-Da-d*]|\d|[A-D]\s*\*)?\s*$/i;
+  const QTY=/^\s*-?\d+(?:[,.]\d+)?\s*(?:kg|g|x|stk\.?|st\.?|×)\b|^\s*\d+\s*[xX×]\s*\d|\b(?:eur|€)\s*\/\s*kg\b|\d\s*[xX×]\s*\d+[,.]\d{2}/i;
+  let pend="";
   for (const r of rows){
     const t=r.t.replace(/\s+/g," ").trim(), n=nrm(t);
-    if (STOP.test(n)) { if (/summe|zu zahlen|total|gesamt/.test(n)) break; continue; }
-    const m=t.match(/^(.*?[A-Za-zÄÖÜäöüß]{3,}.*?)\s+(-?\d{1,3},\d{2})\s*(?:[A-D*]|\d)?\s*$/); if (!m) continue;
-    const name=m[1].replace(/\b\d+\s*[xX]\s*\d+,\d{2}\b/,"").replace(/\s{2,}/g," ").trim(), p=Number(m[2].replace(",","."));
-    if (!(p>0 && p<200) || name.length<3) continue;
+    if (STOP.test(n)) { pend=""; if (/summe|zu zahlen|total|gesamt|zahlbetrag/.test(n)) break; continue; }
+    const pm=(" "+t).match(PRICE);
+    if (!pm){ if (/[A-Za-zÄÖÜäöüß]{3,}/.test(t) && !QTY.test(t)) pend=t; continue; }
+    const p=Number(pm[1].replace(",",".")), head=(" "+t).slice(0, pm.index).trim();
+    let name;
+    if (QTY.test(head) || !/[A-Za-zÄÖÜäöüß]{3,}/.test(head)){
+      if (!pend) continue;
+      name=pend;
+    } else name=head.replace(/\b\d+\s*[xX×]\s*\d+[,.]\d{2}\b/,"").replace(/\s{2,}/g," ").trim();
+    pend="";
+    if (!(Math.abs(p)>0 && p<200) || name.length<3) continue;
     out.push({n:name.slice(0,40), p});
   }
-  return out.slice(0,60);
+  return out.slice(0,80);
 }
 /* Kassenbon */
 const ZAB = (()=>{ const o={}; `
@@ -7747,6 +7776,7 @@ async function runScan(source, attachOnly, fresh){
         const its=receiptItems(L||[]);
         if (its.length){ const pr=parseReceipt(L); UI.scanItems={items:its.map(i=>({r:i.n, p:i.p})), shop:zaShopId(pr.shop||$("fNote").value)}; UI.zbOpen=true; zBonRender();
           toast(`${its.length} Artikel vom Bon gelesen – wird mit der Buchung gespeichert`, null, null, 4000); }
+        else { const ct=UI.editId && S.tx.find(x=>x.id===UI.editId); if (ct && ct.items && ct.items.length){ UI.scanItems={items:[], shop:null, cleared:true}; zBonRender(); toast("Auf dem neuen Foto wurden keine Artikel erkannt – der alte Kassenzettel wird ersetzt", null, null, 5000); } }
       } catch(e){ scanWorking(false); scanBusy(false); }
       return; }
     const r = parseReceipt(lines||[]);
