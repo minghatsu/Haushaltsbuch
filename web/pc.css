@@ -152,7 +152,7 @@ html.pc .pchelp:hover svg.i{transform:rotate(-14deg) scale(1.08)}
 html.pc .top .roundbtn{width:50px;height:50px;flex:none}
 html.pc .pcinbox{margin-right:10px;position:relative}
 html.pc .pcinbox .badge{position:absolute;top:-3px;right:-3px}
-html.pc .pcfbsheet{max-width:860px;width:min(860px,94vw);max-height:84vh;overflow:auto}
+html.pc .pcfbsheet{max-width:1060px;width:min(1060px,95vw);height:min(760px,86vh);max-height:86vh;overflow:hidden;display:flex;flex-direction:column}
 html.pc .pcfb{border-radius:16px;margin-bottom:8px;background:var(--sunk);overflow:hidden}
 html.pc .pcfb.new{box-shadow:inset 4px 0 0 var(--kc)}
 html.pc .pcfbh{width:100%;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border:0;background:none;padding:12px 14px;text-align:left;cursor:pointer;font:inherit;color:var(--fg)}
@@ -870,3 +870,27 @@ html.pc.istab .pcdi em{right:52px}
 html.pc.istab.pcdocked main.wrap{padding-right:52px!important}
 
 html.pc .pcfbpg{flex:none;font:700 11.5px var(--f-body);padding:3px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-right:2px}
+
+/* Feedback-Eingang: Liste links, Meldung rechts */
+html.pc #pcFbBody{flex:1;min-height:0;display:flex;flex-direction:column}
+html.pc .pcfbtop{display:flex;gap:8px;margin:0 0 12px;flex:none}
+html.pc .pcfbgrid{flex:1;min-height:0;display:grid;grid-template-columns:320px minmax(0,1fr);gap:14px}
+html.pc .pcfbl{overflow:auto;display:flex;flex-direction:column;gap:6px;padding:2px 4px 8px 2px;scrollbar-width:thin}
+html.pc .pcfbi{border:0;text-align:left;font:inherit;color:var(--fg);cursor:pointer;border-radius:14px;background:var(--sunk);padding:10px 12px;border-left:4px solid var(--kc);display:flex;flex-direction:column;gap:4px;transition:background .15s,box-shadow .15s}
+html.pc .pcfbi:hover{background:color-mix(in srgb,var(--sunk) 60%,var(--surface))}
+html.pc .pcfbi.on{background:var(--surface);box-shadow:0 4px 14px rgba(0,0,0,.09)}
+html.pc .pcfbi b{font-size:13.5px;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html.pc .pcfbi.new b{font-weight:800}
+html.pc .pcfbi.new .pcfbih::after{content:"";width:8px;height:8px;border-radius:50%;background:#e8590c;margin-left:auto;flex:none}
+html.pc .pcfbih{display:flex;align-items:center;gap:8px}.pcfbih small{color:var(--muted);font-size:11.5px}
+html.pc .pcfbpgs{display:flex;gap:4px;flex-wrap:wrap}
+html.pc .pcfbk{background:color-mix(in srgb,var(--kc) 16%,transparent);color:var(--kc);border-radius:999px;padding:2px 9px;font-weight:800;font-size:11.5px;white-space:nowrap}
+html.pc .pcfbk.big,html.pc .pcfbpg.big{font-size:13px;padding:4px 11px}
+html.pc .pcfbd{background:var(--surface);border-radius:18px;border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:14px;overflow:auto;min-height:0}
+html.pc .pcfbd.empty{display:grid;place-items:center;text-align:center}
+html.pc .pcfbdh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.pcfbdh small{margin-left:auto;color:var(--muted);font-size:12.5px}
+html.pc .pcfbtx{white-space:pre-wrap;font-size:16px;line-height:1.55}
+html.pc .pcfbd .pcfbimgs img,html.pc .pcfbd .pcfbimgs .ph{width:auto;height:180px;max-width:100%;object-fit:contain;background:var(--sunk)}
+html.pc .pcfbkv{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+html.pc .pcfbkv div{background:var(--sunk);border-radius:12px;padding:8px 10px}.pcfbkv small{display:block;color:var(--muted);font-size:11.5px}.pcfbkv b{font-size:13.5px}
+html.pc .pcfbact{margin-top:auto;justify-content:flex-start}

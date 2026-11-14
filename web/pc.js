@@ -505,7 +505,7 @@ if (IS_PC){
     if (n>was && was>=0 && FB.last) { b.animate([{transform:"rotate(0)"},{transform:"rotate(-14deg) scale(1.12)",offset:.25},{transform:"rotate(10deg)",offset:.5},{transform:"rotate(-6deg)",offset:.75},{transform:"none"}],{duration:700}); }
   }
   async function fbLoad(force){
-    if (!updKey() || FB.busy || (!force && Date.now()-FB.last<4*60*1000)) return fbBtn();
+    if (!updKey() || FB.busy || (!force && Date.now()-FB.last<50*1000)) return fbBtn();
     FB.busy=true; const before=unread();
     try { const j=await devReq("feedlist"); FB.items=j.items||[]; const n=unread(); if (FB.last && n>before) toast(n-before===1?"Neues Feedback ist da":`${n-before} neue Feedbacks sind da`, ()=>fbOpen(), "Ansehen", 8000); FB.last=Date.now(); }
     catch(e){ FB.err = /Unbekannte Aktion/i.test(e.message) ? "Auf dem Server läuft noch die alte pair.php – bitte die neue in den Ordner „haushaltsbuch“ kopieren." : e.message; }
@@ -513,18 +513,33 @@ if (IS_PC){
   }
   document.body.insertAdjacentHTML("beforeend", `<div class="backdrop" id="pcFbBg" hidden><div class="sheet pcfbsheet" role="dialog" aria-modal="true" aria-label="Feedback-Eingang"><div class="sheet-head"><h2>Feedback-Eingang</h2><button class="icon-btn" data-pcfbx="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="pcFbBody"></div></div></div>`);
   const KIND={fehler:["Fehler","#c2410c"], idee:["Idee","#3d63a8"], lob:["Lob","#1a7a5c"], absturz:["Absturz","#b91c1c"]};
+  const KIC={fehler:"🐞", idee:"💡", lob:"💚", absturz:"💥"};
+  const PGI={Start:"🏠", Buchungen:"📋", Fixkosten:"📅", Einkauf:"🛒", Analyse:"📊", Einstellungen:"⚙️", allgemein:"🌐"};
+  const ago=ts=>{ const s=Date.now()/1000-ts; if (s<90) return "gerade"; if (s<3600) return `vor ${Math.round(s/60)} Min.`; if (s<86400) return `vor ${Math.round(s/3600)} Std.`; if (s<172800) return "gestern"; return new Date(ts*1000).toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"}); };
+  function fbParse(x){ const full=String(x.text||""), pm=full.match(/^📍 (.*)\n/), pgs=pm?pm[1].split(", "):[]; let rest=pm?full.slice(pm[0].length):full, meta=null;
+    const k=rest.lastIndexOf("\n\n---\n"); if (k>=0){ const m=rest.slice(k+6).trim(); rest=rest.slice(0,k);
+      const parts=m.replace(/^Finanz MAMI\s*/,"").split(" · "); meta={Version:parts[0]||"", Rolle:parts[1]||"", Gerät:parts[2]||"", Gruppe:parts[3]||""}; }
+    rest=rest.trim(); return {pgs, body:rest, title:(rest.split("\n")[0]||"(ohne Text)").slice(0,140), meta}; }
   function fbRender(){
     const el=$("pcFbBody"); if (!el) return;
     const crashes=FB.items.filter(x=>x.kind==="absturz").length;
-    const top = FB.items.length ? `<div class="row-btns" style="justify-content:flex-start;margin:0 0 10px"><button class="btn" data-pcfbcopyall="1">Alles Ungelesene für Claude kopieren</button>${crashes?`<button class="btn" data-pcfbcopyall="absturz">Alle ${crashes} Abstürze kopieren</button>`:""}</div>` : "";
     if (!FB.items.length){ el.innerHTML=`<p class="muted" style="padding:20px 0;text-align:center">${FB.err?esc(FB.err):"Noch kein Feedback angekommen."}</p>`; return; }
-    el.innerHTML=top+FB.items.map(x=>{ const [kl,kc]=KIND[x.kind]||KIND.idee, op=FB.open===x.id, d=new Date(x.ts*1000), full=String(x.text||""), pm=full.match(/^📍 (.*)\n/), pgs=pm?pm[1].split(", "):[], body=pm?full.slice(pm[0].length):full; x.images=Math.max(0,Math.min(5,parseInt(x.images,10)||0));
-      return `<div class="pcfb ${x.read?"":"new"} ${op?"open":""}" style="--kc:${kc}"><button class="pcfbh" data-pcfb="${esc(x.id)}"><span class="pcfbk">${kl}</span>${pgs.map(g=>`<span class="pcfbpg">${esc(g)}</span>`).join("")}<span class="pcfbt">${esc(body.split("\n")[0].slice(0,120))}</span><small>${d.toLocaleDateString("de-DE")} ${d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}${x.images?` · ${x.images} ${x.images===1?"Bild":"Bilder"}`:""}${x.mailed?" · ✉":""}</small></button>
-        ${op?`<div class="pcfbb"><pre>${esc(body)}</pre>${x.images?`<div class="pcfbimgs">${Array.from({length:x.images},(_,i)=>{ const u=FB.imgs[x.id+"/"+(i+1)]; return u?`<a data-pcfbimg="${esc(u)}"><img src="${esc(u)}" alt="Bild ${i+1}"></a>`:`<span class="ph">…</span>`; }).join("")}</div>`:""}
-          <div class="row-btns" style="justify-content:flex-start;margin-top:10px"><button class="btn primary" data-pcfbcopy="${esc(x.id)}">Für Claude kopieren</button><button class="btn" data-pcfbunread="${esc(x.id)}">Als ungelesen markieren</button><button class="btn danger" data-pcfbdel="${esc(x.id)}">${FB.delArm===x.id?"Wirklich endgültig löschen?":"Löschen"}</button></div></div>`:""}</div>`; }).join("");
+    if (!FB.open || !FB.items.some(x=>x.id===FB.open)) FB.open=null;
+    const top=`<div class="pcfbtop"><button class="btn" data-pcfbcopyall="1">Alles Ungelesene für Claude kopieren</button>${crashes?`<button class="btn" data-pcfbcopyall="absturz">Alle ${crashes} Abstürze kopieren</button>`:""}</div>`;
+    const list=FB.items.map(x=>{ const [kl,kc]=KIND[x.kind]||KIND.idee, f=fbParse(x); x.images=Math.max(0,Math.min(5,parseInt(x.images,10)||0));
+      return `<button class="pcfbi ${x.read?"":"new"} ${FB.open===x.id?"on":""}" data-pcfb="${esc(x.id)}" style="--kc:${kc}"><span class="pcfbih"><span class="pcfbk">${KIC[x.kind]||""} ${kl}</span><small>${esc(ago(x.ts))}${x.images?` · 🖼 ${x.images}`:""}</small></span><b>${esc(f.title)}</b>${f.pgs.length?`<span class="pcfbpgs">${f.pgs.map(g=>`<span class="pcfbpg">${esc(g)}</span>`).join("")}</span>`:""}</button>`; }).join("");
+    const x=FB.items.find(i=>i.id===FB.open); let det;
+    if (!x) det=`<div class="pcfbd empty"><div><div style="font-size:40px">📬</div><b>Meldung anklicken</b><p class="muted small">Dann erscheint sie hier groß – mit Bildern und Gerät.</p></div></div>`;
+    else { const [kl,kc]=KIND[x.kind]||KIND.idee, f=fbParse(x), d=new Date(x.ts*1000);
+      det=`<div class="pcfbd" style="--kc:${kc}"><div class="pcfbdh"><span class="pcfbk big">${KIC[x.kind]||""} ${kl}</span>${f.pgs.map(g=>`<span class="pcfbpg big">${PGI[g]||""} ${esc(g)}</span>`).join("")}<small>${d.toLocaleDateString("de-DE")} · ${d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}${x.mailed?" · ✉":""}</small></div>
+        <div class="pcfbtx">${esc(f.body)||'<span class="muted">(ohne Text)</span>'}</div>
+        ${x.images?`<div class="pcfbimgs">${Array.from({length:x.images},(_,n)=>{ const u=FB.imgs[x.id+"/"+(n+1)]; return u?`<a data-pcfbimg="${esc(u)}"><img src="${esc(u)}" alt="Bild ${n+1}"></a>`:`<span class="ph">…</span>`; }).join("")}</div>`:""}
+        ${f.meta?`<div class="pcfbkv">${Object.entries(f.meta).filter(([,v])=>v).map(([k,v])=>`<div><small>${k}</small><b>${esc(v)}</b></div>`).join("")}</div>`:""}
+        <div class="row-btns pcfbact"><button class="btn primary" data-pcfbcopy="${esc(x.id)}">Für Claude kopieren</button><button class="btn" data-pcfbunread="${esc(x.id)}">Als ungelesen markieren</button><button class="btn danger" data-pcfbdel="${esc(x.id)}">${FB.delArm===x.id?"Wirklich endgültig löschen?":"Löschen"}</button></div></div>`; }
+    el.innerHTML=top+`<div class="pcfbgrid"><div class="pcfbl">${list}</div>${det}</div>`;
   }
   async function fbShow(id){
-    FB.open = FB.open===id ? null : id; const x=FB.items.find(i=>i.id===id); fbRender();
+    FB.open = id; const x=FB.items.find(i=>i.id===id); fbRender();
     if (!x || FB.open!==id) return;
     if (!x.read){ x.read=true; fbBtn(); devReq("feedread","",{id}).catch(()=>{}); }
     for (let n=1;n<=x.images;n++){ const k=id+"/"+n; if (FB.imgs[k]) continue; try { const j=await devReq("feedimg", `&id=${encodeURIComponent(id)}&n=${n}`); FB.imgs[k]=j.d; if (FB.open===id) fbRender(); } catch(_){} }
@@ -543,7 +558,7 @@ if (IS_PC){
     const u=e.target.closest("[data-pcfbunread]"); if (u){ const x=FB.items.find(i=>i.id===u.dataset.pcfbunread); if (x){ x.read=false; FB.open=null; fbRender(); fbBtn(); devReq("feedread","",{id:x.id, unread:1}).catch(()=>{}); } return; }
     const dl=e.target.closest("[data-pcfbdel]"); if (dl){ const id=dl.dataset.pcfbdel;
       if (FB.delArm!==id){ FB.delArm=id; fbRender(); clearTimeout(FB.delT); FB.delT=setTimeout(()=>{ FB.delArm=null; fbRender(); }, 4000); return; }
-      FB.delArm=null; const row=dl.closest(".pcfb");
+      FB.delArm=null; const row=document.querySelector(".pcfbd");
       devReq("feeddel","",{id}).then(()=>{ const done=()=>{ FB.items=FB.items.filter(i=>i.id!==id); FB.open=null; fbRender(); fbBtn(); toast("Feedback gelöscht"); };
         if (row && !pcCalm()) row.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateX(60px) scale(.96)"}],{duration:260,easing:"ease-in"}).finished.then(done,done); else done(); })
         .catch(err=>toast(/Unbekannte Aktion/i.test(err.message)?"Zum Löschen bitte die neue pair.php auf den Server laden":"Löschen hat nicht geklappt: "+err.message));
@@ -552,6 +567,7 @@ if (IS_PC){
   });
   document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("pcFbBg").hidden) fbClose(); });
   setTimeout(()=>fbLoad(true), 5000); setInterval(()=>fbLoad(false), 60*1000);
+  addEventListener("focus", ()=>fbLoad(false)); document.addEventListener("visibilitychange", ()=>{ if (!document.hidden) fbLoad(false); });
   const _r4=render; render = (...a) => { const x=_r4(...a); try { fbBtn(); } catch(e){} return x; };
   function relBtn(){ let b=$("pcRel"); if (!updKey()){ if (b) b.remove(); return; }
     if (!b){ const h=$("pcInbox")||$("pcTheme"); if (!h) return; h.insertAdjacentHTML("beforebegin", `<button class="roundbtn pcrel" id="pcRel" aria-label="Entwickler" title="Entwickler: Freigabe, Tester, Testdaten"><svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg><i class="dot" hidden></i></button>`); b=$("pcRel"); }
