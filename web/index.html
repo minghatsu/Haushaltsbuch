@@ -306,6 +306,7 @@ html.touch .kpad{display:grid}
 .actbox .btn.primary{width:100%;justify-content:center}
 .invbg{position:fixed;inset:0;z-index:350;background:var(--bg);overflow:auto;display:flex;justify-content:center;animation:invin .32s cubic-bezier(.3,1.2,.5,1)}
 @keyframes invin{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.invrenew{margin:12px auto 0;display:block;color:var(--muted)}
 .invsh{flex:1;display:flex;flex-direction:column;padding:14px 0 0}
 .invseg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}.invseg button{border:0;border-radius:12px;padding:11px 4px;background:var(--sunk);color:var(--fg);font:700 13.5px var(--f-body);cursor:pointer}.invseg button.on{background:var(--accent);color:#fff}
 .invtxt{min-height:170px;font-size:15px;line-height:1.5;width:100%;box-sizing:border-box;resize:vertical}
@@ -2908,6 +2909,8 @@ document.addEventListener("click", async e=>{
   if (e.target.closest("[data-actpair]")){ const g=$("actBg"); if (g) g.hidden=true; document.body.classList.remove("locked"); pairShow("join"); return; }
   if (e.target.closest("[data-actscan]")){ try { const t=await qrLive(/[?&](?:i=)?[A-Za-z0-9]{6}\b|^\s*[A-Za-z0-9]{6}\s*$/); if (!t) return; UI.act.c=invCode(t); actTry(); } catch(x){ toast(x.message); } return; }
   if (e.target.closest("[data-invopen]")){ invOpen(); return; }
+  if (e.target.closest("[data-invrenew]")){ if (!UI.invArm){ UI.invArm=true; invRender(); clearTimeout(UI.invArmT); UI.invArmT=setTimeout(()=>{ UI.invArm=false; invRender(); }, 5000); return; }
+    UI.invArm=false; try { const r=await pairCall("invrenew", "", {dev:devId()}, true); UI.inv={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; invRender(); toast("Neuer Code – der alte gilt nicht mehr"); } catch(err){ toast(/Unbekannte Aktion/i.test(err.message||"")?"Dafür bitte die neue pair.php auf den Server laden":"Ging nicht: "+(err.message||"")); } return; }
   if (e.target.closest("[data-invsharego]")){ UI.invShare=true; UI.invText=null; invRender(); return; }
   if (e.target.closest("[data-invback]")){ UI.invShare=false; invRender(); return; }
   { const t=e.target.closest("[data-invtone]"); if (t){ UI.invTone=t.dataset.invtone; UI.invText=null; invRender(); return; } }
@@ -2949,7 +2952,8 @@ function invRender(){
     <div class="invhd"><button class="iconbtn" data-invclose aria-label="Zurück">‹</button><b id="invT">App weitergeben</b></div>
     <div class="invmid">${body}</div>
     ${I.code?`<button class="btn primary block" style="justify-content:center;gap:8px" data-invsharego>${ic("arrowUp",18)} Einladung verschicken</button>
-    <p class="small muted" style="margin:10px 4px 0;text-align:center">Wer scannt, kann die App am Handy laden oder sich den Link für den PC selbst schicken.</p>`:""}
+    <p class="small muted" style="margin:10px 4px 0;text-align:center">Wer scannt, kann die App am Handy laden oder sich den Link für den PC selbst schicken.</p>
+    ${updKey()?`<button class="link small invrenew" data-invrenew>${UI.invArm?"Wirklich? Der alte Code funktioniert dann nicht mehr – nochmal tippen":"↻ Neuen Code erzeugen"}</button>`:""}`:""}
   </div>`; }
 function invGrow(){ const ta=$("invTxt"); if (!ta) return; ta.style.height="auto"; ta.style.height=(ta.scrollHeight+4)+"px"; }
 function invMsg(tone, c){ const l=invLink(c), dev=!!updKey();

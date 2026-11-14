@@ -17,6 +17,7 @@ const MAX_CREATE_ALL_HOUR = 200;
 const MAX_TOTAL = 20000000000;
 const MIN_FREE = 2000000000;
 const INV_MAX = 20;
+const DEV_MAX = 50;
 
 define('DATA_DIR', (function (): string {
     $found = array_values(array_filter(glob(__DIR__ . '/pair-*', GLOB_ONLYDIR) ?: [], 'is_writable'));
@@ -139,25 +140,29 @@ try {
     if ($a === 'status') out(['pair' => true]);
 
     // Einladungen
-    if ($a === 'invmake' || $a === 'invinfo' || $a === 'activate') {
+    if ($a === 'invmake' || $a === 'invrenew' || $a === 'invinfo' || $a === 'activate') {
         db()->exec('CREATE TABLE IF NOT EXISTS invites (code TEXT PRIMARY KEY, owner TEXT UNIQUE, max INTEGER, lvl INTEGER DEFAULT 1, created INTEGER)');
         db()->exec('CREATE TABLE IF NOT EXISTS acts (code TEXT NOT NULL, dev TEXT NOT NULL, t INTEGER, PRIMARY KEY (code, dev))');
+        try { db()->exec('ALTER TABLE invites ADD COLUMN off INTEGER DEFAULT 0'); } catch (Throwable $e) { }
         $used = fn(string $c): int => (int)q('SELECT COUNT(*) FROM acts WHERE code = ?', [$c])->fetchColumn();
         $b = body(); $dev = (string)($b['dev'] ?? '');
-        if ($a === 'invmake') {
+        if ($a === 'invmake' || $a === 'invrenew') {
             if (!preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev)) fail('Gerät fehlt', 400);
             $h = trim((string)($_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '')));
             $lvl = null;
             if (preg_match('/^Dev\s/', $h)) { devCheck(); $lvl = 0; }
             else if (q('SELECT 1 FROM acts JOIN invites ON invites.code = acts.code WHERE acts.dev = ? AND invites.lvl = 0', [$dev])->fetch()) $lvl = 1;
             if ($lvl === null) fail('Dieses Gerät darf keine Einladungen verschicken', 403);
+            if ($a === 'invrenew' && $lvl !== 0) fail('Nur der Entwickler kann seinen Code erneuern', 403);
+            if ($a === 'invrenew') q("UPDATE invites SET off = 1, owner = owner || '~' || ? WHERE owner = ?", [(string)time(), $dev]);
             $r = q('SELECT code, max, lvl FROM invites WHERE owner = ?', [$dev])->fetch(PDO::FETCH_ASSOC);
+            if ($r && (int)$r['lvl'] === 0 && (int)$r['max'] === 0) { q('UPDATE invites SET max = ? WHERE code = ?', [DEV_MAX, $r['code']]); $r['max'] = DEV_MAX; }
             if (!$r) {
                 if (!ipCount('ipcreate', MAX_CREATE_PER_HOUR)) fail('Zu viele Versuche – bitte später noch einmal', 429);
                 ipBump('ipcreate');
                 $abc = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
                 do { $c = ''; for ($i = 0; $i < 6; $i++) $c .= $abc[random_int(0, strlen($abc) - 1)]; } while (q('SELECT 1 FROM invites WHERE code = ?', [$c])->fetch());
-                $max = $lvl === 0 ? 0 : INV_MAX;
+                $max = $lvl === 0 ? DEV_MAX : INV_MAX;
                 q('INSERT INTO invites (code, owner, max, lvl, created) VALUES (?, ?, ?, ?, ?)', [$c, $dev, $max, $lvl, time()]);
                 $r = ['code' => $c, 'max' => $max, 'lvl' => $lvl];
             }
@@ -165,8 +170,9 @@ try {
         }
         $c = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)($b['c'] ?? ($_GET['c'] ?? ''))));
         if (!ipCount('ipfails', 60)) fail('Zu viele falsche Versuche – bitte später noch einmal', 429);
-        $r = $c !== '' ? q('SELECT code, max, lvl FROM invites WHERE code = ?', [$c])->fetch(PDO::FETCH_ASSOC) : null;
+        $r = $c !== '' ? q('SELECT code, max, lvl, off FROM invites WHERE code = ?', [$c])->fetch(PDO::FETCH_ASSOC) : null;
         if (!$r) { ipBump('ipfails'); fail('Diesen Einladungscode gibt es nicht', 404); }
+        if ((int)($r['off'] ?? 0) === 1 && !($a === 'activate' && preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev) && q('SELECT 1 FROM acts WHERE code = ? AND dev = ?', [$c, $dev])->fetch())) fail('Dieser Einladungscode gilt nicht mehr – frag nach dem neuen', 410);
         $max = (int)$r['max']; $n = $used($c); $left = $max ? max(0, $max - $n) : -1;
         $inv = (int)$r['lvl'] === 0;
         if ($a === 'invinfo') out(['ok' => true, 'max' => $max, 'left' => $left]);
