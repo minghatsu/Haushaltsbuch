@@ -1011,8 +1011,8 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .parr{color:var(--accent);border:0;background:var(--sunk);border-radius:16px;padding:8px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font:inherit;transition:transform .2s}
 .parr:hover{background:color-mix(in srgb,var(--accent) 12%,var(--sunk))}.parr:active{transform:scale(.94)}
 .parr span{font:800 10px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}.parr small{font:700 10.5px var(--f-body);color:var(--accent);white-space:nowrap}
-.parr svg{transition:transform .32s cubic-bezier(.3,1.4,.5,1)}.proles.flip .parr svg{transform:rotate(180deg)}
-.proles.flip>div{transition:transform .32s ease-in,opacity .32s}.proles.flip>div:first-child{transform:translateX(60%) scale(.9);opacity:.4}.proles.flip>div:last-child{transform:translateX(-60%) scale(.9);opacity:.4}
+.parr svg{transition:transform .35s cubic-bezier(.3,1.4,.5,1)}.proles.back .parr svg{transform:rotate(180deg)}.proles.flip .parr svg{transform:rotate(180deg)}.proles.back.flip .parr svg{transform:rotate(0deg)}
+.proles.flip>div:last-child{transition:transform .32s ease-in,opacity .32s;transform:scale(.85);opacity:.4}
 .proles.flipin>div{animation:pflin .45s cubic-bezier(.3,1.4,.5,1)}@keyframes pflin{from{opacity:.4;transform:scale(.9)}}
 .psteps{margin:4px 0 12px;padding:0;list-style:none;counter-reset:ps;display:flex;flex-direction:column;gap:7px;font-size:13.5px;line-height:1.4;text-align:left}
 .psteps li{counter-increment:ps;display:block;position:relative;padding-left:32px;min-height:22px}.psteps li::before{content:counter(ps);position:absolute;left:0;top:-1px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:800 12px var(--f-body)}
@@ -9740,7 +9740,8 @@ function pairUi(){
   const el=$("loginPair"); if (!el) return; const st=UI.pstep||"start", hasData=S.tx.length>0||S.fixed.length>0;
   const code=pairCode();
   const meC={n:String(S.settings.name||"").trim(), f:devForm(), m:devModel(), p:S.settings.photo||"", main:isMain()};
-  const roles=(left,lsub,right,rsub,lc,rc)=>`<div class="proles"><div>${lc}<b>${left}</b><small>${lsub}</small></div><button class="parr" data-pflip="1" title="Umdrehen" aria-label="Richtung umdrehen"><span>Daten</span>${ic("right",22)}<small>⇄ umdrehen</small></button><div>${rc}<b>${right}</b><small>${rsub}</small></div></div>`;
+  // this device always stays on the left; the arrow shows which way the data go (> to the new device, < from the Hauptgerät)
+  const roles=(left,lsub,right,rsub,lc,rc,back)=>`<div class="proles ${back?"back":""}"><div>${lc}<b>${left}</b><small>${lsub}</small></div><button class="parr" data-pflip="1" title="Umdrehen" aria-label="Richtung umdrehen"><span>Daten</span>${ic("right",22)}<small>⇄ umdrehen</small></button><div>${rc}<b>${right}</b><small>${rsub}</small></div></div>`;
   const unknownAv=`<span class="pav big unk"><b>?</b></span>`, mainAv=`<span class="pav big"><b>${ic("phone",26)}</b><em class="pcrown">👑</em></span>`;
   el.innerHTML = st==="start" ? `<p class="pq">Wo sind deine Daten gerade?</p><div class="pchoice">
       <button class="pbig" data-pstep="first"><span class="pbi">👑</span><span><b>Hier – das wird mein Hauptgerät</b><small>Deine Daten bleiben auf diesem Gerät. Weitere Geräte fragen später hier an und du bestätigst sie.</small></span></button>
@@ -9749,7 +9750,7 @@ function pairUi(){
     : st==="first" ? `<p class="small" style="margin:0;line-height:1.5">Die App legt einen geheimen Schlüssel an, verschlüsselt deine Daten damit und lädt sie hoch. Danach koppelst du dein zweites Gerät mit dem QR-Code.</p>
       <div class="row-btns"><button class="btn" data-pstep="start">Zurück</button><button class="btn primary" id="pairFirst">Los geht's</button></div>`
     : st==="wait" && UI.rwait ? reqWaitHtml(UI.rwait)
-    : st==="join" ? `${roles("Hauptgerät","hat deine Daten","Dieses Gerät","kommt dazu",mainAv,cardAv({...meC, main:false},"big"))}
+    : st==="join" ? `${roles("Dieses Gerät","kommt dazu","Hauptgerät","hat deine Daten",cardAv({...meC, main:false},"big"),mainAv,true)}
       <ol class="psteps"><li>Öffne auf dem Hauptgerät <b>Einstellungen › Geräte › Gerät hinzufügen</b>.</li><li>Scanne hier den QR-Code von dort – oder tippe den Code ein.</li><li>Bestätige auf dem Hauptgerät die Anfrage.</li></ol>
       ${qrBtn("join", true)}
       <div class="field" style="margin:0"><label for="pairCode">… oder den Code vom Hauptgerät eintippen</label><input class="in" id="pairCode" placeholder="z. B. 7KF2-QX9M-3T" autocapitalize="characters" autocomplete="off" spellcheck="false" style="font:700 20px var(--f-display);letter-spacing:.08em;text-align:center"></div>
