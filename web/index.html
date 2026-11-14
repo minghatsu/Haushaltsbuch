@@ -8942,6 +8942,7 @@ async function ghCheck(manual, auto){
   finally { UPD.busy=false; UPD.ts=Date.now(); renderUpd(); updateBell(); }
 }
 function renderUpd(){
+  if (window.pcRelPaint) window.pcRelPaint();
   const card=$("updCard"); if (!card) return;
   if (!window.AndroidBridge){ card.style.display="none"; return; }
   const body=$("updBody"), st=$("updState");

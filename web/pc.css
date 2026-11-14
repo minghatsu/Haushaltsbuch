@@ -697,7 +697,7 @@ html.pc .pcring .pcravg{opacity:.75;font-size:11px;margin-top:2px}
 html.pc .pfsec{font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px}html.pc .pfsec small{text-transform:none;letter-spacing:0;font-weight:600}
 
 /* one help button next to the title instead of help + inbox up here */
-html.pc #pcHelp,html.pc #pcInbox{display:none!important}
+html.pc #pcHelp{display:none!important}
 
 /* Start-Kacheln · Farbstreifen: jede Kachel in der Farbe der Hauptseite, zu der sie gehört */
 html.pc{--pg-home:#1a7a5c;--pg-list:#3d63a8;--pg-fix:#c27c0e;--pg-shop:#d14d72;--pg-year:#0e8aa0;--pg-more:#6b5bb0}
@@ -818,3 +818,8 @@ html.pc .tab:not(.plus):not([aria-selected="true"]){color:var(--tc2,var(--tc))!i
 html.pc[data-pack] .pcacts .roundbtn:nth-child(6n+1){color:var(--pkc0)!important}html.pc[data-pack] .pcacts .roundbtn:nth-child(6n+2){color:var(--pkc1)!important}html.pc[data-pack] .pcacts .roundbtn:nth-child(6n+3){color:var(--pkc2)!important}html.pc[data-pack] .pcacts .roundbtn:nth-child(6n+4){color:var(--pkc3)!important}html.pc[data-pack] .pcacts .roundbtn:nth-child(6n+5){color:var(--pkc4)!important}html.pc[data-pack] .pcacts .roundbtn:nth-child(6n){color:var(--pkc5)!important}
 html.pc[data-pack] .pcss svg.i{color:var(--accent)}
 html.pc.istab #toast{z-index:60!important}
+
+/* Entwickler: Freigabe-Knopf in der Kopfzeile */
+html.pc .pcrel{position:relative}html.pc .pcrel .dot{position:absolute;top:6px;right:6px;width:10px;height:10px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 2px var(--surface)}
+html.pc .pcrelpop{position:fixed;z-index:80;width:330px;background:var(--surface);border-radius:20px;box-shadow:var(--shadow-lg);padding:6px 14px 14px;animation:pqpop .3s cubic-bezier(.3,1.4,.5,1)}
+html.pc .pcrelpop .relbox{background:none;padding:6px 0 0;margin:0}

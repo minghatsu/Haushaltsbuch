@@ -582,6 +582,17 @@ if (IS_PC){
   document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("pcFbBg").hidden) fbClose(); });
   setTimeout(()=>fbLoad(true), 5000); setInterval(()=>fbLoad(false), 60*1000);
   const _r4=render; render = (...a) => { const x=_r4(...a); try { fbBtn(); } catch(e){} return x; };
+  /* Entwickler: „Für alle freigeben“ direkt in der Kopfzeile, mit Punkt, wenn bei dir eine neuere Version läuft als bei allen */
+  function relBtn(){ let b=$("pcRel"); if (!updKey()){ if (b) b.remove(); return; }
+    if (!b){ const h=$("pcInbox")||$("pcTheme"); if (!h) return; h.insertAdjacentHTML("beforebegin", `<button class="roundbtn pcrel" id="pcRel" aria-label="Für alle freigeben" title="Für alle freigeben"><svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg><i class="dot" hidden></i></button>`); b=$("pcRel"); }
+    const d=b.querySelector(".dot"); if (d) d.hidden=!(REL.mine && REL.all && REL.mine!==REL.all); }
+  window.pcRelPaint=()=>{ try { relBtn(); const pop=$("pcRelPop"); if (pop) pop.innerHTML=relCardHtml(); } catch(_){} };
+  document.addEventListener("click", e=>{ const pop=$("pcRelPop");
+    if (e.target.closest("#pcRel")){ if (pop){ pop.remove(); return; } const r=e.target.closest("#pcRel").getBoundingClientRect(); const el=document.createElement("div"); el.id="pcRelPop"; el.className="pcrelpop";
+      el.style.top=(r.bottom+10)+"px"; el.style.left=Math.max(12, Math.min(innerWidth-342, r.right-330))+"px"; el.innerHTML=relCardHtml(); document.body.appendChild(el); relLoad(true); return; }
+    if (pop && !e.target.closest("#pcRelPop")) pop.remove(); });
+  const _r5=render; render = (...a) => { const x=_r5(...a); try { relBtn(); } catch(e){} return x; };
+  setTimeout(()=>{ relBtn(); relLoad(); }, 4000); setInterval(()=>{ if (document.visibilityState==="visible") relLoad(); }, 10*60e3);
 }
 /* ---------- Buchungen: diary (one card per day) + the chosen booking big on the right ("Beleg wird gedruckt") ---------- */
 if (IS_PC){
