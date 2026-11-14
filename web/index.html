@@ -694,6 +694,7 @@ textarea.in{font-family:inherit;line-height:1.45}
 .helpmenu{position:fixed;z-index:120;background:var(--surface);border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.22);padding:6px;min-width:250px;animation:hmin .18s cubic-bezier(.3,1.2,.5,1)}@keyframes hmin{from{opacity:0;transform:translateY(-6px) scale(.97)}}
 .helpmenu button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:10px 12px;border-radius:11px;font:600 14px var(--f-body);color:var(--fg);text-align:left;cursor:pointer}.helpmenu button:hover{background:var(--sunk)}
 .helpmenu .hmb{margin-left:auto;background:var(--bad);color:#fff;border-radius:999px;padding:0 7px;font-size:11px}
+.ptq.ptqph{width:60px;height:60px;margin:0;font-size:20px;background:var(--surface);box-shadow:var(--shadow);color:var(--accent)}
 .ptq{position:relative}.ptq .badge{position:absolute;top:-4px;right:-6px;min-width:16px;height:16px;border-radius:8px;background:var(--bad);color:#fff;font-size:10px;display:grid;place-items:center;padding:0 4px;font-style:normal}
 .ptq{width:24px;height:24px;border-radius:50%;border:0;background:var(--accent-soft);color:var(--accent);font:900 13px var(--f-body);margin-left:8px;vertical-align:middle;cursor:pointer;flex:none;transition:transform .2s}.ptq:hover{transform:scale(1.12)}
 .hello b#viewTitle{display:inline}
@@ -2717,7 +2718,8 @@ function ptourAuto(){ if (BG_RUN || TOUR.i>=0 || wizShould() || !PTOUR[UI.view] 
   clearTimeout(ptourAuto.t); const v=UI.view; ptourAuto.t=setTimeout(()=>{ if (UI.view===v && TOUR.i<0 && !document.querySelector(".backdrop:not([hidden])")) ptourOpen(v); }, 900); }
 function ptourBtn(){ const t=$("viewTitle"); if (!t) return; let b=$("ptourQ"); const on=!!PTOUR[UI.view];
   if (!b){ b=document.createElement("button"); b.id="ptourQ"; b.className="ptq"; b.type="button"; b.innerHTML="?<i class=\"badge\" hidden></i>"; b.setAttribute("aria-label","Hilfe"); b.title="Hilfe: Tour, Fragen & Antworten, Feedback"; t.after(b); }
-  { const g=document.documentElement.classList.contains("pc") && $("pcActs"), bl=$("bellBtn"); if (g){ if (b.parentElement!==g || b.nextElementSibling!==bl) (bl && bl.parentElement===g ? bl.before(b) : g.appendChild(b)); b.classList.add("roundbtn"); } }
+  { const g=document.documentElement.classList.contains("pc") && $("pcActs"), bl=$("bellBtn"); if (g){ if (b.parentElement!==g || b.nextElementSibling!==bl) (bl && bl.parentElement===g ? bl.before(b) : g.appendChild(b)); b.classList.add("roundbtn"); }
+    else if (bl && b.nextElementSibling!==bl){ bl.before(b); b.classList.add("roundbtn","ptqph"); } }   // phone: right next to the bell
   b.hidden=false; const ib=$("pcInbox"), n=ib?Number((ib.querySelector(".badge")||{}).textContent)||0:0, bd=b.querySelector(".badge"); if (bd){ bd.hidden=!n; bd.textContent=n||""; } }
 // one help button: tour of this page, questions & answers, feedback, what's new (on the PC also the developer inbox)
 function helpMenu(){ let m=$("helpMenu"); if (m && !m.hidden){ m.hidden=true; return; }
@@ -6546,7 +6548,7 @@ function phRow(k, c){ const col=themeCol(ACC_COL[k]||c);
   return `<button class="phr" ${act}><span class="saic" style="background:${col}">${ic(accIcon(k),18)}</span><span class="sat"><b>${esc(phTitle(k))}</b><small data-accsub="${k}">${esc(accSub(k))}</small></span><span class="phch">${CHEV}</span></button>`; }
 /* quick switches that really switch right here (App-Sperre and Abgleich need their page – they sit in the list below) */
 function quickSw(){ const dark=document.documentElement.dataset.theme==="dark", sec=lsGet("hb-scrsec")!=="0", nf=CAN_NOTIFY&&!!notifyCfg().on, lg=S.settings.logos===true;
-  return [["dark","Dunkel",dark,dark?"an":"aus"],
+  return [...(IS_TAB?[]:[["dark","Dunkel",dark,dark?"an":"aus"]]),   // tablet: light/dark sits in the header
     ...(CAN_NOTIFY?[["notify","Erinnerungen",nf,nf?"an":"aus"]]:[]),
     ...(window.AndroidBridge && typeof window.AndroidBridge.setSecure==="function" ? [["secure","Bildschirmschutz",sec,sec?"keine Screenshots":"aus"]] : []),
     ["logos","Läden-Logos laden",lg,lg?"an":"aus"]]; }
