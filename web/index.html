@@ -2633,7 +2633,7 @@ function tourGo(i){ const el=$("tourBg");
   const tv=TOUR.page==="danke"?UI.view:(TOUR.page||"home"); if (UI.view!==tv){ UI.view=tv; render(); }
   TOUR.i=i; const s=TOUR.steps[i];
   el.className="tourbg spot"; el.hidden=false; document.body.classList.add("locked");
-  el.innerHTML=`<div class="tring"></div><div class="tbub" role="dialog" aria-live="polite"><div class="ttop"><span class="tico">${ic(s.ic,22)}</span><div><small>${TOUR.page==="danke"?"Für Tester":`${TOUR.page?esc(PTOUR[TOUR.page].t)+" · ":""}Schritt ${i+1} von ${TOUR.steps.length}`}</small><b>${esc(s.t)}</b></div></div>
+  el.innerHTML=`<div class="tring"></div><div class="tbub" role="dialog" aria-live="polite"><div class="ttop"><span class="tico">${ic(s.ic,22)}</span><div><small>${TOUR.page==="danke"?"Feedback":`${TOUR.page?esc(PTOUR[TOUR.page].t)+" · ":""}Schritt ${i+1} von ${TOUR.steps.length}`}</small><b>${esc(s.t)}</b></div></div>
     <div class="tin">${s.p.map(x=>`<p>${esc(x)}</p>`).join("")}<div class="trow"><button class="tskip" data-tour="close">${TOUR.page?"Überspringen":"Beenden"}</button>
     <span class="tdots">${TOUR.steps.map((_,k)=>`<i class="${k===i?"on":""}"></i>`).join("")}</span>
     <span class="tnav">${i>0?`<button class="tback" data-tour="back" aria-label="Zurück">‹</button>`:""}<button class="tnext" data-tour="next">${i===TOUR.steps.length-1?"Fertig":"Weiter"}</button></span></div></div></div>`;
@@ -2715,11 +2715,11 @@ function ptourBtn(){ const t=$("viewTitle"); if (!t) return; let b=$("ptourQ"); 
   if (!b){ b=document.createElement("button"); b.id="ptourQ"; b.className="ptq"; b.type="button"; b.innerHTML="?<i class=\"badge\" hidden></i>"; b.setAttribute("aria-label","Hilfe"); b.title="Hilfe: Tour, Fragen & Antworten, Feedback"; t.after(b); }
   { const g=document.documentElement.classList.contains("pc") && $("pcActs"), bl=$("bellBtn"); if (g){ if (b.parentElement!==g || b.nextElementSibling!==bl) (bl && bl.parentElement===g ? bl.before(b) : g.appendChild(b)); b.classList.add("roundbtn"); }
     else if (bl && b.nextElementSibling!==bl){ bl.before(b); b.classList.add("roundbtn","ptqph"); } }
-  b.hidden=false; const ib=$("pcInbox"), n=ib?Number((ib.querySelector(".badge")||{}).textContent)||0:0, bd=b.querySelector(".badge"); if (bd){ bd.hidden=!n; bd.textContent=n||""; } fbQuickBtn(); }
+  b.hidden=false; const ib=$("pcInbox"), n=ib?Number((ib.querySelector(".badge")||{}).textContent)||0:0, bd=b.querySelector(".badge"); if (bd) bd.hidden=true; fbQuickBtn(); }
 /* Dankeskarte + Feedback-Knopf für Tester */
 const TESTPHASE=true;
 const DANKE={preview:false};
-function fbQuickOn(){ return (TESTPHASE && !updKey()) || DANKE.preview; }
+function fbQuickOn(){ return true; }
 function fbQuickBtn(){ let b=$("fbQuick"); const q=$("ptourQ");
   if (!fbQuickOn() || !q){ if (b) b.remove(); return; }
   if (!b){ b=document.createElement("button"); b.id="fbQuick"; b.type="button"; b.className="ptq fbq roundbtn"; b.setAttribute("aria-label","Feedback geben"); b.title="Feedback geben – Fehler, Ideen, Fragen";
@@ -2744,12 +2744,12 @@ function dankeOpen(preview){ if ($("dankeBg")) return; DANKE.preview=!!preview;
   document.body.appendChild(el); document.body.classList.add("locked");
   el.querySelector("[data-dkok]").onclick=()=>{ el.classList.add("out"); setTimeout(()=>{ el.remove(); document.body.classList.remove("locked"); dankeSpot(); }, 280); }; }
 function dankeSpot(){ fbQuickBtn(); if (!$("fbQuick")){ DANKE.preview=false; return; }
-  TOUR.page="danke"; TOUR.steps=[{sel:"#fbQuick", ic:"insight", t:"Fehler gefunden? Hier tippen!", p:["Mit diesem Knopf schickst du mir jederzeit Fehler, Ideen oder Fragen – von jeder Seite aus.", "Er verschwindet wieder, wenn die Testphase vorbei ist."]}];
+  TOUR.page="danke"; TOUR.steps=[{sel:"#fbQuick", ic:"insight", t:"Fehler gefunden? Hier tippen!", p:["Mit diesem Knopf schickst du mir jederzeit Fehler, Ideen oder Fragen – von jeder Seite aus."]}];
   tourGo(0); }
 function helpMenu(){ let m=$("helpMenu"); if (m && !m.hidden){ m.hidden=true; return; }
   if (!m){ m=document.createElement("div"); m.id="helpMenu"; m.className="helpmenu"; m.setAttribute("role","menu"); document.body.appendChild(m); }
   const inbox=$("pcInbox"), nIn=inbox?Number((inbox.querySelector(".badge")||{}).textContent)||0:0;
-  m.innerHTML=[PTOUR[UI.view]?["tour","🧭","Tour zu dieser Seite"]:null,["faq","❓","Fragen & Antworten"],["fb","✉️","Feedback schreiben"],inbox?["inbox","📥","Feedback-Eingang"+(nIn?` <span class="hmb">${nIn}</span>`:"")]:null,["neu","✨","Neu in dieser Version"],["big","🎓","Große Tour durch die App"],updKey()?["danke","💌","Dankeskarte (Tester) ansehen"]:null].filter(Boolean)
+  m.innerHTML=[PTOUR[UI.view]?["tour","🧭","Tour zu dieser Seite"]:null,["faq","❓","Fragen & Antworten"],["neu","✨","Neu in dieser Version"],["big","🎓","Große Tour durch die App"],updKey()?["danke","💌","Dankeskarte (Tester) ansehen"]:null].filter(Boolean)
     .map(([k,i,l])=>`<button role="menuitem" data-help="${k}"><span>${i}</span>${l}</button>`).join("");
   const b=$("ptourQ").getBoundingClientRect(); m.hidden=false; m.style.top=(b.bottom+8)+"px"; m.style.left=Math.max(8,Math.min(innerWidth-m.offsetWidth-8, b.left-8))+"px"; }
 document.addEventListener("click", e=>{ const h=e.target.closest("[data-help]"), m=$("helpMenu");
