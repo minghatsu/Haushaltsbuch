@@ -1008,7 +1008,12 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .pwait{text-align:center;padding:10px 4px}.pwait .pwt{display:block;font:800 18px var(--f-display);margin:2px 0 6px}.pwait p{margin:0 0 14px;line-height:1.5}
 .proles{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;text-align:center;margin:4px 0 6px}.proles>div{display:flex;flex-direction:column;align-items:center;gap:4px}
 .proles b{font-size:14px;margin-top:6px}.proles small{color:var(--muted);font-size:12px;line-height:1.3}
-.parr{color:var(--accent)}.parr span{font:800 10px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.parr{color:var(--accent);border:0;background:var(--sunk);border-radius:16px;padding:8px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font:inherit;transition:transform .2s}
+.parr:hover{background:color-mix(in srgb,var(--accent) 12%,var(--sunk))}.parr:active{transform:scale(.94)}
+.parr span{font:800 10px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}.parr small{font:700 10.5px var(--f-body);color:var(--accent);white-space:nowrap}
+.parr svg{transition:transform .32s cubic-bezier(.3,1.4,.5,1)}.proles.flip .parr svg{transform:rotate(180deg)}
+.proles.flip>div{transition:transform .32s ease-in,opacity .32s}.proles.flip>div:first-child{transform:translateX(60%) scale(.9);opacity:.4}.proles.flip>div:last-child{transform:translateX(-60%) scale(.9);opacity:.4}
+.proles.flipin>div{animation:pflin .45s cubic-bezier(.3,1.4,.5,1)}@keyframes pflin{from{opacity:.4;transform:scale(.9)}}
 .psteps{margin:4px 0 12px;padding:0;list-style:none;counter-reset:ps;display:flex;flex-direction:column;gap:7px;font-size:13.5px;line-height:1.4;text-align:left}
 .psteps li{counter-increment:ps;display:block;position:relative;padding-left:32px;min-height:22px}.psteps li::before{content:counter(ps);position:absolute;left:0;top:-1px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:800 12px var(--f-body)}
 .pq{margin:0 0 10px;font:800 16px var(--f-display)}
@@ -9717,6 +9722,7 @@ async function pairJoin(code){
   pairSave(p); MODE="pair"; SERVER=pairUrl(); SYNC.token=await pairToken();
   try { await api("pull", {qs:"&since=999999999"}); }
   catch(e){ SYNC.token=""; pairSave(null); throw new Error(e.status===401 ? "Dieser Code gehört zu keiner Kopplung (mehr)." : "Server nicht erreichbar – bist du online?"); }
+  try { localStorage.removeItem("hb-main"); } catch(_){}   // this device came in – the other one is the Hauptgerät
   loginDone(SYNC.token, false, "Gekoppelt – Daten werden geladen");
   if (!actGet()){ actSet({k:"pair"}); const g=$("actBg"); if (g) g.hidden=true; document.body.classList.remove("locked"); legalGate(); }   // own extra device: coupling unlocks it, no invitation code needed
 }
@@ -9734,7 +9740,7 @@ function pairUi(){
   const el=$("loginPair"); if (!el) return; const st=UI.pstep||"start", hasData=S.tx.length>0||S.fixed.length>0;
   const code=pairCode();
   const meC={n:String(S.settings.name||"").trim(), f:devForm(), m:devModel(), p:S.settings.photo||"", main:isMain()};
-  const roles=(left,lsub,right,rsub,lc,rc)=>`<div class="proles"><div>${lc}<b>${left}</b><small>${lsub}</small></div><div class="parr"><span>Daten</span>${ic("right",22)}</div><div>${rc}<b>${right}</b><small>${rsub}</small></div></div>`;
+  const roles=(left,lsub,right,rsub,lc,rc)=>`<div class="proles"><div>${lc}<b>${left}</b><small>${lsub}</small></div><button class="parr" data-pflip="1" title="Umdrehen" aria-label="Richtung umdrehen"><span>Daten</span>${ic("right",22)}<small>⇄ umdrehen</small></button><div>${rc}<b>${right}</b><small>${rsub}</small></div></div>`;
   const unknownAv=`<span class="pav big unk"><b>?</b></span>`, mainAv=`<span class="pav big"><b>${ic("phone",26)}</b><em class="pcrown">👑</em></span>`;
   el.innerHTML = st==="start" ? `<p class="pq">Wo sind deine Daten gerade?</p><div class="pchoice">
       <button class="pbig" data-pstep="first"><span class="pbi">👑</span><span><b>Hier – das wird mein Hauptgerät</b><small>Deine Daten bleiben auf diesem Gerät. Weitere Geräte fragen später hier an und du bestätigst sie.</small></span></button>
@@ -9743,14 +9749,14 @@ function pairUi(){
     : st==="first" ? `<p class="small" style="margin:0;line-height:1.5">Die App legt einen geheimen Schlüssel an, verschlüsselt deine Daten damit und lädt sie hoch. Danach koppelst du dein zweites Gerät mit dem QR-Code.</p>
       <div class="row-btns"><button class="btn" data-pstep="start">Zurück</button><button class="btn primary" id="pairFirst">Los geht's</button></div>`
     : st==="wait" && UI.rwait ? reqWaitHtml(UI.rwait)
-    : st==="join" ? `${roles("Hauptgerät","hat deine Daten","Dieses Gerät","kommt dazu",mainAv,cardAv(meC,"big"))}
-      <ol class="psteps"><li>Öffne auf dem Hauptgerät <b>Einstellungen › Geräte &amp; Abgleich › Gerät hinzufügen</b>.</li><li>Scanne hier den QR-Code von dort – oder tippe den Code ein.</li><li>Bestätige auf dem Hauptgerät die Anfrage.</li></ol>
+    : st==="join" ? `${roles("Hauptgerät","hat deine Daten","Dieses Gerät","kommt dazu",mainAv,cardAv({...meC, main:false},"big"))}
+      <ol class="psteps"><li>Öffne auf dem Hauptgerät <b>Einstellungen › Geräte › Gerät hinzufügen</b>.</li><li>Scanne hier den QR-Code von dort – oder tippe den Code ein.</li><li>Bestätige auf dem Hauptgerät die Anfrage.</li></ol>
       ${qrBtn("join", true)}
       <div class="field" style="margin:0"><label for="pairCode">… oder den Code vom Hauptgerät eintippen</label><input class="in" id="pairCode" placeholder="z. B. 7KF2-QX9M-3T" autocapitalize="characters" autocomplete="off" spellcheck="false" style="font:700 20px var(--f-display);letter-spacing:.08em;text-align:center"></div>
       ${hasData?`<div class="notice warn"><span>Auf <b>diesem</b> Gerät sind schon Daten. Sie werden durch die vom Hauptgerät ersetzt. Mach vorher ein Backup, wenn du unsicher bist.</span></div>`:""}
       <button class="link small" id="pairRecv" style="margin:2px auto 0;display:block">Scannen klappt nicht? Andersherum: hier einen QR-Code zeigen und mit dem Hauptgerät scannen</button>
       <div class="row-btns"><button class="btn" data-pstep="start">Zurück</button><button class="btn primary" id="pairJoin">Anfrage senden</button></div>
-      <p class="small muted" style="text-align:center;margin:0"><button class="link small" data-pstep="first">Moment – meine Daten sind auf <b>diesem</b> Gerät</button></p>`
+      <p class="small muted" style="text-align:center;margin:0"><button class="link small" data-pstep="${SYNC.token&&pairState()?"show":"first"}">Moment – meine Daten sind auf <b>diesem</b> Gerät</button></p>`
     : st==="recv" ? `<p class="small" style="margin:0;line-height:1.5">Öffne auf dem Handy <b>Einstellungen › Abgleich › Weiteres Gerät koppeln</b>, tippe auf <b>„QR-Code vom anderen Gerät scannen“</b> und fotografiere diesen Code:</p>
       <div class="pqr">${UI.precv&&UI.precv.v?qrSvg("HBR1."+UI.precv.v+"."+UI.precv.k,300):`<div class="small muted" style="padding:90px 0">Wird vorbereitet …</div>`}</div>
       <p class="small" style="margin:0;text-align:center">… oder am Handy diesen Code eintippen:</p>
@@ -9853,6 +9859,13 @@ async function pairSendTo(t){   // the phone side: put this device's pairing cod
 function pairShow(step){ UI.pstep=step||UI.pstep||"start"; const bg=$("loginBg"); bg.hidden=false; $("loginErr").textContent=""; loginModeUi(); pairUi(); }
 document.addEventListener("click", async e=>{
   const s=e.target.closest("[data-pstep]"); if (s){ UI.pstep=s.dataset.pstep; $("loginErr").textContent=""; pairUi(); return; }
+  const fl=e.target.closest("[data-pflip]"); if (fl){   // arrow tapped: the data should go the other way round
+    const box=fl.closest(".proles"); if (box) box.classList.add("flip");
+    setTimeout(()=>{ const st=UI.pstep; $("loginErr").textContent="";
+      UI.pstep = st==="show" ? "join" : (SYNC.token && pairState()) ? "show" : "first";
+      if (UI.pstep==="join") shortDrop(); pairUi();
+      const nb=document.querySelector("#loginPair .proles"); if (nb){ nb.classList.add("flipin"); setTimeout(()=>nb.classList.remove("flipin"), 450); } }, 320);
+    return; }
   if (e.target.closest("#pairFirst")){ const b=e.target.closest("#pairFirst"); b.disabled=true; b.textContent="Wird eingerichtet …";
     if (actNeed()){ $("loginBg").hidden=true; actGate(); return; }   /* a brand-new device needs an invitation first */
     try { await pairStart(); $("loginBg").hidden=false; UI.pstep="show"; loginModeUi(); pairUi(); }
