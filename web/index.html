@@ -311,6 +311,7 @@ html.touch .kpad{display:grid}
 .legalbg{position:fixed;inset:0;z-index:400;background:color-mix(in srgb,var(--bg) 70%,#000);display:grid;place-items:end center;overflow:auto;padding:16px}
 .legalbox{background:var(--surface);border-radius:26px;padding:22px 18px 18px;width:100%;max-width:520px;box-shadow:0 20px 50px -20px rgba(0,0,0,.5);margin:auto 0 0}
 .actin{width:100%;font:800 26px ui-monospace,Consolas,monospace;letter-spacing:.18em;text-align:center;text-transform:uppercase;padding:14px;border-radius:16px;border:2px solid var(--line);background:var(--bg);color:var(--fg)}.actin:focus{outline:none;border-color:var(--accent)}
+.actor{display:flex;align-items:center;gap:10px;margin:16px 0 12px;color:var(--muted);font-size:12px}.actor::before,.actor::after{content:"";flex:1;height:1px;background:var(--line)}
 .actin::placeholder{font-size:18px;letter-spacing:.06em;text-transform:none}
 .actbox .btn.primary{width:100%;justify-content:center}
 .invbg{position:fixed;inset:0;z-index:350;background:var(--bg);overflow:auto;display:flex;justify-content:center;animation:invin .32s cubic-bezier(.3,1.2,.5,1)}
@@ -1411,6 +1412,10 @@ html[data-pack][data-theme="dark"]{--accent:color-mix(in srgb,var(--pk) 62%,#fff
   --pkbar:linear-gradient(90deg,color-mix(in srgb,var(--pk) 26%,var(--surface)),color-mix(in srgb,var(--pk2) 20%,var(--surface)))}}
 html[data-pack] .acard:not([style*="background"]):not(.minus):not(.alt){background:linear-gradient(140deg,var(--pk),var(--pk2))!important}
 html[data-pack] .tabs{background:var(--pkbar)!important}
+body:has(#fanBg.show) #toast{opacity:0!important;pointer-events:none!important}
+html[data-pack] .top #bellBtn{color:var(--pkc0)}html[data-pack] .top #settingsBtn{color:var(--pkc1)}html[data-pack] .monthpill button{color:var(--accent)}
+html[data-pack] .search svg.i,html[data-pack] .setsrch svg.i{color:var(--accent)!important}
+html[data-pack] .empty .ictile{background:color-mix(in srgb,var(--pkc2) 14%,transparent);color:var(--pkc2)}
 html[data-pack] [data-view] .card:not(.hblock>.card):not(.acard){border-top:4px solid color-mix(in srgb,var(--pk) 70%,var(--pk2))}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
@@ -2739,6 +2744,9 @@ function actGate(){
     ${canQrLive()?`<button class="btn block" style="justify-content:center;gap:8px;margin-top:10px" data-actscan>${ic("camera",18)} QR-Code der Einladung scannen</button>`:""}
     <p class="small" id="actErr" style="color:var(--bad);min-height:1.2em;margin:10px 0 6px">${esc(A.err)}</p>
     <button class="btn primary" id="actOk" ${A.busy?"disabled":""}>${A.busy?"Wird geprüft …":"Freischalten"}</button>
+    <div class="actor"><span>oder</span></div>
+    <button class="btn block" style="justify-content:center;gap:8px" data-actpair>${ic("phone",18)} Ich habe die App schon – Gerät koppeln</button>
+    <p class="small muted" style="margin:8px 2px 0;text-align:center">Für dein eigenes zweites Gerät brauchst du keinen Code.</p>
   </div>`;
 }
 async function actTry(){
@@ -2751,6 +2759,7 @@ document.addEventListener("input", e=>{ if (e.target.id==="actCode" && UI.act){ 
 document.addEventListener("keydown", e=>{ if (e.key==="Enter" && e.target.id==="actCode") actTry(); });
 document.addEventListener("click", async e=>{
   if (e.target.closest("#actOk")){ actTry(); return; }
+  if (e.target.closest("[data-actpair]")){ const g=$("actBg"); if (g) g.hidden=true; document.body.classList.remove("locked"); pairShow("join"); return; }
   if (e.target.closest("[data-actscan]")){ try { const t=await qrLive(/[?&]i=[A-Za-z0-9]{6}|^\s*[A-Za-z0-9]{6}\s*$/); if (!t) return; UI.act.c=invCode(t); actTry(); } catch(x){ toast(x.message); } return; }
   if (e.target.closest("[data-invopen]")){ invOpen(); return; }
   if (e.target.closest("[data-invclose]")){ const el=$("invBg"); if (el) el.remove(); return; }
@@ -3764,7 +3773,9 @@ document.addEventListener("click", e=>{ if (!e.target.closest("[data-debtgo]")) 
 function fanOpen(){
   const pl=document.querySelector(".tab.plus"), r=pl.getBoundingClientRect(), fan=$("fanBg"), R=Math.min(118, innerWidth*0.29);
   fan.style.setProperty("--cx", (r.left+r.width/2)+"px"); fan.style.setProperty("--cy", (r.top+r.height/2)+"px");
-  [150,90,30].forEach((a,i)=>{ const b=fan.children[i], t=a*Math.PI/180; b.style.setProperty("--dx", Math.round(Math.cos(t)*R)+"px"); b.style.setProperty("--dy", Math.round(-Math.sin(t)*R - 26)+"px"); });
+  // tablet: the plus sits at the right end of the dock, so the buttons fan out up and to the left, clear of the dock
+  const tab=document.documentElement.classList.contains("istab"), RR=tab?130:R, lift=tab?70:26;
+  (tab?[168,128,90]:[150,90,30]).forEach((a,i)=>{ const b=fan.children[i], t=a*Math.PI/180; b.style.setProperty("--dx", Math.round(Math.cos(t)*RR)+"px"); b.style.setProperty("--dy", Math.round(-Math.sin(t)*RR - lift)+"px"); });
   ["#3d63a8","#d14d72","#c27c0e"].forEach((c,i)=>fan.children[i].style.setProperty("--fc", themeCol(c, [6,1,3][i])));
   fan.classList.remove("closing"); fan.hidden=false; pl.classList.add("open"); requestAnimationFrame(()=>requestAnimationFrame(()=>fan.classList.add("show")));
   try { navigator.vibrate && navigator.vibrate(8); } catch(e){}
@@ -6538,7 +6549,7 @@ const TABDEF={home:["Start","#1a7a5c","home"],list:["Buchungen","#3d63a8","list"
 const PACK_MAIN={gruen:["#147A5B","#2e9c74"], ozean:["#0369a1","#0891b2"], sonne:["#ea580c","#db2777"], beere:["#7c3aed","#be185d"], erde:["#8a5a3a","#a16207"], wald:["#166534","#3f6212"], nacht:["#4338ca","#1e293b"], pastell:["#6b9bd1","#d17ba6"], mono:["#374151","#6b7280"]};
 function applyPack(){ const r=document.documentElement, t=(S.settings&&S.settings.theme)||"gruen", P=PACK_MAIN[t];
   if (!P){ r.removeAttribute("data-pack"); r.style.removeProperty("--pk"); r.style.removeProperty("--pk2"); return; }
-  r.setAttribute("data-pack", t); r.style.setProperty("--pk", P[0]); r.style.setProperty("--pk2", P[1]); }
+  r.setAttribute("data-pack", t); r.style.setProperty("--pk", P[0]); r.style.setProperty("--pk2", P[1]); packCols().slice(0,6).forEach((c,i)=>r.style.setProperty("--pkc"+i, c)); }
 function applyTabColors(){ const ks=Object.keys(TABDEF); applyPack(); ks.forEach((k,i)=>{ const c=userCol("tab", k) || (isGreen() ? themeCol(TABDEF[k][1], i) : ""); if (c) document.documentElement.style.setProperty("--pg-"+k, c); else document.documentElement.style.removeProperty("--pg-"+k); });   // PC: page colours follow the chosen colours too
   document.querySelectorAll(".tabs .tab[data-go]").forEach(b=>{ const k=b.dataset.go, c=userCol("tab", k) || (isGreen() && TABDEF[k] ? themeCol(TABDEF[k][1], ks.indexOf(k)) : ""); if (c) b.style.setProperty("--tcol", c); else b.style.removeProperty("--tcol"); }); }
 function renderColorEd(){
@@ -9337,7 +9348,7 @@ $("loginGo").onclick = doLogin;
 })();
 $("syncMoreBtn").onclick = ()=>{ const m=$("syncMore"), open=m.hidden; m.hidden=!open; $("syncMoreBtn").setAttribute("aria-expanded",String(open)); };
 $("loginX").onclick = ()=>{ if (SYNC.token){ $("loginBg").hidden=true; UI.pstep="start"; pairRecvStop(); renderSyncInfo(); } else $("loginSkip").click(); };
-$("loginSkip").onclick = ()=>{ SYNC.skipped=true; saveSync(); $("loginBg").hidden=true; renderSyncDot(); if (wizShould()) setTimeout(()=>{ if (wizShould()) wizOpen(); }, 300); toast("Ohne Abgleich – anmelden kannst du dich unter Einstellungen"); };
+$("loginSkip").onclick = ()=>{ if (actNeed()){ $("loginBg").hidden=true; actGate(); return; }   /* new device that came here from the invitation screen */ SYNC.skipped=true; saveSync(); $("loginBg").hidden=true; renderSyncDot(); if (wizShould()) setTimeout(()=>{ if (wizShould()) wizOpen(); }, 300); toast("Ohne Abgleich – anmelden kannst du dich unter Einstellungen"); };
 function renderSyncDot(){
   const b=$("settingsBtn"); if (!SYNCABLE){ return; }
   const col = !SYNC.token ? "var(--faint)" : SYNC.state==="ok" ? "var(--good)" : SYNC.state==="pending" ? "var(--warn)" : "var(--bad)";
@@ -9547,6 +9558,7 @@ async function pairJoin(code){
   try { await api("pull", {qs:"&since=999999999"}); }
   catch(e){ SYNC.token=""; pairSave(null); throw new Error(e.status===401 ? "Dieser Code gehört zu keiner Kopplung (mehr)." : "Server nicht erreichbar – bist du online?"); }
   loginDone(SYNC.token, false, "Gekoppelt – Daten werden geladen");
+  if (!actGet()){ actSet({k:"pair"}); const g=$("actBg"); if (g) g.hidden=true; document.body.classList.remove("locked"); legalGate(); }   // own extra device: coupling unlocks it, no invitation code needed
 }
 // reading a QR code from a photo: the browser's own detector if there is one, otherwise the built-in jsQR
 async function qrFromFile(file){
@@ -9674,6 +9686,7 @@ function pairShow(step){ UI.pstep=step||UI.pstep||"start"; const bg=$("loginBg")
 document.addEventListener("click", async e=>{
   const s=e.target.closest("[data-pstep]"); if (s){ UI.pstep=s.dataset.pstep; $("loginErr").textContent=""; pairUi(); return; }
   if (e.target.closest("#pairFirst")){ const b=e.target.closest("#pairFirst"); b.disabled=true; b.textContent="Wird eingerichtet …";
+    if (actNeed()){ $("loginBg").hidden=true; actGate(); return; }   /* a brand-new device needs an invitation first */
     try { await pairStart(); $("loginBg").hidden=false; UI.pstep="show"; loginModeUi(); pairUi(); }
     catch(x){ console.warn("pair", x); pairSave(null); SYNC.token=""; $("loginErr").textContent = !(window.crypto&&crypto.subtle) ? "Koppeln geht nur in der Handy- oder PC-App." : x.status===429 ? x.message : "Server nicht erreichbar – bist du online?"; b.disabled=false; b.textContent="Los geht's"; } return; }
   if (e.target.closest("#pairJoin")){ const b=e.target.closest("#pairJoin"); b.disabled=true;
