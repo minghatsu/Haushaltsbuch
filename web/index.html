@@ -984,6 +984,35 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .tediting .sgl{margin-bottom:12px}
 .tediting .sqk button span{outline:2px dashed color-mix(in srgb,var(--tc) 55%,transparent);outline-offset:3px}
 
+/* Kopplungs-Anfrage: Profilbilder, Verbindungslinie, Rollen */
+.pav{position:relative;width:64px;height:64px;border-radius:50%;display:inline-grid;place-items:center;flex:none;background:var(--accent);color:#fff;border:4px solid var(--surface);box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.pav.big{width:84px;height:84px}.pav>b{font:800 30px var(--f-display)}.pav.big>b{font-size:34px}.pav>svg.i{width:32px!important;height:32px!important}
+.pav>img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.pav>i{position:absolute;right:-6px;bottom:-4px;width:28px;height:28px;border-radius:50%;background:var(--surface);color:var(--accent);display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.2);font-style:normal}
+.pav .pcrown{position:absolute;top:-20px;left:50%;transform:translateX(-50%) rotate(-8deg);font-size:24px;font-style:normal;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.pav.unk{background:var(--sunk);color:var(--muted);border-style:dashed;border-color:var(--line)}.pav.gmav{background:linear-gradient(140deg,var(--c1),var(--c5))}
+.plink{display:flex;align-items:center;justify-content:center;gap:4px;margin:6px 0 14px}
+.pline{position:relative;flex:0 0 74px;height:4px;margin:0 2px;background:repeating-linear-gradient(90deg,var(--accent) 0 8px,transparent 8px 14px);background-size:28px 4px;animation:plflow .9s linear infinite;border-radius:2px}
+.pline>i{position:absolute;top:50%;left:0;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 25%,transparent);animation:plball 1.6s cubic-bezier(.45,0,.55,1) infinite alternate}
+.pline>b{position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:var(--good,var(--accent));color:#fff;display:grid;place-items:center;font-size:18px;transform:scale(0);transition:transform .45s cubic-bezier(.3,1.8,.5,1)}
+@keyframes plflow{to{background-position:28px 0}}@keyframes plball{to{left:100%}}
+.ok .pline{animation:none;background:var(--good,var(--accent))}.ok .pline>i{display:none}.ok .pline>b{transform:scale(1)}
+.ok .plink .pav{animation:plbump .5s cubic-bezier(.3,1.6,.5,1)}.ok .plink .pav:last-child{animation-delay:.08s}
+@keyframes plbump{40%{transform:scale(1.12)}}
+.preqbg{position:fixed;inset:0;z-index:400;background:rgba(8,20,15,.5);display:grid;place-items:center;padding:16px;animation:pqin .25s ease-out}
+@keyframes pqin{from{opacity:0}}
+.preqbox{width:min(420px,100%);background:var(--surface);border-radius:28px;padding:24px 22px 20px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.35);animation:pqpop .4s cubic-bezier(.3,1.4,.5,1)}
+@keyframes pqpop{from{transform:translateY(30px) scale(.94);opacity:0}}
+.preqbox h2{margin:4px 0 6px;font:800 21px var(--f-display);line-height:1.25}.preqbox p{margin:0 0 16px;line-height:1.5}
+.preqbox .btn{width:100%;justify-content:center;margin-top:8px}.preqbox .preqno{background:var(--bad-soft);color:var(--bad)}
+.pwait{text-align:center;padding:10px 4px}.pwait .pwt{display:block;font:800 18px var(--f-display);margin:2px 0 6px}.pwait p{margin:0 0 14px;line-height:1.5}
+.proles{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;text-align:center;margin:4px 0 6px}.proles>div{display:flex;flex-direction:column;align-items:center;gap:4px}
+.proles b{font-size:14px;margin-top:6px}.proles small{color:var(--muted);font-size:12px;line-height:1.3}
+.parr{color:var(--accent)}.parr span{font:800 10px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.psteps{margin:4px 0 12px;padding:0;list-style:none;counter-reset:ps;display:flex;flex-direction:column;gap:7px;font-size:13.5px;line-height:1.4;text-align:left}
+.psteps li{counter-increment:ps;display:block;position:relative;padding-left:32px;min-height:22px}.psteps li::before{content:counter(ps);position:absolute;left:0;top:-1px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:800 12px var(--f-body)}
+.pq{margin:0 0 10px;font:800 16px var(--f-display)}
+.relbox{display:flex;flex-direction:column;gap:8px;margin-top:14px;padding:14px;border-radius:16px;background:var(--sunk)}.relbox .btn{justify-content:center}
 /* Farben page */
 .colsec{margin-bottom:16px}.colpkg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0}.colpkg button{border:0;border-radius:14px;padding:10px;background:var(--sunk);display:flex;flex-direction:column;gap:7px;font:700 13px var(--f-body);color:var(--fg)}.colpkg button i{height:14px;border-radius:9px}.colpkg button[aria-pressed=true]{outline:2px solid var(--accent);background:var(--accent-soft)}
 .colpk{--c:hsl(var(--h) var(--s) var(--l));padding:6px 2px 16px;display:flex;flex-direction:column;gap:10px}
@@ -2963,7 +2992,7 @@ function devId(){ let id=null; try{ id=localStorage.getItem("hb-devid"); if (!id
 function devType(){ return IS_DESK ? "pc" : window.AndroidBridge ? "phone" : "web"; }
 function devList(){ try{ return JSON.parse(localStorage.getItem("hb-devs")||"{}"); }catch(e){ return {}; } }
 function devStore(id, data){ const d=devList(); if (data===null) delete d[id]; else d[id]=data; try{ localStorage.setItem("hb-devs", JSON.stringify(d)); }catch(e){} }
-function devMe(){ const d=devList()[devId()]||{}; return { name: d.name || (devType()==="pc"?"PC":devType()==="phone"?"Handy":"Browser"), model:devModel(), form:devForm(), type:devType(), ver:curVerShort(), seen:Date.now() }; }
+function devMe(){ const d=devList()[devId()]||{}; return { name: d.name || (devType()==="pc"?"PC":devType()==="phone"?"Handy":"Browser"), model:devModel(), form:devForm(), type:devType(), ver:curVerShort(), seen:Date.now(), ...(isMain()?{main:true}:{}) }; }
 /* how a device is called: its model ("Galaxy S23"), or a name given to it by hand earlier */
 function devShown(d){ const n=String((d&&d.name)||""); return n && !["PC","Handy","Browser","Gerät"].includes(n) ? n : (d&&d.model) || n || "Gerät"; }
 function devPing(force){ if (!SYNCABLE || !SYNC.token || (S.settings.devOut||{})[devId()]) return; const me=devList()[devId()]; if (!force && me && Date.now()-(me.seen||0)<6*3600e3 && me.ver===curVerShort()) return;
@@ -2973,10 +3002,10 @@ function renderGeraete(){ const el=$("geraeteEd"); if (!el) return; if (el.conta
   const me=devId(), out=S.settings.devOut||{}, L=Object.entries(devList()).filter(([id])=>!out[id]); if (!L.some(([id])=>id===me)) L.unshift([me, devMe()]);
   const ago=t=>{ const m=Math.round((Date.now()-t)/60000); return m<2?"gerade eben":m<60?`vor ${m} Min.`:m<1440?`vor ${Math.round(m/60)} Std.`:`vor ${Math.round(m/1440)} Tagen`; };
   el.innerHTML=`${!SYNCABLE||!SYNC.token?`<div class="notice info" style="margin-bottom:12px"><span>Der Abgleich ist aus – andere Geräte siehst du erst, wenn er an ist.</span><button class="btn" data-spgo="sync">Abgleich</button></div>`:""}
-    ${L.sort((a,b)=>(b[0]===me)-(a[0]===me)||(b[1].seen||0)-(a[1].seen||0)).map(([id,d])=>`<div class="exr">${(()=>{ const pn=String(S.settings.name||"").trim(), f=d.form||(d.type==="pc"?"pc":"phone"); return pn ? `<span class="exi devi"><b>${esc(pn[0].toUpperCase())}</b><span class="avdev">${devIc(f,10)}</span></span><span class="n"><b>${esc(pn)}</b><small>${esc(devShown(d))} · ` : `<span class="exi">${devIc(f,20)}</span><span class="n"><b>${esc(devShown(d))}</b><small>`; })()}${id===me?"Dieses Gerät · ":""}v${esc(String(d.ver||"?").replace(/^[vV] ?/,""))} · ${id===me?"jetzt aktiv":"zuletzt "+ago(d.seen||0)}</small></span>${id===me?"":UI.devDelArm===id?`<button class="btn danger" data-devdel="${esc(id)}" style="padding:8px 12px">Wirklich entfernen?</button>`:`<button class="btn" data-devdel="${esc(id)}" style="padding:8px 12px">Entfernen</button>`}</div>`).join("")}
+    ${L.sort((a,b)=>(b[0]===me)-(a[0]===me)||(b[1].seen||0)-(a[1].seen||0)).map(([id,d])=>`<div class="exr">${(()=>{ const pn=String(S.settings.name||"").trim(), f=d.form||(d.type==="pc"?"pc":"phone"); return pn ? `<span class="exi devi"><b>${esc(pn[0].toUpperCase())}</b><span class="avdev">${devIc(f,10)}</span></span><span class="n"><b>${esc(pn)}${d.main?" 👑":""}</b><small>${esc(devShown(d))} · ` : `<span class="exi">${devIc(f,20)}</span><span class="n"><b>${esc(devShown(d))}${d.main?" 👑":""}</b><small>`; })()}${d.main?"Hauptgerät · ":""}${id===me?"Dieses Gerät · ":""}v${esc(String(d.ver||"?").replace(/^[vV] ?/,""))} · ${id===me?"jetzt aktiv":"zuletzt "+ago(d.seen||0)}</small></span>${id===me?"":UI.devDelArm===id?`<button class="btn danger" data-devdel="${esc(id)}" style="padding:8px 12px">Wirklich entfernen?</button>`:`<button class="btn" data-devdel="${esc(id)}" style="padding:8px 12px">Entfernen</button>`}</div>`).join("")}
     <div class="small muted" style="margin:8px 2px 0">${L.length} von höchstens 5 Geräten gekoppelt.</div>
     ${SYNCABLE&&(!SYNC.token||MODE==="pair")?(SYNC.token?`<div class="sacts">
-        <button class="sact" id="pairMore">${ic("plusIn",20)}Gerät koppeln</button>
+        <button class="sact" id="pairMore">${ic("plusIn",20)}Gerät hinzufügen</button>
         <button class="sact" id="syncCode">${ic("shield",20)}Wieder&shy;herstellungs-Code</button></div>
       <div class="wipe" style="margin-top:14px"><b>Alle Geräte entkoppeln</b><span class="small muted">Löscht die Kopplung und deine verschlüsselten Daten auf dem Server. Die Daten auf jedem Gerät bleiben erhalten.</span><button class="btn danger" id="pairWipe">Kopplung und Server-Daten löschen</button></div>`
       : `<button class="btn primary block" id="devPairStart" style="margin-top:12px">${ic("plusIn",18)} Geräte koppeln</button>`):""}
@@ -8923,12 +8952,37 @@ function renderUpd(){
   st.textContent = (UPD.msg || "An – die App prüft regelmäßig auf neue Versionen, auch wenn sie zu ist.") + when;
   if (document.activeElement && document.activeElement.id==="updKey") return;
   body.innerHTML = has
-    ? `<div class="bkb"><button class="btn primary" id="updNow">Jetzt prüfen</button>${/Schlüssel/.test(UPD.msg)?`<button class="btn" id="updChange">Neuen Schlüssel eingeben</button>`:""}</div>`
+    ? `<div class="bkb"><button class="btn primary" id="updNow">Jetzt prüfen</button>${/Schlüssel/.test(UPD.msg)?`<button class="btn" id="updChange">Neuen Schlüssel eingeben</button>`:""}</div>${relCardHtml()}`
     : UI.updKeyForm ? `<div class="field"><label for="updKey">Entwickler-Schlüssel (GitHub, nur Lesen)</label><input class="in" id="updKey" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></div>
        <div class="bkb"><button class="btn primary" id="updSave">Speichern</button></div>
        <span class="small muted">Nur für den Entwickler – alle anderen bekommen Updates ohne Schlüssel.</span>`
     : `<div class="bkb"><button class="btn primary" id="updNow">Jetzt prüfen</button></div><button class="link small" id="updKeyShow" style="margin-top:6px">Entwickler-Schlüssel</button>`;
 }
+/* ---------- Entwickler: die getestete Version für alle freigeben (startet „Für Tester freigeben“ auf GitHub) ---------- */
+const REL={mine:"", all:"", busy:false, arm:false, msg:"", t:0};
+const relShort = n => String(n||"").replace(/^Finanz MAMI · /,"");
+async function relLoad(force){ if (!updKey() || !canGh() || REL.busy || (!force && Date.now()-REL.t<60e3)) return; REL.t=Date.now();
+  try { const a=JSON.parse(await ghFetch(GH_REL,"json")), b=JSON.parse(await ghFetch(GH_REL_PUB,"json")); REL.mine=a.name||""; REL.all=b.name||""; } catch(_){}
+  renderUpd(); }
+function relCardHtml(){ if (!updKey()) return ""; setTimeout(()=>relLoad(), 0);
+  const same=REL.mine && REL.mine===REL.all;
+  return `<div class="relbox"><b>Für alle freigeben</b>
+    <span class="small muted">Bei dir: ${esc(relShort(REL.mine)||"…")}<br>Bei allen: ${esc(relShort(REL.all)||"…")}</span>
+    <button class="btn ${REL.arm?"danger":"primary"}" id="relGo" ${REL.busy||same?"disabled":""}>${REL.busy?"Wird freigegeben …":same?"Alle haben schon diese Version":REL.arm?"Wirklich für alle freigeben?":"Diese Version für alle freigeben"}</button>
+    ${REL.msg?`<span class="small" style="color:${/geklappt|unterwegs/.test(REL.msg)?"var(--good)":"var(--bad)"}">${esc(REL.msg)}</span>`:""}</div>`; }
+async function relFree(){
+  const url="https://api.github.com/repos/minghatsu/Haushaltsbuch/actions/workflows/freigeben.yml/dispatches";
+  const r=await new Promise(res=>{ const id=newId(); httpWaiting[id]=res; setTimeout(()=>{ if (httpWaiting[id]){ delete httpWaiting[id]; res({status:0}); } }, 30000);
+    window.AndroidBridge.http(id, "POST", url, "Bearer "+updKey(), JSON.stringify({ref:"main"})); });
+  if (r.status===204 || r.status===200) return;
+  if (r.status===403 || r.status===404) throw new Error("Dein Entwickler-Schlüssel darf das noch nicht. Gib ihm bei GitHub unter „Actions“ das Recht „Read and write“.");
+  if (!r.status) throw new Error("Keine Verbindung – bist du online?");
+  throw new Error("GitHub antwortet mit "+r.status); }
+document.addEventListener("click", async e=>{ if (!e.target.closest("#relGo")) return;
+  if (!REL.arm){ REL.arm=true; REL.msg=""; renderUpd(); setTimeout(()=>{ if (REL.arm){ REL.arm=false; renderUpd(); } }, 6000); return; }
+  REL.arm=false; REL.busy=true; renderUpd();
+  try { await relFree(); REL.msg="Hat geklappt – in 1–2 Minuten bekommen alle das Update."; setTimeout(()=>relLoad(true), 90e3); }
+  catch(x){ REL.msg=x.message; } finally { REL.busy=false; renderUpd(); } });
 document.addEventListener("click", async e=>{
   if (e.target.closest("#updSave")){ const v=($("updKey").value||"").trim(); if (!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(v)){ toast("Das sieht nicht wie ein GitHub-Schlüssel aus"); return; }
     S.settings.updKey=v; UI.updKeyForm=false; await saveSettings(); renderUpd(); ghCheck(true); return; }
@@ -9499,6 +9553,7 @@ async function pairStart(){   // this is the first device: new vault, upload eve
   if (!META_PAIR) p.s=pairUrl();
   pairSave(p); MODE="pair"; SERVER=pairUrl(); SYNC.token="";
   const K=await pairKeys(); await api("create", {body:{vault:K.vault, auth:K.auth}});
+  try { localStorage.setItem("hb-main","1"); } catch(_){}   // the device that started the coupling holds the data: the "Hauptgerät"
   loginDone(await pairToken(), true, "Gekoppelt – Daten werden verschlüsselt hochgeladen");
 }
 /* Short coupling code (e.g. 7KF2-QX9M-3T): 10 characters, 50 bits. It only opens a mailbox on the server that holds
@@ -9518,8 +9573,7 @@ async function shortMake(){   // this device is coupled: put its long code into 
   const r=crypto.getRandomValues(new Uint8Array(10)), code=[...r].map(x=>SC_ABC[x&31]).join("");
   const box=await shortBox(code), K=await spKeys(box);
   await spRequest(box,"create","",{vault:K.vault, auth:K.auth});
-  const op={h:b64u((await crypto.subtle.sign("HMAC", K.mac, new TextEncoder().encode("sp\u0000code"))).slice(0,24)), b:await spEnc(K,{i:"code", d:{code:long}})};
-  await spRequest(box,"push","",{ops:[op]});
+  await reqHostOpen("pair", box);   // no long code in the mailbox any more – only after "Zulassen"
   SHORT={code, box, t0:Date.now()}; SHORT_T=setTimeout(shortDrop, 10*60*1000); return SHORT; }
 /* countdown for every short code: minutes:seconds counting down and a bar that slowly fills up */
 const CTD_LEN=10*60*1000;
@@ -9537,22 +9591,97 @@ setInterval(()=>{ if (document.querySelector("[data-ctd]")) ctdTick(); }, 1000);
 // the same for a shared area: the short code opens a mailbox with the area's long code
 const GMS={code:"", v:"", box:null, t0:0, tm:0};
 async function gmShortMake(sp){
-  if (GMS.box) spRequest(GMS.box,"wipe","",{}).catch(()=>{}); clearTimeout(GMS.tm);
+  reqHostStop("gm"); if (GMS.box) spRequest(GMS.box,"wipe","",{}).catch(()=>{}); clearTimeout(GMS.tm);
   const r=crypto.getRandomValues(new Uint8Array(10)), code=[...r].map(x=>SC_ABC[x&31]).join("");
   const box=await shortBox(code), K=await spKeys(box);
   await spRequest(box,"create","",{vault:K.vault, auth:K.auth});
-  const op={h:b64u((await crypto.subtle.sign("HMAC", K.mac, new TextEncoder().encode("sp\u0000code"))).slice(0,24)), b:await spEnc(K,{i:"code", d:{code:spCode(sp)}})};
-  await spRequest(box,"push","",{ops:[op]});
-  Object.assign(GMS, {code, v:sp.v, box, t0:Date.now()}); GMS.tm=setTimeout(()=>{ if (GMS.box) spRequest(GMS.box,"wipe","",{}).catch(()=>{}); }, 10*60*1000);
+  await reqHostOpen("gm", box, {sp});   // the area's key only goes out after "Zulassen"
+  Object.assign(GMS, {code, v:sp.v, box, t0:Date.now()}); GMS.tm=setTimeout(()=>{ reqHostStop("gm"); if (GMS.box) spRequest(GMS.box,"wipe","",{}).catch(()=>{}); }, 10*60*1000);
 }
-function shortDrop(){ clearTimeout(SHORT_T); const s0=SHORT; SHORT=null; if (s0) spRequest(s0.box,"wipe","",{}).catch(()=>{}); }
+function shortDrop(){ clearTimeout(SHORT_T); reqHostStop("pair"); const s0=SHORT; SHORT=null; if (s0) spRequest(s0.box,"wipe","",{}).catch(()=>{}); }
+/* ---------- Anfrage statt Sofort-Kopplung: das neue Gerät (oder die neue Person) fragt an, das andere Gerät bestätigt ----------
+   The short code / QR code only opens a mailbox. The inviting device has put its profile card there ("host").
+   The asking device drops its own card ("req") and waits. Only after "Zulassen" the inviting device puts the long code
+   into the mailbox ("code"), otherwise a "deny". Works the same for coupling own devices (pair) and for "Gemeinsam" (gm). */
+const isMain = () => { try { return localStorage.getItem("hb-main")==="1"; } catch(e){ return false; } };
+async function boxH(K,id){ return b64u((await crypto.subtle.sign("HMAC", K.mac, new TextEncoder().encode("sp\u0000"+id))).slice(0,24)); }
+async function boxPut(box,id,d){ const K=await spKeys(box); await spRequest(box,"push","",{ops:[{h:await boxH(K,id), b:await spEnc(K,{i:id, d})}]}); }
+async function boxAll(box){ const K=await spKeys(box), res=await spRequest(box,"pull","&since=0"), out={};
+  for (const x of res.docs||[]){ if (!x.b) continue; try { const o=await spDec(K,x.b); if (o && o.i) out[o.i]=o.d; } catch(_){} } return out; }
+async function myCard(name){ const st=S.settings||{}; let ph="";
+  if (st.photo) ph=await new Promise(ok=>{ const im=new Image(); im.onload=()=>{ try { const c=document.createElement("canvas"); c.width=c.height=96; c.getContext("2d").drawImage(im,0,0,96,96); ok(c.toDataURL("image/jpeg",0.8)); } catch(_){ ok(""); } }; im.onerror=()=>ok(""); im.src=st.photo; });
+  return {n:String(name!=null?name:(st.name||"")).trim().slice(0,40), m:devModel(), f:devForm(), p:ph, main:isMain()}; }
+const cardName = c => (c&&c.n) || (c&&c.m) || "Neues Gerät";
+function cardAv(c, cls){ c=c||{}; const f=["phone","tablet","pc","laptop"].includes(c.f)?c.f:"phone";
+  const inner = c.p && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(c.p) ? `<img src="${c.p}" alt="">` : c.n ? `<b>${esc(String(c.n)[0].toUpperCase())}</b>` : devIc(f, 30);
+  return `<span class="pav ${cls||""}">${inner}<i>${devIc(f,13)}</i>${c.main?`<em class="pcrown">👑</em>`:""}</span>`; }
+const NOCODE="Diesen Code gibt es nicht (mehr) – er gilt 10 Minuten. Lass dir auf dem anderen Gerät einen neuen zeigen.";
+// the asking side: returns the long code once the other device said yes
+async function reqAsk(kind, sc, card){
+  const box=await shortBox(sc); let all;
+  try { all=await boxAll(box); } catch(e){ throw new Error(e.status===401 ? NOCODE : "Server nicht erreichbar – bist du online?"); }
+  if (all.code && all.code.code && !all.host){ spRequest(box,"wipe","",{}).catch(()=>{}); return all.code.code; }   // the other device still runs an older app
+  if (!all.host) throw new Error(NOCODE);
+  if ((all.host.k||"pair")!==kind) throw new Error(kind==="gm" ? "Das ist ein Code zum Koppeln eigener Geräte, nicht für „Gemeinsam“." : "Das ist ein Code für „Gemeinsam“ – den gibst du unter Gemeinsam › Beitreten ein.");
+  const W={kind, host:all.host, box, id:b64u(crypto.getRandomValues(new Uint8Array(9))), t0:Date.now()}; UI.rwait=W; reqWaitUi();
+  try { await boxPut(box,"req",{id:W.id, k:kind, card, t:Date.now()}); } catch(e){ UI.rwait=null; throw new Error("Server nicht erreichbar – bist du online?"); }
+  while (UI.rwait===W){
+    await new Promise(r=>setTimeout(r,2000)); if (UI.rwait!==W) break;
+    if (Date.now()-W.t0>3*60e3){ UI.rwait=null; throw new Error("Keine Antwort bekommen – bitte noch einmal versuchen."); }
+    let a; try { a=await boxAll(box); } catch(e){ if (e.status===401){ UI.rwait=null; throw new Error("Die Anfrage ist abgelaufen – bitte noch einmal versuchen."); } continue; }
+    if (a.code && a.code.id===W.id){ W.ok=true; reqWaitUi(); spRequest(box,"wipe","",{}).catch(()=>{}); await new Promise(r=>setTimeout(r,1300)); UI.rwait=null; return a.code.code; }
+    if (a.deny && a.deny.id===W.id){ UI.rwait=null; throw new Error(a.deny.why==="voll" ? (kind==="gm" ? "Dieser Bereich hat schon 10 Mitglieder." : "Dort sind schon 10 Geräte gekoppelt – eins muss erst entfernt werden.") : "Die Anfrage wurde abgelehnt."); } }
+  const e=new Error(""); e.cancel=true; throw e; }
+function reqCancel(){ const W=UI.rwait; UI.rwait=null; if (W) boxPut(W.box,"req",{id:W.id, cancel:true}).catch(()=>{}); }
+function reqWaitUi(){ if (UI.rwait && UI.rwait.kind==="gm"){ if (UI.view==="gemeinsam") renderGemeinsam(); } else pairUi(); }
+function reqWaitHtml(W){ const h=W.host.card||{}, gm=W.kind==="gm";
+  return `<div class="pwait ${W.ok?"ok":""}">
+    <div class="plink">${cardAv(h,"big")}<span class="pline"><i></i><b>✓</b></span>${gm?`<span class="pav big gmav"><b>${esc(String(W.host.a||"G")[0].toUpperCase())}</b></span>`:cardAv({f:devForm(), m:devModel()},"big")}</div>
+    <b class="pwt">${W.ok ? (gm?"Du bist dabei!":"Bestätigt – Daten werden geladen …") : "Warte auf Bestätigung …"}</b>
+    <p class="small muted">${W.ok ? "" : gm ? `<b>${esc(cardName(h))}</b> muss auf dem eigenen Gerät „Zulassen“ tippen – dann bist du in „${esc(W.host.a||"Gemeinsam")}“.` : `Tippe auf <b>${esc(cardName(h))}</b>${h.m&&h.n?` (${esc(h.m)})`:""} auf „Zulassen“.`}</p>
+    ${W.ok?"":`<button class="btn" data-reqx="1">Abbrechen</button>`}</div>`; }
+document.addEventListener("click", e=>{ if (!e.target.closest("[data-reqx]")) return; reqCancel(); if (UI.pstep==="wait"){ UI.pstep="join"; pairUi(); } else if (UI.view==="gemeinsam"){ UI.gmStep="join"; renderGemeinsam(); } });
+// the inviting side: keeps an eye on the mailbox and shows the request
+const RQH={};
+async function reqHostOpen(kind, box, extra){ reqHostStop(kind); const H=Object.assign({kind, box, seen:{}}, extra||{}); RQH[kind]=H;
+  await boxPut(box,"host",{k:kind, card:await myCard(kind==="gm"?me().name:undefined), a:H.sp?H.sp.n||"Gemeinsam":""}); reqHostPoll(H); return H; }
+function reqHostStop(kind){ const H=RQH[kind]; if (H){ H.stop=true; delete RQH[kind]; } }
+function reqHostPoll(H){ setTimeout(async()=>{ if (H.stop) return;
+  try { const a=await boxAll(H.box), q=a.req;
+    if (q && q.id){ if (q.cancel){ if (UI.preq && UI.preq.q.id===q.id){ UI.preq=null; preqRender(); toast("Die Anfrage wurde zurückgezogen"); } } else if (!H.seen[q.id]){ H.seen[q.id]=1; UI.preq={H, q}; preqRender(); try { navigator.vibrate && navigator.vibrate([30,60,30]); } catch(_){} } } }
+  catch(e){ if (e.status===401){ H.stop=true; if (H.kind==="pair"){ SHORT=null; try { if (UI.pstep==="show" && !$("loginBg").hidden) pairUi(); } catch(_){} } return; } }
+  reqHostPoll(H); }, 2000); }
+const spMembers = sp => Object.keys(spLocal(sp.v).docs).filter(k=>k.startsWith("m-")).length;
+function preqRender(){ let bg=$("preqBg"); const R=UI.preq; if (!R){ if (bg) bg.remove(); return; }
+  if (!bg){ bg=document.createElement("div"); bg.id="preqBg"; bg.className="preqbg"; document.body.appendChild(bg); }
+  const c=R.q.card||{}, gm=R.H.kind==="gm", area=gm?(R.H.sp.n||"Gemeinsam"):"";
+  const mine={n:String((gm?me().name:S.settings.name)||"").trim(), f:devForm(), p:S.settings.photo||"", main:isMain()};
+  bg.innerHTML=`<div class="preqbox ${R.done?"ok":""}" role="dialog" aria-modal="true" aria-labelledby="preqT">
+    <div class="plink">${cardAv(c,"big")}<span class="pline"><i></i><b>✓</b></span>${gm?`<span class="pav big gmav"><b>${esc(area[0].toUpperCase())}</b></span>`:cardAv(mine,"big")}</div>
+    <h2 id="preqT">${R.done ? (gm?`${esc(cardName(c))} ist jetzt dabei`:"Gekoppelt!") : gm ? `${esc(cardName(c))} möchte „${esc(area)}“ beitreten` : `${esc(cardName(c))} möchte sich koppeln`}</h2>
+    <p class="small muted">${esc(c.m||"")}${c.m?" · ":""}gerade eben<br>${gm ? "Sieht danach nur diesen gemeinsamen Bereich – nichts von deinen anderen Daten." : "Bekommt danach alle deine Buchungen und wird mit diesem Gerät abgeglichen."}</p>
+    ${R.err?`<p class="small" style="color:var(--bad);margin:0 0 8px">${esc(R.err)}</p>`:""}
+    ${R.done?"":`<button class="btn primary block" data-preq="1" ${R.busy?"disabled":""}>Zulassen</button><button class="btn block preqno" data-preq="0" ${R.busy?"disabled":""}>Ablehnen</button>`}</div>`; }
+async function preqAnswer(yes){ const R=UI.preq; if (!R || R.busy) return; R.busy=true; R.err=""; preqRender(); const H=R.H;
+  try {
+    if (yes){ const full = H.kind==="gm" ? spMembers(H.sp)>=10 : zDevs().length>=10;
+      if (full){ await boxPut(H.box,"deny",{id:R.q.id, why:"voll"}); R.busy=false; R.err = H.kind==="gm" ? "Dieser Bereich hat schon 10 Mitglieder." : "Es sind schon 10 Geräte gekoppelt – entferne erst eins unter Geräte & Abgleich."; preqRender(); return; }
+      await boxPut(H.box,"code",{id:R.q.id, code:H.kind==="gm"?spCode(H.sp):pairCode()}); R.done=true; R.busy=false; preqRender();
+      setTimeout(()=>{ if (UI.preq===R){ UI.preq=null; preqRender(); } }, 2200);
+      if (H.kind==="pair") setTimeout(()=>{ try { devPing(true); renderGeraete(); } catch(_){} }, 8000); }
+    else { await boxPut(H.box,"deny",{id:R.q.id}); UI.preq=null; preqRender(); } }
+  catch(e){ R.busy=false; R.err="Server nicht erreichbar – bist du online?"; preqRender(); } }
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-preq]"); if (b) preqAnswer(b.dataset.preq==="1"); });
 async function shortFetch(code){   // the new device: open the mailbox, take the long code, delete the mailbox
   const box=await shortBox(code), K=await spKeys(box); let res;
   try { res=await spRequest(box,"pull","&since=0"); } catch(e){ throw new Error(e.status===401 ? "Diesen Code gibt es nicht (mehr) – er gilt 10 Minuten. Lass dir am Handy einen neuen zeigen." : "Server nicht erreichbar – bist du online?"); }
   for (const d of res.docs||[]){ try { const o=await spDec(K,d.b); if (o&&o.d&&o.d.code){ spRequest(box,"wipe","",{}).catch(()=>{}); return o.d.code; } } catch(_){} }
   throw new Error("Diesen Code gibt es nicht (mehr) – er gilt 10 Minuten. Lass dir am Handy einen neuen zeigen."); }
 async function pairJoin(code){
-  if (!pairParse(code) && shortOk(code)) code=await shortFetch(code);
+  if (!pairParse(code)){ const q=String(code||"").match(/HBQ1\.([0-9A-Za-z]{10})/), sc=q?q[1]:code;
+    if (/HBG1\./.test(String(code))) throw new Error("Das ist ein Code für „Gemeinsam“ – den gibst du unter Gemeinsam › Beitreten ein.");
+    if (!shortOk(sc)) throw new Error("Das ist kein gültiger Kopplungs-Code – er hat 10 Zeichen, z. B. 7KF2-QX9M-3T.");
+    UI.pstep="wait"; try { code=await reqAsk("pair", sc, await myCard()); } catch(e){ if (UI.pstep==="wait"){ UI.pstep="join"; pairUi(); } throw e; } }
   const p=pairParse(code); if (!p) throw new Error("Das ist kein gültiger Kopplungs-Code.");
   pairSave(p); MODE="pair"; SERVER=pairUrl(); SYNC.token=await pairToken();
   try { await api("pull", {qs:"&since=999999999"}); }
@@ -9573,41 +9702,48 @@ async function qrFromFile(file){
 function pairUi(){
   const el=$("loginPair"); if (!el) return; const st=UI.pstep||"start", hasData=S.tx.length>0||S.fixed.length>0;
   const code=pairCode();
-  el.innerHTML = st==="start" ? `<div class="pchoice">
-      <button class="pbig" data-pstep="first"><span class="pbi">${ic("phone",22)}</span><span><b>Das ist mein erstes Gerät</b><small>Neu starten – danach zeigt die App einen QR-Code für dein zweites Gerät.</small></span></button>
-      <button class="pbig" data-pstep="join"><span class="pbi">${ic("camera",22)}</span><span><b>Mit einem anderen Gerät koppeln</b><small>Den QR-Code vom anderen Gerät fotografieren oder den Code einfügen.</small></span></button></div>
+  const meC={n:String(S.settings.name||"").trim(), f:devForm(), m:devModel(), p:S.settings.photo||"", main:isMain()};
+  const roles=(left,lsub,right,rsub,lc,rc)=>`<div class="proles"><div>${lc}<b>${left}</b><small>${lsub}</small></div><div class="parr"><span>Daten</span>${ic("right",22)}</div><div>${rc}<b>${right}</b><small>${rsub}</small></div></div>`;
+  const unknownAv=`<span class="pav big unk"><b>?</b></span>`, mainAv=`<span class="pav big"><b>${ic("phone",26)}</b><em class="pcrown">👑</em></span>`;
+  el.innerHTML = st==="start" ? `<p class="pq">Wo sind deine Daten gerade?</p><div class="pchoice">
+      <button class="pbig" data-pstep="first"><span class="pbi">👑</span><span><b>Hier – das wird mein Hauptgerät</b><small>Deine Daten bleiben auf diesem Gerät. Weitere Geräte fragen später hier an und du bestätigst sie.</small></span></button>
+      <button class="pbig" data-pstep="join"><span class="pbi">${ic("camera",22)}</span><span><b>Auf einem anderen Gerät – ich komme dazu</b><small>Dieses Gerät holt sich die Daten von deinem Hauptgerät. Dort zeigst du dafür einen QR-Code an.</small></span></button></div>
       <div class="notice info"><span>${ic("shield",15)} <b>Kein Konto, keine E-Mail.</b> Deine Daten werden auf dem Gerät verschlüsselt – der Server sieht nur Zahlensalat und kann nichts lesen.</span></div>`
     : st==="first" ? `<p class="small" style="margin:0;line-height:1.5">Die App legt einen geheimen Schlüssel an, verschlüsselt deine Daten damit und lädt sie hoch. Danach koppelst du dein zweites Gerät mit dem QR-Code.</p>
       <div class="row-btns"><button class="btn" data-pstep="start">Zurück</button><button class="btn primary" id="pairFirst">Los geht's</button></div>`
-    : st==="join" ? `<button class="btn primary block" id="pairRecv" style="justify-content:center;gap:8px">${ic("phone",18)} QR-Code hier anzeigen – mit dem Handy scannen</button>
-      ${qrBtn("join", false)}
-      <div class="field" style="margin:0"><label for="pairCode">… oder den Code vom anderen Gerät eintippen</label><input class="in" id="pairCode" placeholder="z. B. 7KF2-QX9M-3T" autocapitalize="characters" autocomplete="off" spellcheck="false" style="font:700 20px var(--f-display);letter-spacing:.08em;text-align:center"></div>
-      ${hasData?`<div class="notice warn"><span>Die Daten auf <b>diesem</b> Gerät werden durch die des anderen Geräts ersetzt. Mach vorher ein Backup, wenn du unsicher bist.</span></div>`:""}
-      <div class="row-btns"><button class="btn" data-pstep="start">Zurück</button><button class="btn primary" id="pairJoin">Koppeln</button></div>`
+    : st==="wait" && UI.rwait ? reqWaitHtml(UI.rwait)
+    : st==="join" ? `${roles("Hauptgerät","hat deine Daten","Dieses Gerät","kommt dazu",mainAv,cardAv(meC,"big"))}
+      <ol class="psteps"><li>Öffne auf dem Hauptgerät <b>Einstellungen › Geräte &amp; Abgleich › Gerät hinzufügen</b>.</li><li>Scanne hier den QR-Code von dort – oder tippe den Code ein.</li><li>Bestätige auf dem Hauptgerät die Anfrage.</li></ol>
+      ${qrBtn("join", true)}
+      <div class="field" style="margin:0"><label for="pairCode">… oder den Code vom Hauptgerät eintippen</label><input class="in" id="pairCode" placeholder="z. B. 7KF2-QX9M-3T" autocapitalize="characters" autocomplete="off" spellcheck="false" style="font:700 20px var(--f-display);letter-spacing:.08em;text-align:center"></div>
+      ${hasData?`<div class="notice warn"><span>Auf <b>diesem</b> Gerät sind schon Daten. Sie werden durch die vom Hauptgerät ersetzt. Mach vorher ein Backup, wenn du unsicher bist.</span></div>`:""}
+      <button class="link small" id="pairRecv" style="margin:2px auto 0;display:block">Scannen klappt nicht? Andersherum: hier einen QR-Code zeigen und mit dem Hauptgerät scannen</button>
+      <div class="row-btns"><button class="btn" data-pstep="start">Zurück</button><button class="btn primary" id="pairJoin">Anfrage senden</button></div>
+      <p class="small muted" style="text-align:center;margin:0"><button class="link small" data-pstep="first">Moment – meine Daten sind auf <b>diesem</b> Gerät</button></p>`
     : st==="recv" ? `<p class="small" style="margin:0;line-height:1.5">Öffne auf dem Handy <b>Einstellungen › Abgleich › Weiteres Gerät koppeln</b>, tippe auf <b>„QR-Code vom anderen Gerät scannen“</b> und fotografiere diesen Code:</p>
       <div class="pqr">${UI.precv&&UI.precv.v?qrSvg("HBR1."+UI.precv.v+"."+UI.precv.k,300):`<div class="small muted" style="padding:90px 0">Wird vorbereitet …</div>`}</div>
       <p class="small" style="margin:0;text-align:center">… oder am Handy diesen Code eintippen:</p>
       <div class="pshort">${UI.precv?esc(shortFmt(UI.precv.code)):"…"}</div>
       <div class="notice info"><span id="pairRecvSt">Warte auf das Handy …</span></div>
       <div class="row-btns"><button class="btn" data-pstep="join">Zurück</button></div>`
-    : `${qrBtn("send", true)}
-      <p class="small muted" style="margin:0;line-height:1.5;text-align:center">Zeigt dein PC einen QR-Code? Dann scanne ihn hier – fertig.</p>
-      <div class="field" style="margin:4px 0 0"><label for="pairSendCode">… oder den Code vom anderen Gerät eingeben</label>
-        <div style="display:flex;gap:8px"><input class="in" id="pairSendCode" placeholder="z. B. 7KF2-QX9M-3T" autocapitalize="characters" autocomplete="off" spellcheck="false" style="font:700 18px var(--f-display);letter-spacing:.06em;text-align:center;flex:1;min-width:0"><button class="btn primary" id="pairSendGo">Koppeln</button></div></div>
-      <p class="small" style="margin:12px 0 0;line-height:1.5">Oder öffne auf dem anderen Gerät <b>Einstellungen › Abgleich › Koppeln</b> und tippe diesen Code ein:</p>
+    : `${roles("Dieses Gerät", isMain()?"Hauptgerät · hat deine Daten":"hat deine Daten", "Neues Gerät", "kommt dazu", cardAv(meC,"big"), unknownAv)}
+      <ol class="psteps"><li>Öffne Finanz MAMI auf dem <b>neuen</b> Gerät.</li><li>Wähle dort <b>„Auf einem anderen Gerät – ich komme dazu“</b>.</li><li>Scanne diesen QR-Code oder tippe den Code darunter ein.</li><li>Hier erscheint die Anfrage – tippe auf <b>Zulassen</b>.</li></ol>
+      <div class="pqr" id="pairQr">${SHORT?qrSvg("HBQ1."+SHORT.code,230):`<div class="small muted" style="padding:80px 0">Wird vorbereitet …</div>`}</div>
       <div class="pshort" id="pairShort">${SHORT?esc(shortFmt(SHORT.code)):"…"}</div>
       <div id="pairCtd">${ctdHtml(SHORT?SHORT.t0:0,"pair")}</div>
       <p class="small muted" style="margin:0;text-align:center"><button class="link small" id="pairShortNew">Neuer Code</button></p>
+      <details class="pmore"><summary>Das neue Gerät zeigt selbst einen QR-Code?</summary>${qrBtn("send", false)}
+        <div class="field" style="margin:8px 0 0"><label for="pairSendCode">… oder dessen Code eingeben</label><div style="display:flex;gap:8px"><input class="in" id="pairSendCode" placeholder="z. B. 7KF2-QX9M-3T" autocapitalize="characters" autocomplete="off" spellcheck="false" style="font:700 18px var(--f-display);letter-spacing:.06em;text-align:center;flex:1;min-width:0"><button class="btn primary" id="pairSendGo">Koppeln</button></div></div></details>
       <details class="pmore" ${UI.pmoreOpen?"open":""}><summary>QR-Code und Wiederherstellungs-Code</summary>
       <div class="pqr">${code?qrSvg(code,230):""}</div>
       <div class="pcode">${esc(code.replace(/(.{5})/g,"$1 ").trim())}</div>
       <div class="notice warn"><span><b>Halte diesen Code geheim</b> – wer ihn hat, sieht deine Finanzen. Heb ihn trotzdem gut auf (ausdrucken oder im Passwort-Manager): Gehen alle Geräte verloren, kommst du nur damit wieder an deine Daten.</span></div>
       </details>
       <div class="row-btns"><button class="btn" id="pairCopy">Langen Code kopieren</button><button class="btn primary" id="pairDone">Fertig</button></div>`;
-  const t=$("loginTitle"); if (t) t.textContent = st==="show" ? "Weiteres Gerät koppeln" : st==="join"||st==="recv" ? "Mit anderem Gerät koppeln" : "Geräte koppeln";
+  const t=$("loginTitle"); if (t) t.textContent = st==="show" ? "Gerät hinzufügen" : st==="wait" ? "Anfrage gesendet" : st==="join"||st==="recv" ? "Zum Hauptgerät dazukommen" : "Geräte koppeln";
   const sk=$("loginSkip"); if (sk) sk.hidden = !!SYNC.token;   /* already coupled: nothing to skip */
   if (st==="recv") pairRecvRun(); else pairRecvStop();
-  if (st==="show" && !SHORT && !UI.pshortBusy){ UI.pshortBusy=true; shortMake().then(()=>{ const e=$("pairShort"); if (e && SHORT) e.textContent=shortFmt(SHORT.code); const c=document.querySelector("#pairCtd [data-ctd]"); if (c && SHORT){ c.dataset.ctd=SHORT.t0; delete c.dataset.done; ctdTick(); } }).catch(()=>{ const e=$("pairShort"); if (e) e.textContent="Server nicht erreichbar"; }).finally(()=>{ UI.pshortBusy=false; }); }
+  if (st==="show" && !SHORT && !UI.pshortBusy){ UI.pshortBusy=true; shortMake().then(()=>{ const e=$("pairShort"); if (e && SHORT) e.textContent=shortFmt(SHORT.code); const q=$("pairQr"); if (q && SHORT) q.innerHTML=qrSvg("HBQ1."+SHORT.code,230); const c=document.querySelector("#pairCtd [data-ctd]"); if (c && SHORT){ c.dataset.ctd=SHORT.t0; delete c.dataset.done; ctdTick(); } }).catch(()=>{ const e=$("pairShort"); if (e) e.textContent="Server nicht erreichbar"; }).finally(()=>{ UI.pshortBusy=false; }); }
 }
 /* Coupling the other way round (for a PC without camera): this device shows a QR code with a short-lived, empty
    mailbox on the server. The phone scans it and drops its pairing code there – encrypted with the key from the QR code.
@@ -9648,13 +9784,13 @@ async function qrLive(want){
 }
 document.addEventListener("click", async e=>{ const b=e.target.closest("[data-qrlive]"); if (!b) return; const kind=b.dataset.qrlive;
   $("loginErr").textContent="";
-  if (kind==="gm" || kind==="code"){ try { const t=await qrLive(kind==="gm" ? /HBS1\./ : /\S/); if (!t) return;
-      if (kind==="gm"){ const c=$("gmCode"); if (c) c.value=t; } else if (UI.code){ UI.code.val=t.trim(); UI.code.err=""; codeRender(); } }
+  if (kind==="gm" || kind==="code"){ try { const t=await qrLive(kind==="gm" ? /HBS1\.|HBG1\./ : /\S/); if (!t) return;
+      if (kind==="gm"){ const c=$("gmCode"); if (c) c.value=t; const g=$("gmJoinGo"); if (g) g.click(); } else if (UI.code){ UI.code.val=t.trim(); UI.code.err=""; codeRender(); } }
     catch(x){ toast(x.message); } return; }
-  try { const t=await qrLive(kind==="send" ? /HBR1\./ : /HBP1\./); if (!t) return;
+  try { const t=await qrLive(kind==="send" ? /HBR1\./ : /HBP1\.|HBQ1\./); if (!t) return;
     if (kind==="send"){ await pairSendTo(t); toast("Gesendet – das andere Gerät koppelt sich jetzt"); $("loginBg").hidden=true; UI.pstep="start"; }
     else { $("pairCode").value=t; await pairJoin(t); UI.pstep="start"; } }
-  catch(x){ $("loginErr").textContent=x.message||"Das hat nicht geklappt."; } });
+  catch(x){ if (!x.cancel) $("loginErr").textContent=x.message||"Das hat nicht geklappt."; } });
 function pairRecvStop(){ clearTimeout(PRECV_T); PRECV_T=0; const m=UI.precv; UI.precv=null; if (m && m.made) spRequest(m,"wipe","",{}).catch(()=>{}); }
 async function pairRecvRun(){
   if (UI.precv) return;
@@ -9667,7 +9803,7 @@ async function pairRecvRun(){
     if (Date.now()-m.t0>10*60*1000){ const st=$("pairRecvSt"); if (st) st.textContent="Zeit abgelaufen – tippe auf Zurück und versuch es nochmal."; return pairRecvStop(); }
     try { const K=await spKeys(m), res=await spRequest(m,"pull","&since=0");
       for (const d of res.docs||[]){ if (!d.b) continue; let o=null; try { o=await spDec(K,d.b); } catch(_){} const code=o&&o.d&&o.d.code;
-        if (code && pairParse(code)){ const st=$("pairRecvSt"); if (st) st.textContent="Handy gefunden – Daten werden geladen …";
+        if (code && pairParse(code)){ const st=$("pairRecvSt"); if (st) st.textContent=(o.d.card?cardName(o.d.card)+" gefunden":"Handy gefunden")+" – Daten werden geladen …";
           pairRecvStop(); try { await pairJoin(code); UI.pstep="start"; } catch(x){ $("loginErr").textContent=x.message; UI.pstep="join"; pairUi(); } return; } } } catch(_){}
     PRECV_T=setTimeout(poll, 2000); };
   PRECV_T=setTimeout(poll, 1500);
@@ -9677,7 +9813,8 @@ async function pairSendTo(t){   // the phone side: put this device's pairing cod
   if (!m && !shortOk(t)) throw new Error("Das ist kein gültiger Code – er hat 10 Zeichen, z. B. 7KF2-QX9M-3T.");
   const code=pairCode(); if (!code) throw new Error("Dieses Gerät ist noch nicht gekoppelt.");
   const box = m ? {v:m[1], k:m[2], s:""} : await shortBox(t), K=await spKeys(box);
-  const op={h:b64u((await crypto.subtle.sign("HMAC", K.mac, new TextEncoder().encode("sp\u0000code"))).slice(0,24)), b:await spEnc(K,{i:"code", d:{code}})};
+  const op={h:b64u((await crypto.subtle.sign("HMAC", K.mac, new TextEncoder().encode("sp\u0000code"))).slice(0,24)), b:await spEnc(K,{i:"code", d:{code, card:await myCard()}})};
+  if (zDevs().length>=10) throw new Error("Es sind schon 10 Geräte gekoppelt – entferne erst eins unter Geräte & Abgleich.");
   try { await spRequest(box,"push","",{ops:[op]}); }
   catch(e){ throw new Error(e.status===401 ? "Dieser Code ist abgelaufen – lass dir am anderen Gerät einen neuen zeigen." : "Server nicht erreichbar – bist du online?"); }
   return true;
@@ -9690,11 +9827,11 @@ document.addEventListener("click", async e=>{
     try { await pairStart(); $("loginBg").hidden=false; UI.pstep="show"; loginModeUi(); pairUi(); }
     catch(x){ console.warn("pair", x); pairSave(null); SYNC.token=""; $("loginErr").textContent = !(window.crypto&&crypto.subtle) ? "Koppeln geht nur in der Handy- oder PC-App." : x.status===429 ? x.message : "Server nicht erreichbar – bist du online?"; b.disabled=false; b.textContent="Los geht's"; } return; }
   if (e.target.closest("#pairJoin")){ const b=e.target.closest("#pairJoin"); b.disabled=true;
-    try { await pairJoin($("pairCode").value); UI.pstep="start"; } catch(x){ $("loginErr").textContent=x.message; } finally { b.disabled=false; } return; }
+    try { await pairJoin($("pairCode").value); UI.pstep="start"; } catch(x){ if (!x.cancel) $("loginErr").textContent=x.message; } finally { b.disabled=false; } return; }
   if (e.target.closest("#pairCopy")){ try{ await copySecret(pairCode()); toast("Code kopiert – nach einer Minute wird er aus der Zwischenablage gelöscht"); }catch(_){ toast("Bitte den Code markieren und kopieren"); } return; }
   if (e.target.closest("#pairDone")){ UI.pmoreOpen=false; $("loginBg").hidden=true; UI.pstep="start"; renderSyncInfo(); return; }
   if (e.target.closest("#pairShortNew")){ shortDrop(); pairUi(); return; }
-  if (e.target.closest("#pairMore")){ if (zDevs().length>=5){ toast("Es sind schon 5 Geräte gekoppelt – entferne erst ein altes unter Einstellungen › Geräte", null, null, 7000); return; } if (SYNC.token && pairState()) pairShow("show"); else showLogin(); return; }
+  if (e.target.closest("#pairMore")){ if (zDevs().length>=10){ toast("Es sind schon 10 Geräte gekoppelt – entferne erst ein altes unter Einstellungen › Geräte", null, null, 7000); return; } if (SYNC.token && pairState()) pairShow("show"); else showLogin(); return; }
   if (e.target.closest("#syncCode")){ UI.pmoreOpen=true; pairShow("show"); return; }
   if (e.target.closest("#pairWipe")){ const b=e.target.closest("#pairWipe"); if (b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Wirklich? Alle gekoppelten Daten auf dem Server löschen"; setTimeout(()=>{ b.dataset.armed=""; renderSyncSec(); },5000); return; }
     try { await api("wipe",{body:{}}); } catch(_){ }
@@ -9713,7 +9850,7 @@ document.addEventListener("keydown", e=>{ if (e.key==="Enter" && e.target.id==="
 document.addEventListener("click", e=>{ if (e.target.closest("#pairRecv")){ UI.pstep="recv"; $("loginErr").textContent=""; pairUi(); } });
 document.addEventListener("change", async e=>{ if (e.target.id!=="pairCam") return; const f=e.target.files&&e.target.files[0]; e.target.value=""; if (!f) return;
   $("loginErr").textContent="QR-Code wird gelesen …";
-  try { const t=await qrFromFile(f); if (!t || !pairParse(t)){ $("loginErr").textContent="Kein Kopplungs-Code erkannt. Halte das Handy ruhig und näher an den Bildschirm – oder füge den Code ein."; return; }
+  try { const t=await qrFromFile(f); if (!t || !(pairParse(t)||/HBQ1\./.test(t))){ $("loginErr").textContent="Kein Kopplungs-Code erkannt. Halte das Handy ruhig und näher an den Bildschirm – oder füge den Code ein."; return; }
     $("pairCode").value=t; $("loginErr").textContent=""; await pairJoin(t); UI.pstep="start"; }
   catch(x){ $("loginErr").textContent=x.message||"Das hat nicht geklappt."; } });
 
@@ -9792,7 +9929,9 @@ async function spCreate(name){
 async function spJoin(code){ const p=spParse(code); if (!p) throw new Error("Das ist kein Code für einen gemeinsamen Bereich.");
   if (spList().some(x=>x.v===p.v)) throw new Error("Diesem Bereich bist du schon beigetreten.");
   await spRequest(p,"pull","&since=999999999").catch(e=>{ throw new Error(e.status===401?"Diesen Bereich gibt es nicht (mehr).":"Server nicht erreichbar – bist du online?"); });
-  p.n="Gemeinsam"; S.settings.shared=[...spList(), p]; saveSettings(); UI.gmSel=p.v; await spSyncAll(); const L=spLocal(p.v); if (L.docs.meta&&L.docs.meta.name){ p.n=L.docs.meta.name; saveSettings(); } return p; }
+  p.n="Gemeinsam"; S.settings.shared=[...spList(), p]; saveSettings(); UI.gmSel=p.v; await spSyncAll(); const L=spLocal(p.v); if (L.docs.meta&&L.docs.meta.name){ p.n=L.docs.meta.name; saveSettings(); }
+  if (Object.keys(L.docs).filter(k=>k.startsWith("m-") && k!=="m-"+me().id).length>=10){ spLeave(p.v); throw new Error("Dieser Bereich hat schon 10 Mitglieder."); }
+  return p; }
 function spLeave(v){ const sp=spList().find(x=>x.v===v); if (!sp) return; spPut(sp,"m-"+me().id,null); spPut(sp,"pub-"+me().id,null);
   setTimeout(()=>{ S.settings.shared=spList().filter(x=>x.v!==v); saveSettings(); try{ localStorage.removeItem("hb-sp-"+v); }catch(e){} UI.gmSel=null; render(); }, 2500); }
 // who owes whom: shared expenses split evenly, settlements move money directly
@@ -9809,15 +9948,16 @@ function gemeinsamCard(){ if (!spList().length) return `<div class="card gmcard"
 function renderGemeinsam(){
   const el=$("v-gemeinsam"); if (!el) return; if (el.contains(document.activeElement) && typingNow()) return;
   const step=UI.gmStep||"", list=spList(), m=me();
+  if (step==="wait" && UI.rwait && UI.rwait.kind==="gm"){ el.innerHTML=`<div class="card">${reqWaitHtml(UI.rwait)}</div>`; return; }
   if (!(window.crypto&&crypto.subtle)){ el.innerHTML=`<div class="card"><p>Gemeinsame Bereiche gehen nur in der Handy- oder PC-App.</p></div>`; return; }
   if (step==="new"||step==="join"||!list.length&&step!=="invite"){
     const join=step==="join";
     el.innerHTML=`<div class="card gmintro"><span class="lgic">${ic("user",26)}</span><h2>${join?"Einem Bereich beitreten":list.length?"Neuer gemeinsamer Bereich":"Gemeinsam statt einsam"}</h2>
       ${!list.length&&!step?`<p class="small muted" style="margin:0 0 12px;line-height:1.5">Teile mit Partner, Familie oder WG nur das, was ihr gemeinsam habt: Ausgaben mit automatischem Ausgleich, Sparziele, eine Einkaufsliste – und auf Wunsch einzelne Budgets oder Fixkosten. Konten und alles andere bleiben privat. Ende-zu-Ende verschlüsselt, ohne Konto.</p>`:""}
       <div class="field"><label for="gmMe">Dein Name (sehen die anderen)</label><input class="in" id="gmMe" value="${esc(m.name||S.settings.name||"")}" placeholder="z. B. Sascha"></div>
-      ${join?`${canQrLive()?`<button class="btn primary block" style="justify-content:center;gap:8px" data-qrlive="gm">${ic("camera",18)} QR-Code scannen</button>`:`<label class="btn primary block" style="justify-content:center;gap:8px">${ic("camera",18)} Bild mit QR-Code auswählen<input type="file" accept="image/*" id="gmCam" hidden></label>`}
+      ${join?`<ol class="psteps"><li>Wer dich einlädt, öffnet <b>Gemeinsam › Einladen</b>.</li><li>Du scannst den QR-Code oder tippst den Code ein.</li><li>Die andere Person bestätigt deine Anfrage – dann bist du dabei.</li></ol>${canQrLive()?`<button class="btn primary block" style="justify-content:center;gap:8px" data-qrlive="gm">${ic("camera",18)} QR-Code scannen</button>`:`<label class="btn primary block" style="justify-content:center;gap:8px">${ic("camera",18)} Bild mit QR-Code auswählen<input type="file" accept="image/*" id="gmCam" hidden></label>`}
         <div class="field"><label for="gmCode">… oder Code eintippen</label><input class="in" id="gmCode" placeholder="z. B. 7KF2-QX9M-3T" autocapitalize="characters" autocomplete="off" spellcheck="false" style="font-family:ui-monospace,monospace;letter-spacing:.08em;font-size:18px;text-align:center"></div>
-        <div class="row-btns"><button class="btn" data-gmstep="">Zurück</button><button class="btn primary" id="gmJoinGo">Beitreten</button></div>`
+        <div class="row-btns"><button class="btn" data-gmstep="">Zurück</button><button class="btn primary" id="gmJoinGo">Anfrage senden</button></div>`
       :step==="new"?`<div class="field"><label for="gmName">Name des Bereichs</label><input class="in" id="gmName" placeholder="z. B. Wir zwei, WG, Familie"></div>
         <div class="row-btns"><button class="btn" data-gmstep="">Zurück</button><button class="btn primary" id="gmNewGo">Anlegen</button></div>`
       :`<div class="row-btns" style="justify-content:stretch"><button class="btn primary" data-gmstep="new">Bereich anlegen</button><button class="btn" data-gmstep="join">Beitreten</button></div>`}
@@ -9825,13 +9965,13 @@ function renderGemeinsam(){
   const sp=list.find(x=>x.v===UI.gmSel)||list[0]; UI.gmSel=sp.v; const L=spLocal(sp.v), tab=UI.gmTab||"over";
   const mem=Object.keys(L.docs).filter(k=>k.startsWith("m-")).map(k=>k.slice(2)), net=spBalance(L), mine=net[m.id]||0;
   const chips=`<div class="gmchips">${list.map(x=>`<button class="chip ${x.v===sp.v?"on":""}" data-gmsel="${esc(x.v)}">${esc(x.n||"Gemeinsam")}</button>`).join("")}<button class="chip" data-gmstep="new">+ Neu</button><button class="chip" data-gmstep="join">Beitreten</button></div>`;
-  if (step==="invite"){ el.innerHTML=chips+`<div class="card"><h2 style="margin:0 0 6px">Jemanden einladen</h2><p class="small" style="margin:0 0 10px;line-height:1.5">Die andere Person öffnet <b>Gemeinsam › Beitreten</b> und fotografiert diesen Code. Sie sieht danach nur diesen Bereich – nichts von deinen anderen Daten.</p>
-    <div class="pqr">${qrSvg(spCode(sp),230)}</div>
+  if (step==="invite"){ el.innerHTML=chips+`<div class="card"><h2 style="margin:0 0 6px">Jemanden einladen</h2><p class="small" style="margin:0 0 10px;line-height:1.5">Die andere Person öffnet <b>Gemeinsam › Beitreten</b> und scannt diesen Code. Dann bekommst du hier eine <b>Anfrage</b> mit ihrem Namen – erst wenn du zulässt, ist sie dabei. Sie sieht nur diesen Bereich, nichts von deinen anderen Daten.</p>
+    <div class="pqr" id="gmQr">${GMS.code&&GMS.v===sp.v?qrSvg("HBG1."+GMS.code,230):`<div class="small muted" style="padding:80px 0">Wird vorbereitet …</div>`}</div>
     <div class="small muted" style="text-align:center;margin-top:12px">Ohne Kamera, z. B. am PC – diesen Code eintippen:</div>
     <div class="pcode gmshort" id="gmShort" style="margin-top:6px;text-align:center;font-size:26px;letter-spacing:.12em;font-family:ui-monospace,monospace">${GMS.code&&GMS.v===sp.v?esc(shortFmt(GMS.code)):"…"}</div>
     <div id="gmCtd">${ctdHtml(GMS.code&&GMS.v===sp.v?GMS.t0:0,"gm")}</div>
     <div class="row-btns" style="margin-top:12px"><button class="btn" id="gmCopy">Code kopieren</button><button class="btn primary" data-gmstep="">Fertig</button></div></div>`;
-    if (!(GMS.code && GMS.v===sp.v && Date.now()-GMS.t0<CTD_LEN-5000)) gmShortMake(sp).then(()=>{ const e=$("gmShort"); if (e) e.textContent=GMS.code?shortFmt(GMS.code):"– (offline)"; const c=document.querySelector("#gmCtd [data-ctd]"); if (c && GMS.code){ c.dataset.ctd=GMS.t0; delete c.dataset.done; ctdTick(); } }).catch(()=>{ const e=$("gmShort"); if (e) e.textContent="– (offline)"; });
+    if (!(GMS.code && GMS.v===sp.v && Date.now()-GMS.t0<CTD_LEN-5000)) gmShortMake(sp).then(()=>{ const e=$("gmShort"); if (e) e.textContent=GMS.code?shortFmt(GMS.code):"– (offline)"; const q=$("gmQr"); if (q && GMS.code) q.innerHTML=qrSvg("HBG1."+GMS.code,230); const c=document.querySelector("#gmCtd [data-ctd]"); if (c && GMS.code){ c.dataset.ctd=GMS.t0; delete c.dataset.done; ctdTick(); } }).catch(()=>{ const e=$("gmShort"); if (e) e.textContent="– (offline)"; });
     return; }
   const TABS=[["over","Übersicht"],["exp","Ausgaben"],["goal","Sparziele"],["shop","Einkauf"],["share","Freigaben"]];
   const exps=Object.entries(L.docs).filter(([k])=>k.startsWith("x-")).map(([k,x])=>({id:k,...x})).sort((a,b)=>(b.d||"").localeCompare(a.d||""));
@@ -9884,10 +10024,13 @@ document.addEventListener("click", async e=>{
   if (t.closest("#gmNewGo")){ const n=$("gmName").value.trim()||"Gemeinsam"; saveMe(); if (!me().name){ err("Bitte deinen Namen eintragen"); return; } t.closest("#gmNewGo").disabled=true;
     try { await spCreate(n.slice(0,40)); UI.gmStep="invite"; render(); } catch(x){ err("Server nicht erreichbar – bist du online?"); t.closest("#gmNewGo").disabled=false; } return; }
   if (t.closest("#gmJoinGo")){ let code=$("gmCode").value; saveMe(); if (!me().name){ err("Bitte deinen Namen eintragen"); return; }
-    try { if (!spParse(code) && shortOk(code)){ const b=t.closest("#gmJoinGo"); b.disabled=true; b.textContent="Wird geholt …"; try { code=await shortFetch(code); } finally { b.disabled=false; b.textContent="Beitreten"; } }
+    try { if (!spParse(code)){ const q=String(code||"").match(/HBG1\.([0-9A-Za-z]{10})/), sc=q?q[1]:code;
+        if (/HBQ1\./.test(String(code))) throw new Error("Das ist ein Code zum Koppeln eigener Geräte – den gibst du unter Einstellungen › Geräte & Abgleich ein.");
+        if (!shortOk(sc)) throw new Error("Der Code hat 10 Zeichen, z. B. 7KF2-QX9M-3T.");
+        UI.gmStep="wait"; try { code=await reqAsk("gm", sc, await myCard(me().name)); } catch(e){ if (UI.gmStep==="wait"){ UI.gmStep="join"; renderGemeinsam(); } if (e.cancel) return; throw e; } }
       if (!spParse(code)) throw new Error("Das ist kein Code für einen gemeinsamen Bereich.");
-      await spJoin(code); UI.gmStep=""; render(); toast("Beigetreten"); } catch(x){ err(String(x.message||x).replace("Lass dir am Handy einen neuen zeigen.","Lass dir einen neuen zeigen.")); } return; }
-  if (t.closest("#gmCopy")&&sp){ const c=GMS.code&&GMS.v===sp.v?shortFmt(GMS.code):spCode(sp); try{ await copySecret(c); toast(GMS.code?"Code kopiert – er gilt 10 Minuten":"Code kopiert – nach einer Minute wird er aus der Zwischenablage gelöscht"); }catch(_){ toast("Bitte markieren und kopieren"); } return; }
+      await spJoin(code); UI.gmStep=""; render(); toast("Du bist dabei!"); } catch(x){ err(String(x.message||x).replace("Lass dir am Handy einen neuen zeigen.","Lass dir einen neuen zeigen.")); } return; }
+  if (t.closest("#gmCopy")&&sp){ if (!(GMS.code&&GMS.v===sp.v)){ toast("Der Code wird noch vorbereitet"); return; } try{ await copySecret(shortFmt(GMS.code)); toast("Code kopiert – er gilt 10 Minuten"); }catch(_){ toast("Bitte markieren und kopieren"); } return; }
   if (!sp) return;
   if (t.closest("#gxAdd")){ const a=parseAmt($("gxA").value); if (!(a>0)){ toast("Bitte einen Betrag eintragen"); return; } spPut(sp,"x-"+newId(),{t:$("gxT").value.trim().slice(0,60)||"Ausgabe", a:Math.round(a*100)/100, p:$("gxP").value, d:$("gxD").value||isoToday(), by:me().id}); toast("Eingetragen"); renderGemeinsam(); return; }
   const stl=t.closest("[data-gmsettle]"); if (stl){ spPut(sp,"x-"+newId(),{settle:true, a:Number(stl.dataset.amt), p:me().id, to:stl.dataset.gmsettle, d:isoToday(), by:me().id}); toast("Ausgleich eingetragen"); renderGemeinsam(); return; }
@@ -9902,7 +10045,7 @@ document.addEventListener("click", async e=>{
 });
 document.addEventListener("change", async e=>{ const t=e.target; if (!t.closest||!t.closest("#v-gemeinsam")) return; const sp=spList().find(x=>x.v===UI.gmSel);
   if (t.id==="gmCam"){ const f=t.files&&t.files[0]; t.value=""; if (!f) return; const x=$("gmErr"); if (x) x.textContent="QR-Code wird gelesen …";
-    try { const c=await qrFromFile(f); if (!c||!spParse(c)){ if (x) x.textContent="Kein Code erkannt – näher ran oder Code einfügen."; return; } $("gmCode").value=c; if (x) x.textContent=""; } catch(_){ if (x) x.textContent="Das Foto ließ sich nicht lesen."; } return; }
+    try { const c=await qrFromFile(f); if (!c||!(spParse(c)||/HBG1\./.test(c))){ if (x) x.textContent="Kein Code erkannt – näher ran oder Code einfügen."; return; } $("gmCode").value=c; if (x) x.textContent=""; const g=$("gmJoinGo"); if (g) g.click(); } catch(_){ if (x) x.textContent="Das Foto ließ sich nicht lesen."; } return; }
   if (!sp) return;
   if (t.dataset.gmsb!=null){ spSelSet(sp.v, s=>{ s.bud=s.bud||{}; s.bud[t.dataset.gmsb]=t.checked; }); spSyncSoon(); }
   else if (t.dataset.gmsg!=null){ spSelSet(sp.v, s=>{ s.goal=s.goal||{}; s.goal[t.dataset.gmsg]=t.checked; }); spSyncSoon(); }
