@@ -908,3 +908,7 @@ html.pc.istab:not(.tabp) .pcfcalc .grid{grid-auto-rows:minmax(max(44px,calc((100
 html.pc.istab:not(.tabp) .pcfcalc .wd{padding-bottom:4px}
 html.pc.istab:not(.tabp) .pcfd{gap:3px!important}
 html.pc.istab:not(.tabp) .pcfd .dh b{font-size:14px}
+/* tablet landscape: calendar and side column scroll on their own */
+html.pc.istab:not(.tabp) #v-fix.pcfcal{height:calc(100vh - 212px);overflow:hidden;align-items:stretch!important}
+html.pc.istab:not(.tabp) #v-fix.pcfcal>.pcfcalc,html.pc.istab:not(.tabp) #v-fix.pcfcal>.pcfside{max-height:100%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;position:relative!important;top:auto!important}
+html.pc.istab:not(.tabp) #v-fix.pcfcal>.pcfcalc{align-self:start}
