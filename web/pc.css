@@ -765,7 +765,6 @@ html.pc.istab .tsg button small{margin-left:auto;color:var(--muted);font-weight:
 html.pc.istab .tsback{display:inline-flex;align-items:center;gap:6px;border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:14px;padding:10px 14px;font:700 14px var(--f-body);color:var(--fg);margin-bottom:12px}
 html.pc.istab #setHome .pcset{grid-template-columns:minmax(0,1fr)!important}
 html.pc.istab #setHome .pcsl{display:none!important}
-html.pc.istab.tabpre main [data-view]{opacity:0}
 
 html.pc[data-pack] .tabs{background:transparent!important}
 html.pc[data-pack] .pchero:not([style]){background:linear-gradient(160deg,var(--pk) 0%,var(--pk2) 100%);box-shadow:0 18px 40px color-mix(in srgb,var(--pk) 25%,transparent)}
@@ -863,7 +862,3 @@ html.pc.istab:not(.tabp) #v-fix.pcfcal>.pcfcalc,html.pc.istab:not(.tabp) #v-fix.
 html.pc.istab:not(.tabp) #v-fix.pcfcal>.pcfcalc{align-self:start}
 html.pc[data-theme="dark"] .pcz{background-color:color-mix(in srgb,#ffd36b 7%,var(--surface))!important}
 @media (prefers-color-scheme: dark){html.pc:not([data-theme="light"]) .pcz{background-color:color-mix(in srgb,#ffd36b 7%,var(--surface))!important}}
-
-/* tablet: while turning, no shadows or blur – only transforms move, so it stays smooth */
-html.pc.istab.tabrot main *,html.pc.istab.tabrot .pchero{box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;transition:none!important}
-html.pc.istab.tabrot main .card,html.pc.istab.tabrot .pchero{will-change:transform}
