@@ -898,3 +898,13 @@ html.pc.istab:not(.tabp) .pchero{position:fixed!important;left:24px;top:104px!im
   html.pc.istab:not(.tabp) .pcminis button{padding:4px 9px;border-radius:11px}
   html.pc.istab:not(.tabp) .pcminis b{font-size:13px}
 }
+/* tablet: "Ohne festen Tag" first – top of the side column (landscape), right under the calendar (portrait) */
+html.pc.istab .pcfside>.pcfnone{order:-1}
+html.pc.istab.tabp .pcfside>.pcfnone{grid-column:1/-1}
+/* tablet: filter chips wrap instead of being cut off */
+html.pc.istab #filters{flex-wrap:wrap!important;overflow:visible!important}
+/* tablet landscape: the whole month fits between header and dock */
+html.pc.istab:not(.tabp) .pcfcalc .grid{grid-auto-rows:minmax(max(44px,calc((100vh - 340px) / 6)),auto)!important}
+html.pc.istab:not(.tabp) .pcfcalc .wd{padding-bottom:4px}
+html.pc.istab:not(.tabp) .pcfd{gap:3px!important}
+html.pc.istab:not(.tabp) .pcfd .dh b{font-size:14px}
