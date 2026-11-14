@@ -138,7 +138,7 @@ if (IS_DESK){   // the tablet has the dock down there – it keeps the legal tex
     <span class="pcfr">
     ${LEG.map(([k,t])=>`<button data-pclegal="${k}">${t}</button>`).join("")}</span></footer>
     <div class="backdrop" id="pcLegalBg" hidden><div class="sheet pclegal" role="dialog" aria-modal="true"><div class="sheet-head"><h2 id="pcLegalT"></h2><button class="icon-btn" data-pclegalclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="legal" id="pcLegalB"></div></div></div>`);
-  const foot=()=>{ const v=$("pcVer"); if (v) v.textContent="v"+curVerShort();
+  const foot=()=>{ const v=$("pcVer"); if (v) v.textContent=verFull();
     const s=$("pcSync"), t=$("pcSyncT"); if (!s||!t) return;
     const st = !SYNC.token ? "off" : SYNC.state==="ok" ? "ok" : SYNC.state==="pending" ? "busy" : SYNC.state==="offline" ? "offline" : "err";
     s.dataset.st=st;
@@ -1502,7 +1502,7 @@ if (IS_TAB){
     const n=String(S.settings.name||"").trim(), p=S.settings.photo, f=devForm(), badge=`<span class="avdev">${devIc(f,11)}</span>`;
     const av=p?`<img src="${esc(p)}" alt="">${badge}`:n?`<span class="avl">${esc(n[0].toUpperCase())}</span>${badge}`:devIc(f,24);
     const sw=[["dark","Dunkel",H.dataset.theme==="dark"],["sicherheit","App-Sperre",!!lockCfg()],["notify","Benachrichtigungen",!!notifyCfg().on],["geraete","Abgleich",!!SYNC.token]].filter(([k])=>k!=="notify"||CAN_NOTIFY);
-    return `<div class="card tsprof"><button class="topav ${!p&&!n?"devav":""}" data-tsprof="1" aria-label="Profil">${av}</button><div style="min-width:0"><b>${esc(n||devModel())}</b><small>${esc([n?devModel():"",SYNC.token?"Abgleich an":"Abgleich aus","v"+curVerShort()].filter(Boolean).join(" · "))}</small></div><span style="flex:1"></span><button class="btn" data-tsprof="1">Profil bearbeiten</button></div>
+    return `<div class="card tsprof"><button class="topav ${!p&&!n?"devav":""}" data-tsprof="1" aria-label="Profil">${av}</button><div style="min-width:0"><b>${esc(n||devModel())}</b><small>${esc([n?devModel():"",SYNC.token?"Abgleich an":"Abgleich aus",verFull()].filter(Boolean).join(" · "))}</small></div><span style="flex:1"></span><button class="btn" data-tsprof="1">Profil bearbeiten</button></div>
       <div class="tssw">${sw.map(([k,l,on])=>`<button class="${on?"on":""}" data-tssw="${k}" role="switch" aria-checked="${on}"><span>${esc(l)}</span><i></i></button>`).join("")}</div>
       <div class="tsgr">${GROUPS().map(([g,c,ks])=>`<div class="card tsg" style="--gc:${c}"><h3><span class="saic" style="background:${c}">${ic(accIcon(ks[0]),16)}</span>${esc(I18N.tr?I18N.tr(g):g)}</h3>${ks.filter(k=>SP_PAGES[k]||k==="weiter").map(k=>`<button data-tsgo="${k}"><span class="saic" style="background:${themeCol(ACC_COL[k]||c)};width:28px;height:28px;border-radius:9px">${ic(accIcon(k),14)}</span>${esc(tTitle(k))}<small>${esc(accSub(k)||"")} ›</small></button>`).join("")}</div>`).join("")}</div>`;
   }
