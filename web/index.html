@@ -351,6 +351,17 @@ html.pc .invbg{background:color-mix(in srgb,var(--bg) 70%,#000a);align-items:cen
 .tg.on{background:var(--accent)}.tg.on:after{left:21px}
 .hasnew{position:relative}.hasnew:after{content:"neu";position:absolute;top:6px;right:6px;background:#e0902b;color:#fff;font-size:9.5px;font-weight:800;border-radius:6px;padding:1px 5px}
 .clog{padding:12px 0;border-bottom:1px solid var(--line)}.clog.top .clh b{color:var(--accent)}.clh{display:flex;justify-content:space-between;align-items:baseline}.clog ul{margin:6px 0 0;padding-left:18px;line-height:1.55;font-size:14px}
+.rfseg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:4px 0 12px}.rfseg button{border:0;border-radius:13px;padding:11px 6px;background:var(--sunk);color:var(--fg);font:700 14px var(--f-body);cursor:pointer}
+.rfseg button.on{background:var(--accent);color:#fff}.rfseg button.on.rate{background:#7a5bc2}
+.rfchips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}.rfchips button{border:0;border-radius:999px;padding:7px 12px;background:var(--sunk);color:var(--fg);font:700 12.5px var(--f-body);cursor:pointer}.rfchips button.on{background:#7a5bc2;color:#fff}
+.rfnote{font-size:12.5px;color:#6b4fb0;background:color-mix(in srgb,#7a5bc2 12%,var(--surface));border-radius:12px;padding:9px 11px;margin:4px 0 6px}.rfnote:empty{display:none}
+html[data-theme="dark"] .rfnote{color:#c9b8f2}
+.btn.primary.rfgo{background:#7a5bc2;border-color:#7a5bc2}
+.fxnsheet .pf{display:block;margin-bottom:10px}.fxnsheet .pf>span{display:block;font:700 12.5px var(--f-body);color:var(--muted);margin-bottom:4px}.fxnsheet .pr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fxnsheet .in{width:100%;box-sizing:border-box}
+.wdebts{display:flex;flex-direction:column;gap:8px}.wdebt{background:var(--sunk);border-radius:16px;padding:10px 12px}.wdh{display:flex;gap:8px;align-items:center}.wdh .in{flex:1}
+.wdx{border:0;background:none;font-size:22px;color:var(--muted);cursor:pointer;width:34px}
+.wdr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.wdr span{display:block;font:700 11.5px var(--f-body);color:var(--muted);margin-bottom:3px}.wdr .in{width:100%;box-sizing:border-box}
+.wdend{display:block;margin-top:6px;color:#7a5bc2;font-weight:700}.wdadd{align-self:flex-start}
 .fbwrap{display:grid;gap:4px 22px}
 .fbsheet{max-width:620px}html.pc .fbsheet{max-width:min(1000px,95vw);width:min(1000px,95vw);border-radius:28px}
 #fbFloatBg #fbEd{padding:4px 0 6px}
@@ -6044,8 +6055,53 @@ function renderAutoBk(){
 document.addEventListener("change", e=>{ if (e.target.id==="abOn"){ const c=abCfg(); c.on=e.target.checked; abSave(c); if (c.on) autoBackupCheck(); renderAutoBk(); } });
 
 
+/* Raten / Schulden */
+function rateEnd(open, rate, zinsPct){ open=Number(open)||0; rate=Number(rate)||0; const z=(Number(zinsPct)||0)/100/12; if (!(open>0) || !(rate>0)) return null;
+  let n; if (z>0){ if (rate<=open*z) return {never:true}; n=Math.ceil(-Math.log(1-z*open/rate)/Math.log(1+z)); } else n=Math.ceil(open/rate);
+  const ym=shiftYm(ymOf(new Date()), n); return {n, ym}; }
+function rateEndTxt(open, rate, zins){ const e=rateEnd(open, rate, zins); if (!e) return ""; if (e.never) return "⚠️ Die Rate deckt nicht einmal die Zinsen – so wird die Schuld nie kleiner.";
+  return `💡 Noch <b>${e.n} ${e.n===1?"Rate":"Raten"}</b> – letzte etwa im ${esc(monthName(e.ym))}.`; }
+const RATE_CHIPS=[["kredit","Kredit"],["ratenkauf","Ratenkauf"],["handy","Handy"],["privat","Privat geliehen"],["tax","Steuerschulden"],["bafoeg","BAföG / Studium"]];
+function rateFormHtml(day, st){ st=st||{}; const D=daysIn(UI.ym||ymOf(new Date()));
+  return `<label class="pf"><span>Wofür?</span><input class="in" data-rf="name" value="${esc(st.name||"")}" placeholder="z. B. Autokredit, Handy auf Raten" autocomplete="off"></label>
+    <div class="rfchips">${RATE_CHIPS.map(([k,l])=>`<button type="button" class="${st.art===k?"on":""}" data-rfart="${k}">${l}</button>`).join("")}</div>
+    <div class="pr2"><label class="pf"><span>Rate pro Monat</span><input class="in" data-rf="rate" inputmode="decimal" value="${esc(st.rate||"")}" placeholder="0,00"></label><label class="pf"><span>Noch offen</span><input class="in" data-rf="open" inputmode="decimal" value="${esc(st.open||"")}" placeholder="0,00"></label></div>
+    <div class="pr2"><label class="pf"><span>Am</span><select class="in" data-rf="day"><option value="0">ohne festen Tag</option>${Array.from({length:D},(_,i)=>`<option value="${i+1}" ${(st.day||day)===i+1?"selected":""}>${i+1}. des Monats</option>`).join("")}</select></label><label class="pf"><span>Zins pro Jahr (optional)</span><input class="in" data-rf="zins" inputmode="decimal" value="${esc(st.zins||"")}" placeholder="0 %"></label></div>
+    <div class="rfnote" data-rfnote>${rateEndTxt(parseAmt(st.open||""), parseAmt(st.rate||""), parseAmt(st.zins||""))}</div>`; }
+function rateRead(root){ const v=k=>{ const el=root.querySelector(`[data-rf="${k}"]`); return el?el.value.trim():""; }; const a=root.querySelector("[data-rfart].on");
+  return {name:v("name"), rate:v("rate"), open:v("open"), zins:v("zins"), day:+v("day")||0, art:a?a.dataset.rfart:""}; }
+async function rateCreate(r){ const ym=UI.ym||ymOf(new Date()), rate=Math.round((parseAmt(r.rate)||0)*100)/100, open=Math.round((parseAmt(r.open)||0)*100)/100, zins=parseAmt(r.zins)||0;
+  const art = r.art==="tax"||r.art==="handy" ? (r.art==="handy"?"ratenkauf":"sonst") : (r.art || debtArt({name:r.name}));
+  const name=r.name || (RATE_CHIPS.find(x=>x[0]===r.art)||[,"Rate"])[1];
+  const fid=newId(), f={name, amount:rate, kind:"privat", order:S.fixed.length, from:ym}; if (r.day) f.days=[{from:ym, day:r.day}];
+  if (!(await safe(()=>put("fixed", fid, f)))) return false;
+  if (open>0 && !(await safe(()=>put("debts", newId(), {name, art, start:open, since:shiftYm(ymOf(new Date()),1), zins:isFinite(zins)?zins:0, fixedId:fid, auto:true})))) return false;
+  return name; }
+function rateCheck(r){ if (!r.name && !r.art) return "Bitte eintragen, wofür die Rate ist"; if (!(parseAmt(r.rate)>0)) return "Bitte die Rate pro Monat eintragen"; return ""; }
+document.addEventListener("click", e=>{ const c=e.target.closest("[data-rfart]"); if (!c) return; const root=c.closest(".rfroot")||c.parentElement.parentElement; root.querySelectorAll("[data-rfart]").forEach(b=>b.classList.toggle("on", b===c && !b.classList.contains("on")));
+  const n=root.querySelector('[data-rf="name"]'); if (n && !n.value.trim()) n.placeholder=(RATE_CHIPS.find(x=>x[0]===c.dataset.rfart)||[,""])[1]; });
+document.addEventListener("input", e=>{ if (!e.target.matches("[data-rf]")) return; const root=e.target.closest(".rfroot"); if (!root) return; const r=rateRead(root), n=root.querySelector("[data-rfnote]"); if (n) n.innerHTML=rateEndTxt(parseAmt(r.open), parseAmt(r.rate), parseAmt(r.zins)); });
+/* Handy: neue Fixkosten oder Rate */
+function fxNewOpen(mode){ let bg=$("fxNewBg"); if (!bg){ bg=document.createElement("div"); bg.id="fxNewBg"; bg.className="backdrop"; bg.hidden=true; document.body.appendChild(bg);
+    bg.addEventListener("click", ev=>{ if (ev.target===bg || ev.target.closest("[data-fxnx]")) fxNewClose(); }); }
+  UI.fxNew=mode||"fix"; fxNewRender(); bg.hidden=false; document.body.classList.add("locked"); requestAnimationFrame(()=>bg.classList.add("show")); }
+function fxNewClose(){ const bg=$("fxNewBg"); if (!bg||bg.hidden) return; bg.classList.remove("show"); document.body.classList.remove("locked"); setTimeout(()=>{ bg.hidden=true; },220); }
+function fxNewRender(){ const bg=$("fxNewBg"); if (!bg) return; const m=UI.fxNew, D=daysIn(UI.ym||ymOf(new Date()));
+  bg.innerHTML=`<div class="sheet fxnsheet rfroot" role="dialog" aria-modal="true" aria-label="Was kommt dazu?"><div class="sheet-head"><h2>Was kommt dazu?</h2><button class="icon-btn" data-fxnx aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="rfseg"><button class="${m==="fix"?"on":""}" data-fxnm="fix">📅 Fixkosten</button><button class="${m==="rate"?"on rate":""}" data-fxnm="rate">🏦 Rate / Schulden</button></div>
+    ${m==="rate" ? rateFormHtml(0) : `<label class="pf"><span>Name</span><input class="in" data-fn="name" placeholder="z. B. Miete, Netflix, Versicherung" autocomplete="off"></label>
+      <div class="pr2"><label class="pf"><span>Betrag pro Monat</span><input class="in" data-fn="amount" inputmode="decimal" placeholder="0,00"></label><label class="pf"><span>Am</span><select class="in" data-fn="day"><option value="0">ohne festen Tag</option>${Array.from({length:D},(_,i)=>`<option value="${i+1}">${i+1}. des Monats</option>`).join("")}</select></label></div>`}
+    <button class="btn primary block ${m==="rate"?"rfgo":""}" style="justify-content:center;margin-top:10px" data-fxnok>${m==="rate"?"Rate anlegen":"Eintragen"}</button></div>`;
+  setTimeout(()=>{ const i=bg.querySelector('[data-rf="name"],[data-fn="name"]'); if (i) i.focus({preventScroll:true}); },60); }
+document.addEventListener("click", async e=>{ const mm=e.target.closest("[data-fxnm]"); if (mm){ UI.fxNew=mm.dataset.fxnm; fxNewRender(); return; }
+  if (!e.target.closest("[data-fxnok]")) return; const bg=$("fxNewBg");
+  if (UI.fxNew==="rate"){ const r=rateRead(bg), err=rateCheck(r); if (err){ toast(err); return; } fxNewClose(); const n=await rateCreate(r); if (n) toast(`${n} als Rate eingetragen`); return; }
+  const v=k=>(bg.querySelector(`[data-fn="${k}"]`)||{}).value||"", name=v("name").trim(), amt=parseAmt(v("amount")||"0"), day=+v("day")||0, ym=UI.ym||ymOf(new Date());
+  if (!name){ toast("Bitte einen Namen eintragen"); return; } if (!(amt>=0)){ toast("Betrag ungültig"); return; }
+  const f={name, amount:Math.round(amt*100)/100, kind:"privat", order:S.fixed.length, from:ym}; if (day) f.days=[{from:ym, day}];
+  fxNewClose(); if (await safe(()=>put("fixed", newId(), f))) toast(`${name} eingetragen`); });
 /* Einrichtung */
-const WIZ_FIX=[["Miete",""],["Strom",""],["Internet",""],["Handy",""],["Versicherungen",""],["Rundfunkbeitrag","18,36"],["Streaming",""],["Fitnessstudio",""],["Auto",""],["Deutschlandticket","63"],["Kredit",""],["Sparen / ETF",""]];
+const WIZ_FIX=[["Miete",""],["Strom",""],["Internet",""],["Handy",""],["Versicherungen",""],["Rundfunkbeitrag","18,36"],["Streaming",""],["Fitnessstudio",""],["Auto",""],["Deutschlandticket","63"],["Sparen / ETF",""]];
 /* Bank */
 const BANKS = [
   ["sparkasse","Sparkasse","S","#e30613","filiale","im Online-Banking deiner Sparkasse (über sparkasse.de)","<b>Umsätze</b> › <b>Exportieren</b> und das Format <b>CSV-CAMT V2</b>","csv","sparkasse.de"],
@@ -6136,7 +6192,7 @@ function wizShould(){
   return true;
 }
 function wizOpen(){
-  UI.wiz={step:0, forced:!S.settings.wizDone, name:S.settings.name||"", work:S.settings.work||"", extra:[...(S.settings.extra||[])], exAsk:false, bal:"", bank:(S.settings.bank||{}).id||"", bankName:(S.settings.bank||{}).name||"", fix:{}, own:[], bud:{}};
+  UI.wiz={step:0, forced:!S.settings.wizDone, name:S.settings.name||"", work:S.settings.work||"", extra:[...(S.settings.extra||[])], exAsk:false, bal:"", bank:(S.settings.bank||{}).id||"", bankName:(S.settings.bank||{}).name||"", fix:{}, own:[], bud:{}, debts:[]};
   let el=$("wizBg"); if (!el){ el=document.createElement("div"); el.id="wizBg"; el.className="wizbg"; document.body.appendChild(el); }
   el.hidden=false; document.body.classList.add("locked"); wizRender(); wizAnimIn(1);
 }
@@ -6160,7 +6216,7 @@ function wizBackOne(){
 function wizClose(){ UI.wiz=null; const el=$("wizBg"); if (el) el.hidden=true; document.body.classList.remove("locked"); }
 function wizRender(){
   const w=UI.wiz, el=$("wizBg"); if (!w||!el) return;
-  const N=6, st=w.step, y=ymOf(new Date()).slice(0,4);
+  const N=7, st=w.step, y=ymOf(new Date()).slice(0,4);
   const g1 = st===1 ? (w.grp===undefined ? workGroup(w.work) : w.grp) : "";
   const crumb = st===1 && (g1 || w.exAsk) ? `<div class="wcrumb"><button data-wzcrumb="0">Schritt 2</button>${g1?`<i>›</i><button data-wzcrumb="1">${esc((WGROUPS.find(x=>x[0]===g1)||[,""])[1])}</button>`:""}${w.exAsk&&w.work?`<i>›</i><span>${esc((WORK.find(x=>x[0]===w.work)||[,""])[1])}</span>`:""}</div>` : `<small class="wk">Schritt ${st+1} von ${N}</small>`;
   const head=(t,sub)=>`<div class="wsteps">${Array.from({length:N},(_,i)=>`<i class="${i<=st?"on":""}"></i>`).join("")}</div>${crumb}<h2 class="wt">${t}</h2><p class="ws">${sub}</p>`;
@@ -6178,11 +6234,15 @@ function wizRender(){
       ${w.own.map((x,i)=>`<div class="wrow"><input class="in" data-wzownn="${i}" value="${esc(x.n)}" placeholder="Name"><input class="in" data-wzowna="${i}" inputmode="decimal" value="${esc(x.a)}" placeholder="Betrag €"></div>`).join("")}
       <button class="chip" id="wzOwn">+ Eigene Fixkosten</button></div>
       ${tot>0?`<div class="wsum"><span>${Object.keys(w.fix).length+w.own.filter(x=>x.n).length} Fixkosten</span><b>${esc(eur(tot))} im Monat</b></div>`:""}`; }
-  if (st===5) body=head("Fast fertig: Budgets","Wie viel willst du im Monat höchstens ausgeben? Leer lassen = kein Budget.")+`<div class="wfix">${cats("ausgabe").filter(c=>!/bargeld/i.test(c)).map(c=>`<label class="wrow"><span>${esc(c)}</span><input class="in" data-wzbud="${esc(c)}" inputmode="decimal" value="${esc(w.bud[c]||"")}" placeholder="kein Budget"></label>`).join("")}</div>
+  if (st===5){ const tot=sum(w.debts,x=>parseAmt(x.o)||0);
+    body=head("Zahlst du etwas ab?","Kredite, Ratenkäufe oder Geld, das du jemandem schuldest. Die App rechnet dir aus, wann alles weg ist.")+`<div class="wfix wdebts">${w.debts.map((x,i)=>{ const en=rateEnd(parseAmt(x.o), parseAmt(x.r), 0); return `<div class="wdebt"><div class="wdh"><input class="in" data-wzdn="${i}" value="${esc(x.n)}" placeholder="z. B. Autokredit, Handy auf Raten"><button class="wdx" data-wzddel="${i}" aria-label="Entfernen">×</button></div><div class="wdr"><label><span>Rate pro Monat</span><input class="in" data-wzdr="${i}" inputmode="decimal" value="${esc(x.r)}" placeholder="0,00 €"></label><label><span>Noch offen</span><input class="in" data-wzdo="${i}" inputmode="decimal" value="${esc(x.o)}" placeholder="0,00 €"></label></div>${en&&!en.never?`<small class="wdend">bis ca. ${esc(monthName(en.ym))} · noch ${en.n} Raten</small>`:""}</div>`; }).join("")}
+      <button class="chip wdadd" id="wzDebt">＋ ${w.debts.length?"Weitere Rate oder Schuld":"Rate oder Schuld hinzufügen"}</button></div>
+      ${tot>0?`<div class="wsum"><span>${w.debts.length} ${w.debts.length===1?"Schuld":"Schulden"}</span><b>${esc(eur(tot))} offen</b></div>`:""}`; }
+  if (st===6) body=head("Fast fertig: Budgets","Wie viel willst du im Monat höchstens ausgeben? Leer lassen = kein Budget.")+`<div class="wfix">${cats("ausgabe").filter(c=>!/bargeld/i.test(c)).map(c=>`<label class="wrow"><span>${esc(c)}</span><input class="in" data-wzbud="${esc(c)}" inputmode="decimal" value="${esc(w.bud[c]||"")}" placeholder="kein Budget"></label>`).join("")}</div>
       ${SYNCABLE&&!(SYNC&&SYNC.token)?`<div class="notice info" style="margin-top:14px"><span>Handy und PC abgleichen? Das geht jederzeit unter Einstellungen › Abgleich & Backup.</span></div>`:""}`;
   el.innerHTML=`<div class="wiz" role="dialog" aria-label="Einrichtung">${body}
-    <div class="wfoot ${!st&&w.forced?"solo":""}">${st?`<button class="btn" id="wzBack">Zurück</button>`:w.forced?"":`<button class="btn" id="wzSkipAll">Später</button>`}<button class="btn primary" id="wzNext" ${st===3&&(!w.bank||(w.bank==="andere"&&!(w.bankName||"").trim()))?"disabled":""}>${st===N-1?"Fertig":st===4&&!Object.keys(w.fix).length&&!w.own.length?"Überspringen":"Weiter"}</button></div></div>`;
-  const f=el.querySelector("input"); if (f && st!==3 && st!==4 && st!==5) setTimeout(()=>f.focus({preventScroll:true}),50);
+    <div class="wfoot ${!st&&w.forced?"solo":""}">${st?`<button class="btn" id="wzBack">Zurück</button>`:w.forced?"":`<button class="btn" id="wzSkipAll">Später</button>`}<button class="btn primary" id="wzNext" ${st===3&&(!w.bank||(w.bank==="andere"&&!(w.bankName||"").trim()))?"disabled":""}>${st===N-1?"Fertig":(st===4&&!Object.keys(w.fix).length&&!w.own.length)||(st===5&&!w.debts.some(x=>x.n||parseAmt(x.r)>0))?"Überspringen":"Weiter"}</button></div></div>`;
+  const f=el.querySelector("input"); if (f && st!==3 && st!==4 && st!==5 && st!==6) setTimeout(()=>f.focus({preventScroll:true}),50);
 }
 function wizRead(){
   const w=UI.wiz; if (!w) return;
@@ -6191,6 +6251,9 @@ function wizRead(){
   document.querySelectorAll("[data-wzfixamt]").forEach(i=>w.fix[i.dataset.wzfixamt]=i.value.trim());
   document.querySelectorAll("[data-wzownn]").forEach(i=>w.own[Number(i.dataset.wzownn)].n=i.value.trim());
   document.querySelectorAll("[data-wzowna]").forEach(i=>w.own[Number(i.dataset.wzowna)].a=i.value.trim());
+  document.querySelectorAll("[data-wzdn]").forEach(i=>{ const d=w.debts[Number(i.dataset.wzdn)]; if (d) d.n=i.value.trim(); });
+  document.querySelectorAll("[data-wzdr]").forEach(i=>{ const d=w.debts[Number(i.dataset.wzdr)]; if (d) d.r=i.value.trim(); });
+  document.querySelectorAll("[data-wzdo]").forEach(i=>{ const d=w.debts[Number(i.dataset.wzdo)]; if (d) d.o=i.value.trim(); });
   document.querySelectorAll("[data-wzbud]").forEach(i=>{ if (i.value.trim()) w.bud[i.dataset.wzbud]=i.value.trim(); else delete w.bud[i.dataset.wzbud]; });
 }
 async function wizFinish(){
@@ -6209,6 +6272,7 @@ async function wizFinish(){
   let k=S.fixed.length;
   const items=[...Object.entries(w.fix).map(([n,v])=>[n,v]), ...w.own.map(x=>[x.n,x.a])].filter(([n,v])=>n && parseAmt(v)>0);
   for (const [n,v] of items) await safe(()=>put("fixed", newId(), {name:n, amount:Math.round(parseAmt(v)*100)/100, kind:"privat", order:k++}));
+  for (const d of (w.debts||[])) if ((d.n||"").trim() && parseAmt(d.r)>0) await rateCreate({name:d.n.trim(), rate:d.r, open:d.o, zins:"", day:0, art:""});
   wizClose(); UI.view="home"; render(); setTimeout(()=>{ if ($("tourBg").hidden) tourOpen(); }, 500);
 }
 document.addEventListener("click", e=>{ if (e.target.closest("#wizAgain")) wizOpen(); });
@@ -6224,6 +6288,8 @@ document.addEventListener("click", async e=>{
   const we=t.closest("[data-wzextra]"); if (we){ const k=we.dataset.wzextra; w.extra=w.extra||[]; w.extra = !k ? [] : w.extra.includes(k) ? w.extra.filter(x=>x!==k) : [...w.extra, k]; wizRender(); return; }
   if (t.closest("[data-wzexback]")){ wizBackOne(); return; }
   const fx=t.closest("[data-wzfix]"); if (fx){ wizRead(); const n=fx.dataset.wzfix; if (n in w.fix) delete w.fix[n]; else w.fix[n]=fx.dataset.def||""; wizRender(); const i=document.querySelector(`[data-wzfixamt="${CSS.escape(n)}"]`); if (i&&!i.value) i.focus(); return; }
+  if (t.closest("#wzDebt")){ wizRead(); w.debts.push({n:"",r:"",o:""}); wizRender(); const i=document.querySelector(`[data-wzdn="${w.debts.length-1}"]`); if (i) i.focus(); return; }
+  const wdd=t.closest("[data-wzddel]"); if (wdd){ wizRead(); w.debts.splice(Number(wdd.dataset.wzddel),1); wizRender(); return; }
   if (t.closest("#wzOwn")){ wizRead(); w.own.push({n:"",a:""}); wizRender(); const i=document.querySelector(`[data-wzownn="${w.own.length-1}"]`); if (i) i.focus(); return; }
   if (t.closest("#wzBack")){ wizBackOne(); return; }
   if (t.closest("#wzSkipAll")){ try{ localStorage.setItem("hb-wiz-skip","1"); }catch(_){} wizClose(); toast("Die Einrichtung findest du unter Einstellungen › Startseite"); return; }
@@ -6233,9 +6299,9 @@ document.addEventListener("click", async e=>{
     if (w.step===2 && w.bal!=="" && !isFinite(parseAmt(w.bal))){ toast("Bitte eine Zahl eingeben"); return; }
     if (w.step===3 && !w.bank){ toast("Bitte deine Bank auswählen"); return; }
     if (w.step===3 && w.bank==="andere" && !(w.bankName||"").trim()){ toast("Bitte den Namen deiner Bank eintragen"); return; }
-    if (w.step<5){ wizNav(()=>{ w.step++; }, 1); } else await wizFinish(); }
+    if (w.step<6){ wizNav(()=>{ w.step++; }, 1); } else await wizFinish(); }
 });
-document.addEventListener("keydown", e=>{ if (UI.wiz && e.key==="Enter" && e.target.closest && e.target.closest("#wizBg") && e.target.tagName==="INPUT" && UI.wiz.step!==4 && UI.wiz.step!==5){ e.preventDefault(); $("wzNext").click(); } });
+document.addEventListener("keydown", e=>{ if (UI.wiz && e.key==="Enter" && e.target.closest && e.target.closest("#wizBg") && e.target.tagName==="INPUT" && UI.wiz.step!==4 && UI.wiz.step!==5 && UI.wiz.step!==6){ e.preventDefault(); $("wzNext").click(); } });
 
 
 /* Sicherheit des Abgleichs */
@@ -7048,7 +7114,7 @@ document.addEventListener("click", async e => {
   if (t.closest("#fixShowAll")){ UI.fixShowAll=!UI.fixShowAll; renderFix(); return; }
   if (t.closest("#fixEditBtn")){ UI.fixEdit=true; renderFix(); return; }
   if (t.closest("#fixDone")){ UI.fixEdit=false; renderFix(); return; }
-  if (t.closest("#fixAdd")){ const id=newId(); await safe(()=>put("fixed", id, {name:"Neue Fixkosten", amount:0, kind:"privat", order:S.fixed.length})); setTimeout(()=>{ const el=$("fxn-"+id); if (el){ el.focus(); el.select(); } },80); return; }
+  if (t.closest("#fixAdd")){ fxNewOpen("fix"); return; }
   const fxd = t.closest("[data-fxdel]"); if (fxd){ const f=S.fixed.find(x=>x.id===fxd.dataset.fxdel); const prev=f?(({id:_,...r})=>r)(f):null; if (await safe(()=>del("fixed", fxd.dataset.fxdel))) toast("Gelöscht", prev?()=>safe(()=>put("fixed", f.id, prev)):null); return; }
   if (t.closest("#debtEditBtn")){ UI.debtEdit=true; renderMore(); return; }
   if (t.closest("#debtDone")){ UI.debtEdit=false; renderMore(); return; }

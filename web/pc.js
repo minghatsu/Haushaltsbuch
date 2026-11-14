@@ -883,9 +883,14 @@ if (IS_PC){
   }
   function popEdit(id, anchor, del){ const f=S.fixed.find(x=>x.id===id); if (!f || !anchor) return; popFor={id, anchor}; pop.innerHTML=form(f, dayOf(f,UI.ym)); pop.hidden=false; place(anchor);
     const el=pop.querySelector(del?"[data-pfdel]":"[data-pf=name]"); if (el){ el.focus(); if (el.select) el.select(); } }
-  function popNew(day, anchor){ if (!anchor) return; popFor={id:null, day, anchor}; pop.innerHTML=form(null, day); pop.hidden=false; place(anchor); pop.querySelector("[data-pf=name]").focus(); }
+  const seg=m=>`<div class="rfseg"><button class="${m==="fix"?"on":""}" data-pfmode="fix">📅 Fixkosten</button><button class="${m==="rate"?"on rate":""}" data-pfmode="rate">🏦 Rate / Schulden</button></div>`;
+  function newHtml(day, m){ if (m==="rate") return `<div class="ph"><b>Neue Rate</b><button class="px" data-pfx aria-label="Schließen">${SV.x}</button></div>${seg(m)}<div class="rfroot">${rateFormHtml(day)}</div>
+      <div class="pa"><span style="flex:1"></span><button class="btn" data-pfx>Abbrechen</button><button class="btn primary rfgo" data-pfok>Rate anlegen</button></div>`;
+    return form(null, day).replace('</div>', '</div>'+seg(m)); }
+  function popNew(day, anchor, m){ if (!anchor) return; popFor={id:null, day, anchor, mode:m||"fix"}; pop.innerHTML=newHtml(day, popFor.mode); pop.hidden=false; place(anchor); const i=pop.querySelector('[data-pf=name],[data-rf=name]'); if (i) i.focus(); }
   const val=k=>{ const el=pop.querySelector(`[data-pf="${k}"]`); return el?el.value:""; };
   async function popSave(){
+    if (popFor && !popFor.id && popFor.mode==="rate"){ const r=rateRead(pop), err=rateCheck(r); if (err){ toast(err); return; } popClose(); const n=await rateCreate(r); if (n) toast(`${n} als Rate eingetragen`); return; }
     const ym=UI.ym, name=val("name").trim(), v=parseAmt(val("amount")||"0"), day=+val("day")||0, rh=val("rhythm"), kind=val("kind");
     if (!name){ const n=pop.querySelector("[data-pf=name]"); n.focus(); if (!pcCalm()) n.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(-3px)"},{transform:"none"}],{duration:300}); return; }
     if (!(v>=0)){ toast("Betrag ungültig"); return; }
@@ -919,6 +924,7 @@ if (IS_PC){
   }
   pop.addEventListener("click", e=>{ e.stopPropagation();
     if (e.target.closest("[data-pfx]")) return popClose();
+    const pm=e.target.closest("[data-pfmode]"); if (pm && popFor && !popFor.id){ popFor.mode=pm.dataset.pfmode; pop.innerHTML=newHtml(popFor.day, popFor.mode); place(popFor.anchor); const i=pop.querySelector('[data-pf=name],[data-rf=name]'); if (i) i.focus(); return; }
     if (e.target.closest("[data-pfok]")) return popSave();
     const db=e.target.closest("[data-pfdel]"); if (db){ if (db.classList.contains("arm")) return popDelete(); db.classList.add("arm"); db.querySelector("span").textContent="Wirklich löschen?"; setTimeout(()=>{ if (db.isConnected){ db.classList.remove("arm"); db.querySelector("span").textContent="Löschen"; } }, 3500); } });
   pop.addEventListener("keydown", e=>{ if (e.key==="Escape"){ e.stopPropagation(); popClose(); } else if (e.key==="Enter" && e.target.tagName!=="BUTTON"){ e.preventDefault(); popSave(); } });
