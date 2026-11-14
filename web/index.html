@@ -1054,11 +1054,11 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .qtg .qsm{width:16px;height:16px}
 /* Erinnerungen: Glocke mit Noten / roter Balken */
 .qi-notify{background:#2a2e36}.qs.on .qi-notify{background:#fff1d6}
-.qi-notify .bell{fill:#6b7280;transition:fill .4s;transform-origin:12px 3px}.qs.on .qi-notify .bell{fill:#f5a623;animation:qsring 1.4s ease-in-out infinite}
+.qi-notify .bell{fill:#6b7280;transition:fill .4s;transform-origin:12px 3px}.qs.on .qi-notify .bell{fill:#f5a623}.qs.ring .qi-notify .bell{animation:qsring 1.4s ease-in-out 1}
 @keyframes qsring{0%,60%,100%{transform:rotate(0)}10%{transform:rotate(16deg)}20%{transform:rotate(-14deg)}30%{transform:rotate(10deg)}40%{transform:rotate(-6deg)}50%{transform:rotate(3deg)}}
 .qi-notify .slash{stroke:#e5484d;stroke-width:2.6;stroke-linecap:round;stroke-dasharray:30;stroke-dashoffset:0;transition:stroke-dashoffset .35s}.qs.on .qi-notify .slash{stroke-dashoffset:30}
 .qi-notify .note{position:absolute;left:28px;top:4px;font-size:11px;color:#c27c0e;opacity:0;pointer-events:none;--x:8px;--r:20deg}.qi-notify .n2{left:30px;top:10px;--x:12px;--r:-15deg}.qi-notify .n3{left:2px;top:6px;--x:-10px;--r:-20deg}
-.qs.on .qi-notify .note{animation:qsnote 2s ease-out infinite}.qs.on .qi-notify .n2{animation-delay:.65s}.qs.on .qi-notify .n3{animation-delay:1.3s}
+.qs.ring .qi-notify .note{animation:qsnote 1.6s ease-out 1 both}.qs.ring .qi-notify .n2{animation-delay:.3s}.qs.ring .qi-notify .n3{animation-delay:.6s}
 @keyframes qsnote{0%{opacity:0;transform:none}20%{opacity:1}100%{opacity:0;transform:translate(var(--x),-22px) rotate(var(--r))}}
 /* Bildschirmschutz: Schild bricht */
 .qs.on .qi-secure{background:color-mix(in srgb,var(--accent) 14%,transparent)}
@@ -6605,6 +6605,7 @@ function qsTile([k,l,on,sub]){ const t=qsText(k,on)||[l,sub];
 function quickToggle(k, btn){
   if (btn){ const on=!btn.classList.contains("on"); btn.classList.toggle("on", on); btn.setAttribute("aria-checked", String(on));   // the tile animates first …
     const t=qsText(k,on)||[null, k==="secure"?(on?"keine Screenshots":"aus"):(on?"an":"aus")]; if (t[0]) btn.querySelector(".qtx b").textContent=t[0]; btn.querySelector(".qtx small").textContent=t[1];
+    if (k==="notify" && on){ btn.classList.add("ring"); setTimeout(()=>btn.classList.remove("ring"), 2400); }   // the bell rings once with a few notes
     setTimeout(()=>quickToggle(k), k==="dark"?600:250); return; }   // … then the setting really switches
   if (k==="dark"){ const t=document.documentElement.dataset.theme==="dark"?"light":"dark"; document.documentElement.dataset.theme=t; try{ localStorage.setItem("hb-theme",t); }catch(_){} try{ render(); }catch(_){} return; }
   if (k==="notify"){ const c=notifyCfg(); if (c.on){ c.on=false; notifySave(c); toast("Erinnerungen aus"); } else { c.on=true; notifySave(c); try { AndroidBridge.notifyAsk(); if (AndroidBridge.desktop) window.hbNotifyPerm(true); } catch(_){} toast("Erinnerungen an"); } }
