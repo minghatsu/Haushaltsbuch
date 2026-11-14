@@ -1513,7 +1513,7 @@ if (IS_TAB){
     let mix=$("tabSet"); if (!mix){ ps.insertAdjacentHTML("beforebegin", `<div id="tabSet"></div>`); mix=$("tabSet"); }
     const open=!!UI.tabOpen; mix.hidden=open; ps.hidden=!open;
     if (!open){ const h=tabSetHTML(); if (mix.dataset.h!==h){ mix.dataset.h=h; mix.innerHTML=h; } }
-    else { const ph=ps.querySelector(".pcsph"); if (ph && !ph.querySelector("[data-tsback]")) ph.insertAdjacentHTML("beforebegin", `<button class="tsback" data-tsback="1"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m15 6-6 6 6 6"/></svg> Einstellungen</button>`); }
+    else { const ph=ps.querySelector(".pcsph"); if (ph && !ps.querySelector("[data-tsback]")) ph.insertAdjacentHTML("beforebegin", `<button class="tsback" data-tsback="1"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m15 6-6 6 6 6"/></svg> Einstellungen</button>`); }
     return r;
   };
   const _ag=accGo; accGo=function(k){ if (k!=="profil") UI.tabOpen=1; return _ag(k); };

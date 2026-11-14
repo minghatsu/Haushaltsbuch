@@ -7168,7 +7168,7 @@ function renderLockEd(){
        <div class="row-btns"><button class="btn" id="lockChange">PIN ändern</button><button class="btn" id="lockOff">Sperre ausschalten</button></div>
        <div class="meta-row"><span class="small muted">${cfg.rec?"Wiederherstellungscode ist eingerichtet – damit entsperrst du die App, falls du die PIN vergisst.":"Noch kein Wiederherstellungscode – leg einen an, falls du die PIN mal vergisst."}</span></div>
        <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="lockRecNew">${cfg.rec?"Neuen Wiederherstellungscode":"Wiederherstellungscode anlegen"}</button></div>`
-    : `<div class="meta-row"><span>Schützt deine Finanzen mit einer PIN${BIO?" oder deinem Fingerabdruck":""}, wenn jemand anderes dein ${NATIVE&&!(window.AndroidBridge||{}).desktop?"Handy":"Gerät"} benutzt.</span></div><div class="row-btns"><button class="btn primary" id="lockOn">App-Sperre einrichten</button></div>`;
+    : `<div class="meta-row"><span>Schützt deine Finanzen mit einer PIN${BIO?" oder deinem Fingerabdruck":""}, wenn jemand anderes dein ${NATIVE&&!(window.AndroidBridge||{}).desktop?(IS_TAB?"Tablet":"Handy"):"Gerät"} benutzt.</span></div><div class="row-btns"><button class="btn primary" id="lockOn">App-Sperre einrichten</button></div>`;
   if (window.AndroidBridge && typeof window.AndroidBridge.setSecure==="function")
     el.innerHTML += `<div class="switch" style="margin-top:12px"><label for="scrSecChk"><b>Bildschirmschutz</b><br><span class="small muted">Keine Screenshots, keine Bildschirmaufnahmen und kein Vorschaubild in der App-Übersicht. Für einen Screenshot kurz ausschalten.</span></label><input type="checkbox" id="scrSecChk" ${lsGet("hb-scrsec")==="0"?"":"checked"}></div>`;
 }
