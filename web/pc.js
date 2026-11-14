@@ -104,11 +104,12 @@ function pcHome(o){
   const pct=isCur ? left/dim : ym>cur ? 1 : 0;
   const first=String(S.settings.name||"").trim().split(/\s+/)[0], greet=first ? (I18N.tr ? I18N.tr("Hallo") : "Hallo") : devModel();
   const many=accts.filter(a=>!a.total).length>1;
-  const html=`<aside class="pchero" id="pcHero">
+  const hi=Math.max(0, accts.findIndex(a=>a.total)), heroCol=accts.length ? userCol("acct", accts[hi].name) : "";   // own colour from Einstellungen → Farben → Konten
+  const html=`<aside class="pchero" id="pcHero"${heroCol?` style="--herocol2:color-mix(in srgb, ${heroCol} 78%, #000);--heroring:color-mix(in srgb, ${heroCol} 45%, #fff);background:linear-gradient(160deg, ${heroCol} 0%, color-mix(in srgb, ${heroCol} 62%, #000) 70%);box-shadow:0 18px 40px color-mix(in srgb, ${heroCol} 20%, transparent)"`:""}>
     <small class="pchi"><span>${esc(greet)}</span>${first?", "+esc(first):""} · <span>${esc(MONTHS[m-1])} ${y}</span></small>
     <div class="pcbal" data-cv="${tot}" data-cf="eur">${esc(eur(tot))}</div>
     <span class="pcsub">${many?"auf allen Konten":"auf deinem Konto"}</span>
-    <div class="pcaccs">${accts.filter(a=>!a.total).map(a=>`<button class="${a.main?"main":""}" data-spgo="konten"><span>${esc(a.main?(mainName||"Hauptkonto"):a.name)}</span><b data-cv="${Number(a.bal)||0}" data-cf="eur">${esc(eur(Number(a.bal)||0))}</b></button>`).join("")}<button class="add" data-spgo="konten"><span>+ Space</span><b>anlegen</b></button></div>
+    <div class="pcaccs">${accts.filter(a=>!a.total).map(a=>{ const ac=userCol("acct", a.name); return `<button class="${a.main?"main":""}" data-spgo="konten"${ac?` style="background:color-mix(in srgb, ${ac} 55%, transparent)"`:""}><span>${esc(a.main?(mainName||"Hauptkonto"):a.name)}</span><b data-cv="${Number(a.bal)||0}" data-cf="eur">${esc(eur(Number(a.bal)||0))}</b></button>`; }).join("")}<button class="add" data-spgo="konten"><span>+ Space</span><b>anlegen</b></button></div>
     <button class="pcring" data-go="year" style="--p:${Math.round(pct*100)}" aria-label="Analyse öffnen"><span>${isCur
       ? `<small>noch pro Tag</small><b data-cv="${perDay}">${esc(eur0(perDay))}</b><small>${left} ${left===1?"Tag":"Tage"} übrig</small><small class="pcravg">bisher Ø ${esc(eur0(c.expenses/Math.max(1,new Date().getDate())))} / Tag</small>`
       : `<small>${c.net>=0?"übrig":"mehr ausgegeben"}</small><b data-cv="${Math.abs(c.net)}">${esc(eur0(Math.abs(c.net)))}</b><small>im ${esc(MONTHS[m-1])}</small>`}</span></button>

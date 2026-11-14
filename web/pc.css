@@ -48,9 +48,9 @@ html.pc .pchi{color:#bfe6d4;font-weight:600;font-size:14px}
 html.pc .pcbal{font:800 clamp(40px,4.4vw,62px)/1.05 var(--f-display);letter-spacing:-.03em;margin:8px 0 6px;font-variant-numeric:tabular-nums}
 html.pc .pcsub{color:#bfe6d4}
 html.pc .pcring{margin:auto;width:min(230px,30vh);aspect-ratio:1;border-radius:50%;border:0;padding:0;cursor:pointer;display:grid;place-items:center;
-  background:conic-gradient(#3fbf8a calc(var(--p)*1%),#ffffff26 0)}
-html.pc .pcring>span{width:80%;aspect-ratio:1;border-radius:50%;background:#126b50;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}
-html.pc .pcring small{color:#bfe6d4;font-size:13px}
+  background:conic-gradient(var(--heroring,#3fbf8a) calc(var(--p)*1%),#ffffff26 0)}
+html.pc .pcring>span{width:80%;aspect-ratio:1;border-radius:50%;background:var(--herocol2,#126b50);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+html.pc .pcring small{color:#ffffffbb;font-size:13px}
 html.pc .pcring b{font:800 34px var(--f-display);margin:2px 0}
 html.pc .pcminis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 html.pc .pcminis button{border:0;text-align:left;cursor:pointer;background:#ffffff1a;color:#fff;border-radius:18px;padding:14px;font:inherit}

@@ -6519,7 +6519,8 @@ document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("spBg").hid
 /* ---------- Farben: own colours for account cards, categories and the tab bar ---------- */
 const COLSW=["#1a7a5c","#2e9c74","#0f8a8a","#2f7fb8","#3d63a8","#5b4fc7","#7a5bc2","#a64ca6","#d14d72","#c2410c","#d4813a","#c27c0e","#8a6d1f","#4d7c0f","#5b6472","#1f2937"];
 const TABDEF={home:["Start","#1a7a5c","home"],list:["Buchungen","#3d63a8","list"],fix:["Fixkosten","#c27c0e","repeat"],shop:["Einkauf","#0f8a8a","cart"],year:["Analyse","#d14d72","chart"],more:["Optionen","#5b6472","sliders"]};
-function applyTabColors(){ const ks=Object.keys(TABDEF); document.querySelectorAll(".tabs .tab[data-go]").forEach(b=>{ const k=b.dataset.go, c=userCol("tab", k) || (isGreen() && TABDEF[k] ? themeCol(TABDEF[k][1], ks.indexOf(k)) : ""); if (c) b.style.setProperty("--tcol", c); else b.style.removeProperty("--tcol"); }); }
+function applyTabColors(){ const ks=Object.keys(TABDEF); ks.forEach((k,i)=>{ const c=userCol("tab", k) || (isGreen() ? themeCol(TABDEF[k][1], i) : ""); if (c) document.documentElement.style.setProperty("--pg-"+k, c); else document.documentElement.style.removeProperty("--pg-"+k); });   // PC: page colours follow the chosen colours too
+  document.querySelectorAll(".tabs .tab[data-go]").forEach(b=>{ const k=b.dataset.go, c=userCol("tab", k) || (isGreen() && TABDEF[k] ? themeCol(TABDEF[k][1], ks.indexOf(k)) : ""); if (c) b.style.setProperty("--tcol", c); else b.style.removeProperty("--tcol"); }); }
 function renderColorEd(){
   const el=$("colorEd"); if (!el) return;
   let accts=[...new Set([...(UI.acctNames||[]), ...accountNames()])]; if (!accts.length) accts=["Hauptkonto"]; const open=UI.colOpen||"";
