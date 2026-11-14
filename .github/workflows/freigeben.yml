@@ -1,7 +1,20 @@
 name: Für Tester freigeben
-# Erst selbst testen, dann hier "Run workflow" – die aktuell neueste Version geht an alle Tester (minghatsu/finanz-mami).
+# Erst selbst testen, dann freigeben – einzeln für Handy, Tablet und PC (minghatsu/finanz-mami).
 on:
   workflow_dispatch:
+    inputs:
+      handy:
+        description: "Handy freigeben"
+        type: boolean
+        default: true
+      tablet:
+        description: "Tablet freigeben"
+        type: boolean
+        default: true
+      pc:
+        description: "PC freigeben"
+        type: boolean
+        default: true
 permissions:
   contents: read
 jobs:
@@ -9,19 +22,38 @@ jobs:
     name: Neueste Version für Tester freigeben
     runs-on: ubuntu-latest
     steps:
-      - name: Neueste Version spiegeln
+      - name: Gewählte Geräte spiegeln
         env:
           GH_TOKEN: ${{ github.token }}
           PUB_TOKEN: ${{ secrets.PUBLIC_RELEASE_TOKEN }}
           PUB: minghatsu/finanz-mami
+          H: ${{ inputs.handy }}
+          T: ${{ inputs.tablet }}
+          P: ${{ inputs.pc }}
         run: |
           if [ -z "$PUB_TOKEN" ]; then echo "::error::Secret PUBLIC_RELEASE_TOKEN fehlt"; exit 1; fi
-          mkdir pub && cd pub
-          gh release download neueste -R "${{ github.repository }}" -D . --clobber
-          REL=$(gh api "repos/${{ github.repository }}/releases/tags/neueste")
-          TITLE=$(echo "$REL" | jq -r .name); VERS=$(echo "$REL" | jq -r .body | grep -o 'web=[0-9]* apk=[0-9]* exe=[0-9]*[ a-z0-9=]*')
-          mv Haushaltsbuch.apk Finanz-MAMI.apk; mv Haushaltsbuch-Setup.exe Finanz-MAMI-Setup.exe
-          zip -q Finanz-MAMI-Windows.zip Finanz-MAMI-Setup.exe
+          if [ "$H" != "true" ] && [ "$T" != "true" ] && [ "$P" != "true" ]; then echo "::error::Nichts ausgewählt"; exit 1; fi
+          mkdir new old pub
+          gh release download neueste -R "${{ github.repository }}" -D new --clobber
+          GH_TOKEN=$PUB_TOKEN gh release download neueste -R "$PUB" -D old --clobber || true
+          NB=$(gh api "repos/${{ github.repository }}/releases/tags/neueste" -q .body)
+          OB=$(GH_TOKEN=$PUB_TOKEN gh api "repos/$PUB/releases/tags/neueste" -q .body 2>/dev/null || true)
+          num(){ echo "$1" | grep -o "\b$2=[0-9]*" | head -1 | cut -d= -f2; }
+          NW=$(num "$NB" web); NA=$(num "$NB" apk); NE=$(num "$NB" exe)
+          OW=$(num "$OB" web); OT=$(num "$OB" webt); OP=$(num "$OB" webp); OA=$(num "$OB" apk); OE=$(num "$OB" exe)
+          OT=${OT:-$OW}; OP=${OP:-$OW}
+          pick(){ if [ -f "old/$1" ]; then cp "old/$1" "pub/$2"; elif [ -f "old/app.html" ]; then cp old/app.html "pub/$2"; fi; }
+          # phone page
+          if [ "$H" = "true" ]; then cp new/app.html pub/app.html; W=$NW; else pick app.html app.html; W=$OW; fi
+          if [ "$T" = "true" ]; then cp new/app.html pub/app-tab.html; WT=$NW; else pick app-tab.html app-tab.html; WT=$OT; fi
+          if [ "$P" = "true" ]; then cp new/app.html pub/app-pc.html; WP=$NW; else pick app-pc.html app-pc.html; WP=$OP; fi
+          # Android app (phone and tablet share it), Windows installer
+          if [ "$H" = "true" ] || [ "$T" = "true" ] || [ ! -f old/Finanz-MAMI.apk ]; then cp new/Haushaltsbuch.apk pub/Finanz-MAMI.apk; A=$NA; else cp old/Finanz-MAMI.apk pub/; A=$OA; fi
+          if [ "$P" = "true" ] || [ ! -f old/Finanz-MAMI-Setup.exe ]; then cp new/Haushaltsbuch-Setup.exe pub/Finanz-MAMI-Setup.exe; E=$NE; else cp old/Finanz-MAMI-Setup.exe pub/; E=$OE; fi
+          (cd pub && zip -q Finanz-MAMI-Windows.zip Finanz-MAMI-Setup.exe)
+          v(){ m=$(( $1 - 88 )); echo "v0.$(( m / 10 )).$(( m % 10 ))"; }
+          if [ "$W" = "$WT" ] && [ "$W" = "$WP" ]; then TITLE="Finanz MAMI · $(v $W) · Handy, Tablet & PC"; else TITLE="Finanz MAMI · Handy $(v $W) · Tablet $(v $WT) · PC $(v $WP)"; fi
+          VERS="web=$W webt=$WT webp=$WP apk=$A exe=$E"
           NOTES=$(printf '%s\n\n%s\n%s\n%s\n\n%s\n\n%s' \
             "**Testversion – danke fürs Ausprobieren!**" \
             "📱 **Android (Handy & Tablet):** Finanz-MAMI.apk herunterladen und öffnen. Beim ersten Mal fragt Android, ob Apps aus dieser Quelle erlaubt sind – einmal zulassen." \
@@ -30,6 +62,6 @@ jobs:
             "Feedback: in der App unter Einstellungen › Feedback oder an kontakt@miracleframe.de" \
             "Versionen für die automatischen Updates: $VERS")
           GH_TOKEN=$PUB_TOKEN gh release delete neueste -R "$PUB" -y --cleanup-tag || true
-          GH_TOKEN=$PUB_TOKEN gh release create neueste Finanz-MAMI.apk Finanz-MAMI-Windows.zip Finanz-MAMI-Setup.exe app.html \
-            -R "$PUB" --title "$TITLE" --notes "$NOTES" --latest
-          echo "### Freigegeben: $TITLE" >> "$GITHUB_STEP_SUMMARY"
+          (cd pub && GH_TOKEN=$PUB_TOKEN gh release create neueste Finanz-MAMI.apk Finanz-MAMI-Windows.zip Finanz-MAMI-Setup.exe app.html app-tab.html app-pc.html \
+            -R "$PUB" --title "$TITLE" --notes "$NOTES" --latest)
+          echo "### Freigegeben: $TITLE ($VERS)" >> "$GITHUB_STEP_SUMMARY"

@@ -1012,7 +1012,7 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .psteps{margin:4px 0 12px;padding:0;list-style:none;counter-reset:ps;display:flex;flex-direction:column;gap:7px;font-size:13.5px;line-height:1.4;text-align:left}
 .psteps li{counter-increment:ps;display:block;position:relative;padding-left:32px;min-height:22px}.psteps li::before{content:counter(ps);position:absolute;left:0;top:-1px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:800 12px var(--f-body)}
 .pq{margin:0 0 10px;font:800 16px var(--f-display)}
-.relbox{display:flex;flex-direction:column;gap:8px;margin-top:14px;padding:14px;border-radius:16px;background:var(--sunk)}.relbox .btn{justify-content:center}
+.relbox{display:flex;flex-direction:column;gap:8px;margin-top:14px;padding:14px;border-radius:16px;background:var(--sunk)}.relsel{display:flex;flex-direction:column;gap:6px}.relsel label{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:12px;background:var(--surface);cursor:pointer}.relsel input{width:18px;height:18px;accent-color:var(--accent)}.relsel b{display:block;font-size:13.5px}.relsel small{color:var(--muted);font-size:12px}.relsel .same small{color:var(--good)}.relbox .btn{justify-content:center}
 /* Farben page */
 .colsec{margin-bottom:16px}.colpkg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0}.colpkg button{border:0;border-radius:14px;padding:10px;background:var(--sunk);display:flex;flex-direction:column;gap:7px;font:700 13px var(--f-body);color:var(--fg)}.colpkg button i{height:14px;border-radius:9px}.colpkg button[aria-pressed=true]{outline:2px solid var(--accent);background:var(--accent-soft)}
 .colpk{--c:hsl(var(--h) var(--s) var(--l));padding:6px 2px 16px;display:flex;flex-direction:column;gap:10px}
@@ -8923,7 +8923,10 @@ async function ghCheck(manual, auto){
     const ALT = {"Haushaltsbuch.apk":"Finanz-MAMI.apk", "Haushaltsbuch-Setup.exe":"Finanz-MAMI-Setup.exe"};
     const asset = n => (rel.assets||[]).find(a=>a.name===n || a.name===ALT[n]);
     const desk = !!window.AndroidBridge.desktop, mine = +(window.AndroidBridge.nativeRev() || 0), theirs = num(desk ? "exe" : "apk");
-    const rv = () => verName(num("web"));   // one version number everywhere
+    // the testers' release can carry its own page for tablet and PC (released one by one); the developer's release has one for all
+    const wk = IS_DESK ? "webp" : IS_TAB ? "webt" : "web", web = () => num(wk) || num("web");
+    const page = () => (rel.assets||[]).find(a=>a.name===(IS_DESK?"app-pc.html":IS_TAB?"app-tab.html":"app.html")) || asset("app.html");
+    const rv = () => verName(web());   // one version number everywhere
     UPD.relName = rv();
     let apkNew=false;
     if (theirs > mine){
@@ -8945,8 +8948,8 @@ async function ghCheck(manual, auto){
         // on the phone the new app content still comes right away, even if the new Android app is not installed yet
       }
     }
-    if (num("web") > HB_VERSION){
-      const a = asset("app.html");
+    if (web() > HB_VERSION){
+      const a = page();
       // "same" = this version was already fetched earlier and is waiting on the device
       if (a && ["saved","same"].includes(await ghFetch(a.url, "app"))){
         UPD.ready = true; if (apkNew) return;
@@ -8981,21 +8984,25 @@ function renderUpd(){
     : `<div class="bkb"><button class="btn primary" id="updNow">Jetzt prüfen</button></div><button class="link small" id="updKeyShow" style="margin-top:6px">Entwickler-Schlüssel</button>`;
 }
 /* ---------- Entwickler: die getestete Version für alle freigeben (startet „Für Tester freigeben“ auf GitHub) ---------- */
-const REL={mine:"", all:"", busy:false, arm:false, msg:"", t:0};
+const REL={mine:"", all:"", allBody:"", mineBody:"", busy:false, arm:false, msg:"", t:0, sel:{handy:true, tablet:true, pc:true}};
 const relShort = n => String(n||"").replace(/^Finanz MAMI · /,"");
 async function relLoad(force){ if (!updKey() || !canGh() || REL.busy || (!force && Date.now()-REL.t<60e3)) return; REL.t=Date.now();
-  try { const a=JSON.parse(await ghFetch(GH_REL,"json")), b=JSON.parse(await ghFetch(GH_REL_PUB,"json")); REL.mine=a.name||""; REL.all=b.name||""; } catch(_){}
+  try { const a=JSON.parse(await ghFetch(GH_REL,"json")), b=JSON.parse(await ghFetch(GH_REL_PUB,"json")); REL.mine=a.name||""; REL.all=b.name||""; REL.mineBody=a.body||""; REL.allBody=b.body||""; } catch(_){}
   renderUpd(); }
+const relNum=(body,k)=>{ const m=String(body||"").match(new RegExp("\\b"+k+"=(\\d+)")); return m?+m[1]:0; };
 function relCardHtml(){ if (!updKey()) return ""; setTimeout(()=>relLoad(), 0);
-  const same=REL.mine && REL.mine===REL.all;
+  const mine=relNum(REL.mineBody,"web"), ow=relNum(REL.allBody,"web"), D=[["handy","Handy",ow],["tablet","Tablet",relNum(REL.allBody,"webt")||ow],["pc","PC",relNum(REL.allBody,"webp")||ow]];
+  const any=D.some(([k])=>REL.sel[k]), loaded=!!mine;
   return `<div class="relbox"><b>Für alle freigeben</b>
-    <span class="small muted">Bei dir: ${esc(relShort(REL.mine)||"…")}<br>Bei allen: ${esc(relShort(REL.all)||"…")}</span>
-    <button class="btn ${REL.arm?"danger":"primary"}" id="relGo" ${REL.busy||same?"disabled":""}>${REL.busy?"Wird freigegeben …":same?"Alle haben schon diese Version":REL.arm?"Wirklich für alle freigeben?":"Diese Version für alle freigeben"}</button>
+    <span class="small muted">Bei dir: ${mine?verName(mine):"…"}</span>
+    <div class="relsel">${D.map(([k,l,n])=>{ const same=n&&n===mine; return `<label class="${same?"same":""}"><input type="checkbox" data-relsel="${k}" ${REL.sel[k]?"checked":""}><span><b>${l}</b><small>bei allen: ${n?verName(n):"…"}${same?" ✓":""}</small></span></label>`; }).join("")}</div>
+    <button class="btn ${REL.arm?"danger":"primary"}" id="relGo" ${REL.busy||!any||!loaded?"disabled":""}>${REL.busy?"Wird freigegeben …":REL.arm?"Wirklich freigeben?":`${verName(mine)} freigeben für: ${D.filter(([k])=>REL.sel[k]).map(([,l])=>l).join(", ")||"–"}`}</button>
     ${REL.msg?`<span class="small" style="color:${/geklappt|unterwegs/.test(REL.msg)?"var(--good)":"var(--bad)"}">${esc(REL.msg)}</span>`:""}</div>`; }
+document.addEventListener("change", e=>{ const c=e.target.closest("[data-relsel]"); if (!c) return; REL.sel[c.dataset.relsel]=c.checked; REL.arm=false; renderUpd(); });
 async function relFree(){
   const url="https://api.github.com/repos/minghatsu/Haushaltsbuch/actions/workflows/freigeben.yml/dispatches";
   const r=await new Promise(res=>{ const id=newId(); httpWaiting[id]=res; setTimeout(()=>{ if (httpWaiting[id]){ delete httpWaiting[id]; res({status:0}); } }, 30000);
-    window.AndroidBridge.http(id, "POST", url, "Bearer "+updKey(), JSON.stringify({ref:"main"})); });
+    window.AndroidBridge.http(id, "POST", url, "Bearer "+updKey(), JSON.stringify({ref:"main", inputs:{handy:String(!!REL.sel.handy), tablet:String(!!REL.sel.tablet), pc:String(!!REL.sel.pc)}})); });
   if (r.status===204 || r.status===200) return;
   if (r.status===403 || r.status===404) throw new Error("Dein Entwickler-Schlüssel darf das noch nicht. Gib ihm bei GitHub unter „Actions“ das Recht „Read and write“.");
   if (!r.status) throw new Error("Keine Verbindung – bist du online?");
