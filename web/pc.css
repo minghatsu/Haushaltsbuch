@@ -828,3 +828,5 @@ html.pc .pcdevseg{display:flex;gap:4px;background:var(--sunk);border-radius:12px
 html.pc .pcds h4{margin:12px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 html.pc .pcdsk{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}html.pc .pcdsk div{background:var(--sunk);border-radius:12px;padding:10px}html.pc .pcdsk b{display:block;font:800 22px var(--f-display)}html.pc .pcdsk small{color:var(--muted);font-size:12px}
 html.pc .pcdsr{display:flex;gap:8px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}html.pc .pcdsr b{flex:none}html.pc .pcdsr span{flex:1;color:var(--muted);font-family:ui-monospace,monospace;font-size:12.5px}html.pc .pcdsr em{font-style:normal;font-weight:700}
+html.pc.istab .tssw button.nav>span{display:flex;flex-direction:column;text-align:left}html.pc.istab .tssw button.nav small{font-size:12px;font-weight:600;color:var(--muted)}html.pc.istab .tssw button.nav.on small{color:var(--accent);font-weight:800}
+html.pc.istab .tssw button.nav em{font-style:normal;color:var(--faint);display:grid;place-items:center}

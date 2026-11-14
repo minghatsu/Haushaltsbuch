@@ -1019,6 +1019,22 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .pq{margin:0 0 10px;font:800 16px var(--f-display)}
 .relbox{display:flex;flex-direction:column;gap:8px;margin-top:14px;padding:14px;border-radius:16px;background:var(--sunk)}.relsel{display:flex;flex-direction:column;gap:6px}.relsel label{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:12px;background:var(--surface);cursor:pointer}.relsel input{width:18px;height:18px;accent-color:var(--accent)}.relsel b{display:block;font-size:13.5px}.relsel small{color:var(--muted);font-size:12px}.relsel .same small{color:var(--good)}.relbox .btn{justify-content:center}
 .exi.devi .devph{width:100%;height:100%;border-radius:50%;object-fit:cover}
+/* Handy-Einstellungen: Profil, Schnellwahl, Kästen, eigene Seiten */
+.phprof{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:10px}
+.phav{position:relative;width:54px;height:54px;border-radius:50%;border:0;padding:0;background:var(--accent);color:#fff;display:grid;place-items:center;flex:none;cursor:pointer}.phav img{width:100%;height:100%;border-radius:50%;object-fit:cover}.phav>b{font:800 22px var(--f-display)}
+.phav .avdev{position:absolute;right:-4px;bottom:-3px}
+.phprof .sat{flex:1;min-width:0;display:flex;flex-direction:column}.phprof .sat b{font-size:16px}.phprof .sat small{color:var(--muted);font-size:12px}
+.phqs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.phq{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 12px;border:0;border-radius:16px;background:var(--surface);box-shadow:var(--shadow);text-align:left;color:var(--fg);font:inherit;cursor:pointer;min-width:0}
+.phq>span:first-child{display:flex;flex-direction:column;min-width:0}.phq b{font-size:13.5px}.phq small{font-size:11.5px;color:var(--muted)}.phq.on small{color:var(--accent);font-weight:700}
+.phq .tg{flex:none;pointer-events:none}.phq .phch,.phr .phch{color:var(--faint);display:grid;place-items:center;flex:none}
+.phg{padding:4px 0 6px;margin-bottom:12px;border-top:4px solid var(--gc);overflow:hidden}
+.phg h3{display:flex;align-items:center;gap:8px;margin:10px 14px 4px;font:800 15px var(--f-display)}.phg h3 .saic{width:24px;height:24px;border-radius:8px}
+.phr{display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px;border:0;background:none;text-align:left;color:var(--fg);font:inherit;cursor:pointer;border-top:1px solid var(--line)}.phr:first-of-type{border-top:0}
+.phr .sat{flex:1;min-width:0;display:flex;flex-direction:column}.phr .sat b{font-size:14.5px}.phr .sat small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.phr:active{background:var(--sunk)}
+.phback{display:inline-flex;align-items:center;gap:4px;border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:999px;padding:8px 14px 8px 10px;font:700 14px var(--f-body);color:var(--fg);margin:2px 0 12px;cursor:pointer}
+.phph{display:flex;align-items:center;gap:12px;margin:0 2px 14px}.phph h2{margin:0;font:800 24px var(--f-display)}.phph .saic{width:40px;height:40px;border-radius:13px}
+.phbody{display:flex;flex-direction:column;gap:12px}
 /* Farben page */
 .colsec{margin-bottom:16px}.colpkg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0}.colpkg button{border:0;border-radius:14px;padding:10px;background:var(--sunk);display:flex;flex-direction:column;gap:7px;font:700 13px var(--f-body);color:var(--fg)}.colpkg button i{height:14px;border-radius:9px}.colpkg button[aria-pressed=true]{outline:2px solid var(--accent);background:var(--accent-soft)}
 .colpk{--c:hsl(var(--h) var(--s) var(--l));padding:6px 2px 16px;display:flex;flex-direction:column;gap:10px}
@@ -6518,8 +6534,46 @@ function accBuild(){
   ks.filter(k=>ACC.open.has(k) && accHasBody(k)).forEach(accMount);
   ACC.built=ACC.tab;
 }
+/* ---------- Handy: Einstellungen wie am Tablet – Profil, Schnellwahl, Bereiche als Kästen; jede Zeile öffnet ihre eigene Seite ---------- */
+const PH_SYNC = () => accTabKeys("sicherheit").includes("sync");
+const phPageKeys = k => k==="geraete" && PH_SYNC() ? ["sync","geraete"] : [k];
+const phTitle = k => k==="geraete" && PH_SYNC() ? "Geräte & Abgleich" : accTitle(k);
+const PH_GROUPS = () => [["Geld","#6b8e23",accTabKeys("geld")],["Anpassen","#1a7a5c",accTabKeys("anpassen").filter(k=>k!=="dark")],
+  ["Sicherheit & Geräte","#3d63a8",accTabKeys("sicherheit").filter(k=>k!=="sync"&&k!=="notify")],["Hilfe","#c27c0e",accTabKeys("hilfe")]];
+const CHEV='<svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="m9 6 6 6-6 6"/></svg>';
+function phRow(k, c){ const col=themeCol(ACC_COL[k]||c);
+  const act = k==="wiz" ? `data-qwiz="1"` : k==="weiter" ? `data-invopen="1"` : `data-accgo="${k}"`;
+  return `<button class="phr" ${act}><span class="saic" style="background:${col}">${ic(accIcon(k),18)}</span><span class="sat"><b>${esc(phTitle(k))}</b><small data-accsub="${k}">${esc(accSub(k))}</small></span><span class="phch">${CHEV}</span></button>`; }
+function phHomeHtml(){
+  const n=String(S.settings.name||"").trim(), p=S.settings.photo, f=devForm(), dark=document.documentElement.dataset.theme==="dark";
+  const av=p?`<img src="${esc(p)}" alt="">`:n?`<b>${esc(n[0].toUpperCase())}</b>`:devIc(f,26);
+  // Dunkel switches right here; App-Sperre, Abgleich and Hinweise lead to their page – so they look like buttons, not like switches
+  const nav=(k,l,on,txt)=>`<button class="phq nav ${on?"on":""}" data-accgo="${k}"><span><b>${l}</b><small>${txt}</small></span><span class="phch">${CHEV}</span></button>`;
+  const q=[`<button class="phq ${dark?"on":""}" data-qdark="1" role="switch" aria-checked="${dark}"><span><b>Dunkel</b><small>${dark?"an":"aus"}</small></span><i class="tg ${dark?"on":""}"></i></button>`,
+    nav("sicherheit","App-Sperre",!!lockCfg(),lockCfg()?"an":"aus"),
+    ...(SYNCABLE||window.AndroidBridge?[nav("geraete","Abgleich",!!SYNC.token,SYNC.token?"an":"aus")]:[]),
+    ...(CAN_NOTIFY?[nav("notify","Hinweise",!!notifyCfg().on,notifyCfg().on?"an":"aus")]:[])];
+  return `<div class="card phprof"><button class="phav" data-spgo="profil" aria-label="Profil">${av}<span class="avdev">${devIc(f,11)}</span></button><div class="sat"><b>${esc(n||devModel())}</b><small>${esc([n?devModel():"", verFull()].filter(Boolean).join(" · "))}</small></div><button class="btn small" data-spgo="profil">Profil</button></div>
+    <div class="phqs">${q.join("")}</div>
+    ${PH_GROUPS().map(([g,c,ks])=>`<div class="card phg" style="--gc:${c}"><h3><span class="saic" style="background:${c}">${ic(accIcon(ks[0]),15)}</span>${esc(g)}</h3>${ks.map(k=>phRow(k,c)).join("")}</div>`).join("")}
+    <div class="appfoot"><b>Finanz MAMI</b><span>Die App, die sich um dich kümmert</span><small>${esc(verFull())}</small></div>`; }
+function phSetRender(el){
+  if (ACC.page){ const k=ACC.page;
+    if (el.dataset.page!==k){ accRestoreAll(); el.dataset.page=k; const col=themeCol(ACC_COL[k]||"#1a7a5c");
+      el.innerHTML=`<button class="phback" data-phback="1"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="m15 6-6 6 6 6"/></svg> Einstellungen</button>
+        <div class="phph"><span class="saic" style="background:${col}">${ic(accIcon(k),20)}</span><h2>${esc(phTitle(k))}</h2></div>${phPageKeys(k).map(x=>`<div class="sabody phbody" id="sab-${x}"></div>`).join("")}`;
+      ACC.nodes={}; phPageKeys(k).forEach(x=>accMount(x)); window.scrollTo({top:0}); }
+    return; }
+  if (el.dataset.page!=="home" || !$("setQ")){ accRestoreAll(); el.dataset.page="home";
+    el.innerHTML=`<div class="settop"><label class="setsrch"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="setQ" type="search" placeholder="Einstellung suchen …" autocomplete="off" aria-label="Einstellung suchen"></label></div><div id="phHome"></div><div id="setList"></div>`; ACC.built=""; }
+  const q=ACC.q.trim(); $("phHome").hidden=!!q; $("setList").hidden=!q;
+  if (q){ if (ACC.built!=="q:"+q.toLowerCase()) accBuild(); return; }
+  $("phHome").innerHTML=phHomeHtml(); }
+function phPageClose(){ accRestoreAll(); ACC.page=null; const el=$("setHome"); if (el) el.dataset.page=""; renderSetHome(); window.scrollTo({top:0}); }
+document.addEventListener("click", e=>{ if (e.target.closest("[data-phback]")) phPageClose(); });
 function renderSetHome(){
   const el=$("setHome"); if (!el) return;
+  if (!IS_PC) return phSetRender(el);
   if (!$("setList")){
     el.innerHTML=`<div class="settop"><label class="setsrch"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="setQ" type="search" placeholder="Einstellung suchen …" autocomplete="off" aria-label="Einstellung suchen"></label><button class="setav" data-spgo="profil" aria-label="Profil" id="setAv"></button></div>
       <div class="settabs" role="tablist" id="setTabs"></div><div id="setList"></div>`; ACC.built=""; }
@@ -6535,6 +6589,7 @@ function accGo(k){
   if (k==="profil"){ spSheetOpen("profil"); return; }
   if (k==="weiter"){ invOpen(); return; }
   if (!SP_PAGES[k] && !["dark","wiz"].includes(k)) return;
+  if (!IS_PC){ if (k==="dark"||k==="wiz") return; ACC.q=""; ACC.page = k==="sync" ? "geraete" : k; if (UI.view!=="more"){ UI.view="more"; render(); } else renderSetHome(); return; }
   ACC.q=""; const q=$("setQ"); if (q) q.value="";
   ACC.tab=accTabOf(k); if (accHasBody(k)) ACC.open.add(k);
   if (UI.view!=="more"){ UI.view="more"; render(); }
@@ -6551,7 +6606,7 @@ document.addEventListener("click", e=>{
 document.addEventListener("input", e=>{ if (e.target.id!=="setQ") return; ACC.q=e.target.value; renderSetHome(); });
 function renderSpPages(){
   // old way in: a page key in UI.sp → open that section (only the profile still opens as a sheet)
-  if (UI.sp && !spsOpen()){ const k=UI.sp; UI.sp=null; if (k==="profil"){ spSheetOpen("profil"); return; } if (SP_PAGES[k]){ ACC.tab=accTabOf(k); if (accHasBody(k)) ACC.open.add(k); ACC.built=""; } }
+  if (UI.sp && !spsOpen()){ const k=UI.sp; UI.sp=null; if (k==="profil"){ spSheetOpen("profil"); return; } if (SP_PAGES[k]){ if (!IS_PC) ACC.page = k==="sync" ? "geraete" : k; else { ACC.tab=accTabOf(k); if (accHasBody(k)) ACC.open.add(k); ACC.built=""; } } }
   $("spHead").hidden=true; $("setHome").hidden=false; const hero=$("spHero"); if (hero) hero.hidden=true;
   const sk = spsOpen() ? UI.sp : null;
   liveSp().forEach(el=>{ if (!el.closest(".sabody")) el.hidden = !(sk && el.dataset.sp===sk); });
@@ -6563,6 +6618,7 @@ document.addEventListener("click", e=>{
   if (!e.target.closest("[data-qdark]")) return;
   const t=document.documentElement.dataset.theme==="dark"?"light":"dark"; document.documentElement.dataset.theme=t;
   try{ localStorage.setItem("hb-theme",t); }catch(_){}
+  if (!IS_PC && UI.view==="more" && !ACC.page) try { renderSetHome(); } catch(_){}
   const tg=document.querySelector('[data-acc="dark"] .tg'); if (tg){ tg.classList.toggle("on", t==="dark"); tg.setAttribute("aria-checked", String(t==="dark")); }
   renderSetHome(); try{ render(); }catch(_){}
 });
@@ -8778,6 +8834,7 @@ window.hbBack = () => {
   if (!$("fanBg").hidden){ fanClose(); return true; }
   if (!$("sheetBg").hidden){ closeSheet(); return true; }
   if (UI.view==="import" && UI.importing) return true;
+  if (!IS_PC && UI.view==="more" && ACC.page){ phPageClose(); return true; }
   if (UI.view!=="home"){ UI.imp=null; UI.view="home"; render(); window.scrollTo({top:0}); return true; }
   return false;
 };
