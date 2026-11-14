@@ -2774,13 +2774,13 @@ function dankeSpot(){ fbQuickBtn(); if (!$("fbQuick")){ DANKE.preview=false; ret
 function helpMenu(){ let m=$("helpMenu"); if (m && !m.hidden){ m.hidden=true; return; }
   if (!m){ m=document.createElement("div"); m.id="helpMenu"; m.className="helpmenu"; m.setAttribute("role","menu"); document.body.appendChild(m); }
   const inbox=$("pcInbox"), nIn=inbox?Number((inbox.querySelector(".badge")||{}).textContent)||0:0;
-  m.innerHTML=[PTOUR[UI.view]?["tour","🧭","Tour zu dieser Seite"]:null,["faq","❓","Fragen & Antworten"],["neu","✨","Neu in dieser Version"],["big","🎓","Große Tour durch die App"],updKey()?["danke","💌","Dankeskarte (Tester) ansehen"]:null].filter(Boolean)
+  m.innerHTML=[PTOUR[UI.view]?["tour","🧭","Tour zu dieser Seite"]:null,["faq","❓","Fragen & Antworten"],["neu","✨","Neu in dieser Version"],["big","🎓","Große Tour durch die App"],canInvite()?["weiter","📲","App weitergeben (QR-Code)"]:null,updKey()?["danke","💌","Dankeskarte (Tester) ansehen"]:null].filter(Boolean)
     .map(([k,i,l])=>`<button role="menuitem" data-help="${k}"><span>${i}</span>${l}</button>`).join("");
   const b=$("ptourQ").getBoundingClientRect(); m.hidden=false; m.style.top=(b.bottom+8)+"px"; m.style.left=Math.max(8,Math.min(innerWidth-m.offsetWidth-8, b.left-8))+"px"; }
 document.addEventListener("click", e=>{ const h=e.target.closest("[data-help]"), m=$("helpMenu");
   if (!h){ if (m && !m.hidden && !e.target.closest("#helpMenu,#ptourQ")) m.hidden=true; return; }
   m.hidden=true; const k=h.dataset.help;
-  if (k==="tour") ptourOpen(UI.view); else if (k==="faq") accGo("hilfe"); else if (k==="fb") accGo("feedback"); else if (k==="neu") accGo("neu"); else if (k==="big") tourOpen(); else if (k==="danke") dankeOpen(true); else if (k==="inbox"){ const ib=$("pcInbox"); if (ib) ib.click(); } });
+  if (k==="tour") ptourOpen(UI.view); else if (k==="faq") accGo("hilfe"); else if (k==="fb") accGo("feedback"); else if (k==="neu") accGo("neu"); else if (k==="big") tourOpen(); else if (k==="danke") dankeOpen(true); else if (k==="weiter") invOpen(); else if (k==="inbox"){ const ib=$("pcInbox"); if (ib) ib.click(); } });
 document.addEventListener("keydown", e=>{ const m=$("helpMenu"); if (e.key==="Escape" && m && !m.hidden) m.hidden=true; });
 document.addEventListener("click", e=>{ const pg=e.target.closest("[data-ptgo]"); if (pg){ const v=pg.dataset.ptgo; try{ if (spsOpen()) spSheetClose(); }catch(_){} UI.view=v; render(); window.scrollTo({top:0}); setTimeout(()=>ptourOpen(v), 500); return; } if (e.target.closest("#ptourQ")){ e.preventDefault(); helpMenu(); } });
 addEventListener("resize", ()=>{ if (TOUR.i>=0) tourPlace(); });

@@ -1381,6 +1381,8 @@ if (IS_PC){
   };
   accGo=function(k){
     if (k==="profil"){ spSheetOpen("profil"); return; }
+    if (k==="feedback"){ fbFloatOpen(); return; }
+    if (k==="weiter"){ invOpen(); return; }
     if (!SP_PAGES[k]) return;
     ACC.q=""; const q=$("setQ"); if (q) q.value="";
     UI.pcset=alias[k]||k;
