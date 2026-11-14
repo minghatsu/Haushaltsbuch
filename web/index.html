@@ -1036,6 +1036,45 @@ tfoot td{font-weight:800;border-top:2px solid var(--fg)}
 .phback{display:inline-flex;align-items:center;gap:4px;border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:999px;padding:8px 14px 8px 10px;font:700 14px var(--f-body);color:var(--fg);margin:2px 0 12px;cursor:pointer}
 .phph{display:flex;align-items:center;gap:12px;margin:0 2px 14px}.phph h2{margin:0;font:800 24px var(--f-display)}.phph .saic{width:40px;height:40px;border-radius:13px}
 .phbody{display:flex;flex-direction:column;gap:12px}
+/* Schnellschalter-Kacheln mit lebenden Symbolen */
+.qs{display:flex;flex-direction:column;gap:10px;padding:12px;border:0;border-radius:18px;background:var(--surface);box-shadow:var(--shadow);text-align:left;color:var(--fg);font:inherit;cursor:pointer;min-width:0;transition:background .5s,color .5s}
+.qtop{display:flex;align-items:center;justify-content:space-between}.qtx{display:flex;flex-direction:column;min-width:0}.qtx b{font-size:14px}.qtx small{font-size:12px;color:var(--muted)}.qs.on .qtx small{color:var(--accent);font-weight:700}
+.qic{position:relative;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--sunk);transition:background .4s}.qic svg{width:24px;height:24px;overflow:visible}
+.qtg{width:54px;height:32px;border-radius:16px;background:color-mix(in srgb,var(--fg) 18%,transparent);position:relative;flex:none;transition:background .4s}
+.qtg>i{position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.25);display:grid;place-items:center;font-style:normal;transition:left .5s cubic-bezier(.3,1.5,.5,1),background .4s}
+.qtg>i b{font-size:13px}.qtg .v{color:var(--accent)}.qtg .x{color:#999}.qs.on .qtg .x,.qs:not(.on) .qtg .v{display:none}
+.qs.on .qtg{background:var(--accent)}.qs.on .qtg>i{left:25px}
+/* Hell / Dunkel: Sonne wird Mond */
+.qs[data-phsw="dark"] .qtg{background:#f5c542}.qs[data-phsw="dark"].on .qtg{background:#2b2f4a}.qs[data-phsw="dark"].on .qtg>i{background:#e9ecf7}
+.qs[data-phsw="dark"].on{background:#1d2230;color:#eef1f6}.qs[data-phsw="dark"].on .qtx small{color:#aab3c8;font-weight:400}.qs[data-phsw="dark"]:not(.on) .qtx small{color:var(--muted)}
+.qi-dark{background:#fff3cc}.qs.on .qi-dark{background:#2b2f4a}
+.qsm .core{r:5;fill:#f5a623;transition:r .5s cubic-bezier(.3,1.5,.5,1),fill .4s}.qsm .rays{stroke:#f5a623;stroke-width:2;stroke-linecap:round;fill:none;transition:transform .5s,opacity .3s;transform-origin:12px 12px}
+.qsm .bite{cx:30;cy:-6;transition:cx .5s cubic-bezier(.3,1.2,.5,1),cy .5s}
+.qs.on .qsm .core{r:9;fill:#ffd75e}.qs.on .qsm .rays{transform:rotate(90deg) scale(.4);opacity:0}.qs.on .qsm .bite{cx:17;cy:7}
+.qtg .qsm{width:16px;height:16px}
+/* Erinnerungen: Glocke mit Noten / roter Balken */
+.qi-notify{background:#2a2e36}.qs.on .qi-notify{background:#fff1d6}
+.qi-notify .bell{fill:#6b7280;transition:fill .4s;transform-origin:12px 3px}.qs.on .qi-notify .bell{fill:#f5a623;animation:qsring 1.4s ease-in-out infinite}
+@keyframes qsring{0%,60%,100%{transform:rotate(0)}10%{transform:rotate(16deg)}20%{transform:rotate(-14deg)}30%{transform:rotate(10deg)}40%{transform:rotate(-6deg)}50%{transform:rotate(3deg)}}
+.qi-notify .slash{stroke:#e5484d;stroke-width:2.6;stroke-linecap:round;stroke-dasharray:30;stroke-dashoffset:0;transition:stroke-dashoffset .35s}.qs.on .qi-notify .slash{stroke-dashoffset:30}
+.qi-notify .note{position:absolute;left:28px;top:4px;font-size:11px;color:#c27c0e;opacity:0;pointer-events:none;--x:8px;--r:20deg}.qi-notify .n2{left:30px;top:10px;--x:12px;--r:-15deg}.qi-notify .n3{left:2px;top:6px;--x:-10px;--r:-20deg}
+.qs.on .qi-notify .note{animation:qsnote 2s ease-out infinite}.qs.on .qi-notify .n2{animation-delay:.65s}.qs.on .qi-notify .n3{animation-delay:1.3s}
+@keyframes qsnote{0%{opacity:0;transform:none}20%{opacity:1}100%{opacity:0;transform:translate(var(--x),-22px) rotate(var(--r))}}
+/* Bildschirmschutz: Schild bricht */
+.qs.on .qi-secure{background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.qi-secure .l,.qi-secure .r{fill:#b9c2bd;transform-origin:12px 20px;transition:transform .5s cubic-bezier(.3,1.5,.5,1),fill .4s}.qs.on .qi-secure .l,.qs.on .qi-secure .r{fill:var(--accent)}
+.qs:not(.on) .qi-secure .l{transform:translate(-2.5px,1.5px) rotate(-8deg)}.qs:not(.on) .qi-secure .r{transform:translate(2.5px,2.5px) rotate(9deg)}
+.qi-secure .ck{stroke:#fff;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:14;stroke-dashoffset:14;transition:stroke-dashoffset .4s .25s}.qs.on .qi-secure .ck{stroke-dashoffset:0}
+/* Läden-Logos: Rollladen und Logo-Schild */
+.qs.on .qi-logos{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.qi-logos .wall{fill:var(--accent)}.qi-logos .door{fill:color-mix(in srgb,var(--accent) 70%,#000)}.qi-logos .win{fill:#fff3b0;transition:fill .4s}.qs:not(.on) .qi-logos .win{fill:#cfd6d2}
+.qi-logos .aw{fill:#9aa6a0;transition:fill .4s}.qs.on .qi-logos .aw{fill:#e5484d}
+.qi-logos .shut{transform-origin:12px 9px;transition:transform .55s cubic-bezier(.3,1.2,.5,1)}.qi-logos .shut rect{fill:#8b958f}.qi-logos .shut path{stroke:#6d756f;stroke-width:.8}.qs.on .qi-logos .shut{transform:scaleY(0)}
+.qi-logos .sign{position:absolute;left:50%;top:-9px;width:18px;height:14px;margin-left:-9px;border-radius:4px;background:#e30613;color:#fff;font:800 8px var(--f-body);display:grid;place-items:center;box-shadow:0 2px 5px rgba(0,0,0,.25);transform:translateY(8px) scale(0);opacity:0;transition:transform .25s ease-in,opacity .2s}
+.qi-logos .sign::after{content:"";position:absolute;left:50%;bottom:-4px;width:2px;height:4px;margin-left:-1px;background:#6d756f}
+.qs.on .qi-logos .sign{transform:none;opacity:1;transition:transform .5s cubic-bezier(.3,1.8,.5,1) .35s,opacity .2s .35s;animation:qsglow 2.4s ease-in-out 1s infinite}
+@keyframes qsglow{0%,100%{filter:none}50%{filter:brightness(1.25) drop-shadow(0 0 3px #e3061388)}}
+@media (prefers-reduced-motion:reduce){.qs *{animation:none!important;transition:none!important}}
 /* Farben page */
 .colsec{margin-bottom:16px}.colpkg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0}.colpkg button{border:0;border-radius:14px;padding:10px;background:var(--sunk);display:flex;flex-direction:column;gap:7px;font:700 13px var(--f-body);color:var(--fg)}.colpkg button i{height:14px;border-radius:9px}.colpkg button[aria-pressed=true]{outline:2px solid var(--accent);background:var(--accent-soft)}
 .colpk{--c:hsl(var(--h) var(--s) var(--l));padding:6px 2px 16px;display:flex;flex-direction:column;gap:10px}
@@ -6552,16 +6591,31 @@ function quickSw(){ const dark=document.documentElement.dataset.theme==="dark", 
     ...(CAN_NOTIFY?[["notify","Erinnerungen",nf,nf?"an":"aus"]]:[]),
     ...(window.AndroidBridge && typeof window.AndroidBridge.setSecure==="function" ? [["secure","Bildschirmschutz",sec,sec?"keine Screenshots":"aus"]] : []),
     ["logos","Läden-Logos laden",lg,lg?"an":"aus"]]; }
-function quickToggle(k){
+/* the quick switches as small tiles with a living symbol: sun turns into moon, the bell rings with notes or gets a red bar,
+   the shield breaks, the shop gets its logo sign or the shutter comes down */
+let QS_N=0;
+function qsIcon(k){ const u="qs"+(++QS_N);
+  if (k==="dark") return `<svg viewBox="0 0 24 24" class="qsm"><defs><mask id="${u}"><rect x="-10" y="-10" width="44" height="44" fill="#fff"/><circle class="bite" cx="30" cy="-6" r="7" fill="#000"/></mask></defs><g mask="url(#${u})"><circle class="core" cx="12" cy="12" r="5"/></g><g class="rays"><path d="M12 1v3M12 20v3M1 12h3M20 12h3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></g></svg>`;
+  if (k==="notify") return `<svg viewBox="0 0 24 24"><g class="bell"><path d="M12 3a6 6 0 0 0-6 6c0 5-2 6.5-2 6.5h16S18 14 18 9a6 6 0 0 0-6-6z"/><circle cx="12" cy="19" r="2.2"/></g><line class="slash" x1="3" y1="3" x2="21" y2="21"/></svg><span class="note">♪</span><span class="note n2">♫</span><span class="note n3">♪</span>`;
+  if (k==="secure") return `<svg viewBox="0 0 24 24"><path class="l" d="M12 2 4 5v6c0 5 3.4 9.3 8 11V2z"/><path class="r" d="M12 2l8 3v6c0 5-3.4 9.3-8 11V2z"/><path class="ck" d="M8.5 12.2l2.4 2.4 4.6-4.8"/></svg>`;
+  return `<svg viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="12" rx="1.5" class="wall"/><rect class="win" x="6.5" y="12" width="5" height="4" rx=".6"/><rect x="13.5" y="12" width="4" height="9" rx=".6" class="door"/><path class="aw" d="M3 9l2-5h14l2 5c0 1.3-1.2 2-2.3 2s-2.2-.7-2.2-2c0 1.3-1.1 2-2.2 2S12 10.3 12 9c0 1.3-1.1 2-2.2 2S7.5 10.3 7.5 9c0 1.3-1.1 2-2.2 2S3 10.3 3 9z"/><g class="shut"><rect x="4" y="9" width="16" height="12"/><path d="M4 12h16M4 15h16M4 18h16"/></g></svg><span class="sign">24</span>`; }
+const qsText = (k,on) => k==="dark" ? [on?"Dunkel":"Hell", on?"Tippen für Hell":"Tippen für Dunkel"] : null;
+function qsTile([k,l,on,sub]){ const t=qsText(k,on)||[l,sub];
+  return `<button class="qs ${on?"on":""}" data-phsw="${k}" role="switch" aria-checked="${on}" aria-label="${esc(l)}"><span class="qtop"><span class="qic qi-${k}">${qsIcon(k)}</span><span class="qtg"><i>${k==="dark"?qsIcon("dark"):`<b class="v">✓</b><b class="x">✕</b>`}</i></span></span><span class="qtx"><b>${esc(t[0])}</b><small>${esc(t[1])}</small></span></button>`; }
+function quickToggle(k, btn){
+  if (btn){ const on=!btn.classList.contains("on"); btn.classList.toggle("on", on); btn.setAttribute("aria-checked", String(on));   // the tile animates first …
+    const t=qsText(k,on)||[null, k==="secure"?(on?"keine Screenshots":"aus"):(on?"an":"aus")]; if (t[0]) btn.querySelector(".qtx b").textContent=t[0]; btn.querySelector(".qtx small").textContent=t[1];
+    setTimeout(()=>quickToggle(k), k==="dark"?600:250); return; }   // … then the setting really switches
+  if (k==="dark"){ const t=document.documentElement.dataset.theme==="dark"?"light":"dark"; document.documentElement.dataset.theme=t; try{ localStorage.setItem("hb-theme",t); }catch(_){} try{ render(); }catch(_){} return; }
   if (k==="notify"){ const c=notifyCfg(); if (c.on){ c.on=false; notifySave(c); toast("Erinnerungen aus"); } else { c.on=true; notifySave(c); try { AndroidBridge.notifyAsk(); if (AndroidBridge.desktop) window.hbNotifyPerm(true); } catch(_){} toast("Erinnerungen an"); } }
   else if (k==="secure"){ const on=lsGet("hb-scrsec")==="0"; try{ localStorage.setItem("hb-scrsec", on?"1":"0"); }catch(_){} try{ window.AndroidBridge.setSecure(on); }catch(_){} toast(on?"Bildschirmschutz an":"Bildschirmschutz aus – Screenshots sind jetzt möglich"); }
   else if (k==="logos"){ S.settings.logos=!(S.settings.logos===true); saveSettings(); toast(S.settings.logos?"Läden-Logos werden online geladen":"Läden-Logos nur noch eingebaute"); }
-  renderSetHome(); try { const sl=$("sLogos"); if (sl) sl.checked=S.settings.logos===true; } catch(_){} }
-document.addEventListener("click", e=>{ const b=e.target.closest("[data-phsw]"); if (b) quickToggle(b.dataset.phsw); });
+  try { const sl=$("sLogos"); if (sl) sl.checked=S.settings.logos===true; } catch(_){} }
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-phsw]"); if (b) quickToggle(b.dataset.phsw, b); });
 function phHomeHtml(){
   const n=String(S.settings.name||"").trim(), p=S.settings.photo, f=devForm(), dark=document.documentElement.dataset.theme==="dark";
   const av=p?`<img src="${esc(p)}" alt="">`:n?`<b>${esc(n[0].toUpperCase())}</b>`:devIc(f,26);
-  const q=quickSw().map(([k,l,on,sub])=>`<button class="phq ${on?"on":""}" ${k==="dark"?'data-qdark="1"':`data-phsw="${k}"`} role="switch" aria-checked="${on}"><span><b>${l}</b><small>${sub}</small></span><i class="tg ${on?"on":""}"></i></button>`);
+  const q=quickSw().map(qsTile);
   return `<div class="card phprof"><button class="phav" data-spgo="profil" aria-label="Profil">${av}<span class="avdev">${devIc(f,11)}</span></button><div class="sat"><b>${esc(n||devModel())}</b><small>${esc([n?devModel():"", verFull()].filter(Boolean).join(" · "))}</small></div><button class="btn small" data-spgo="profil">Profil</button></div>
     <div class="phqs">${q.join("")}</div>
     ${PH_GROUPS().map(([g,c,ks])=>`<div class="card phg" style="--gc:${c}"><h3><span class="saic" style="background:${c}">${ic(accIcon(ks[0]),15)}</span>${esc(g)}</h3>${ks.map(k=>phRow(k,c)).join("")}</div>`).join("")}

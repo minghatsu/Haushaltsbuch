@@ -833,3 +833,4 @@ html.pc.istab .tssw button.nav em{font-style:normal;color:var(--faint);display:g
 html.pc.istab .tssw button>span{display:flex;flex-direction:column;text-align:left}html.pc.istab .tssw button small{font-size:12px;font-weight:600;color:var(--muted)}html.pc.istab .tssw button.on small{color:var(--accent)}
 /* Tablet: keine Entwickler-Knöpfe und kein Aktualisieren in der Kopfzeile (Herunterziehen lädt neu) */
 html.pc.istab #pcRel,html.pc.istab #pcInbox,html.pc.istab #pcRefresh{display:none!important}
+html.pc.istab .tsqs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}html.pc.istab.tabp .tsqs{grid-template-columns:repeat(2,minmax(0,1fr))}
