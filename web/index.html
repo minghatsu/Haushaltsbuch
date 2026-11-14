@@ -2454,7 +2454,7 @@ const LEGAL = {
 <p><b>Geräte koppeln (ohne Konto):</b> Koppelst du Geräte per QR-Code, werden deine Daten schon auf dem Gerät mit einem Schlüssel verschlüsselt (AES-256, Ende-zu-Ende), den nur deine gekoppelten Geräte kennen. Der Abgleich-Server speichert nur eine Zufallsnummer, die Prüfsumme eines Zugangsschlüssels und verschlüsselte Datenpakete – weder Name noch E-Mail, und der Anbieter kann die Inhalte nicht lesen. Ungenutzte Kopplungen werden nach zwei Jahren gelöscht, Kopplungen ganz ohne Daten nach einer Woche; du kannst sie jederzeit selbst löschen.</p>
 <p><b>Gemeinsame Bereiche:</b> Teilst du einen Bereich mit anderen (z. B. Partner oder WG), gilt dasselbe Prinzip mit einem eigenen Schlüssel für diesen Bereich. Die anderen Mitglieder sehen nur, was du dort einträgst oder ausdrücklich freigibst (z. B. ein Budget, ein Sparziel, die Summe deiner Fixkosten) – nie deine Konten, Kontostände oder Buchungen.</p>
 <h3>4. Updates</h3>
-<p>Die App fragt regelmäßig nach einer neuen Version und lädt sie herunter – bei GitHub (GitHub Inc., USA; eine Übermittlung in die USA ist möglich, EU-US Data Privacy Framework). Dabei wird technisch bedingt deine IP-Adresse übertragen; deine Finanzdaten nicht. Jede neue Version ist digital signiert, die App nimmt nur echte Versionen des Anbieters an. Rechtsgrundlage ist unser berechtigtes Interesse, Fehler und Sicherheitslücken schnell zu beheben (Art. 6 Abs. 1 lit. f DSGVO). Für die Protokolle bei GitHub gilt die Datenschutzerklärung von GitHub.</p>
+<p>Die App fragt regelmäßig nach einer neuen Version und lädt sie herunter – bei GitHub (GitHub Inc., USA; eine Übermittlung in die USA ist möglich, EU-US Data Privacy Framework). Dabei wird technisch bedingt deine IP-Adresse übertragen; deine Finanzdaten nicht. Damit wir sehen, ob ein Update angekommen ist, meldet die App einmal am Tag eine zufällige Gerätenummer, die Versionsnummer und die Geräteart (Handy, Tablet oder PC) an unseren Server. Stürzt die App ab, schickt sie eine technische Fehlermeldung (Fehlertext, Version, Geräteart) dorthin, damit wir den Fehler beheben können. Namen und Finanzdaten sind in beidem nicht enthalten. Jede neue Version ist digital signiert, die App nimmt nur echte Versionen des Anbieters an. Rechtsgrundlage ist unser berechtigtes Interesse, Fehler und Sicherheitslücken schnell zu beheben (Art. 6 Abs. 1 lit. f DSGVO). Für die Protokolle bei GitHub gilt die Datenschutzerklärung von GitHub.</p>
 <h3>5. Texterkennung bei Fotos und PDFs</h3>
 <p>Belege, Kontoauszüge und Lohnabrechnungen werden <b>auf deinem Gerät</b> gelesen – die Bilder und PDFs verlassen es nicht. In der Android-App übernimmt das die eingebaute Texterkennung ML Kit von Google direkt auf dem Gerät; Google erhält dabei keine Bilder, ML Kit kann aber technische Nutzungs- und Diagnosedaten an Google senden. Auf dem PC und im Browser werden das Erkennungsprogramm (Tesseract.js, pdf.js) und die Sprachdaten beim ersten Benutzen vom Dienst jsDelivr geladen und per Prüfsumme kontrolliert. Dabei erfährt jsDelivr (und dessen Netzwerk-Partner) deine IP-Adresse. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.</p>
 <h3>6. Händler-Logos (nur wenn du es einschaltest)</h3>
@@ -2743,6 +2743,27 @@ async function fbPost(body){
   let j={}; try{ j=JSON.parse(r.text); }catch(e){}
   if (r.status<200 || r.status>=300){ throw new Error(j.error || "Server antwortet mit "+r.status); }
   return j; }
+/* ---------- Abstürze melden sich selbst: Fehlertext, Version und Gerät landen im Posteingang des Entwicklers (keine Finanzdaten).
+   Jeder Fehler höchstens einmal am Tag, höchstens 10 am Tag. ---------- */
+(function(){
+  const send=(msg, where)=>{ try {
+    msg=String(msg||"").slice(0,600); if (!msg || /^Script error\.?$/i.test(msg) || /ResizeObserver loop|Extension context|chrome-extension:/.test(msg+where)) return;
+    if (window.claude || !window.AndroidBridge || !pairUrl()) return;
+    const day=new Date().toISOString().slice(0,10), key=(msg+"|"+String(where||"").split("\n")[0]).slice(0,200); let st={};
+    try { st=JSON.parse(localStorage.getItem("hb-crash")||"{}"); } catch(_){}
+    if (st.d!==day) st={d:day, n:0, k:{}}; if (st.k[key] || st.n>=10) return; st.k[key]=1; st.n++;
+    try { localStorage.setItem("hb-crash", JSON.stringify(st)); } catch(_){}
+    const info=`Finanz MAMI ${verFull()} · ${IS_DESK?"PC":IS_TAB?"Tablet":"Android"} · ${devModel()} · Ansicht: ${(window.UI&&UI.view)||"?"}`;
+    setTimeout(()=>fbPost({kind:"absturz", text:`${msg}\n\n${String(where||"").slice(0,1500)}\n\n---\n${info}`}).catch(()=>{}), 2500);
+  } catch(_){} };
+  addEventListener("error", e=>send(e.message, (e.error&&e.error.stack) || (e.filename? e.filename+":"+e.lineno+":"+e.colno : "")));
+  addEventListener("unhandledrejection", e=>{ const r=e.reason; send(r&&r.message||String(r), r&&r.stack||""); });
+})();
+/* ---------- once a day: which version runs where (random device number, version, kind of device – nothing else) ---------- */
+function verPing(){ try { if (window.claude || !window.AndroidBridge || !pairUrl()) return; const day=new Date().toISOString().slice(0,10);
+  if (localStorage.getItem("hb-ping")===day+"|"+curVerShort()) return;
+  pairCall("ping","",{dev:devId(), ver:curVerShort(), form:devForm(), role:verRole()}).then(()=>{ try { localStorage.setItem("hb-ping", day+"|"+curVerShort()); } catch(_){} }).catch(()=>{}); } catch(_){} }
+setTimeout(verPing, 15000); setInterval(verPing, 6*3600e3);
 /* ---------- Einladungen: dein QR-Code (mit Update-Schlüssel) ist unbegrenzt; wer damit kommt, bekommt einen eigenen Code für 20 Geräte; deren Gäste können nicht weiter einladen ---------- */
 const INV_PAGE = "https://miracleframe.synology.me/mami/";
 function actGet(){ try{ return JSON.parse(localStorage.getItem("hb-act")||"null"); }catch(e){ return {k:"root"}; } }

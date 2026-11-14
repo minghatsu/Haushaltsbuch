@@ -548,14 +548,16 @@ if (IS_PC){
     finally { FB.busy=false; fbBtn(); if (!$("pcFbBg").hidden) fbRender(); }
   }
   document.body.insertAdjacentHTML("beforeend", `<div class="backdrop" id="pcFbBg" hidden><div class="sheet pcfbsheet" role="dialog" aria-modal="true" aria-label="Feedback-Eingang"><div class="sheet-head"><h2>Feedback-Eingang</h2><button class="icon-btn" data-pcfbx="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="pcFbBody"></div></div></div>`);
-  const KIND={fehler:["Fehler","#c2410c"], idee:["Idee","#3d63a8"], lob:["Lob","#1a7a5c"]};
+  const KIND={fehler:["Fehler","#c2410c"], idee:["Idee","#3d63a8"], lob:["Lob","#1a7a5c"], absturz:["Absturz","#b91c1c"]};
   function fbRender(){
     const el=$("pcFbBody"); if (!el) return;
+    const crashes=FB.items.filter(x=>x.kind==="absturz").length;
+    const top = FB.items.length ? `<div class="row-btns" style="justify-content:flex-start;margin:0 0 10px"><button class="btn" data-pcfbcopyall="1">Alles Ungelesene für Claude kopieren</button>${crashes?`<button class="btn" data-pcfbcopyall="absturz">Alle ${crashes} Abstürze kopieren</button>`:""}</div>` : "";
     if (!FB.items.length){ el.innerHTML=`<p class="muted" style="padding:20px 0;text-align:center">${FB.err?esc(FB.err):"Noch kein Feedback angekommen."}</p>`; return; }
-    el.innerHTML=FB.items.map(x=>{ const [kl,kc]=KIND[x.kind]||KIND.idee, op=FB.open===x.id, d=new Date(x.ts*1000), body=String(x.text||""); x.images=Math.max(0,Math.min(5,parseInt(x.images,10)||0));
+    el.innerHTML=top+FB.items.map(x=>{ const [kl,kc]=KIND[x.kind]||KIND.idee, op=FB.open===x.id, d=new Date(x.ts*1000), body=String(x.text||""); x.images=Math.max(0,Math.min(5,parseInt(x.images,10)||0));
       return `<div class="pcfb ${x.read?"":"new"} ${op?"open":""}" style="--kc:${kc}"><button class="pcfbh" data-pcfb="${esc(x.id)}"><span class="pcfbk">${kl}</span><span class="pcfbt">${esc(body.split("\n")[0].slice(0,120))}</span><small>${d.toLocaleDateString("de-DE")} ${d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}${x.images?` · ${x.images} ${x.images===1?"Bild":"Bilder"}`:""}${x.mailed?" · ✉":""}</small></button>
         ${op?`<div class="pcfbb"><pre>${esc(body)}</pre>${x.images?`<div class="pcfbimgs">${Array.from({length:x.images},(_,i)=>{ const u=FB.imgs[x.id+"/"+(i+1)]; return u?`<a data-pcfbimg="${esc(u)}"><img src="${esc(u)}" alt="Bild ${i+1}"></a>`:`<span class="ph">…</span>`; }).join("")}</div>`:""}
-          <div class="row-btns" style="justify-content:flex-start;margin-top:10px"><button class="btn" data-pcfbunread="${esc(x.id)}">Als ungelesen markieren</button><button class="btn danger" data-pcfbdel="${esc(x.id)}">${FB.delArm===x.id?"Wirklich endgültig löschen?":"Löschen"}</button></div></div>`:""}</div>`; }).join("");
+          <div class="row-btns" style="justify-content:flex-start;margin-top:10px"><button class="btn primary" data-pcfbcopy="${esc(x.id)}">Für Claude kopieren</button><button class="btn" data-pcfbunread="${esc(x.id)}">Als ungelesen markieren</button><button class="btn danger" data-pcfbdel="${esc(x.id)}">${FB.delArm===x.id?"Wirklich endgültig löschen?":"Löschen"}</button></div></div>`:""}</div>`; }).join("");
   }
   async function fbShow(id){
     FB.open = FB.open===id ? null : id; const x=FB.items.find(i=>i.id===id); fbRender();
@@ -569,6 +571,11 @@ if (IS_PC){
     if (e.target.closest("#pcInbox")){ fbOpen(); return; }
     if (e.target.closest("[data-pcfbx]") || e.target===$("pcFbBg")){ fbClose(); return; }
     const h=e.target.closest("[data-pcfb]"); if (h){ fbShow(h.dataset.pcfb); return; }
+    const fbTxt=x=>{ const [kl]=KIND[x.kind]||KIND.idee, d=new Date(x.ts*1000); return `### ${kl} vom ${d.toLocaleDateString("de-DE")} ${d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}${x.images?` (${x.images} Bild${x.images>1?"er":""} – im Posteingang)`:""}\n${String(x.text||"").trim()}`; };
+    const cp=async(t,msg)=>{ try { await navigator.clipboard.writeText(t); toast(msg); } catch(_){ toast("Kopieren ging nicht"); } };
+    const c1=e.target.closest("[data-pcfbcopy]"); if (c1){ const x=FB.items.find(i=>i.id===c1.dataset.pcfbcopy); if (x) cp("Feedback aus Finanz MAMI:\n\n"+fbTxt(x), "Kopiert – einfach bei Claude einfügen"); return; }
+    const ca=e.target.closest("[data-pcfbcopyall]"); if (ca){ const all=ca.dataset.pcfbcopyall==="absturz", L=FB.items.filter(x=>all?x.kind==="absturz":!x.read);
+      if (!L.length){ toast("Nichts Ungelesenes da"); return; } cp(`${all?"Abstürze":"Feedback"} aus Finanz MAMI (${L.length}):\n\n`+L.map(fbTxt).join("\n\n"), `${L.length} kopiert – einfach bei Claude einfügen`); return; }
     const u=e.target.closest("[data-pcfbunread]"); if (u){ const x=FB.items.find(i=>i.id===u.dataset.pcfbunread); if (x){ x.read=false; FB.open=null; fbRender(); fbBtn(); devReq("feedread","",{id:x.id, unread:1}).catch(()=>{}); } return; }
     const dl=e.target.closest("[data-pcfbdel]"); if (dl){ const id=dl.dataset.pcfbdel;
       if (FB.delArm!==id){ FB.delArm=id; fbRender(); clearTimeout(FB.delT); FB.delT=setTimeout(()=>{ FB.delArm=null; fbRender(); }, 4000); return; }
@@ -584,13 +591,45 @@ if (IS_PC){
   const _r4=render; render = (...a) => { const x=_r4(...a); try { fbBtn(); } catch(e){} return x; };
   /* Entwickler: „Für alle freigeben“ direkt in der Kopfzeile, mit Punkt, wenn bei dir eine neuere Version läuft als bei allen */
   function relBtn(){ let b=$("pcRel"); if (!updKey()){ if (b) b.remove(); return; }
-    if (!b){ const h=$("pcInbox")||$("pcTheme"); if (!h) return; h.insertAdjacentHTML("beforebegin", `<button class="roundbtn pcrel" id="pcRel" aria-label="Für alle freigeben" title="Für alle freigeben"><svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg><i class="dot" hidden></i></button>`); b=$("pcRel"); }
+    if (!b){ const h=$("pcInbox")||$("pcTheme"); if (!h) return; h.insertAdjacentHTML("beforebegin", `<button class="roundbtn pcrel" id="pcRel" aria-label="Entwickler" title="Entwickler: Freigabe, Tester, Testdaten"><svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg><i class="dot" hidden></i></button>`); b=$("pcRel"); }
     const d=b.querySelector(".dot"); if (d) d.hidden=!(REL.mine && REL.all && REL.mine!==REL.all); }
-  window.pcRelPaint=()=>{ try { relBtn(); const pop=$("pcRelPop"); if (pop) pop.innerHTML=relCardHtml(); } catch(_){} };
+  const DS={busy:false, d:null, err:"", t:0};
+  async function dsLoad(force){ if (DS.busy || (!force && Date.now()-DS.t<60e3)) return; DS.busy=true; DS.err="";
+    try { DS.d=await devReq("devstats"); DS.t=Date.now(); } catch(e){ DS.err=e.message||"Server nicht erreichbar"; } finally { DS.busy=false; window.pcRelPaint(); } }
+  function devPanelHtml(){ const tab=UI.devTab||"rel";
+    const tabs=`<div class="seg pcdevseg">${[["rel","Freigabe"],["stat","Tester"],["test","Testdaten"]].map(([k,l])=>`<button class="${tab===k?"on":""}" data-devtab="${k}">${l}</button>`).join("")}</div>`;
+    if (tab==="rel") return tabs+relCardHtml();
+    if (tab==="stat"){ const d=DS.d; if (!d) return tabs+`<p class="small muted" style="padding:14px 0">${DS.err?esc(DS.err):"Wird geladen …"}</p>`;
+      const fm={phone:"Handy",tablet:"Tablet",pc:"PC",laptop:"Laptop"}, byV={};
+      for (const v of d.versions||[]){ const k="v"+(v.ver||"?"); (byV[k]=byV[k]||[]).push(v); }
+      const inv=(d.invites||[]).map(i=>`<div class="pcdsr"><b>${i.lvl==0?"👑 Dein Code":"Tester-Code"}</b><span>${esc(i.code)}</span><em>${i.used}${+i.max?" / "+i.max:""} Geräte</em></div>`).join("") || `<p class="small muted">Noch keine Einladung verschickt.</p>`;
+      const ver=Object.entries(byV).map(([k,L])=>`<div class="pcdsr"><b>${esc(k)}</b><span>${L.map(v=>`${v.n}× ${fm[v.form]||v.form}${v.role==="dev"?" (du)":""}`).join(" · ")}</span></div>`).join("") || `<p class="small muted">Noch keine Meldungen – die Apps melden sich einmal am Tag.</p>`;
+      return tabs+`<div class="pcds"><div class="pcdsk"><div><b>${d.activations|0}</b><small>freigeschaltet</small></div><div><b>${d.active7|0}</b><small>aktiv (7 Tage)</small></div></div>
+        <h4>Einladungen</h4>${inv}<h4>Versionen (14 Tage)</h4>${ver}<button class="link small" data-dsreload="1">Neu laden</button></div>`; }
+    const coupled=!!SYNC.token;
+    return tabs+`<div class="pcds"><p class="small muted" style="margin:6px 0 10px">Nur für ein Testgerät: füllt die App mit Beispiel-Buchungen der letzten 3 Monate oder setzt sie komplett zurück.</p>
+      ${coupled?`<div class="notice warn"><span>Dieses Gerät ist gekoppelt – Testdaten würden auf alle deine Geräte übertragen. Deshalb hier gesperrt.</span></div>`:
+      `<button class="btn primary block" data-testfill="1">Testdaten laden</button><button class="btn block ${UI.testArm?"danger":""}" data-testwipe="1" style="margin-top:8px">${UI.testArm?"Wirklich alles löschen?":"Alles zurücksetzen"}</button>`}</div>`; }
+  async function testFill(){ const C=cats("ausgabe"), today=new Date(); let n=0;
+    const shops={"Lebensmittel":["Rewe","Aldi","Lidl","Edeka"],"Haushalt & Pflichten":["dm","Rossmann"],"Spaß & Freizeit":["Kino","Restaurant","Café"],"Tanken & Parken":["Aral","Shell"]};
+    for (let m=0;m<3;m++) for (let i=0;i<22;i++){ const d=new Date(today.getFullYear(), today.getMonth()-m, 1+Math.floor(Math.random()*27)); if (d>today) continue;
+      const cat=C[Math.floor(Math.random()*C.length)], sh=(shops[cat]||["Laden"])[Math.floor(Math.random()*(shops[cat]||["Laden"]).length)];
+      await put("tx", newId(), {date:isoOf(d), amount:Math.round((4+Math.random()*80)*100)/100, kind:"ausgabe", cat, note:sh, ts:Date.now(), test:true}); n++; }
+    for (let m=0;m<3;m++){ const d=new Date(today.getFullYear(), today.getMonth()-m, 1); await put("tx", newId(), {date:isoOf(d), amount:2150, kind:"einnahme", cat:(cats("einnahme")[0]||{}).name||cats("einnahme")[0]||"Gehalt", note:"Gehalt (Test)", ts:Date.now(), test:true}); n++; }
+    const F=[["Miete",650],["Strom",68],["Handy",19.99],["Internet",34.99],["Netflix",13.99]]; let k=S.fixed.length;
+    for (const [name,amount] of F) await put("fixed", newId(), {name, amount, kind:"privat", order:k++, test:true});
+    render(); toast(`${n} Test-Buchungen und ${F.length} Fixkosten angelegt`); }
+  document.addEventListener("click", async e=>{
+    const t=e.target.closest("[data-devtab]"); if (t){ UI.devTab=t.dataset.devtab; if (UI.devTab==="stat") dsLoad(); window.pcRelPaint(); return; }
+    if (e.target.closest("[data-dsreload]")){ dsLoad(true); return; }
+    if (e.target.closest("[data-testfill]")){ if (SYNC.token) return; await testFill(); return; }
+    if (e.target.closest("[data-testwipe]")){ if (SYNC.token) return; if (!UI.testArm){ UI.testArm=true; window.pcRelPaint(); setTimeout(()=>{ UI.testArm=false; window.pcRelPaint(); }, 5000); return; } UI.testArm=false; $("pcRelPop")?.remove(); await wipeAll(); toast("Alles zurückgesetzt"); return; }
+  });
+  window.pcRelPaint=()=>{ try { relBtn(); const pop=$("pcRelPop"); if (pop) pop.innerHTML=devPanelHtml(); } catch(_){} };
   document.addEventListener("click", e=>{ const pop=$("pcRelPop");
     if (e.target.closest("#pcRel")){ if (pop){ pop.remove(); return; } const r=e.target.closest("#pcRel").getBoundingClientRect(); const el=document.createElement("div"); el.id="pcRelPop"; el.className="pcrelpop";
-      el.style.top=(r.bottom+10)+"px"; el.style.left=Math.max(12, Math.min(innerWidth-342, r.right-330))+"px"; el.innerHTML=relCardHtml(); document.body.appendChild(el); relLoad(true); return; }
-    if (pop && !e.target.closest("#pcRelPop")) pop.remove(); });
+      el.style.top=(r.bottom+10)+"px"; el.style.left=Math.max(12, Math.min(innerWidth-342, r.right-330))+"px"; el.innerHTML=devPanelHtml(); document.body.appendChild(el); relLoad(true); if ((UI.devTab||"rel")==="stat") dsLoad(); return; }
+    if (pop && !e.target.closest("#pcRelPop") && document.contains(e.target)) pop.remove(); });   /* a button inside that just redrew the panel is not "outside" */
   const _r5=render; render = (...a) => { const x=_r5(...a); try { relBtn(); } catch(e){} return x; };
   setTimeout(()=>{ relBtn(); relLoad(); }, 4000); setInterval(()=>{ if (document.visibilityState==="visible") relLoad(); }, 10*60e3);
 }

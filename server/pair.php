@@ -16,6 +16,7 @@
  *   POST ?a=wipe                         -> {ok}        löscht den Tresor und alle Daten endgültig
  *   POST ?a=feedback {kind,text,images}  -> {ok}        Feedback aus der App (landet im Datenordner unter feedback/)
  *   GET  ?a=feedlist / feedimg, POST ?a=feedread / feeddel   Feedback-Eingang (nur mit Entwickler-Schlüssel)
+ *   POST ?a=ping {dev,ver,form,role} – Versionsmeldung · GET ?a=devstats (Entwickler) – Einladungen & Versionen
  *   POST ?a=invmake {dev} / GET ?a=invinfo&c= / POST ?a=activate {c,dev}   Einladungen (Entwickler unbegrenzt, seine Gäste je 20, deren Gäste keine)
  *
  * Läuft auf normalem PHP 8 mit SQLite, z. B. auf der Synology (Web Station) neben api.php.
@@ -207,9 +208,9 @@ try {
 
     // feedback straight from the app (no mail program needed): stored here, a copy goes out by mail if the server can send mail
     if ($a === 'feedback') {
-        if (!ipCount('ipfeed', 10)) fail('Gerade zu viel Feedback von hier – bitte später noch einmal', 429);
         $b = body();
-        $kind = in_array($b['kind'] ?? '', ['fehler', 'idee', 'lob'], true) ? $b['kind'] : 'idee';
+        $kind = in_array($b['kind'] ?? '', ['fehler', 'idee', 'lob', 'absturz'], true) ? $b['kind'] : 'idee';
+        if (!ipCount($kind === 'absturz' ? 'ipcrash' : 'ipfeed', $kind === 'absturz' ? 20 : 10)) fail('Gerade zu viel Feedback von hier – bitte später noch einmal', 429);
         $text = trim(mb_substr((string)($b['text'] ?? ''), 0, 8000));
         if ($text === '') fail('Bitte etwas schreiben', 400);
         $imgs = [];
@@ -218,7 +219,7 @@ try {
             $bin = base64_decode($m[2], true); if ($bin === false || strlen($bin) > 3000000) continue;
             $imgs[] = [$m[1] === 'jpeg' ? 'jpg' : $m[1], $bin];
         }
-        ipBump('ipfeed');
+        ipBump($kind === 'absturz' ? 'ipcrash' : 'ipfeed');
         // never let feedback fill the disk: at most ~500 MB in total, and always the reserve left free
         $used = 0; foreach (glob(feedDir() . '/*/*') ?: [] as $f) $used += (int)@filesize($f);
         $need = strlen($text); foreach ($imgs as [, $bin]) $need += strlen($bin);
@@ -228,7 +229,7 @@ try {
         if (!@mkdir($dir, 0700, true)) fail('Feedback konnte nicht gespeichert werden', 500);
         @file_put_contents($dir . '/feedback.txt', $text . "\n");
         foreach ($imgs as $i => [$ext, $bin]) @file_put_contents($dir . '/bild-' . ($i + 1) . '.' . $ext, $bin);
-        $to = (string)(cfg()['feedback_to'] ?? '');
+        $to = $kind === 'absturz' ? '' : (string)(cfg()['feedback_to'] ?? '');   // automatic crash reports only land in the inbox, no e-mail
         if ($to !== '') {
             $bd = 'fm' . bin2hex(random_bytes(8));
             $msg = "--$bd\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($text)) . "\r\n";
@@ -238,6 +239,29 @@ try {
             if (smtpSend($to, $subj, $msg, "multipart/mixed; boundary=\"$bd\"")) @touch($dir . '/.mailed');
         }
         out(['ok' => true]);
+    }
+    // ---------- once a day every app says which version it runs (random device number, version, kind of device – nothing else)
+    if ($a === 'ping') {
+        $b = body(); $dev = (string)($b['dev'] ?? '');
+        if (!preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev)) fail('Gerät fehlt', 400);
+        $ver = preg_replace('/[^0-9.]/', '', (string)($b['ver'] ?? '')); $form = in_array($b['form'] ?? '', ['phone', 'tablet', 'pc', 'laptop'], true) ? $b['form'] : 'phone';
+        $role = ($b['role'] ?? '') === 'Entwickler' ? 'dev' : 'tester';
+        db()->exec('CREATE TABLE IF NOT EXISTS pings (h TEXT PRIMARY KEY, ver TEXT, form TEXT, role TEXT, t INTEGER)');
+        q('INSERT OR REPLACE INTO pings (h, ver, form, role, t) VALUES (?, ?, ?, ?, ?)', [hash('sha256', 'ping|' . $dev), substr($ver, 0, 12), $form, $role, time()]);
+        out(['ok' => true]);
+    }
+    // ---------- developer overview: invitations and which versions are out there
+    if ($a === 'devstats') {
+        devCheck();
+        db()->exec('CREATE TABLE IF NOT EXISTS invites (code TEXT PRIMARY KEY, owner TEXT UNIQUE, max INTEGER, lvl INTEGER DEFAULT 1, created INTEGER)');
+        db()->exec('CREATE TABLE IF NOT EXISTS acts (code TEXT NOT NULL, dev TEXT NOT NULL, t INTEGER, PRIMARY KEY (code, dev))');
+        db()->exec('CREATE TABLE IF NOT EXISTS pings (h TEXT PRIMARY KEY, ver TEXT, form TEXT, role TEXT, t INTEGER)');
+        $inv = q('SELECT i.code, i.max, i.lvl, i.created, COUNT(a.dev) AS used, MAX(a.t) AS last FROM invites i LEFT JOIN acts a ON a.code = i.code GROUP BY i.code ORDER BY i.lvl, used DESC')->fetchAll(PDO::FETCH_ASSOC);
+        $since = time() - 14 * 86400;
+        $vers = q('SELECT ver, form, role, COUNT(*) AS n FROM pings WHERE t > ? GROUP BY ver, form, role ORDER BY ver DESC', [$since])->fetchAll(PDO::FETCH_ASSOC);
+        $act7 = (int)q('SELECT COUNT(*) FROM pings WHERE t > ?', [time() - 7 * 86400])->fetchColumn();
+        $acts = (int)q('SELECT COUNT(*) FROM acts')->fetchColumn();
+        out(['invites' => $inv, 'versions' => $vers, 'active7' => $act7, 'activations' => $acts]);
     }
     if ($a === 'feedlist') {
         devCheck(); $list = [];

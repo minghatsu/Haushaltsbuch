@@ -823,3 +823,8 @@ html.pc.istab #toast{z-index:60!important}
 html.pc .pcrel{position:relative}html.pc .pcrel .dot{position:absolute;top:6px;right:6px;width:10px;height:10px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 2px var(--surface)}
 html.pc .pcrelpop{position:fixed;z-index:80;width:330px;background:var(--surface);border-radius:20px;box-shadow:var(--shadow-lg);padding:6px 14px 14px;animation:pqpop .3s cubic-bezier(.3,1.4,.5,1)}
 html.pc .pcrelpop .relbox{background:none;padding:6px 0 0;margin:0}
+html.pc .pcrelpop{width:380px;max-height:calc(100vh - 120px);overflow:auto}
+html.pc .pcdevseg{display:flex;gap:4px;background:var(--sunk);border-radius:12px;padding:3px;margin:8px 0 4px}html.pc .pcdevseg button{flex:1;border:0;background:none;border-radius:9px;padding:7px;font:700 12.5px var(--f-body);color:var(--muted);cursor:pointer}html.pc .pcdevseg button.on{background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
+html.pc .pcds h4{margin:12px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+html.pc .pcdsk{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}html.pc .pcdsk div{background:var(--sunk);border-radius:12px;padding:10px}html.pc .pcdsk b{display:block;font:800 22px var(--f-display)}html.pc .pcdsk small{color:var(--muted);font-size:12px}
+html.pc .pcdsr{display:flex;gap:8px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}html.pc .pcdsr b{flex:none}html.pc .pcdsr span{flex:1;color:var(--muted);font-family:ui-monospace,monospace;font-size:12.5px}html.pc .pcdsr em{font-style:normal;font-weight:700}
