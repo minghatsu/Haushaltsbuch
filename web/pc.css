@@ -807,3 +807,12 @@ html.pc.istab .tsback{display:inline-flex;align-items:center;gap:6px;border:0;ba
 html.pc.istab #setHome .pcset{grid-template-columns:minmax(0,1fr)!important}
 html.pc.istab #setHome .pcsl{display:none!important}
 html.pc.istab.tabpre main [data-view]{opacity:0}
+
+/* Farbpaket: Kopfzeile, Kontokarte und Seitensymbole in den Paketfarben */
+html.pc[data-pack] .top .wrap{background:var(--pkbar)!important}
+html.pc[data-pack] .tabs{background:transparent!important}
+html.pc[data-pack] .pchero:not([style]){background:linear-gradient(160deg,var(--pk) 0%,var(--pk2) 100%);box-shadow:0 18px 40px color-mix(in srgb,var(--pk) 25%,transparent)}
+html.pc[data-pack] .pchero:not([style]) .pcring>span{background:color-mix(in srgb,var(--pk2) 55%,color-mix(in srgb,var(--pk) 80%,#000))}
+html.pc[data-pack] .pchero:not([style]) .pcring{background:conic-gradient(color-mix(in srgb,var(--pk) 40%,#fff) calc(var(--p)*1%),#ffffff26 0)}
+html.pc .tab[data-go="home"]{--tc:var(--pg-home,#1a7a5c)}html.pc .tab[data-go="list"]{--tc:var(--pg-list,#3d63a8)}html.pc .tab[data-go="fix"]{--tc:var(--pg-fix,#c27c0e)}html.pc .tab[data-go="shop"]{--tc:var(--pg-shop,#d14d72)}html.pc .tab[data-go="year"]{--tc:var(--pg-year,#0e8aa0)}html.pc .tab[data-go="more"]{--tc:var(--pg-more,#6b5bb0)}
+html.pc .tab:not(.plus):not([aria-selected="true"]){color:var(--tc2,var(--tc))}
