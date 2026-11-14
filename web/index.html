@@ -7486,21 +7486,25 @@ function receiptItems(lines){
   const rows=[]; const L=lines.map(l=>({...l}));
   if (L.some(l=>l.y!=null)){
     L.sort((a,b)=>(a.y||0)-(b.y||0));
-    for (const l of L){ const r=rows.find(r=>Math.abs(((r.y+r.h/2))-((l.y||0)+(l.h||0)/2)) < Math.min(r.h,l.h||r.h)*0.55); if (r){ r.parts.push(l); } else rows.push({y:l.y||0, h:l.h||10, parts:[l]}); }
+    const apart=(r,l)=>r.parts.every(p=>(l.x||0)>=(p.x||0)+(p.w||0)-4 || (l.x||0)+(l.w||0)<=(p.x||0)+4);
+    for (const l of L){ const r=rows.find(r=>Math.abs(((r.y+r.h/2))-((l.y||0)+(l.h||0)/2)) < Math.min(r.h,l.h||r.h)*0.55 && apart(r,l)); if (r){ r.parts.push(l); } else rows.push({y:l.y||0, h:l.h||10, parts:[l]}); }
     rows.forEach(r=>{ r.parts.sort((a,b)=>(a.x||0)-(b.x||0)); r.t=r.parts.map(p=>p.t).join("  "); });
   } else L.forEach(l=>rows.push({t:l.t}));
-  const out=[], STOP=/summe|gesamt|zu zahlen|total|zahlbetrag|\bbar\b|\bkarte\b|kartenzahlung|girocard|\bec\b|\bec-|mwst|\bust\b|netto|brutto|rückgeld|rueckgeld|\bpfand|leergut|rabatt|coupon|\bbonus|punkte|payback|steuer|datum|uhrzeit|\bkasse\b|kassenbon|\bbon\b|bon-nr|\bbeleg|\btse\b|signatur|vielen dank|www|tel\.|filiale|\beur\s*$|^\s*eur\b|posten|artikel\s*:|anzahl artikel|transaktion|terminal|kundenbeleg/;
-  const PRICE=/\s(-?\d{1,3}[,.]\d{2})\s*(?:€|eur)?\s*(?:[A-Da-d*]|\d|[A-D]\s*\*)?\s*$/i;
-  const QTY=/^\s*-?\d+(?:[,.]\d+)?\s*(?:kg|g|x|stk\.?|st\.?|×)\b|^\s*\d+\s*[xX×]\s*\d|\b(?:eur|€)\s*\/\s*kg\b|\d\s*[xX×]\s*\d+[,.]\d{2}/i;
+  const out=[], STOP=/summe|gesamt|zu zahlen|total|zahlbetrag|\bbar\b|\bkarte\b|kartenzahlung|girocard|\bec\b|\bec-|mwst|\bust\b|netto|brutto|rückgeld|rueckgeld|\bpfand|leergut|rabatt|coupon|\bbonus|punkte|payback|steuer|datum|uhrzeit|\bkasse\b|kassenbon|\bbon\b|bon-nr|\bbeleg|\btse\b|signatur|vielen dank|www|tel\.|filiale|\beur\s*$|^\s*eur\b|posten|artikel\s*:|anzahl artikel|transaktion|terminal|kundenbeleg|\buid\b|ust-id|st\.?-?nr|steuernr/;
+  const PRICE=/\s(-?\d{1,3}\s?[,.]\s?\d{2})\s*(?:€|eur)?\s*(?:[A-Za-z*]|\d)?\s*[*‘'`]?\s*$/i;
+  const QTY=/^\s*-?\d+(?:[,.]\d+)?\s*(?:kg|g|x|stk\.?|st\.?|×)\b|^\s*\d*\s*st\w{0,2}\.?\s*[xX×]|^\s*\d+\s*\w{0,4}\.?\s*[xX×]\s|^\s*\d+\s*[xX×]\s*\d|\b(?:eur|€)\s*\/\s*kg\b|\d\s*[xX×]\s*\d+\s?[,.]\s?\d{2}/i;
   let pend="";
-  for (const r of rows){
+  for (let ri=0; ri<rows.length; ri++){ const r=rows[ri];
     const t=r.t.replace(/\s+/g," ").trim(), n=nrm(t);
-    if (STOP.test(n)) { pend=""; if (/summe|zu zahlen|total|gesamt|zahlbetrag/.test(n)) break; continue; }
+    if (STOP.test(n) || (out.length && /kundenbeleg|^geg\b|gegeben|bezahlung|mastercard|visa|^datum|gesa\w*betrag/.test(n))) { pend=""; if (/summe|zu zahlen|total|gesamt|zahlbetrag/.test(n) || (out.length && /kundenbeleg|^geg\b|gegeben|bezahlung|^datum|gesa\w*betrag/.test(n))) break; continue; }
     const pm=(" "+t).match(PRICE);
-    if (!pm){ if (/[A-Za-zÄÖÜäöüß]{3,}/.test(t) && !QTY.test(t)) pend=t; continue; }
-    const p=Number(pm[1].replace(",",".")), head=(" "+t).slice(0, pm.index).trim();
+    if (!pm){ if (/[A-Za-zÄÖÜäöüß]{3,}/.test(t) && !QTY.test(t)) pend=t.replace(/(\s+[^\s%]*\d[^\s%]*)+\s*$/,"").trim(); continue; }
+    let p=Number(pm[1].replace(/\s/g,"").replace(",",".")); const head=(" "+t).slice(0, pm.index).trim();
+    if (/\beur\b/i.test(head) && !QTY.test(head)){ if (out.length) break; continue; }
+    { const q=t.match(/^\s*(\d{1,2})\s*\w{0,4}\.?\s*[xX×]\s*(\d{1,3}\s?[,.]\s?\d{2})\s*[A-Za-z*]?\s*$/); if (q){ const u=Number(q[2].replace(/\s/g,"").replace(",",".")); if (Math.abs(u-p)<0.005) p=Math.round(Number(q[1])*u*100)/100; } }
     let name;
     if (QTY.test(head) || !/[A-Za-zÄÖÜäöüß]{3,}/.test(head)){
+      if (!pend && !QTY.test(head)){ const nx=rows[ri+1], nt=nx?nx.t.replace(/\s+/g," ").trim():""; if (nt && /[A-Za-zÄÖÜäöüß]{3,}/.test(nt) && !(" "+nt).match(PRICE) && !QTY.test(nt) && !STOP.test(nrm(nt))){ pend=nt; ri++; } }
       if (!pend) continue;
       name=pend;
     } else name=head.replace(/\b\d+\s*[xX×]\s*\d+[,.]\d{2}\b/,"").replace(/\s{2,}/g," ").trim();
