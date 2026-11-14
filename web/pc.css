@@ -862,3 +862,9 @@ html.pc.istab:not(.tabp) #v-fix.pcfcal>.pcfcalc,html.pc.istab:not(.tabp) #v-fix.
 html.pc.istab:not(.tabp) #v-fix.pcfcal>.pcfcalc{align-self:start}
 html.pc[data-theme="dark"] .pcz{background-color:color-mix(in srgb,#ffd36b 7%,var(--surface))!important}
 @media (prefers-color-scheme: dark){html.pc:not([data-theme="light"]) .pcz{background-color:color-mix(in srgb,#ffd36b 7%,var(--surface))!important}}
+/* tablet: minimized start tiles as small tabs on the right edge (like the feedback tab on the phone) */
+html.pc.istab .pcdock{right:0!important;background:none!important;box-shadow:none!important;padding:0!important;gap:8px!important;border-radius:0!important}
+html.pc.istab .pcdi{width:40px!important;height:44px!important;border-radius:14px 0 0 14px!important;background:var(--accent)!important;color:#fff!important;box-shadow:-3px 4px 12px rgba(0,0,0,.18)}
+html.pc.istab .pcdi svg{width:19px!important;height:19px!important}
+html.pc.istab .pcdi em{right:52px}
+html.pc.istab.pcdocked main.wrap{padding-right:52px!important}
