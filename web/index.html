@@ -306,6 +306,11 @@ html.touch .kpad{display:grid}
 .actbox .btn.primary{width:100%;justify-content:center}
 .invbg{position:fixed;inset:0;z-index:350;background:var(--bg);overflow:auto;display:flex;justify-content:center;animation:invin .32s cubic-bezier(.3,1.2,.5,1)}
 @keyframes invin{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.invsh{flex:1;display:flex;flex-direction:column;padding:14px 0 0}
+.invseg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}.invseg button{border:0;border-radius:12px;padding:11px 4px;background:var(--sunk);color:var(--fg);font:700 13.5px var(--f-body);cursor:pointer}.invseg button.on{background:var(--accent);color:#fff}
+.invtxt{min-height:170px;font-size:15px;line-height:1.5;width:100%;box-sizing:border-box;resize:vertical}
+.invapps{display:flex;justify-content:space-between;gap:6px}.invapps button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:6px;font:600 12px var(--f-body);color:var(--fg);cursor:pointer;flex:1}
+.invapps i{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;font-style:normal;font-size:25px;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.12)}
 .invbox{width:100%;max-width:440px;padding:calc(18px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
 .invhd{display:flex;align-items:center;gap:12px;font-size:19px}.invhd .iconbtn{width:38px;height:38px;border-radius:12px;background:var(--surface);font-size:24px;line-height:1}
 .invmid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:26px 0}
@@ -2903,6 +2908,18 @@ document.addEventListener("click", async e=>{
   if (e.target.closest("[data-actpair]")){ const g=$("actBg"); if (g) g.hidden=true; document.body.classList.remove("locked"); pairShow("join"); return; }
   if (e.target.closest("[data-actscan]")){ try { const t=await qrLive(/[?&]i=[A-Za-z0-9]{6}|^\s*[A-Za-z0-9]{6}\s*$/); if (!t) return; UI.act.c=invCode(t); actTry(); } catch(x){ toast(x.message); } return; }
   if (e.target.closest("[data-invopen]")){ invOpen(); return; }
+  if (e.target.closest("[data-invsharego]")){ UI.invShare=true; UI.invText=null; invRender(); return; }
+  if (e.target.closest("[data-invback]")){ UI.invShare=false; invRender(); return; }
+  { const t=e.target.closest("[data-invtone]"); if (t){ UI.invTone=t.dataset.invtone; UI.invText=null; invRender(); return; } }
+  if (e.target.closest("[data-invcopytxt]")){ const t=($("invTxt")||{}).value||""; try{ await navigator.clipboard.writeText(t); toast("Text kopiert – einfach einfügen"); }catch(_){ toast("Kopieren ging nicht"); } return; }
+  { const a=e.target.closest("[data-invapp]"); if (a){ const t=($("invTxt")||{}).value||"", k=a.dataset.invapp, E=encodeURIComponent(t), I=UI.inv||{};
+      const go=u=>{ if (window.AndroidBridge && window.AndroidBridge.desktop){ window.open(u,"_blank"); } else location.href=u; };
+      if (k==="wa") return go("https://wa.me/?text="+E);
+      if (k==="tg") return go("https://t.me/share/url?url="+encodeURIComponent(invLink(I.code))+"&text="+encodeURIComponent(t.replace(invLink(I.code),"").trim()));
+      if (k==="sms") return go("sms:?body="+E);
+      if (k==="mail") return go("mailto:?subject="+encodeURIComponent("Einladung zu Finanz MAMI")+"&body="+E);
+      try { if (navigator.share && !NATIVE){ await navigator.share({text:t}); return; } } catch(err){ if (err && err.name==="AbortError") return; }
+      try{ await navigator.clipboard.writeText(t); toast("Text kopiert – füg ihn in jede beliebige App ein"); }catch(_){ toast("Kopieren ging nicht"); } return; } }
   if (e.target.closest("[data-invclose]")){ const el=$("invBg"); if (el) el.remove(); return; }
   if (e.target.closest("[data-invcopy]")){ const I=UI.inv; if (!I||!I.code) return; const l=invLink(I.code);
     try { if (navigator.share && !NATIVE && !IS_DESK){ await navigator.share({title:"Finanz MAMI", text:"Hol dir Finanz MAMI – Einladungscode "+I.code, url:l}); return; } } catch(err){ if (err && err.name==="AbortError") return; }
@@ -2917,19 +2934,35 @@ function invRender(){
        <div class="invurl" data-noi18n>${esc(INV_PAGE.replace(/^https?:\/\//,"").replace(/\/$/,""))}</div>
        <div class="invcode">Code <b data-noi18n>${esc(I.code)}</b></div>
        <p class="small muted" style="margin:8px 0 0">${!I.max?`Unbegrenzt · schon <b>${I.used}</b> ${I.used===1?"Gerät":"Geräte"} dabei`:I.left>0?`Noch <b>${I.left}</b> von ${I.max} Geräten frei`:`Alle ${I.max} Plätze sind vergeben`}</p>`;
+  if (I.code && UI.invShare){ const tone=UI.invTone||"pers", txt=UI.invText!=null?UI.invText:invMsg(tone, I.code);
+    const apps=[["wa","WhatsApp","#25D366","💬"],["tg","Telegram","#229ED9","✈️"],...(IS_DESK?[]:[["sms","SMS","#0b8a5f","✉️"]]),["mail","E-Mail","#c27c0e","📧"],["more","Mehr","#8a958f","⋯"]];
+    el.innerHTML=`<div class="invbox" role="dialog" aria-modal="true" aria-labelledby="invT">
+      <div class="invhd"><button class="iconbtn" data-invback aria-label="Zurück">‹</button><b id="invT">Einladung verschicken</b></div>
+      <div class="invsh"><p class="muted" style="margin:4px 0 10px">Wie soll die Nachricht klingen?</p>
+      <div class="invseg">${[["kurz","Kurz"],["pers","Persönlich"],["anl","Mit Anleitung"]].map(([k,l])=>`<button class="${tone===k?"on":""}" data-invtone="${k}">${l}</button>`).join("")}</div>
+      <textarea class="in invtxt" id="invTxt" rows="8" aria-label="Nachricht">${esc(txt)}</textarea>
+      <p class="small muted" style="margin:6px 2px 14px">✏️ Den Text kannst du noch ändern.</p>
+      <div class="invapps">${apps.map(([k,l,c,e])=>`<button data-invapp="${k}"><i style="background:${c}">${e}</i><span>${l}</span></button>`).join("")}</div>
+      <button class="btn primary block" style="justify-content:center;margin-top:14px" data-invcopytxt>Text kopieren</button></div>
+    </div>`; invGrow(); return; }
   el.innerHTML=`<div class="invbox" role="dialog" aria-modal="true" aria-labelledby="invT">
     <div class="invhd"><button class="iconbtn" data-invclose aria-label="Zurück">‹</button><b id="invT">App weitergeben</b></div>
     <div class="invmid">${body}</div>
-    ${I.code?`<button class="btn block" style="justify-content:center;gap:8px" data-invcopy>${ic("arrowUp",18)} Link stattdessen teilen</button>
+    ${I.code?`<button class="btn primary block" style="justify-content:center;gap:8px" data-invsharego>${ic("arrowUp",18)} Einladung verschicken</button>
     <p class="small muted" style="margin:10px 4px 0;text-align:center">Wer scannt, kann die App am Handy laden oder sich den Link für den PC selbst schicken.</p>`:""}
   </div>`; }
+function invGrow(){ const ta=$("invTxt"); if (!ta) return; ta.style.height="auto"; ta.style.height=(ta.scrollHeight+4)+"px"; }
+function invMsg(tone, c){ const l=invLink(c), dev=!!updKey();
+  if (tone==="kurz") return `Finanz MAMI testen? Hier laden – Einladungscode ${c}:\n${l}`;
+  if (tone==="anl") return `Hey! ${dev?"Ich suche Tester für meine App":"Ich teste gerade die App"} Finanz MAMI – ein Haushaltsbuch fürs Handy und den PC 📊\n\nSo geht's:\n1. Link öffnen: ${l}\n2. App für Android oder Windows laden und installieren\n3. Beim ersten Start den Code ${c} eingeben\n\nFehler oder Ideen bitte über den Feedback-Knopf in der App melden. Danke! 🙏`;
+  return dev ? `Hey 😊 ich hab eine eigene Haushaltsbuch-App gebaut und suche Tester. Du bekommst sie kostenlos – Fehler und Ideen einfach über den Feedback-Knopf melden.\n\nDownload & Code: ${l}` : `Hey 😊 ich teste gerade die Haushaltsbuch-App Finanz MAMI – magst du auch? Sie ist kostenlos, Fehler und Ideen meldest du einfach über den Feedback-Knopf.\n\nDownload & Code: ${l}`; }
 async function invOpen(){
   let el=$("invBg"); if (!el){ el=document.createElement("div"); el.id="invBg"; el.className="invbg"; document.body.appendChild(el); }
-  UI.inv={}; invRender();
+  UI.inv={}; UI.invShare=false; UI.invText=null; invRender();
   try { const r=await pairCall("invmake", "", {dev:devId()}, true); UI.inv={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; }
   catch(e){ UI.inv={err:e.message||"Server nicht erreichbar"}; }
   invRender(); }
-document.addEventListener("input", e=>{ if (e.target.id==="fbTxt") UI.fbDraft=e.target.value; });
+document.addEventListener("input", e=>{ if (e.target.id==="fbTxt") UI.fbDraft=e.target.value; if (e.target.id==="invTxt"){ UI.invText=e.target.value; invGrow(); } });
 document.addEventListener("change", async e=>{ if (e.target.id==="fbInfo"){ UI.fbInfo=e.target.checked; const kv=document.querySelector(".fbkv"); if (kv) kv.classList.toggle("off", !UI.fbInfo); return; }
   if (e.target.id!=="fbImgFile") return; const files=[...e.target.files].slice(0, FB_MAX_IMG-(UI.fbImgs||[]).length); e.target.value="";
   for (const f of files){ try { (UI.fbImgs||(UI.fbImgs=[])).push(await fbShrink(f)); } catch(_){ toast("Bild konnte nicht gelesen werden"); } }

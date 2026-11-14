@@ -130,7 +130,8 @@ function createWindow() {
   win.on("show", () => { if (!pageView) win.webContents.executeJavaScript("window.hbPageClose && window.hbPageClose()").catch(() => {}); });
 
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (/^https?:\/\//i.test(url)) pageRequest(url); else if (/^(mailto|tel):/i.test(url)) shell.openExternal(url);
+    if (/^https:\/\/(wa\.me|api\.whatsapp\.com|web\.whatsapp\.com|t\.me)\//i.test(url)) shell.openExternal(url);
+    else if (/^https?:\/\//i.test(url)) pageRequest(url); else if (/^(mailto|tel):/i.test(url)) shell.openExternal(url);
     return { action: "deny" };
   });
   win.webContents.on("will-navigate", (e, url) => {
