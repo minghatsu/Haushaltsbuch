@@ -834,3 +834,19 @@ html.pc.istab .tssw button>span{display:flex;flex-direction:column;text-align:le
 /* Tablet: keine Entwickler-Knöpfe und kein Aktualisieren in der Kopfzeile (Herunterziehen lädt neu) */
 html.pc.istab #pcRel,html.pc.istab #pcInbox,html.pc.istab #pcRefresh{display:none!important}
 html.pc.istab .tsqs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}html.pc.istab.tabp .tsqs{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* tablet portrait: the green panel as a narrow column on the left, the tiles beside it */
+html.pc.istab.tabp #v-home{display:grid!important;grid-template-columns:250px minmax(0,1fr);gap:0 16px;align-items:start}
+html.pc.istab.tabp #v-home>*{grid-column:2!important;min-width:0}
+html.pc.istab.tabp #v-home>.pchero{grid-column:1!important;grid-row:1/span 30;position:sticky!important;top:96px;min-height:0!important;padding:20px 18px!important;border-radius:26px!important;margin-top:16px}
+html.pc.istab.tabp #v-home .hcols{columns:1!important}
+html.pc.istab.tabp .pcbal{font-size:32px!important}
+html.pc.istab.tabp .pchero::after{width:200px;height:200px;right:-70px;top:-70px}
+html.pc.istab.tabp .pcaccs{display:flex!important;flex-direction:column;gap:6px;margin:12px 0}
+html.pc.istab.tabp .pcaccs button{padding:8px 12px!important;min-height:0!important;width:100%}
+html.pc.istab.tabp .pcaccs b{font-size:16px!important}
+html.pc.istab.tabp .pcring{width:150px!important;margin:6px auto 12px!important}
+html.pc.istab.tabp .pcring b{font-size:24px!important}
+html.pc.istab.tabp .pcravg{display:none}
+html.pc.istab.tabp .pcminis{display:flex!important;flex-direction:column;gap:6px}
+html.pc.istab.tabp .pcminis button{padding:8px 12px!important;display:flex!important;justify-content:space-between;align-items:center}
+html.pc.istab.tabp .pcminis b{font-size:15px!important}
