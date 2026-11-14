@@ -105,7 +105,7 @@ function pcHome(o){
   const first=String(S.settings.name||"").trim().split(/\s+/)[0], greet=first ? (I18N.tr ? I18N.tr("Hallo") : "Hallo") : devModel();
   const many=accts.filter(a=>!a.total).length>1;
   const hi=Math.max(0, accts.findIndex(a=>a.total)), heroCol=accts.length ? userCol("acct", accts[hi].name) : "";   // own colour from Einstellungen → Farben → Konten
-  const html=`<aside class="pchero" id="pcHero"${heroCol?` style="--herocol2:color-mix(in srgb, ${heroCol} 78%, #000);--heroring:color-mix(in srgb, ${heroCol} 45%, #fff);background:linear-gradient(160deg, ${heroCol} 0%, color-mix(in srgb, ${heroCol} 62%, #000) 70%);box-shadow:0 18px 40px color-mix(in srgb, ${heroCol} 20%, transparent)"`:""}>
+  const html=`<aside class="pchero" id="pcHero"${heroCol?` style="--herocol:${heroCol};--herocol2:color-mix(in srgb, ${heroCol} 78%, #000);--heroring:color-mix(in srgb, ${heroCol} 45%, #fff);background:linear-gradient(160deg, ${heroCol} 0%, color-mix(in srgb, ${heroCol} 62%, #000) 70%);box-shadow:0 18px 40px color-mix(in srgb, ${heroCol} 20%, transparent)"`:""}>
     <small class="pchi"><span>${esc(greet)}</span>${first?", "+esc(first):""} · <span>${esc(MONTHS[m-1])} ${y}</span></small>
     <div class="pcbal" data-cv="${tot}" data-cf="eur">${esc(eur(tot))}</div>
     <span class="pcsub">${many?"auf allen Konten":"auf deinem Konto"}</span>
