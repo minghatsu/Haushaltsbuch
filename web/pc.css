@@ -875,7 +875,7 @@ html.pc.istab .pcfd{padding:6px!important}
 html.pc.istab:not(.tabp) #v-list{grid-template-columns:minmax(0,1fr) 340px!important}
 /* tablet landscape (also on narrow tablets ≤1100px): the green panel stays a column on the left */
 html.pc.istab:not(.tabp) #v-home{padding-left:calc(var(--hw) + 28px)!important}
-html.pc.istab:not(.tabp) .pchero{position:fixed!important;left:24px;top:104px!important;bottom:104px!important;width:var(--hw)!important;min-height:0!important;overflow-y:auto;scrollbar-width:none}
+html.pc.istab:not(.tabp) .pchero{position:fixed!important;left:24px;top:104px!important;bottom:104px!important;width:var(--hw)!important;min-height:0!important;overflow:hidden}
 @media (max-height:800px){
   html.pc.istab:not(.tabp) .pchero{display:grid!important;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"hi hi" "bal bal" "sub sub" "accs accs" "ring minis";align-content:start;column-gap:10px}
   html.pc.istab:not(.tabp) .pchi{grid-area:hi}html.pc.istab:not(.tabp) .pcbal{grid-area:bal}html.pc.istab:not(.tabp) .pcsub{grid-area:sub}html.pc.istab:not(.tabp) .pcaccs{grid-area:accs}
@@ -883,4 +883,18 @@ html.pc.istab:not(.tabp) .pchero{position:fixed!important;left:24px;top:104px!im
   html.pc.istab:not(.tabp) .pcring b{font-size:19px!important}
   html.pc.istab:not(.tabp) .pcminis{grid-area:minis;display:flex!important;flex-direction:column;gap:5px;margin-top:12px;align-self:center}
   html.pc.istab:not(.tabp) .pcminis button{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:6px 9px}
+  html.pc.istab:not(.tabp) .pchero{top:96px!important;bottom:96px!important;padding:14px 16px!important}
+  html.pc.istab:not(.tabp) .pcbal{font-size:clamp(28px,3vw,34px)!important}
+  html.pc.istab:not(.tabp) .pcsub{font-size:12px}
+  html.pc.istab:not(.tabp) .pcaccs{margin-top:8px;gap:5px}
+  html.pc.istab:not(.tabp) .pcaccs button{padding:4px 9px;border-radius:11px;line-height:1.15}
+  html.pc.istab:not(.tabp) .pcaccs button.main{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px}
+  html.pc.istab:not(.tabp) .pcaccs span{font-size:10px}
+  html.pc.istab:not(.tabp) .pcaccs b{font-size:13px}
+  html.pc.istab:not(.tabp) .pcaccs button.main b{font-size:15px}
+  html.pc.istab:not(.tabp) .pcring{width:min(108px,17vh)!important;margin-top:10px!important}
+  html.pc.istab:not(.tabp) .pcring b{font-size:17px!important}
+  html.pc.istab:not(.tabp) .pcminis{margin-top:10px}
+  html.pc.istab:not(.tabp) .pcminis button{padding:4px 9px;border-radius:11px}
+  html.pc.istab:not(.tabp) .pcminis b{font-size:13px}
 }
