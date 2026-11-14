@@ -1486,7 +1486,7 @@ if (IS_TAB){
   const GROUPS=()=>[["Geld","#6b8e23",["konten","budgets","schulden",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]),"invest","export"]],
     ["Anpassen","#1a7a5c",["farben","sprache","kategorien","start","laeden"]],
     ["Sicherheit","#3d63a8",["sicherheit",...(SYNCABLE||window.AndroidBridge?["geraete"]:[]),"backup",...(CAN_NOTIFY?["notify"]:[]),"speicher"]],
-    ["Hilfe","#c27c0e",["neu","hilfe",...(canInvite()?["weiter"]:[]),"feedback","recht"]]];
+    ["Hilfe","#c27c0e",["neu","hilfe",...(canInvite()?["weiter"]:[]),"recht"]]];
   const tTitle=k=>k==="geraete"&&(SYNCABLE||window.AndroidBridge)?"Geräte & Abgleich":accTitle(k);
   function tabSetHTML(){
     const n=String(S.settings.name||"").trim(), p=S.settings.photo, f=devForm(), badge=`<span class="avdev">${devIc(f,11)}</span>`;

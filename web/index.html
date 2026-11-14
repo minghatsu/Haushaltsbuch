@@ -345,7 +345,24 @@ html.pc .invbg{background:color-mix(in srgb,var(--bg) 70%,#000a);align-items:cen
 .tg.on{background:var(--accent)}.tg.on:after{left:21px}
 .hasnew{position:relative}.hasnew:after{content:"neu";position:absolute;top:6px;right:6px;background:#e0902b;color:#fff;font-size:9.5px;font-weight:800;border-radius:6px;padding:1px 5px}
 .clog{padding:12px 0;border-bottom:1px solid var(--line)}.clog.top .clh b{color:var(--accent)}.clh{display:flex;justify-content:space-between;align-items:baseline}.clog ul{margin:6px 0 0;padding-left:18px;line-height:1.55;font-size:14px}
-.fbk{display:flex;gap:8px;margin-bottom:12px}.fbpgh{font-weight:700;font-size:14px;margin:2px 0 8px}.fbpgh span{font-weight:500;color:var(--muted)}
+.fbwrap{display:grid;gap:4px 22px}
+.fbsheet{max-width:620px}html.pc .fbsheet{max-width:min(1000px,95vw);width:min(1000px,95vw);border-radius:28px}
+#fbFloatBg #fbEd{padding:4px 0 6px}
+.fbk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:16px}
+.fbk button{border:0;border-radius:16px;padding:12px 6px;background:var(--sunk);color:var(--fg);font:700 14px var(--f-body);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:background .15s,transform .15s}
+.fbk button span{font-size:22px;line-height:1}
+.fbk button.on{background:color-mix(in srgb,var(--c) 14%,var(--surface));color:var(--c);box-shadow:inset 0 0 0 2px var(--c)}
+.fbk button:active{transform:scale(.96)}
+.fbmh{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.fbkb{background:color-mix(in srgb,var(--kc) 16%,transparent);color:var(--kc);border-radius:999px;padding:4px 11px;font:800 13px var(--f-body)}
+.fbpb{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:4px 11px;font:700 13px var(--f-body)}
+.fbta{min-height:150px;font-size:16px;line-height:1.5;border-left:4px solid var(--kc)!important;margin-bottom:12px;width:100%;box-sizing:border-box}
+.fbinfo{margin:2px 0 8px}.fbinfo small{color:var(--muted);font-weight:500}
+.fbkv{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:14px;transition:opacity .2s}
+.fbkv.off{opacity:.35}
+.fbkv div{background:var(--sunk);border-radius:12px;padding:7px 9px;min-width:0}.fbkv small{display:block;color:var(--muted);font-size:11px}.fbkv b{font-size:12.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fbbtns{justify-content:flex-start}
+@media (min-width:1000px){ html.pc .fbwrap{grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);align-items:start} }.fbpgh{font-weight:700;font-size:14px;margin:2px 0 8px}.fbpgh span{font-weight:500;color:var(--muted)}
 .fbpg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
 .fbpg button{position:relative;border:0;border-radius:16px;padding:12px 6px 10px;background:var(--sunk);color:var(--fg);font:700 12.5px var(--f-body);display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:background .15s,transform .15s}
 .fbpg button svg{width:24px;height:24px}
@@ -2732,7 +2749,7 @@ function fbQuickBtn(){ let b=$("fbQuick"); const q=$("ptourQ");
   if (!fbQuickOn() || !q){ if (b) b.remove(); return; }
   if (!b){ b=document.createElement("button"); b.id="fbQuick"; b.type="button"; b.className="ptq fbq roundbtn"; b.setAttribute("aria-label","Feedback geben"); b.title="Feedback geben – Fehler, Ideen, Fragen";
     b.innerHTML=`<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M12 8v4M12 15.5v.01"/></svg>`;
-    b.onclick=()=>{ if (FB_PAGES.some(p=>p[0]===UI.view) && !(UI.fbDraft||"").trim()) UI.fbPages=[UI.view]; accGo("feedback"); }; }
+    b.onclick=()=>{ if (FB_PAGES.some(p=>p[0]===UI.view) && !(UI.fbDraft||"").trim()) UI.fbPages=[UI.view]; fbFloatOpen(); }; }
   if (!document.documentElement.classList.contains("pc")){ b.className="fbtab"; b.innerHTML=`<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M12 8v4M12 15.5v.01"/></svg><span>Feedback</span>`; if (b.parentElement!==document.body) document.body.appendChild(b); return; }
   if (q.classList.contains("ptqph")) b.classList.add("ptqph"); else b.classList.remove("ptqph");
   if (b.nextElementSibling!==q) q.before(b); }
@@ -2773,6 +2790,15 @@ document.addEventListener("click", e=>{ const b=e.target.closest("[data-tour]");
 
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-faq]"); if (!b) return; const i=+b.dataset.faq; UI.faqOpen = UI.faqOpen===i ? null : i; renderHilfe(); });
 
+function fbFloatEl(){ let bg=$("fbFloatBg"); if (bg) return bg;
+  bg=document.createElement("div"); bg.id="fbFloatBg"; bg.className="backdrop fbfloat"; bg.hidden=true;
+  bg.innerHTML=`<div class="sheet fbsheet" role="dialog" aria-modal="true" aria-label="Feedback"><div class="sheet-head"><h2>Feedback</h2><button class="icon-btn" data-fbx="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>`;
+  document.body.appendChild(bg); const ed=$("fbEd"); if (ed){ ed.removeAttribute("data-sp"); ed.classList.remove("sp","card"); ed.hidden=false; bg.querySelector(".sheet").appendChild(ed); }
+  bg.addEventListener("click", e=>{ if (e.target===bg || e.target.closest("[data-fbx]")) fbFloatClose(); });
+  return bg; }
+function fbFloatOpen(){ const bg=fbFloatEl(); bg.hidden=false; document.body.classList.add("locked"); renderFeedback(); requestAnimationFrame(()=>bg.classList.add("show")); }
+function fbFloatClose(){ const bg=$("fbFloatBg"); if (!bg || bg.hidden) return; bg.classList.remove("show"); document.body.classList.remove("locked"); setTimeout(()=>{ bg.hidden=true; }, 220); }
+document.addEventListener("keydown", e=>{ if (e.key==="Escape"){ const bg=$("fbFloatBg"); if (bg && !bg.hidden) fbFloatClose(); } });
 const FB_PAGES=[["home","Start"],["list","Buchungen"],["fix","Fixkosten"],["shop","Einkauf"],["year","Analyse"],["more","Einstellungen"]];
 function fbText(){ const t=($("fbTxt")||{}).value||""; const info=($("fbInfo")||{}).checked; const pg=(UI.fbPages||[]).map(k=>(FB_PAGES.find(p=>p[0]===k)||[,k])[1]);
   return (t.trim()?"📍 "+(pg.length?pg.join(", "):"allgemein")+"\n":"") + t.trim() + (info?`\n\n---\nFinanz MAMI ${verFull()} · ${window.AndroidBridge?(IS_DESK?"PC":IS_TAB?"Tablet":"Android"):"Browser"} · ${(WORK.find(x=>x[0]===S.settings.work)||[,"–"])[1]}`:""); }
@@ -2785,15 +2811,23 @@ function renderFeedback(){ const el=$("fbEd"); if (!el) return; if (document.act
   const imgs=UI.fbImgs||(UI.fbImgs=[]);
   const kind=UI.fbKind||"idee", mail=IMPRESSUM.mail||FEEDBACK_MAIL;
   const pgs=UI.fbPages||(UI.fbPages=[]);
-  el.innerHTML=`<div class="fbk">${[["fehler","Fehler"],["idee","Idee"],["lob","Lob"]].map(([k,l])=>`<button class="chip ${kind===k?"on":""}" data-fbk="${k}" aria-pressed="${kind===k}">${l}</button>`).join("")}</div>
+  const KD=[["fehler","Fehler","🐞","#c2410c"],["idee","Idee","💡","#3d63a8"],["lob","Lob","💚","#1a7a5c"]], kc=(KD.find(x=>x[0]===kind)||KD[1])[3];
+  const dev=window.AndroidBridge?(IS_DESK?"PC":IS_TAB?"Tablet":"Android"):"Browser", grp=(WORK.find(x=>x[0]===S.settings.work)||[,"–"])[1], info=UI.fbInfo!==false;
+  el.innerHTML=`<div class="fbwrap" style="--kc:${kc}"><div class="fbcol">
+    <div class="fbpgh">Was möchtest du melden?</div>
+    <div class="fbk">${KD.map(([k,l,e,c])=>`<button class="${kind===k?"on":""}" data-fbk="${k}" aria-pressed="${kind===k}" style="--c:${c}"><span>${e}</span>${l}</button>`).join("")}</div>
     <div class="fbpgh">Wo ist es? <span>(mehrere möglich)</span></div>
     <div class="fbpg">${FB_PAGES.map(([k,l])=>{ const on=pgs.includes(k), sv=document.querySelector(`.tabs .tab[data-go="${k}"] svg`); return `<button type="button" class="${on?"on":""}" data-fbpg="${k}" aria-pressed="${on}">${sv?sv.outerHTML:""}<span>${l}</span></button>`; }).join("")}</div>
-    <div class="field"><label for="fbTxt">${kind==="fehler"?"Was ist passiert? Was hast du davor gemacht?":kind==="lob"?"Was gefällt dir?":"Was wünschst du dir?"}</label><textarea class="in" id="fbTxt" rows="6" placeholder="Schreib einfach drauflos …">${esc(UI.fbDraft||"")}</textarea></div>
+    </div><div class="fbcol fbmsg">
+    <div class="fbmh"><span class="fbkb">${(KD.find(x=>x[0]===kind)||KD[1])[2]} ${(KD.find(x=>x[0]===kind)||KD[1])[1]}</span>${pgs.map(k=>`<span class="fbpb">${esc((FB_PAGES.find(p=>p[0]===k)||[,k])[1])}</span>`).join("")}</div>
+    <textarea class="in fbta" id="fbTxt" rows="6" aria-label="Deine Nachricht" placeholder="${kind==="fehler"?"Was ist passiert? Was hast du davor gemacht?":kind==="lob"?"Was gefällt dir?":"Was wünschst du dir?"}">${esc(UI.fbDraft||"")}</textarea>
     <div class="fbimgs">${imgs.map((u,i)=>`<div class="t"><img src="${u}" alt="Bild ${i+1}"><button data-fbimgdel="${i}" aria-label="Bild ${i+1} entfernen">×</button></div>`).join("")}${imgs.length<FB_MAX_IMG?`<button class="add" id="fbImgAdd"><b>＋</b>Bild</button>`:""}</div>
     <input type="file" id="fbImgFile" accept="image/*" multiple hidden>
-    <label class="lgchk" style="margin:4px 0 12px"><input type="checkbox" id="fbInfo" ${UI.fbInfo===false?"":"checked"}><span>Version, Gerät und Gruppe anhängen (keine Finanzdaten)</span></label>
-    <div class="row-btns" style="justify-content:flex-start"><button class="btn primary" id="fbSend" ${UI.fbBusy?"disabled":""}>${UI.fbBusy?"Wird gesendet …":"Senden"}</button><button class="btn" id="fbCopy">Text kopieren</button></div>
-    <p class="small muted" style="margin:10px 0 0">Geht direkt aus der App an den Entwickler – ohne E-Mail-Programm.${mail?` Klappt das nicht, geht es auch <button class="link small" id="fbMail">per E-Mail</button>.`:""}</p>`; }
+    <label class="lgchk fbinfo"><input type="checkbox" id="fbInfo" ${info?"checked":""}><span>Diese Infos mitschicken <small>(keine Finanzdaten)</small></span></label>
+    <div class="fbkv ${info?"":"off"}"><div><small>Version</small><b>${esc(curVerShort())}</b></div><div><small>Rolle</small><b>${esc(verRole())}</b></div><div><small>Gerät</small><b>${esc(dev)}</b></div><div><small>Gruppe</small><b>${esc(grp)}</b></div></div>
+    <div class="row-btns fbbtns"><button class="btn primary" id="fbSend" ${UI.fbBusy?"disabled":""}>${UI.fbBusy?"Wird gesendet …":"Senden"}</button><button class="btn" id="fbCopy">Text kopieren</button></div>
+    <p class="small muted" style="margin:10px 0 0">Geht direkt aus der App an den Entwickler – ohne E-Mail-Programm.${mail?` Klappt das nicht, geht es auch <button class="link small" id="fbMail">per E-Mail</button>.`:""}</p>
+    </div></div>`; }
 async function fbPost(body){
   const base=pairUrl(); if (!base) throw new Error("Kein Server eingestellt");
   const url=apiUrl(base, "feedback", ""), js=JSON.stringify(body); let r;
@@ -2896,7 +2930,7 @@ async function invOpen(){
   catch(e){ UI.inv={err:e.message||"Server nicht erreichbar"}; }
   invRender(); }
 document.addEventListener("input", e=>{ if (e.target.id==="fbTxt") UI.fbDraft=e.target.value; });
-document.addEventListener("change", async e=>{ if (e.target.id==="fbInfo"){ UI.fbInfo=e.target.checked; return; }
+document.addEventListener("change", async e=>{ if (e.target.id==="fbInfo"){ UI.fbInfo=e.target.checked; const kv=document.querySelector(".fbkv"); if (kv) kv.classList.toggle("off", !UI.fbInfo); return; }
   if (e.target.id!=="fbImgFile") return; const files=[...e.target.files].slice(0, FB_MAX_IMG-(UI.fbImgs||[]).length); e.target.value="";
   for (const f of files){ try { (UI.fbImgs||(UI.fbImgs=[])).push(await fbShrink(f)); } catch(_){ toast("Bild konnte nicht gelesen werden"); } }
   renderFeedback(); });
@@ -2908,7 +2942,7 @@ document.addEventListener("click", async e=>{
   if (e.target.closest("#fbCopy")){ const t=fbText(); if (!t.trim()){ toast("Bitte erst etwas schreiben"); return; } try{ await navigator.clipboard.writeText(t); toast("Kopiert"); }catch(_){ toast("Kopieren ging nicht – Text bitte markieren"); } return; }
   if (e.target.closest("#fbSend")){ const t=fbText(); if (!(UI.fbDraft||"").trim()){ toast("Bitte erst etwas schreiben"); return; } if (UI.fbBusy) return;
     UI.fbBusy=true; renderFeedback();
-    try { await fbPost({kind:UI.fbKind||"idee", text:t, images:UI.fbImgs||[]}); UI.fbDraft=""; UI.fbImgs=[]; UI.fbPages=[]; toast("Danke! Dein Feedback ist angekommen", null, null, 5000); }
+    try { await fbPost({kind:UI.fbKind||"idee", text:t, images:UI.fbImgs||[]}); UI.fbDraft=""; UI.fbImgs=[]; UI.fbPages=[]; fbFloatClose(); toast("Danke! Dein Feedback ist angekommen", null, null, 5000); }
     catch(err){ toast("Senden hat nicht geklappt"+(err&&err.message?" – "+err.message:""), ()=>{ const b=$("fbMail"); if (b) b.click(); }, "Per E-Mail", 9000); }
     finally { UI.fbBusy=false; renderFeedback(); }
     return; }
@@ -6360,7 +6394,7 @@ function accTabKeys(t){
   if (t==="geld") return ["konten","budgets","schulden", ...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]), "invest","export"];
   if (t==="anpassen") return ["dark","farben","sprache","kategorien","start","laeden"];
   if (t==="sicherheit") return ["sicherheit", ...(SYNCABLE||window.AndroidBridge?["sync","geraete"]:[]), "backup", ...(CAN_NOTIFY?["notify"]:[]), "speicher"];
-  return ["neu","hilfe","wiz", ...(canInvite()?["weiter"]:[]), "feedback","recht"];
+  return ["neu","hilfe","wiz", ...(canInvite()?["weiter"]:[]), "recht"];
 }
 const accTabOf = k => (ACC_TABS.find(([t])=>accTabKeys(t).includes(k))||["geld"])[0];
 const ACC_COL={invest:"#c98a12",konten:"#3d63a8",budgets:"#c27c0e",schulden:"#7a5bc2",steuer:"#d4813a",amt:"#3d63a8",abos:"#0f766e",export:"#047857",dark:"#34413b",farben:"#d14d72",sprache:"#65a30d",kategorien:"#c0497a",start:"#1a7a5c",laeden:"#0f8a8a",sicherheit:"#b23a3a",sync:"#2f7fb8",geraete:"#0e7490",backup:"#2e9c74",notify:"#e0902b",speicher:"#4b5563",neu:"#15803d",hilfe:"#0e7490",wiz:"#1a7a5c",feedback:"#4d7c0f",recht:"#4b5563"};
@@ -6494,6 +6528,7 @@ function renderSetHome(){
   else document.querySelectorAll("#setList [data-accsub]").forEach(s=>{ const t=accSub(s.dataset.accsub); if (s.textContent!==t) s.textContent=t; });
 }
 function accGo(k){
+  if (k==="feedback"){ fbFloatOpen(); return; }
   if (k==="profil"){ spSheetOpen("profil"); return; }
   if (k==="weiter"){ invOpen(); return; }
   if (!SP_PAGES[k] && !["dark","wiz"].includes(k)) return;
