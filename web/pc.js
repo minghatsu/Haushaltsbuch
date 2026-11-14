@@ -1519,31 +1519,31 @@ if (IS_TAB){
   { const pick=()=>{ const v=document.querySelector(`[data-view="${UI.view}"]`); if (!v) return [];
       const l=[...v.querySelectorAll(".hblock>.card, #pcHero, .pcday, #pcDet, .pcfcalc, .pcfside>.card, .pcac>*, .pcana>*, #tabSet>*, .tsgr>.card, .tssw>button, .pcsr>*, .zstack>*, .pcshop>*, .card")]
         .filter((x,i,a)=>a.indexOf(x)===i && !a.some(y=>y!==x && y.contains(x)));
-      return l.filter(x=>{ const r=x.getBoundingClientRect(); return r.width>20 && r.height>20 && r.bottom>0 && r.top<innerHeight; }).slice(0,24); };
+      return l.filter(x=>{ const r=x.getBoundingClientRect(); return r.width>20 && r.height>20 && r.bottom>0 && r.top<innerHeight; }).slice(0,14); };
     const keyOf=(x,i)=>{ const hb=x.closest("[data-hb]"); return x.id || (hb&&"hb:"+hb.dataset.hb) || (x.dataset.pcday&&"d:"+x.dataset.pcday) || (x.dataset.tssw&&"s:"+x.dataset.tssw) || (x.dataset.tsgo&&"g:"+x.dataset.tsgo) || (x.className+"#"+i); };
     let snap=new Map(), plusR=null, lastPortrait=innerHeight>innerWidth;
     const take=()=>{ if (H.classList.contains("tabrot") || H.classList.contains("tabpre")) return; snap=new Map(pick().map((x,i)=>[keyOf(x,i),x.getBoundingClientRect()])); plusR=plus?plus.getBoundingClientRect():null; };
-    setInterval(()=>{ if (!document.hidden && !PC_ANIM.busy) take(); }, 400); addEventListener("scroll", ()=>{ clearTimeout(take.t); take.t=setTimeout(take, 120); }, {passive:true});
+    setInterval(()=>{ if (!document.hidden && !PC_ANIM.busy) take(); }, 900); addEventListener("scroll", ()=>{ clearTimeout(take.t); take.t=setTimeout(take, 120); }, {passive:true});
     const color=x=>{ const c=getComputedStyle(x), t=c.getPropertyValue("--tcol").trim(); if (t) return t; const b=c.borderTopColor; return b && !/rgba?\(0, 0, 0, 0\)/.test(b) && c.borderTopWidth!=="0px" ? b : "#1a7a5c"; };
     function whirl(){
       if (calm() || !snap.size || !plus){ take(); return; }
       H.classList.add("tabrot"); dockPlace(); window.scrollTo({top:0});
       const P0=plusR||plus.getBoundingClientRect(), P1=plus.getBoundingClientRect();
       const c0=[P0.left+P0.width/2, P0.top+P0.height/2], c1=[P1.left+P1.width/2, P1.top+P1.height/2];
-      plus.animate([{transform:"rotate(0) scale(1)", translate:`${c0[0]-c1[0]}px ${c0[1]-c1[1]}px`},{transform:"rotate(180deg) scale(1.3)", translate:`${c0[0]-c1[0]}px ${c0[1]-c1[1]}px`, offset:.45},{transform:"rotate(360deg) scale(1.3)", translate:"0 0", offset:.6},{transform:"rotate(360deg) scale(1)", translate:"0 0"}],{duration:1500,easing:"cubic-bezier(.45,0,.2,1)"});
+      plus.animate([{transform:"rotate(0) scale(1)", translate:`${c0[0]-c1[0]}px ${c0[1]-c1[1]}px`},{transform:"rotate(180deg) scale(1.3)", translate:`${c0[0]-c1[0]}px ${c0[1]-c1[1]}px`, offset:.45},{transform:"rotate(360deg) scale(1.3)", translate:"0 0", offset:.6},{transform:"rotate(360deg) scale(1)", translate:"0 0"}],{duration:1300,easing:"cubic-bezier(.45,0,.2,1)"});
       let i=0;
       pick().forEach((x,j)=>{ const n=x.getBoundingClientRect(); if (n.width<20) return;
         const o=snap.get(keyOf(x,j)) || {left:c0[0]-13,top:c0[1]-13,width:26,height:26};
-        const nc=[n.left+n.width/2, n.top+n.height/2], oc=[o.left+o.width/2, o.top+o.height/2], d=26, sx=d/n.width, sy=d/n.height, col=color(x), dl=i*45; i++;
+        const nc=[n.left+n.width/2, n.top+n.height/2], oc=[o.left+o.width/2, o.top+o.height/2], d=26, sx=d/n.width, sy=d/n.height, col=color(x), dl=i*35; i++;
         const T=(c,scx,scy)=>`translate(${c[0]-nc[0]}px,${c[1]-nc[1]}px) scale(${scx},${scy})`, br=getComputedStyle(x).borderRadius||"18px";
-        x.animate([{transform:T(oc,o.width/n.width,o.height/n.height),borderRadius:br},{transform:T(oc,sx,sy),borderRadius:"50%",offset:.25},{transform:T(c0,sx*.75,sy*.75),borderRadius:"50%",offset:.48},{transform:T(c1,sx*.75,sy*.75),borderRadius:"50%",offset:.6},{transform:T(nc,sx,sy),borderRadius:"50%",offset:.75},{transform:"none",borderRadius:br}],
-          {duration:1500, delay:dl, easing:"cubic-bezier(.45,0,.2,1)", fill:"backwards"});
-        const ov=document.createElement("i"); ov.style.cssText=`position:absolute;inset:0;border-radius:inherit;background:${col};pointer-events:none;z-index:9;opacity:0`;
+        x.animate([{transform:T(oc,o.width/n.width,o.height/n.height)},{transform:T(oc,sx,sy),offset:.25},{transform:T(c0,sx*.75,sy*.75),offset:.48},{transform:T(c1,sx*.75,sy*.75),offset:.6},{transform:T(nc,sx,sy),offset:.75},{transform:"none"}],
+          {duration:1300, delay:dl, easing:"cubic-bezier(.45,0,.2,1)", fill:"backwards"});
+        const ov=document.createElement("i"); ov.style.cssText=`position:absolute;inset:0;border-radius:inherit;background:${col};pointer-events:none;z-index:9;opacity:0;will-change:opacity`;
         if (getComputedStyle(x).position==="static") x.style.position="relative"; x.appendChild(ov);
-        ov.animate([{opacity:0},{opacity:1,offset:.18},{opacity:1,offset:.8},{opacity:0}],{duration:1500,delay:dl,fill:"backwards"}).finished.then(()=>ov.remove(),()=>ov.remove());
+        ov.animate([{opacity:0},{opacity:1,offset:.18},{opacity:1,offset:.8},{opacity:0}],{duration:1300,delay:dl,fill:"backwards"}).finished.then(()=>ov.remove(),()=>ov.remove());
       });
-      setTimeout(()=>{ H.classList.remove("tabrot"); take(); }, 1500+i*45+50);
+      setTimeout(()=>{ H.classList.remove("tabrot"); take(); }, 1300+i*35+50);
     }
-    addEventListener("resize", ()=>{ const p=innerHeight>innerWidth; if (p===lastPortrait) return; lastPortrait=p; if (!calm() && snap.size) H.classList.add("tabpre"); clearTimeout(whirl.t); whirl.t=setTimeout(()=>requestAnimationFrame(()=>{ whirl(); H.classList.remove("tabpre"); }), 140); });
+    addEventListener("resize", ()=>{ const p=innerHeight>innerWidth; if (p===lastPortrait) return; lastPortrait=p; if (!calm() && snap.size) H.classList.add("tabpre"); clearTimeout(whirl.t); whirl.t=setTimeout(()=>requestAnimationFrame(()=>{ whirl(); H.classList.remove("tabpre"); }), 200); });
   }
 }

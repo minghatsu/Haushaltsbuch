@@ -863,3 +863,7 @@ html.pc.istab:not(.tabp) #v-fix.pcfcal>.pcfcalc,html.pc.istab:not(.tabp) #v-fix.
 html.pc.istab:not(.tabp) #v-fix.pcfcal>.pcfcalc{align-self:start}
 html.pc[data-theme="dark"] .pcz{background-color:color-mix(in srgb,#ffd36b 7%,var(--surface))!important}
 @media (prefers-color-scheme: dark){html.pc:not([data-theme="light"]) .pcz{background-color:color-mix(in srgb,#ffd36b 7%,var(--surface))!important}}
+
+/* tablet: while turning, no shadows or blur – only transforms move, so it stays smooth */
+html.pc.istab.tabrot main *,html.pc.istab.tabrot .pchero{box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;transition:none!important}
+html.pc.istab.tabrot main .card,html.pc.istab.tabrot .pchero{will-change:transform}

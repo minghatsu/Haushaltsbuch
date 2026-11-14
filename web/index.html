@@ -3988,7 +3988,7 @@ document.addEventListener("click", e=>{
   if (e.target.closest("[data-hreset]")){ S.settings.homeOrder=[]; S.settings.homeHidden=[...HOME_LATER]; saveSettings(); renderHomeEd(); toast("Startseite zurückgesetzt"); }
 });
 document.addEventListener("change", e=>{ const t=e.target.closest("[data-hshow]"); if (!t) return; const h=new Set(S.settings.homeHidden||[]); if (t.checked) h.delete(t.dataset.hshow); else h.add(t.dataset.hshow); S.settings.homeHidden=[...h]; saveSettings(); renderHomeEd(); });
-matchMedia("(min-width:1000px)").addEventListener("change", ()=>{ if (UI.view==="home") renderHome(); });
+matchMedia("(min-width:1000px)").addEventListener("change", ()=>{ if (UI.view==="home" && !IS_PC) renderHome(); });
 (function(){
   let src=null, ghost=null, sx=0, sy=0, ox=0, oy=0, timer=0, dragging=false, moved=false, pid=null;
   const grid=()=>$("homeGrid");
