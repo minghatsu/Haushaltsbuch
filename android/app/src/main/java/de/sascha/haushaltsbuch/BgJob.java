@@ -22,12 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Notifications while the app is closed: about every 15 minutes the app's own page is started without a window,
- * syncs with the other devices and shows what is new (shopping trip started on the PC, budget used up, …).
- * Everything is worked out by the page itself – exactly like when the app is open.
- * If the app is still alive in the background, its page does the check instead (no second copy).
- */
 public class BgJob extends JobService {
     static final int JOB_ID = 4712;
     private static final String APP_URL = "file:///android_asset/index.html";
@@ -45,7 +39,6 @@ public class BgJob extends JobService {
     }
 
     static final int JOB_SOON = 4713;
-    /** one extra check after a delay (test button) */
     static void soon(Context c, long ms) {
         JobScheduler js = c.getSystemService(JobScheduler.class);
         if (js == null) return;
@@ -65,7 +58,7 @@ public class BgJob extends JobService {
         params = p;
         finished = false;
         main.post(this::run);
-        main.postDelayed(this::finish, MAX_MS);   // never hang
+        main.postDelayed(this::finish, MAX_MS);
         return true;
     }
 
@@ -77,7 +70,7 @@ public class BgJob extends JobService {
 
     private void run() {
         getSharedPreferences("hb-bg", MODE_PRIVATE).edit().putLong("last", System.currentTimeMillis()).apply();
-        if (MainActivity.fg) { finish(); return; }          // app is open: it syncs and notifies by itself
+        if (MainActivity.fg) { finish(); return; }
         MainActivity a = MainActivity.live;
         if (a != null) { a.runBg(() -> main.post(this::finish)); return; }
         try { startPage(); } catch (Throwable t) { finish(); }
@@ -104,10 +97,9 @@ public class BgJob extends JobService {
                 return new WebResourceResponse("text/html", "utf-8", new ByteArrayInputStream(html));
             }
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) { return true; }   // never leave the app page
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) { return true; }
             @Override
             public void onPageFinished(WebView view, String url) {
-                // give the app a moment to start, then ask it to check
                 main.postDelayed(() -> { if (web != null) web.evaluateJavascript("window.hbBg ? window.hbBg() : AndroidBridge.bgDone()", null); }, 2500);
             }
         });
@@ -141,7 +133,6 @@ public class BgJob extends JobService {
         }
     }
 
-    /** What the page may use without a window: storage key, server requests, notifications. Everything else does nothing. */
     private class BgBridge {
         private Context c() { return getApplicationContext(); }
 
@@ -186,7 +177,6 @@ public class BgJob extends JobService {
             catch (Exception e) { return false; }
         }
 
-        // nothing to show or open without a window
         @JavascriptInterface public void notifyAsk() {}
         @JavascriptInterface public void notifySettings() {}
         @JavascriptInterface public void openInApp(String url) {}

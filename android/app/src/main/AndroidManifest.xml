@@ -30,7 +30,6 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- push note "update ready" opens the app with finanzmami://update -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -39,12 +38,10 @@
             </intent-filter>
         </activity>
 
-        <!-- looks for new versions about every 15 minutes, also while the app is closed -->
         <service
             android:name=".UpdateJob"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-        <!-- notifications while the app is closed: syncs about every 15 minutes and shows what is new -->
         <service
             android:name=".BgJob"
             android:exported="false"
@@ -57,7 +54,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- hands the camera app a file to store the receipt photo in -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="de.sascha.haushaltsbuch.files"

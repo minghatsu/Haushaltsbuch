@@ -1,26 +1,4 @@
 <?php
-/*
- * Finanz MAMI – Abgleich ohne Konto ("Geräte koppeln")
- *
- * Kein Name, keine E-Mail, kein Passwort. Geräte werden per QR-Code gekoppelt.
- * Alle Daten werden schon auf dem Gerät verschlüsselt (AES-256-GCM). Dieser Server sieht nur:
- *   - eine zufällige Tresor-Nummer (vault, 32 Hex-Zeichen)
- *   - die Prüfsumme eines Zugangsschlüssels (nicht den Schlüssel zum Entschlüsseln)
- *   - verschlüsselte Datenpakete unter zufällig aussehenden Namen (h)
- * Wer den Server betreibt, kann die Daten also nicht lesen.
- *
- *   GET  ?a=status                       -> {pair:true}
- *   POST ?a=create {vault, auth}         -> {ok}        legt einen neuen Tresor an (auth = 64 Hex-Zeichen)
- *   GET  ?a=pull&since=N                 -> {rev, docs:[{h,b,rev}]}      Authorization: Bearer <vault>.<auth>
- *   POST ?a=push {ops:[{h,b}]}           -> {rev}
- *   POST ?a=wipe                         -> {ok}        löscht den Tresor und alle Daten endgültig
- *   POST ?a=feedback {kind,text,images}  -> {ok}        Feedback aus der App (landet im Datenordner unter feedback/)
- *   GET  ?a=feedlist / feedimg, POST ?a=feedread / feeddel   Feedback-Eingang (nur mit Entwickler-Schlüssel)
- *   POST ?a=ping {dev,ver,form,role} – Versionsmeldung · GET ?a=devstats (Entwickler) – Einladungen & Versionen
- *   POST ?a=invmake {dev} / GET ?a=invinfo&c= / POST ?a=activate {c,dev}   Einladungen (Entwickler unbegrenzt, seine Gäste je 20, deren Gäste keine)
- *
- * Läuft auf normalem PHP 8 mit SQLite, z. B. auf der Synology (Web Station) neben api.php.
- */
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Authorization, Content-Type');
@@ -32,15 +10,14 @@ header('Referrer-Policy: no-referrer');
 header('X-Frame-Options: DENY');
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
-const MAX_BLOB = 6000000;          // one encrypted package (e.g. a receipt photo) at most ~6 MB
-const MAX_VAULT = 800000000;       // all data of one vault at most ~800 MB
-const MAX_CREATE_PER_HOUR = 20;    // new vaults per IP address and hour
-const MAX_CREATE_ALL_HOUR = 200;   // new vaults per hour from all addresses together
-const MAX_TOTAL = 20000000000;     // all vaults together at most ~20 GB
-const MIN_FREE = 2000000000;       // always leave at least ~2 GB free on the disk
-const INV_MAX = 20;                // new devices per invitation QR code
+const MAX_BLOB = 6000000;
+const MAX_VAULT = 800000000;
+const MAX_CREATE_PER_HOUR = 20;
+const MAX_CREATE_ALL_HOUR = 200;
+const MAX_TOTAL = 20000000000;
+const MIN_FREE = 2000000000;
+const INV_MAX = 20;
 
-// data folder with a random name, so the database can't be guessed and downloaded
 define('DATA_DIR', (function (): string {
     $found = array_values(array_filter(glob(__DIR__ . '/pair-*', GLOB_ONLYDIR) ?: [], 'is_writable'));
     if ($found) return $found[0];
@@ -60,12 +37,11 @@ function db(): PDO {
         @file_put_contents(DATA_DIR . '/.htaccess', "Require all denied\nDeny from all\n");
         @file_put_contents(DATA_DIR . '/index.html', '');
     }
-    // the database gets a random file name: the web server (nginx on Synology) ignores .htaccess, so the name must not be guessable
     $dbs = glob(DATA_DIR . '/tresore-*.sqlite') ?: [];
     if ($dbs) $file = $dbs[0];
     else {
         $file = DATA_DIR . '/tresore-' . bin2hex(random_bytes(16)) . '.sqlite';
-        if (is_file(DATA_DIR . '/tresore.sqlite')) {   // move the old, guessable file (and its journal) over
+        if (is_file(DATA_DIR . '/tresore.sqlite')) {
             if (!@rename(DATA_DIR . '/tresore.sqlite', $file)) fail('Datenbank konnte nicht umbenannt werden', 500);
             foreach (['-wal', '-shm'] as $x) if (is_file(DATA_DIR . '/tresore.sqlite' . $x)) @rename(DATA_DIR . '/tresore.sqlite' . $x, $file . $x);
         }
@@ -83,7 +59,7 @@ function db(): PDO {
 }
 function q(string $sql, array $p = []): PDOStatement { $s = db()->prepare($sql); $s->execute($p); return $s; }
 
-function ipCount(string $table, int $limit): bool {   // true = still allowed
+function ipCount(string $table, int $limit): bool {
     $r = q("SELECT n, since FROM $table WHERE ip = ?", [ip()])->fetch();
     return !($r && (int)$r['since'] > time() - 3600 && (int)$r['n'] >= $limit);
 }
@@ -104,7 +80,7 @@ function authVault(): array {
     return $v;
 }
 
-// ---------- e-mail: own mailbox via SMTP (config.php: smtp_host, smtp_port, smtp_secure, smtp_user, smtp_pass), otherwise PHP mail()
+// E-Mail
 function cfg(): array { static $c = null; if ($c === null) { $c = is_file(__DIR__ . '/config.php') ? (include __DIR__ . '/config.php') : []; if (!is_array($c)) $c = []; } return $c; }
 function smtpSend(string $to, string $subject, string $mime, string $ctype): bool {
     $c = cfg(); $from = (string)($c['mail_from'] ?? ($c['smtp_user'] ?? 'noreply@localhost'));
@@ -123,7 +99,6 @@ function smtpSend(string $to, string $subject, string $mime, string $ctype): boo
     if ($ok) { fwrite($fp, $head . "\r\n" . preg_replace('/^\./m', '..', $mime) . "\r\n.\r\n"); $ok = strncmp($rd(), '250', 3) === 0; }
     @fwrite($fp, "QUIT\r\n"); fclose($fp); return $ok;
 }
-// ---------- the developer reads the feedback in the PC app: proven by the GitHub key that may read the app's repository
 const DEV_REPO = 'minghatsu/Haushaltsbuch';
 function devCheck(): void {
     $h = (string)($_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? ''));
@@ -133,7 +108,6 @@ function devCheck(): void {
     $r = q('SELECT until FROM devkeys WHERE h = ?', [$hash])->fetch();
     if ($r && (int)$r['until'] > time()) return;
     if (!ipCount('ipfails', 30)) fail('Zu viele Versuche', 429);
-    // ask GitHub whether this key may read the app's repository (curl if there, otherwise PHP streams)
     $code = 0; $why = '';
     $hdr = ["Authorization: Bearer {$m[1]}", 'User-Agent: FinanzMAMI-Server', 'Accept: application/vnd.github+json'];
     if (function_exists('curl_init')) {
@@ -148,7 +122,6 @@ function devCheck(): void {
     } else $why = 'PHP darf keine Verbindung nach außen aufbauen (curl und allow_url_fopen sind aus)';
     if ($code === 401 || $code === 403 || $code === 404) { ipBump('ipfails'); fail('Entwickler-Schlüssel ungültig (GitHub ' . $code . ')', 401); }
     if ($code !== 200) fail('GitHub nicht erreichbar' . ($why !== '' ? ': ' . mb_substr($why, 0, 160) : ' (' . $code . ')'), 502);
-    // a private repository can only be read with a key that was given access; if it ever becomes public, reading is not enough anymore
     $rj = is_string($body ?? null) ? (json_decode($body, true) ?: []) : []; $perm = $rj['permissions'] ?? [];
     if (empty($rj['private']) && empty($perm['admin']) && empty($perm['maintain']) && empty($perm['push'])) { ipBump('ipfails'); fail('Entwickler-Schlüssel ungültig (keine Rechte an der App)', 401); }
     q('INSERT OR REPLACE INTO devkeys (h, until) VALUES (?, ?)', [$hash, time() + 3600]);
@@ -158,7 +131,6 @@ function feedPath(string $id): string { if (!preg_match('/^[0-9A-Za-z_-]{10,80}$
 
 try {
     $a = $_GET['a'] ?? '';
-    // unused vaults are removed after two years without any device
     if (random_int(1, 200) === 1) {
         $old = q('SELECT id FROM vaults WHERE used < ?', [time() - 730 * 86400])->fetchAll(PDO::FETCH_COLUMN);
         foreach ($old as $id) { q('DELETE FROM docs WHERE vault = ?', [$id]); q('DELETE FROM vaults WHERE id = ?', [$id]); }
@@ -166,8 +138,7 @@ try {
 
     if ($a === 'status') out(['pair' => true]);
 
-    // ---------- invitations: the developer's QR code is unlimited (level 0); whoever he invites gets an own code for INV_MAX
-    // new devices (level 1); devices invited by those cannot invite anyone
+    // Einladungen
     if ($a === 'invmake' || $a === 'invinfo' || $a === 'activate') {
         db()->exec('CREATE TABLE IF NOT EXISTS invites (code TEXT PRIMARY KEY, owner TEXT UNIQUE, max INTEGER, lvl INTEGER DEFAULT 1, created INTEGER)');
         db()->exec('CREATE TABLE IF NOT EXISTS acts (code TEXT NOT NULL, dev TEXT NOT NULL, t INTEGER, PRIMARY KEY (code, dev))');
@@ -186,7 +157,7 @@ try {
                 ipBump('ipcreate');
                 $abc = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
                 do { $c = ''; for ($i = 0; $i < 6; $i++) $c .= $abc[random_int(0, strlen($abc) - 1)]; } while (q('SELECT 1 FROM invites WHERE code = ?', [$c])->fetch());
-                $max = $lvl === 0 ? 0 : INV_MAX;   // 0 = unlimited
+                $max = $lvl === 0 ? 0 : INV_MAX;
                 q('INSERT INTO invites (code, owner, max, lvl, created) VALUES (?, ?, ?, ?, ?)', [$c, $dev, $max, $lvl, time()]);
                 $r = ['code' => $c, 'max' => $max, 'lvl' => $lvl];
             }
@@ -196,17 +167,16 @@ try {
         if (!ipCount('ipfails', 60)) fail('Zu viele falsche Versuche – bitte später noch einmal', 429);
         $r = $c !== '' ? q('SELECT code, max, lvl FROM invites WHERE code = ?', [$c])->fetch(PDO::FETCH_ASSOC) : null;
         if (!$r) { ipBump('ipfails'); fail('Diesen Einladungscode gibt es nicht', 404); }
-        $max = (int)$r['max']; $n = $used($c); $left = $max ? max(0, $max - $n) : -1;   // -1 = unlimited
-        $inv = (int)$r['lvl'] === 0;   // devices activated with the developer's code may invite others
+        $max = (int)$r['max']; $n = $used($c); $left = $max ? max(0, $max - $n) : -1;
+        $inv = (int)$r['lvl'] === 0;
         if ($a === 'invinfo') out(['ok' => true, 'max' => $max, 'left' => $left]);
         if (!preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev)) fail('Gerät fehlt', 400);
-        if (q('SELECT 1 FROM acts WHERE code = ? AND dev = ?', [$c, $dev])->fetch()) out(['ok' => true, 'left' => $left, 'invite' => $inv]);   // same device again
+        if (q('SELECT 1 FROM acts WHERE code = ? AND dev = ?', [$c, $dev])->fetch()) out(['ok' => true, 'left' => $left, 'invite' => $inv]);
         if ($max && $n >= $max) fail('Diese Einladung ist schon aufgebraucht – frag nach einem neuen Code', 403);
         q('INSERT INTO acts (code, dev, t) VALUES (?, ?, ?)', [$c, $dev, time()]);
         out(['ok' => true, 'left' => $max ? $max - $n - 1 : -1, 'invite' => $inv]);
     }
 
-    // feedback straight from the app (no mail program needed): stored here, a copy goes out by mail if the server can send mail
     if ($a === 'feedback') {
         $b = body();
         $kind = in_array($b['kind'] ?? '', ['fehler', 'idee', 'lob', 'absturz'], true) ? $b['kind'] : 'idee';
@@ -220,7 +190,6 @@ try {
             $imgs[] = [$m[1] === 'jpeg' ? 'jpg' : $m[1], $bin];
         }
         ipBump($kind === 'absturz' ? 'ipcrash' : 'ipfeed');
-        // never let feedback fill the disk: at most ~500 MB in total, and always the reserve left free
         $used = 0; foreach (glob(feedDir() . '/*/*') ?: [] as $f) $used += (int)@filesize($f);
         $need = strlen($text); foreach ($imgs as [, $bin]) $need += strlen($bin);
         $free = function_exists('disk_free_space') ? @disk_free_space(DATA_DIR) : false;
@@ -229,7 +198,7 @@ try {
         if (!@mkdir($dir, 0700, true)) fail('Feedback konnte nicht gespeichert werden', 500);
         @file_put_contents($dir . '/feedback.txt', $text . "\n");
         foreach ($imgs as $i => [$ext, $bin]) @file_put_contents($dir . '/bild-' . ($i + 1) . '.' . $ext, $bin);
-        $to = $kind === 'absturz' ? '' : (string)(cfg()['feedback_to'] ?? '');   // automatic crash reports only land in the inbox, no e-mail
+        $to = $kind === 'absturz' ? '' : (string)(cfg()['feedback_to'] ?? '');
         if ($to !== '') {
             $bd = 'fm' . bin2hex(random_bytes(8));
             $msg = "--$bd\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($text)) . "\r\n";
@@ -240,7 +209,7 @@ try {
         }
         out(['ok' => true]);
     }
-    // ---------- once a day every app says which version it runs (random device number, version, kind of device – nothing else)
+    // Versions-Ping
     if ($a === 'ping') {
         $b = body(); $dev = (string)($b['dev'] ?? '');
         if (!preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev)) fail('Gerät fehlt', 400);
@@ -250,7 +219,7 @@ try {
         q('INSERT OR REPLACE INTO pings (h, ver, form, role, t) VALUES (?, ?, ?, ?, ?)', [hash('sha256', 'ping|' . $dev), substr($ver, 0, 12), $form, $role, time()]);
         out(['ok' => true]);
     }
-    // ---------- developer overview: invitations and which versions are out there
+    // Dev-Übersicht
     if ($a === 'devstats') {
         devCheck();
         db()->exec('CREATE TABLE IF NOT EXISTS invites (code TEXT PRIMARY KEY, owner TEXT UNIQUE, max INTEGER, lvl INTEGER DEFAULT 1, created INTEGER)');
@@ -300,7 +269,6 @@ try {
         if ($all && (int)$all['since'] > time() - 3600) q('UPDATE ipcreate SET n = n + 1 WHERE ip = ?', ['*']);
         else q('INSERT INTO ipcreate (ip, n, since) VALUES (?, 1, ?) ON CONFLICT(ip) DO UPDATE SET n = 1, since = excluded.since', ['*', time()]);
         ipBump('ipcreate');
-        // vaults that were created but never got any data are removed after a week
         if (random_int(1, 20) === 1) q('DELETE FROM vaults WHERE size = 0 AND rev = 0 AND created < ?', [time() - 7 * 86400]);
         q('INSERT INTO vaults (id, auth, created, used) VALUES (?, ?, ?, ?)', [$id, hash('sha256', $auth), time(), time()]);
         out(['ok' => true]);
@@ -310,7 +278,6 @@ try {
         $v = authVault();
         $since = max(0, (int)($_GET['since'] ?? 0));
         $s = q('SELECT h, b, rev FROM docs WHERE vault = ? AND rev > ? ORDER BY rev LIMIT 2000', [$v['id'], $since]);
-        // at most ~4 MB per answer – the rest comes with the next call (photos would otherwise make one huge answer that phones can't load)
         $docs = []; $last = $since; $bytes = 0; $cut = false;
         foreach ($s as $r) {
             $n = strlen((string)$r['b']);

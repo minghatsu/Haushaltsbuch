@@ -10,16 +10,12 @@ android {
         applicationId 'de.sascha.haushaltsbuch'
         minSdk 29
         targetSdk 34
-        // CI sets the build number so every new APK installs over the old one
         versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int)
         versionName "0.${((System.getenv('GITHUB_RUN_NUMBER') ?: '0') as int).intdiv(10)}.${((System.getenv('GITHUB_RUN_NUMBER') ?: '0') as int) % 10}"
     }
 
     signingConfigs {
         release {
-            // fixed key, so updates install over the previous version without losing data.
-            // The key comes from the GitHub secrets HB_KEYSTORE / HB_KEYSTORE_PASS (the build writes it to a temporary file);
-            // (the key is no longer kept in the repository)
             def ks = System.getenv('HB_KEYSTORE_FILE')
             def pw = System.getenv('HB_KEYSTORE_PASS')
             storeFile file(ks ?: '../keystore/haushaltsbuch.jks')
@@ -43,11 +39,8 @@ android {
 }
 
 dependencies {
-    // receipt scan: text recognition runs on the phone (model is inside the app, works offline)
     implementation 'com.google.mlkit:text-recognition:16.0.1'
     implementation 'androidx.core:core:1.13.1'
-    // shop offers open inside the app (custom tab)
     implementation 'androidx.browser:browser:1.8.0'
-    // keeps the Kotlin libraries the two above bring along on one version
     implementation platform('org.jetbrains.kotlin:kotlin-bom:1.8.22')
 }

@@ -1,33 +1,4 @@
 <?php
-/*
- * Haushaltsbuch – Abgleich-Server (eine Person, mehrere Geräte)
- *
- * Speichert die Dokumente der App (Buchungen, Fixkosten, Monate, Schulden, Einstellungen)
- * in einer SQLite-Datei und verteilt Änderungen an alle Geräte.
- *
- *   GET  api.php?a=status              -> {setup:bool}
- *   POST api.php?a=setup  {password}   -> {token}   (nur solange noch kein Passwort existiert)
- *   POST api.php?a=login  {password}   -> {token}
- *   GET  api.php?a=pull&since=N        -> {rev, docs:[{col,id,data,rev}]}   (Authorization: Bearer <token>)
- *   POST api.php?a=push   {ops:[{col,id,data}]} -> {rev}                    (data null = löschen)
- *   POST api.php?a=logout
- *   POST api.php?a=login  {password, code?} -> {token} | 401 {need2fa}   (code = 6 Ziffern aus der Authenticator-App oder Wiederherstellungscode)
- *   GET  api.php?a=twofa               -> {on, recovery}       Zwei-Faktor-Anmeldung: Stand
- *   POST api.php?a=twofaStart {password} -> {secret, uri}       neues Geheimnis für die Authenticator-App
- *   POST api.php?a=twofaEnable {code}  -> {recovery:[…]}       erst mit richtigem Code aktiv
- *   POST api.php?a=twofaDisable {password, code}
- *   POST api.php?a=verify {password}   -> {ok}                 z. B. für „PIN vergessen“
- *   Passwort vergessen: leere Datei passwort-zuruecksetzen.txt in diesen Ordner legen, dann im Heimnetz neu festlegen.
- *   POST api.php?a=logoutAll           -> alle Geräte abmelden
- *   POST api.php?a=password {old,new}  -> {token}  (neues Passwort, alle anderen Geräte werden abgemeldet)
- *
- *   App-Updates (neue Versionen kommen über die Synology auf PC und Handy):
- *   GET  api.php?a=version             -> {version}
- *   GET  api.php?a=app[&web=1]         -> die aktuelle App (HTML)
- *   POST api.php?a=deploy  (X-Deploy-Token, Body = HTML) -> {version}
- *        Nur der GitHub-Build von minghatsu/Haushaltsbuch (Branch main) darf das: er schickt ein von GitHub
- *        signiertes Kurzzeit-Token (OIDC), das hier mit GitHubs öffentlichen Schlüsseln geprüft wird.
- */
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Authorization, Content-Type');
@@ -40,11 +11,9 @@ header('Referrer-Policy: no-referrer');
 header('X-Frame-Options: DENY');
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
-// Datenordner mit zufälligem Namen, damit die Datenbank-Datei nicht erraten und heruntergeladen werden kann.
-// The installation gives it a random name; a replaced api.php finds the existing folder by itself.
 define('DATA_DIR', (function (): string {
     $fixed = __DIR__ . '/data-__DATA_SUFFIX__';
-    if (strpos($fixed, '__DATA' . '_SUFFIX__') === false) return $fixed;      // name filled in at installation
+    if (strpos($fixed, '__DATA' . '_SUFFIX__') === false) return $fixed;
     $found = glob(__DIR__ . '/data-*', GLOB_ONLYDIR) ?: [];
     if ($found) { usort($found, fn($a, $b) => filemtime($b) <=> filemtime($a)); return $found[0]; }
     return __DIR__ . '/data-' . bin2hex(random_bytes(12));
@@ -106,7 +75,6 @@ function requireAuth(): void {
     $s = db()->prepare('UPDATE tokens SET used = ? WHERE hash = ?');
     $s->execute([time(), hash('sha256', strtolower($m[1]))]);
     if ($s->rowCount() !== 1) fail('Nicht angemeldet', 401);
-    // devices that were not used for half a year are logged out
     if (random_int(1, 50) === 1) db()->prepare('DELETE FROM tokens WHERE used < ?')->execute([time() - 180 * 86400]);
 }
 function appVersion(string $html): int {
@@ -114,7 +82,7 @@ function appVersion(string $html): int {
 }
 function appFile(): string { return DATA_DIR . '/app.html'; }
 function currentApp(): string { return is_file(appFile()) ? (string)file_get_contents(appFile()) : ''; }
-/* ---- GitHub OIDC token check (for automatic updates from the GitHub build) ---- */
+/* GitHub-OIDC prüfen */
 function b64u(string $s): string { return (string)base64_decode(strtr($s, '-_', '+/') . str_repeat('=', (4 - strlen($s) % 4) % 4)); }
 function derLen(int $l): string { if ($l < 128) return chr($l); $b = ltrim(pack('N', $l), "\0"); return chr(0x80 | strlen($b)) . $b; }
 function derInt(string $x): string { if (ord($x[0]) > 127) $x = "\0" . $x; return "\x02" . derLen(strlen($x)) . $x; }
@@ -172,7 +140,7 @@ function githubBuildAllowed(string $jwt): bool {
         && (int)($c['iat'] ?? 0) < $now + 300;
 }
 
-/* ---- protection against password guessing: after 5 wrong tries the login is locked, each round longer (1, 5, 15, 60 min) ---- */
+/* Schutz gegen Passwort-Raten */
 function loginLocked(): int {
     $f = json_decode((string)(meta('fails') ?? '{}'), true) ?: [];
     $until = (int)($f['until'] ?? 0);
@@ -185,16 +153,15 @@ function loginFailed(): void {
     setMeta('fails', json_encode(['n' => $n, 'r' => $r, 'until' => $until]));
 }
 function loginOk(): void { setMeta('fails', '{}'); }
-/** Setting the first password is only allowed from the home network, so nobody from outside can take over a fresh server. */
 function fromHomeNetwork(): bool {
     $ip = (string)($_SERVER['REMOTE_ADDR'] ?? '');
     if ($ip === '' ) return false;
-    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) return true;  // private or loopback
-    if (preg_match('/^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./', $ip)) return true;   // Tailscale (own encrypted network)
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) return true;
+    if (preg_match('/^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./', $ip)) return true;
     return false;
 }
 
-/* ---- two-factor login (TOTP, RFC 6238): 6-digit code from an authenticator app ---- */
+/* Zwei-Faktor */
 function b32decode(string $b): string {
     $b = strtoupper(preg_replace('/[^A-Za-z2-7]/', '', $b)); $bits = ''; $out = '';
     foreach (str_split($b) as $c) $bits .= str_pad(decbin(strpos('ABCDEFGHIJKLMNOPQRSTUVWXYZ234567', $c)), 5, '0', STR_PAD_LEFT);
@@ -213,7 +180,6 @@ function totpAt(string $secret, int $step): string {
     $n = ((ord($h[$o]) & 127) << 24 | ord($h[$o + 1]) << 16 | ord($h[$o + 2]) << 8 | ord($h[$o + 3])) % 1000000;
     return str_pad((string)$n, 6, '0', STR_PAD_LEFT);
 }
-/** Checks a code from the app (±30 s) or one of the one-time recovery codes; a code can only be used once. */
 function totpCheck(string $secret, string $code, string $metaUsed = 'totp_used'): bool {
     $code = preg_replace('/\s+/', '', $code);
     if (preg_match('/^\d{6}$/', $code)) {
@@ -224,7 +190,7 @@ function totpCheck(string $secret, string $code, string $metaUsed = 'totp_used')
         }
         return false;
     }
-    $norm = strtr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $code)), ['0' => 'O', '1' => 'I', '8' => 'B']);   // easy to mix up when typing
+    $norm = strtr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $code)), ['0' => 'O', '1' => 'I', '8' => 'B']);
     if (strlen($norm) !== 10) return false;
     $list = json_decode((string)(meta('totp_recovery') ?? '[]'), true) ?: [];
     foreach ($list as $i => $h) {
@@ -233,7 +199,6 @@ function totpCheck(string $secret, string $code, string $metaUsed = 'totp_used')
     return false;
 }
 function totpOn(): bool { return (string)(meta('totp') ?? '') !== ''; }
-/** Password reset: whoever can put a file named passwort-zuruecksetzen.txt into this folder on the Synology owns it. */
 function resetRequested(): bool { return is_file(__DIR__ . '/passwort-zuruecksetzen.txt'); }
 
 function checkPassword(string $pw): bool {
@@ -250,7 +215,7 @@ try {
         db();
         $html = currentApp();
         if ($html === '') fail('Noch keine App-Version hochgeladen', 404);
-        if (!empty($_GET['web'])) { // web copy on the NAS: sync with this server, installable on the PC
+        if (!empty($_GET['web'])) {
             $html = preg_replace('/<meta name="hb-server" content="[^"]*">/', '<meta name="hb-server" content="api.php">', $html, 1);
             $html = preg_replace('/<meta charset="utf-8">/', '<meta charset="utf-8"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#147A5B">', $html, 1);
         }
@@ -279,7 +244,7 @@ try {
         $reset = meta('password') !== null && resetRequested();
         if (meta('password') !== null && !$reset) fail('Passwort ist schon festgelegt', 409);
         if (!fromHomeNetwork()) fail('Das Passwort kann nur im Heimnetz festgelegt werden', 403);
-        if ($reset) {   // new password: every device logs in again, two-factor login is switched off, the file is removed
+        if ($reset) {
             db()->exec('DELETE FROM tokens');
             foreach (['totp', 'totp_pending', 'totp_recovery', 'fails'] as $k) setMeta($k, '');
             @unlink(__DIR__ . '/passwort-zuruecksetzen.txt');
@@ -329,7 +294,7 @@ try {
             $col = (string)($op['col'] ?? ''); $id = (string)($op['id'] ?? '');
             if (!in_array($col, ALLOWED_COLS, true) || $id === '' || strlen($id) > 200) continue;
             $data = array_key_exists('data', $op) && $op['data'] !== null ? json_encode($op['data'], JSON_UNESCAPED_UNICODE) : null;
-            if ($data !== null && strlen($data) > 3000000) continue;   // one document (e.g. a receipt photo) at most 3 MB
+            if ($data !== null && strlen($data) > 3000000) continue;
             $rev++;
             $put->execute([$col, $id, $data, $rev]);
         }
@@ -338,11 +303,11 @@ try {
         out(['rev' => $rev]);
     }
 
-    if ($a === 'twofa') {       // state of the two-factor login
+    if ($a === 'twofa') {
         out(['on' => totpOn(), 'recovery' => count(json_decode((string)(meta('totp_recovery') ?? '[]'), true) ?: [])]);
     }
 
-    if ($a === 'twofaStart') {  // new secret for the authenticator app (only active after a correct code)
+    if ($a === 'twofaStart') {
         if (!checkPassword((string)(body()['password'] ?? ''))) { loginFailed(); sleep(2); fail('Das Passwort stimmt nicht', 403); }
         $secret = b32encode(random_bytes(20));
         setMeta('totp_pending', $secret);
@@ -371,19 +336,19 @@ try {
         out(['ok' => true]);
     }
 
-    if ($a === 'verify') {      // e.g. "PIN vergessen": is this the password of the Synology?
+    if ($a === 'verify') {
         if (loginLocked() > 0) fail('Zu viele falsche Versuche – bitte später noch einmal', 429);
         if (!checkPassword((string)(body()['password'] ?? ''))) { loginFailed(); sleep(2); fail('Das Passwort stimmt nicht', 403); }
         loginOk();
         out(['ok' => true]);
     }
 
-    if ($a === 'logoutAll') {   // e.g. after a phone was lost: every device has to log in again
+    if ($a === 'logoutAll') {
         db()->exec('DELETE FROM tokens');
         out(['ok' => true]);
     }
 
-    if ($a === 'password') {    // change the password; all other devices are logged out
+    if ($a === 'password') {
         $b = body();
         if (!checkPassword((string)($b['old'] ?? ''))) { loginFailed(); sleep(2); fail('Das bisherige Passwort stimmt nicht', 403); }
         $new = (string)($b['new'] ?? '');
@@ -403,5 +368,5 @@ try {
 } catch (Throwable $e) {
     try { if (db()->inTransaction()) db()->exec('ROLLBACK'); } catch (Throwable $ignored) {}
     error_log('Haushaltsbuch: ' . $e->getMessage());
-    fail('Serverfehler', 500);   // no details for outsiders
+    fail('Serverfehler', 500);
 }

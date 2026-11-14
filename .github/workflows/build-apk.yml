@@ -9,8 +9,6 @@ permissions:
   contents: write
   id-token: write
 
-# normal updates (only the app content changed) need just ONE job – it builds, signs and publishes.
-# It runs on the runner named in the repository variable RUNNER (e.g. the own laptop), otherwise on GitHub.
 defaults:
   run:
     shell: bash
@@ -39,7 +37,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # only build the native apps when their part changed since the published release (saves Actions minutes)
           APK=$(git rev-list --count HEAD -- android/); EXE=$(git rev-list --count HEAD -- desktop/)
           BODY=$(gh release view neueste --json body --jq .body 2>/dev/null || echo "")
           RA=$(echo "$BODY" | grep -o 'apk=[0-9]*' | cut -d= -f2 || true); RE=$(echo "$BODY" | grep -o 'exe=[0-9]*' | cut -d= -f2 || true)
@@ -53,15 +50,12 @@ jobs:
         id: build
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then PY=python; else PY=python3; fi
-          # own version numbers: the phone counts changes of the shared app and the Android part,
-          # the PC counts the shared app, its own look (web/pc.*) and the Windows part
           BASE=0e2eef2
           APPV=$((129 + $(git rev-list --count $BASE..HEAD -- web/index.html android/)))
           PCV=$((75 + $(git rev-list --count $BASE..HEAD -- web/index.html web/pc.js web/pc.css desktop/)))
           echo "appv=$APPV" >> $GITHUB_OUTPUT; echo "pcv=$PCV" >> $GITHUB_OUTPUT
           echo "APPV=$APPV" >> $GITHUB_ENV; echo "PCV=$PCV" >> $GITHUB_ENV
           echo "Handy-Version $APPV · PC-Version $PCV"
-          # Tageskurse der EZB fest einbauen (die App lädt sonst nur auf Knopfdruck neu)
           RATES=$(curl -fsS --max-time 20 https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml 2>/dev/null | $PY -c "import sys,re,json; x=sys.stdin.read(); d=re.search(r\"time=.(\\d{4}-\\d\\d-\\d\\d)\",x); r={c:float(v) for c,v in re.findall(r\"currency=.([A-Z]{3}). rate=.([\\d.]+)\",x)}; print(json.dumps({'d':d.group(1),'r':r},separators=(',',':')) if d and r else '')" 2>/dev/null) || RATES=""
           echo "EZB-Kurse: ${RATES:-keine (App nutzt Näherungswerte)}"
           {
@@ -74,7 +68,6 @@ jobs:
             printf '<title>Finanz MAMI</title>'
             printf '<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%%}[hidden]{display:none!important}</style>'
             printf '</head><body>'
-            # the PC look lives in its own files and is put into the one script / style block of the app
             $PY -c "import sys;s=open('web/index.html',encoding='utf-8').read();s=s.replace('/*PC-JS*/',open('web/pc.js',encoding='utf-8').read(),1).replace('/*PC-CSS*/',open('web/pc.css',encoding='utf-8').read(),1);sys.stdout.buffer.write(s.encode('utf-8'))"
             printf '</body></html>'
           } > app.html
@@ -112,7 +105,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # remove this and any leftover intermediate releases (from runs that failed halfway)
           for t in $(gh api "repos/${{ github.repository }}/releases?per_page=100" --jq '.[].tag_name' | grep '^build-'); do
             gh release delete "$t" -y --cleanup-tag || true
           done
@@ -124,13 +116,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release download neueste -p Haushaltsbuch.apk -p Haushaltsbuch-Setup.exe -D . --clobber
-          # update the existing release instead of deleting it first (a GitHub hiccup must never leave the apps without updates)
           TITLE="Finanz MAMI · v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · Handy, Tablet & PC"
           NOTES="Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=${{ steps.need.outputs.ra }} exe=${{ steps.need.outputs.re }} appv=$APPV pcv=$PCV"
           if gh release view neueste >/dev/null 2>&1; then
             gh release upload neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --clobber
             gh release edit neueste --title "$TITLE" --notes "$NOTES" --latest
-            # the tag follows the newest build (no old commits stay reachable through it)
             git tag -f neueste ${{ github.sha }} && git push -f origin refs/tags/neueste || true
           else
             gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --title "$TITLE" --notes "$NOTES" --latest
@@ -165,7 +155,6 @@ jobs:
           HB_KEYSTORE: ${{ secrets.HB_KEYSTORE }}
           HB_KEYSTORE_PASS: ${{ secrets.HB_KEYSTORE_PASS }}
         run: |
-          # signing key from the secrets (never stored in the repository)
           if [ -n "$HB_KEYSTORE" ]; then
             printf '%s' "$HB_KEYSTORE" | tr -d ' \r\n' | base64 -d > "$RUNNER_TEMP/hb.jks"
             export HB_KEYSTORE_FILE="$RUNNER_TEMP/hb.jks"
@@ -179,17 +168,14 @@ jobs:
           fi
           mkdir -p android/app/src/main/assets
           cp app.html android/app/src/main/assets/index.html
-          # version of the Android part: the app compares it with the release to know when a new APK is needed
           git rev-list --count HEAD -- android/ > android/app/src/main/assets/native.txt
           cd android
           if ! gradle assembleRelease --no-daemon > ../gradle.log 2>&1; then
-            # show the compiler/gradle errors as annotations, so they can be read without the full log
             grep -v "^> Task" ../gradle.log | grep -E -A3 "error|What went wrong|FAILURE|Could not|Execution failed" | head -60 | while IFS= read -r l; do echo "::error::$l"; done
             exit 1
           fi
           cp app/build/outputs/apk/release/app-release.apk ../Haushaltsbuch.apk
           rm -f "$RUNNER_TEMP/hb.jks"
-          # the APK must carry the same signature as always, otherwise phones refuse the update (e.g. a wrong secret)
           SIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
           if [ -n "$SIGNER" ]; then
             FP=$("$SIGNER" verify --print-certs ../Haushaltsbuch.apk | grep -i 'SHA-256 digest' | head -1 | awk '{print $NF}' | tr 'A-F' 'a-f')
@@ -280,7 +266,6 @@ jobs:
   release:
     name: Veröffentlichen
     needs: [web, android, windows, windows-test]
-    # the app content is published as soon as it is built; a failed APK or Windows build keeps the previous file (e.g. GitHub outage)
     if: ${{ always() && needs.web.result == 'success' && needs.web.outputs.native == 'true' }}
     runs-on: ubuntu-latest
     permissions:
@@ -298,29 +283,24 @@ jobs:
           ls -la
           APK=$(git rev-list --count HEAD -- android/); EXE=$(git rev-list --count HEAD -- desktop/)
           if [ ! -f Haushaltsbuch.apk ]; then
-            # Android build failed or did not start: keep the previous APK and its version number
             gh release download neueste -p Haushaltsbuch.apk -D . --clobber
             APK=$(gh release view neueste --json body --jq .body | grep -o 'apk=[0-9]*' | cut -d= -f2)
             echo "Android-Build fehlt – bisherige APK bleibt (apk=$APK)"
           fi
           if [ ! -f Haushaltsbuch-Setup.exe ]; then
-            # Windows build failed: keep the previous installer and its version number, so PCs do not update in circles
             gh release download neueste -p Haushaltsbuch-Setup.exe -D . --clobber
             EXE=$(gh release view neueste --json body --jq .body | grep -o 'exe=[0-9]*' | cut -d= -f2)
             echo "Windows-Build fehlt – bisheriger Installer bleibt (exe=$EXE)"
           fi
-          # update the existing release instead of deleting it first (a GitHub hiccup must never leave the apps without updates)
           TITLE="Finanz MAMI · v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · Handy, Tablet & PC"
           NOTES="Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=$APK exe=$EXE appv=${{ needs.web.outputs.appv }} pcv=${{ needs.web.outputs.pcv }}"
           if gh release view neueste >/dev/null 2>&1; then
             gh release upload neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --clobber
             gh release edit neueste --title "$TITLE" --notes "$NOTES" --latest
-            # the tag follows the newest build (no old commits stay reachable through it)
             git tag -f neueste ${{ github.sha }} && git push -f origin refs/tags/neueste || true
           else
             gh release create neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --title "$TITLE" --notes "$NOTES" --latest
           fi
-          # remove this and any leftover intermediate releases (from runs that failed halfway)
           for t in $(gh api "repos/${{ github.repository }}/releases?per_page=100" --jq '.[].tag_name' | grep '^build-'); do
             gh release delete "$t" -y --cleanup-tag || true
           done

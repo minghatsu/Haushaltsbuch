@@ -1,4 +1,3 @@
-// Stellt der App dieselben Funktionen bereit wie die Android-App (window.AndroidBridge).
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("AndroidBridge", {

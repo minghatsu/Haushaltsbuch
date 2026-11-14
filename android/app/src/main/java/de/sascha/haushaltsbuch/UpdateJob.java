@@ -22,10 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Looks for a new version about every 15 minutes, also while the app is closed,
- * and shows a notification. Tapping it opens the app, which then loads and installs the update.
- */
 public class UpdateJob extends JobService {
     static final int JOB_ID = 4711, NOTE_ID = 4711;
     static final String CH_UPD = "updates";
@@ -33,7 +29,6 @@ public class UpdateJob extends JobService {
     private static final String REL_PUB = "https://api.github.com/repos/minghatsu/finanz-mami/releases/tags/neueste";
     private static final Pattern VERSION = Pattern.compile("name=\"hb-version\" content=\"(\\d+)\"");
 
-    /** Plans the regular check (keeps running after a restart of the phone). */
     static void plan(Context c) {
         JobScheduler js = c.getSystemService(JobScheduler.class);
         if (js == null || js.getPendingJob(JOB_ID) != null) return;
@@ -100,7 +95,7 @@ public class UpdateJob extends JobService {
         boolean newApk = apk > mineApk, newWeb = web > mineWeb;
         if (!newApk && !newWeb) return;
         String mark = web + "/" + apk;
-        if (mark.equals(sp.getString("updNoted", ""))) return;   // this version was already announced
+        if (mark.equals(sp.getString("updNoted", ""))) return;
         sp.edit().putString("updNoted", mark).apply();
         int m = Math.max(0, web - 88);
         show(c, "Neue Version v0." + (m / 10) + "." + (m % 10) + " ist da",

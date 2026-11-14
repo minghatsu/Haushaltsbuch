@@ -1,6 +1,3 @@
-// Haushaltsbuch für Windows.
-// Zeigt dieselbe App wie auf dem Handy. Die Daten liegen auf dem PC und werden mit der Synology abgeglichen.
-// Neue App-Versionen holt sich die App selbst von der Synology (wie die Handy-App).
 const { app, BrowserWindow, WebContentsView, protocol, ipcMain, shell, Menu, Tray, Notification, nativeImage, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
@@ -12,14 +9,12 @@ protocol.registerSchemesAsPrivileged([
 const APP_URL = "app://haushaltsbuch/index.html";
 const BUNDLED = path.join(__dirname, "app.html");
 const SMOKE = process.argv.includes("--smoke");
-// keep the data folder of earlier versions (named "Haushaltsbuch") although the app is now called Finanz MAMI
 if (SMOKE) app.setPath("userData", path.join(app.getPath("temp"), "haushaltsbuch-smoke-" + process.pid));
 else app.setPath("userData", path.join(app.getPath("appData"), "Haushaltsbuch"));
 
 const cachedFile = () => path.join(app.getPath("userData"), "app.html");
 const windowFile = () => path.join(app.getPath("userData"), "fenster.json");
 
-/* Updates from the Synology are only used if the GitHub build signed them (ECDSA P-256, key below). */
 const crypto = require("crypto");
 const UPDATE_KEY = crypto.createPublicKey({ key: Buffer.from("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWc6eJAgFbzrfP4Smmawd8Iv5ApsSFtZXDcZ4odJm/NDemZmJ1c6KQt4h+Jn6e+5KhGaXm6EIuf0jWIHZUtHptQ==", "base64"), format: "der", type: "spki" });
 function signedByBuild(html) {
@@ -35,7 +30,6 @@ function versionOf(html) {
   const m = /name="hb-version" content="(\d+)"/.exec(String(html).slice(0, 4000));
   return m ? Number(m[1]) : 0;
 }
-/** The downloaded version if it is newer than the one inside this program, otherwise the built-in one. */
 function newestApp() {
   const bundled = fs.readFileSync(BUNDLED, "utf8");
   try {
@@ -72,7 +66,7 @@ function makeTray() {
   } catch (e) { tray = null; }
 }
 
-/* ---------- notifications (Windows): the app hands over the planned reminders, the PC shows them while the program runs (also in the background) ---------- */
+/* Benachrichtigungen */
 const notifyFile = () => path.join(app.getPath("userData"), "erinnerungen.json");
 let planned = [];
 function loadPlanned() { try { planned = JSON.parse(fs.readFileSync(notifyFile(), "utf8")) || []; } catch (e) { planned = []; } }
@@ -87,7 +81,7 @@ function checkPlanned() {
   const now = Date.now(), due = planned.filter((x) => x.at <= now);
   if (!due.length) return;
   planned = planned.filter((x) => x.at > now); savePlanned();
-  for (const x of due.slice(-3)) if (now - x.at < 6 * 3600e3) showNote(x.title, x.text);   // older than 6 h (PC was off): skip
+  for (const x of due.slice(-3)) if (now - x.at < 6 * 3600e3) showNote(x.title, x.text);
 }
 
 function loadBounds() {
@@ -126,17 +120,15 @@ function createWindow() {
     },
   });
   if (b.maximized) win.maximize();
-  win.setContentProtection(secureOn());   // screenshots and screen sharing show a black window (switch in Sicherheit)
+  win.setContentProtection(secureOn());
   win.on("close", (e) => {
     saveBounds();
-    // closing the app (also into the tray) closes an open web page inside it for good
     if (pageView) { pageDestroy(); win.webContents.executeJavaScript("window.hbPageClose && window.hbPageClose()").catch(() => {}); }
-    if (!quitting && !SMOKE && prefs().tray) { e.preventDefault(); win.hide(); }   // keep running in the tray for reminders
+    if (!quitting && !SMOKE && prefs().tray) { e.preventDefault(); win.hide(); }
   });
   win.on("closed", () => { pageDestroy(); win = null; });
   win.on("show", () => { if (!pageView) win.webContents.executeJavaScript("window.hbPageClose && window.hbPageClose()").catch(() => {}); });
 
-  // web links open inside the app window (the app shows them with its own bar); other schemes (mailto …) go to Windows
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https?:\/\//i.test(url)) pageRequest(url); else if (/^(mailto|tel):/i.test(url)) shell.openExternal(url);
     return { action: "deny" };
@@ -145,7 +137,6 @@ function createWindow() {
     if (!url.startsWith("app://")) { e.preventDefault(); if (/^https?:\/\//i.test(url)) pageRequest(url); else if (/^(mailto|tel):/i.test(url)) shell.openExternal(url); }
   });
 
-  // keyboard: F5 reload, Ctrl +/-/0 zoom, Alt+Left / mouse back = back
   win.webContents.on("before-input-event", (e, input) => {
     if (input.type !== "keyDown") return;
     const ctrl = input.control || input.meta;
@@ -156,14 +147,12 @@ function createWindow() {
     else if (input.alt && input.key === "ArrowLeft") { goBack(); e.preventDefault(); }
   });
   win.on("app-command", (e, cmd) => { if (cmd === "browser-backward") goBack(); });
-  // back from another program: the keyboard goes back to where it was – to the app itself unless a shop page is open and was used last
   win.webContents.on("focus", () => { lastFocus = "app"; });
   win.on("focus", () => { setTimeout(() => { try {
     if (lastFocus === "page" && pageView && pageShown && !pageView.webContents.isDestroyed()) pageView.webContents.focus();
     else win.webContents.focus();
   } catch (err) {} }, 0); });
 
-  // the app itself reloads (update, F5): a web page shown above it belongs to the old page – remove it
   win.webContents.on("did-start-navigation", (e) => { if (e.isMainFrame !== false && pageView && pageShown && !e.isSameDocument) { try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; pickOn = false; } });
   win.loadURL(APP_URL);
   if (SMOKE) runSmokeTest();
@@ -173,7 +162,7 @@ function goBack() {
   if (win) win.webContents.executeJavaScript("window.hbBack && window.hbBack()").catch(() => {});
 }
 
-/* ---------- bridge for the app (same functions as in the Android app) ---------- */
+/* Bridge (wie Android) */
 ipcMain.on("saveFile", (e, name, text) => {
   try {
     const safe = String(name).replace(/[\\/:*?"<>|]/g, "_") || "haushaltsbuch.json";
@@ -194,7 +183,6 @@ ipcMain.on("saveFileB64", (e, name, b64) => {
   }
 });
 
-// shopping list: a PDF to save, or the normal Windows print dialog (the page is rendered in a hidden window without scripts)
 ipcMain.on("printHtml", async (e, id, html, mode) => {
   const done = (ok, msg) => { if (!e.sender.isDestroyed()) e.sender.executeJavaScript(`window.hbPrintDone && window.hbPrintDone(${JSON.stringify(String(id))}, ${ok ? "true" : "false"}, ${JSON.stringify(String(msg || ""))})`).catch(() => {}); };
   let pw = null, file = "";
@@ -257,8 +245,7 @@ ipcMain.on("saveApp", (e, html) => {
 
 ipcMain.on("reloadApp", () => { if (win) win.loadURL(APP_URL); });
 
-// Requests to the Synology are made here (not in the page), so browser rules for the home network never block them.
-/* ---------- encrypted storage of the app data: a random key, itself locked by Windows (DPAPI via safeStorage) ---------- */
+/* Verschlüsselter Speicher */
 let VAULT_KEY = null;
 function vaultKey() {
   if (VAULT_KEY) return VAULT_KEY;
@@ -283,7 +270,6 @@ ipcMain.on("unseal", (e, sealed) => {
 ipcMain.on("pbkdf2", (e, pin, salt, iter) => {
   try { e.returnValue = crypto.pbkdf2Sync(String(pin), String(salt), Math.max(1000, Math.min(Number(iter) || 0, 2000000)), 32, "sha256").toString("hex"); } catch (err) { e.returnValue = ""; }
 });
-// https to the Synology's local address: the certificate must be valid for its internet name (certHost)
 function httpsPinned(req) {
   return new Promise((ok, bad) => {
     const u = new URL(req.url), tls = require("tls");
@@ -306,7 +292,6 @@ ipcMain.on("http", async (e, req) => {
   let status = 0, text = "";
   try {
     if (!/^https?:\/\//i.test(req.url)) throw new Error("bad url");
-    // unencrypted only inside the home network or Tailscale – never across the internet
     if (/^http:/i.test(req.url) && !homeHost(new URL(req.url).hostname)) throw new Error("http only at home");
     const headers = { "Content-Type": "application/json" };
     if (req.auth) headers.Authorization = req.auth;
@@ -324,7 +309,7 @@ ipcMain.on("http", async (e, req) => {
   e.sender.executeJavaScript(`window.hbHttpDone && window.hbHttpDone(${JSON.stringify(req.id)}, ${status}, ${JSON.stringify(text)})`).catch(() => {});
 });
 
-/* ---------- self-update from the GitHub release (private repo: read-only key the user entered) ---------- */
+/* Selbst-Update */
 function nativeRev() { try { return String(JSON.parse(fs.readFileSync(path.join(__dirname, "native.json"), "utf8")).rev || 0); } catch (e) { return "0"; } }
 ipcMain.on("nativeRev", (e) => { e.returnValue = nativeRev(); });
 ipcMain.on("ghFetch", async (e, req) => {
@@ -333,9 +318,9 @@ ipcMain.on("ghFetch", async (e, req) => {
     if (!String(req.url).startsWith("https://api.github.com/repos/minghatsu/")) throw new Error("Adresse nicht erlaubt");
     const json = req.kind === "json";
     const headers = { "User-Agent": "FinanzMAMI", Accept: json ? "application/vnd.github+json" : "application/octet-stream" };
-    if (req.token) headers.Authorization = "Bearer " + req.token;     // public download repo: no key
+    if (req.token) headers.Authorization = "Bearer " + req.token;
     let r = await fetch(req.url, { redirect: "manual", signal: AbortSignal.timeout(300000), headers });
-    if (r.status >= 300 && r.status < 400) {     // download link of the file: fetched without the key
+    if (r.status >= 300 && r.status < 400) {
       const loc = r.headers.get("location");
       if (!loc || !loc.startsWith("https://")) throw new Error("Weiterleitung fehlt");
       r = await fetch(loc, { signal: AbortSignal.timeout(300000) });
@@ -354,7 +339,6 @@ ipcMain.on("ghFetch", async (e, req) => {
       if (buf.length < 1000000 || buf.subarray(0, 2).toString() !== "MZ") throw new Error("Download unvollständig");
       const f = path.join(app.getPath("temp"), "FinanzMAMI-Update.exe");
       fs.writeFileSync(f, buf);
-      // silent install; the installer starts the app again afterwards
       require("child_process").spawn(f, ["/S", "--force-run"], { detached: true, stdio: "ignore" }).unref();
       result = "installing";
       setTimeout(() => { quitting = true; app.quit(); }, 800);
@@ -364,7 +348,6 @@ ipcMain.on("ghFetch", async (e, req) => {
   e.sender.executeJavaScript(`window.hbGhDone && window.hbGhDone(${JSON.stringify(req.id)}, ${JSON.stringify(result)}, ${JSON.stringify(err)})`).catch(() => {});
 });
 
-// merchant logos: downloaded here and handed to the app as data URL (the app keeps them for offline use)
 ipcMain.on("fetchImage", async (e, req) => {
   let data = null;
   try {
@@ -377,8 +360,6 @@ ipcMain.on("fetchImage", async (e, req) => {
   e.sender.executeJavaScript(`window.hbImgDone && window.hbImgDone(${JSON.stringify(req.id)}, ${JSON.stringify(data)})`).catch(() => {});
 });
 
-// scanner: Windows Image Acquisition (WIA) – the first scanner found scans one page without any dialog,
-// the picture comes back to the app as JPEG (data URL) and goes into the same check window as a photo
 const WIA_JPEG = "{B96B3CAE-0728-11D3-9D7B-0000F81EF32E}";
 const SCAN_PS = `
 $ErrorActionPreference = "Stop"
@@ -426,24 +407,19 @@ ipcMain.on("scan", (e, id) => {
     });
 });
 
-// web pages (shop leaflets, help, imprint …) open INSIDE the app window: a web view placed where the app leaves room for it
 let pageView = null, pageShown = false, pageBase = "", pageFirst = false;
 let pageEditing = false;
-// the web view is thrown away completely (not only hidden) – so nothing of it keeps the app running or shows up again
 function pageDestroy() {
   const v = pageView; pageView = null; pageShown = false; pickOn = false; pageBase = ""; pickCssKey = null;
   if (!v) return;
   try { if (win && !win.isDestroyed()) win.contentView.removeChildView(v); } catch (e) {}
   try { if (!v.webContents.isDestroyed()) v.webContents.close(); } catch (e) {}
 }
-// "Angebot picken": a script in the shown page highlights the offer under the mouse and reads name, price and "valid until"
-// from the clicked one (also inside embedded leaflet frames); "lasso" puts a see-through layer over the whole page to draw a frame
-// (for leaflets that are only pictures) – that part is photographed and read with the text recognition of Windows
 let pickOn = false, pickMode = "", lastFocus = "app";
 const PICK_JS = String.raw`(() => {
   const W = window; if (W.__hbPick) return W.__hbPick;
   const TOP = W === W.top;
-  const PR = /(\d{1,4})\s*[.,]\s*(\d{2})(?![\d.]\d|\.(?!\d)|\d|\s?(?:gbit|mbit|gb|tb|mb|mah|ghz|mhz|hz|zoll|cm|mm|kg|ml|kw|w|v|l|m|g)\b|\s?%)|[-–]\s*[.,]\s*(\d{2})(?!\d)|(\d{1,4})\s*[.,]\s*[-–]/i;   // "9.11." and "14.11.2026" are dates, not prices
+  const PR = /(\d{1,4})\s*[.,]\s*(\d{2})(?![\d.]\d|\.(?!\d)|\d|\s?(?:gbit|mbit|gb|tb|mb|mah|ghz|mhz|hz|zoll|cm|mm|kg|ml|kw|w|v|l|m|g)\b|\s?%)|[-–]\s*[.,]\s*(\d{2})(?!\d)|(\d{1,4})\s*[.,]\s*[-–]/i;
   const BAD = /^(uvp|statt|je |grundpreis|1 ?kg|100 ?g|1 ?l |\d+ ?%|-?\d+ ?%|ab |nur |aktion|angebot|knaller|neu|online|in den warenkorb|merken|details|zum angebot|mehr|versch\.|verschiedene|auch |inkl|versand|lieferung|markt ausw|jetzt |spare |bewert|\d+ bewertung)|:$/i;
   const txt = (e) => (e && (e.innerText || e.textContent) || "").replace(/ /g, " ").trim();
   const PRG = new RegExp(PR.source, "g");
@@ -453,57 +429,44 @@ const PICK_JS = String.raw`(() => {
   const fs = (e) => { try { return parseFloat(getComputedStyle(e).fontSize) || 0; } catch (x) { return 0; } };
   const maxFs = (e) => { let m = fs(e); for (const k of e.querySelectorAll("*")) m = Math.max(m, fs(k)); return m; };
   function hasPrice(e) { return PR.test(txt(e)) || !!e.querySelector("[itemprop=price],[class*=price i],[class*=preis i],[data-price]"); }
-  // value of a small price element: "11,99 €", "-.99", "59,-" or "11" + small "99"
   function valOf(e) {
     const it = e.matches && e.matches("[itemprop=price]") ? e : null; if (it) { const v = parseFloat(String(it.getAttribute("content") || txt(it)).replace(",", ".")); if (v > 0) return v; }
     const t = txt(e).replace(/\s+/g, " "); const m = price(t); if (m != null) return m;
-    // cents written on their own: <sup>, or an element called "cent", "decimal", "fraction" (not "text-center")
     const CENT = /(^|[-_\s])(cents?|decimals?|fraction(al)?|nachkomma)([-_\s]|$)/i;
     const sup = [...e.querySelectorAll("*")].find((k) => k.matches("sup,small") || CENT.test(String(k.className || "")) || CENT.test(k.getAttribute("data-testid") || ""));
     if (sup && /^\d{2}$/.test(txt(sup).replace(/[^\d]/g, ""))) { const w = t.replace(txt(sup), "").replace(/[^\d]/g, ""); if (w.length <= 4 && (w || /[-–.,]/.test(t))) return Number((w || "0") + "." + txt(sup).replace(/[^\d]/g, "")); }
     return null;
   }
-  // the offer price in a card: the biggest written price that is not a base price, deposit, UVP or "statt"
   function cardPrice(c) {
     const it = c.querySelector("[itemprop=price]"); if (it) { const v = valOf(it); if (v) return v; }
-    // a unit word right next to the price ("3,99 /kg", "1 kg = 3,99") makes it a base price; a separate line with the base price does not
     const own = (p) => p ? [...p.childNodes].filter((n) => n.nodeType === 3).map((n) => n.nodeValue).join(" ") : "";
     const els = [c, ...c.querySelectorAll("*")].filter((e) => { const t = txt(e); return t && t.length <= 24 && !UNIT.test(t) && !UNIT.test(own(e.parentElement)); });
     let best = null;
-    // prices only with the shop's app ("1.11 App") come second – the normal price counts
     const app = (e) => { for (let x = e, i = 0; x && x !== c && i < 3; i++, x = x.parentElement) if (/\bapp\b/i.test(txt(x)) && txt(x).length < 30) return true; return false; };
-    // crossed-out old prices ("statt") never count
     const struck = (e) => { for (let x = e, i = 0; x && i < 4; i++, x = x.parentElement) { if (x.matches("s,del,strike")) return true; try { if (/line-through/.test(getComputedStyle(x).textDecorationLine)) return true; } catch (z) {} if (x === c) break; } return false; };
     for (const e of els) { if (struck(e)) continue; const v = valOf(e); if (!(v > 0 && v < 100000)) continue; const f = maxFs(e), r = e.getBoundingClientRect(), a = app(e) ? 1 : 0;
       if (!best || a < best.app || (a === best.app && (f > best.f + 0.5 || (Math.abs(f - best.f) <= 0.5 && r.width * r.height < best.a)))) best = { v, f, a: r.width * r.height, app: a }; }
     if (best) return best.v;
     const all = txt(c).split(/\n+/).filter((l) => !UNIT.test(l)).join("\n"); return price(all);
   }
-  // the product name: the biggest text in the card that is not a price, a badge word or a detail line
   function cardName(c) {
     let best = null;
     const clean = (t) => String(t || "").replace(/\s+/g, " ").trim().replace(/[:\s,(*¹⁴⁵⁶⁷⁸⁹⁰†]+$/, "").replace(/^[^A-Za-zÄÖÜäöü0-9"„]+/, "");
     const ok = (t) => !(t.length < 3 || t.length > 90 || PR.test(t) || UNIT.test(t) || BAD.test(t) || /bewertung|rezension|sternen?\b|bitte w(ä|ae)hle|entdecken|alle anzeigen|mehr erfahren|zum produkt/i.test(t) || !nameish(t));
     const consider = (t, f) => { t = clean(t); if (!ok(t)) return; if (!best || f > best.f + 0.5) best = { t, f }; };
-    // every piece of text on its own (also text that sits loose next to other elements), with the size it is written in
     const all = [];
     const tw = document.createTreeWalker(c, NodeFilter.SHOW_TEXT);
     for (let n = tw.nextNode(); n; n = tw.nextNode()) { const pe = n.parentElement; if (!pe) continue; const st = getComputedStyle(pe); if (st.display === "none" || st.visibility === "hidden") continue;
-      const pr = pe.getBoundingClientRect(); if (pr.width < 3 || pr.height < 3) continue;   // text only for screen readers
+      const pr = pe.getBoundingClientRect(); if (pr.width < 3 || pr.height < 3) continue;
       const t = clean(n.nodeValue); if (!t) continue; all.push({ t, f: fs(pe) }); consider(t, fs(pe)); }
-    // a short brand line ("K-PURLAND") right before a name in the same size belongs to it
     if (best && best.t.length <= 24) { const i = all.findIndex((a) => a.t === best.t && Math.abs(a.f - best.f) < 0.01), nx = all[i + 1];
       if (nx && Math.abs(nx.f - best.f) <= 0.5 && ok(nx.t) && best.t.length + nx.t.length < 90) best = { t: best.t + " " + nx.t, f: best.f }; }
     if (!best) { let e = c; for (let i = 0; e && i < 3 && !best; i++, e = e.parentElement) { const img = e.querySelector("img[alt]"); if (img) consider(img.alt, 0); } }
     return best ? best.t.replace(/\s+,/g, ",").replace(/(\.\.\.|…)$/, "").trim() : "";
   }
-  // grows from the found text up to the whole tile of the offer: up to just below the list that holds several offers
-  // a list of offers: at least two children that each have their own picture, name and price (price bubbles like "UVP 10.49 / Angebotspreis 6.49" are not a list)
-  // the tiles of a list look alike (same kind of element, similar size); the parts of one card (name, price, delivery) do not
   const alike = (a, b) => { if (a.tagName !== b.tagName) return false; const ca = String(a.className || "").split(/\s+/).filter(Boolean), cb = String(b.className || "").split(/\s+/).filter(Boolean);
     const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(), sim = (x, y) => Math.abs(x - y) <= Math.max(x, y) * 0.3 + 2;
     if ((ca.length || cb.length) && !ca.some((x) => cb.includes(x))) return false;
-    // same size, or side by side in one row with the same height
     return sim(ra.height, rb.height) && (sim(ra.width, rb.width) || (Math.abs(ra.top - rb.top) < 12 && Math.abs(ra.left - rb.left) > 20)); };
   const isList = (e) => { const ks = [...e.children].filter((k) => { const kt = txt(k); return kt.length > 12 && hasPrice(k) && nameish(kt); });
     if (ks.length >= 3) return ks.filter((k) => k.querySelector("img,picture")).length >= 3 || ks.some((k) => ks.some((o) => o !== k && alike(k, o)));
@@ -517,7 +480,6 @@ const PICK_JS = String.raw`(() => {
     }
     return e;
   }
-  // an offer that is only a picture (leaflet tiles like at tegut): the picture's tile, without growing into the list around it
   const hasBg = (e) => { try { const b = getComputedStyle(e).backgroundImage; return b && b !== "none" && /url\(/.test(b); } catch (x) { return false; } };
   const pics = (e) => e.querySelectorAll("img,picture,canvas,svg image").length + (hasBg(e) ? 1 : 0);
   function imgBox(el) {
@@ -536,11 +498,10 @@ const PICK_JS = String.raw`(() => {
     let e = el && el.nodeType === 1 ? el : el && el.parentElement, priceOnly = null;
     for (let i = 0; e && e !== document.body && e !== document.documentElement && i < 14; i++, e = e.parentElement) {
       const t = txt(e); if (t.length > 900) break;
-      // a list of several products (each child with its own name and price): went too far up
       if (isList(e)) break;
       if (!hasPrice(e)) continue;
       const r = e.getBoundingClientRect(); if (r.width < 50 || r.height < 24) continue;
-      if (nameish(t)) return whole(e);   // the offer – grown to its whole box (picture, badges and all)
+      if (nameish(t)) return whole(e);
       if (!priceOnly) priceOnly = e;
     }
     return priceOnly;
@@ -554,7 +515,6 @@ const PICK_JS = String.raw`(() => {
   }
   let hov = null, hovOld = "", mode = "", box = null, layer = null, sx = 0, sy = 0, skip = false;
   const send = (o) => console.log("__HBPICK__" + JSON.stringify(o));
-  // highlight with inline styles (works on pages that forbid extra style sheets)
   function mark(c) { if (hov === c) return; if (hov) hov.style.cssText = hovOld; hov = c; if (c) { hovOld = c.style.cssText; c.style.setProperty("outline", "3px solid #1a7a5c", "important"); c.style.setProperty("outline-offset", "2px", "important"); c.style.setProperty("box-shadow", "0 10px 30px rgba(26,122,92,.35)", "important"); } }
   function over(e) { if (mode === "pick") mark(cand(e.target) || (TOP ? imgBox(e.target) : null)); }
   function stop(e) { if (!mode) return; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); }
@@ -572,7 +532,6 @@ const PICK_JS = String.raw`(() => {
     send(r);
   }
   function cursor(on) { document.documentElement.style.setProperty("cursor", on ? "copy" : "", on ? "important" : ""); if (document.body) document.body.style.setProperty("cursor", on ? "copy" : "", on ? "important" : ""); }
-  // drawing a frame: a see-through layer over everything (also over embedded leaflet frames)
   function lassoOn() {
     if (!TOP || layer) return;
     layer = document.createElement("div");
@@ -593,23 +552,21 @@ const PICK_JS = String.raw`(() => {
   ["click", "auxclick", "dblclick", "contextmenu"].forEach((t) => W.addEventListener(t, t === "click" ? click : stop, true));
   W.addEventListener("mouseover", over, true);
   ["pointerdown", "mousedown", "touchstart"].forEach((t) => W.addEventListener(t, (e) => { if (mode === "pick") stop(e); }, { capture: true, passive: false }));
-  W.__hbPick = { set, test: { cand, read, imgBox } };   // test: used to check shop pages
+  W.__hbPick = { set, test: { cand, read, imgBox } };
   return W.__hbPick;
 })()`;
 const PICK_CSS = "html,html *{cursor:copy!important}";
 let pickCssKey = null;
-let pickSrc = "";   // the app can bring a newer version of the script along (so fixes need no new installer)
+let pickSrc = "";
 let pickOffAt = 0;
 async function pickSet(mode) {
   if (!pageView) return; if (pickOn && !mode) pickOffAt = Date.now(); pickOn = !!mode; pickMode = mode || "";
   const wc = pageView.webContents, call = (pickSrc || PICK_JS) + `.set(${JSON.stringify(mode || "")})`;
   try { if (pickCssKey) { await wc.removeInsertedCSS(pickCssKey); pickCssKey = null; } if (mode === "pick") pickCssKey = await wc.insertCSS(PICK_CSS); } catch (e) {}
   wc.executeJavaScriptInIsolatedWorld(1999, [{ code: call }]).catch(() => {});
-  // embedded frames (leaflet viewers) get it too; the frame layer for drawing only lives in the top page
   try { for (const f of wc.mainFrame.framesInSubtree) if (f !== wc.mainFrame) f.executeJavaScript(call).catch(() => {}); } catch (e) {}
 }
 ipcMain.on("pagePick", (e, mode, src) => { if (typeof src === "string" && src.length > 200 && src.length < 200000 && /^\(\(\) => \{/.test(src.trim())) pickSrc = src.trim(); pickSet(mode === "pick" || mode === "lasso" ? mode : ""); });
-// text recognition of Windows (offline, German) for a frame drawn on a picture leaflet
 const OCR_PS = String.raw`
 $ErrorActionPreference = "Stop"
 try {
@@ -654,15 +611,12 @@ function winOcr(png) {
       });
   });
 }
-// finds price badges (white writing on a coloured spot) in a picture and redraws them as one plain line "5.99"
-// input: BGRA buffer (Electron nativeImage.toBitmap()); output: list of {w,h,data(BGRA)} pictures ready for text recognition
 function badgeLines(b, W, H) {
   const N = W * H, col = new Uint8Array(N), wht = new Uint8Array(N);
   for (let i = 0, p = 0; i < N; i++, p += 4) {
     const B = b[p], G = b[p + 1], R = b[p + 2], mx = Math.max(R, G, B), mn = Math.min(R, G, B), lum = 0.299 * R + 0.587 * G + 0.114 * B;
     if (mx - mn > 90 && mx > 120) col[i] = 1; else if (lum > 200 && mx - mn < 45) wht[i] = 1;
   }
-  // connected pieces (4-neighbours) of a mask, optionally inside a box
   function comps(mask, x0, y0, w, h, minA) {
     const seen = new Uint8Array(w * h), out = [], st = [];
     for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) {
@@ -678,14 +632,12 @@ function badgeLines(b, W, H) {
   const res = [];
   for (const c of comps(col, 0, 0, W, H, Math.max(60, N * 0.004))) {
     if (c.a > N * 0.25 || c.w / c.h < 0.5 || c.w / c.h > 2) continue;
-    // white writing inside the spot: white pieces not touching the edge of the spot's box
     const ink = comps(wht, c.x, c.y, c.w, c.h, 20).filter((g) => g.x > 0 && g.y > 0 && g.x + g.w < c.w && g.y + g.h < c.h);
     if (!ink.length) continue;
     const Hm = Math.max(...ink.map((g) => g.h)); if (Hm < 10) continue;
     const big = ink.filter((g) => g.h >= 0.75 * Hm).sort((p, q) => p.x - q.x); if (!big.length) continue;
     const top = Math.min(...big.map((g) => g.y)), bot = Math.max(...big.map((g) => g.y + g.h));
     const small = ink.filter((g) => g.h >= 0.35 * Hm && g.h < 0.75 * Hm && g.y < top + 0.5 * Hm && g.y + g.h <= bot && g.x > big[0].x).sort((p, q) => p.x - q.x);
-    // draw: big digits as they are, a dot, the small (cents) digits grown to full size – black on white
     const parts = [...big.map((g) => ({ g, s: 1 })), ...(small.length ? [{ dot: 1 }] : []), ...small.map((g) => ({ g, s: Hm / g.h }))];
     const gap = Math.round(Hm * 0.12), pad = Math.round(Hm * 0.4);
     let Wd = pad * 2; for (const p of parts) Wd += (p.dot ? Math.round(Hm * 0.25) : Math.round(p.g.w * p.s)) + gap;
@@ -703,7 +655,6 @@ function badgeLines(b, W, H) {
   }
   return res;
 }
-// all found price badges, biggest first, one below the other in one picture (one run of the text recognition)
 function badgePicture(img) {
   const { width, height } = img.getSize(), list = badgeLines(img.toBitmap(), width, height).sort((p, q) => q.size - p.size).slice(0, 5);
   if (!list.length) return null;
@@ -727,11 +678,9 @@ function pickResult(o) {
     out({ reading: true });
     pageView.webContents.capturePage({ x: Math.max(0, Math.round(r.x * z)), y: Math.max(0, Math.round(r.y * z)), width: Math.max(1, Math.round(r.w * z)), height: Math.max(1, Math.round(r.h * z)) })
       .then(async (img) => {
-        const sz = img.getSize(), big = sz.width < 900 ? img.resize({ width: sz.width * 2, quality: "best" }) : img;   // bigger reads better
+        const sz = img.getSize(), big = sz.width < 900 ? img.resize({ width: sz.width * 2, quality: "best" }) : img;
         const lines = await winOcr(big.toPNG());
-        // second look for white writing on colour (price circles like "5⁹⁹"): white becomes black, everything else white
         let white = null; try { white = await winOcr(whiteToBlack(big)); } catch (err) {}
-        // price badges ("5⁹⁹" in a coloured circle) redrawn as a plain "5.99" and read on their own
         let badges = null; try { const bp = badgePicture(img); if (bp) badges = await winOcr(bp); } catch (err) {}
         const all = (lines || []).concat((white || []).map((l) => ({ ...l, w: 1 })));
         out({ img: img.toDataURL(), badges: (badges || []).map((l) => l.t), lines: (lines || white) ? all : null, ocrErr: (lines || white) ? "" : lastOcrErr, rect: r });
@@ -741,7 +690,6 @@ function pickResult(o) {
   out(o);
 }
 
-// the "base" of a web address: rewe.de for www.rewe.de, shop.rewe.de …; amazon.co.uk keeps three parts
 function baseOf(u) {
   try { const h = new URL(u).hostname.toLowerCase().replace(/\.$/, ""), p = h.split(".");
     const two = /^(co|com|org|net|gov|ac)\.[a-z]{2}$/.test(p.slice(-2).join(".")); return p.slice(two ? -3 : -2).join("."); } catch (e) { return ""; }
@@ -767,14 +715,12 @@ function pageMake() {
   pageView.webContents.on("focus", () => { lastFocus = "page"; });
   pageView.setBorderRadius && pageView.setBorderRadius(0);
   const wc = pageView.webContents;
-  // locked to the site that was opened: links to other sites are blocked (no free surfing in the app)
   wc.setWindowOpenHandler(({ url }) => { if (pageAllowed(url)) wc.loadURL(url); else pageBlocked(); return { action: "deny" }; });
   wc.on("will-navigate", (e, url) => { if (!pageAllowed(url)) { e.preventDefault(); pageBlocked(); } });
-  // the shop's own start address may forward to its real site once (e.g. to another domain of the shop) – that one is then allowed
   wc.on("will-redirect", (e, url) => { if (pageAllowed(url)) return; if (pageFirst && /^https:\/\//i.test(url)) { pageBase = baseOf(url); return; } e.preventDefault(); pageBlocked(); });
   wc.on("did-stop-loading", () => { pageFirst = false; });
   wc.on("did-fail-load", (e, code, desc, url, isMain) => {
-    if (!isMain || code === -3 || !win || win.isDestroyed()) return;   // -3 = stopped on purpose
+    if (!isMain || code === -3 || !win || win.isDestroyed()) return;
     pageView.setVisible(false);
     win.webContents.executeJavaScript(`window.hbPageError && window.hbPageError(${JSON.stringify(String(desc || code))})`).catch(() => {});
   });
@@ -782,17 +728,15 @@ function pageMake() {
   wc.on("will-frame-navigate", (e) => { if (e.isMainFrame && !pageAllowed(e.url)) { e.preventDefault(); pageBlocked(); } });
   ["did-start-loading", "did-stop-loading", "did-navigate", "did-navigate-in-page", "page-title-updated"].forEach((ev) => wc.on(ev, pageSend));
   wc.on("did-navigate", () => { if (pickOn) setTimeout(() => pickSet(pickMode || "pick"), 400); });
-  wc.on("did-frame-finish-load", (e, isMain) => { if (pickOn && !isMain) pickSet(pickMode || "pick"); });   // picking stays on after the page changed
+  wc.on("did-frame-finish-load", (e, isMain) => { if (pickOn && !isMain) pickSet(pickMode || "pick"); });
   wc.on("console-message", (...a) => { const ev = a[0], msg = ev && typeof ev.message === "string" ? ev.message : a[2];
     if (typeof msg === "string" && msg.startsWith("__HBEDIT__")) { pageEditing = msg.slice(10) === "1"; return; }
     if ((pickOn || Date.now() - pickOffAt < 3000) && typeof msg === "string" && msg.startsWith("__HBPICK__")) { try { pickResult(JSON.parse(msg.slice(10))); } catch (err) {} } });
-  // know whether a text field of the page has the focus (then the arrow keys stay with the page)
   wc.on("dom-ready", () => { pageEditing = false; wc.executeJavaScript(`(()=>{ const f=()=>{ const a=document.activeElement; console.log("__HBEDIT__"+(a&&(a.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))?"1":"0")); }; addEventListener("focusin",f,true); addEventListener("focusout",()=>setTimeout(f,0),true); })()`).catch(() => {}); });
   wc.on("before-input-event", (e, input) => {
     if (input.type !== "keyDown") return;
     if (input.key === "Escape") { e.preventDefault(); win.webContents.executeJavaScript(pickOn ? "window.hbPagePickOff && window.hbPagePickOff()" : "window.hbPageClose && window.hbPageClose()").catch(() => {}); }
     else if (input.alt && input.key === "ArrowLeft") { e.preventDefault(); if (wc.canGoBack()) wc.goBack(); }
-    // plain ← / →: flip the app's pages (as everywhere else) – unless you are typing in a field of the shop's page
     else if ((input.key === "ArrowLeft" || input.key === "ArrowRight") && !input.alt && !input.control && !input.meta && !input.shift && !pageEditing) {
       e.preventDefault(); win.webContents.executeJavaScript(`window.pcStep && window.pcStep(${input.key === "ArrowRight" ? 1 : -1})`).catch(() => {}); }
     else if (input.key === "F5") { e.preventDefault(); wc.reload(); }
@@ -800,11 +744,10 @@ function pageMake() {
   wc.on("render-process-gone", () => { try { win.contentView.removeChildView(pageView); } catch (e) {} pageView = null; pageShown = false; });
   return pageView;
 }
-// the page tells us where (css pixels of the app) – converted with the app's zoom
 function pageRect(r) { const z = win.webContents.getZoomFactor(); return { x: Math.round(r.x * z), y: Math.round(r.y * z), width: Math.max(1, Math.round(r.w * z)), height: Math.max(1, Math.round(r.h * z)) }; }
 ipcMain.on("pageOpen", (e, url, r) => {
   if (!win || !/^https:\/\//i.test(url)) return;
-  pageBase = baseOf(url); pageFirst = true;   // only this site may be shown until the page is closed
+  pageBase = baseOf(url); pageFirst = true;
   const v = pageMake();
   if (!pageShown) { win.contentView.addChildView(v); pageShown = true; }
   if (r) v.setBounds(pageRect(r));
@@ -813,7 +756,7 @@ ipcMain.on("pageOpen", (e, url, r) => {
   pageSend();
 });
 ipcMain.on("pageBounds", (e, r) => { if (pageView && pageShown && r) pageView.setBounds(pageRect(r)); });
-ipcMain.on("pageShow", (e, on) => { if (pageView && pageShown) pageView.setVisible(!!on); if (!on && win) win.webContents.focus(); });   // keyboard back to the app (e.g. a window opens over the shop page)
+ipcMain.on("pageShow", (e, on) => { if (pageView && pageShown) pageView.setVisible(!!on); if (!on && win) win.webContents.focus(); });
 ipcMain.on("pageNav", (e, cmd) => {
   if (!pageView) return; const wc = pageView.webContents;
   if (cmd === "back" && wc.canGoBack()) wc.goBack();
@@ -822,10 +765,9 @@ ipcMain.on("pageNav", (e, cmd) => {
   else if (cmd === "external") { const u = wc.getURL(); if (/^https?:\/\//i.test(u)) shell.openExternal(u); }
   else if (cmd === "close") { pickOn = false; try { win.contentView.removeChildView(pageView); } catch (err) {} pageShown = false; pageBase = ""; wc.loadURL("about:blank").catch(() => {}); lastFocus = "app"; try { win.webContents.focus(); } catch (err) {} }
 });
-// older app versions still ask for "openInApp": same place
 ipcMain.on("openInApp", (e, url) => { if (/^https:\/\//i.test(url)) pageRequest(url); });
 
-/* ---------- automatic start test for the build (npm run smoke) ---------- */
+/* Smoke-Test */
 function runSmokeTest() {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const js = (code) => win.webContents.executeJavaScript(code);
@@ -838,13 +780,12 @@ function runSmokeTest() {
       result.page = await js(`({login: !!document.getElementById("loginBg"), bridge: typeof window.AndroidBridge, version: (document.querySelector('meta[name="hb-version"]')||{}).content, urlField: !!(document.getElementById("loginUrlRow") && !document.getElementById("loginUrlRow").hidden)})`);
       const server = process.env.SMOKE_SERVER;
       if (server) {
-        await js(`localStorage.setItem("haushaltsbuch-server", ${JSON.stringify(server)}); localStorage.removeItem("haushaltsbuch-sync-v1")`);   // like a first start: the sign-in window opens
+        await js(`localStorage.setItem("haushaltsbuch-server", ${JSON.stringify(server)}); localStorage.removeItem("haushaltsbuch-sync-v1")`);
         win.webContents.reload();
         await new Promise((r) => win.webContents.once("did-finish-load", r));
         await wait(3000);
         result.title = await js(`document.getElementById("loginTitle").textContent`);
       }
-      // since pairing without an account the first window is "Geräte koppeln" (the server address field is gone)
       const ok = result.page.login && result.page.bridge === "object" && !!result.page.version && (!server || ["Geräte koppeln","Passwort festlegen"].includes(result.title));
       done(ok);
     } catch (err) {
@@ -854,7 +795,7 @@ function runSmokeTest() {
   });
 }
 
-/* ---------- start ---------- */
+/* Start */
 if (!SMOKE && !app.requestSingleInstanceLock()) {
   app.quit();
 } else {
@@ -869,9 +810,7 @@ if (!SMOKE && !app.requestSingleInstanceLock()) {
       return new Response("", { status: 404 });
     });
     if (process.platform === "win32") app.setAppUserModelId("de.sascha.haushaltsbuch");
-    // the app never needs camera, microphone, location etc. in the PC version
     require("electron").session.defaultSession.setPermissionRequestHandler((wc, perm, cb) => cb(perm === "notifications" || perm === "clipboard-sanitized-write"));
-    // shop pages opened inside the app: no camera, microphone, location, notifications … and no downloads
     const shops = require("electron").session.fromPartition("persist:seiten");
     shops.setPermissionRequestHandler((wc, perm, cb) => cb(false));
     shops.setPermissionCheckHandler(() => false);

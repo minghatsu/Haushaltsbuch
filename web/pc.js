@@ -1,6 +1,4 @@
-/* ---------- PC version: its own look ("Magazin") – the big green panel on the left, the pages as pills on top.
-   Flip through the pages with the arrow keys, the arrow buttons next to the pills, the mouse on the pills
-   or by swiping on a touch screen – endless in both directions. Only active in the PC app. ---------- */
+/* PC-Ansicht */
 function pcOn(){
   if (pcOn.done || !IS_PC) return; pcOn.done=true;
   const st=document.getElementById("pcCss"); if (st) st.media="all";
@@ -13,13 +11,10 @@ function pcOn(){
   }
 }
 const PC_ORDER=["home","list","fix","shop","year","more"];
-/* page change "Fallen & Springen": the tiles of the old page drop away slightly tilted, one after another,
-   the tiles of the new page fall in from above and bounce into place */
 const PC_ANIM={busy:false, pass:false};
 function pcTiles(sec, leaving){
   if (!sec) return [];
   const out=[];
-  // these pages have their own entrance – but they fall away like all the others when you leave them
   if (!leaving && ((sec.id==="v-fix" && sec.classList.contains("pcfcal")) || sec.id==="v-list" || sec.id==="v-shop")) return out;
   for (const c of sec.children){
     if (c.matches(".hcols,.cols")) c.querySelectorAll(":scope > .hcol > *, :scope > .col > *").forEach(x=>out.push(x));
@@ -31,14 +26,13 @@ function pcTiles(sec, leaving){
 }
 function pcCalm(){ return matchMedia("(prefers-reduced-motion: reduce)").matches; }
 function pcGo(k, nav){
-  if (PC_ANIM.busy){ PC_ANIM.next=()=>pcGo(k, nav); return true; }   // pressed again during the animation: goes on right after
+  if (PC_ANIM.busy){ PC_ANIM.next=()=>pcGo(k, nav); return true; }
   const sec=document.querySelector(`[data-view="${UI.view}"]`), olds=pcCalm()?[]:[...pcTiles(sec, true), ...(window.pcDockEls&&UI.view==="home"?pcDockEls():[])];
   PC_ANIM.busy=true; if (k==="home") pcHome.intro=true; document.documentElement.classList.add("pcanim");
   const outs=olds.map((e,i,a)=>e.animate([{opacity:1,transform:"none"},{opacity:0,transform:`translateY(${Math.round(innerHeight*0.6+i*24)}px) rotate(${i%2?9:-9}deg)`}],
     {duration:300, delay:(a.length-1-i)*22, easing:"cubic-bezier(.55,0,1,.45)", fill:"forwards"}));
   const done=()=>{
     PC_ANIM.pass=true; try { nav(); } finally { PC_ANIM.pass=false; }
-    // the new tiles get their animation right away (in the same frame), so the finished page never flashes up first
     const news0=pcCalm()?[]:[...pcTiles(document.querySelector(`[data-view="${UI.view}"]`)), ...(window.pcDockEls?pcDockEls():[])];
     news0.forEach(e=>{ e.style.opacity="0"; });
     outs.forEach(a=>{ try { a.cancel(); } catch(_){} });
@@ -56,22 +50,19 @@ function pcGo(k, nav){
   return true;
 }
 function pcStep(d){
-  // pressed several times during an animation: the steps add up and are done in one go afterwards
   if (PC_ANIM.busy){ PC_ANIM.pend=(PC_ANIM.pend||0)+d; PC_ANIM.next=()=>{ const n=PC_ANIM.pend; PC_ANIM.pend=0; if (n) pcStep(n); }; return true; }
   const i=PC_ORDER.indexOf(UI.view); if (i<0 || (UI.view==="more" && UI.sp) || document.querySelector(".backdrop:not([hidden])")) return false;
   const b=document.querySelector(`.tabs [data-go="${PC_ORDER[((i+d)%PC_ORDER.length+PC_ORDER.length)%PC_ORDER.length]}"]`); if (!b) return false;
   return pcGo(b.dataset.go, ()=>b.click());
 }
-window.pcStep=pcStep;   // the shop page shown inside the app passes ← / → on to here
+window.pcStep=pcStep;
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-pcstep]"); if (b) pcStep(Number(b.dataset.pcstep)); });
-// a click on a page (pills, the tiles of the green panel …) gets the same animation
 document.addEventListener("click", e=>{
   if (!IS_PC || PC_ANIM.pass) return;
   const b=e.target.closest("[data-go]"); if (!b || !PC_ORDER.includes(b.dataset.go) || b.dataset.go===UI.view || b.dataset.scroll || document.querySelector(".backdrop:not([hidden])")) return;
   e.preventDefault(); e.stopImmediatePropagation();
   pcGo(b.dataset.go, ()=>b.click());
 }, true);
-// touch screen: swipe left / right, endless
 { let x0=null, y0=0, t0=0;
   document.addEventListener("touchstart", e=>{ if (!IS_PC || e.touches.length!==1 || e.target.closest("input,textarea,select,.sheet,.backdrop,.astack,.srail,.table-wrap,.fxchips")){ x0=null; return; } x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now(); }, {passive:true});
   document.addEventListener("touchend", e=>{ if (x0===null) return; const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
@@ -82,7 +73,6 @@ document.addEventListener("keydown", e=>{
   const t=e.target; if (t && t.closest && t.closest('input,textarea,select,[contenteditable="true"],.astack,.srail,[role="slider"],.sheet,.backdrop')) return;
   if (pcStep(e.key==="ArrowRight"?1:-1)) e.preventDefault();
 });
-/* the green panel appears: the amounts count up and the ring fills itself */
 function pcHeroIntro(h){
   if (!h || pcCalm()) return;
   const ease=t=>1-Math.pow(1-t,3), ring=h.querySelector(".pcring"), P=Number((ring&&ring.style.getPropertyValue("--p"))||0);
@@ -104,7 +94,7 @@ function pcHome(o){
   const pct=isCur ? left/dim : ym>cur ? 1 : 0;
   const first=String(S.settings.name||"").trim().split(/\s+/)[0], greet=first ? (I18N.tr ? I18N.tr("Hallo") : "Hallo") : devModel();
   const many=accts.filter(a=>!a.total).length>1;
-  const hi=Math.max(0, accts.findIndex(a=>a.total)), heroCol=accts.length ? userCol("acct", accts[hi].name) : "";   // own colour from Einstellungen → Farben → Konten
+  const hi=Math.max(0, accts.findIndex(a=>a.total)), heroCol=accts.length ? userCol("acct", accts[hi].name) : "";
   const html=`<aside class="pchero" id="pcHero"${heroCol?` style="--herocol:${heroCol};--herocol2:color-mix(in srgb, ${heroCol} 78%, #000);--heroring:color-mix(in srgb, ${heroCol} 45%, #fff);background:linear-gradient(160deg, ${heroCol} 0%, color-mix(in srgb, ${heroCol} 62%, #000) 70%);box-shadow:0 18px 40px color-mix(in srgb, ${heroCol} 20%, transparent)"`:""}>
     <small class="pchi"><span>${esc(greet)}</span>${first?", "+esc(first):""} · <span>${esc(MONTHS[m-1])} ${y}</span></small>
     <div class="pcbal" data-cv="${tot}" data-cf="eur">${esc(eur(tot))}</div>
@@ -120,17 +110,14 @@ function pcHome(o){
     </div>
   </aside>`;
   const v=$("v-home"); if (!v) return; const old=v.querySelector("#pcHero"); if (old) old.remove(); v.insertAdjacentHTML("afterbegin", html);
-  // drawn again while it is still counting (data arriving): the new panel simply goes on counting
   if (pcHome.intro){ pcHome.intro=false; pcHeroIntro.t0=performance.now()+260; }
   if (performance.now() < (pcHeroIntro.t0||0)+1100) pcHeroIntro(v.querySelector("#pcHero"));
-  // one column of tiles in the original order – the stylesheet spreads them over as many columns as the screen has room for
   const hc=v.querySelector(".hcols"); if (hc && hc.children.length===2){ const [a,b]=[...hc.children], A=[...a.children], B=[...b.children];
     a.replaceChildren(...A.flatMap((x,i)=>B[i]?[x,B[i]]:[x]), ...B.slice(A.length)); b.remove(); }
 }
 if (IS_PC){ pcOn(); pcHome.intro=true; try { if (UI.view==="home") renderHome(); } catch(e){} }
-/* ---------- footer (status bar): name, version, sync state, help and the legal texts ---------- */
-if (IS_DESK){   // the tablet has the dock down there – it keeps the legal texts in the settings
-  // the legal texts live in the footer on the PC, not in the settings
+/* Fußzeile */
+if (IS_DESK){
   const _keys=accTabKeys; accTabKeys = t => _keys(t).filter(k=>k!=="recht");
   const LEG=[["impressum","Impressum"],["datenschutz","Datenschutz"],["agb","Nutzungsbedingungen"],["lizenzen","Lizenzen"]].filter(([k])=>LEGAL[k]);
   document.body.insertAdjacentHTML("beforeend", `<footer class="pcfoot" id="pcFoot"><span class="pcfn"><b>Finanz MAMI</b> · PC <span id="pcVer"></span></span>
@@ -154,7 +141,6 @@ if (IS_DESK){   // the tablet has the dock down there – it keeps the legal tex
   });
   document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("pcLegalBg").hidden) pcLegalClose(); });
 }
-/* translations of the PC-only texts (kept here, so a PC change does not touch the shared app) */
 if (IS_PC){
   const PC_I18N={
     "Neu in dieser Version":["New in this version","Bu sürümde yeni","Новое в этой версии","Нове в цій версії","Nowości w tej wersji","الجديد في هذا الإصدار","Nou în această versiune"],
@@ -272,19 +258,16 @@ if (IS_PC){
   for (const [k,v] of Object.entries(PC_I18N)) if (!I18N_K.includes(k)){ I18N_K.push(k); LL.forEach((l,i)=>{ (I18N_T[l]=I18N_T[l]||[])[I18N_K.length-1]=v[i]; }); }
   if (LANG!=="de") try { I18N.set(LANG); } catch(e){}
 }
-/* ---------- start page tiles: drag & drop to sort, "minimize" to the dock on the right edge (they can never be deleted).
-   The PC keeps its own order (S.settings.pcHome), the phone keeps its own. ---------- */
+/* Start */
 if (IS_PC){
   const PCH=()=>{ const h=S.settings.pcHome||(S.settings.pcHome={}); h.order=Array.isArray(h.order)?h.order:[]; h.min=Array.isArray(h.min)?h.min:[]; return h; };
   const BIC={cash:"cash",budgets:"target",fix:"repeat",tax:"shield",goals:"piggy",debts:"bank",recent:"list",gemeinsam:"heart",offers:"cart",...HX_IC};
   const name=k=>(HOME_BLOCKS.find(b=>b[0]===k)||[k,k])[1];
-  // the settings section "Startseite anpassen" is not needed on the PC – everything happens right on the page
   const _k2=accTabKeys; accTabKeys = t => _k2(t).filter(k=>k!=="start");
   homeOrder = () => { const o=[...new Set(PCH().order)].filter(k=>HOME_BLOCKS.some(b=>b[0]===k)); for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; };
   const _hb=homeBlocks; homeBlocks = html => { const keep=S.settings.homeHidden; S.settings.homeHidden=[...PCH().min]; try { return _hb(html); } finally { S.settings.homeHidden=keep; } };
   const save=()=>{ try { saveSettings(); } catch(e){} };
 
-  // dock with the minimized tiles
   document.body.insertAdjacentHTML("beforeend", `<div class="pcdock" id="pcDock" aria-label="Minimierte Kacheln"></div>`);
   function dock(){
     const d=$("pcDock"); if (!d) return; const on=UI.view==="home", m=PCH().min.filter(k=>HOME_BLOCKS.some(b=>b[0]===k));
@@ -293,7 +276,6 @@ if (IS_PC){
     const have=[...d.children].map(x=>x.dataset.pcrest).join(","); if (have===m.join(",")) return;
     d.innerHTML=m.map(k=>`<button class="pcdi" data-pcrest="${k}" aria-label="${esc(name(k))} wieder anzeigen"><span>${ic(BIC[k]||"tag",22)}</span><em>${esc(name(k))}</em></button>`).join("");
   }
-  // controls on every tile
   function decorate(){
     dock();
     if (UI.view!=="home") return;
@@ -306,16 +288,14 @@ if (IS_PC){
   window.pcDockEls = () => UI.view==='home' && !$("pcDock").hidden ? [...$("pcDock").children] : [];
   const dockSpot=k=>{ const el=document.querySelector(`#pcDock [data-pcrest="${k}"]`); if (el){ const r=el.getBoundingClientRect(); return {x:r.left+r.width/2, y:r.top+r.height/2}; } return {x:innerWidth-50, y:innerHeight/2}; };
 
-  // the other tiles glide to their new places (also when the whole page is drawn anew)
   const snap=()=>new Map([...document.querySelectorAll("#v-home .hblock")].map(t=>[t.dataset.hb, t.getBoundingClientRect()]));
   function glide(before, skip){ document.querySelectorAll("#v-home .hblock").forEach(t=>{ if (t.dataset.hb===skip) return; const a=before.get(t.dataset.hb); if (!a) return; const r=t.getBoundingClientRect(), dx=a.left-r.left, dy=a.top-r.top;
     if (Math.abs(dx)>1 || Math.abs(dy)>1) t.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)"}); }); }
-  // minimize: the tile lifts, spins a little and flies into the dock; the others close the gap
   document.addEventListener("click", e=>{
     const b=e.target.closest("[data-pcmin]"); if (!b) return; const k=b.dataset.pcmin, tile=b.closest(".hblock"); if (!tile || PC_ANIM.busy) return;
     const r=tile.getBoundingClientRect(), h=PCH(), before=snap(); if (!h.min.includes(k)) h.min.push(k);
     const fly=tile.cloneNode(true); fly.classList.add("pcfly"); Object.assign(fly.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"}); document.body.appendChild(fly);
-    tile.remove(); save();                          // draws the page without the tile (and with the dock)
+    tile.remove(); save();
     glide(before, k);
     const di=document.querySelector(`#pcDock [data-pcrest="${k}"]`); if (di) di.style.opacity="0";
     const t=dockSpot(k), dx=t.x-(r.left+r.width/2), dy=t.y-(r.top+r.height/2), sc=Math.max(0.06, 52/Math.max(r.width,r.height));
@@ -325,7 +305,6 @@ if (IS_PC){
         const d2=document.querySelector(`#pcDock [data-pcrest="${k}"]`); if (d2){ d2.style.opacity=""; d2.animate([{transform:"scale(.3)"},{transform:"scale(1.25)",offset:.6},{transform:"none"}],{duration:420,easing:"cubic-bezier(.3,.7,.3,1)"}); }
       });
   });
-  // restore: the icon pops out of the dock and the tile grows back into its old place; the others make room
   document.addEventListener("click", e=>{
     const b=e.target.closest("[data-pcrest]"); if (!b || PC_ANIM.busy) return; const k=b.dataset.pcrest, from=b.getBoundingClientRect(), h=PCH(), before=snap();
     h.min=h.min.filter(x=>x!==k); save();
@@ -336,7 +315,6 @@ if (IS_PC){
     tile.animate([{transform:`translate(${dx}px,${dy}px) scale(${sc}) rotate(10deg)`,opacity:.3,borderRadius:"50%"},{transform:"translate(0,-14px) scale(1.03) rotate(-1.5deg)",opacity:1,offset:.7},{transform:"none",opacity:1}],
       {duration:700, easing:"cubic-bezier(.3,.7,.3,1)"});
   });
-  // drag & drop (mouse, pen and touch): the tile lifts off, the others make room smoothly
   let D=null;
   const tiles=()=>[...document.querySelectorAll("#v-home .hcol > .hblock, #v-home .hlist > .hblock")];
   function flip(move){ const els=tiles().filter(t=>t!==D.ph), before=new Map(els.map(t=>[t,t.getBoundingClientRect()])); move();
@@ -353,7 +331,6 @@ if (IS_PC){
   document.addEventListener("pointermove", e=>{
     if (!D || e.pointerId!==D.id) return;
     D.fly.style.left=(e.clientX-D.ox)+"px"; D.fly.style.top=(e.clientY-D.oy)+"px";
-    // scroll the page when the tile gets near the top or bottom edge
     if (e.clientY>innerHeight-70) scrollBy(0,14); else if (e.clientY<130) scrollBy(0,-14);
     const now=Date.now(); if (now-D.last<60) return; D.last=now;
     const over=document.elementsFromPoint(e.clientX,e.clientY).find(x=>x.matches && x.matches("#v-home .hcol > .hblock, #v-home .hlist > .hblock") && x!==D.ph);
@@ -369,13 +346,12 @@ if (IS_PC){
       .finished.then(()=>{ ph.replaceWith(tile); fly.remove();
         tile.animate([{transform:"scale(.98)"},{transform:"scale(1.01)",offset:.5},{transform:"none"}],{duration:260});
         const dom=tiles().map(t=>t.dataset.hb), min=PCH().min, it=dom[Symbol.iterator]();
-        // minimized tiles keep their place, so they come back where they were
         PCH().order=homeOrder().map(k=>min.includes(k) || !dom.includes(k) ? k : it.next().value); save(); });
   };
   document.addEventListener("pointerup", drop); document.addEventListener("pointercancel", drop);
   decorate();
 }
-/* ---------- light / dark: a button in the header, the sun turns into a moon ---------- */
+/* Hell / Dunkel */
 if (IS_PC){
   const _k3=accTabKeys; accTabKeys = t => _k3(t).filter(k=>k!=="dark");
   const bell=$("bellBtn");
@@ -391,7 +367,6 @@ if (IS_PC){
     const t=isDark()?"light":"dark", r=b.getBoundingClientRect(), x=r.left+r.width/2, y=r.top+r.height/2;
     const apply=()=>{ document.documentElement.dataset.theme=t; try{ localStorage.setItem("hb-theme",t); }catch(_){} sync(); try{ render(); }catch(_){} };
     b.animate([{transform:"rotate(0) scale(1)"},{transform:"rotate(-25deg) scale(.86)",offset:.4},{transform:"rotate(0) scale(1)"}],{duration:520,easing:"cubic-bezier(.3,.7,.3,1)"});
-    // the new look spreads out from the button as a growing circle (where the browser supports it)
     if (document.startViewTransition && !pcCalm()){
       const vt=document.startViewTransition(apply);
       vt.ready.then(()=>{ const R=Math.hypot(Math.max(x,innerWidth-x), Math.max(y,innerHeight-y));
@@ -399,18 +374,15 @@ if (IS_PC){
     } else apply();
   });
 }
-/* ---------- "+" : a big round button; it opens the same three circles as on the phone –
-   instead of "Foto" (no camera on the PC) the PC scans straight from the scanner ---------- */
+/* + Knopf */
 if (IS_PC){
   const fan=$("fanBg"), rc=fan && fan.querySelector('[data-addpick="receipt"]');
-  if (rc && IS_DESK){   /* the tablet keeps its camera */ rc.dataset.addpick="pcscan"; rc.innerHTML=`<svg class="i" viewBox="0 0 24 24"><path d="M4 14h16v4.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"/><path d="M6 14 8.5 5.5h7L18 14"/><path d="M7.5 17h3"/></svg><span>Scannen</span>`; }
-  // always the circles (not the list window of the wide layout); they open to the left and upwards, the button sits in the corner
+  if (rc && IS_DESK){    rc.dataset.addpick="pcscan"; rc.innerHTML=`<svg class="i" viewBox="0 0 24 24"><path d="M4 14h16v4.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"/><path d="M6 14 8.5 5.5h7L18 14"/><path d="M7.5 17h3"/></svg><span>Scannen</span>`; }
   openAddMenu = () => { if (!fan.hidden){ fanClose(); return; } fanOpen();
-    if (IS_TAB) return;   /* tablet: fanOpen already lays the buttons out above the dock */
+    if (IS_TAB) return;
     const R=140; [180,135,90].forEach((a,i)=>{ const t=a*Math.PI/180, b=fan.children[i]; b.style.setProperty("--dx", Math.round(Math.cos(t)*R)+"px"); b.style.setProperty("--dy", Math.round(-Math.sin(t)*R-14)+"px"); }); };
   const SCANW={}; window.hbScanDone=(id,data,err)=>{ const f=SCANW[id]; if (f){ delete SCANW[id]; f(data,err); } };
   const scanNow=()=>new Promise(ok=>{ const id=newId(); SCANW[id]=(d,e)=>ok({d,e}); window.AndroidBridge.scan(id); });
-  // the check window speaks about the scanner, not about a phone camera
   const PCSCAN={on:false};
   function pcScanTexts(on){ PCSCAN.on=on; const t=document.querySelector("#docRev .drtop b"), r=$("drRetake"), d=$("docRev");
     if (t) t.textContent=on?"Scan prüfen":"Foto prüfen"; if (r) r.textContent=on?"Neu scannen":"Neu aufnehmen"; if (d) d.setAttribute("aria-label", on?"Scan prüfen":"Foto prüfen"); }
@@ -443,14 +415,12 @@ if (IS_PC){
   }
   document.addEventListener("click", e=>{ const b=e.target.closest('[data-addpick="pcscan"]'); if (!b) return; e.stopImmediatePropagation(); closeAddMenu(); setTimeout(pcScan, 120); }, true);
 }
-/* profile photo next to the greeting – without a photo the first letter of the name */
 if (IS_PC){
-  const av=()=>{ try { renderAvatar(); } catch(_){} };   // photo, first letter or the device symbol (shared with the phone)
+  const av=()=>{ try { renderAvatar(); } catch(_){} };
   const _r2=render; render = (...a) => { const x=_r2(...a); try { av(); } catch(e){} return x; };
   av();
 }
-/* ---------- month / year change ("Zahlenwalze"): the month name rolls on, every amount runs from the old
-   to the new value, bars grow or shrink, each tile lights up briefly ---------- */
+/* Monatswechsel */
 if (IS_PC){
   const NUM=/\d{1,3}(?:[.   ,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?/;
   const parse=s=>{ const m=String(s).match(NUM); if (!m) return null; const t=m[0], dm=t.match(/[.,](\d{1,2})$/), dec=dm && !(dm[1].length===3) ? dm[1].length : 0;
@@ -477,7 +447,6 @@ if (IS_PC){
     return x;
   };
   function pcMonthAnim(sec, oldA, oldB, d){
-    // the month name rolls on in the direction of the change
     document.querySelectorAll("#monthpill select").forEach(s=>s.animate([{transform:`translateY(${d*18}px)`,opacity:0},{transform:"none",opacity:1}],{duration:380,easing:"cubic-bezier(.2,.8,.2,1)"}));
     const now=amounts(sec), runs=[];
     for (const [k,e] of now){ const o=oldA.get(k), n=parse(e.textContent); if (!o || !n || o.v===n.v) continue;
@@ -487,19 +456,15 @@ if (IS_PC){
       for (const r of runs){ if (!r.e.isConnected) continue; r.e.textContent = t>=1 ? r.fin : r.fin.replace(r.n.t, fmt(r.n, r.a+(r.b-r.a)*k)); }
       if (t<1 && runs.length) requestAnimationFrame(step); };
     requestAnimationFrame(step);
-    // bars: from the old width to the new one
     for (const [k,[e,w]] of bars(sec)){ const o=oldB.get(k); if (o==null || Math.abs(o-w)<0.5) continue; e.animate([{width:o+"%"},{width:w+"%"}],{duration:800,easing:"cubic-bezier(.2,.8,.2,1)"}); }
-    // every tile lights up briefly, one after another
     [...sec.querySelectorAll(".pchero, #v-home .hblock > *, :scope > .card, :scope > .cols .card, :scope .card")].filter(e=>!e.closest(".cubestage")).slice(0,16)
       .forEach((c,i)=>c.animate([{boxShadow:"0 0 0 0 rgba(63,191,138,0)"},{boxShadow:"0 0 0 3px rgba(63,191,138,.45)"},{boxShadow:"0 0 0 0 rgba(63,191,138,0)"}],{duration:900,delay:i*55,easing:"ease-out"}));
   }
 }
-/* help: a "?" button in the header, next to light / dark */
 if (IS_PC){
   const th=$("pcTheme");
   if (th && !$("pcHelp")) th.insertAdjacentHTML("beforebegin", `<button class="roundbtn pchelp" id="pcHelp" data-spgo="hilfe" aria-label="Hilfe" title="Hilfe – Fragen und Antworten"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.9.7c0 1.7-2.5 2.2-2.5 3.8"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg></button>`);
 }
-/* refresh: sync with the server, look for an update, redraw */
 if (IS_PC){
   const hp=$("pcHelp")||$("pcTheme");
   if (hp && !$("pcRefresh")) hp.insertAdjacentHTML("beforebegin", `<button class="roundbtn pcrefresh" id="pcRefresh" aria-label="Aktualisieren" title="Aktualisieren"><svg class="i" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4h-4"/></svg></button>`);
@@ -518,14 +483,13 @@ if (IS_PC){
     setTimeout(()=>b.classList.remove("ok"), 1400);
   });
 }
-/* header icons in one group, in a sensible order: refresh · light/dark · help · notifications (bell at the far right) */
 if (IS_PC){
   const w=document.querySelector(".top .wrap");
   if (w && !$("pcActs")){ const g=document.createElement("div"); g.id="pcActs"; g.className="pcacts";
     ["pcRefresh","pcHelp","pcTheme","ptourQ","bellBtn"].forEach(id=>{ const e=$(id); if (e) g.appendChild(e); });
     const st=$("settingsBtn"); if (st && st.parentElement===w) w.insertBefore(g, st); else w.appendChild(g); }
 }
-/* ---------- feedback inbox for the developer (only with the update key): all feedback from the app, with pictures ---------- */
+/* Posteingang */
 if (IS_PC){
   const FB={items:[], open:null, imgs:{}, last:0, busy:false};
   const devReq=(action, qs, body)=>new Promise((ok,no)=>{
@@ -589,7 +553,6 @@ if (IS_PC){
   document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("pcFbBg").hidden) fbClose(); });
   setTimeout(()=>fbLoad(true), 5000); setInterval(()=>fbLoad(false), 60*1000);
   const _r4=render; render = (...a) => { const x=_r4(...a); try { fbBtn(); } catch(e){} return x; };
-  /* Entwickler: „Für alle freigeben“ direkt in der Kopfzeile, mit Punkt, wenn bei dir eine neuere Version läuft als bei allen */
   function relBtn(){ let b=$("pcRel"); if (!updKey()){ if (b) b.remove(); return; }
     if (!b){ const h=$("pcInbox")||$("pcTheme"); if (!h) return; h.insertAdjacentHTML("beforebegin", `<button class="roundbtn pcrel" id="pcRel" aria-label="Entwickler" title="Entwickler: Freigabe, Tester, Testdaten"><svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg><i class="dot" hidden></i></button>`); b=$("pcRel"); }
     const d=b.querySelector(".dot"); if (d) d.hidden=!(REL.mine && REL.all && REL.mine!==REL.all); }
@@ -629,16 +592,16 @@ if (IS_PC){
   document.addEventListener("click", e=>{ const pop=$("pcRelPop");
     if (e.target.closest("#pcRel")){ if (pop){ pop.remove(); return; } const r=e.target.closest("#pcRel").getBoundingClientRect(); const el=document.createElement("div"); el.id="pcRelPop"; el.className="pcrelpop";
       el.style.top=(r.bottom+10)+"px"; el.style.left=Math.max(12, Math.min(innerWidth-342, r.right-330))+"px"; el.innerHTML=devPanelHtml(); document.body.appendChild(el); relLoad(true); if ((UI.devTab||"rel")==="stat") dsLoad(); return; }
-    if (pop && !e.target.closest("#pcRelPop") && document.contains(e.target)) pop.remove(); });   /* a button inside that just redrew the panel is not "outside" */
+    if (pop && !e.target.closest("#pcRelPop") && document.contains(e.target)) pop.remove(); });
   const _r5=render; render = (...a) => { const x=_r5(...a); try { relBtn(); } catch(e){} return x; };
   setTimeout(()=>{ relBtn(); relLoad(); }, 4000); setInterval(()=>{ if (document.visibilityState==="visible") relLoad(); }, 10*60e3);
 }
-/* ---------- Buchungen: diary (one card per day) + the chosen booking big on the right ("Beleg wird gedruckt") ---------- */
+/* Buchungen */
 if (IS_PC){
   const B={sel:null, sig:"", arm:null, armT:0, closed:new Set(), busy:new Set(), n:0};
   try { (JSON.parse(localStorage.getItem("hb-pc-closed")||"[]")||[]).forEach(d=>B.closed.add(d)); } catch(_){}
   const saveClosed=()=>{ try { localStorage.setItem("hb-pc-closed", JSON.stringify([...B.closed].filter(d=>d>=shiftYm(ymOf(new Date()),-24)))); } catch(_){} };
-  function nCols(){ const lc=$("listCard"), w=lc && lc.clientWidth; return Math.max(1, Math.min(5, Math.floor(((w||720)+14)/(330+14)))); }   // never more than 5 columns
+  function nCols(){ const lc=$("listCard"), w=lc && lc.clientWidth; return Math.max(1, Math.min(5, Math.floor(((w||720)+14)/(330+14)))); }
   const isIn=t=>t.kind==="einnahme"||(t.kind==="umbuchung"&&t._k0==="einnahme");
   const ttl=t=>t.note||t.cat||KIND_LABEL[t.kind];
   const amtTxt=(t,v)=>(t.kind==="umbuchung"?"":isIn(t)?"+ ":"− ")+eur(v==null?t.amount:v);
@@ -653,12 +616,11 @@ if (IS_PC){
     if (!$("pcDet")){ $("v-list").insertAdjacentHTML("beforeend", `<div class="card pcdet" id="pcDet"></div>`); }
     lc.classList.toggle("pcdiary", list.length>0);
     if (list.length){
-      const days={}; for (const t of list.slice().reverse()) (days[t.date]=days[t.date]||[]).push(t);   // day 1 first
+      const days={}; for (const t of list.slice().reverse()) (days[t.date]=days[t.date]||[]).push(t);
       const chev=`<svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m6 9 6 6 6-6"/></svg>`;
       const card=([d,ts])=>{ const net=sum(ts,t=>t.kind==="umbuchung"?0:isIn(t)?t.amount:-t.amount), dt=new Date(d+"T12:00"), cl=B.closed.has(d);
         return `<div class="pcday ${cl?"closed":""}" data-pcday="${d}"><div class="pcdh" data-pcfold="${d}" role="button" tabindex="0" aria-expanded="${!cl}" title="${cl?"Aufklappen":"Einklappen"}"><span class="pcdn">${pad(dt.getDate())}<i class="pcdbadge">${ts.length}</i></span><span class="pcdw"><b>${esc(dt.toLocaleDateString(LOCD(),{weekday:"long"}))}</b><small>${esc(MONTHS[dt.getMonth()])}</small></span><span class="pcdmini" aria-hidden="true">${ts.slice(0,5).map(t=>`<span>${avatar(t)}</span>`).join("")}</span><b class="pcdnet ${net>=0?"pos":""}">${net>=0?"+":"−"} ${esc(eur(Math.abs(net)))}</b><span class="pcdchev">${chev}</span></div>
           <div class="pcdrows">${ts.map(t=>`<button class="pcbr ${isIn(t)?"inc":""} ${B.sel===t.id?"sel":""}" data-pcsel="${esc(t.id)}">${avatar(t)}<span class="grow"><b>${esc(ttl(t))}${hasReceipt(t.id)?" "+clip:""}</b>${sub(t)?`<small>${esc(sub(t))}</small>`:""}</span><b class="amt">${esc(amtTxt(t))}</b></button>`).join("")}</div></div>`; };
-      // fixed columns, filled from top left (day 1) to bottom right (last day) – folding a day never moves cards to another column
       const ents=Object.entries(days), n=nCols(), w=ents.map(([d,ts])=>B.closed.has(d)?1.3:1.6+ts.length), tot=sum(w,x=>x), cols=[[]]; let acc=0;
       ents.forEach((e,i)=>{ if (cols.length<n && cols[cols.length-1].length && acc+w[i]/2>tot*cols.length/n) cols.push([]); cols[cols.length-1].push(e); acc+=w[i]; });
       B.n=n; lc.innerHTML = `<div class="pccols">${cols.map(c=>`<div class="pccol">${c.map(card).join("")}</div>`).join("")}</div><i class="pchl" aria-hidden="true"></i>`;
@@ -736,7 +698,6 @@ if (IS_PC){
     e.preventDefault(); if (document.activeElement && document.activeElement.closest && document.activeElement.closest(".pcbr")) document.activeElement.blur(); const i=ids.indexOf(B.sel); pick(ids[i<0 ? 0 : Math.max(0, Math.min(ids.length-1, i+(e.key==="ArrowDown"?1:-1)))]);
   });
   addEventListener("resize", ()=>{ if (UI.view!=="list") return; if (nCols()!==B.n) renderList(); else placeHl(false); });
-  // fold a day: the bookings fly into the big day number (which pulses and gets a counter); unfolding lets them jump out again
   function follow(ms){ const t0=performance.now(); const st=n=>{ placeHl(false); if (n-t0<ms) requestAnimationFrame(st); }; requestAnimationFrame(st); }
   async function fold(d){
     const day=document.querySelector(`#listCard [data-pcday="${d}"]`); if (!day || B.busy.has(d)) return;
@@ -773,7 +734,7 @@ if (IS_PC){
   document.addEventListener("click", e=>{ if (UI.view!=="list") return; const h=e.target.closest("[data-pcfold]"); if (h) fold(h.dataset.pcfold); });
   document.addEventListener("keydown", e=>{ const h=e.target.closest && e.target.closest("[data-pcfold]"); if (h && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); e.stopPropagation(); fold(h.dataset.pcfold); } }, true);
 }
-/* ---------- Fixkosten: month calendar – every fixed cost sits on its day; move, edit, delete and add right here ---------- */
+/* Fixkosten-Kalender */
 if (IS_PC){
   const F={pop:null, ring:0, drag:null, fresh:null, gone:null, first:true};
   const FCOL={Wohnen:"#2f7d5b",Schulden:"#b5473a",Auto:"#c27c0e",Versicherung:"#5b7f95","Sparen & Vorsorge":"#3d63a8","Abos & Handy":"#d14d72",Betrieb:"#6b5bb0",Sonstiges:"#0e8aa0"};
@@ -781,7 +742,6 @@ if (IS_PC){
   const SV={pen:`<svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4ZM13.5 6.5l4 4"/></svg>`, bin:`<svg class="i" viewBox="0 0 24 24"><path d="M5 7h14M10 11v6M14 11v6M6.5 7l1 12.5h9L17.5 7M9.5 7V4.5h5V7"/></svg>`, x:`<svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>`, plus:`<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>`};
   const col=a=>FCOL[a]||"#0e8aa0";
   const E="cubic-bezier(.2,.8,.2,1)", BO="cubic-bezier(.3,1.5,.5,1)";
-  // the day of a fixed cost: a move applies from its month on, earlier months keep their day
   const dayOf=(f,ym)=>{ const D=daysIn(ym); let d=null;
     if (Array.isArray(f.days) && f.days.length){ for (const e of f.days) if (e.from<=ym) d=e.day; }
     if (d==null && f.day>=1) d=f.day; if (d==null) d=fixDay(f,ym);
@@ -840,14 +800,14 @@ if (IS_PC){
       F.pop=null; F.fresh=null; });
   };
   const root=$("v-fix");
-  // ---- coming into the page: the days flip down like calendar pages, week by week
+  // Intro
   function enter(){
     if (pcCalm() || !root.classList.contains("pcfcal")) return;
     const cells=[...root.querySelectorAll(".pcfd")], chips=[...root.querySelectorAll(".pcfcalc .pcfc")], side=[...root.querySelectorAll(".pcfside>*")];
     const cal=root.querySelector(".pcfcalc"), cols=7;
     const ring=root.querySelector(".pcfring .fg"), bars=[...root.querySelectorAll(".pcfgr .gb>i")], big=root.querySelector(".pcfsum .big");
     if (cal) cal.animate([{opacity:0},{opacity:1}],{duration:260,easing:"ease-out",fill:"backwards"});
-    { // calendar pages flip down week by week
+    {
       cells.forEach((el,i)=>{ const r=Math.floor(i/cols), c=i%cols; el.style.transformOrigin="50% 0";
         el.animate([{opacity:0,transform:"perspective(700px) rotateX(-88deg)"},{opacity:1,transform:"perspective(700px) rotateX(8deg)",offset:.7},{opacity:1,transform:"none"}],{duration:560,delay:80+r*90+c*28,easing:E,fill:"backwards"}); });
       chips.forEach(el=>{ const i=cells.indexOf(el.closest(".pcfd")), r=Math.floor(i/cols), c=i%cols;
@@ -859,7 +819,7 @@ if (IS_PC){
     if (big){ const to=Number(big.dataset.v)||0, t0=performance.now()+250, txt=big.textContent; const step=t=>{ const k=Math.min(1,Math.max(0,(t-t0)/900)), e=1-Math.pow(1-k,3); big.textContent=eur0(to*e); if (k<1) requestAnimationFrame(step); else big.textContent=txt; }; requestAnimationFrame(step); }
   }
   new MutationObserver(()=>{ if (!root.hidden) requestAnimationFrame(enter); }).observe(root, {attributes:true, attributeFilter:["hidden"]});
-  // ---- tick (pop) · pencil / plus open the editor instead of ticking
+  // Abhaken
   root.addEventListener("click", e=>{
     const ed=e.target.closest("[data-pcfedit]"); if (ed){ e.stopPropagation(); e.preventDefault(); popEdit(ed.dataset.pcfedit, ed.closest(".pcfc")); return; }
     const nw=e.target.closest("[data-pcfnew]"); if (nw){ e.stopPropagation(); e.preventDefault(); popNew(+nw.dataset.pcfnew, nw); return; }
@@ -868,7 +828,7 @@ if (IS_PC){
   root.addEventListener("contextmenu", e=>{ const c=e.target.closest(".pcfc"); if (c){ e.preventDefault(); popEdit(c.dataset.pcfid, c); } });
   root.addEventListener("keydown", e=>{ const p=e.target.closest && e.target.closest(".pcfc"); if (!p || e.target!==p) return;
     if (e.key==="Enter"||e.key===" "){ e.preventDefault(); p.click(); } else if (e.key==="F2"||e.key==="e"){ e.preventDefault(); popEdit(p.dataset.pcfid, p); } else if (e.key==="Delete"){ e.preventDefault(); popEdit(p.dataset.pcfid, p, true); } });
-  // ---- drag a fixed cost onto another day: it stays there from this month on
+  // Ziehen
   let ghost=null;
   root.addEventListener("dragstart", e=>{ const c=e.target.closest && e.target.closest(".pcfc"); if (!c) return; if (e.target.closest("input,textarea,select") || c.querySelector("#fxAmtIn")){ e.preventDefault(); return; } popClose(); F.drag=c.dataset.pcfid; e.dataTransfer.effectAllowed="move"; try { e.dataTransfer.setData("text/plain", F.drag); } catch(_){}
     ghost=c.cloneNode(true); ghost.classList.add("pcfghost"); ghost.style.width=c.offsetWidth+"px"; document.body.appendChild(ghost); try { e.dataTransfer.setDragImage(ghost, 24, 18); } catch(_){}
@@ -880,7 +840,7 @@ if (IS_PC){
     const f=S.fixed.find(x=>x.id===id); if (!f) return; const n=+d.dataset.pcfday, ym=UI.ym; if ((dayOf(f,ym)||0)===n){ renderFix(); return; }
     const before=clean(f), data=clean(f); data.days=withDay(f,ym,n); delete data.day; F.fresh=id;
     if (await safe(()=>put("fixed", id, data))) toast(n?`${f.name}: ab ${monthName(ym)} am ${n}.`:`${f.name}: ohne festen Tag`, ()=>safe(()=>put("fixed", id, before)), "Rückgängig"); });
-  // ---- the editor bubble (edit · delete · new)
+  // Editor
   const pop=document.createElement("div"); pop.id="pcfPop"; pop.className="pcfpop"; pop.hidden=true; document.body.appendChild(pop);
   let popFor=null;
   function place(anchor){
@@ -931,16 +891,13 @@ if (IS_PC){
   async function popDelete(){
     const f=S.fixed.find(x=>x.id===popFor.id); if (!f) return popClose();
     const ym=UI.ym, before=clean(f), anchor=popFor.anchor;
-    // earlier months keep it (with their ticks) – it only disappears from this month on
     const used=Object.keys(S.months).some(k=>k<ym && S.months[k] && S.months[k].paid && f.id in S.months[k].paid) || (f.from && f.from<ym);
     popClose();
-    // ticks of this and later months go with it (undo brings them back)
     const ticks=Object.keys(S.months).filter(k=>k>=ym && S.months[k] && S.months[k].paid && f.id in S.months[k].paid).map(k=>[k, clone(S.months[k])]);
     const unTick=async()=>{ for (const [k,mo] of ticks){ const n=clone(mo); delete n.paid[f.id]; await put("months", k, n); } };
     const reTick=async()=>{ for (const [k,mo] of ticks) await put("months", k, mo); };
     const go=async()=>{ if (used){ const d=clean(f); d.until=shiftYm(ym,-1); if (await safe(async()=>{ await unTick(); await put("fixed", f.id, d); })) toast(`${f.name} ab ${monthName(ym)} gelöscht`, ()=>safe(async()=>{ await put("fixed", f.id, before); await reTick(); }), "Rückgängig"); }
       else if (await safe(async()=>{ await unTick(); await del("fixed", f.id); })) toast(`${f.name} gelöscht`, ()=>safe(async()=>{ await put("fixed", f.id, before); await reTick(); }), "Rückgängig"); };
-    // puff: the chip shrinks, spins a little and is gone
     if (anchor && anchor.isConnected && !pcCalm()){ anchor.style.pointerEvents="none"; const a=anchor.animate([{opacity:1,transform:"none",filter:"blur(0)"},{opacity:.9,transform:"scale(1.06)",offset:.25},{opacity:0,transform:"scale(.3) rotate(-8deg)",filter:"blur(3px)"}],{duration:380,easing:"cubic-bezier(.5,0,.75,0)",fill:"forwards"}); a.onfinish=go; }
     else go();
   }
@@ -954,7 +911,7 @@ if (IS_PC){
   document.addEventListener("scroll", ()=>{ if (!pop.hidden && popFor && popFor.anchor && popFor.anchor.isConnected){ const r=popFor.anchor.getBoundingClientRect(); if (r.bottom<0||r.top>innerHeight) popClose(); } }, true);
 }
 
-/* ---------- Buchungen: entrance when the page comes into view – the day cards are dealt like playing cards ---------- */
+/* Buchungen */
 if (IS_PC){
   const root=$("v-list"), E="cubic-bezier(.2,.8,.2,1)", BO="cubic-bezier(.3,1.5,.5,1)";
   const vis=el=>{ const r=el.getBoundingClientRect(); return r.bottom>0 && r.top<innerHeight && r.width>0; };
@@ -978,7 +935,7 @@ if (IS_PC){
   }
   new MutationObserver(()=>{ if (!root.hidden) requestAnimationFrame(enter); }).observe(root, {attributes:true, attributeFilter:["hidden"]});
 }
-/* ---------- Einkauf: shops on the left, the chosen shop big in the middle, the shopping list on the right ---------- */
+/* Einkauf */
 if (IS_PC){
   const root=$("v-shop"), E="cubic-bezier(.2,.8,.2,1)", BO="cubic-bezier(.3,1.5,.5,1)";
   const CATN={super:"Supermarkt",disc:"Discounter",drog:"Drogerie",kleid:"Kleidung",elek:"Elektronik",bau:"Baumarkt",moebel:"Möbel",tier:"Tierbedarf",online:"Online"};
@@ -987,7 +944,6 @@ if (IS_PC){
   const list=()=>S.settings.shoplist||[];
   const chosen=()=>(S.settings.shops||[]).map(shopBy).filter(Boolean);
   const K={fresh:null, gone:null, swap:false, prev:""};
-  // where an item is cheapest: your receipts first, then the offers you noted
   function bestFor(name){
     const tk=priceToks(name); if (!tk.length) return null; const mine=new Set(S.settings.shops||[]), by={};
     for (const e of (S.settings.pricebook||[])) if (sameProduct(tk, priceToks(e.n))){ if (!by[e.s] || by[e.s].d<=e.d) by[e.s]=e; }
@@ -1002,7 +958,6 @@ if (IS_PC){
   function saveList(l){ zSave(l); }
   function renderShopPC(){
     const ch=chosen();
-    // no shops chosen yet: the shopping list still works – it is the main thing here
     if (!ch.length){ root.classList.remove("pcshop"); root.innerHTML=`<div class="pcsnone">${zettelCard()}${offersCard()}</div>`; return; }
     const cats=[...new Set(ch.map(x=>x.cat))]; if (UI.shopCat && !cats.includes(UI.shopCat)) UI.shopCat="";
     const shown=UI.shopCat?ch.filter(x=>x.cat===UI.shopCat):ch;
@@ -1035,7 +990,6 @@ if (IS_PC){
         ${recent.length?`<div class="pcbars">${recent.slice().reverse().map(t=>`<div><span class="v">${esc(eur0(t.amount))}</span><i style="height:${Math.max(6,Math.round(t.amount/rmax*100))}%"></i><small>${esc(shortDate(t.date))}</small></div>`).join("")}</div>`
           :`<div class="small muted">Hier hast du in letzter Zeit nichts gekauft.</div>`}
       </div></div></div>`;
-    // the list: open items first, grouped route below
     const open=W.filter(x=>!x.it.done), done=W.filter(x=>x.it.done), groups={};
     for (const x of open){ const k=x.w?x.w.s:""; (groups[k]=groups[k]||[]).push(x); }
     const save=sum(open,x=>x.w&&x.w.save>0?x.w.save*zQ(x.it):0), est=sum(open,x=>x.w&&x.w.p?x.w.p*zQ(x.it):0);
@@ -1077,7 +1031,6 @@ if (IS_PC){
     root.innerHTML=left+det+zet;
     for (const k in kept){ const el=$(k); if (el && kept[k]) el.value=kept[k]; } if (fid && /^pcpD/.test(fid) && $(fid)) $(fid).focus();
     if (web){ $("pcsWeb").appendChild(K.pg); requestAnimationFrame(()=>K.place()); }
-    // the browser is always open on the Einkauf page: the chosen shop's offers right away
     if (canWeb && UI.view==="shop" && !root.hidden && document.visibilityState!=="hidden" && !(K.PG.open && K.PG.embed && K.PG.shop && K.PG.shop.id===sh.id))
       requestAnimationFrame(()=>{ if (UI.view==="shop" && !(K.PG.open && K.PG.shop && K.PG.shop.id===sh.id)) K.open(sh.url, sh); });
     if (keep){ const i=$("pczIn"); i.value=val; i.focus(); }
@@ -1092,7 +1045,6 @@ if (IS_PC){
   }
   renderShop = renderShopPC;
   rerenderShopPanel = renderShopPC;
-  // entrance when the page comes into view
   function enter(){ if (pcCalm() || !root.classList.contains("pcshop")) return;
     root.querySelectorAll(".pcsli,.pcsadd,.pcscats").forEach((el,i)=>el.animate([{opacity:0,transform:"translateX(-40px)"},{opacity:1,transform:"none"}],{duration:460,delay:i*45,easing:E,fill:"backwards"}));
     const d=root.querySelector(".pcsd"); if (d){ d.animate([{opacity:0,transform:"translateY(30px) scale(.97)"},{opacity:1,transform:"none"}],{duration:560,delay:120,easing:E,fill:"backwards"});
@@ -1130,7 +1082,7 @@ if (IS_PC){
   root.addEventListener("keydown", e=>{ if (e.target.id==="pczIn" && e.key==="Enter"){ e.preventDefault(); addItem(); } });
   root.addEventListener("change", e=>{ const q=e.target.closest("[data-pczq]"); if (q) zSetQ(q.dataset.pczq, q.value); });
   root.addEventListener("focusin", e=>{ if (e.target.matches("[data-pczq]")) e.target.select(); });
-  /* ---- web pages inside the app window: page on the left, for a shop a bar of its own on the right ---- */
+  /* Webseite im Fenster */
   const NB=()=>window.AndroidBridge && window.AndroidBridge.pageOpen ? window.AndroidBridge : null;
   const PG={open:false, url:"", shop:null, st:{}, ro:null, embed:false}; let lastView=UI.view;
   const pg=document.createElement("div"); pg.id="pcPage"; pg.className="pcpage"; pg.hidden=true;
@@ -1150,7 +1102,6 @@ if (IS_PC){
     pg.querySelector('[data-pcpnav="back"]').disabled=!st.back; pg.querySelector('[data-pcpnav="fwd"]').disabled=!st.fwd;
     pg.querySelector(".rl").classList.toggle("spin", !!st.loading); pg.classList.toggle("ready", st.loading===false); }
   window.hbPageState=st=>{ PG.st=st||{}; bar(); };
-  // the page could not be loaded: say so in the browser area (the page view steps aside)
   window.hbPageError=msg=>{ const l=pg.querySelector(".pcpload"); if (!l) return; pg.classList.remove("ready"); pg.classList.add("failed");
     l.innerHTML=`<b>Die Seite lädt gerade nicht</b><span class="small muted">${esc(msg||"")}</span><button class="btn" data-pcpnav="reload">Noch einmal versuchen</button>`; };
   function sideHtml(){
@@ -1175,7 +1126,7 @@ if (IS_PC){
     const sh=shop!==undefined?shop:shopOf(url), was=PG.open, wasEmbed=PG.embed;
     PG.url=url; PG.shop=sh; PG.st={url}; PG.open=true; bar(); pg.classList.remove("ready","withside"); side.hidden=true;
     const go=()=>{ const b=NB(); if (b) b.pageOpen(url, holeRect()); else if (window.pcPageDemo) window.pcPageDemo(url, holeRect()); };
-    if (sh){ // a shop: the browser takes the place of the shop in the middle of the Einkauf page
+    if (sh){
       PG.embed=true; pg.classList.add("embed"); pg.hidden=false; if (PG.pick && !wasEmbed) pickToggle(false); document.documentElement.classList.remove("pcpageon");
       UI.shopSel=sh.id; UI.dealAdd=null; if (!(S.settings.shops||[]).includes(sh.id)) UI.shopCat="";
       if (UI.view!=="shop"){ UI.view="shop"; lastView="shop"; render(); window.scrollTo({top:0}); } else renderShopPC();
@@ -1195,9 +1146,8 @@ if (IS_PC){
     if (pcCalm()) return done();
     pg.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateY(24px) scale(.97)"}],{duration:240,easing:"ease-in"}).onfinish=done;
     if (!side.hidden) side.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateX(50px)"}],{duration:220,easing:"ease-in",fill:"forwards"}); }
-  // the script that reads offers inside the shown page (the PC app runs it there; kept here so it can improve with normal updates)
-  const PICK_SRC="(() => {\n  const W = window; if (W.__hbPick) return W.__hbPick;\n  const TOP = W === W.top;\n  const PR = /(\\d{1,4})\\s*[.,]\\s*(\\d{2})(?![\\d.]\\d|\\.(?!\\d)|\\d|\\s?(?:gbit|mbit|gb|tb|mb|mah|ghz|mhz|hz|zoll|cm|mm|kg|ml|kw|w|v|l|m|g)\\b|\\s?%)|[-–]\\s*[.,]\\s*(\\d{2})(?!\\d)|(\\d{1,4})\\s*[.,]\\s*[-–]/i;   // \"9.11.\" and \"14.11.2026\" are dates, not prices\n  const BAD = /^(uvp|statt|je |grundpreis|1 ?kg|100 ?g|1 ?l |\\d+ ?%|-?\\d+ ?%|ab |nur |aktion|angebot|knaller|neu|online|in den warenkorb|merken|details|zum angebot|mehr|versch\\.|verschiedene|auch |inkl|versand|lieferung|markt ausw|jetzt |spare |bewert|\\d+ bewertung)|:$/i;\n  const txt = (e) => (e && (e.innerText || e.textContent) || \"\").replace(/ /g, \" \").trim();\n  const PRG = new RegExp(PR.source, \"g\");\n  const UNIT = /(=|zzgl|pfand|uvp|statt|grundpreis|sparst|ersparnis|spare |rabatt|vorher|bisher|ursprüngl|\\bje\\b|\\(1|pro\\s|€\\s?\\/|\\/\\s?(kg|l|st|stk|stück|m|m²|qm|lfm|100 ?g|100 ?ml)\\b)/i;\n  const FILL = /\\b(aktion|knaller|angebot|angebote|preis|statt|uvp|nur|ab|je|neu|top|deal|super|sale|rabatt|bonus|coupon|app|payback|auch|alkoholfrei)\\b|€/gi;\n  const nameish = (t) => /[a-zäöüß]{4}/i.test(String(t).replace(PRG, \" \").replace(FILL, \" \"));\n  const fs = (e) => { try { return parseFloat(getComputedStyle(e).fontSize) || 0; } catch (x) { return 0; } };\n  const maxFs = (e) => { let m = fs(e); for (const k of e.querySelectorAll(\"*\")) m = Math.max(m, fs(k)); return m; };\n  function hasPrice(e) { return PR.test(txt(e)) || !!e.querySelector(\"[itemprop=price],[class*=price i],[class*=preis i],[data-price]\"); }\n  // value of a small price element: \"11,99 €\", \"-.99\", \"59,-\" or \"11\" + small \"99\"\n  function valOf(e) {\n    const it = e.matches && e.matches(\"[itemprop=price]\") ? e : null; if (it) { const v = parseFloat(String(it.getAttribute(\"content\") || txt(it)).replace(\",\", \".\")); if (v > 0) return v; }\n    const t = txt(e).replace(/\\s+/g, \" \"); const m = price(t); if (m != null) return m;\n    // cents written on their own: <sup>, or an element called \"cent\", \"decimal\", \"fraction\" (not \"text-center\")\n    const CENT = /(^|[-_\\s])(cents?|decimals?|fraction(al)?|nachkomma)([-_\\s]|$)/i;\n    const sup = [...e.querySelectorAll(\"*\")].find((k) => k.matches(\"sup,small\") || CENT.test(String(k.className || \"\")) || CENT.test(k.getAttribute(\"data-testid\") || \"\"));\n    if (sup && /^\\d{2}$/.test(txt(sup).replace(/[^\\d]/g, \"\"))) { const w = t.replace(txt(sup), \"\").replace(/[^\\d]/g, \"\"); if (w.length <= 4 && (w || /[-–.,]/.test(t))) return Number((w || \"0\") + \".\" + txt(sup).replace(/[^\\d]/g, \"\")); }\n    return null;\n  }\n  // the offer price in a card: the biggest written price that is not a base price, deposit, UVP or \"statt\"\n  function cardPrice(c) {\n    const it = c.querySelector(\"[itemprop=price]\"); if (it) { const v = valOf(it); if (v) return v; }\n    // a unit word right next to the price (\"3,99 /kg\", \"1 kg = 3,99\") makes it a base price; a separate line with the base price does not\n    const own = (p) => p ? [...p.childNodes].filter((n) => n.nodeType === 3).map((n) => n.nodeValue).join(\" \") : \"\";\n    const els = [c, ...c.querySelectorAll(\"*\")].filter((e) => { const t = txt(e); return t && t.length <= 24 && !UNIT.test(t) && !UNIT.test(own(e.parentElement)); });\n    let best = null;\n    // prices only with the shop's app (\"1.11 App\") come second – the normal price counts\n    const app = (e) => { for (let x = e, i = 0; x && x !== c && i < 3; i++, x = x.parentElement) if (/\\bapp\\b/i.test(txt(x)) && txt(x).length < 30) return true; return false; };\n    // crossed-out old prices (\"statt\") never count\n    const struck = (e) => { for (let x = e, i = 0; x && i < 4; i++, x = x.parentElement) { if (x.matches(\"s,del,strike\")) return true; try { if (/line-through/.test(getComputedStyle(x).textDecorationLine)) return true; } catch (z) {} if (x === c) break; } return false; };\n    for (const e of els) { if (struck(e)) continue; const v = valOf(e); if (!(v > 0 && v < 100000)) continue; const f = maxFs(e), r = e.getBoundingClientRect(), a = app(e) ? 1 : 0;\n      if (!best || a < best.app || (a === best.app && (f > best.f + 0.5 || (Math.abs(f - best.f) <= 0.5 && r.width * r.height < best.a)))) best = { v, f, a: r.width * r.height, app: a }; }\n    if (best) return best.v;\n    const all = txt(c).split(/\\n+/).filter((l) => !UNIT.test(l)).join(\"\\n\"); return price(all);\n  }\n  // the product name: the biggest text in the card that is not a price, a badge word or a detail line\n  function cardName(c) {\n    let best = null;\n    const clean = (t) => String(t || \"\").replace(/\\s+/g, \" \").trim().replace(/[:\\s,(*¹⁴⁵⁶⁷⁸⁹⁰†]+$/, \"\").replace(/^[^A-Za-zÄÖÜäöü0-9\"„]+/, \"\");\n    const ok = (t) => !(t.length < 3 || t.length > 90 || PR.test(t) || UNIT.test(t) || BAD.test(t) || /bewertung|rezension|sternen?\\b|bitte w(ä|ae)hle|entdecken|alle anzeigen|mehr erfahren|zum produkt/i.test(t) || !nameish(t));\n    const consider = (t, f) => { t = clean(t); if (!ok(t)) return; if (!best || f > best.f + 0.5) best = { t, f }; };\n    // every piece of text on its own (also text that sits loose next to other elements), with the size it is written in\n    const all = [];\n    const tw = document.createTreeWalker(c, NodeFilter.SHOW_TEXT);\n    for (let n = tw.nextNode(); n; n = tw.nextNode()) { const pe = n.parentElement; if (!pe) continue; const st = getComputedStyle(pe); if (st.display === \"none\" || st.visibility === \"hidden\") continue;\n      const pr = pe.getBoundingClientRect(); if (pr.width < 3 || pr.height < 3) continue;   // text only for screen readers\n      const t = clean(n.nodeValue); if (!t) continue; all.push({ t, f: fs(pe) }); consider(t, fs(pe)); }\n    // a short brand line (\"K-PURLAND\") right before a name in the same size belongs to it\n    if (best && best.t.length <= 24) { const i = all.findIndex((a) => a.t === best.t && Math.abs(a.f - best.f) < 0.01), nx = all[i + 1];\n      if (nx && Math.abs(nx.f - best.f) <= 0.5 && ok(nx.t) && best.t.length + nx.t.length < 90) best = { t: best.t + \" \" + nx.t, f: best.f }; }\n    if (!best) { let e = c; for (let i = 0; e && i < 3 && !best; i++, e = e.parentElement) { const img = e.querySelector(\"img[alt]\"); if (img) consider(img.alt, 0); } }\n    return best ? best.t.replace(/\\s+,/g, \",\").replace(/(\\.\\.\\.|…)$/, \"\").trim() : \"\";\n  }\n  // grows from the found text up to the whole tile of the offer: up to just below the list that holds several offers\n  // a list of offers: at least two children that each have their own picture, name and price (price bubbles like \"UVP 10.49 / Angebotspreis 6.49\" are not a list)\n  // the tiles of a list look alike (same kind of element, similar size); the parts of one card (name, price, delivery) do not\n  const alike = (a, b) => { if (a.tagName !== b.tagName) return false; const ca = String(a.className || \"\").split(/\\s+/).filter(Boolean), cb = String(b.className || \"\").split(/\\s+/).filter(Boolean);\n    const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(), sim = (x, y) => Math.abs(x - y) <= Math.max(x, y) * 0.3 + 2;\n    if ((ca.length || cb.length) && !ca.some((x) => cb.includes(x))) return false;\n    // same size, or side by side in one row with the same height\n    return sim(ra.height, rb.height) && (sim(ra.width, rb.width) || (Math.abs(ra.top - rb.top) < 12 && Math.abs(ra.left - rb.left) > 20)); };\n  const isList = (e) => { const ks = [...e.children].filter((k) => { const kt = txt(k); return kt.length > 12 && hasPrice(k) && nameish(kt); });\n    if (ks.length >= 3) return ks.filter((k) => k.querySelector(\"img,picture\")).length >= 3 || ks.some((k) => ks.some((o) => o !== k && alike(k, o)));\n    return ks.length === 2 && alike(ks[0], ks[1]) && ks.every((k) => k.querySelector(\"img,picture,canvas,svg\") || hasBg(k)); };\n  function whole(e) {\n    const vw = innerWidth * innerHeight;\n    while (e.parentElement && e.parentElement !== document.body && e.parentElement !== document.documentElement) {\n      const p = e.parentElement, r = p.getBoundingClientRect();\n      if (isList(p) || txt(p).length > 900 || r.width * r.height > vw * 0.6) break;\n      e = p;\n    }\n    return e;\n  }\n  // an offer that is only a picture (leaflet tiles like at tegut): the picture's tile, without growing into the list around it\n  const hasBg = (e) => { try { const b = getComputedStyle(e).backgroundImage; return b && b !== \"none\" && /url\\(/.test(b); } catch (x) { return false; } };\n  const pics = (e) => e.querySelectorAll(\"img,picture,canvas,svg image\").length + (hasBg(e) ? 1 : 0);\n  function imgBox(el) {\n    let e = el && el.nodeType === 1 ? el : el && el.parentElement;\n    for (let i = 0; e && i < 6 && !(e.matches(\"img,picture,canvas\") || hasBg(e)); i++) e = e.parentElement;\n    if (!e || e === document.body || e === document.documentElement) return null;\n    const vw = innerWidth * innerHeight, r0 = e.getBoundingClientRect(); if (r0.width < 60 || r0.height < 40 || r0.width * r0.height > vw * 0.7) return null;\n    while (e.parentElement && e.parentElement !== document.body && e.parentElement !== document.documentElement) {\n      const p = e.parentElement, r = p.getBoundingClientRect();\n      if (pics(p) > Math.max(1, pics(e)) || r.width * r.height > vw * 0.6 || txt(p).length > 300) break;\n      e = p;\n    }\n    return e;\n  }\n  function cand(el) {\n    let e = el && el.nodeType === 1 ? el : el && el.parentElement, priceOnly = null;\n    for (let i = 0; e && e !== document.body && e !== document.documentElement && i < 14; i++, e = e.parentElement) {\n      const t = txt(e); if (t.length > 900) break;\n      // a list of several products (each child with its own name and price): went too far up\n      if (isList(e)) break;\n      if (!hasPrice(e)) continue;\n      const r = e.getBoundingClientRect(); if (r.width < 50 || r.height < 24) continue;\n      if (nameish(t)) return whole(e);   // the offer – grown to its whole box (picture, badges and all)\n      if (!priceOnly) priceOnly = e;\n    }\n    return priceOnly;\n  }\n  function price(t) { const m = String(t).match(PR); if (!m) return null; if (m[1]) return Number(m[1] + \".\" + m[2]); if (m[3]) return Number(\"0.\" + m[3]); if (m[4]) return Number(m[4]); return null; }\n  function read(c) {\n    const t = txt(c);\n    const u = t.match(/(?:bis|gültig bis)\\s*(?:[a-z]{2,10}\\.?,?\\s*)?(\\d{1,2})\\.(\\d{1,2})\\.?(\\d{2,4})?/i);\n    const r = c.getBoundingClientRect();\n    return { name: cardName(c).slice(0, 60), price: cardPrice(c), until: u ? { d: +u[1], m: +u[2], y: u[3] ? +u[3] : 0 } : null, rect: TOP ? { x: r.left, y: r.top, w: r.width, h: r.height } : null };\n  }\n  let hov = null, hovOld = \"\", mode = \"\", box = null, layer = null, sx = 0, sy = 0, skip = false;\n  const send = (o) => console.log(\"__HBPICK__\" + JSON.stringify(o));\n  // highlight with inline styles (works on pages that forbid extra style sheets)\n  function mark(c) { if (hov === c) return; if (hov) hov.style.cssText = hovOld; hov = c; if (c) { hovOld = c.style.cssText; c.style.setProperty(\"outline\", \"3px solid #1a7a5c\", \"important\"); c.style.setProperty(\"outline-offset\", \"2px\", \"important\"); c.style.setProperty(\"box-shadow\", \"0 10px 30px rgba(26,122,92,.35)\", \"important\"); } }\n  function over(e) { if (mode === \"pick\") mark(cand(e.target) || (TOP ? imgBox(e.target) : null)); }\n  function stop(e) { if (!mode) return; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); }\n  function click(e) {\n    if (mode !== \"pick\") return; stop(e);\n    if (skip) { skip = false; return; }\n    const c = cand(e.target);\n    const photo = (b) => { mark(null); const r = b.getBoundingClientRect(); if (b.animate) b.animate([{ transform: \"scale(1)\" }, { transform: \"scale(.95)\" }, { transform: \"scale(1)\" }], { duration: 420 });\n      setTimeout(() => send({ lasso: { x: Math.max(0, r.left), y: Math.max(0, r.top), w: Math.min(r.width, innerWidth - Math.max(0, r.left)), h: Math.min(r.height, innerHeight - Math.max(0, r.top)) } }), 450); };\n    if (!c) { const b = TOP ? imgBox(e.target) : null; if (b) return photo(b); return send({ fail: true, why: \"nocard\", tag: e.target && e.target.tagName }); }\n    const r = read(c);\n    if (!r.price || !r.name) { const b = TOP ? (imgBox(e.target) || c) : null; if (b && !r.price) return photo(b); }\n    if (c.animate) c.animate([{ transform: \"scale(1)\" }, { transform: \"scale(.95)\" }, { transform: \"scale(1)\" }], { duration: 420 });\n    if (!r.price || !r.name) return send({ fail: true, why: \"noprice\", partial: r });\n    send(r);\n  }\n  function cursor(on) { document.documentElement.style.setProperty(\"cursor\", on ? \"copy\" : \"\", on ? \"important\" : \"\"); if (document.body) document.body.style.setProperty(\"cursor\", on ? \"copy\" : \"\", on ? \"important\" : \"\"); }\n  // drawing a frame: a see-through layer over everything (also over embedded leaflet frames)\n  function lassoOn() {\n    if (!TOP || layer) return;\n    layer = document.createElement(\"div\");\n    layer.style.cssText = \"position:fixed;inset:0;z-index:2147483646;cursor:crosshair;background:rgba(194,124,14,.06)\";\n    const tip = document.createElement(\"div\"); tip.textContent = \"Zieh einen Rahmen um das Angebot\";\n    tip.style.cssText = \"position:fixed;left:50%;top:14px;transform:translateX(-50%);background:#c27c0e;color:#fff;font:700 14px system-ui,sans-serif;padding:8px 16px;border-radius:12px;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.2)\";\n    layer.appendChild(tip);\n    layer.addEventListener(\"pointerdown\", (e) => { e.preventDefault(); tip.style.display = \"none\"; sx = e.clientX; sy = e.clientY; box = document.createElement(\"div\");\n      box.style.cssText = \"position:fixed;z-index:2147483647;border:2.5px dashed #1a7a5c;background:rgba(26,122,92,.10);border-radius:10px;pointer-events:none\";\n      document.documentElement.appendChild(box); layer.setPointerCapture(e.pointerId); move(e); });\n    layer.addEventListener(\"pointermove\", move);\n    layer.addEventListener(\"pointerup\", (e) => { if (!box) return; const r = box.getBoundingClientRect(); box.remove(); box = null; skip = true; setTimeout(() => { skip = false; }, 400);\n      if (r.width < 20 || r.height < 14) return; set(\"pick\"); send({ lasso: { x: r.left, y: r.top, w: r.width, h: r.height } }); });\n    document.documentElement.appendChild(layer);\n  }\n  function move(e) { if (!box) return; const x = Math.min(sx, e.clientX), y = Math.min(sy, e.clientY); Object.assign(box.style, { left: x + \"px\", top: y + \"px\", width: Math.abs(e.clientX - sx) + \"px\", height: Math.abs(e.clientY - sy) + \"px\" }); }\n  function set(m) { mode = m; cursor(m === \"pick\"); if (m !== \"pick\") mark(null); if (m === \"lasso\") lassoOn(); else if (layer) { layer.remove(); layer = null; } }\n  [\"click\", \"auxclick\", \"dblclick\", \"contextmenu\"].forEach((t) => W.addEventListener(t, t === \"click\" ? click : stop, true));\n  W.addEventListener(\"mouseover\", over, true);\n  [\"pointerdown\", \"mousedown\", \"touchstart\"].forEach((t) => W.addEventListener(t, (e) => { if (mode === \"pick\") stop(e); }, { capture: true, passive: false }));\n  W.__hbPick = { set, test: { cand, read, imgBox } };   // test: used to check shop pages\n  return W.__hbPick;\n})()";
-  /* ---- "Angebot picken": click an offer in the page, it lands on the list; without readable text: draw a frame (text recognition) ---- */
+  const PICK_SRC="(() => {\n  const W = window; if (W.__hbPick) return W.__hbPick;\n  const TOP = W === W.top;\n  const PR = /(\\d{1,4})\\s*[.,]\\s*(\\d{2})(?![\\d.]\\d|\\.(?!\\d)|\\d|\\s?(?:gbit|mbit|gb|tb|mb|mah|ghz|mhz|hz|zoll|cm|mm|kg|ml|kw|w|v|l|m|g)\\b|\\s?%)|[-–]\\s*[.,]\\s*(\\d{2})(?!\\d)|(\\d{1,4})\\s*[.,]\\s*[-–]/i;\n  const BAD = /^(uvp|statt|je |grundpreis|1 ?kg|100 ?g|1 ?l |\\d+ ?%|-?\\d+ ?%|ab |nur |aktion|angebot|knaller|neu|online|in den warenkorb|merken|details|zum angebot|mehr|versch\\.|verschiedene|auch |inkl|versand|lieferung|markt ausw|jetzt |spare |bewert|\\d+ bewertung)|:$/i;\n  const txt = (e) => (e && (e.innerText || e.textContent) || \"\").replace(/ /g, \" \").trim();\n  const PRG = new RegExp(PR.source, \"g\");\n  const UNIT = /(=|zzgl|pfand|uvp|statt|grundpreis|sparst|ersparnis|spare |rabatt|vorher|bisher|ursprüngl|\\bje\\b|\\(1|pro\\s|€\\s?\\/|\\/\\s?(kg|l|st|stk|stück|m|m²|qm|lfm|100 ?g|100 ?ml)\\b)/i;\n  const FILL = /\\b(aktion|knaller|angebot|angebote|preis|statt|uvp|nur|ab|je|neu|top|deal|super|sale|rabatt|bonus|coupon|app|payback|auch|alkoholfrei)\\b|€/gi;\n  const nameish = (t) => /[a-zäöüß]{4}/i.test(String(t).replace(PRG, \" \").replace(FILL, \" \"));\n  const fs = (e) => { try { return parseFloat(getComputedStyle(e).fontSize) || 0; } catch (x) { return 0; } };\n  const maxFs = (e) => { let m = fs(e); for (const k of e.querySelectorAll(\"*\")) m = Math.max(m, fs(k)); return m; };\n  function hasPrice(e) { return PR.test(txt(e)) || !!e.querySelector(\"[itemprop=price],[class*=price i],[class*=preis i],[data-price]\"); }\n  function valOf(e) {\n    const it = e.matches && e.matches(\"[itemprop=price]\") ? e : null; if (it) { const v = parseFloat(String(it.getAttribute(\"content\") || txt(it)).replace(\",\", \".\")); if (v > 0) return v; }\n    const t = txt(e).replace(/\\s+/g, \" \"); const m = price(t); if (m != null) return m;\n    const CENT = /(^|[-_\\s])(cents?|decimals?|fraction(al)?|nachkomma)([-_\\s]|$)/i;\n    const sup = [...e.querySelectorAll(\"*\")].find((k) => k.matches(\"sup,small\") || CENT.test(String(k.className || \"\")) || CENT.test(k.getAttribute(\"data-testid\") || \"\"));\n    if (sup && /^\\d{2}$/.test(txt(sup).replace(/[^\\d]/g, \"\"))) { const w = t.replace(txt(sup), \"\").replace(/[^\\d]/g, \"\"); if (w.length <= 4 && (w || /[-–.,]/.test(t))) return Number((w || \"0\") + \".\" + txt(sup).replace(/[^\\d]/g, \"\")); }\n    return null;\n  }\n  function cardPrice(c) {\n    const it = c.querySelector(\"[itemprop=price]\"); if (it) { const v = valOf(it); if (v) return v; }\n    const own = (p) => p ? [...p.childNodes].filter((n) => n.nodeType === 3).map((n) => n.nodeValue).join(\" \") : \"\";\n    const els = [c, ...c.querySelectorAll(\"*\")].filter((e) => { const t = txt(e); return t && t.length <= 24 && !UNIT.test(t) && !UNIT.test(own(e.parentElement)); });\n    let best = null;\n    const app = (e) => { for (let x = e, i = 0; x && x !== c && i < 3; i++, x = x.parentElement) if (/\\bapp\\b/i.test(txt(x)) && txt(x).length < 30) return true; return false; };\n    const struck = (e) => { for (let x = e, i = 0; x && i < 4; i++, x = x.parentElement) { if (x.matches(\"s,del,strike\")) return true; try { if (/line-through/.test(getComputedStyle(x).textDecorationLine)) return true; } catch (z) {} if (x === c) break; } return false; };\n    for (const e of els) { if (struck(e)) continue; const v = valOf(e); if (!(v > 0 && v < 100000)) continue; const f = maxFs(e), r = e.getBoundingClientRect(), a = app(e) ? 1 : 0;\n      if (!best || a < best.app || (a === best.app && (f > best.f + 0.5 || (Math.abs(f - best.f) <= 0.5 && r.width * r.height < best.a)))) best = { v, f, a: r.width * r.height, app: a }; }\n    if (best) return best.v;\n    const all = txt(c).split(/\\n+/).filter((l) => !UNIT.test(l)).join(\"\\n\"); return price(all);\n  }\n  function cardName(c) {\n    let best = null;\n    const clean = (t) => String(t || \"\").replace(/\\s+/g, \" \").trim().replace(/[:\\s,(*¹⁴⁵⁶⁷⁸⁹⁰†]+$/, \"\").replace(/^[^A-Za-zÄÖÜäöü0-9\"„]+/, \"\");\n    const ok = (t) => !(t.length < 3 || t.length > 90 || PR.test(t) || UNIT.test(t) || BAD.test(t) || /bewertung|rezension|sternen?\\b|bitte w(ä|ae)hle|entdecken|alle anzeigen|mehr erfahren|zum produkt/i.test(t) || !nameish(t));\n    const consider = (t, f) => { t = clean(t); if (!ok(t)) return; if (!best || f > best.f + 0.5) best = { t, f }; };\n    const all = [];\n    const tw = document.createTreeWalker(c, NodeFilter.SHOW_TEXT);\n    for (let n = tw.nextNode(); n; n = tw.nextNode()) { const pe = n.parentElement; if (!pe) continue; const st = getComputedStyle(pe); if (st.display === \"none\" || st.visibility === \"hidden\") continue;\n      const pr = pe.getBoundingClientRect(); if (pr.width < 3 || pr.height < 3) continue;\n      const t = clean(n.nodeValue); if (!t) continue; all.push({ t, f: fs(pe) }); consider(t, fs(pe)); }\n    if (best && best.t.length <= 24) { const i = all.findIndex((a) => a.t === best.t && Math.abs(a.f - best.f) < 0.01), nx = all[i + 1];\n      if (nx && Math.abs(nx.f - best.f) <= 0.5 && ok(nx.t) && best.t.length + nx.t.length < 90) best = { t: best.t + \" \" + nx.t, f: best.f }; }\n    if (!best) { let e = c; for (let i = 0; e && i < 3 && !best; i++, e = e.parentElement) { const img = e.querySelector(\"img[alt]\"); if (img) consider(img.alt, 0); } }\n    return best ? best.t.replace(/\\s+,/g, \",\").replace(/(\\.\\.\\.|…)$/, \"\").trim() : \"\";\n  }\n  const alike = (a, b) => { if (a.tagName !== b.tagName) return false; const ca = String(a.className || \"\").split(/\\s+/).filter(Boolean), cb = String(b.className || \"\").split(/\\s+/).filter(Boolean);\n    const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(), sim = (x, y) => Math.abs(x - y) <= Math.max(x, y) * 0.3 + 2;\n    if ((ca.length || cb.length) && !ca.some((x) => cb.includes(x))) return false;\n    return sim(ra.height, rb.height) && (sim(ra.width, rb.width) || (Math.abs(ra.top - rb.top) < 12 && Math.abs(ra.left - rb.left) > 20)); };\n  const isList = (e) => { const ks = [...e.children].filter((k) => { const kt = txt(k); return kt.length > 12 && hasPrice(k) && nameish(kt); });\n    if (ks.length >= 3) return ks.filter((k) => k.querySelector(\"img,picture\")).length >= 3 || ks.some((k) => ks.some((o) => o !== k && alike(k, o)));\n    return ks.length === 2 && alike(ks[0], ks[1]) && ks.every((k) => k.querySelector(\"img,picture,canvas,svg\") || hasBg(k)); };\n  function whole(e) {\n    const vw = innerWidth * innerHeight;\n    while (e.parentElement && e.parentElement !== document.body && e.parentElement !== document.documentElement) {\n      const p = e.parentElement, r = p.getBoundingClientRect();\n      if (isList(p) || txt(p).length > 900 || r.width * r.height > vw * 0.6) break;\n      e = p;\n    }\n    return e;\n  }\n  const hasBg = (e) => { try { const b = getComputedStyle(e).backgroundImage; return b && b !== \"none\" && /url\\(/.test(b); } catch (x) { return false; } };\n  const pics = (e) => e.querySelectorAll(\"img,picture,canvas,svg image\").length + (hasBg(e) ? 1 : 0);\n  function imgBox(el) {\n    let e = el && el.nodeType === 1 ? el : el && el.parentElement;\n    for (let i = 0; e && i < 6 && !(e.matches(\"img,picture,canvas\") || hasBg(e)); i++) e = e.parentElement;\n    if (!e || e === document.body || e === document.documentElement) return null;\n    const vw = innerWidth * innerHeight, r0 = e.getBoundingClientRect(); if (r0.width < 60 || r0.height < 40 || r0.width * r0.height > vw * 0.7) return null;\n    while (e.parentElement && e.parentElement !== document.body && e.parentElement !== document.documentElement) {\n      const p = e.parentElement, r = p.getBoundingClientRect();\n      if (pics(p) > Math.max(1, pics(e)) || r.width * r.height > vw * 0.6 || txt(p).length > 300) break;\n      e = p;\n    }\n    return e;\n  }\n  function cand(el) {\n    let e = el && el.nodeType === 1 ? el : el && el.parentElement, priceOnly = null;\n    for (let i = 0; e && e !== document.body && e !== document.documentElement && i < 14; i++, e = e.parentElement) {\n      const t = txt(e); if (t.length > 900) break;\n      if (isList(e)) break;\n      if (!hasPrice(e)) continue;\n      const r = e.getBoundingClientRect(); if (r.width < 50 || r.height < 24) continue;\n      if (nameish(t)) return whole(e);\n      if (!priceOnly) priceOnly = e;\n    }\n    return priceOnly;\n  }\n  function price(t) { const m = String(t).match(PR); if (!m) return null; if (m[1]) return Number(m[1] + \".\" + m[2]); if (m[3]) return Number(\"0.\" + m[3]); if (m[4]) return Number(m[4]); return null; }\n  function read(c) {\n    const t = txt(c);\n    const u = t.match(/(?:bis|gültig bis)\\s*(?:[a-z]{2,10}\\.?,?\\s*)?(\\d{1,2})\\.(\\d{1,2})\\.?(\\d{2,4})?/i);\n    const r = c.getBoundingClientRect();\n    return { name: cardName(c).slice(0, 60), price: cardPrice(c), until: u ? { d: +u[1], m: +u[2], y: u[3] ? +u[3] : 0 } : null, rect: TOP ? { x: r.left, y: r.top, w: r.width, h: r.height } : null };\n  }\n  let hov = null, hovOld = \"\", mode = \"\", box = null, layer = null, sx = 0, sy = 0, skip = false;\n  const send = (o) => console.log(\"__HBPICK__\" + JSON.stringify(o));\n  function mark(c) { if (hov === c) return; if (hov) hov.style.cssText = hovOld; hov = c; if (c) { hovOld = c.style.cssText; c.style.setProperty(\"outline\", \"3px solid #1a7a5c\", \"important\"); c.style.setProperty(\"outline-offset\", \"2px\", \"important\"); c.style.setProperty(\"box-shadow\", \"0 10px 30px rgba(26,122,92,.35)\", \"important\"); } }\n  function over(e) { if (mode === \"pick\") mark(cand(e.target) || (TOP ? imgBox(e.target) : null)); }\n  function stop(e) { if (!mode) return; e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); }\n  function click(e) {\n    if (mode !== \"pick\") return; stop(e);\n    if (skip) { skip = false; return; }\n    const c = cand(e.target);\n    const photo = (b) => { mark(null); const r = b.getBoundingClientRect(); if (b.animate) b.animate([{ transform: \"scale(1)\" }, { transform: \"scale(.95)\" }, { transform: \"scale(1)\" }], { duration: 420 });\n      setTimeout(() => send({ lasso: { x: Math.max(0, r.left), y: Math.max(0, r.top), w: Math.min(r.width, innerWidth - Math.max(0, r.left)), h: Math.min(r.height, innerHeight - Math.max(0, r.top)) } }), 450); };\n    if (!c) { const b = TOP ? imgBox(e.target) : null; if (b) return photo(b); return send({ fail: true, why: \"nocard\", tag: e.target && e.target.tagName }); }\n    const r = read(c);\n    if (!r.price || !r.name) { const b = TOP ? (imgBox(e.target) || c) : null; if (b && !r.price) return photo(b); }\n    if (c.animate) c.animate([{ transform: \"scale(1)\" }, { transform: \"scale(.95)\" }, { transform: \"scale(1)\" }], { duration: 420 });\n    if (!r.price || !r.name) return send({ fail: true, why: \"noprice\", partial: r });\n    send(r);\n  }\n  function cursor(on) { document.documentElement.style.setProperty(\"cursor\", on ? \"copy\" : \"\", on ? \"important\" : \"\"); if (document.body) document.body.style.setProperty(\"cursor\", on ? \"copy\" : \"\", on ? \"important\" : \"\"); }\n  function lassoOn() {\n    if (!TOP || layer) return;\n    layer = document.createElement(\"div\");\n    layer.style.cssText = \"position:fixed;inset:0;z-index:2147483646;cursor:crosshair;background:rgba(194,124,14,.06)\";\n    const tip = document.createElement(\"div\"); tip.textContent = \"Zieh einen Rahmen um das Angebot\";\n    tip.style.cssText = \"position:fixed;left:50%;top:14px;transform:translateX(-50%);background:#c27c0e;color:#fff;font:700 14px system-ui,sans-serif;padding:8px 16px;border-radius:12px;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.2)\";\n    layer.appendChild(tip);\n    layer.addEventListener(\"pointerdown\", (e) => { e.preventDefault(); tip.style.display = \"none\"; sx = e.clientX; sy = e.clientY; box = document.createElement(\"div\");\n      box.style.cssText = \"position:fixed;z-index:2147483647;border:2.5px dashed #1a7a5c;background:rgba(26,122,92,.10);border-radius:10px;pointer-events:none\";\n      document.documentElement.appendChild(box); layer.setPointerCapture(e.pointerId); move(e); });\n    layer.addEventListener(\"pointermove\", move);\n    layer.addEventListener(\"pointerup\", (e) => { if (!box) return; const r = box.getBoundingClientRect(); box.remove(); box = null; skip = true; setTimeout(() => { skip = false; }, 400);\n      if (r.width < 20 || r.height < 14) return; set(\"pick\"); send({ lasso: { x: r.left, y: r.top, w: r.width, h: r.height } }); });\n    document.documentElement.appendChild(layer);\n  }\n  function move(e) { if (!box) return; const x = Math.min(sx, e.clientX), y = Math.min(sy, e.clientY); Object.assign(box.style, { left: x + \"px\", top: y + \"px\", width: Math.abs(e.clientX - sx) + \"px\", height: Math.abs(e.clientY - sy) + \"px\" }); }\n  function set(m) { mode = m; cursor(m === \"pick\"); if (m !== \"pick\") mark(null); if (m === \"lasso\") lassoOn(); else if (layer) { layer.remove(); layer = null; } }\n  [\"click\", \"auxclick\", \"dblclick\", \"contextmenu\"].forEach((t) => W.addEventListener(t, t === \"click\" ? click : stop, true));\n  W.addEventListener(\"mouseover\", over, true);\n  [\"pointerdown\", \"mousedown\", \"touchstart\"].forEach((t) => W.addEventListener(t, (e) => { if (mode === \"pick\") stop(e); }, { capture: true, passive: false }));\n  W.__hbPick = { set, test: { cand, read, imgBox } };\n  return W.__hbPick;\n})()";
+  /* Angebot picken */
   PG.pick=false;
   function pickToggle(on){ const b=NB(); PG.pick=!!on && !!(b && b.pagePick); if (on && !PG.pick){ toast("Dafür braucht es die neue PC-App – kommt mit dem nächsten Update"); return; }
     if (b && b.pagePick) b.pagePick(PG.pick?"pick":"", PICK_SRC); pg.classList.toggle("picking", PG.pick); pg.classList.remove("lassoing");
@@ -1219,26 +1169,22 @@ if (IS_PC){
       S.settings.deals=[...keep, {id:newId(), shop:PG.shop.id, text:n, price:p>0?Math.round(p*100)/100:null, until:until||nextSat()}]; saveSettings(); toast(`Angebot gemerkt: ${n}`); return; }
     const id=newId(); K.fresh=id; fly(n+(p?" · "+eur(p):""), rect);
     setTimeout(()=>{ const before=list(), r=zAddTo(before, {id, n, done:false, s:PG.shop.id, ...(p>0?{p:Math.round(p*100)/100}:{}), ...(until?{u:until}:{})}); saveList(r.list); toast(r.more?`${n}: jetzt ${zQ(r.list.find(x=>x.id===r.id))}x auf dem Zettel`:`Auf dem Zettel: ${n}${p?" · "+eur(p):""}`, ()=>saveList(before), "Rückgängig"); }, pcCalm()?0:700); }
-  // reads name, price and date from recognised lines (h = text height: the price is usually the biggest number)
   function readOcr(lines){
     const L=(lines||[]).map(l=>({t:String(l.t||"").replace(/[¹²³⁴⁵⁶⁷⁸⁹⁰*]+/g,"").trim(), h:+l.h||0, w:!!l.w})).filter(l=>l.t), all=L.map(l=>l.t).join("\n");
     const shopN=PG.shop?nrm(PG.shop.name):"";
     const BAD=/^(uvp|statt|je|grundpreis|ab|nur|aktion|angebot|angebote|preis|kg|1 ?kg|1 ?l|100 ?g|\d+ ?%|wochen|deal|knaller|kauf \d|super|top|neu|sale|tipp)\b/i;
     const pr=t=>{ let m=t.match(/(\d{1,4})\s*[.,]\s*(\d{2})(?!\d)/); if (m) return +(m[1]+"."+m[2]); m=t.match(/[-–]\s*[.,]\s*(\d{2})(?!\d)/); if (m) return +("0."+m[1]); m=t.match(/(\d{1,4})\s*[.,]\s*[-–]/); if (m) return +m[1];
-      m=t.replace(/\s+/g," ").match(/^\D{0,3}(\d{1,3})\s(\d{2})\D{0,3}$/); if (m) return +(m[1]+"."+m[2]); return null; };   // "1 79" = 1,79 (small cents)
-    // white price circles: "599" written big with small cents = 5,99
+      m=t.replace(/\s+/g," ").match(/^\D{0,3}(\d{1,3})\s(\d{2})\D{0,3}$/); if (m) return +(m[1]+"."+m[2]); return null; };
     const prW=t=>{ const v=pr(t); if (v!=null) return v; const m=t.replace(/[oO]/g,"0").match(/^\D{0,2}(\d{3,4})\D{0,8}$/); return m ? +m[1]/100 : null; };
     const UNIT=/(=|zzgl|pfand|uvp|statt|grundpreis|\(1|je\s*\d|\bkg\b|\bl\b|100\s*g|%)/i;
     let cands=L.map((l,i)=>({v:l.w?prW(l.t):pr(l.t), h:l.h, i, t:l.t, w:l.w})).filter(x=>x.v>0 && x.v<10000 && !UNIT.test(x.t));
     const mh=Math.max(0,...cands.map(x=>x.h)), big=cands.filter(x=>!mh || x.h>=mh*0.6), pick=(big.length?big:cands).slice(-1)[0];
     const price=pick?pick.v:null;
     const clean=t=>t.replace(/^[^A-Za-zÄÖÜäöü0-9]+/,"").replace(/[\s,(.…]+$/,"").trim();
-    // the name: written in normal letters (not a shouting banner), not the shop's own name, not white banner text
     const noShop=t=>shopN ? t.replace(new RegExp("^"+shopN.replace(/[^a-z0-9]/g,"")+"[\\s.…:-]*","i"),"") : t;
     const names=L.map((l,i)=>({t:clean(noShop(clean(l.t))), h:l.h, i, raw:noShop(l.t), w:l.w})).filter(l=>!l.w && /[a-zäöüß]{3}/.test(l.raw) && pr(l.raw)==null && !BAD.test(l.raw) && !/^(bis|gültig)/i.test(l.raw) && !UNIT.test(l.raw) && l.t.length>=4
      );
     const top=names.slice().sort((a,b)=>(b.h-a.h)||(b.t.length-a.t.length))[0];
-    // a name over two lines ("Bitburger Pils oder" / "alkoholfrei"): the next line in the same size belongs to it
     const name=top?[top.t]:[]; if (top && top.h){ const nx=names.find(l=>l.i===top.i+1 && Math.abs(l.h-top.h)<=top.h*0.15); if (nx) name.push(nx.t); }
     const u=all.match(/bis\s*(?:[a-z]{2,10}\.?,?\s*)?(\d{1,2})\.(\d{1,2})\.?(\d{2,4})?/i);
     return {n:name.join(" ").replace(/\s+/g," ").slice(0,60), p:price, u:u?untilIso({d:+u[1],m:+u[2],y:u[3]?+u[3]:0}):""}; }
@@ -1250,10 +1196,9 @@ if (IS_PC){
     if (res.reading){ pg.classList.remove("lassoing"); const pb=pg.querySelector(".pick"); if (pb) pb.textContent="✓ Picken an – Esc zum Beenden"; K.pick={busy:true}; renderShopPC(); return; }
     if (res.img){ pg.classList.remove("lassoing"); const pb=pg.querySelector(".pick"); if (pb) pb.textContent="✓ Picken an – Esc zum Beenden";
       K.pick={busy:true}; renderShopPC();
-      try { let lines=Array.isArray(res.lines)&&res.lines.length?res.lines:null;   // Windows text recognition; otherwise the one in the app
+      try { let lines=Array.isArray(res.lines)&&res.lines.length?res.lines:null;
         if (!lines){ await loadTesseract(); const r=await window.Tesseract.recognize(res.img, "deu"); lines=((r.data&&r.data.lines)||[]).map(l=>({t:l.text.trim(), h:l.bbox?l.bbox.y1-l.bbox.y0:0})); }
         K.pick=readOcr(lines); K.pick.raw=lines.map(l=>l.t).join(" · ").slice(0,160); if (!lines.length) K.pick.raw="(kein Text erkannt)"+(res.ocrErr?" – "+res.ocrErr:"");
-        // price badges read on their own (biggest first): the most reliable price on picture leaflets
         for (const t of (res.badges||[])){ const c=String(t).replace(/[oO]/g,"0").replace(/\s+/g,""), m=c.match(/(\d{1,4})[.,](\d{2})/)||c.match(/^\D*(\d{1,3})(\d{2})\D*$/);
           if (m){ K.pick.p=+(m[1]+"."+m[2]); K.pick.raw="Preis-Kreis: "+m[1]+","+m[2]+" · "+K.pick.raw; break; } } }
       catch(e){ K.pick={n:"", p:null, u:"", raw:"(Texterkennung nicht erreichbar"+(res.ocrErr?" – "+res.ocrErr:"")+")"}; toast("Texterkennung ging nicht – bitte selbst eintragen"); }
@@ -1267,7 +1212,6 @@ if (IS_PC){
   });
   root.addEventListener("keydown", e=>{ if (e.key==="Enter" && /^pk[NPU]$/.test(e.target.id||"")){ e.preventDefault(); const b=root.querySelector('[data-pkok="zettel"]'); if (b) b.click(); } });
   K.PG=PG; K.pg=pg; K.place=place; K.open=pageOpen;
-  // after the app restarted (update, F5) a web page from before may still lie over the app: away with it
   try { const b=NB(); if (b) b.pageNav("close"); } catch(_){}
   window.hbPageRequest=url=>pageOpen(url);
   window.hbPageBlocked=()=>{ toast("Andere Webseiten sind hier gesperrt"); const u=pg.querySelector(".url"); if (u && !pcCalm()) u.animate([{transform:"none"},{transform:"translateX(-6px)"},{transform:"translateX(6px)"},{transform:"translateX(-3px)"},{transform:"none"}],{duration:320}); };
@@ -1290,13 +1234,11 @@ if (IS_PC){
   document.addEventListener("keydown", e=>{ if (e.key==="Escape" && PG.open && !document.querySelector(".backdrop.show:not([hidden])")){ e.preventDefault(); if (PG.pick) pickToggle(false); else if (!PG.embed) pageClose(); } });
   addEventListener("resize", ()=>place());
   new ResizeObserver(()=>place()).observe($("pcpHole"));
-  // the page view sits above the app: step aside while a sheet or dialog of the app is open
   new MutationObserver(()=>{ const b=NB(); if (!b || !PG.open) return; b.pageShow(!document.querySelector(".backdrop.show:not([hidden]),#pcFbBg:not([hidden])")); }).observe(document.body, {subtree:true, attributes:true, attributeFilter:["class","hidden"]});
-  // the side bar follows the data, the page closes when you go to another app page
   const _r6=render; render=(...a)=>{ const x=_r6(...a); if (PG.open){ if (UI.view!==lastView) pageClose(); else if (!PG.embed) sideRender(); } lastView=UI.view; return x; };
 }
-/* ---------- Analyse am PC: drei Spalten nebeneinander – Auswertung · Planung · Steuer ---------- */
-/* ---------- Hover-Kasten für Punkte und Balken: sofort, mit Zahl (Variante B) ---------- */
+/* Analyse */
+/* Hover */
 const TT=o=>` data-tt="${esc(JSON.stringify(o))}"`;
 if (IS_PC){
   const box=document.createElement("div"); box.id="pctt"; box.setAttribute("role","tooltip"); document.body.appendChild(box);
@@ -1307,7 +1249,6 @@ if (IS_PC){
     if (g===cur) return; cur=g; let o; try{ o=JSON.parse(g.dataset.tt); }catch(_){ return hide(); }
     box.style.setProperty("--ttc",o.c||"var(--accent)");
     box.innerHTML=`<div class="h">${esc(o.h||"")}</div>${(o.r||[]).map(r=>`<div class="r${r[3]?" m":""}"><i style="background:${r[2]||"var(--accent)"}"></i><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join("")}${o.f?`<div class="f" style="color:${o.fc||"var(--fg)"}">${esc(o.f)}</div>`:""}`;
-    // anchor: the top of the visible mark (point or bar), else the column
     const marks=[...g.querySelectorAll("circle,.b")], rs=(marks.length?marks:[g]).map(m=>m.getBoundingClientRect()), gr=g.getBoundingClientRect();
     const cx=marks.length?(Math.min(...rs.map(r=>r.left))+Math.max(...rs.map(r=>r.right)))/2:gr.left+gr.width/2, top=Math.min(...rs.map(r=>r.top));
     box.classList.add("on"); const bw=box.offsetWidth, bh=box.offsetHeight;
@@ -1320,7 +1261,6 @@ if (IS_PC){
 }
 if (IS_PC){
   const sg=v=>(v>=0?"+ ":"− ")+eur0(Math.abs(v));
-  // bars around a middle line: green = money left, red = more spent; the chosen month is full colour
   const netBars=(pts,onIdx)=>{ const W=520,H=118,n=pts.length,bw=W/n, vals=pts.filter(p=>!p.fut).map(p=>Math.abs(p.v)), mx=Math.max(1,...vals), mid=H/2;
     let s=`<svg class="pcab" viewBox="0 0 ${W} ${H+24}" role="img" aria-label="Übrig pro Monat"><line x1="0" x2="${W}" y1="${mid}" y2="${mid}" stroke="var(--line)" stroke-dasharray="4 5"/>`;
     pts.forEach((p,i)=>{ const h=p.fut?0:Math.max(3,Math.abs(p.v)/mx*(mid-6)), x=i*bw+bw*.22, w=bw*.56, y=p.v>=0?mid-h:mid, on=i===onIdx;
@@ -1336,21 +1276,17 @@ if (IS_PC){
         <text x="${(x+cw/2).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="12" font-weight="${on?800:500}" fill="${on?"var(--fg)":"var(--muted)"}">${esc(MSHORT[i].slice(0,1))}</text></g>`.replace('<g class="pcabg"', `<g class="pcabg"${TT({h:MONTHS[i]+" "+r.ym.slice(0,4), c:"var(--accent)", r:[["Einnahmen",eur0(r.c.income),"var(--good)"],["Ausgaben",eur0(r.c.expenses),"var(--bad)"]], f:(r.c.income-r.c.expenses>=0?"Übrig ":"Mehr ausgegeben ")+eur0(Math.abs(r.c.income-r.c.expenses)), fc:r.c.income-r.c.expenses>=0?"var(--good)":"var(--bad)"})}`); });
     return s+`</svg>`; };
   const _ath=anaTabsHtml;
-  // the year sits in "Planung" – the analysis on the left is always the month
   const _ry=renderYear; renderYear=function(...a){ UI.anaMode="m"; return _ry(...a); };
   anaTabsHtml = function(a){
     const {tiles, GRP, TL, ord, rows, ym, mc, y, inc, exp}=a;
     const mode="m", cur=ymOf(new Date()), [, mi]=ymParts(ym), mn=MONTHS[mi-1];
     const g3=GRP[2]||["Steuer",[]], g3n=/steuer/i.test(g3[0]) ? "Steuer" : String(g3[0]).replace(/&amp;/g,"&").split(/[ &]/)[0];
     const row=t=>`<button class="arw" data-anaopen="${t.k}" style="--tc:${userCol("ana",t.k)||themeCol(TL[t.k][1], ord.indexOf(t.k))}"><span class="ai">${ic(t.icon,18)}</span><span class="an"><b>${t.k==="wk"&&!hasJob()?"Steuererklärung":t.k==="fix"?"Fixkosten geplant":TL[t.k][0]}</b><small>${t.sub||""}</small></span><span class="av">${esc(t.short||"")}<span class="ch">›</span></span></button>`;
-    // nothing twice: the big cards already show the year plan and the tax; no empty savings goals; the balance only once
     const skip=t=>t.k==="tax"||(t.k==="goal"&&/noch kein/i.test(String(t.sub||"").replace(/<[^>]+>/g,"")));
     for (const t of tiles) if (t.k==="calc"){ const m=String(t.sub||"").match(/^Stand heute (.+?) · frei (.+)$/); if (m && m[1]===m[2]){ t.sub="Stand heute "+m[1]; t.short=String(t.short||"").replace(/^frei\s+/,""); } }
     const rowsFor=ks=>{ const ts=tiles.filter(t=>ks.includes(t.k)&&!skip(t)).sort((p,q)=>ks.indexOf(p.k)-ks.indexOf(q.k)); return ts.length?`<div class="card pcarl"><div class="arl">${ts.map(row).join("")}</div></div>`:""; };
-    // only what the overview does not show: how it develops, how this month compares, the year against last year
     const M=true, net=mc.net, expn=mc.expenses;
     const pts=Array.from({length:6},(_,k)=>{ const m=shiftYm(ym,k-5); return {ym:m, l:MSHORT[ymParts(m)[1]-1], t:MONTHS[ymParts(m)[1]-1], v:monthCalc(m).net}; });
-    // 1 · Verlauf: spending of the last 12 months against the average
     const hist=Array.from({length:12},(_,k)=>{ const m=shiftYm(ym,k-11), c=monthCalc(m); return {ym:m, i:ymParts(m)[1], v:c.expenses, has:c.tx.length>0||c.expenses>0}; });
     const withData=hist.filter(h=>h.has), avg=withData.length?sum(withData,h=>h.v)/withData.length:0;
     const line=(()=>{ const W=520,H=140, n=hist.length, mx=Math.max(1,...hist.map(h=>h.v), avg)*1.08, X=i=>10+i*(W-20)/(n-1), Y=v=>H-v/mx*(H-8);
@@ -1359,14 +1295,12 @@ if (IS_PC){
       return `<svg class="pcab" viewBox="0 0 ${W} ${H+22}" role="img" aria-label="Ausgaben der letzten 12 Monate">${avg?`<line x1="0" x2="${W}" y1="${Y(avg).toFixed(1)}" y2="${Y(avg).toFixed(1)}" stroke="var(--faint)" stroke-dasharray="4 5"/><text x="${W-2}" y="${(Y(avg)-6).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--muted)">Ø ${esc(eur0(avg))}</text>`:""}
         <path d="${d}" fill="none" stroke="var(--bad)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" class="pcaln"/>
         ${hist.map((h,i)=>`<g class="pcabg" data-pcaym="${h.ym}"><rect x="${(X(i)-(W-20)/(n-1)/2).toFixed(1)}" y="0" width="${((W-20)/(n-1)).toFixed(1)}" height="${H+22}" fill="transparent"/>${h.has?`<circle cx="${X(i).toFixed(1)}" cy="${Y(h.v).toFixed(1)}" r="${h.ym===ym?6:3.5}" fill="var(--bad)"/>`:""}<text x="${X(i).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="11" font-weight="${h.ym===ym?800:500}" fill="${h.ym===ym?"var(--fg)":"var(--muted)"}">${esc(MSHORT[h.i-1].slice(0,1))}</text></g>`.replace('<g class="pcabg"', `<g class="pcabg"${(()=>{ const pp=avg&&h.has?Math.round((h.v-avg)/avg*100):null; return TT({h:MONTHS[h.i-1]+" "+h.ym.slice(0,4), c:"var(--bad)", r:[["Ausgaben",h.has?eur0(h.v):"–","var(--bad)"],...(avg?[["Ø",eur0(avg),"var(--faint)",1]]:[])], f:pp==null?"":pp===0?"genau im Ø":(pp>0?"+":"−")+Math.abs(pp)+" % "+(pp>0?"über":"unter")+" Ø", fc:pp>0?"var(--bad)":"var(--good)"}); })()}`)).join("")}</svg>`; })();
-    // the running month is only partly over: compare with the average of the other months up to the same day
     const isCur=ym===cur, past=withData.filter(h=>h.ym!==ym), avgP=past.length?sum(past,h=>h.v)/past.length:0, frac=isCur?Math.min(1,new Date().getDate()/daysIn(ym)):1;
     const dAvg=avgP&&(!isCur||new Date().getDate()>=3)?Math.round((expn-avgP*frac)/(avgP*frac)*100):null;
     const chip=(p,inv)=>p==null?"":`<span class="pcachg ${(inv?-p:p)>0?"up":"dn"}">${p>0?"+":p<0?"−":"±"}${Math.abs(p)} %</span>`;
     const col1=`<div class="pcac"><div class="pcah"><h2>Verlauf</h2><span>letzte 12 Monate</span></div>
       <div class="card pcabig" data-anaopen="trend"><small>Ausgaben im ${esc(mn)}</small><div style="display:flex;align-items:baseline;gap:10px"><div class="pcan">${esc(eur0(expn))}</div>${dAvg!=null?chip(dAvg)+`<span class="pcas" style="margin:0">${isCur?"zum Ø bis heute":"zum Ø"}</span>`:""}</div>${line}</div>
       <div class="card pcabig" data-anaopen="kpi"><small>${net>=0?"Übrig":"Mehr ausgegeben"} pro Monat</small>${netBars(pts,5)}</div></div>`;
-    // 2 · Kategorien: this month against the average of the 6 months before; then this year against last year
     const prevM=Array.from({length:6},(_,k)=>monthCalc(shiftYm(ym,-(k+1)))).filter(c=>c.tx.length||c.expenses>0), avgOf={};
     for (const c of prevM) for (const [n,v] of catTotals(c.tx, c.fixPaid)) avgOf[n]=(avgOf[n]||0)+v/prevM.length;
     const ct=catTotals(mc.tx, mc.fixPaid).slice(0,6);
@@ -1383,7 +1317,6 @@ if (IS_PC){
       <div class="card pcabig" data-anaopen="io"><small>${y} gegen ${y-1}</small><div style="display:flex;align-items:baseline;gap:10px;margin-top:4px"><b style="font-size:22px">${esc(eur0(ytd))}</b>${hasLast&&dY!=null?chip(dY)+`<span class="pcas" style="margin:0">zu ${y-1} bis ${esc(mn)}</span>`:`<span class="pcas" style="margin:0">ausgegeben bis ${esc(mn)}</span>`}</div>
         <div class="pcalg"><span><i style="background:var(--bad)"></i>${y}</span><span><i style="background:var(--faint);opacity:.55"></i>${y-1}</span></div>${cmp}</div>
       ${rowsFor(["calc","plan"])}</div>`;
-    // 3 · Steuer
     const tt=tiles.find(t=>t.k==="tax"); let tx=null; try { tx=taxCalc(y); } catch(e){}
     const box=(l,v)=>`<div><small>${l}</small><b>${v}</b></div>`;
     const col3=`<div class="pcac"><div class="pcah"><h2>${esc(g3n)}</h2><span>${y} · Schätzung</span></div>
@@ -1392,11 +1325,10 @@ if (IS_PC){
       ${rowsFor(g3[1])}</div>`;
     return `<div class="pcana">${col1}${col2}${col3}</div>`;
   };
-  // a click on a month in a chart shows that month
   document.addEventListener("click", e=>{ const g=e.target.closest("[data-pcaym]"); if (!g || UI.view!=="year") return; e.stopPropagation(); if (g.dataset.pcaym===UI.ym) return; UI.ym=g.dataset.pcaym; render(); }, true);
   const yv=document.getElementById("v-year"); if (yv) yv.classList.add("pca");
 }
-/* ---------- Einstellungen am PC: Liste links, Inhalt rechts (nichts doppelt mit anderen Seiten) ---------- */
+/* Einstellungen am PC */
 if (IS_PC){
   const PCSET=[["Geld",()=>["konten","budgets",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]),"invest","export"]],
     ["Anpassen",()=>["farben","sprache","kategorien","laeden"]],
@@ -1439,24 +1371,21 @@ if (IS_PC){
     if (UI.view!=="more"){ UI.view="more"; render(); }
     renderSetHome(); window.scrollTo({top:0});
   };
-  // old way in (e.g. "Schuld hinzufügen" on the start page): a page key in UI.sp → show that page on the right
   const _rsp=renderSpPages; renderSpPages=function(...a){ if (UI.sp && !spsOpen() && UI.sp!=="profil" && SP_PAGES[UI.sp]) UI.pcset=alias[UI.sp]||UI.sp; return _rsp.apply(this,a); };
   document.addEventListener("click", e=>{ const b=e.target.closest("[data-pcset]"); if (!b) return; UI.pcset=b.dataset.pcset; UI.pctAdd=""; renderSetHome(); });
   addEventListener("resize", ()=>requestAnimationFrame(moveHl));
-  // Farben: the bar at the bottom only exists on the phone
   const _rce=renderColorEd; renderColorEd=function(...a){ const r=_rce.apply(this,a);
     document.querySelectorAll(".colsec").forEach(s=>{ const h=s.querySelector("h3"); if (h && /^(Leiste unten|Bottom bar)$/i.test(h.textContent.trim())) s.hidden=true; }); return r; };
 }
-/* ---------- Einstellungen am PC, Variante A: Kacheln für Konten, Budgets und Abos – anlegen und löschen direkt hier ---------- */
+/* Einstellungen am PC */
 if (IS_PC){
-  const PT={};   // pane renderers: key → html
+  const PT={};
   const trash=`<svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M4.5 7h15M9.5 7V4.8h5V7M6.5 7l.9 12.2h9.2l.9-12.2M10.2 10.5v5.5M13.8 10.5v5.5"/></svg>`;
   const ring=(p,c)=>{ const q=Math.max(0,Math.min(1,p)); return `<svg class="pctring" viewBox="0 0 48 48"><circle cx="24" cy="24" r="19" fill="none" stroke="var(--sunk)" stroke-width="6"/><circle class="pcta" cx="24" cy="24" r="19" fill="none" stroke="${p>1?"var(--bad)":c}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(q*119.4).toFixed(1)} 200" transform="rotate(-90 24 24)"/><text x="24" y="28" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--fg)">${Math.round(p*100)}%</text></svg>`; };
   const delBtn=(attr,v)=>`<button class="pctdel" ${attr}="${esc(v)}" aria-label="Löschen" title="Löschen">${trash}</button>`;
   const armed=b=>{ if (b.dataset.armed==="1") return true; b.dataset.armed="1"; b.classList.add("arm"); b.innerHTML=`<b>Wirklich löschen?</b>`; setTimeout(()=>{ if (b.isConnected){ b.dataset.armed=""; b.classList.remove("arm"); b.innerHTML=trash; } },3000); return false; };
   UI.pctAdd=UI.pctAdd||"";
 
-  // Monatsbudgets
   PT.budgets=()=>{ const b=S.settings.budgets||{}, ym=ymOf(new Date()), mc=monthCalc(ym), spent=Object.fromEntries(catTotals(mc.tx, mc.fixPaid));
     const ks=Object.keys(b).filter(k=>b[k]>0), free=cats("ausgabe").filter(c=>!(b[c]>0));
     const tot=sum(ks,k=>b[k]), used=sum(ks,k=>spent[k]||0);
@@ -1466,7 +1395,6 @@ if (IS_PC){
       ${UI.pctAdd==="budgets"?`<div class="pctk pctform" style="--i:${ks.length}"><b>Neues Budget</b><label>Kategorie<select class="in" id="pcbCat">${free.map(c=>`<option>${esc(c)}</option>`).join("")}</select></label><label>Pro Monat<input class="in" id="pcbAmt" inputmode="decimal" placeholder="z. B. 150"></label><div class="pctbtns"><button class="btn" data-pctcancel>Abbrechen</button><button class="btn primary" data-pcbadd>Anlegen</button></div></div>`
         : free.length?`<button class="pctk pctnew" data-pctnew="budgets" style="--i:${ks.length}">+ Budget anlegen</button>`:""}</div>`; };
 
-  // Konten & Spaces
   const acctList=()=>{ const A=S.settings.accountAnchors||{}, sp=S.settings.spaces||[];
     return [...new Set([...Object.keys(A), ...accountNames(), ...sp])].sort((a,b)=>(b==="Hauptkonto")-(a==="Hauptkonto")||a.localeCompare(b,"de")); };
   PT.konten=()=>{ const today=isoToday(), names=acctList(), A=S.settings.accountAnchors||{}, imp=new Set(accountNames()), sp=new Set(S.settings.spaces||[]);
@@ -1478,7 +1406,6 @@ if (IS_PC){
       ${UI.pctAdd==="konten"?`<div class="pctk pctform" style="--i:${names.length+1}"><b>Neues Konto oder Space</b><label>Name<input class="in" id="pcaName" placeholder="z. B. Urlaub"></label><label>Stand heute<input class="in" id="pcaBal" inputmode="decimal" placeholder="0,00"></label><div class="pctbtns"><button class="btn" data-pctcancel>Abbrechen</button><button class="btn primary" data-pcaadd>Anlegen</button></div></div>`
         :`<button class="pctk pctnew" data-pctnew="konten" style="--i:${names.length+1}">+ Konto oder Space</button>`}</div>`; };
 
-  // Abos & Verträge (only what is a subscription or contract – not rent or loans)
   const aboList=()=>{ const A=aboCfg(); return S.fixed.filter(f=>!debtFor(f.id) && (fixArea(f)==="Abos & Handy" || A[f.id])).sort((x,y)=>(aboDeadline(A[x.id])||"9999").localeCompare(aboDeadline(A[y.id])||"9999")||String(x.name).localeCompare(String(y.name))); };
   const NOT=[[0,"jederzeit"],[0.5,"2 Wochen"],[1,"1 Monat"],[2,"2 Monate"],[3,"3 Monate"],[6,"6 Monate"]];
   PT.abos=()=>{ const A=aboCfg(), today=isoToday(), L=aboList(), ym=ymOf(new Date());
@@ -1499,17 +1426,14 @@ if (IS_PC){
   document.addEventListener("click", async e=>{
     const n=e.target.closest("[data-pctnew]"); if (n){ UI.pctAdd=n.dataset.pctnew; repaint(); setTimeout(()=>{ const f=document.querySelector("#pcsR .pctform input, #pcsR .pctform select"); if (f) f.focus(); },30); return; }
     if (e.target.closest("[data-pctcancel]")){ after(); return; }
-    // budgets
     let b=e.target.closest("[data-pcbdel]"); if (b){ if (!armed(b)) return; const B={...(S.settings.budgets||{})}; delete B[b.dataset.pcbdel]; S.settings.budgets=B; await saveSettings(); after("Budget gelöscht"); return; }
     if (e.target.closest("[data-pcbadd]")){ const c=$("pcbCat").value, v=parseAmt($("pcbAmt").value); if (!(v>0)){ toast("Bitte einen Betrag eingeben"); $("pcbAmt").focus(); return; }
       S.settings.budgets={...(S.settings.budgets||{}), [c]:Math.round(v*100)/100}; await saveSettings(); after(`Budget für ${c} angelegt`); return; }
-    // accounts
     b=e.target.closest("[data-pcadel]"); if (b){ if (!armed(b)) return; const n2=b.dataset.pcadel, A={...(S.settings.accountAnchors||{})}; delete A[n2]; S.settings.accountAnchors=A; S.settings.spaces=(S.settings.spaces||[]).filter(x=>x!==n2); await saveSettings(); after(`${n2} entfernt`); return; }
     if (e.target.closest("[data-pcaadd]")){ const nm=$("pcaName").value.trim(), raw=$("pcaBal").value.trim(); if (!nm){ toast("Bitte einen Namen eingeben"); $("pcaName").focus(); return; }
       if (nm!=="Hauptkonto" && !(S.settings.spaces||[]).includes(nm)) S.settings.spaces=[...(S.settings.spaces||[]), nm];
       if (raw){ const v=parseAmt(raw); if (!isFinite(v)){ toast("Bitte eine Zahl eingeben"); return; } S.settings.accountAnchors={...(S.settings.accountAnchors||{}), [nm]:{date:isoToday(), balance:Math.round(v*100)/100}}; }
       await saveSettings(); after(`${nm} angelegt`); return; }
-    // abos
     b=e.target.closest("[data-pcodel]"); if (b){ if (!armed(b)) return; const id=b.dataset.pcodel, f=S.fixed.find(x=>x.id===id); const A={...(S.settings.abos||{})}; delete A[id]; S.settings.abos=A;
       if (await safe(()=>del("fixed", id))){ await saveSettings(); after(`${f?f.name:"Abo"} gelöscht`); } return; }
     if (e.target.closest("[data-pcoadd]")){ const nm=$("pcoName").value.trim(), v=parseAmt($("pcoAmt").value), rh=$("pcoRh").value; if (!nm){ toast("Bitte einen Namen eingeben"); $("pcoName").focus(); return; } if (!(v>0)){ toast("Bitte einen Betrag eingeben"); $("pcoAmt").focus(); return; }
@@ -1526,10 +1450,10 @@ if (IS_PC){
   document.addEventListener("keydown", e=>{ if (e.key==="Enter" && e.target.closest(".pctform")){ e.preventDefault(); const ok=e.target.closest(".pctform").querySelector(".btn.primary"); if (ok) ok.click(); } if (e.key==="Escape" && e.target.closest(".pctform")){ e.stopPropagation(); after(); } }, true);
 }
 
-/* =================== TABLET: Dock unten, Einstellungen-Übersicht, Wischen mit dem Finger, Drehen („Wirbel ins Plus") =================== */
+/* Tablet */
 if (IS_TAB){
   const H=document.documentElement, calm=()=>pcCalm();
-  /* ---- Dock: farbige Blase gleitet zur gewählten Seite, das Plus sitzt rechts daneben ---- */
+  /* Dock */
   const dock=document.querySelector(".tabs"), plus=dock && dock.querySelector(".tab.plus");
   let bub=null;
   function dockPlace(){
@@ -1542,7 +1466,7 @@ if (IS_TAB){
   const _rd=render; render=(...a)=>{ const x=_rd(...a); if (UI.view!=="more") UI.tabOpen=0; requestAnimationFrame(dockPlace); return x; };
   addEventListener("resize", ()=>requestAnimationFrame(dockPlace)); setTimeout(dockPlace, 60); setTimeout(dockPlace, 600);
 
-  /* ---- Einstellungen: oben Profil, darunter Schnellschalter, darunter je Bereich eine Karte ---- */
+  /* Einstellungen */
   const GROUPS=()=>[["Geld","#6b8e23",["konten","budgets","schulden",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]),"invest","export"]],
     ["Anpassen","#1a7a5c",["farben","sprache","kategorien","start","laeden"]],
     ["Sicherheit","#3d63a8",["sicherheit",...(SYNCABLE||window.AndroidBridge?["geraete"]:[]),"backup",...(CAN_NOTIFY?["notify"]:[]),"speicher"]],
@@ -1578,7 +1502,7 @@ if (IS_TAB){
       UI.tabOpen=1; UI.pcset=k; renderSetHome(); window.scrollTo({top:0}); }
   });
 
-  /* ---- Wischen: die Seite folgt dem Finger, beim Loslassen fliegt sie weg (wie am PC) oder federt zurück ---- */
+  /* Wischen */
   { let x0=null, y0=0, t0=0, dx=0, sec=null, horiz=null;
     const blocked=t=>t.closest("input,textarea,select,.sheet,.backdrop,.astack,.srail,.table-wrap,.fxchips,.tabs,.pcfcalc,[draggable=true],.pcsweb,.leaflet-container");
     document.addEventListener("touchstart", e=>{ if (e.touches.length!==1 || blocked(e.target) || PC_ANIM.busy || (UI.view==="more" && UI.tabOpen) || document.querySelector(".backdrop:not([hidden])")){ x0=null; return; }
@@ -1591,7 +1515,7 @@ if (IS_TAB){
       if (go){ e.stopImmediatePropagation(); pcStep(dx<0?1:-1); } }, {passive:true, capture:true});
   }
 
-  /* ---- Drehen: „Wirbel ins Plus" – die Kacheln schrumpfen zu bunten Punkten, wirbeln ins Plus und springen an ihre neuen Plätze ---- */
+  /* Drehen */
   { const pick=()=>{ const v=document.querySelector(`[data-view="${UI.view}"]`); if (!v) return [];
       const l=[...v.querySelectorAll(".hblock>.card, #pcHero, .pcday, #pcDet, .pcfcalc, .pcfside>.card, .pcac>*, .pcana>*, #tabSet>*, .tsgr>.card, .tssw>button, .pcsr>*, .zstack>*, .pcshop>*, .card")]
         .filter((x,i,a)=>a.indexOf(x)===i && !a.some(y=>y!==x && y.contains(x)));
@@ -1620,7 +1544,6 @@ if (IS_TAB){
       });
       setTimeout(()=>{ H.classList.remove("tabrot"); take(); }, 1500+i*45+50);
     }
-    // wait until the page has been drawn new for the other format, then let the tiles whirl from their old places
     addEventListener("resize", ()=>{ const p=innerHeight>innerWidth; if (p===lastPortrait) return; lastPortrait=p; if (!calm() && snap.size) H.classList.add("tabpre"); clearTimeout(whirl.t); whirl.t=setTimeout(()=>requestAnimationFrame(()=>{ whirl(); H.classList.remove("tabpre"); }), 140); });
   }
 }

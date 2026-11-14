@@ -13,11 +13,6 @@ import android.os.Build;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-/**
- * Notifications that also arrive when the app is closed.
- * The web app works out what to say and when; it hands over a list of {id, at, title, text, ch}.
- * Each one gets an alarm; the list is kept so the alarms survive a restart of the phone.
- */
 public final class Notifier {
     static final String CH_ALERT = "hinweise", CH_REMIND = "erinnerungen";
     private static final String PREFS = "hb-notify", KEY = "list";
@@ -49,7 +44,6 @@ public final class Notifier {
                 .setStyle(new Notification.BigTextStyle().bigText(text))
                 .setContentIntent(pi)
                 .setAutoCancel(true)
-                // on the lock screen only "Finanz MAMI" shows, not the amounts
                 .setVisibility(Notification.VISIBILITY_PRIVATE)
                 .setPublicVersion(new Notification.Builder(c, CH_REMIND.equals(ch) ? CH_REMIND : CH_ALERT)
                         .setSmallIcon(R.drawable.ic_stat).setColor(0xFF147A5B)
@@ -67,7 +61,6 @@ public final class Notifier {
         return PendingIntent.getBroadcast(c, o.optInt("id"), i, PendingIntent.FLAG_IMMUTABLE | flags);
     }
 
-    /** Replaces all planned notifications by the given list (JSON array). */
     static synchronized void schedule(Context c, String json) {
         SharedPreferences p = c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         AlarmManager am = c.getSystemService(AlarmManager.class);
@@ -94,7 +87,6 @@ public final class Notifier {
         p.edit().putString(KEY, keep.toString()).apply();
     }
 
-    /** After a restart of the phone the alarms are gone – set them again from the stored list. */
     static void restore(Context c) {
         schedule(c, c.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, "[]"));
     }

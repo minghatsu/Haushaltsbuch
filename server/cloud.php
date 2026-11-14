@@ -1,22 +1,4 @@
 <?php
-/*
- * Haushaltsbuch – Abgleich-Server für viele Kunden (Konto = E-Mail + Passwort)
- *
- * Jeder Kunde hat einen eigenen, getrennten Datenbereich. Läuft auf normalem PHP-Webhosting (PHP 8, SQLite).
- * Einstellungen (Absender der E-Mails usw.) stehen in config.php daneben (siehe config.example.php).
- *
- *   GET  ?a=status                         -> {cloud:true, signup:bool}
- *   POST ?a=register {email,password}      -> {token}
- *   POST ?a=login {email,password,code?}   -> {token} | 401 {need2fa}
- *   POST ?a=forgot {email}                 -> {ok}         schickt einen Code per E-Mail (15 Minuten gültig)
- *   POST ?a=reset {email,code,password}    -> {token}      neues Passwort, alle Geräte abgemeldet, 2FA aus
- *   GET  ?a=pull&since=N  /  POST ?a=push {ops}           (Authorization: Bearer <token>)
- *   GET  ?a=account                        -> {email, created, twofa, recovery}
- *   POST ?a=password {old,new} · ?a=logout · ?a=logoutAll · ?a=verify {password}
- *   POST ?a=twofaStart {password} · ?a=twofaEnable {code} · ?a=twofaDisable {password,code}
- *   POST ?a=deleteAccount {password}       -> löscht Konto und alle Daten endgültig
- *   GET  ?a=version · ?a=app · POST ?a=deploy   App-Updates (nur vom GitHub-Build)
- */
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Authorization, Content-Type');
@@ -31,10 +13,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204);
 
 $CFG = ['mail_from' => 'Finanz MAMI <noreply@localhost>', 'app_name' => 'Finanz MAMI', 'signup' => true, 'max_accounts' => 1000, 'data_dir' => ''];
 if (is_file(__DIR__ . '/config.php')) $CFG = array_merge($CFG, (array)(include __DIR__ . '/config.php'));
-// Datenordner mit zufälligem Namen (cloud-…), damit die Datenbank nicht erraten und heruntergeladen werden kann.
-// Getrennt vom Ordner der api.php (data-…), beide können im selben Verzeichnis liegen.
 define('DATA_DIR', $CFG['data_dir'] !== '' ? $CFG['data_dir'] : (function (): string {
-    foreach (['/cloud-*', '/data-*'] as $pat) {     // eigener Ordner, sonst der (geschützte) Datenordner der api.php
+    foreach (['/cloud-*', '/data-*'] as $pat) {
         $found = array_values(array_filter(glob(__DIR__ . $pat, GLOB_ONLYDIR) ?: [], 'is_writable'));
         if ($found) { usort($found, fn($a, $b) => filemtime($b) <=> filemtime($a)); return $found[0]; }
     }
@@ -75,7 +55,7 @@ function normEmail(string $e): string { return strtolower(trim($e)); }
 function validEmail(string $e): bool { return strlen($e) <= 200 && filter_var($e, FILTER_VALIDATE_EMAIL) !== false; }
 function ip(): string { return substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 64); }
 
-/* ---- limits: per account (5 wrong → 1, 5, 15, 60 min) and per address (30 wrong per hour) ---- */
+/* Limits */
 function ipBlocked(): bool {
     $r = q('SELECT n, since FROM ipfails WHERE ip = ?', [ip()])->fetch();
     return $r && (int)$r['since'] > time() - 3600 && (int)$r['n'] >= 30;
@@ -125,7 +105,7 @@ function sendMail(string $to, string $subject, string $text): bool {
 function checkPw(array $u, string $pw): bool { return password_verify($pw, (string)$u['pw']); }
 function goodPassword(string $pw): ?string { return mb_strlen($pw) < 10 ? 'Das Passwort braucht mindestens 10 Zeichen' : null; }
 
-/* ---- two-factor login (TOTP) ---- */
+/* Zwei-Faktor */
 function b32decode(string $b): string {
     $b = strtoupper(preg_replace('/[^A-Za-z2-7]/', '', $b)); $bits = ''; $out = '';
     foreach (str_split($b) as $c) $bits .= str_pad(decbin(strpos('ABCDEFGHIJKLMNOPQRSTUVWXYZ234567', $c)), 5, '0', STR_PAD_LEFT);
@@ -144,7 +124,6 @@ function totpAt(string $secret, int $step): string {
     $n = ((ord($h[$o]) & 127) << 24 | ord($h[$o + 1]) << 16 | ord($h[$o + 2]) << 8 | ord($h[$o + 3])) % 1000000;
     return str_pad((string)$n, 6, '0', STR_PAD_LEFT);
 }
-/** Checks a code from the app (±30 s) or one of the one-time recovery codes; a code can only be used once. */
 function totpCheckRaw(string $secret, string $code, int $last, ?array &$recovery, int &$usedStep): bool {
     $code = preg_replace('/\s+/', '', $code);
     if (preg_match('/^\d{6}$/', $code)) {
@@ -155,7 +134,7 @@ function totpCheckRaw(string $secret, string $code, int $last, ?array &$recovery
         }
         return false;
     }
-    $norm = strtr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $code)), ['0' => 'O', '1' => 'I', '8' => 'B']);   // easy to mix up when typing
+    $norm = strtr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $code)), ['0' => 'O', '1' => 'I', '8' => 'B']);
     if (strlen($norm) !== 10) return false;
     if ($recovery === null) return false;
     foreach ($recovery as $i => $h) {
@@ -164,7 +143,6 @@ function totpCheckRaw(string $secret, string $code, int $last, ?array &$recovery
     return false;
 }
 
-/** checks a code of this user (app code or recovery code) and remembers that it was used */
 function userCode(array $u, string $code): bool {
     if ((string)$u['totp'] === '') return true;
     $rec = json_decode((string)($u['totp_recovery'] ?? '[]'), true) ?: [];
@@ -174,7 +152,7 @@ function userCode(array $u, string $code): bool {
     return true;
 }
 
-/* ---- GitHub OIDC token check (for automatic updates from the GitHub build) ---- */
+/* GitHub-OIDC prüfen */
 function b64u(string $s): string { return (string)base64_decode(strtr($s, '-_', '+/') . str_repeat('=', (4 - strlen($s) % 4) % 4)); }
 function derLen(int $l): string { if ($l < 128) return chr($l); $b = ltrim(pack('N', $l), "\0"); return chr(0x80 | strlen($b)) . $b; }
 function derInt(string $x): string { if (ord($x[0]) > 127) $x = "\0" . $x; return "\x02" . derLen(strlen($x)) . $x; }
@@ -282,7 +260,7 @@ Warst du das nicht? Dann antworte bitte auf diese E-Mail.
 
     if ($a === 'login') {
         $b = body(); $u = userByEmail((string)($b['email'] ?? ''));
-        if (!$u) { ipFail(); password_verify('x', password_hash('y', PASSWORD_DEFAULT)); /* same time as a real check */ sleep(2); fail('E-Mail oder Passwort stimmt nicht', 403); }
+        if (!$u) { ipFail(); password_verify('x', password_hash('y', PASSWORD_DEFAULT));  sleep(2); fail('E-Mail oder Passwort stimmt nicht', 403); }
         lockedMsg($u);
         if (!checkPw($u, (string)($b['password'] ?? ''))) { userFail($u); sleep(2); fail('E-Mail oder Passwort stimmt nicht', 403); }
         if ((string)$u['totp'] !== '') {
@@ -296,7 +274,7 @@ Warst du das nicht? Dann antworte bitte auf diese E-Mail.
 
     if ($a === 'forgot') {
         $u = userByEmail((string)(body()['email'] ?? ''));
-        if ($u && (int)$u['reset_until'] < time() + 14 * 60) {     // at most one e-mail per minute
+        if ($u && (int)$u['reset_until'] < time() + 14 * 60) {
             $code = strtoupper(substr(b32encode(random_bytes(8)), 0, 8));
             q('UPDATE users SET reset_hash = ?, reset_until = ?, reset_tries = 0 WHERE id = ?', [password_hash($code, PASSWORD_DEFAULT), time() + 15 * 60, $u['id']]);
             sendMail((string)$u['email'], 'Dein Code zum Zurücksetzen', "Hallo,
@@ -309,7 +287,7 @@ Er gilt 15 Minuten. Hast du das nicht angefordert, kannst du diese E-Mail ignori
 ");
         }
         if (!$u) ipFail();
-        out(['ok' => true]);   // same answer either way: nobody can find out which e-mails have an account
+        out(['ok' => true]);
     }
 
     if ($a === 'reset') {
@@ -408,7 +386,7 @@ Warst du das nicht? Dann antworte bitte sofort auf diese E-Mail.
     if ($a === 'logoutAll') { q('DELETE FROM tokens WHERE user_id = ?', [$uid]); out(['ok' => true]); }
     if ($a === 'logout') { q('DELETE FROM tokens WHERE hash = ?', [$u['token_hash']]); out(['ok' => true]); }
 
-    if ($a === 'deleteAccount') {   // right to erasure: account and all data, at once
+    if ($a === 'deleteAccount') {
         lockedMsg($u);
         if (!checkPw($u, (string)(body()['password'] ?? ''))) { userFail($u); sleep(2); fail('Das Passwort stimmt nicht', 403); }
         q('DELETE FROM docs WHERE user_id = ?', [$uid]); q('DELETE FROM tokens WHERE user_id = ?', [$uid]); q('DELETE FROM users WHERE id = ?', [$uid]);

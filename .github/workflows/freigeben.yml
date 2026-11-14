@@ -43,11 +43,9 @@ jobs:
           OW=$(num "$OB" web); OT=$(num "$OB" webt); OP=$(num "$OB" webp); OA=$(num "$OB" apk); OE=$(num "$OB" exe)
           OT=${OT:-$OW}; OP=${OP:-$OW}
           pick(){ if [ -f "old/$1" ]; then cp "old/$1" "pub/$2"; elif [ -f "old/app.html" ]; then cp old/app.html "pub/$2"; fi; }
-          # phone page
           if [ "$H" = "true" ]; then cp new/app.html pub/app.html; W=$NW; else pick app.html app.html; W=$OW; fi
           if [ "$T" = "true" ]; then cp new/app.html pub/app-tab.html; WT=$NW; else pick app-tab.html app-tab.html; WT=$OT; fi
           if [ "$P" = "true" ]; then cp new/app.html pub/app-pc.html; WP=$NW; else pick app-pc.html app-pc.html; WP=$OP; fi
-          # Android app (phone and tablet share it), Windows installer
           if [ "$H" = "true" ] || [ "$T" = "true" ] || [ ! -f old/Finanz-MAMI.apk ]; then cp new/Haushaltsbuch.apk pub/Finanz-MAMI.apk; A=$NA; else cp old/Finanz-MAMI.apk pub/; A=$OA; fi
           if [ "$P" = "true" ] || [ ! -f old/Finanz-MAMI-Setup.exe ]; then cp new/Haushaltsbuch-Setup.exe pub/Finanz-MAMI-Setup.exe; E=$NE; else cp old/Finanz-MAMI-Setup.exe pub/; E=$OE; fi
           (cd pub && zip -q Finanz-MAMI-Windows.zip Finanz-MAMI-Setup.exe)

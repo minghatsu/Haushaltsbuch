@@ -46,11 +46,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Shows the Haushaltsbuch web app. Data is kept in the WebView's local storage.
- * The app code comes from the APK's assets, or from a newer version the app downloaded from the Synology
- * (saved in the app's private folder and served under the same address, so the stored data stays the same).
- */
 public class MainActivity extends Activity {
     private static final int FILE_REQUEST = 1;
     private static final int SCAN_CAMERA = 2;
@@ -59,11 +54,9 @@ public class MainActivity extends Activity {
     private Uri scanUri;
     private static final String APP_URL = "file:///android_asset/index.html";
     private static final Pattern VERSION = Pattern.compile("name=\"hb-version\" content=\"(\\d+)\"");
-    /** Public key of the GitHub build. Updates from the Synology are only used if the build signed them. */
     private static final String UPDATE_KEY = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWc6eJAgFbzrfP4Smmawd8Iv5ApsSFtZXDcZ4odJm/NDemZmJ1c6KQt4h+Jn6e+5KhGaXm6EIuf0jWIHZUtHptQ==";
     private static final byte[] SIG_MARK = "\n<!--hb-sig:".getBytes(StandardCharsets.UTF_8);
 
-    /** true if the HTML ends with a valid signature of the GitHub build (ECDSA P-256 over everything before it). */
     static boolean signedByBuild(byte[] html) {
         try {
             int at = -1;
@@ -94,7 +87,6 @@ public class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // no screenshots, screen recordings or preview picture in the app overview (can be switched off in Sicherheit)
         if (getSharedPreferences("hb-native", MODE_PRIVATE).getBoolean("secure", true))
             getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
         web = new WebView(this);
@@ -102,13 +94,12 @@ public class MainActivity extends Activity {
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
-        s.setMediaPlaybackRequiresUserGesture(false);   // live camera preview for the document scanner
+        s.setMediaPlaybackRequiresUserGesture(false);
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
         s.setAllowFileAccess(true);
-        // the app (a local file) talks to the user's own Synology for syncing
         s.setAllowUniversalAccessFromFileURLs(true);
-        s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);   // Synology requests go through the native bridge, not the page
+        s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         s.setTextZoom(100);
 
         web.addJavascriptInterface(new Bridge(), "AndroidBridge");
@@ -125,15 +116,13 @@ public class MainActivity extends Activity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri u = request.getUrl();
-                if ("file".equals(u.getScheme()) && APP_URL.equals(u.toString())) return false;   // only the app itself
+                if ("file".equals(u.getScheme()) && APP_URL.equals(u.toString())) return false;
                 try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) { }
                 return true;
             }
         });
 
-        // <input type="file"> for the CSV import and backup restore
         web.setWebChromeClient(new WebChromeClient() {
-            /** live camera for the document scanner (getUserMedia): only the camera, only after the user allowed it */
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
                 runOnUiThread(() -> {
@@ -151,7 +140,6 @@ public class MainActivity extends Activity {
                 fileCallback = callback;
                 Intent i = new Intent(Intent.ACTION_GET_CONTENT);
                 i.addCategory(Intent.CATEGORY_OPENABLE);
-                // pictures (accept="image/*") open the gallery, everything else the file picker
                 String[] acc = params.getAcceptTypes();
                 boolean img = acc != null && acc.length > 0 && acc[0] != null && acc[0].startsWith("image/");
                 i.setType(img ? "image/*" : "*/*");
@@ -172,7 +160,6 @@ public class MainActivity extends Activity {
         loadApp();
     }
 
-    /** opens Android's installer for the downloaded update (Android itself checks that it is signed like this app) */
     String installApk(File f) {
         if (android.os.Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
             Intent p = new Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + getPackageName()));
@@ -188,8 +175,6 @@ public class MainActivity extends Activity {
         return "installing";
     }
 
-    /** Shows the newest version: a downloaded (signed) update directly, otherwise the copy inside the APK.
-     *  Loaded as data with the app's own address, so storage and everything else stay the same. */
     void loadApp() {
         byte[] html = newestApp();
         if (html == null) { web.loadUrl(APP_URL); return; }
@@ -214,16 +199,14 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** The downloaded version if it is newer than the one inside the APK, otherwise null (= use the APK's copy). */
     private byte[] newestApp() { return newestApp(this); }
 
-    /** also used by the background check (BgJob), which has no activity */
     static byte[] newestApp(android.content.Context ctx) {
         try {
             File f = new File(ctx.getFilesDir(), "app.html");
             if (!f.exists()) return null;
             byte[] cached = readAll(new java.io.FileInputStream(f));
-            if (!signedByBuild(cached)) { f.delete(); return null; }   // changed or unsigned: never run it
+            if (!signedByBuild(cached)) { f.delete(); return null; }
             byte[] bundled = readAll(ctx.getAssets().open("index.html"));
             return versionOf(cached) > versionOf(bundled) ? cached : null;
         } catch (Exception e) {
@@ -267,7 +250,7 @@ public class MainActivity extends Activity {
         });
     }
 
-    /* ---------- receipt scan: photo -> text recognition on the phone -> lines with positions to the app ---------- */
+    /* Beleg scannen */
     private void startScan(String source) {
         try {
             if ("gallery".equals(source)) {
@@ -276,7 +259,6 @@ public class MainActivity extends Activity {
                 i.addCategory(Intent.CATEGORY_OPENABLE);
                 startActivityForResult(Intent.createChooser(i, "Foto auswählen"), SCAN_GALLERY);
             } else {
-                // with CAMERA in the manifest, the system camera only opens once the permission is granted
                 if (checkSelfPermission(android.Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(new String[]{android.Manifest.permission.CAMERA}, SCAN_CAM_REQUEST);
                     return;
@@ -326,7 +308,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** The receipt photo, at most 1600 px, upright, as JPEG data URL (kept with the booking). */
     private String jpegDataUrl(Uri uri) {
         try {
             BitmapFactory.Options o = new BitmapFactory.Options();
@@ -410,7 +391,6 @@ public class MainActivity extends Activity {
             web.evaluateJavascript("window.hbNotifyPerm && window.hbNotifyPerm(" + (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) + ")", null);
     }
 
-    /** home network, Tailscale or this device: the only places plain http may go to */
     static boolean homeHost(String h) {
         if (h == null) return false;
         h = h.toLowerCase(java.util.Locale.ROOT);
@@ -418,8 +398,6 @@ public class MainActivity extends Activity {
                 || h.equals("localhost") || h.endsWith(".local") || h.endsWith(".fritz.box") || h.endsWith(".ts.net");
     }
 
-    /** Called from JavaScript as window.AndroidBridge */
-    /* ---- opened from an update notice (own notification or the push link finanzmami://update) ---- */
     private volatile boolean updTap;
 
     private static boolean isUpdIntent(Intent i) {
@@ -436,7 +414,7 @@ public class MainActivity extends Activity {
         if (isUpdIntent(i) && web != null) web.evaluateJavascript("window.hbUpdTap && window.hbUpdTap()", null);
     }
 
-    /* ---- background check (BgJob): while the app sits in the background, its own page does the check ---- */
+    /* Hintergrund-Check */
     static volatile MainActivity live;
     static volatile boolean fg;
     private volatile Runnable bgCb;
@@ -455,7 +433,6 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
-    /** one request (also used by BgJob): {code, text} */
     static Object[] httpCall(String method, String url, String auth, String body, String certHost) {
         int code = 0;
         String text = "";
@@ -463,7 +440,6 @@ public class MainActivity extends Activity {
         try {
             if (!url.startsWith("http://") && !url.startsWith("https://")) throw new IllegalArgumentException();
             URL u0 = new URL(url);
-            // unencrypted only inside the home network or Tailscale – never across the internet
             if (url.startsWith("http://") && !homeHost(u0.getHost())) throw new IllegalArgumentException("http only at home");
             c = (HttpURLConnection) u0.openConnection();
             final boolean pin = certHost != null && !certHost.isEmpty();
@@ -488,7 +464,7 @@ public class MainActivity extends Activity {
             code = c.getResponseCode();
             InputStream is = code >= 400 ? c.getErrorStream() : c.getInputStream();
             text = is == null ? "" : new String(readAll(is), StandardCharsets.UTF_8);
-        } catch (Throwable e) {   // also "out of memory": always answer, so the app does not wait forever
+        } catch (Throwable e) {
             code = 0;
             String m = e.getMessage();
             text = "ERR:" + e.getClass().getSimpleName() + (m == null ? "" : ": " + (m.length() > 160 ? m.substring(0, 160) : m));
@@ -499,10 +475,8 @@ public class MainActivity extends Activity {
     }
 
     private class Bridge {
-        /** false: this is the visible app (the background check has its own bridge) */
         @JavascriptInterface
         public boolean bgMode() { return false; }
-        /** "free" if Android does not slow the app down in the background (battery optimisation off) */
         @JavascriptInterface
         public String batteryState() {
             try {
@@ -510,7 +484,6 @@ public class MainActivity extends Activity {
                 return pm != null && pm.isIgnoringBatteryOptimizations(getPackageName()) ? "free" : "limited";
             } catch (Exception e) { return "unknown"; }
         }
-        /** asks Android to let the app run in the background (system dialog) */
         @JavascriptInterface
         public void batteryAsk() {
             runOnUiThread(() -> {
@@ -522,22 +495,17 @@ public class MainActivity extends Activity {
                 }
             });
         }
-        /** runs the background check right now in about a minute (for testing with the app closed) */
-        /** when the phone last ran the background check (ms), 0 = never */
         @JavascriptInterface
         public long bgLast() { return getSharedPreferences("hb-bg", MODE_PRIVATE).getLong("last", 0); }
         @JavascriptInterface
         public void bgSoon() { BgJob.soon(MainActivity.this, 60_000); }
-        /** the page finished a background check it was asked for */
         @JavascriptInterface
         public void bgDone() { runOnUiThread(MainActivity.this::finishBg); }
 
-        /** true once if the app was opened by tapping an update notice */
         @JavascriptInterface
         public boolean takeUpdTap() { boolean b = updTap; updTap = false; return b; }
 
 
-        /** "granted" or "denied" – whether the app may show notifications */
         @JavascriptInterface
         public String notifyState() {
             if (android.os.Build.VERSION.SDK_INT < 33) {
@@ -547,7 +515,6 @@ public class MainActivity extends Activity {
             return checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED ? "granted" : "denied";
         }
 
-        /** Asks the user for permission (Android 13+); the answer comes back through window.hbNotifyPerm(ok). */
         @JavascriptInterface
         public void notifyAsk() {
             runOnUiThread(() -> {
@@ -557,7 +524,6 @@ public class MainActivity extends Activity {
             });
         }
 
-        /** Opens the Android settings for this app's notifications. */
         @JavascriptInterface
         public void notifySettings() {
             Intent i = new Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
@@ -570,14 +536,11 @@ public class MainActivity extends Activity {
             Notifier.show(MainActivity.this, id, title, text, ch);
         }
 
-        /** Replaces all planned notifications: JSON array of {id, at (ms), title, text, ch}. */
         @JavascriptInterface
         public void notifySchedule(String json) {
             Notifier.schedule(MainActivity.this, json);
         }
 
-        /** Stores a newer app version (downloaded from the Synology); it is used from the next (re)load on. */
-        /** Opens a web page (e.g. a shop's weekly offers) inside the app as a "custom tab"; back returns to the app. */
         @JavascriptInterface
         public void openInApp(final String url) {
             runOnUiThread(() -> {
@@ -604,11 +567,6 @@ public class MainActivity extends Activity {
             }
         }
 
-        /**
-         * Network requests to the Synology go through Android directly (not the WebView), so the browser rules
-         * for local network access never get in the way. The answer comes back via window.hbHttpDone(id, status, text).
-         */
-        /** copies a code as "sensitive" (no preview) and removes it from the clipboard again after sec seconds */
         @JavascriptInterface
         public void copySecret(final String text, final int sec) {
             runOnUiThread(() -> {
@@ -638,7 +596,6 @@ public class MainActivity extends Activity {
             });
         }
 
-        /** screen protection on/off (FLAG_SECURE), remembered for the next start */
         @JavascriptInterface
         public void setSecure(final boolean on) {
             getSharedPreferences("hb-native", MODE_PRIVATE).edit().putBoolean("secure", on).apply();
@@ -646,7 +603,6 @@ public class MainActivity extends Activity {
                                   else getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE); });
         }
 
-        /** encrypted storage for the app data (see Vault) */
         @JavascriptInterface
         public String seal(String text) { return Vault.seal(MainActivity.this, text == null ? "" : text); }
         @JavascriptInterface
@@ -659,8 +615,6 @@ public class MainActivity extends Activity {
             httpAs(id, method, url, auth, body, "");
         }
 
-        /** like http(), but for the Synology in the home network: https to its local address (192.168.…),
-            the certificate has to be valid for certHost (its internet name) – so nobody in the WLAN can read along */
         @JavascriptInterface
         public void httpAs(final String id, final String method, final String url, final String auth, final String body, final String certHost) {
             new Thread(() -> {
@@ -670,7 +624,6 @@ public class MainActivity extends Activity {
                 try {
                     if (!url.startsWith("http://") && !url.startsWith("https://")) throw new IllegalArgumentException();
                     URL u0 = new URL(url);
-                    // unencrypted only inside the home network or Tailscale – never across the internet
                     if (url.startsWith("http://") && !homeHost(u0.getHost())) throw new IllegalArgumentException("http only at home");
                     c = (HttpURLConnection) u0.openConnection();
                     final boolean pin = certHost != null && !certHost.isEmpty();
@@ -695,9 +648,9 @@ public class MainActivity extends Activity {
                     code = c.getResponseCode();
                     InputStream is = code >= 400 ? c.getErrorStream() : c.getInputStream();
                     text = is == null ? "" : new String(readAll(is), StandardCharsets.UTF_8);
-                } catch (Throwable e) {   // also "out of memory": always answer, so the app does not wait forever
+                } catch (Throwable e) {
                     code = 0;
-                    String m = e.getMessage();   // tell the app what went wrong (timeout, certificate, …) – shown in the sync status
+                    String m = e.getMessage();
                     text = "ERR:" + e.getClass().getSimpleName() + (m == null ? "" : ": " + (m.length() > 160 ? m.substring(0, 160) : m));
                 } finally {
                     if (c != null) c.disconnect();
@@ -707,7 +660,7 @@ public class MainActivity extends Activity {
             }).start();
         }
 
-        /* ---- self-update from the GitHub release (private repo: read-only key the user entered) ---- */
+        /* Selbst-Update */
         @JavascriptInterface
         public String appVersions() {
             try {
@@ -716,7 +669,6 @@ public class MainActivity extends Activity {
             } catch (Exception e) { return "{}"; }
         }
 
-        /** the phone's own name as it shows it ("Galaxy S23"), not the model code */
         @JavascriptInterface
         public String deviceName() {
             String n = null;
@@ -735,23 +687,21 @@ public class MainActivity extends Activity {
             catch (Exception e) { return "0"; }
         }
 
-        /** kind "json": text back; "app": verify signature and keep as next app version; "apk": install the new Android app */
         @JavascriptInterface
         public void ghFetch(final String id, final String url, final String token, final String kind) {
             new Thread(() -> {
                 String result = "", err = "";
                 try {
                     if (!url.startsWith("https://api.github.com/repos/minghatsu/")) throw new IllegalArgumentException("Adresse nicht erlaubt");
-                    // the background check (UpdateJob) uses the same key
                     if ("json".equals(kind)) getSharedPreferences("hb-native", MODE_PRIVATE).edit().putString("ghkey", token == null ? "" : token).apply();
                     HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
                     c.setInstanceFollowRedirects(false);
                     c.setConnectTimeout(10000); c.setReadTimeout(120000);
-                    if (token != null && !token.isEmpty()) c.setRequestProperty("Authorization", "Bearer " + token);   // public download repo: no key
+                    if (token != null && !token.isEmpty()) c.setRequestProperty("Authorization", "Bearer " + token);
                     c.setRequestProperty("User-Agent", "FinanzMAMI");
                     c.setRequestProperty("Accept", "json".equals(kind) ? "application/vnd.github+json" : "application/octet-stream");
                     int code = c.getResponseCode();
-                    if (code >= 300 && code < 400) {     // download link of the file: fetched without the key
+                    if (code >= 300 && code < 400) {
                         String loc = c.getHeaderField("Location"); c.disconnect();
                         if (loc == null || !loc.startsWith("https://")) throw new IllegalStateException("Weiterleitung fehlt");
                         c = (HttpURLConnection) new URL(loc).openConnection();
@@ -779,14 +729,13 @@ public class MainActivity extends Activity {
             }).start();
         }
 
-        /* ---- app lock: fingerprint / face via the system dialog ---- */
+        /* App-Sperre */
         @JavascriptInterface
         @SuppressWarnings("deprecation")
         public boolean biometricAvailable() {
             try {
                 BiometricManager bm = getSystemService(BiometricManager.class);
                 if (bm == null) return false;
-                // fingerprint or face (also the "weak" kind many phones use)
                 if (android.os.Build.VERSION.SDK_INT >= 30)
                     return bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS;
                 return bm.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS;
@@ -815,7 +764,6 @@ public class MainActivity extends Activity {
             });
         }
 
-        /** true if the phone itself is protected (pattern, PIN, password) – then "PIN vergessen" can use it. */
         @JavascriptInterface
         public boolean deviceSecure() {
             try {
@@ -826,7 +774,6 @@ public class MainActivity extends Activity {
             }
         }
 
-        /** Unlock with the phone's own screen lock (or fingerprint); the answer comes back via window.hbBioDone(id, ok). */
         @JavascriptInterface
         @SuppressWarnings("deprecation")
         public void deviceCredential(final String id) {
@@ -850,8 +797,6 @@ public class MainActivity extends Activity {
             });
         }
 
-        /** Text recognition for a picture the app already has (live scanner frame or the straightened photo).
-         *  Answers window.hbOcrDone(id, json, err) with the lines and their positions in that picture. */
         @JavascriptInterface
         public void ocrImage(final String id, final String dataUrl) {
             new Thread(() -> {
@@ -884,7 +829,6 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> { scanId = id; startScan(source); });
         }
 
-        /** Downloads a small image (merchant logo) and hands it back as data URL via window.hbImgDone(id, data). */
         @JavascriptInterface
         public void fetchImage(final String id, final String url) {
             new Thread(() -> {
@@ -936,7 +880,6 @@ public class MainActivity extends Activity {
                 return false;
             }
         }
-        /** Saves a binary file (base64) in the Downloads folder, e.g. the receipts as ZIP. */
         @JavascriptInterface
         public boolean saveFileB64(String name, String mime, String b64) {
             try {
@@ -957,7 +900,6 @@ public class MainActivity extends Activity {
             }
         }
 
-        /** Opens the Android share menu for an image (base64 JPEG), e.g. to send a receipt. */
         @JavascriptInterface
         public boolean shareImage(String b64, String name) {
             try {
@@ -977,7 +919,6 @@ public class MainActivity extends Activity {
                 return false;
             }
         }
-        /** Feedback mail with screenshots: opens the mail app (share menu) with recipient, subject, text and images (base64 JPEGs, JSON array). */
         @JavascriptInterface
         public boolean sendMail(String to, String subject, String body, String imagesJson) {
             try {
@@ -1010,7 +951,6 @@ public class MainActivity extends Activity {
                 return false;
             }
         }
-        /** Weekly automatic backup: Downloads/Haushaltsbuch-Backups, only the newest `keep` files stay. */
         @JavascriptInterface
         public boolean autoBackup(String name, String content, int keep) {
             try {
@@ -1025,7 +965,6 @@ public class MainActivity extends Activity {
                     if (os == null) return false;
                     os.write(content.getBytes(StandardCharsets.UTF_8));
                 }
-                // remove older backups of this app beyond `keep`
                 try (android.database.Cursor c = getContentResolver().query(MediaStore.Downloads.EXTERNAL_CONTENT_URI,
                         new String[]{MediaStore.Downloads._ID, MediaStore.Downloads.DISPLAY_NAME},
                         MediaStore.Downloads.RELATIVE_PATH + "=? AND " + MediaStore.Downloads.DISPLAY_NAME + " LIKE 'haushaltsbuch-auto-%'",

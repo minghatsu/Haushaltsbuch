@@ -17,11 +17,6 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-/**
- * Encrypts the app's stored data on the phone.
- * A master key lives in the Android Keystore (it never leaves the secure hardware). It locks a random data key,
- * which is kept in the app's private settings. The data key encrypts the stored data with AES-256-GCM.
- */
 final class Vault {
     private static final String ALIAS = "hb-master";
     private static final String PREFS = "hb-vault";
@@ -62,7 +57,6 @@ final class Vault {
         return dataKey;
     }
 
-    /** text -> "v1:" + base64(iv + ciphertext), or "" if it did not work */
     static String seal(Context ctx, String text) {
         try {
             byte[] iv = new byte[12];
@@ -73,7 +67,6 @@ final class Vault {
         } catch (Exception e) { return ""; }
     }
 
-    /** the reverse of seal(); null if the text is damaged or the key is missing */
     static String unseal(Context ctx, String sealed) {
         try {
             if (sealed == null || !sealed.startsWith("v1:")) return null;
@@ -84,7 +77,6 @@ final class Vault {
         } catch (Exception e) { return null; }
     }
 
-    /** slow PIN check value (PBKDF2-SHA256), hex */
     static String pbkdf2(String pin, String salt, int iter) {
         try {
             PBEKeySpec s = new PBEKeySpec(pin.toCharArray(), salt.getBytes(StandardCharsets.UTF_8), Math.max(1000, Math.min(iter, 2000000)), 256);
