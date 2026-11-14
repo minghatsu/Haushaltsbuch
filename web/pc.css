@@ -852,11 +852,35 @@ html.pc.istab.tabp .pcminis button{padding:8px 12px!important;display:flex!impor
 html.pc.istab.tabp .pcminis b{font-size:15px!important}
 /* tablet: slimmer green panel, calendar + side column next to each other, smaller calendar boxes */
 html.pc.istab{--hw:clamp(280px,25vw,340px)!important}
-html.pc.istab:not(.tabp) .pchero{padding:24px!important}
-html.pc.istab:not(.tabp) .pcring{width:min(165px,22vh)!important}
-html.pc.istab:not(.tabp) .pcbal{font-size:44px!important}
+html.pc.istab:not(.tabp) .pchero{padding:18px 18px 16px!important}
+html.pc.istab:not(.tabp) .pchi{font-size:13px}
+html.pc.istab:not(.tabp) .pcbal{font-size:clamp(30px,3.4vw,40px)!important;margin:4px 0 2px!important}
+html.pc.istab:not(.tabp) .pcaccs{margin-top:10px;gap:6px;max-height:none;overflow:visible}
+html.pc.istab:not(.tabp) .pcaccs button{padding:7px 10px;border-radius:14px}
+html.pc.istab:not(.tabp) .pcaccs span{font-size:11px}
+html.pc.istab:not(.tabp) .pcaccs b{font-size:15px}
+html.pc.istab:not(.tabp) .pcaccs button.main b{font-size:18px}
+html.pc.istab:not(.tabp) .pcring{width:min(150px,20vh)!important;margin:12px auto!important;flex:none}
+html.pc.istab:not(.tabp) .pcring b{font-size:22px!important}
+html.pc.istab:not(.tabp) .pcring small{font-size:11px}
+html.pc.istab:not(.tabp) .pcravg{display:none}
+html.pc.istab:not(.tabp) .pcminis{gap:6px;flex:none}
+html.pc.istab:not(.tabp) .pcminis button{padding:8px 9px;border-radius:14px}
+html.pc.istab:not(.tabp) .pcminis span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.pc.istab:not(.tabp) .pcminis b{font-size:14px}
 html.pc.istab:not(.tabp) #v-fix.pcfcal{grid-template-columns:minmax(0,1fr) 320px!important}
 html.pc.istab:not(.tabp) .pcfside{display:flex!important;flex-direction:column;gap:14px}
 html.pc.istab .pcfcalc .grid{grid-auto-rows:minmax(72px,auto)!important}
 html.pc.istab .pcfd{padding:6px!important}
 html.pc.istab:not(.tabp) #v-list{grid-template-columns:minmax(0,1fr) 340px!important}
+/* tablet landscape (also on narrow tablets ≤1100px): the green panel stays a column on the left */
+html.pc.istab:not(.tabp) #v-home{padding-left:calc(var(--hw) + 28px)!important}
+html.pc.istab:not(.tabp) .pchero{position:fixed!important;left:24px;top:104px!important;bottom:104px!important;width:var(--hw)!important;min-height:0!important;overflow-y:auto;scrollbar-width:none}
+@media (max-height:800px){
+  html.pc.istab:not(.tabp) .pchero{display:grid!important;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"hi hi" "bal bal" "sub sub" "accs accs" "ring minis";align-content:start;column-gap:10px}
+  html.pc.istab:not(.tabp) .pchi{grid-area:hi}html.pc.istab:not(.tabp) .pcbal{grid-area:bal}html.pc.istab:not(.tabp) .pcsub{grid-area:sub}html.pc.istab:not(.tabp) .pcaccs{grid-area:accs}
+  html.pc.istab:not(.tabp) .pcring{grid-area:ring;width:118px!important;margin:12px 0 0!important}
+  html.pc.istab:not(.tabp) .pcring b{font-size:19px!important}
+  html.pc.istab:not(.tabp) .pcminis{grid-area:minis;display:flex!important;flex-direction:column;gap:5px;margin-top:12px;align-self:center}
+  html.pc.istab:not(.tabp) .pcminis button{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:6px 9px}
+}
