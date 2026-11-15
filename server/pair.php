@@ -154,8 +154,12 @@ try {
             else if (q('SELECT 1 FROM acts JOIN invites ON invites.code = acts.code WHERE acts.dev = ? AND invites.lvl = 0', [$dev])->fetch()) $lvl = 1;
             if ($lvl === null) fail('Dieses Gerät darf keine Einladungen verschicken', 403);
             if ($a === 'invrenew' && $lvl !== 0) fail('Nur der Entwickler kann seinen Code erneuern', 403);
-            if ($a === 'invrenew') q("UPDATE invites SET off = 1, owner = owner || '~' || ? WHERE owner = ?", [(string)time(), $dev]);
-            $r = q('SELECT code, max, lvl FROM invites WHERE owner = ?', [$dev])->fetch(PDO::FETCH_ASSOC);
+            if ($a === 'invrenew') q("UPDATE invites SET off = 1, owner = owner || '~' || ? WHERE (owner = ? OR lvl = 0) AND COALESCE(off, 0) = 0", [(string)time(), $dev]);
+            $r = null;
+            if ($lvl === 0) {
+                $r = q('SELECT i.code, i.max, i.lvl FROM invites i LEFT JOIN acts a ON a.code = i.code WHERE i.lvl = 0 AND COALESCE(i.off, 0) = 0 GROUP BY i.code ORDER BY COUNT(a.dev) DESC, i.created ASC LIMIT 1')->fetch(PDO::FETCH_ASSOC) ?: null;
+                if ($r) q("UPDATE invites SET off = 1, owner = owner || '~' || ? WHERE lvl = 0 AND code <> ? AND COALESCE(off, 0) = 0 AND code NOT IN (SELECT code FROM acts)", [(string)time(), $r['code']]);
+            } else $r = q('SELECT code, max, lvl FROM invites WHERE owner = ?', [$dev])->fetch(PDO::FETCH_ASSOC) ?: null;
             if ($r && (int)$r['lvl'] === 0 && (int)$r['max'] === 0) { q('UPDATE invites SET max = ? WHERE code = ?', [DEV_MAX, $r['code']]); $r['max'] = DEV_MAX; }
             if (!$r) {
                 if (!ipCount('ipcreate', MAX_CREATE_PER_HOUR)) fail('Zu viele Versuche – bitte später noch einmal', 429);
@@ -230,8 +234,9 @@ try {
         devCheck();
         db()->exec('CREATE TABLE IF NOT EXISTS invites (code TEXT PRIMARY KEY, owner TEXT UNIQUE, max INTEGER, lvl INTEGER DEFAULT 1, created INTEGER)');
         db()->exec('CREATE TABLE IF NOT EXISTS acts (code TEXT NOT NULL, dev TEXT NOT NULL, t INTEGER, PRIMARY KEY (code, dev))');
+        try { db()->exec('ALTER TABLE invites ADD COLUMN off INTEGER DEFAULT 0'); } catch (Throwable $e) { }
         db()->exec('CREATE TABLE IF NOT EXISTS pings (h TEXT PRIMARY KEY, ver TEXT, form TEXT, role TEXT, t INTEGER)');
-        $inv = q('SELECT i.code, i.max, i.lvl, i.created, COUNT(a.dev) AS used, MAX(a.t) AS last FROM invites i LEFT JOIN acts a ON a.code = i.code GROUP BY i.code ORDER BY i.lvl, used DESC')->fetchAll(PDO::FETCH_ASSOC);
+        $inv = q('SELECT i.code, i.max, i.lvl, i.created, COUNT(a.dev) AS used, MAX(a.t) AS last FROM invites i LEFT JOIN acts a ON a.code = i.code WHERE COALESCE(i.off, 0) = 0 GROUP BY i.code ORDER BY i.lvl, used DESC')->fetchAll(PDO::FETCH_ASSOC);
         $since = time() - 14 * 86400;
         $vers = q('SELECT ver, form, role, COUNT(*) AS n FROM pings WHERE t > ? GROUP BY ver, form, role ORDER BY ver DESC', [$since])->fetchAll(PDO::FETCH_ASSOC);
         $act7 = (int)q('SELECT COUNT(*) FROM pings WHERE t > ?', [time() - 7 * 86400])->fetchColumn();
