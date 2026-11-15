@@ -35,7 +35,7 @@ h1{font:800 24px Georgia,serif;margin:26px 0 4px}.mu{color:var(--mu);font-size:1
   <p class="mu" id="sub">Dein Haushaltsbuch – deine Daten bleiben auf deinem Gerät.</p>
 
   <div class="note bad" id="noInv" hidden>Für die Testversion brauchst du eine Einladung. Lass dir den QR-Code in der App von jemandem zeigen, der sie schon hat.</div>
-  <div class="note bad" id="full" hidden>Diese Einladung ist schon aufgebraucht. Frag nach einem neuen Code.</div>
+  <div class="note bad" id="full" hidden>Dieser Code wurde schon benutzt. Jeder bekommt seinen eigenen – frag nach einem neuen. Hast du die App schon? Weitere Geräte (z. B. den PC) verbindest du in der App über „Geräte koppeln“, dafür brauchst du keinen Code.</div>
 
   <div id="dl" hidden>
     <div class="code"><div style="flex:1"><small>Dein Einladungscode</small><b id="code">——</b></div><button id="cp">Kopieren</button></div>
@@ -82,7 +82,7 @@ h1{font:800 24px Georgia,serif;margin:26px 0 4px}.mu{color:var(--mu);font-size:1
   fetch(PAIR + "?a=invinfo&c=" + code, { cache: "no-store" }).then(function(r){ return r.json().then(function(j){ return [r.status, j]; }); }).then(function(x){
     var s = x[0], j = x[1];
     if (s === 404 || s === 410){ $("dl").hidden = true; $("noInv").hidden = false; $("noInv").textContent = s === 410 ? "Dieser Einladungscode gilt nicht mehr. Frag nach dem neuen Code." : "Diesen Einladungscode gibt es nicht. Scann den QR-Code bitte noch einmal."; return; }
-    if (j && j.ok && j.left >= 0){ if (j.left === 0){ $("dl").hidden = true; $("full").hidden = false; } else $("left").textContent = "Noch " + j.left + " von " + j.max + " Plätzen frei."; }
+    if (j && j.ok && j.left >= 0){ if (j.left === 0){ $("full").hidden = false; } else $("left").textContent = "Der Code gilt für eine Person."; }
   }).catch(function(){});
 })();
 </script>

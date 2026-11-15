@@ -2921,6 +2921,7 @@ document.addEventListener("click", async e=>{
   if (e.target.closest("[data-actpair]")){ const g=$("actBg"); if (g) g.hidden=true; document.body.classList.remove("locked"); pairShow("join"); return; }
   if (e.target.closest("[data-actscan]")){ try { const t=await qrLive(/[?&](?:i=)?[A-Za-z0-9]{6}\b|^\s*[A-Za-z0-9]{6}\s*$/); if (!t) return; UI.act.c=invCode(t); actTry(); } catch(x){ toast(x.message); } return; }
   if (e.target.closest("[data-invopen]")){ invOpen(); return; }
+  if (e.target.closest("[data-invnew]")){ try { const r=await pairCall("invmake", "", {dev:devId(), fresh:1}, true); UI.inv={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; UI.invText=null; invRender(); toast("Neuer Code – gilt für eine Person"); } catch(err){ toast(err.message||"Server nicht erreichbar"); } return; }
   if (e.target.closest("[data-invrenew]")){ if (!UI.invArm){ UI.invArm=true; invRender(); clearTimeout(UI.invArmT); UI.invArmT=setTimeout(()=>{ UI.invArm=false; invRender(); }, 5000); return; }
     UI.invArm=false; try { const r=await pairCall("invrenew", "", {dev:devId()}, true); UI.inv={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; invRender(); toast("Neuer Code – der alte gilt nicht mehr"); } catch(err){ toast(/Unbekannte Aktion/i.test(err.message||"")?"Dafür bitte die neue pair.php auf den Server laden":"Ging nicht: "+(err.message||"")); } return; }
   if (e.target.closest("[data-invsharego]")){ UI.invShare=true; UI.invText=null; invRender(); return; }
@@ -2948,7 +2949,8 @@ function invRender(){
        <div class="invqr">${qrSvg(invLink(I.code), 236)}</div>
        <div class="invurl" data-noi18n>${esc(INV_PAGE.replace(/^https?:\/\//,"").replace(/\/$/,""))}</div>
        <div class="invcode">Code <b data-noi18n>${esc(I.code)}</b></div>
-       <p class="small muted" style="margin:8px 0 0">${!I.max?`Unbegrenzt · schon <b>${I.used}</b> ${I.used===1?"Gerät":"Geräte"} dabei`:I.left>0?`Noch <b>${I.left}</b> von ${I.max} Geräten frei`:`Alle ${I.max} Plätze sind vergeben`}</p>`;
+       <p class="small muted" style="margin:8px 0 0">${I.used?`Dieser Code wurde schon benutzt`:`Gilt für <b>eine Person</b> · danach nicht mehr verwendbar`}</p>
+       <button class="link small" style="margin-top:6px" data-invnew>＋ Neuer Code für die nächste Person</button>`;
   if (I.code && UI.invShare){ const tone=UI.invTone||"pers", txt=UI.invText!=null?UI.invText:invMsg(tone, I.code);
     const apps=[["wa","WhatsApp","#25D366","💬"],["tg","Telegram","#229ED9","✈️"],...(IS_DESK?[]:[["sms","SMS","#0b8a5f","✉️"]]),["mail","E-Mail","#c27c0e","📧"],["more","Mehr","#8a958f","⋯"]];
     el.innerHTML=`<div class="invbox" role="dialog" aria-modal="true" aria-labelledby="invT">
@@ -2965,7 +2967,7 @@ function invRender(){
     <div class="invmid">${body}</div>
     ${I.code?`<button class="btn primary block" style="justify-content:center;gap:8px" data-invsharego>${ic("arrowUp",18)} Einladung verschicken</button>
     <p class="small muted" style="margin:10px 4px 0;text-align:center">Wer scannt, kann die App am Handy laden oder sich den Link für den PC selbst schicken.</p>
-    ${updKey()?`<button class="link small invrenew" data-invrenew>${UI.invArm?"Wirklich? Der alte Code funktioniert dann nicht mehr – nochmal tippen":"↻ Neuen Code erzeugen"}</button>`:""}`:""}
+`:""}
   </div>`; }
 function invGrow(){ const ta=$("invTxt"); if (!ta) return; ta.style.height="auto"; ta.style.height=(ta.scrollHeight+4)+"px"; }
 function invMsg(tone, c){ const l=invLink(c), dev=!!updKey();

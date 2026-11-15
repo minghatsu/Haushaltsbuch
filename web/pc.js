@@ -581,7 +581,7 @@ if (IS_PC){
     if (tab==="stat"){ const d=DS.d; if (!d) return tabs+`<p class="small muted" style="padding:14px 0">${DS.err?esc(DS.err):"Wird geladen …"}</p>`;
       const fm={phone:"Handy",tablet:"Tablet",pc:"PC",laptop:"Laptop"}, byV={};
       for (const v of d.versions||[]){ const k="v"+(v.ver||"?"); (byV[k]=byV[k]||[]).push(v); }
-      const inv=(d.invites||[]).map(i=>`<div class="pcdsr"><b>${i.lvl==0?"👑 Dein Code":"Tester-Code"}</b><span>${esc(i.code)}</span><em>${i.used}${+i.max?" / "+i.max:""} Geräte</em></div>`).join("") || `<p class="small muted">Noch keine Einladung verschickt.</p>`;
+      const inv=(d.invites||[]).map(i=>`<div class="pcdsr"><b>${i.lvl==0?"👑 Von dir":"Von Tester"}</b><span>${esc(i.code)}</span><em>${+i.used?`benutzt${i.last?" am "+esc(new Date(i.last*1000).toLocaleDateString("de-DE")):""}`:"noch offen"}</em></div>`).join("") || `<p class="small muted">Noch keine Einladung verschickt.</p>`;
       const ver=Object.entries(byV).map(([k,L])=>`<div class="pcdsr"><b>${esc(k)}</b><span>${L.map(v=>`${v.n}× ${fm[v.form]||v.form}${v.role==="dev"?" (du)":""}`).join(" · ")}</span></div>`).join("") || `<p class="small muted">Noch keine Meldungen – die Apps melden sich einmal am Tag.</p>`;
       return tabs+`<div class="pcds"><div class="pcdsk"><div><b>${d.activations|0}</b><small>freigeschaltet</small></div><div><b>${d.active7|0}</b><small>aktiv (7 Tage)</small></div></div>
         <h4>Einladungen</h4>${inv}<h4>Versionen (14 Tage)</h4>${ver}<button class="link small" data-dsreload="1">Neu laden</button></div>`; }

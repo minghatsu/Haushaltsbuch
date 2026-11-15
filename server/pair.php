@@ -153,23 +153,21 @@ try {
             if (preg_match('/^Dev\s/', $h)) { devCheck(); $lvl = 0; }
             else if (q('SELECT 1 FROM acts JOIN invites ON invites.code = acts.code WHERE acts.dev = ? AND invites.lvl = 0', [$dev])->fetch()) $lvl = 1;
             if ($lvl === null) fail('Dieses Gerät darf keine Einladungen verschicken', 403);
-            if ($a === 'invrenew' && $lvl !== 0) fail('Nur der Entwickler kann seinen Code erneuern', 403);
-            if ($a === 'invrenew') q("UPDATE invites SET off = 1, owner = owner || '~' || ? WHERE (owner = ? OR lvl = 0) AND COALESCE(off, 0) = 0", [(string)time(), $dev]);
+            $fresh = $a === 'invrenew' || !empty($b['fresh']);
+            $mine = $lvl === 0 ? 'lvl = 0' : "owner LIKE ? ESCAPE '\\'";
+            $mp = $lvl === 0 ? [] : [str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $dev) . '#%'];
             $r = null;
-            if ($lvl === 0) {
-                $r = q('SELECT i.code, i.max, i.lvl FROM invites i LEFT JOIN acts a ON a.code = i.code WHERE i.lvl = 0 AND COALESCE(i.off, 0) = 0 GROUP BY i.code ORDER BY COUNT(a.dev) DESC, i.created ASC LIMIT 1')->fetch(PDO::FETCH_ASSOC) ?: null;
-                if ($r) q("UPDATE invites SET off = 1, owner = owner || '~' || ? WHERE lvl = 0 AND code <> ? AND COALESCE(off, 0) = 0 AND code NOT IN (SELECT code FROM acts)", [(string)time(), $r['code']]);
-            } else $r = q('SELECT code, max, lvl FROM invites WHERE owner = ?', [$dev])->fetch(PDO::FETCH_ASSOC) ?: null;
-            if ($r && (int)$r['lvl'] === 0 && (int)$r['max'] === 0) { q('UPDATE invites SET max = ? WHERE code = ?', [DEV_MAX, $r['code']]); $r['max'] = DEV_MAX; }
+            if (!$fresh) $r = q("SELECT code, max, lvl FROM invites WHERE $mine AND COALESCE(off, 0) = 0 AND code NOT IN (SELECT code FROM acts) ORDER BY created DESC, rowid DESC LIMIT 1", $mp)->fetch(PDO::FETCH_ASSOC) ?: null;
             if (!$r) {
-                if (!ipCount('ipcreate', MAX_CREATE_PER_HOUR)) fail('Zu viele Versuche – bitte später noch einmal', 429);
+                if ($lvl === 1 && (int)q("SELECT COUNT(*) FROM invites WHERE $mine", $mp)->fetchColumn() >= INV_MAX) fail('Du hast schon ' . INV_MAX . ' Einladungen verschickt', 403);
+                if (!ipCount('ipcreate', MAX_CREATE_PER_HOUR)) fail('Zu viele neue Codes – bitte später noch einmal', 429);
                 ipBump('ipcreate');
                 $abc = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
                 do { $c = ''; for ($i = 0; $i < 6; $i++) $c .= $abc[random_int(0, strlen($abc) - 1)]; } while (q('SELECT 1 FROM invites WHERE code = ?', [$c])->fetch());
-                $max = $lvl === 0 ? DEV_MAX : INV_MAX;
-                q('INSERT INTO invites (code, owner, max, lvl, created) VALUES (?, ?, ?, ?, ?)', [$c, $dev, $max, $lvl, time()]);
-                $r = ['code' => $c, 'max' => $max, 'lvl' => $lvl];
+                q('INSERT INTO invites (code, owner, max, lvl, created) VALUES (?, ?, 1, ?, ?)', [$c, $dev . '#' . $c, $lvl, time()]);
+                $r = ['code' => $c, 'max' => 1, 'lvl' => $lvl];
             }
+            $r['max'] = 1;
             out(['code' => $r['code'], 'max' => (int)$r['max'], 'used' => $used($r['code'])]);
         }
         $c = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)($b['c'] ?? ($_GET['c'] ?? ''))));
@@ -177,14 +175,14 @@ try {
         $r = $c !== '' ? q('SELECT code, max, lvl, off FROM invites WHERE code = ?', [$c])->fetch(PDO::FETCH_ASSOC) : null;
         if (!$r) { ipBump('ipfails'); fail('Diesen Einladungscode gibt es nicht', 404); }
         if ((int)($r['off'] ?? 0) === 1 && !($a === 'activate' && preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev) && q('SELECT 1 FROM acts WHERE code = ? AND dev = ?', [$c, $dev])->fetch())) fail('Dieser Einladungscode gilt nicht mehr – frag nach dem neuen', 410);
-        $max = (int)$r['max']; $n = $used($c); $left = $max ? max(0, $max - $n) : -1;
+        $max = 1; $n = $used($c); $left = max(0, $max - $n);
         $inv = (int)$r['lvl'] === 0;
         if ($a === 'invinfo') out(['ok' => true, 'max' => $max, 'left' => $left]);
         if (!preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev)) fail('Gerät fehlt', 400);
         if (q('SELECT 1 FROM acts WHERE code = ? AND dev = ?', [$c, $dev])->fetch()) out(['ok' => true, 'left' => $left, 'invite' => $inv]);
-        if ($max && $n >= $max) fail('Diese Einladung ist schon aufgebraucht – frag nach einem neuen Code', 403);
+        if ($n >= $max) fail('Dieser Code wurde schon benutzt – jeder bekommt seinen eigenen. Frag nach einem neuen.', 403);
         q('INSERT INTO acts (code, dev, t) VALUES (?, ?, ?)', [$c, $dev, time()]);
-        out(['ok' => true, 'left' => $max ? $max - $n - 1 : -1, 'invite' => $inv]);
+        out(['ok' => true, 'left' => 0, 'invite' => $inv]);
     }
 
     if ($a === 'feedback') {
@@ -236,7 +234,7 @@ try {
         db()->exec('CREATE TABLE IF NOT EXISTS acts (code TEXT NOT NULL, dev TEXT NOT NULL, t INTEGER, PRIMARY KEY (code, dev))');
         try { db()->exec('ALTER TABLE invites ADD COLUMN off INTEGER DEFAULT 0'); } catch (Throwable $e) { }
         db()->exec('CREATE TABLE IF NOT EXISTS pings (h TEXT PRIMARY KEY, ver TEXT, form TEXT, role TEXT, t INTEGER)');
-        $inv = q('SELECT i.code, i.max, i.lvl, i.created, COUNT(a.dev) AS used, MAX(a.t) AS last FROM invites i LEFT JOIN acts a ON a.code = i.code WHERE COALESCE(i.off, 0) = 0 GROUP BY i.code ORDER BY i.lvl, used DESC')->fetchAll(PDO::FETCH_ASSOC);
+        $inv = q('SELECT i.code, i.max, i.lvl, i.created, COUNT(a.dev) AS used, MAX(a.t) AS last FROM invites i LEFT JOIN acts a ON a.code = i.code WHERE COALESCE(i.off, 0) = 0 GROUP BY i.code ORDER BY i.lvl, i.created DESC LIMIT 60')->fetchAll(PDO::FETCH_ASSOC);
         $since = time() - 14 * 86400;
         $vers = q('SELECT ver, form, role, COUNT(*) AS n FROM pings WHERE t > ? GROUP BY ver, form, role ORDER BY ver DESC', [$since])->fetchAll(PDO::FETCH_ASSOC);
         $act7 = (int)q('SELECT COUNT(*) FROM pings WHERE t > ?', [time() - 7 * 86400])->fetchColumn();
