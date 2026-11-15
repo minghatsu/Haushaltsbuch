@@ -35,6 +35,7 @@ h1{font:800 24px Georgia,serif;margin:26px 0 4px}.mu{color:var(--mu);font-size:1
   <p class="mu" id="sub">Dein Haushaltsbuch – deine Daten bleiben auf deinem Gerät.</p>
 
   <div class="note bad" id="noInv" hidden>Für die Testversion brauchst du eine Einladung. Lass dir den QR-Code in der App von jemandem zeigen, der sie schon hat.</div>
+  <form class="code" id="ask" hidden><div style="flex:1"><small>Dein Einladungscode</small><input id="askIn" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC123" style="font:800 26px ui-monospace,Consolas,monospace;letter-spacing:.16em;border:0;background:transparent;width:100%;outline:none;color:inherit;text-transform:uppercase"></div><button type="submit">Weiter</button></form>
   <div class="note bad" id="full" hidden>Dieser Code wurde schon benutzt. Jeder bekommt seinen eigenen – frag nach einem neuen. Hast du die App schon? Weitere Geräte (z. B. den PC) verbindest du in der App über „Geräte koppeln“, dafür brauchst du keinen Code.</div>
 
   <div id="dl" hidden>
@@ -67,8 +68,10 @@ h1{font:800 24px Georgia,serif;margin:26px 0 4px}.mu{color:var(--mu);font-size:1
   var m = (location.search.match(/[?&](?:i=)?([A-Za-z0-9]{6})\b/) || [])[1], code = m ? m.toUpperCase() : "";
   function toast(t){ var e=$("toast"); e.textContent=t; e.classList.add("on"); clearTimeout(e._t); e._t=setTimeout(function(){ e.classList.remove("on"); }, 2600); }
   function copy(t, msg){ (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ toast(msg); }, function(){ prompt("Zum Kopieren:", t); }); }
-  if (!code){ $("noInv").hidden = false; return; }
-  $("dl").hidden = false; $("code").textContent = code;
+  if (!code){ $("ask").hidden = false; $("askIn").focus(); $("ask").onsubmit = function(e){ e.preventDefault(); var v = ($("askIn").value || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase(); if (v.length !== 6){ toast("Der Code hat 6 Zeichen"); return; } try { history.replaceState(null, "", location.pathname + "?" + v); } catch(x){} $("ask").hidden = true; go(v); }; return; }
+  go(code);
+  function go(code){
+  $("noInv").hidden = true; $("dl").hidden = false; $("code").textContent = code;
   $("android").hidden = !isAnd; $("ios").hidden = !isIos; 
   if (!mobile){ $("t").textContent = "Finanz MAMI für den PC"; $("android").hidden = true; $("win").hidden = !isWin; $("other").hidden = isWin; $("mob").hidden = true; }
   else $("win").hidden = true;
@@ -81,9 +84,10 @@ h1{font:800 24px Georgia,serif;margin:26px 0 4px}.mu{color:var(--mu);font-size:1
   };
   fetch(PAIR + "?a=invinfo&c=" + code, { cache: "no-store" }).then(function(r){ return r.json().then(function(j){ return [r.status, j]; }); }).then(function(x){
     var s = x[0], j = x[1];
-    if (s === 404 || s === 410){ $("dl").hidden = true; $("noInv").hidden = false; $("noInv").textContent = s === 410 ? "Dieser Einladungscode gilt nicht mehr. Frag nach dem neuen Code." : "Diesen Einladungscode gibt es nicht. Scann den QR-Code bitte noch einmal."; return; }
+    if (s === 404 || s === 410){ $("dl").hidden = true; $("noInv").hidden = false; if ($("ask").onsubmit){ $("ask").hidden = false; $("askIn").value = ""; } $("noInv").textContent = s === 410 ? "Dieser Einladungscode gilt nicht mehr. Frag nach dem neuen Code." : "Diesen Einladungscode gibt es nicht. Scann den QR-Code bitte noch einmal."; return; }
     if (j && j.ok && j.left >= 0){ if (j.left === 0){ $("full").hidden = false; } else $("left").textContent = "Der Code gilt für eine Person."; }
   }).catch(function(){});
+  }
 })();
 </script>
 </body>
