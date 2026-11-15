@@ -2880,7 +2880,7 @@ function actGet(){ try{ return JSON.parse(localStorage.getItem("hb-act")||"null"
 function actSet(o){ try{ localStorage.setItem("hb-act", JSON.stringify(o)); }catch(e){} }
 (function(){ try{ if (!localStorage.getItem("hb-act") && localStorage.getItem("hb-legal")) actSet({k:"root"}); }catch(e){} })();
 const actNeed = () => !actGet() && !window.claude && !!pairUrl();
-const canInvite = () => { const a=actGet(); return !!pairUrl() && (!!updKey() || !!(a && a.k==="tester")); };
+const canInvite = () => !!pairUrl() && !!updKey();
 const invCode = s => { const m=String(s||"").toUpperCase().match(/[?&](?:I=)?([A-Z0-9]{6})\b/) || String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"").match(/^([A-Z0-9]{6})$/); return m?m[1]:""; };
 const invLink = c => INV_PAGE+"?"+c;
 async function pairCall(action, qs, body, devAuth){
@@ -6511,7 +6511,7 @@ function accSub(k){
   const st=S.settings;
   if (k==="dark") return document.documentElement.dataset.theme==="dark" ? "an" : "aus";
   if (k==="wiz") return "Noch einmal Schritt für Schritt einrichten";
-  if (k==="weiter") return updKey() ? "Dein QR-Code zum Einladen" : "QR-Code für bis zu 20 Geräte";
+  if (k==="weiter") return "Für jeden Tester ein eigener Code";
   if (k==="sync") return !SYNC.token ? "Abgleich aus" : SYNC.state==="ok" ? "Abgeglichen"+(SYNC.last?" · "+new Date(SYNC.last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}):"") : SYNC.state==="pending" ? "wartet" : "nicht erreichbar";
   if (k==="sprache") return `${(LANGS.find(x=>x[0]===LANG)||LANGS[0])[1]} · €${st.cur2?" · "+st.cur2:""}`;
   if (k==="invest"){ const g=(st.inv&&st.inv.goals)||[]; return g.length ? `${g.length} Anlage-${g.length===1?"Ziel":"Ziele"}` : "Zinseszins · Vergleich · Ziele"; }

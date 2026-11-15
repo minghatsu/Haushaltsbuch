@@ -151,8 +151,7 @@ try {
             $h = trim((string)($_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '')));
             $lvl = null;
             if (preg_match('/^Dev\s/', $h)) { devCheck(); $lvl = 0; }
-            else if (q('SELECT 1 FROM acts JOIN invites ON invites.code = acts.code WHERE acts.dev = ? AND invites.lvl = 0', [$dev])->fetch()) $lvl = 1;
-            if ($lvl === null) fail('Dieses Gerät darf keine Einladungen verschicken', 403);
+            if ($lvl === null) fail('Nur der Entwickler kann Einladungen verschicken', 403);
             $fresh = $a === 'invrenew' || !empty($b['fresh']);
             $mine = $lvl === 0 ? 'lvl = 0' : "owner LIKE ? ESCAPE '\\'";
             $mp = $lvl === 0 ? [] : [str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $dev) . '#%'];
@@ -176,7 +175,7 @@ try {
         if (!$r) { ipBump('ipfails'); fail('Diesen Einladungscode gibt es nicht', 404); }
         if ((int)($r['off'] ?? 0) === 1 && !($a === 'activate' && preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev) && q('SELECT 1 FROM acts WHERE code = ? AND dev = ?', [$c, $dev])->fetch())) fail('Dieser Einladungscode gilt nicht mehr – frag nach dem neuen', 410);
         $max = 1; $n = $used($c); $left = max(0, $max - $n);
-        $inv = (int)$r['lvl'] === 0;
+        $inv = false;
         if ($a === 'invinfo') out(['ok' => true, 'max' => $max, 'left' => $left]);
         if (!preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev)) fail('Gerät fehlt', 400);
         if (q('SELECT 1 FROM acts WHERE code = ? AND dev = ?', [$c, $dev])->fetch()) out(['ok' => true, 'left' => $left, 'invite' => $inv]);
