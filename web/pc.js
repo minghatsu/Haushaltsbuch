@@ -4,13 +4,13 @@ function pcOn(){
   const st=document.getElementById("pcCss"); if (st) st.media="all";
   document.documentElement.classList.add("pc");
   if (IS_TAB){ const h=document.documentElement; h.classList.add("istab"); const o=()=>h.classList.toggle("tabp", innerHeight>innerWidth); o(); addEventListener("resize", o); }
-  const tabs=document.querySelector(".tabs"), first=tabs && tabs.querySelector('.tab[data-go="home"]'), last=tabs && tabs.querySelector(".tab.tset");
+  const tabs=document.querySelector(".tabs"), first=tabs && tabs.querySelector('.tab[data-go="home"]'), last=tabs && (tabs.querySelector(".tab.tset")||tabs.querySelector(".tab[data-go=\"shop\"]"));
   if (first && !tabs.querySelector(".pcarr")){
     first.insertAdjacentHTML("beforebegin", `<button class="pcarr" data-pcstep="-1" aria-label="Vorherige Seite (Pfeil links)"><svg class="i" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>`);
     (last||first).insertAdjacentHTML("afterend", `<button class="pcarr" data-pcstep="1" aria-label="Nächste Seite (Pfeil rechts)"><svg class="i" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>`);
   }
 }
-const PC_ORDER=["home","list","fix","shop","year","more"];
+const PC_ORDER=["home","beruf","zukunft","shop"];
 const PC_ANIM={busy:false, pass:false};
 function pcTiles(sec, leaving){
   if (!sec) return [];
