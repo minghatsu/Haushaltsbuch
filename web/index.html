@@ -8466,11 +8466,12 @@ function stmtCheck(imp){
 async function loadPdf(file){
   toast("PDF wird gelesen …");
   let rows;
-  try { rows = pdfStatementRows(await pdfLines(await file.arrayBuffer())); }
+  let pp=false;
+  try { const L=await pdfLines(await file.arrayBuffer()); pp=/paypal/i.test(file.name||"") || /transaktionscode|transaktions-id|paypal[- ]?(kontoauszug|konto\b)|paypal \(europe\)[^\n]{0,40}(kontoauszug|aktivit)/i.test(L.filter(l=>l.page===1).slice(0,14).map(l=>l.text).join("\n")); rows = pdfStatementRows(L); }
   catch(e){ toast(e && /PDF-Leser/.test(e.message) ? e.message : (e && e.name==="PasswordException" ? "Die PDF ist mit Passwort geschützt" : "Die PDF konnte nicht gelesen werden")); return; }
   if (!rows.length){ toast("In der PDF wurden keine Buchungen gefunden. Am sichersten ist der CSV-Export deiner Bank."); return; }
   const headers=["Datum","Empfänger","Verwendungszweck","Betrag","Buchungsart"];
-  UI.imp = { fileName:file.name, headers, raw:rows.slice(0,2000), map:{date:0, payee:1, payer:-1, ref:2, amount:3, type:4, account:-1, status:-1, sh:-1, soll:-1, haben:-1, paypal:false}, items:null, pdf:true };
+  UI.imp = { fileName:file.name, headers, raw:rows.slice(0,2000), map:{date:0, payee:1, payer:-1, ref:2, amount:3, type:4, account:-1, status:-1, sh:-1, soll:-1, haben:-1, paypal:pp}, items:null, pdf:true };
   buildItems();
   UI.view="import"; render(); window.scrollTo({top:0});
 }
@@ -8547,6 +8548,20 @@ document.addEventListener("change", e=>{
   s[el.dataset.acctbal]={date:isoOf(new Date()), balance:Math.round(v*100)/100};
   S.settings.accountAnchors=s; el.value=""; el.blur(); saveSettings(); toast("Gespeichert"); render();
 });
+function ppMatch(items, isPP){
+  const RX=/paypal/, day=d=>new Date(d+"T12:00:00").getTime()/864e5, used=new Set();
+  const pool=S.tx.filter(t=>t.kind!=="einnahme" && t.date);
+  for (const it of items){
+    if (it.dup || it.internal || it.amount>=0 || it.target==="skip|") continue;
+    const bankPP=!isPP && RX.test(nrm(it.payee+" "+it.ref)); if (!isPP && !bankPP) continue;
+    const a=Math.abs(it.amount), d=day(it.date);
+    const t=pool.find(t=>{ if (used.has(t) || Math.abs(Number(t.amount)-a)>0.005) return false;
+      const tPP=t.source==="paypal", tBankPP=!tPP && RX.test(nrm((t.note||"")+" "+(t.ref||"")));
+      const gap = isPP ? day(t.date)-d : d-day(t.date);
+      return gap>=-1 && gap<=5 && (isPP ? tBankPP : (tPP || !tBankPP)); });
+    if (t){ used.add(t); it.ppDup = isPP ? "bank" : "paypal"; it.ppWith = t.note||""; it.target="skip|"; it.sure=true; }
+  }
+}
 function buildItems(){
   const imp=UI.imp, m=imp.map;
   if (m.date<0 || m.amount<0){ imp.items=null; return; }
@@ -8575,6 +8590,7 @@ function buildItems(){
     if (it.maybeDup){ it.target="skip|"; it.sure=true; }
     items.push(it);
   }
+  ppMatch(items, !!m.paypal);
   items.sort((a,b)=>b.date.localeCompare(a.date));
   imp.items = items;
   refBackfill(items);
@@ -8641,6 +8657,7 @@ function renderImport(){
       ${nIgn&&!imp.showIgnored?`<div class="notice info" style="margin-top:14px"><span>${nIgn} davon hast du früher bewusst übersprungen.</span><button class="btn" id="impShowIgn">Wieder anzeigen</button></div>`:""}
       ${imp.photo?stmtCheck(imp)+`<button class="btn" id="stmtMore" style="margin-top:10px">${ic("camera",17)} Weitere Seite fotografieren</button>`:""}
       ${imp.pdf&&!imp.photo?`<div class="notice info" style="margin-top:14px"><span>Aus einer PDF gelesen. Prüf kurz Beträge und Vorzeichen.${imp.items.some(i=>i.maybeDup&&!i.dup)?` <b>${imp.items.filter(i=>i.maybeDup&&!i.dup).length}</b> mit gleichem Tag und Betrag gibt es schon – die werden übersprungen, außer du stellst sie um.`:""}</span></div>`:""}
+      ${(n=>n?`<div class="notice info" style="margin-top:14px"><span><b>${n}</b> PayPal-${n===1?"Zahlung steht":"Zahlungen stehen"} schon ${imp.map.paypal?"aus dem Bank-Import":"aus dem PayPal-Import"} drin und ${n===1?"wird":"werden"} übersprungen, damit nichts doppelt zählt.</span></div>`:"")(imp.items.filter(i=>i.ppDup&&!i.dup&&i.target==="skip|").length)}
       ${unsure?`<div class="notice warn" style="margin-top:14px"><span><b>${unsure}</b> ${unsure===1?"Buchung ist":"Buchungen sind"} unsicher zugeordnet und gelb markiert. Kurz prüfen, dann importieren.</span></div>`:""}
     </div>
     ${(()=>{ const names=[...new Set(imp.items.map(i=>i.acct).filter(Boolean))].sort((a,b)=>(b==="Hauptkonto")-(a==="Hauptkonto")||a.localeCompare(b,"de")); return names.length&&mem ? `<div class="card"><div class="card-head"><h2>Kontostände</h2><span class="small muted">aus dieser Datei</span></div><p class="small muted" style="margin:-6px 0 8px">Trag ein, was heute auf dem Konto ist. Den Rest rechnet die App aus.</p>${acctRows(names)}</div>` : ""; })()}
@@ -8652,7 +8669,7 @@ function renderImport(){
         return `<div class="imp" data-imp="${idx}"><div style="min-width:0"><div class="who">${esc(it.payee||it.ref||"Ohne Namen")}</div><div class="ref">${esc(shortDate(it.date))}${it.ref&&it.payee?" · "+esc(it.ref):""}</div></div>
           <div class="amt ${pos?"inc":""}" style="text-align:right">${pos?"+":"−"} ${esc(eur(Math.abs(it.amount)))}</div>
           <div class="ctl"><select class="in" id="imp-${idx}" data-imptarget="${idx}" aria-label="Zuordnung" style="${it.sure?"":"border-color:var(--warn)"}">${targetOptions(it.target,pos)}</select>
-          ${it.maybeDup&&it.target==="skip|"?`<span class="pill warn">schon vorhanden?</span>`:it.internal?`<span class="pill">Umbuchung Space</span>`:it.learned?`<span class="pill ok">gemerkt</span>`:!it.sure?`<span class="pill warn">prüfen</span>`:""}
+          ${it.ppDup&&it.target==="skip|"?`<span class="pill warn" title="${esc(it.ppWith)}">schon über ${it.ppDup==="bank"?"die Bank":"PayPal"} drin</span>`:it.maybeDup&&it.target==="skip|"?`<span class="pill warn">schon vorhanden?</span>`:it.internal?`<span class="pill">Umbuchung Space</span>`:it.learned?`<span class="pill ok">gemerkt</span>`:!it.sure?`<span class="pill warn">prüfen</span>`:""}
           ${it.payee?`<label class="rem"><input type="checkbox" data-impremember="${idx}" ${it.remember?"checked":""}>${esc(it.payee.length>22?it.payee.slice(0,22)+"…":it.payee)} merken</label>`:""}${selfNote}</div></div>`; }).join("")
         : emptyState("check","Alles schon importiert","In dieser Datei sind keine neuen Buchungen.")}
     </div>
@@ -8682,7 +8699,7 @@ async function commitImport(){
       m.paidKeys[v]=it.key; m.importKeys=[...(m.importKeys||[]), it.key]; m._fresh[v]=true; nFix++;
     } else {
       let amount=Math.abs(it.amount), note=(it.payee||"").trim().slice(0,80);
-      const doc={ date:it.date, amount:Math.round(amount*100)/100, kind:k==="vz"?"vorauszahlung":k, cat:k==="vz"?"Steuer-Vorauszahlung":v, note, ts:ordTs(it), importKey:it.key, source:"n26" };
+      const doc={ date:it.date, amount:Math.round(amount*100)/100, kind:k==="vz"?"vorauszahlung":k, cat:k==="vz"?"Steuer-Vorauszahlung":v, note, ts:ordTs(it), importKey:it.key, source:(imp.map.paypal?"paypal":"n26") };
       const ref=String(it.ref||"").replace(/\s+/g," ").trim().slice(0,120); if (ref) doc.ref=ref;
       if (k==="einnahme" && incArt(v)==="selbst" && !S.settings.kleinunternehmer) doc.net=Math.round(amount/(1+vat)*100)/100;
       (bundles[ym]=bundles[ym]||{})[newId()+nTx.toString(36)]=doc; nTx++;
