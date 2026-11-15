@@ -7391,13 +7391,15 @@ async function zBonFromStored(id, img){
   } catch(e){ scanWorking(false); try { scanBusy(false); } catch(_){} } }
 async function zBonBackfill(){
   if (BG_RUN || zBonBackfill.on) return; zBonBackfill.on=true; let done={}; try{ done=JSON.parse(localStorage.getItem("hb-zbtried")||"{}"); }catch(_){}
-  const todo=S.tx.filter(t=>t.kind==="ausgabe" && hasReceipt(t.id) && !(t.items&&t.items.length) && !done[t.id] && !ZB_TRIED.has(t.id)).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,40);
+  const isum=t=>(t.items||[]).reduce((a,i)=>a+(Number(i.p)||0),0), bad=t=>t.items&&t.items.length&&Math.abs(isum(t)-t.amount)>Math.max(0.05,t.amount*0.03);
+  const todo=S.tx.filter(t=>t.kind==="ausgabe" && hasReceipt(t.id) && (!(t.items&&t.items.length) ? !done[t.id] : bad(t) && !done[t.id+"~2"]) && !ZB_TRIED.has(t.id)).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,40);
   let n=0;
-  for (const t of todo){ if (document.hidden) await new Promise(r=>setTimeout(r,5000)); ZB_TRIED.add(t.id); done[t.id]=1; try{ localStorage.setItem("hb-zbtried", JSON.stringify(done)); }catch(_){}
+  for (const t of todo){ if (document.hidden) await new Promise(r=>setTimeout(r,5000)); ZB_TRIED.add(t.id); done[t.items&&t.items.length?t.id+"~2":t.id]=1; try{ localStorage.setItem("hb-zbtried", JSON.stringify(done)); }catch(_){}
     try { const v0=RCPT.v[t.id]||0, img=await rcptGet(t.id); if (!img) continue;
       const L = canNativeOcr() ? await ocrDataUrl(img) : await (async()=>{ await loadTesseract(); const r=await window.Tesseract.recognize(img,"deu"); return ((r.data&&r.data.lines)||[]).map(l=>({t:l.text.trim(), x:l.bbox.x0, y:l.bbox.y0, w:l.bbox.x1-l.bbox.x0, h:l.bbox.y1-l.bbox.y0})).filter(l=>l.t); })();
       const its=receiptItems(L||[]); if (!its.length) continue;
-      const t2=S.tx.find(x=>x.id===t.id); if (!t2 || (t2.items&&t2.items.length) || (RCPT.v[t.id]||0)!==v0 || UI.editId===t.id) continue;
+      const t2=S.tx.find(x=>x.id===t.id); if (!t2 || (RCPT.v[t.id]||0)!==v0 || UI.editId===t.id) continue;
+      if (t2.items&&t2.items.length){ const ns=its.reduce((a,i)=>a+i.p,0); if (!bad(t2) || Math.abs(ns-t2.amount)>=Math.abs(isum(t2)-t2.amount)) continue; }
       const doc={...plainTx(t2), items:its.map(i=>({r:i.n, p:i.p}))}, sid=zaShopId(parseReceipt(L).shop||t2.note); if (sid) doc.ishop=sid;
       if (await saveTxDoc(t.id, doc, t2).then(()=>true,()=>false)) n++;
     } catch(e){}
@@ -7497,6 +7499,41 @@ async function scanImageFile(file){
 const AMT_RE = /(^|[^\d,.])(\d{1,4}(?:\.\d{3})*|\d{1,6})\s?[,.]\s?(\d{2})(?!\d)/g;
 function amountsIn(t){ const out=[]; let m; AMT_RE.lastIndex=0; while ((m=AMT_RE.exec(t))){ const v=Number(m[2].replace(/\./g,"")+"."+m[3]); if (v>0 && v<100000) out.push(v); } return out; }
 function receiptItems(lines){
+  const a=receiptItemsRows(lines); let b=[]; try { b=receiptItemsCols(lines); } catch(e){}
+  if (!b.length) return a; if (!a.length) return b;
+  let tot=null; try { tot=parseReceipt(lines).amount; } catch(e){}
+  const ok=x=>tot!=null && Math.abs(x.reduce((s,i)=>s+i.p,0)-tot)<0.02;
+  if (ok(a)) return a; if (ok(b)) return b;
+  return b.length>a.length ? b : a;
+}
+function receiptItemsCols(lines){
+  const L=lines.filter(l=>l && l.t && l.y!=null && l.x!=null).map(l=>({...l, t:String(l.t).replace(/\s+/g," ").trim(), h:l.h||20, w:l.w||0}));
+  if (L.length<4) return [];
+  const cy=l=>l.y+l.h/2;
+  const sum=L.filter(l=>/summe|zu zahlen|zahlbetrag|gesamtbetrag|\btotal\b/.test(nrm(l.t)) && !/zwischen/.test(nrm(l.t))).sort((a,b)=>a.y-b.y)[0]; if (!sum) return [];
+  const sY=cy(sum)-sum.h*0.4, xs=L.map(l=>l.x+l.w).sort((a,b)=>a-b), right=xs[Math.floor(xs.length*0.5)];
+  const PO=/^(-?\d{1,3}\s?[,.]\s?\d{2})\s*(?:€|eur)?\s*[A-Za-z*]?\s*\*?$/i, PE=/\s(-?\d{1,3}\s?[,.]\s?\d{2})\s*(?:€|eur)?\s*[A-Za-z*]?\s*\*?$/i;
+  const QTY=/^\s*-?\d+(?:[,.]\d+)?\s*(?:kg|g|x|stk\.?|st\.?|×)\b|\d\s*[xX×]\s*\d+\s?[,.]\s?\d{2}|(?:eur|€)\s*\/\s*\w{1,3}\b/i;
+  const BAD=/summe|gesamt|\bmwst|\bust\b|netto|brutto|steuer|datum|uhrzeit|kasse|\bbon\b|beleg|\buid\b|str\.|strasse|straße|\bnr\b|tel|www|filiale|^eur$|^\d{5}\s/;
+  const prices=[], names=[];
+  for (const l of L){ if (cy(l)>=sY) continue;
+    const m=l.t.match(PO);
+    if (m && l.x+l.w>=right-4){ prices.push({y:cy(l), h:l.h, p:Number(m[1].replace(/\s/g,"").replace(",","."))}); continue; }
+    const pe=(" "+l.t).match(PE), n=nrm(l.t);
+    if (/[a-zäöüß]{3,}/.test(n) && !QTY.test(l.t) && !BAD.test(n)){
+      if (pe){ const nm=(" "+l.t).slice(0,pe.index).trim(); if (/[A-Za-zÄÖÜäöüß]{3,}/.test(nm)){ names.push({y:cy(l), h:l.h, n:nm}); prices.push({y:cy(l), h:l.h, p:Number(pe[1].replace(/\s/g,"").replace(",","."))}); } }
+      else names.push({y:cy(l), h:l.h, n:l.t.replace(/(\s+[^\s%]*\d[^\s%]*)+\s*$/,"").trim()});
+    } }
+  if (!prices.length) return [];
+  prices.sort((a,b)=>a.y-b.y); const p0=prices[0].y-prices[0].h*1.6;
+  const nm=names.filter(n=>n.y>=p0).sort((a,b)=>a.y-b.y);
+  if (!nm.length) return [];
+  let pairs=[];
+  if (nm.length===prices.length) pairs=nm.map((n,i)=>[n,prices[i]]);
+  else { const used=new Set(); for (const p of prices){ let best=null, bd=1e9; for (const n of nm){ if (used.has(n)) continue; const d=Math.abs(n.y-p.y); if (d<bd){ bd=d; best=n; } } if (best && bd<Math.max(best.h,p.h)*1.6){ used.add(best); pairs.push([best,p]); } } }
+  return pairs.filter(([n,p])=>n.n.length>=3 && Math.abs(p.p)>0 && p.p<200).map(([n,p])=>({n:n.n.slice(0,40), p:p.p})).slice(0,80);
+}
+function receiptItemsRows(lines){
   const rows=[]; const L=lines.map(l=>({...l}));
   if (L.some(l=>l.y!=null)){
     L.sort((a,b)=>(a.y||0)-(b.y||0));
@@ -7514,7 +7551,8 @@ function receiptItems(lines){
     const pm=(" "+t).match(PRICE);
     if (!pm){ if (/[A-Za-zÄÖÜäöüß]{3,}/.test(t) && !QTY.test(t)) pend=t.replace(/(\s+[^\s%]*\d[^\s%]*)+\s*$/,"").trim(); continue; }
     let p=Number(pm[1].replace(/\s/g,"").replace(",",".")); const head=(" "+t).slice(0, pm.index).trim();
-    if (/\beur\b/i.test(head) && !QTY.test(head)){ if (out.length) break; continue; }
+    if (/^[^A-Za-z0-9]*(?:summe\s*)?eur[^A-Za-z0-9]*$/i.test(head)){ if (out.length) break; continue; }
+    if (/\b(?:eur|€)\s*\/\s*\w{1,3}\b/i.test(head) && !pend){ continue; }
     { const q=t.match(/^\s*(\d{1,2})\s*\w{0,4}\.?\s*[xX×]\s*(\d{1,3}\s?[,.]\s?\d{2})\s*[A-Za-z*]?\s*$/); if (q){ const u=Number(q[2].replace(/\s/g,"").replace(",",".")); if (Math.abs(u-p)<0.005) p=Math.round(Number(q[1])*u*100)/100; } }
     let name;
     if (QTY.test(head) || !/[A-Za-zÄÖÜäöüß]{3,}/.test(head)){
