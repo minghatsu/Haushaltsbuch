@@ -3022,7 +3022,7 @@ function mamiOpen(){ const p=mamiEl(); MAMI.open=true; if (!mCfg()){ MAMI.studio
   p.hidden=false; mamiRender(); requestAnimationFrame(()=>{ p.classList.add("on"); const i=$("mamiIn"); if (i && !IS_TOUCH_ONLY()) i.focus(); }); }
 function IS_TOUCH_ONLY(){ return matchMedia("(pointer:coarse)").matches; }
 function mamiClose(){ const p=$("mamiPop"); if (!p) return; MAMI.open=false; p.classList.remove("on"); p.hidden=true; }
-function mamiGreet(){ const keys=Math.random()<0.5?["g1","g2","g3"]:["f1","f2","f3"]; MAMI.log.push({me:false, t:mFill(mL(keys[Math.floor(Math.random()*3)]))}); }
+function mamiGreet(){ const keys=Math.random()<0.5?["g1","g2","g3"]:["f1","f2","f3"]; MAMI.log.push({me:false, k:keys[Math.floor(Math.random()*3)]}); }
 function mIntent(id){ return MI.find(x=>x.id===id); }
 function mTxt(it, k){ const i=ML.indexOf(LANG); return (it[k][i<0?0:i]||it[k][0]); }
 function mNorm(s){ return String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^\p{L}\p{N}' ]+/gu," ").replace(/\s+/g," ").trim(); }
@@ -3033,11 +3033,13 @@ function mFind(q){ const n=" "+mNorm(q)+" "; if (n.trim().length<2) return [];
     for (const t of it.t){ const m=mNorm(t); if (m && n.includes(m)) sc+=4; }
     return {it, sc}; }).filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc); const top=res.length?res[0].sc:0; return res.filter(x=>x.sc>=top*0.5);
   return res; }
-function mamiAsk(q){ q=String(q||"").trim(); if (!q) return; MAMI.log.push({me:true, t:esc(q)}); const r=mFind(q);
-  if (!r.length){ MAMI.log.push({me:false, t:esc(mFill(mL("nf"))), chips:["feedback","tour","faq"]}); }
-  else { const it=r[0].it; MAMI.log.push({me:false, t:`<b>${esc(mTxt(it,"t"))}</b><br>${esc(mTxt(it,"a"))}`, go:it.id, chips:r.slice(1,3).map(x=>x.it.id)}); }
+function mamiAsk(q){ q=String(q||"").trim(); if (!q) return; MAMI.log.push({me:true, raw:q}); const r=mFind(q);
+  if (!r.length){ MAMI.log.push({me:false, k:"nf", chips:["feedback","tour","faq"]}); }
+  else { const it=r[0].it; MAMI.log.push({me:false, it:it.id, go:it.id, chips:r.slice(1,3).map(x=>x.it.id)}); }
   mamiRender(true); }
-function mamiChip(id){ const it=mIntent(id); if (!it) return; MAMI.log.push({me:true, t:esc(mTxt(it,"t"))}); MAMI.log.push({me:false, t:`<b>${esc(mTxt(it,"t"))}</b><br>${esc(mTxt(it,"a"))}`, go:it.id}); mamiRender(true); }
+function mMsg(m){ if (m.raw!=null) return esc(m.raw); if (m.k) return esc(mFill(mL(m.k)));
+  const it=mIntent(m.it||m.itq); if (!it) return ""; return m.itq?esc(mTxt(it,"t")):`<b>${esc(mTxt(it,"t"))}</b><br>${esc(mTxt(it,"a"))}`; }
+function mamiChip(id){ const it=mIntent(id); if (!it) return; MAMI.log.push({me:true, itq:it.id}); MAMI.log.push({me:false, it:it.id, go:it.id}); mamiRender(true); }
 function mamiGo(id){ const it=mIntent(id); if (!it) return; const g=it.go; mamiClose();
   if (g.fn==="studio"){ MAMI.studio=true; MAMI.draft={...(mCfg()||mDef())}; MAMI.bub=mFill(mL("st_ask"), MAMI.draft); mamiOpen(); return; }
   if (g.fn==="feedback"){ fbFloatOpen(); return; }
@@ -3060,7 +3062,7 @@ function mamiRender(scroll){ const p=$("mamiPop"); if (!p || p.hidden) return; c
     mamiPlace(); return; }
   const chips0=["budget","bon","koppeln","fix","schulden","tour","feedback","neu","bigtour","faq","weiter","danke"].filter(id=>mOk(mIntent(id)));
   p.innerHTML=`<div class="mphd">${mAv(c)}<span class="mpn"><b>${esc(mL("name"))}</b><small>● ${esc(mL("here"))}</small></span><button class="mpe" data-mgo="mami" aria-label="${esc(mL("look"))}" title="${esc(mL("look"))}">🎨</button><button class="mpx" data-mx aria-label="${esc(mL("close"))}">✕</button></div>
-    <div class="mlog" id="mamiLog">${MAMI.log.map(m=>`<div class="mmsg ${m.me?"me":""}">${m.t}${m.go?`<button class="mshow" data-mgo="${m.go}">👉 ${esc(mL("show"))}</button>`:""}</div>${m.chips&&m.chips.length?`<div class="mchips">${m.chips.map(id=>{ const it=mIntent(id); return it?`<button data-mchip="${id}">${esc(mTxt(it,"t"))}</button>`:""; }).join("")}</div>`:""}`).join("")}
+    <div class="mlog" id="mamiLog">${MAMI.log.map(m=>`<div class="mmsg ${m.me?"me":""}">${mMsg(m)}${m.go?`<button class="mshow" data-mgo="${m.go}">👉 ${esc(mL("show"))}</button>`:""}</div>${m.chips&&m.chips.length?`<div class="mchips">${m.chips.map(id=>{ const it=mIntent(id); return it?`<button data-mchip="${id}">${esc(mTxt(it,"t"))}</button>`:""; }).join("")}</div>`:""}`).join("")}
       ${MAMI.log.length<=1?`<div class="mchips">${chips0.filter(id=>id!=="tour"||PTOUR[UI.view]).map(id=>`<button data-mchip="${id}">${esc(mTxt(mIntent(id),"t"))}</button>`).join("")}</div>`:""}</div>
     <form class="min" id="mamiForm"><input id="mamiIn" autocomplete="off" placeholder="${esc(mL("ph"))}" aria-label="${esc(mL("ph"))}"><button type="submit" aria-label="${esc(mL("send"))}">➤</button></form>`;
   mamiPlace(); const lg=$("mamiLog"); if (lg) lg.scrollTop=lg.scrollHeight; if (scroll){ const i=$("mamiIn"); if (i && !IS_TOUCH_ONLY()) i.focus(); } }
