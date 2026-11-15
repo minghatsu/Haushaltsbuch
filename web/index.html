@@ -1945,6 +1945,54 @@ html.pc #hlBg{background:rgba(5,15,11,.82);backdrop-filter:blur(8px)}html.pc .hl
 .hltap{position:absolute;top:80px;bottom:0;z-index:30}.hltap.l{left:0;width:32%}.hltap.r{right:0;width:68%}
 .hlsl[data-i="7"].on~.hltap.r{bottom:120px}
 @media (prefers-reduced-motion: reduce){.hlw,.hllet span,.hlpod .em,.md,.hlflip,.hlhm i,.hlstamp{animation:none!important;opacity:1!important;transform:none!important;filter:none!important}.hlflip.on{transform:rotateY(180deg)!important}.hlpod .bl{transition:none}}
+/* Amt: Termine · Zuverdienst · Bescheid */
+.tmhero{position:relative;display:flex;align-items:center;gap:14px;padding:16px;border-radius:22px;color:#fff;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 60%,#3fb98a));margin-bottom:10px;box-shadow:var(--shadow);overflow:hidden}
+.tmhero.hot{background:linear-gradient(135deg,#b42318,#e0573f)}.tmhero.calm{background:linear-gradient(135deg,#3d63a8,#5b7fd0)}
+.tmring{position:absolute;left:16px;top:50%;width:76px;height:76px;margin-top:-38px;transform:rotate(-90deg)}.tmring circle{fill:none;stroke-width:7;stroke-linecap:round}.tmring .bg{stroke:rgba(255,255,255,.25)}.tmring .fg{stroke:#fff}
+.tmn{flex:none;width:76px;height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}.tmn b{font-size:24px;font-weight:900;line-height:1}.tmn small{font-size:10px;font-weight:800;opacity:.9}
+.tmht{flex:1;min-width:0}.tmht small{font-size:12px;font-weight:700;opacity:.85}.tmht b{display:block;font-size:19px;line-height:1.2;margin:2px 0}.tmht span{font-size:13px;font-weight:600;opacity:.92}
+.tmed{position:absolute;right:10px;top:10px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:15px;cursor:pointer}
+.tmbr{padding:4px 0}.tmbi{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:10px 14px;text-align:start;color:var(--fg);font:600 14.5px var(--f-body);cursor:pointer;border-top:1px solid var(--line)}.tmbi:first-child{border-top:0}
+.tmck{flex:none;width:26px;height:26px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;font-weight:900;color:#fff;transition:all .3s cubic-bezier(.3,1.6,.5,1)}.tmbi.ok .tmck{background:var(--good);border-color:var(--good);transform:scale(1.08)}.tmbi.ok .grow{text-decoration:line-through;color:var(--muted)}
+.tmadd{display:flex;gap:8px;padding:8px 14px 12px}.tmadd .in{flex:1;max-width:none;text-align:start}.tmadd .btn{flex:none;width:46px}
+.tmdone{display:block;width:100%;height:52px;border:0;border-radius:16px;background:var(--accent);color:var(--accent-ink);font:800 15.5px var(--f-body);cursor:pointer;margin:12px 0 4px;position:relative;overflow:hidden;box-shadow:0 10px 24px -12px color-mix(in srgb,var(--accent) 80%,transparent)}
+.tmdone::after{content:"";position:absolute;top:0;bottom:0;width:50%;left:-70%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent);animation:vaShn 2.8s ease-in-out infinite}
+.tmnote{margin:10px 4px 0;text-align:center}.tmico{flex:none;width:28px;text-align:center;font-size:18px}
+.tmrow{width:100%;border:0;background:none;text-align:start;color:var(--fg);font-family:var(--f-body);cursor:pointer}.tmrow .grow b{display:block;font-size:14.5px}.tmrow .grow small{color:var(--muted);font-size:12px;font-weight:600}
+.tmdn .grow b{display:block;font-size:14px}.tmdn .grow small{color:var(--muted);font-size:12px}
+.tmph{flex:none;width:36px;height:36px;border-radius:12px;border:0;background:var(--sunk);font-size:16px;cursor:pointer;margin-left:4px}.tmph.add{background:var(--accent-soft)}
+.tmnew{display:block;width:100%;margin:12px 0 0}
+.tmform{padding:14px;margin-top:12px}.tmform>b{display:block;font-size:16px;margin-bottom:8px}.tmform .in{max-width:none;text-align:start}
+.tmview{position:fixed;inset:0;z-index:950;background:rgba(0,0,0,.88);display:grid;place-items:center;padding:20px}.tmview img{max-width:100%;max-height:100%;border-radius:12px}.tmview .hlx{position:absolute;right:16px;top:calc(16px + env(safe-area-inset-top))}
+.jlbs{display:flex;align-items:center;gap:12px;width:100%;text-align:start;border:0;cursor:pointer;font-family:var(--f-body);color:var(--fg)}.jlbs .grow b{display:block}.jlbs small{color:var(--muted);font-size:12.5px}
+.zvc{padding:14px;margin-bottom:10px}.zvc>small{color:var(--muted);font-size:12px;font-weight:700}.zvbig{font-size:40px;font-weight:900;letter-spacing:-.02em;margin:2px 0 6px}
+.zvsl{position:relative;padding:10px 0}.zvsl input{width:100%;-webkit-appearance:none;appearance:none;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--accent)) 0/var(--p,0%) 100% no-repeat,var(--sunk);outline:none;margin:0}
+.zvsl input::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.3),0 0 0 4px color-mix(in srgb,var(--accent) 30%,transparent);cursor:grab;transition:transform .15s}.zvsl input:active::-webkit-slider-thumb{transform:scale(1.15)}
+.zvsl input::-moz-range-thumb{width:28px;height:28px;border:0;border-radius:50%;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.zvmj{position:absolute;top:4px;bottom:4px;width:2px;background:var(--warn);border-radius:1px;pointer-events:none}
+.zvax{position:relative;height:16px;font-size:10.5px;font-weight:700;color:var(--muted)}.zvax span{position:absolute;top:0;white-space:nowrap}.zvax span:first-child{left:0}.zvax span:last-child{right:0}.zvax span:nth-child(2){transform:translateX(-50%);color:var(--warn)}
+.zvc .in{max-width:none;text-align:start}
+.zvbar{display:flex;height:44px;border-radius:14px;overflow:hidden;font-weight:800;font-size:12.5px;color:#fff;margin-bottom:6px;background:var(--sunk)}
+.zvbar i{display:grid;place-items:center;height:100%;transition:width .7s cubic-bezier(.3,1.2,.4,1);overflow:hidden;white-space:nowrap;font-style:normal}.zvbar .k{background:linear-gradient(135deg,#1fae7a,#147a5b)}.zvbar .a{background:#9aa49f}.zvbar .a.empty{background:var(--sunk);color:var(--muted)}
+.zvrow{padding:10px 2px}.zvrow .grow b{display:block;font-size:14.5px}.zvrow .grow small{color:var(--muted);font-size:12px;font-weight:600}
+.zvhero .srbig{font-size:38px}
+.bshero .srbig{font-size:32px}
+.bsintro{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:22px 16px;border-radius:22px;background:var(--surface);box-shadow:var(--shadow);margin-bottom:10px}.bsintro b{font-size:16.5px}.bsintro span{font-size:13px;color:var(--muted);font-weight:600}
+.bsdoc{position:relative;font-size:54px;line-height:1;margin-bottom:6px;overflow:hidden;padding:4px 8px}.bsdoc i{position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent);box-shadow:0 0 12px 3px color-mix(in srgb,var(--accent) 60%,transparent);animation:bsBeam 2s ease-in-out infinite alternate}
+@keyframes bsBeam{from{top:6%}to{top:90%}}
+.bsbtns{display:flex;gap:8px}.bsbtns .vakb{flex:1.3}.bsbtns .vadone{flex:1}
+.bsscan{position:relative;border-radius:20px;overflow:hidden;box-shadow:var(--shadow-lg);max-height:62vh;background:#000}.bsscan img{display:block;width:100%;max-height:62vh;object-fit:contain;opacity:.92}
+.bsbeam{position:absolute;left:0;right:0;top:0;height:4px;background:#1fae7a;box-shadow:0 0 22px 8px rgba(31,174,122,.55);animation:bsBeam 1.3s ease-in-out infinite alternate}
+.bscorner{position:absolute;inset:10px;border:3px solid #1fae7a;border-radius:16px;clip-path:polygon(0 0,18% 0,18% 4%,4% 4%,4% 18%,0 18%,0 82%,4% 82%,4% 96%,18% 96%,18% 100%,0 100%,0 0,100% 0,100% 100%,82% 100%,82% 96%,96% 96%,96% 82%,100% 82%,100% 18%,96% 18%,96% 4%,82% 4%,82% 0);animation:bsPul 1.2s ease-in-out infinite}@keyframes bsPul{50%{opacity:.5}}
+.bsstat{text-align:center;font-weight:700;color:var(--muted);margin:14px 0 0}
+.dots3{display:inline-flex;gap:4px;vertical-align:middle}.dots3 i{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:bsDot 1s infinite}.dots3 i:nth-child(2){animation-delay:.15s}.dots3 i:nth-child(3){animation-delay:.3s}@keyframes bsDot{50%{transform:translateY(-4px);opacity:.4}}
+.bsthumb{display:flex;justify-content:center;margin-bottom:6px}.bsthumb img{max-height:130px;max-width:100%;border-radius:14px;box-shadow:var(--shadow);cursor:zoom-in}
+.bschips{display:flex;flex-wrap:wrap;gap:6px}.bschip{background:var(--good-soft);color:var(--good);border-radius:999px;padding:7px 11px;font-size:12.5px;font-weight:700}.bschip b{font-weight:900}
+.bsform{padding:14px}.bsform .in{max-width:none;text-align:start}.bsform .field.bsok label::after{content:" ✓";color:var(--good);font-weight:900}
+.bsform .field.bsok .in{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--good) 45%,transparent)}
+.bstot{display:flex;gap:8px}.bstot .in{flex:1}.bstot .vadone{flex:none;min-width:0;padding:0 12px;height:auto}
+.bscks{padding:4px 0}.bsck{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;border-top:1px solid var(--line);font-size:13.5px}.bsck:first-child{border-top:0}.bsck>span:first-child{font-size:18px;flex:none}
+.bsck b{display:block;font-size:14px}.bsck small{color:var(--muted);font-size:12px;font-weight:600}.bsck.bad b{color:var(--bad)}.bsck.warn b{color:var(--warn)}.bsck.ok b{color:var(--good)}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -2292,6 +2340,8 @@ function LOCD(){ const l=LANGS.find(x=>x[0]===LANG); return l?l[2]:"de-DE"; }
 (function(){ const N={"QR-Code": ["QR code", "QR kod", "QR-код", "QR-код", "Kod QR", "رمز QR", "Cod QR"]}, LL=["en","tr","ru","uk","pl","ar","ro"];
   for (const [k,v] of Object.entries(N)){ let i=I18N_K.indexOf(k); if (i<0){ I18N_K.push(k); i=I18N_K.length-1; } LL.forEach((l,j)=>{ const a=(I18N_T[l]=I18N_T[l]||[]); if (!a[i]) a[i]=v[j]; }); } })();
 (function(){ const N={"Sparregeln": ["Saving rules", "Birikim kuralları", "Правила накоплений", "Правила заощаджень", "Zasady oszczędzania", "قواعد الادخار", "Reguli de economisire"], "einschalten": ["turn on", "aç", "включить", "увімкнути", "włącz", "تفعيل", "activează"]}, LL=["en","tr","ru","uk","pl","ar","ro"];
+  for (const [k,v] of Object.entries(N)){ let i=I18N_K.indexOf(k); if (i<0){ I18N_K.push(k); i=I18N_K.length-1; } LL.forEach((l,j)=>{ const a=(I18N_T[l]=I18N_T[l]||[]); if (!a[i]) a[i]=v[j]; }); } })();
+(function(){ const N={"Zuverdienst": ["Side income", "Ek gelir", "Подработка", "Підробіток", "Dorabianie", "دخل إضافي", "Venit suplimentar"], "Bescheid-Check": ["Notice check", "Karar kontrolü", "Проверка решения", "Перевірка рішення", "Sprawdzenie decyzji", "فحص القرار", "Verificare decizie"], "Rechner": ["Calculator", "Hesaplayıcı", "Калькулятор", "Калькулятор", "Kalkulator", "حاسبة", "Calculator"], "scannen": ["scan", "tara", "сканировать", "сканувати", "skanuj", "مسح", "scanează"], "keine offen": ["none open", "açık yok", "нет открытых", "немає відкритих", "brak otwartych", "لا شيء مفتوح", "niciuna deschisă"], "Bescheid fotografieren & prüfen": ["Photograph & check your notice", "Kararı fotoğrafla ve kontrol et", "Сфотографируй и проверь решение", "Сфотографуй і перевір рішення", "Sfotografuj i sprawdź decyzję", "صوّر القرار وتحقق منه", "Fotografiază și verifică decizia"], "Termine öffnen": ["Open appointments", "Randevuları aç", "Открыть встречи", "Відкрити зустрічі", "Otwórz terminy", "افتح المواعيد", "Deschide programările"], "Zuverdienst-Rechner öffnen": ["Open side income calculator", "Ek gelir hesaplayıcısını aç", "Открыть калькулятор подработки", "Відкрити калькулятор підробітку", "Otwórz kalkulator dorabiania", "افتح حاسبة الدخل الإضافي", "Deschide calculatorul de venit suplimentar"], "📄 Bescheid-Check": ["📄 Notice check", "📄 Karar kontrolü", "📄 Проверка решения", "📄 Перевірка рішення", "📄 Sprawdzenie decyzji", "📄 فحص القرار", "📄 Verificare decizie"]}, LL=["en","tr","ru","uk","pl","ar","ro"];
   for (const [k,v] of Object.entries(N)){ let i=I18N_K.indexOf(k); if (i<0){ I18N_K.push(k); i=I18N_K.length-1; } LL.forEach((l,j)=>{ const a=(I18N_T[l]=I18N_T[l]||[]); if (!a[i]) a[i]=v[j]; }); } })();
 const I18N = (()=>{
   const NUM=/\d[\d.,]*/g, MRE=new RegExp("\\b("+MONTHS.join("|")+")\\b","g");
@@ -2861,7 +2911,7 @@ function joblessTop(ym, free, c){
   const fmtD=d=>new Date(d+"T12:00").toLocaleDateString("de-DE",{day:"numeric",month:"long",year:"numeric"});
   const go=`data-go="more" data-sp="amt"`, MJ=yv(ym.slice(0,4)).mj;
   const tiles=[];
-  if (P.side==="jl") tiles.push(`<button class="card" ${go}><span class="jli">${ic("cash",17)}</span><b>Minijob</b><small>${mini?`${esc(eur0(mini))} Lohn<br><b>${esc(eur0(keep))} behältst du</b>`:"Rechner öffnen"}</small></button>`);
+  if (P.side==="jl") tiles.push(`<button class="card" data-zvopen><span class="jli">${ic("cash",17)}</span><b>Minijob</b><small>${mini?`${esc(eur0(mini))} Lohn<br><b>${esc(eur0(keep))} behältst du</b>`:"Rechner öffnen"}</small></button>`);
   else if (P.side==="bafoeg") tiles.push(`<button class="card" ${go}><span class="jli">${ic("case",17)}</span><b>Nebenjob</b><small>${mini?`${esc(eur0(mini))} im Monat<br><b class="${mini>MJ?"neg":""}">${mini>MJ?`${esc(eur0(mini-MJ))} über der Grenze`:`noch ${esc(eur0(MJ-mini))} frei`}</b>`:`bis ${MJ} € ohne Abzug`}</small></button>`);
   else if (P.side==="ferien") tiles.push(`<button class="card" ${go}><span class="jli">${ic("case",17)}</span><b>Ferienjob</b><small>${mini?`${esc(eur0(mini))} verdient<br><b>bleibt dir ganz</b>`:"eintragen, was du verdienst"}</small></button>`);
   else if (P.side==="beihilfe"){ const open=j.beihilfe.filter(x=>!x.done), sumO=sum(open,x=>Number(x.amt)||0);
@@ -2880,9 +2930,10 @@ function joblessTop(ym, free, c){
         return `<div class="bpr"><span class="bpic" style="--bc:${col}">${ic(potIc(p.n),16)}</span><span class="bpm"><span class="bpl"><b>${esc(p.n)}</b><span class="${ov?"neg":"muted"}">${ov?`${esc(eur0(p.s-p.v))} drüber`:`${esc(eur0(p.v-p.s))} frei`}</span></span><span class="bpbar"><i style="width:${Math.min(100,Math.max(p.s?3:0,r*100))}%;background:${col}"></i></span></span></div>`; }).join("")}
       ${pots.length>4?`<button class="link small bpmore" data-potall="1">${UI.potAll?"Weniger":`Alle ${pots.length} Töpfe`}</button>`:""}</div>`:""}
     <div class="jltiles">${tiles.slice(0,2).join("")}</div>
+    ${P.side==="jl"?`<button type="button" class="card jlbs" data-bsopen><span class="jli">📄</span><span class="grow"><b>Bescheid-Check</b><small>${(()=>{ const B=(jlCfg().bescheide||[]).slice().sort((a,c)=>(c.from||"").localeCompare(a.from||""))[0]; return B&&B.wid&&daysTo(B.wid)>=0?esc(nt("bs_w",{d:dLong(B.wid,{day:"numeric",month:"short"})})):"Bescheid fotografieren & prüfen"; })()}</small></span><span class="fcchev">›</span></button>`:""}
     <div class="card jlterms"><div class="card-head"><h2>${hIc("cal")}Termine & Fristen</h2>${terms.length?`<span class="pill">${terms.length} offen</span>`:""}</div>
-      ${terms.length?terms.map(t=>`<div class="jlt"><span class="jli">${ic(/bewillig|antrag|nachweis|frist|einreich|bescheid|meldung/i.test(t.n)?"doc":"cal",16)}</span><span class="n"><b>${esc(t.n)}</b><small>${esc(new Date(t.d+"T12:00").toLocaleDateString(LOCD(),{weekday:"short",day:"2-digit",month:"2-digit"}))}${t.t?` · ${esc(t.t)} Uhr`:""}${t.d===today?" · heute":""}</small></span></div>`).join(""):`<p class="small muted" style="margin:0">Keine Termine eingetragen.</p>`}
-      <button class="link small" ${go} style="margin-top:8px">+ Termin eintragen</button></div>
+      ${terms.length?terms.map(t=>`<div class="jlt" data-tmopen="${esc(t.id)}" role="button" tabindex="0" style="cursor:pointer"><span class="jli">${ic(/bewillig|antrag|nachweis|frist|einreich|bescheid|meldung/i.test(t.n)?"doc":"cal",16)}</span><span class="n"><b>${esc(t.n)}</b><small>${esc(new Date(t.d+"T12:00").toLocaleDateString(LOCD(),{weekday:"short",day:"2-digit",month:"2-digit"}))}${t.t?` · ${esc(t.t)} Uhr`:""}${t.d===today?" · heute":""}</small></span></div>`).join(""):`<p class="small muted" style="margin:0">Keine Termine eingetragen.</p>`}
+      <button class="link small" data-tmopen style="margin-top:8px">+ Termin eintragen</button></div>
     ${P.tip&&!(S.settings.tipsOff||{})[S.settings.work]?`<div class="notice info jltip"><span>${esc(P.tip)}</span><button class="icon-btn" data-tipoff="1" aria-label="Tipp ausblenden">×</button></div>`:""}
   </div>`;
 }
@@ -2920,9 +2971,10 @@ function renderAmtEd(){
     ${j.beihilfe.slice().sort((a,b)=>(a.done-b.done)||(b.d||"").localeCompare(a.d||"")).map(x=>`<div class="jlt ${x.done?"past":""}"><button class="icon-btn" data-bhdone="${esc(x.id)}" aria-label="${x.done?"Wieder offen":"Erstattet"}">${x.done?"✓":"○"}</button><span class="n"><b>${esc(x.n)} · ${esc(eur(x.amt))}</b><small>eingereicht ${esc(new Date(x.d+"T12:00").toLocaleDateString("de-DE"))}${x.done?" · erstattet":""}</small></span><button class="icon-btn" data-bhdel="${esc(x.id)}" aria-label="Löschen">×</button></div>`).join("")}
     <div class="jlnew"><input class="in" id="bhN" placeholder="z. B. Zahnarzt"><input class="in" id="bhA" inputmode="decimal" placeholder="Betrag €"><input class="in" type="date" id="bhD" value="${today}"><button class="btn primary" id="bhAdd">Eintragen</button></div>`:""}
     <div class="section-title" style="font-size:14px">Termine & Fristen</div>
+    <div class="vabtns" style="margin:0 0 10px"><button type="button" class="btn primary" data-tmopen>Termine öffnen</button><button type="button" class="btn" data-bsopen>📄 Bescheid-Check</button></div>
     ${j.terms.slice().sort((a,b)=>a.d.localeCompare(b.d)).map(t=>`<div class="jlt ${t.d<today?"past":""}"><span class="jli">${ic("cal",16)}</span><span class="n"><b>${esc(t.n)}</b><small>${esc(new Date(t.d+"T12:00").toLocaleDateString("de-DE"))}${t.t?` · ${esc(t.t)} Uhr`:""}</small></span><button class="icon-btn" data-termdel="${esc(t.id)}" aria-label="Termin löschen">×</button></div>`).join("")}
     <div class="jlnew"><select class="in" id="tN">${P.terms.map(n=>`<option>${esc(n)}</option>`).join("")}<option>Sonstiger Termin</option></select><input class="in" type="date" id="tD" value="${today}"><input class="in" type="time" id="tT"><button class="btn primary" id="tAdd">Eintragen</button></div>
-    ${P.side==="jl"?`<div class="section-title" style="font-size:14px">Minijob-Rechner</div>
+    ${P.side==="jl"?`<div class="section-title" style="font-size:14px">Minijob-Rechner</div><button type="button" class="btn primary" data-zvopen style="margin-bottom:10px">Zuverdienst-Rechner öffnen</button>
     <div class="field"><label for="aMini">Lohn pro Monat (€ brutto)</label><input class="in" id="aMini" inputmode="decimal" value="${mini?esc(numStr(mini)):""}" placeholder="z. B. 300"></div>
     ${mini?`<div class="notice info"><span>Von <b>${esc(eur(mini))}</b> behältst du ungefähr <b>${esc(eur(jlKeep(mini)))}</b> zusätzlich, <b>${esc(eur(Math.max(0,mini-jlKeep(mini))))}</b> werden ${w==="alg"?"vom Arbeitslosengeld":"von der Grundsicherung"} abgezogen.</span></div>`:""}
     <p class="small muted" style="margin:8px 0 0">${w==="alg"?"Arbeitslosengeld: 165 € Nebenverdienst im Monat sind frei, höchstens 15 Stunden pro Woche.":"Grundsicherung: die ersten 100 € sind frei, darüber bleiben 20 % (bis 520 €), 30 % (bis 1.000 €) und 10 % (bis 1.200 €, mit Kind 1.500 €)."} Angaben ohne Gewähr – im Zweifel beim ${w==="alg"?"Arbeitsamt":"Jobcenter"} nachfragen.</p>`
@@ -3826,6 +3878,8 @@ function renderBeruf(){ const el=document.querySelector(`[data-view="beruf"]`); 
   if (hasSelf()){ const K=kundenOf(y); if (K.list.length && K.tot>0 && K.list[0].sum/K.tot>0.5) hints.push(`<button type="button" class="ahint" data-anaopen="kunden">👥 <span>${Math.round(K.list[0].sum/K.tot*100)} % deiner Einnahmen kommen von einem Kunden</span></button>`); }
   if ((hasSelf()||hasJob()) && !hoCfg(y).on && (y===new Date().getFullYear())) hints.push(`<button type="button" class="ahint g" data-hoopen>🏠 <span>Arbeitest du zu Hause? Homeoffice eintragen</span></button>`);
   const extra=[]; if (staat){ const m=bwMonth(ymOf(new Date())), g2=Number(bwCfg().goal)||0; extra.push(areaTile("📨","Bewerbungen",`${m.length}${g2?" / "+g2:""} im Monat`,"data-bwopen")); }
+  if (isJobless()){ const j=jlCfg(), up=(j.terms||[]).filter(t=>!t.done&&t.d>=isoToday()).sort((a,c)=>a.d.localeCompare(c.d))[0], mini=Number(j.mini)||0;
+    extra.push(areaTile("⏰","Termine & Fristen",up?esc(dLong(up.d,{day:"numeric",month:"short"})):"keine offen","data-tmopen"), areaTile("💶","Zuverdienst",mini?"+"+esc(eur0(jlKeep(mini))):"Rechner","data-zvopen"), areaTile("📄","Bescheid-Check",(j.bescheide||[]).length?esc(eur0((j.bescheide.slice().sort((a,c)=>(c.from||"").localeCompare(a.from||""))[0]||{}).total||0)):"scannen","data-bsopen")); }
   if (hasSelf()||["angestellt","beamte","beides","azubi"].includes(S.settings.work||"beides")||hasExtra("angestellt")){ const H=hoCalc(y); extra.push(areaTile("🏠","Homeoffice",H.on?esc(eur0(H.amt)):"eintragen","data-hoopen")); }
   el.innerHTML = `${hero}${hints.length?`<div class="ahints">${hints.slice(0,3).join("")}</div>`:""}
     <div class="card areacard">${areaHead(g[0], hasJob()||hasSelf()?"steuer":"amt", "Einstellungen")}<div class="agrid">${tiles.filter(t=>!(tax&&t.k==="tax"&&false)).map(t=>areaTile(ic(t.icon,22), (typeof TL_!=="undefined"&&TL_[t.k]?TL_[t.k][0]:t.title), t.short?esc(String(t.short)):"", `data-anaopen="${esc(t.k)}"`)).join("")}${extra.join("")}</div></div>${IS_PC?`<div class="apcgrid">${["tax","kunden"].map(k=>T.find(t=>t.k===k)).filter(Boolean).map(t=>`<div class="card apcc"><div class="card-head"><h2>${hIc(t.icon)}${(typeof TL_!=="undefined"&&TL_[t.k]?TL_[t.k][0]:t.title)}</h2></div>${t.body||""}</div>`).join("")}</div>`:""}`;
@@ -4991,7 +5045,7 @@ function renderHome(){
       if (md.on && md.h && a.ml!==b.ml){ const plus=(a.ml-b.ml)*md.h*13/3; hints.unshift({k:"mindest", lvl:"good", t:`Neu ab ${ny}: Mindestlohn ${ml2(a.ml)} €`, s:`Du bekommst ca. ${eur0(plus)} mehr brutto im Monat. Prüf, ob es auf deiner Abrechnung steht.`}); }
       if (a.mj!==b.mj && (["minijob","studium","schule","alg","grusi"].includes(S.settings.work)||hasExtra("minijob"))) hints.push({k:"mjgrenze", lvl:"warn", t:`Neu ab ${ny}: Minijob-Grenze ${a.mj} €`, s:`vorher ${b.mj} € im Monat`}); } }
   { const nb=S.tx.filter(t=>t.nobon && !hasReceipt(t.id)).length; if (nb) hints.push({lvl:"warn", t:`${nb} ${nb===1?"Einkauf":"Einkäufe"} ohne Kassenbon`, s:"Öffne die Buchung und fotografier den Bon nach – oder tipp dort „Bon gibt’s nicht“."}); }
-  aboHints(hints);
+  aboHints(hints); try{ tmHints(hints); }catch(_){}
   UI.hints=hints; updateBell();
   if (ym===cur) notifyAlerts(hints);
   const bt = g.filter(x=>x.budget).sort((a,b)=>b.v/b.budget-a.v/a.budget).slice(0,3);
@@ -8738,6 +8792,345 @@ document.addEventListener("pointerdown", e=>{ if (!e.target.closest||!e.target.c
 document.addEventListener("pointerup", e=>{ if (!HL.paused) return; const held=performance.now()-(HL.pd||0); HL.paused=false; if (held>350){ e.preventDefault(); const i=HL.i, rest=Math.max(800,(HL.end||0)-(HL.pd||0)); HL.end=performance.now()+rest; const u=document.querySelectorAll("#hlBg .hlbars u")[i]; if (u&&HL_DUR[i]){ u.style.transition=`width ${rest}ms linear`; u.style.width="100%"; HL.t=setTimeout(()=>{ if (HL.i===i) hlGo(i+1); }, rest); } HL.skipClick=true; setTimeout(()=>HL.skipClick=false,50); } });
 document.addEventListener("click", e=>{ if (HL.skipClick && e.target.closest(".hltap")){ e.stopImmediatePropagation(); } }, true);
 document.addEventListener("keydown", e=>{ if (!$("hlBg")) return; if (e.key==="Escape") hlClose(); else if (e.key==="ArrowRight") hlGo(HL.i+1); else if (e.key==="ArrowLeft") hlGo(HL.i-1); });
+
+Object.assign(NT,{
+am_aa:["Arbeitsamt","employment agency","İş Ajansı","агентство занятости","агентство зайнятості","urząd pracy","وكالة العمل","agenția de muncă"],
+am_jc:["Jobcenter","job centre","Jobcenter","Jobcenter","Jobcenter","Jobcenter","مركز العمل","Jobcenter"],
+am_alg:["Arbeitslosengeld","unemployment benefit","işsizlik parası","пособие по безработице","допомога з безробіття","zasiłek","إعانة البطالة","ajutor de șomaj"],
+am_gs:["Grundsicherung","basic income support","temel güvence","базовое пособие","базова допомога","zasiłek podstawowy","الإعانة الأساسية","ajutor social de bază"],
+tm_title:["Termine & Fristen","Appointments & deadlines","Randevular ve süreler","Встречи и сроки","Зустрічі та терміни","Terminy i wizyty","المواعيد والمهل","Programări și termene"],
+tm_nextt:["Nächster Termin","Next appointment","Sonraki randevu","Следующая встреча","Наступна зустріч","Następna wizyta","الموعد التالي","Următoarea programare"],
+tm_nextf:["Nächste Frist","Next deadline","Sonraki süre","Следующий срок","Наступний термін","Następny termin","المهلة التالية","Următorul termen"],
+tm_today:["heute","today","bugün","сегодня","сьогодні","dziś","اليوم","azi"],
+tm_tom:["morgen","tomorrow","yarın","завтра","завтра","jutro","غدًا","mâine"],
+tm_past:["vorbei","past","geçti","прошло","минуло","minęło","انتهى","trecut"],
+tm_days:["in {n} Tagen","in {n} days","{n} gün sonra","через {n} дн.","через {n} дн.","za {n} dni","بعد {n} أيام","în {n} zile"],
+tm_day1:["Tag","day","gün","день","день","dzień","يوم","zi"],
+tm_daysw:["Tage","days","gün","дн.","дн.","dni","أيام","zile"],
+tm_edit:["Bearbeiten","Edit","Düzenle","Изменить","Редагувати","Edytuj","تعديل","Editează"],
+tm_mami0:["Heute ist dein Termin{t} – du schaffst das, {a}! Hast du alles dabei? 💚","Your appointment is today{t} – you’ve got this, {a}! Got everything? 💚","Randevun bugün{t} – başaracaksın {a}! Her şey yanında mı? 💚","Сегодня твоя встреча{t} – ты справишься, {a}! Всё взял? 💚","Сьогодні твоя зустріч{t} – ти впораєшся, {a}! Усе взяв? 💚","Dziś twoja wizyta{t} – dasz radę, {a}! Masz wszystko? 💚","موعدك اليوم{t} – ستنجح يا {a}! هل معك كل شيء؟ 💚","Azi ai programarea{t} – reușești, {a}! Ai tot ce trebuie? 💚"],
+tm_mami1:["Morgen ist dein Termin{t}, {a}. Pack heute schon alles ein! 🎒","Your appointment is tomorrow{t}, {a}. Pack everything today! 🎒","Randevun yarın{t}, {a}. Her şeyi bugünden hazırla! 🎒","Завтра твоя встреча{t}, {a}. Собери всё уже сегодня! 🎒","Завтра твоя зустріч{t}, {a}. Збери все вже сьогодні! 🎒","Jutro twoja wizyta{t}, {a}. Spakuj wszystko już dziś! 🎒","موعدك غدًا{t} يا {a}. جهّز كل شيء اليوم! 🎒","Mâine ai programarea{t}, {a}. Pregătește totul de azi! 🎒"],
+tm_bring:["Mitnehmen","Bring along","Yanına al","Взять с собой","Взяти з собою","Zabierz ze sobą","أحضر معك","De luat"],
+tm_b_id:["Personalausweis","ID card","Kimlik kartı","Удостоверение личности","Посвідчення особи","Dowód osobisty","بطاقة الهوية","Buletin"],
+tm_b_inv:["Einladungsschreiben","Invitation letter","Davet mektubu","Письмо-приглашение","Лист-запрошення","Zaproszenie","خطاب الدعوة","Scrisoarea de invitație"],
+tm_b_bw:["Bewerbungsnachweise","Proof of applications","Başvuru kanıtları","Подтверждения заявок","Підтвердження заявок","Potwierdzenia aplikacji","إثباتات التقديم","Dovezi ale candidaturilor"],
+tm_b_docs:["Unterlagen vollständig","Documents complete","Belgeler tamam","Документы готовы","Документи готові","Dokumenty kompletne","المستندات مكتملة","Documente complete"],
+tm_b_more:["Noch etwas mitnehmen …","Something else …","Başka bir şey …","Что-то ещё …","Ще щось …","Coś jeszcze …","شيء آخر …","Altceva …"],
+tm_was:["Ich war da – Nachweis speichern","I was there – save proof","Oradaydım – kanıtı kaydet","Я был там – сохранить подтверждение","Я був там – зберегти підтвердження","Byłem – zapisz potwierdzenie","حضرت – احفظ الإثبات","Am fost – salvează dovada"],
+tm_donef:["Erledigt – abhaken","Done – tick off","Tamam – işaretle","Готово – отметить","Готово – відмітити","Zrobione – odhacz","تم – علّم","Gata – bifează"],
+tm_later:["Am Termin-Tag kannst du hier abhaken, dass du da warst.","On the day you can tick off here that you were there.","Randevu günü burada orada olduğunu işaretleyebilirsin.","В день встречи здесь можно отметить, что ты был.","У день зустрічі тут можна відмітити, що ти був.","W dniu wizyty możesz tu odhaczyć, że byłeś.","في يوم الموعد يمكنك هنا تأكيد حضورك.","În ziua programării poți bifa aici că ai fost."],
+tm_none:["Kein Termin offen","No open appointments","Açık randevu yok","Нет открытых встреч","Немає відкритих зустрічей","Brak otwartych terminów","لا مواعيد مفتوحة","Nicio programare deschisă"],
+tm_none_s:["Alles erledigt","All done","Hepsi tamam","Всё сделано","Усе зроблено","Wszystko załatwione","تم كل شيء","Totul e gata"],
+tm_after:["Danach","Coming up","Sonra","Далее","Далі","Potem","لاحقًا","Urmează"],
+tm_new:["Termin oder Frist","Appointment or deadline","Randevu veya süre","Встреча или срок","Зустріч або термін","Termin lub wizyta","موعد أو مهلة","Programare sau termen"],
+tm_done:["Erledigt","Done","Tamamlandı","Выполнено","Виконано","Załatwione","منجز","Gata"],
+tm_at:["um {t}","at {t}","saat {t}","в {t}","о {t}","o {t}","الساعة {t}","la {t}"],
+tm_proof:["Nachweis ansehen","View proof","Kanıtı gör","Посмотреть подтверждение","Переглянути підтвердження","Zobacz potwierdzenie","عرض الإثبات","Vezi dovada"],
+tm_photo:["Foto","Photo","Fotoğraf","Фото","Фото","Zdjęcie","صورة","Fotografie"],
+tm_undo:["Wieder öffnen","Reopen","Yeniden aç","Открыть снова","Відкрити знову","Otwórz ponownie","إعادة فتح","Redeschide"],
+tm_hint:["Tipp: Wer einen Termin beim {a} verpasst, dem kann die Leistung gekürzt werden. Kannst du nicht kommen, sag vorher Bescheid.","Tip: missing an appointment with the {a} can lead to cuts. If you can’t come, let them know beforehand.","İpucu: {a} randevusunu kaçırırsan ödemen kesilebilir. Gelemezsen önceden haber ver.","Совет: за пропущенную встречу в {a} пособие могут урезать. Если не можешь прийти, предупреди заранее.","Порада: за пропущену зустріч у {a} допомогу можуть урізати. Якщо не можеш прийти, попередь заздалегідь.","Wskazówka: za opuszczoną wizytę w {a} świadczenie może zostać obniżone. Jeśli nie możesz przyjść, uprzedź wcześniej.","نصيحة: قد تُخفَّض الإعانة إذا فاتك موعد في {a}. إن لم تستطع الحضور فأبلغهم مسبقًا.","Sfat: dacă ratezi o programare la {a}, ți se poate tăia ajutorul. Dacă nu poți veni, anunță dinainte."],
+tm_what:["Was?","What?","Ne?","Что?","Що?","Co?","ماذا؟","Ce?"],
+tm_date:["Datum","Date","Tarih","Дата","Дата","Data","التاريخ","Data"],
+tm_time:["Uhrzeit","Time","Saat","Время","Час","Godzina","الوقت","Ora"],
+tm_place:["Wo? (optional)","Where? (optional)","Nerede? (isteğe bağlı)","Где? (необязательно)","Де? (необов’язково)","Gdzie? (opcjonalnie)","أين؟ (اختياري)","Unde? (opțional)"],
+tm_place_p:["z. B. Zimmer 214","e.g. room 214","ör. oda 214","напр. кабинет 214","напр. кабінет 214","np. pokój 214","مثلًا غرفة 214","ex. camera 214"],
+tm_k_t:["Termin","Appointment","Randevu","Встреча","Зустріч","Wizyta","موعد","Programare"],
+tm_k_f:["Frist","Deadline","Süre","Срок","Термін","Termin","مهلة","Termen"],
+tm_del:["Löschen","Delete","Sil","Удалить","Видалити","Usuń","حذف","Șterge"],
+tm_cancel:["Abbrechen","Cancel","İptal","Отмена","Скасувати","Anuluj","إلغاء","Anulează"],
+tm_save:["Speichern","Save","Kaydet","Сохранить","Зберегти","Zapisz","حفظ","Salvează"],
+tm_need:["Bitte Name und Datum eintragen","Please enter name and date","Lütfen ad ve tarih gir","Укажи название и дату","Вкажи назву й дату","Wpisz nazwę i datę","أدخل الاسم والتاريخ","Introdu numele și data"],
+tm_ok:["Eingetragen – ich erinnere dich","Saved – I’ll remind you","Kaydedildi – sana hatırlatırım","Сохранено – я напомню","Збережено – я нагадаю","Zapisane – przypomnę ci","تم الحفظ – سأذكّرك","Salvat – îți amintesc"],
+tm_saved:["Abgehakt! Willst du ein Foto als Nachweis?","Ticked off! Want a photo as proof?","İşaretlendi! Kanıt olarak fotoğraf ister misin?","Отмечено! Сделать фото как подтверждение?","Відмічено! Зробити фото як підтвердження?","Odhaczone! Zrobić zdjęcie jako dowód?","تم! هل تريد صورة كإثبات؟","Bifat! Vrei o fotografie ca dovadă?"],
+tm_proof_ok:["Nachweis gespeichert","Proof saved","Kanıt kaydedildi","Подтверждение сохранено","Підтвердження збережено","Dowód zapisany","تم حفظ الإثبات","Dovada a fost salvată"],
+tm_proof_err:["Foto konnte nicht gespeichert werden","Couldn’t save photo","Fotoğraf kaydedilemedi","Не удалось сохранить фото","Не вдалося зберегти фото","Nie udało się zapisać zdjęcia","تعذّر حفظ الصورة","Fotografia nu a putut fi salvată"],
+tm_h_t:["Pack Ausweis und Einladung ein – und sei pünktlich.","Pack ID and invitation – and be on time.","Kimliğini ve davetini al – ve dakik ol.","Возьми удостоверение и приглашение – и приходи вовремя.","Візьми посвідчення й запрошення – і прийди вчасно.","Weź dowód i zaproszenie – i bądź punktualnie.","خذ الهوية والدعوة – وكن في الموعد.","Ia buletinul și invitația – și fii punctual."],
+tm_h_f:["Gib die Unterlagen rechtzeitig ab.","Hand in the documents on time.","Belgeleri zamanında teslim et.","Сдай документы вовремя.","Здай документи вчасно.","Złóż dokumenty na czas.","سلّم المستندات في الوقت.","Predă documentele la timp."],
+zv_title:["Zuverdienst-Rechner","Side income calculator","Ek gelir hesaplayıcı","Калькулятор подработки","Калькулятор підробітку","Kalkulator dorabiania","حاسبة الدخل الإضافي","Calculator venit suplimentar"],
+zv_gross:["Dein Brutto-Lohn im Monat","Your gross pay per month","Aylık brüt maaşın","Твоя зарплата брутто в месяц","Твоя зарплата брутто на місяць","Twoja pensja brutto miesięcznie","راتبك الإجمالي شهريًا","Salariul tău brut lunar"],
+zv_mj:["Minijob {n}","Mini-job {n}","Mini iş {n}","Миниджоб {n}","Мініджоб {n}","Minijob {n}","وظيفة صغيرة {n}","Minijob {n}"],
+zv_exact:["Genau (€)","Exact (€)","Tam (€)","Точно (€)","Точно (€)","Dokładnie (€)","بالضبط (€)","Exact (€)"],
+zv_hours:["Std. pro Woche","Hours per week","Haftalık saat","Часов в неделю","Годин на тиждень","Godzin tygodniowo","ساعات أسبوعيًا","Ore pe săptămână"],
+zv_hours_p:["optional","optional","isteğe bağlı","необязательно","необов’язково","opcjonalnie","اختياري","opțional"],
+zv_keep:["Du behältst","You keep","Sende kalan","Тебе остаётся","Тобі залишається","Zostaje ci","يبقى لك","Îți rămân"],
+zv_after:["{a} danach","{a} afterwards","Sonrasında {a}","{a} после","{a} після","{a} potem","{a} بعد ذلك","{a} după"],
+zv_before:["vorher {n}","before {n}","önce {n}","до этого {n}","до цього {n}","wcześniej {n}","قبل ذلك {n}","înainte {n}"],
+zv_total:["Insgesamt im Monat","Total per month","Aylık toplam","Всего в месяц","Усього на місяць","Łącznie miesięcznie","المجموع شهريًا","Total pe lună"],
+zv_tot_s:["statt {n} ohne Job · ≈ {h} pro Stunde extra","instead of {n} without a job · ≈ {h} extra per hour","işsiz {n} yerine · saat başı ≈ {h} ekstra","вместо {n} без работы · ≈ {h} в час сверху","замість {n} без роботи · ≈ {h} на годину зверху","zamiast {n} bez pracy · ≈ {h} więcej za godzinę","بدل {n} بدون عمل · ≈ {h} إضافية بالساعة","în loc de {n} fără job · ≈ {h} în plus pe oră"],
+zv_tot_0:["Schieb den Regler – ich rechne mit","Move the slider – I’ll calculate","Kaydırıcıyı oynat – ben hesaplarım","Двигай ползунок – я посчитаю","Рухай повзунок – я порахую","Przesuń suwak – policzę","حرّك المؤشر – وسأحسب","Mută cursorul – calculez eu"],
+zv_move:["Regler schieben","Move the slider","Kaydırıcıyı oynat","Двигай ползунок","Рухай повзунок","Przesuń suwak","حرّك المؤشر","Mută cursorul"],
+zv_ded:["{n} angerechnet","{n} deducted","{n} mahsup edilir","{n} засчитывается","{n} зараховується","{n} odliczone","يُخصم {n}","{n} se scad"],
+zv_none:["noch kein Lohn","no pay yet","henüz maaş yok","пока нет зарплаты","поки немає зарплати","brak pensji","لا راتب بعد","încă niciun salariu"],
+zv_p_free:["{n} frei","{n} free","{n} muaf","{n} свободно","{n} вільно","{n} wolne","{n} معفاة","{n} liberi"],
+zv_p_pct:["{p} % von {n}","{p} % of {n}","{n} tutarının %{p}'i","{p} % от {n}","{p} % від {n}","{p} % z {n}","{p} ٪ من {n}","{p} % din {n}"],
+zv_alg_free:["{n} im Monat frei","{n} per month free","Ayda {n} muaf","{n} в месяц свободно","{n} на місяць вільно","{n} miesięcznie wolne","{n} شهريًا معفاة","{n} pe lună liberi"],
+zv_noamt:["Trag ein, wie viel du vom Amt bekommst – dann stimmt die Summe.","Enter how much you get from the office – then the total is right.","Dairenden ne kadar aldığını gir – toplam doğru olsun.","Укажи, сколько получаешь от ведомства – тогда сумма будет точной.","Вкажи, скільки отримуєш від установи – тоді сума буде точною.","Wpisz, ile dostajesz z urzędu – wtedy suma się zgodzi.","أدخل ما تحصل عليه من الجهة – ليصح المجموع.","Introdu cât primești de la instituție – ca totalul să fie corect."],
+zv_set:["Eintragen","Enter","Gir","Указать","Вказати","Wpisz","أدخل","Introdu"],
+zv_15:["15 Stunden pro Woche erreicht","15 hours a week reached","Haftada 15 saate ulaşıldı","Достигнуто 15 часов в неделю","Досягнуто 15 годин на тиждень","Osiągnięto 15 godzin tygodniowo","تم بلوغ 15 ساعة أسبوعيًا","15 ore pe săptămână atinse"],
+zv_15_s:["Ab 15 Stunden gilt man nicht mehr als arbeitslos – das Arbeitslosengeld kann ganz wegfallen.","From 15 hours you no longer count as unemployed – the benefit may stop completely.","15 saatten itibaren işsiz sayılmazsın – işsizlik parası tamamen kesilebilir.","С 15 часов ты больше не считаешься безработным – пособие может полностью прекратиться.","Від 15 годин ти вже не вважаєшся безробітним – допомога може повністю припинитися.","Od 15 godzin nie jesteś już bezrobotny – zasiłek może zostać wstrzymany.","من 15 ساعة لا تُعتبر عاطلًا – وقد تتوقف الإعانة كليًا.","De la 15 ore nu mai ești considerat șomer – ajutorul poate înceta complet."],
+zv_svp:["Über der Minijob-Grenze","Above the mini-job limit","Mini iş sınırının üzerinde","Выше лимита миниджоба","Вище ліміту мініджоба","Powyżej limitu minijobu","فوق حد الوظيفة الصغيرة","Peste limita de minijob"],
+zv_svp_s:["Ab hier zahlst du Sozialabgaben – rechne mit etwas weniger Netto.","From here you pay social contributions – expect a bit less net.","Buradan itibaren sosyal kesinti ödersin – neti biraz daha az hesapla.","Отсюда платятся соцвзносы – нетто будет чуть меньше.","Звідси сплачуються соцвнески – нетто буде трохи менше.","Od tego progu płacisz składki – netto będzie trochę mniej.","من هنا تدفع اشتراكات اجتماعية – توقع صافيًا أقل قليلًا.","De aici plătești contribuții – net vei avea puțin mai puțin."],
+zv_note_gs:["Grundsicherung: 100 € sind frei, darüber bleiben 20 % (bis 520 €), 30 % (bis 1.000 €) und 10 % (bis 1.200 €, mit Kind 1.500 €). Ohne Gewähr – im Zweifel beim Jobcenter fragen.","Basic income support: 100 € free, then 20 % (up to 520 €), 30 % (up to 1,000 €) and 10 % (up to 1,200 €, with child 1,500 €). No guarantee – ask the job centre if unsure.","Temel güvence: 100 € muaf, sonra %20 (520 €'ya kadar), %30 (1.000 €'ya kadar), %10 (1.200 €'ya kadar, çocukla 1.500 €). Garanti yok – emin değilsen Jobcenter'a sor.","Базовое пособие: 100 € свободны, далее 20 % (до 520 €), 30 % (до 1000 €) и 10 % (до 1200 €, с ребёнком 1500 €). Без гарантии – уточни в Jobcenter.","Базова допомога: 100 € вільні, далі 20 % (до 520 €), 30 % (до 1000 €) і 10 % (до 1200 €, з дитиною 1500 €). Без гарантії – уточни в Jobcenter.","Zasiłek podstawowy: 100 € wolne, potem 20 % (do 520 €), 30 % (do 1000 €) i 10 % (do 1200 €, z dzieckiem 1500 €). Bez gwarancji – w razie wątpliwości zapytaj w Jobcenter.","الإعانة الأساسية: 100 € معفاة، ثم 20 ٪ (حتى 520 €) و30 ٪ (حتى 1000 €) و10 ٪ (حتى 1200 €، مع طفل 1500 €). دون ضمان – اسأل مركز العمل عند الشك.","Ajutor de bază: 100 € liberi, apoi 20 % (până la 520 €), 30 % (până la 1.000 €) și 10 % (până la 1.200 €, cu copil 1.500 €). Fără garanție – întreabă la Jobcenter."],
+zv_note_alg:["Arbeitslosengeld: 165 € Nebenverdienst im Monat sind frei, höchstens unter 15 Stunden pro Woche. Ohne Gewähr – im Zweifel beim Arbeitsamt fragen.","Unemployment benefit: 165 € side income per month is free, under 15 hours a week. No guarantee – ask the agency if unsure.","İşsizlik parası: ayda 165 € ek gelir muaf, haftada 15 saatin altında. Garanti yok – emin değilsen İş Ajansı'na sor.","Пособие по безработице: 165 € подработки в месяц свободны, меньше 15 часов в неделю. Без гарантии – уточни в агентстве.","Допомога з безробіття: 165 € підробітку на місяць вільні, менше 15 годин на тиждень. Без гарантії – уточни в агентстві.","Zasiłek: 165 € dorobku miesięcznie wolne, poniżej 15 godzin tygodniowo. Bez gwarancji – zapytaj w urzędzie.","إعانة البطالة: 165 € دخل إضافي شهريًا معفاة، أقل من 15 ساعة أسبوعيًا. دون ضمان – اسأل الوكالة عند الشك.","Ajutor de șomaj: 165 € venit suplimentar pe lună liberi, sub 15 ore pe săptămână. Fără garanție – întreabă la agenție."],
+bs_title:["Bescheid-Check","Notice check","Karar kontrolü","Проверка решения","Перевірка рішення","Sprawdzenie decyzji","فحص القرار","Verificare decizie"],
+bs_cur:["Aktuell bewilligt","Currently granted","Şu an onaylı","Сейчас назначено","Зараз призначено","Obecnie przyznane","المعتمد حاليًا","Aprobat acum"],
+bs_month:["Monat","month","ay","мес.","міс.","mies.","شهر","lună"],
+bs_until:["bis {d}","until {d}","{d} tarihine kadar","до {d}","до {d}","do {d}","حتى {d}","până la {d}"],
+bs_intro:["Bescheid bekommen?","Got a notice?","Karar mı geldi?","Пришло решение?","Прийшло рішення?","Dostałeś decyzję?","وصلك قرار؟","Ai primit o decizie?"],
+bs_intro_s:["Fotografier ihn – ich lese die Zahlen, prüfe sie und merke mir die Fristen.","Take a photo – I’ll read the numbers, check them and remember the deadlines.","Fotoğrafını çek – rakamları okur, kontrol eder ve süreleri hatırlarım.","Сфотографируй – я прочитаю цифры, проверю их и запомню сроки.","Сфотографуй – я прочитаю цифри, перевірю їх і запам’ятаю терміни.","Zrób zdjęcie – odczytam liczby, sprawdzę je i zapamiętam terminy.","صوّره – سأقرأ الأرقام وأتحقق منها وأتذكر المهل.","Fotografiaz-o – citesc cifrele, le verific și rețin termenele."],
+bs_photo:["Fotografieren","Take photo","Fotoğraf çek","Сфотографировать","Сфотографувати","Zrób zdjęcie","التقاط صورة","Fotografiază"],
+bs_file:["Bild wählen","Choose image","Görsel seç","Выбрать фото","Вибрати фото","Wybierz obraz","اختر صورة","Alege imagine"],
+bs_manual:["Ohne Foto eintragen","Enter without photo","Fotoğrafsız gir","Ввести без фото","Ввести без фото","Wpisz bez zdjęcia","أدخل دون صورة","Introdu fără foto"],
+bs_all:["Deine Bescheide","Your notices","Kararların","Твои решения","Твої рішення","Twoje decyzje","قراراتك","Deciziile tale"],
+bs_w_badge:["Widerspruch {n} T.","Appeal {n} d","İtiraz {n} g","Возражение {n} дн.","Заперечення {n} дн.","Odwołanie {n} dni","اعتراض {n} ي","Contestație {n} z"],
+bs_priv:["Das Foto wird nur auf deinem Gerät gelesen und gespeichert.","The photo is read and stored only on your device.","Fotoğraf yalnızca cihazında okunur ve saklanır.","Фото читается и хранится только на твоём устройстве.","Фото читається й зберігається лише на твоєму пристрої.","Zdjęcie jest odczytywane i zapisywane tylko na twoim urządzeniu.","تُقرأ الصورة وتُحفظ على جهازك فقط.","Fotografia e citită și salvată doar pe dispozitivul tău."],
+bs_reading:["Ich lese deinen Bescheid …","Reading your notice …","Kararını okuyorum …","Читаю твоё решение …","Читаю твоє рішення …","Czytam twoją decyzję …","أقرأ قرارك …","Citesc decizia ta …"],
+bs_found:["Erkannt – bitte prüfen","Recognized – please check","Tanındı – lütfen kontrol et","Распознано – проверь","Розпізнано – перевір","Rozpoznano – sprawdź","تم التعرف – يرجى التحقق","Recunoscut – verifică te rog"],
+bs_nothing:["Ich konnte nichts sicher lesen","I couldn’t read anything reliably","Hiçbir şeyi net okuyamadım","Не удалось уверенно ничего прочитать","Не вдалося впевнено нічого прочитати","Nie udało się nic pewnie odczytać","لم أتمكن من قراءة شيء بوضوح","N-am putut citi nimic sigur"],
+bs_nothing_s:["Kein Problem – trag die Werte unten einfach selbst ein.","No problem – just enter the values below yourself.","Sorun değil – değerleri aşağıya kendin gir.","Не страшно – просто введи значения ниже сам.","Не страшно – просто введи значення нижче сам.","Nie szkodzi – wpisz wartości poniżej samodzielnie.","لا مشكلة – أدخل القيم أدناه بنفسك.","Nicio problemă – introdu valorile mai jos."],
+bs_check:["Werte prüfen & bearbeiten","Check & edit values","Değerleri kontrol et ve düzenle","Проверить и изменить","Перевірити та змінити","Sprawdź i edytuj","تحقق وعدّل القيم","Verifică și editează"],
+bs_kind:["Art","Type","Tür","Вид","Вид","Rodzaj","النوع","Tip"],
+bs_k_b:["Bewilligung","Approval","Onay","Назначение","Призначення","Przyznanie","موافقة","Aprobare"],
+bs_k_a:["Änderungsbescheid","Change notice","Değişiklik kararı","Изменение","Зміна","Decyzja zmieniająca","قرار تعديل","Decizie de modificare"],
+bs_k_ab:["Ablehnung","Rejection","Ret","Отказ","Відмова","Odmowa","رفض","Respingere"],
+bs_f_from:["Zeitraum von","Period from","Dönem başı","Период с","Період з","Okres od","الفترة من","Perioada de la"],
+bs_f_to:["bis","to","bitiş","по","по","do","إلى","până la"],
+bs_f_regel:["Regelbedarf","Standard rate","Standart ihtiyaç","Стандартная ставка","Стандартна ставка","Stawka podstawowa","الاحتياج الأساسي","Necesar standard"],
+bs_f_kdu:["Miete / Unterkunft","Rent / housing","Kira / konut","Аренда / жильё","Оренда / житло","Czynsz / mieszkanie","الإيجار / السكن","Chirie / locuință"],
+bs_f_heiz:["Heizung","Heating","Isınma","Отопление","Опалення","Ogrzewanie","التدفئة","Încălzire"],
+bs_f_mehr:["Mehrbedarf","Additional needs","Ek ihtiyaç","Доп. потребность","Дод. потреба","Dodatkowe potrzeby","احتياج إضافي","Necesar suplimentar"],
+bs_f_ek:["Einkommen angerechnet","Income deducted","Mahsup edilen gelir","Засчитанный доход","Зарахований дохід","Odliczony dochód","الدخل المخصوم","Venit scăzut"],
+bs_f_total:["Zahlbetrag pro Monat","Payment per month","Aylık ödeme","Выплата в месяц","Виплата на місяць","Wypłata miesięcznie","المبلغ الشهري","Plată pe lună"],
+bs_f_date:["Bescheid vom","Notice dated","Karar tarihi","Решение от","Рішення від","Decyzja z dnia","تاريخ القرار","Decizie din"],
+bs_date_s:["Daraus rechne ich die Widerspruchsfrist aus.","I use this to work out the appeal deadline.","İtiraz süresini buradan hesaplarım.","По ней я посчитаю срок возражения.","За нею я порахую строк заперечення.","Na tej podstawie policzę termin odwołania.","منه أحسب مهلة الاعتراض.","Din ea calculez termenul de contestație."],
+bs_use:["Als meinen monatlichen Betrag übernehmen","Use as my monthly amount","Aylık tutarım olarak kullan","Взять как ежемесячную сумму","Взяти як щомісячну суму","Ustaw jako moją miesięczną kwotę","استخدمه كمبلغي الشهري","Folosește ca suma mea lunară"],
+bs_terms:["Fristen in meine Termine eintragen","Add deadlines to my appointments","Süreleri randevularıma ekle","Добавить сроки в мои встречи","Додати терміни до моїх зустрічей","Dodaj terminy do moich wizyt","أضف المهل إلى مواعيدي","Adaugă termenele în programări"],
+bs_checks:["Mein Check","My check","Kontrolüm","Моя проверка","Моя перевірка","Moje sprawdzenie","فحصي","Verificarea mea"],
+bs_w:["Widerspruch möglich bis {d}","Appeal possible until {d}","{d} tarihine kadar itiraz edilebilir","Возражение возможно до {d}","Заперечення можливе до {d}","Odwołanie możliwe do {d}","يمكن الاعتراض حتى {d}","Contestație posibilă până la {d}"],
+bs_w_s:["noch {n} Tage · 1 Monat nach Zugang","{n} days left · 1 month after receipt","{n} gün kaldı · tebliğden 1 ay sonra","ещё {n} дн. · 1 месяц после получения","ще {n} дн. · 1 місяць після отримання","jeszcze {n} dni · 1 miesiąc od doręczenia","باقي {n} يوم · شهر بعد الاستلام","mai sunt {n} zile · 1 lună de la primire"],
+bs_w_over:["Widerspruchsfrist ist vorbei","Appeal period is over","İtiraz süresi geçti","Срок возражения истёк","Строк заперечення минув","Termin odwołania minął","انتهت مهلة الاعتراض","Termenul de contestație a expirat"],
+bs_rent:["Miete {a} angesetzt – du zahlst {b}","Rent set at {a} – you pay {b}","Kira {a} olarak alınmış – sen {b} ödüyorsun","Аренда учтена как {a} – ты платишь {b}","Оренду враховано як {a} – ти платиш {b}","Czynsz przyjęto {a} – płacisz {b}","احتُسب الإيجار {a} – وأنت تدفع {b}","Chiria luată în calcul {a} – plătești {b}"],
+bs_rent_s:["Vielleicht lohnt sich eine Nachfrage beim Amt.","Maybe ask the office about it.","Belki daireye sormaya değer.","Возможно, стоит уточнить в ведомстве.","Можливо, варто уточнити в установі.","Może warto zapytać w urzędzie.","ربما يستحق الأمر السؤال لدى الجهة.","Poate merită să întrebi la instituție."],
+bs_ek_ok:["Einkommen {n} angerechnet – passt zum Zuverdienst-Rechner","Income {n} deducted – matches the calculator","Gelir {n} mahsup – hesaplayıcıyla uyumlu","Засчитано {n} дохода – совпадает с калькулятором","Зараховано {n} доходу – збігається з калькулятором","Odliczono {n} – zgadza się z kalkulatorem","خُصم دخل {n} – يطابق الحاسبة","Venit {n} scăzut – se potrivește cu calculatorul"],
+bs_ek_diff:["{a} angerechnet – laut Rechner wären es {b}","{a} deducted – calculator says {b}","{a} mahsup – hesaplayıcıya göre {b}","Засчитано {a} – по калькулятору {b}","Зараховано {a} – за калькулятором {b}","Odliczono {a} – według kalkulatora {b}","خُصم {a} – والحاسبة تقول {b}","{a} scăzut – calculatorul zice {b}"],
+bs_ek_s:["Das kann an Fahrtkosten oder anderen Freibeträgen liegen.","This can be due to travel costs or other allowances.","Bu yol masrafları veya başka muafiyetlerden olabilir.","Это может быть из-за проезда или других вычетов.","Це може бути через проїзд чи інші пільги.","Może to wynikać z kosztów dojazdu lub innych ulg.","قد يكون ذلك بسبب تكاليف التنقل أو إعفاءات أخرى.","Poate fi din cauza transportului sau altor deduceri."],
+bs_sum:["Summe {a} ≠ Zahlbetrag {b}","Sum {a} ≠ payment {b}","Toplam {a} ≠ ödeme {b}","Сумма {a} ≠ выплата {b}","Сума {a} ≠ виплата {b}","Suma {a} ≠ wypłata {b}","المجموع {a} ≠ المبلغ {b}","Suma {a} ≠ plata {b}"],
+bs_sum_s:["Prüf die Werte – vielleicht wurde etwas falsch gelesen.","Check the values – something may have been misread.","Değerleri kontrol et – bir şey yanlış okunmuş olabilir.","Проверь значения – возможно, что-то прочитано неверно.","Перевір значення – можливо, щось прочитано неправильно.","Sprawdź wartości – coś mogło zostać źle odczytane.","تحقق من القيم – ربما قُرئ شيء خطأ.","Verifică valorile – poate ceva a fost citit greșit."],
+bs_wb:["Weiterbewilligung ab {d} beantragen","Apply for continuation from {d}","{d} tarihinden itibaren devam başvurusu yap","Подать на продление с {d}","Подати на продовження з {d}","Złóż wniosek o kontynuację od {d}","قدّم طلب التمديد من {d}","Cere prelungirea de la {d}"],
+bs_wb_s:["Bewilligung endet am {d}","Approval ends on {d}","Onay {d} tarihinde biter","Назначение заканчивается {d}","Призначення закінчується {d}","Przyznanie kończy się {d}","تنتهي الموافقة في {d}","Aprobarea expiră pe {d}"],
+bs_save:["Speichern","Save","Kaydet","Сохранить","Зберегти","Zapisz","حفظ","Salvează"],
+bs_saved:["Bescheid gespeichert – Fristen eingetragen","Notice saved – deadlines added","Karar kaydedildi – süreler eklendi","Решение сохранено – сроки добавлены","Рішення збережено – терміни додано","Decyzja zapisana – terminy dodane","تم حفظ القرار – وأضيفت المهل","Decizie salvată – termene adăugate"],
+bs_need:["Bitte mindestens den Zahlbetrag eintragen","Please enter at least the payment","Lütfen en az ödeme tutarını gir","Укажи хотя бы сумму выплаты","Вкажи хоча б суму виплати","Wpisz przynajmniej kwotę wypłaty","أدخل المبلغ على الأقل","Introdu cel puțin suma de plată"],
+bs_showimg:["Foto ansehen","View photo","Fotoğrafı gör","Посмотреть фото","Переглянути фото","Zobacz zdjęcie","عرض الصورة","Vezi fotografia"],
+bs_err_img:["Bild konnte nicht geladen werden","Couldn’t load image","Görsel yüklenemedi","Не удалось загрузить фото","Не вдалося завантажити фото","Nie udało się wczytać obrazu","تعذّر تحميل الصورة","Imaginea nu a putut fi încărcată"],
+bs_t_w:["Widerspruchsfrist Bescheid","Appeal deadline notice","Karar itiraz süresi","Срок возражения на решение","Строк заперечення на рішення","Termin odwołania od decyzji","مهلة الاعتراض على القرار","Termen contestație decizie"],
+bs_t_w_b:["Bescheid geprüft","Notice checked","Karar kontrol edildi","Решение проверено","Рішення перевірено","Decyzja sprawdzona","تم فحص القرار","Decizie verificată"],
+bs_t_wb:["Weiterbewilligung beantragen","Apply for continuation","Devam başvurusu yap","Подать на продление","Подати на продовження","Złóż wniosek o kontynuację","قدّم طلب التمديد","Cere prelungirea"],
+bs_t_wb_b:["Antrag ausgefüllt","Form filled in","Başvuru dolduruldu","Заявление заполнено","Заяву заповнено","Wniosek wypełniony","تم ملء الطلب","Cerere completată"]
+});
+
+/* ===== Amt: Termin-Wecker · Zuverdienst-Rechner · Bescheid-Check ===== */
+["tmBg","zvBg","bsBg"].forEach(()=>{});
+document.addEventListener("click", e=>{ const t=e.target; if (t.classList&&t.classList.contains("hobg")&&["tmBg","zvBg","bsBg"].includes(t.id)) hbSheetClose(t.id); });
+const daysTo=d=>Math.round((new Date(d+"T12:00")-new Date(isoToday()+"T12:00"))/864e5);
+const dLong=(d,o)=>new Date(d+"T12:00").toLocaleDateString(cLoc(), o||{weekday:"short", day:"numeric", month:"short"});
+function addDays(iso, n){ const d=new Date(iso+"T12:00"); d.setDate(d.getDate()+n); return isoOf(d); }
+function addMonths(iso, n){ const d=new Date(iso+"T12:00"), y=d.getFullYear(), m=d.getMonth()+n, last=new Date(y,m+1,0).getDate(); return isoOf(new Date(y,m,Math.min(d.getDate(),last),12)); }
+function amtWord(){ return S.settings.work==="alg" ? nt("am_aa") : nt("am_jc"); }
+
+/* ---------- 1A Termin-Wecker ---------- */
+const TM2={sel:null, add:false, edit:null};
+function tmIsFrist(t){ return t.k==="frist" || /frist|einreich|abgeb|antrag|nachweis|bescheid|weiterbewill|unterlag|widerspruch|bezahlen/i.test(t.n||""); }
+function tmBringDef(t){ return tmIsFrist(t) ? [nt("tm_b_docs")] : [nt("tm_b_id"), nt("tm_b_inv"), nt("tm_b_bw")]; }
+function tmList(){ const j=jlCfg(); return j.terms; }
+function tmOpen(sel){ TM2.sel=sel||null; TM2.add=false; TM2.edit=null; hbSheet("tmBg", nt("tm_title")); tmRender(true); }
+function tmBadge(d){ const n=daysTo(d); return n<0?`<span class="vab b-free">${esc(nt("tm_past"))}</span>`:n===0?`<span class="vab b-red">${esc(nt("tm_today"))}</span>`:n===1?`<span class="vab b-red">${esc(nt("tm_tom"))}</span>`:`<span class="vab ${n<=3?"b-red":n<=14?"b-amb":"b-grn"}">${esc(nt("tm_days",{n:String(n)}))}</span>`; }
+function tmRender(first){ const bg=$("tmBg"); if (!bg||bg.hidden) return; const b=bg.querySelector(".hobody"), L=tmList(), today=isoToday();
+  const open=L.filter(t=>!t.done && t.d>=today).sort((a,c)=>(a.d+(a.t||"")).localeCompare(c.d+(c.t||""))), late=L.filter(t=>!t.done && t.d<today), done=L.filter(t=>t.done).sort((a,c)=>c.d.localeCompare(a.d));
+  const cur=(TM2.sel&&L.find(t=>t.id===TM2.sel&&!t.done)) || open[0] || late[0] || null;
+  let h="";
+  if (cur){ const n=daysTo(cur.d), C=2*Math.PI*31, frac=n<=0?1:Math.max(.06,1-Math.min(n,21)/21), bring=cur.bring||(cur.bring=tmBringDef(cur).map(x=>({n:x,ok:false}))), fr=tmIsFrist(cur);
+    h+=`<div class="tmhero ${n<=1?"hot":""}"><svg class="tmring" viewBox="0 0 74 74"><circle cx="37" cy="37" r="31" class="bg"/><circle cx="37" cy="37" r="31" class="fg" style="stroke-dasharray:${C.toFixed(1)};stroke-dashoffset:${first&&!RMo()?C.toFixed(1):(C*(1-frac)).toFixed(1)}" data-off="${(C*(1-frac)).toFixed(1)}"/></svg>
+      <span class="tmn"><b id="tmN">${n<=0?"!":esc(String(n))}</b><small>${esc(n<=0?(n===0?nt("tm_today"):nt("tm_past")):n===1?nt("tm_day1"):nt("tm_daysw"))}</small></span>
+      <div class="tmht"><small>${esc(fr?nt("tm_nextf"):nt("tm_nextt"))}</small><b>${esc(T(cur.n))}</b><span>${esc(dLong(cur.d,{weekday:"short",day:"numeric",month:"long"}))}${cur.t?` · ${esc(cur.t)}`:""}${cur.o?` · ${esc(cur.o)}`:""}</span></div>
+      <button type="button" class="tmed" data-tmedit="${esc(cur.id)}" aria-label="${esc(nt("tm_edit"))}">✎</button></div>`;
+    if (n<=1 && n>=0) h+=`<div class="fcmami on" style="margin:0 0 10px">${mAv?mAv(null):"👩"}<div class="bub">${esc(mFill(n===0?nt("tm_mami0",{t:cur.t?` (${cur.t})`:""}):nt("tm_mami1",{t:cur.t?` (${cur.t})`:""})))}</div></div>`;
+    h+=`<div class="vak">${esc(nt("tm_bring"))}</div><div class="vacard tmbr">${bring.map((x,i)=>`<button type="button" class="tmbi ${x.ok?"ok":""}" data-tmbr="${esc(cur.id)}|${i}"><span class="tmck">${x.ok?"✓":""}</span><span class="grow">${esc(x.n)}</span>${x.ok?`<span class="vab b-grn">✓</span>`:""}</button>`).join("")}
+      <div class="tmadd"><input class="in" id="tmBrN" placeholder="${esc(nt("tm_b_more"))}"><button type="button" class="btn" data-tmbradd="${esc(cur.id)}">+</button></div></div>`;
+    h+=n<=0||fr?`<button type="button" class="tmdone" data-tmdone="${esc(cur.id)}">✓ ${esc(fr?nt("tm_donef"):nt("tm_was"))}</button>`:`<p class="small muted tmnote">${esc(nt("tm_later"))}</p>`;
+  } else h+=`<div class="tmhero calm"><span class="tmn"><b>☀️</b></span><div class="tmht"><small>${esc(nt("tm_none_s"))}</small><b>${esc(nt("tm_none"))}</b></div></div>`;
+  const rest=[...late.filter(t=>!cur||t.id!==cur.id), ...open.filter(t=>!cur||t.id!==cur.id)];
+  if (rest.length) h+=`<div class="vak">${esc(nt("tm_after"))}</div><div class="vacard">${rest.map(t=>`<button type="button" class="fcr tmrow" data-tmsel="${esc(t.id)}"><span class="tmico">${tmIsFrist(t)?"📄":"📍"}</span><span class="grow"><b>${esc(T(t.n))}</b><small>${esc(dLong(t.d))}${t.t?` · ${esc(t.t)}`:""}</small></span>${tmBadge(t.d)}</button>`).join("")}</div>`;
+  h+=TM2.add||TM2.edit?tmForm():`<button type="button" class="btn tmnew" data-tmnew>+ ${esc(nt("tm_new"))}</button>`;
+  if (done.length) h+=`<div class="vak">${esc(nt("tm_done"))}</div><div class="vacard tmdn">${done.slice(0,12).map(t=>`<div class="fcr"><span class="tmico">✅</span><span class="grow"><b>${esc(T(t.n))}</b><small>${esc(dLong(t.d))}${t.done.ts?` · ${esc(nt("tm_at",{t:new Date(t.done.ts).toLocaleTimeString(cLoc(),{hour:"2-digit",minute:"2-digit"})}))}`:""}</small></span>
+    ${t.done.img?`<button type="button" class="tmph" data-tmview="${esc(t.id)}" aria-label="${esc(nt("tm_proof"))}">📎</button>`:`<button type="button" class="tmph add" data-tmphoto="${esc(t.id)}" aria-label="${esc(nt("tm_photo"))}">📸</button>`}<button type="button" class="tmph" data-tmundo="${esc(t.id)}" aria-label="${esc(nt("tm_undo"))}">↺</button></div>`).join("")}</div>`;
+  h+=`<p class="small muted" style="margin:12px 4px 0">${esc(nt("tm_hint",{a:amtWord()}))}</p><input type="file" id="tmFile" accept="image/*" capture="environment" hidden>`;
+  b.innerHTML=h;
+  if (first && !RMo()){ const fg=b.querySelector(".tmring .fg"); if (fg) requestAnimationFrame(()=>requestAnimationFrame(()=>{ fg.style.transition="stroke-dashoffset 1.3s cubic-bezier(.3,0,.2,1)"; fg.style.strokeDashoffset=fg.dataset.off; }));
+    b.querySelectorAll(".tmhero,.vacard,.tmdone,.tmnew").forEach((e,i)=>e.animate([{opacity:0,transform:"translateY(14px)",filter:"blur(6px)"},{opacity:1,transform:"none",filter:"none"}],{duration:550,delay:i*80,easing:"cubic-bezier(.2,1.2,.35,1)",fill:"backwards"})); } }
+function tmForm(){ const t=TM2.edit?tmList().find(x=>x.id===TM2.edit)||{}:{}, P=prof()||GPROF.alg;
+  return `<div class="vacard tmform"><b>${esc(TM2.edit?nt("tm_edit"):nt("tm_new"))}</b>
+    <div class="field"><label>${esc(nt("tm_what"))}</label><input class="in" id="tmFN" list="tmDL" value="${esc(t.n||"")}" placeholder="${esc(T((P.terms||[])[0]||"Termin"))}"><datalist id="tmDL">${(P.terms||[]).map(n=>`<option value="${esc(T(n))}">`).join("")}</datalist></div>
+    <div class="grid2"><div class="field"><label>${esc(nt("tm_date"))}</label><input class="in" type="date" id="tmFD" value="${esc(t.d||isoToday())}"></div><div class="field"><label>${esc(nt("tm_time"))}</label><input class="in" type="time" id="tmFT" value="${esc(t.t||"")}"></div></div>
+    <div class="field"><label>${esc(nt("tm_place"))}</label><input class="in" id="tmFO" value="${esc(t.o||"")}" placeholder="${esc(nt("tm_place_p"))}"></div>
+    <div class="srseg" style="padding:0;margin:4px 0 10px"><button type="button" class="${!tmIsFrist(t)||t.k==="termin"?"on":""}" data-tmk="termin">📍 ${esc(nt("tm_k_t"))}</button><button type="button" class="${t.k==="frist"||(t.n&&tmIsFrist(t)&&t.k!=="termin")?"on":""}" data-tmk="frist">📄 ${esc(nt("tm_k_f"))}</button></div>
+    <div class="vabtns">${TM2.edit?`<button type="button" class="btn danger" data-tmdel="${esc(TM2.edit)}">${esc(nt("tm_del"))}</button>`:""}<button type="button" class="btn" data-tmcancel>${esc(nt("tm_cancel"))}</button><button type="button" class="btn primary" data-tmsave>${esc(nt("tm_save"))}</button></div></div>`; }
+async function tmSaveAll(){ await saveSettings(); }
+async function tmShrink(file){ const url=await new Promise((ok,no)=>{ const r=new FileReader(); r.onload=()=>ok(r.result); r.onerror=no; r.readAsDataURL(file); }); const im=await loadImg(url), k=Math.min(1,1600/Math.max(im.naturalWidth,im.naturalHeight)), c=document.createElement("canvas"); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); c.getContext("2d").drawImage(im,0,0,c.width,c.height); return c.toDataURL("image/jpeg",0.85); }
+document.addEventListener("click", async e=>{
+  const op=e.target.closest("[data-tmopen]"); if (op){ e.preventDefault(); tmOpen(op.dataset.tmopen||null); return; }
+  const bg=$("tmBg"); if (!bg||bg.hidden||!bg.contains(e.target)) return; const L=tmList();
+  const sel=e.target.closest("[data-tmsel]"); if (sel){ TM2.sel=sel.dataset.tmsel; tmRender(true); bg.querySelector(".hobody").scrollTop=0; return; }
+  const br=e.target.closest("[data-tmbr]"); if (br){ const [id,i]=br.dataset.tmbr.split("|"), t=L.find(x=>x.id===id); if (!t) return; t.bring=t.bring||tmBringDef(t).map(x=>({n:x,ok:false})); t.bring[+i].ok=!t.bring[+i].ok; await tmSaveAll(); tmRender(); if (t.bring[+i].ok && !RMo()){ const r=bg.querySelectorAll(".tmbi")[+i]; if (r){ const bb=r.querySelector(".tmck").getBoundingClientRect(); hbBurst(document.body, bb.left+bb.width/2, bb.top+bb.height/2, 10); } } return; }
+  const ba=e.target.closest("[data-tmbradd]"); if (ba){ const v=($("tmBrN").value||"").trim(); if (!v) return; const t=L.find(x=>x.id===ba.dataset.tmbradd); t.bring=[...(t.bring||[]), {n:v, ok:false}]; await tmSaveAll(); tmRender(); return; }
+  const dn=e.target.closest("[data-tmdone]"); if (dn){ const t=L.find(x=>x.id===dn.dataset.tmdone); if (!t) return; t.done={ts:Date.now()}; const bb=dn.getBoundingClientRect(); hbBurst(document.body, bb.left+bb.width/2, bb.top, 26); await tmSaveAll(); TM2.sel=null; tmRender();
+    toast(nt("tm_saved"), ()=>{ TM2.photo=t.id; $("tmFile").click(); }, "📸 "+nt("tm_photo"), 8000); return; }
+  const ph=e.target.closest("[data-tmphoto]"); if (ph){ TM2.photo=ph.dataset.tmphoto; $("tmFile").click(); return; }
+  const vw=e.target.closest("[data-tmview]"); if (vw){ const img=await rcptGet("tm-"+vw.dataset.tmview); if (img) tmShow(img); return; }
+  const un=e.target.closest("[data-tmundo]"); if (un){ const t=L.find(x=>x.id===un.dataset.tmundo); if (t){ delete t.done; await tmSaveAll(); tmRender(); } return; }
+  if (e.target.closest("[data-tmnew]")){ TM2.add=true; TM2.edit=null; TM2.k=null; tmRender(); setTimeout(()=>{ const f=$("tmFN"); if (f){ f.focus(); f.scrollIntoView({block:"center",behavior:"smooth"}); } },60); return; }
+  const ed=e.target.closest("[data-tmedit]"); if (ed){ TM2.edit=ed.dataset.tmedit; TM2.add=false; TM2.k=null; tmRender(); setTimeout(()=>{ const f=bg.querySelector(".tmform"); if (f) f.scrollIntoView({block:"center",behavior:"smooth"}); },60); return; }
+  const k=e.target.closest("[data-tmk]"); if (k){ TM2.k=k.dataset.tmk; k.parentElement.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===k)); return; }
+  if (e.target.closest("[data-tmcancel]")){ TM2.add=false; TM2.edit=null; tmRender(); return; }
+  const dl=e.target.closest("[data-tmdel]"); if (dl){ const j=jlCfg(); j.terms=j.terms.filter(x=>x.id!==dl.dataset.tmdel); TM2.edit=null; await tmSaveAll(); tmRender(); return; }
+  if (e.target.closest("[data-tmsave]")){ const n=($("tmFN").value||"").trim(), d=$("tmFD").value; if (!n||!d){ toast(nt("tm_need")); return; }
+    const j=jlCfg(), kk=TM2.k||(bg.querySelector("[data-tmk].on")||{}).dataset?.tmk||"termin";
+    if (TM2.edit){ const t=j.terms.find(x=>x.id===TM2.edit); if (t){ Object.assign(t,{n,d,t:$("tmFT").value||"",o:($("tmFO").value||"").trim(),k:kk}); } }
+    else { const t={id:newId(), n, d, t:$("tmFT").value||"", o:($("tmFO").value||"").trim(), k:kk}; t.bring=tmBringDef(t).map(x=>({n:x,ok:false})); j.terms.push(t); TM2.sel=t.id; }
+    TM2.add=false; TM2.edit=null; await tmSaveAll(); tmRender(true); toast(nt("tm_ok")); return; }
+});
+document.addEventListener("change", async e=>{ if (e.target.id!=="tmFile") return; const f=e.target.files&&e.target.files[0]; e.target.value=""; if (!f||!TM2.photo) return;
+  try{ const img=await tmShrink(f); await rcptPut("tm-"+TM2.photo, img); const t=tmList().find(x=>x.id===TM2.photo); if (t){ t.done={...(t.done||{ts:Date.now()}), img:1}; await tmSaveAll(); } tmRender(); toast(nt("tm_proof_ok")); }catch(_){ toast(nt("tm_proof_err")); } });
+function tmShow(img){ const o=document.createElement("div"); o.className="tmview"; o.innerHTML=`<img src="${img}" alt=""><button type="button" class="hlx" aria-label="${esc(nt("hl_close"))}">✕</button>`; o.onclick=()=>o.remove(); document.body.appendChild(o); }
+function tmHints(hints){ if (!prof||!prof()) return; const today=isoToday();
+  for (const t of (jlCfg().terms||[])){ if (t.done) continue; const n=daysTo(t.d); if (n<0||n>2) continue;
+    hints.push({k:"term", lvl:n<=1?"warn":"info", t:`${T(t.n)}: ${n===0?nt("tm_today"):n===1?nt("tm_tom"):nt("tm_days",{n:"2"})}${t.t?` · ${t.t}`:""}`, s:tmIsFrist(t)?nt("tm_h_f"):nt("tm_h_t")}); } }
+
+/* ---------- 2A Zuverdienst-Rechner ---------- */
+function zvParts(g){ const alg=S.settings.work==="alg", kid=Number(S.settings.kinder)>0||(S.settings.kids||[]).length>0, top=kid?1500:1200, P=[];
+  if (alg){ P.push(nt("zv_alg_free",{n:"165 €"})); return {keep:Math.min(g,165), P}; }
+  if (g<=0) return {keep:0,P}; let k=Math.min(g,100); P.push(nt("zv_p_free",{n:eur0(Math.min(g,100))}));
+  if (g>100){ const a=Math.min(g,520)-100; k+=a*0.2; P.push(nt("zv_p_pct",{p:"20",n:eur0(a)})); }
+  if (g>520){ const a=Math.min(g,1000)-520; k+=a*0.3; P.push(nt("zv_p_pct",{p:"30",n:eur0(a)})); }
+  if (g>1000){ const a=Math.min(g,top)-1000; if (a>0){ k+=a*0.1; P.push(nt("zv_p_pct",{p:"10",n:eur0(a)})); } }
+  return {keep:Math.round(k), P, top}; }
+const ZV={};
+function zvOpen(){ const j=jlCfg(); ZV.g=Number(j.mini)||0; ZV.h=Number(j.miniH)||0; hbSheet("zvBg", nt("zv_title")); zvRender(true); }
+function zvRender(first){ const bg=$("zvBg"); if (!bg||bg.hidden) return; const b=bg.querySelector(".hobody"), j=jlCfg(), MJ=yv().mj, max=1500, alg=S.settings.work==="alg";
+  b.innerHTML=`<div class="vacard zvc"><small>${esc(nt("zv_gross"))}</small><div class="zvbig"><span id="zvN">${esc(eur0(first&&!RMo()?0:ZV.g))}</span></div>
+      <div class="zvsl"><input type="range" id="zvR" min="0" max="${max}" step="10" value="${ZV.g}" aria-label="${esc(nt("zv_gross"))}"><i class="zvmj" style="left:${(MJ/max*100).toFixed(1)}%"></i></div>
+      <div class="zvax"><span>0</span><span style="left:${(MJ/max*100).toFixed(1)}%">${esc(nt("zv_mj",{n:eur0(MJ)}))}</span><span>${esc(eur0(max))}</span></div>
+      <div class="grid2" style="margin-top:12px"><div class="field"><label>${esc(nt("zv_exact"))}</label><input class="in" id="zvG" inputmode="decimal" value="${ZV.g||""}" placeholder="520"></div>
+      <div class="field"><label>${esc(nt("zv_hours"))}</label><input class="in" id="zvH" inputmode="decimal" value="${ZV.h||""}" placeholder="${esc(nt("zv_hours_p"))}"></div></div></div>
+    <div class="vacard zvc"><div class="zvbar"><i class="k" id="zvBK"><span id="zvBKt"></span></i><i class="a" id="zvBA"><span id="zvBAt"></span></i></div>
+      <div class="fcr zvrow"><span class="tmico">✅</span><span class="grow"><b>${esc(nt("zv_keep"))}</b><small id="zvWhy"></small></span><b class="pos" id="zvK"></b></div>
+      <div class="fcr zvrow"><span class="tmico">🏛️</span><span class="grow"><b>${esc(nt("zv_after",{a:alg?nt("am_alg"):nt("am_gs")}))}</b><small id="zvBefore"></small></span><b id="zvL"></b></div></div>
+    <div class="srhero zvhero"><small>${esc(nt("zv_total"))}</small><div class="srbig"><span id="zvT">0 €</span></div><span id="zvTs"></span><i class="srsh"></i></div>
+    ${j.amount?"":`<div class="notice info"><span>${esc(nt("zv_noamt"))}</span><button class="btn primary" data-go="more" data-sp="amt" data-hbclose="zvBg">${esc(nt("zv_set"))}</button></div>`}
+    <div id="zvWarn"></div>
+    <p class="small muted" style="margin:10px 4px 0">${esc(alg?nt("zv_note_alg"):nt("zv_note_gs"))}</p>`;
+  zvCalc(first); }
+function zvCalc(first){ const j=jlCfg(), g=Math.max(0,Number(ZV.g)||0), {keep,P}=zvParts(g), ded=Math.max(0,g-keep), base=Number(j.amount)||0, after=Math.max(0,base-ded), tot=after+g, alg=S.settings.work==="alg";
+  const hrs=Number(ZV.h)>0?Number(ZV.h)*52/12:(g>0?g/(yv().ml||13.9):0), ph=hrs>0?keep/hrs:0;
+  hbOdo($("zvN"), eur0(g)); { const r=$("zvR"); if (r) r.style.setProperty("--p", Math.min(100,g/15)+"%"); } const kw=g>0?Math.max(keep/g*100, keep?8:0):0;
+  $("zvBK").style.width=(g>0?kw:0)+"%"; $("zvBA").style.width=(g>0?100-kw:100)+"%"; $("zvBA").classList.toggle("empty", g<=0);
+  $("zvBKt").textContent=g>0&&keep?eur0(keep):""; $("zvBAt").textContent=g<=0?nt("zv_move"):ded?nt("zv_ded",{n:eur0(ded)}):"";
+  $("zvK").textContent="+"+eur0(keep); $("zvWhy").textContent=P.join(" + ")||nt("zv_none"); $("zvL").textContent=eur0(after); $("zvBefore").textContent=nt("zv_before",{n:eur0(base)});
+  hbOdo($("zvT"), eur0(tot), first?1400:700); $("zvTs").textContent=g>0?nt("zv_tot_s",{n:eur0(base),h:ph?eur(ph):"–"}):nt("zv_tot_0");
+  const w=$("zvWarn"); w.innerHTML=alg&&Number(ZV.h)>=15?`<div class="fcwarn on"><b>⚠ ${esc(nt("zv_15"))}</b><span>${esc(nt("zv_15_s"))}</span></div>`:g>yv().mj&&!alg?`<div class="fcgood on"><b>ℹ️ ${esc(nt("zv_svp"))}</b><span>${esc(nt("zv_svp_s"))}</span></div>`:""; }
+let zvT0=0; function zvStore(){ clearTimeout(zvT0); zvT0=setTimeout(()=>{ const j=jlCfg(); j.mini=Number(ZV.g)||0; j.miniH=Number(ZV.h)||0; saveSettings(); }, 700); }
+document.addEventListener("input", e=>{ const id=e.target.id; if (id==="zvR"){ ZV.g=Number(e.target.value)||0; const gi=$("zvG"); if (gi) gi.value=ZV.g||""; zvCalc(); zvStore(); }
+  else if (id==="zvG"){ ZV.g=Math.max(0,parseAmt(e.target.value||"0")||0); const r=$("zvR"); if (r) r.value=Math.min(1500,ZV.g); zvCalc(); zvStore(); }
+  else if (id==="zvH"){ ZV.h=Math.max(0,parseAmt(e.target.value||"0")||0); zvCalc(); zvStore(); } });
+document.addEventListener("click", e=>{ if (e.target.closest("[data-zvopen]")){ e.preventDefault(); zvOpen(); } });
+
+/* ---------- 3A Bescheid-Check ---------- */
+const BS={st:0, img:null, d:null, found:{}};
+function bsList(){ const j=jlCfg(); return j.bescheide=j.bescheide||[]; }
+function bsOpen(id){ BS.st=0; BS.img=null; BS.d=null; BS.found={}; BS.edit=null; hbSheet("bsBg", nt("bs_title")); if (id){ const x=bsList().find(b=>b.id===id); if (x){ BS.d={...x}; BS.edit=id; BS.st=2; } } bsRender(true); }
+function bsRender(first){ const bg=$("bsBg"); if (!bg||bg.hidden) return; const b=bg.querySelector(".hobody"), L=bsList().slice().sort((a,c)=>(c.from||"").localeCompare(a.from||""));
+  if (BS.st===0){ const cur=L[0];
+    b.innerHTML=`${cur?`<div class="srhero bshero"><small>${esc(nt("bs_cur"))}</small><div class="srbig">${esc(eur(cur.total||0))} <span style="font-size:16px;opacity:.8">/ ${esc(nt("bs_month"))}</span></div><span>${cur.to?esc(nt("bs_until",{d:dLong(cur.to,{day:"numeric",month:"long",year:"numeric"})})):""}</span><i class="srsh"></i></div>`:`<div class="bsintro"><div class="bsdoc">📄<i></i></div><b>${esc(nt("bs_intro"))}</b><span>${esc(nt("bs_intro_s"))}</span></div>`}
+      <div class="bsbtns"><button type="button" class="vakb" data-bspick="cam">📸 ${esc(nt("bs_photo"))}</button><button type="button" class="vadone" data-bspick="file">🖼️ ${esc(nt("bs_file"))}</button></div>
+      <button type="button" class="btn tmnew" data-bsmanual>✍️ ${esc(nt("bs_manual"))}</button>
+      ${L.length?`<div class="vak">${esc(nt("bs_all"))}</div><div class="vacard">${L.map(x=>{ const wd=x.wid?daysTo(x.wid):null; return `<button type="button" class="fcr tmrow" data-bsedit="${esc(x.id)}"><span class="tmico">📄</span><span class="grow"><b>${esc(x.kind==="aend"?nt("bs_k_a"):x.kind==="ab"?nt("bs_k_ab"):nt("bs_k_b"))}${x.from?` · ${esc(fxDate(x.from,{month:"short",year:"2-digit"}))}–${esc(fxDate(x.to||x.from,{month:"short",year:"2-digit"}))}`:""}</b><small>${esc(eur(x.total||0))}${x.img?" · 📎":""}</small></span>${wd!=null&&wd>=0?`<span class="vab ${wd<=7?"b-red":"b-amb"}">${esc(nt("bs_w_badge",{n:String(wd)}))}</span>`:""}</button>`; }).join("")}</div>`:""}
+      <input type="file" id="bsCam" accept="image/*" capture="environment" hidden><input type="file" id="bsFile" accept="image/*" hidden>
+      <p class="small muted" style="margin:12px 4px 0">${esc(nt("bs_priv"))}</p>`;
+    if (first&&!RMo()) b.querySelectorAll(".srhero,.bsintro,.bsbtns,.tmnew,.vacard").forEach((e,i)=>e.animate([{opacity:0,transform:"translateY(14px)"},{opacity:1,transform:"none"}],{duration:500,delay:i*80,easing:"cubic-bezier(.2,1.2,.35,1)",fill:"backwards"}));
+    return; }
+  if (BS.st===1){ b.innerHTML=`<div class="bsscan"><img src="${BS.img}" alt=""><i class="bsbeam"></i><span class="bscorner"></span></div><p class="bsstat"><span class="dots3"><i></i><i></i><i></i></span> ${esc(nt("bs_reading"))}</p>`; return; }
+  const d=BS.d||{}, F=BS.found||{}, keys=[["from","bs_f_from","date"],["to","bs_f_to","date"],["regel","bs_f_regel","num"],["kdu","bs_f_kdu","num"],["heiz","bs_f_heiz","num"],["mehr","bs_f_mehr","num"],["ek","bs_f_ek","num"],["total","bs_f_total","num"],["date","bs_f_date","date"]];
+  const chips=Object.keys(F).filter(k=>F[k]).map(k=>{ const def=keys.find(x=>x[0]===k); if (!def) return ""; return `<span class="bschip">${esc(nt(def[1]))}: <b>${esc(def[2]==="num"?eur(d[k]||0):fxDate(d[k],{day:"2-digit",month:"2-digit",year:"numeric"}))}</b></span>`; }).join("");
+  const sumP=(Number(d.regel)||0)+(Number(d.kdu)||0)+(Number(d.heiz)||0)+(Number(d.mehr)||0)-(Number(d.ek)||0);
+  b.innerHTML=`${BS.img||d.img?`<div class="bsthumb">${BS.img?`<img src="${BS.img}" alt="" data-bszoom>`:`<button type="button" class="vadone" data-bsview="${esc(BS.edit||"")}">📎 ${esc(nt("bs_showimg"))}</button>`}</div>`:""}
+    ${BS.scanned?(chips?`<div class="vak">${esc(nt("bs_found"))}</div><div class="bschips">${chips}</div>`:`<div class="fcwarn on"><b>${esc(nt("bs_nothing"))}</b><span>${esc(nt("bs_nothing_s"))}</span></div>`):""}
+    <div class="vak">${esc(nt("bs_check"))}</div>
+    <div class="vacard bsform">
+      <div class="field"><label>${esc(nt("bs_kind"))}</label><select class="in" data-bsf="kind"><option value="bew" ${d.kind!=="aend"&&d.kind!=="ab"?"selected":""}>${esc(nt("bs_k_b"))}</option><option value="aend" ${d.kind==="aend"?"selected":""}>${esc(nt("bs_k_a"))}</option><option value="ab" ${d.kind==="ab"?"selected":""}>${esc(nt("bs_k_ab"))}</option></select></div>
+      <div class="grid2">${keys.filter(k=>k[2]==="date"&&k[0]!=="date").map(([k,l])=>`<div class="field ${F[k]?"bsok":""}"><label>${esc(nt(l))}</label><input class="in" type="date" data-bsf="${k}" value="${esc(d[k]||"")}"></div>`).join("")}</div>
+      <div class="grid2">${keys.filter(k=>k[2]==="num"&&k[0]!=="total").map(([k,l])=>`<div class="field ${F[k]?"bsok":""}"><label>${esc(nt(l))}</label><input class="in" inputmode="decimal" data-bsf="${k}" value="${d[k]!=null&&d[k]!==""?esc(numStr(d[k])):""}" placeholder="0,00"></div>`).join("")}</div>
+      <div class="field ${F.total?"bsok":""}"><label>${esc(nt("bs_f_total"))}</label><div class="bstot"><input class="in" inputmode="decimal" data-bsf="total" value="${d.total!=null&&d.total!==""?esc(numStr(d.total)):""}" placeholder="0,00"><button type="button" class="vadone" data-bssum>= ${esc(eur(sumP))}</button></div></div>
+      <div class="field ${F.date?"bsok":""}"><label>${esc(nt("bs_f_date"))}</label><input class="in" type="date" data-bsf="date" value="${esc(d.date||"")}"><span class="small muted">${esc(nt("bs_date_s"))}</span></div>
+      <label class="kidedu"><input type="checkbox" id="bsUse" ${d.use!==false?"checked":""}> <span>${esc(nt("bs_use"))}</span></label>
+      <label class="kidedu"><input type="checkbox" id="bsTerms" ${d.terms!==false?"checked":""}> <span>${esc(nt("bs_terms"))}</span></label></div>
+    ${bsChecks(d)}
+    <div class="vabtns" style="margin-top:12px">${BS.edit?`<button type="button" class="btn danger" data-bsdel="${esc(BS.edit)}">${esc(nt("tm_del"))}</button>`:`<button type="button" class="btn" data-bsback>${esc(nt("tm_cancel"))}</button>`}<button type="button" class="btn primary" data-bssave>✓ ${esc(nt("bs_save"))}</button></div>`;
+  if (BS.scanned && !RMo()){ b.querySelectorAll(".bschip").forEach((c,i)=>c.animate([{opacity:0,transform:"scale(.5) translateY(10px)"},{opacity:1,transform:"none"}],{duration:450,delay:150+i*110,easing:"cubic-bezier(.3,1.7,.5,1)",fill:"backwards"})); BS.scanned=false; } }
+function bsChecks(d){ const out=[], wid=d.date?addMonths(addDays(d.date,4),1):null;
+  if (wid){ const n=daysTo(wid); out.push(n>=0?`<div class="bsck ${n<=7?"bad":"warn"}"><span>⏳</span><span class="grow"><b>${esc(nt("bs_w",{d:dLong(wid,{day:"numeric",month:"long"})}))}</b><small>${esc(nt("bs_w_s",{n:String(n)}))}</small></span></div>`:`<div class="bsck"><span>✔️</span><span class="grow"><b>${esc(nt("bs_w_over"))}</b></span></div>`); }
+  const rent=sum(S.fixed.filter(f=>/miete|warmmiete|kaltmiete|wohnung/i.test(f.name||"")),f=>Number(f.amount)||0);
+  if (Number(d.kdu)>0 && rent>0 && rent-(Number(d.kdu)+(Number(d.heiz)||0))>15 && !(jlCfg().rentDirect)) out.push(`<div class="bsck bad"><span>⚠️</span><span class="grow"><b>${esc(nt("bs_rent",{a:eur0(Number(d.kdu)+(Number(d.heiz)||0)),b:eur0(rent)}))}</b><small>${esc(nt("bs_rent_s"))}</small></span></div>`);
+  const ek=Number(d.ek)||0, mini=Number(jlCfg().mini)||0; if (ek>0 && mini>0){ const exp=Math.max(0,mini-jlKeep(mini)); out.push(Math.abs(exp-ek)<=10?`<div class="bsck ok"><span>✅</span><span class="grow"><b>${esc(nt("bs_ek_ok",{n:eur0(ek)}))}</b></span></div>`:`<div class="bsck warn"><span>ℹ️</span><span class="grow"><b>${esc(nt("bs_ek_diff",{a:eur0(ek),b:eur0(exp)}))}</b><small>${esc(nt("bs_ek_s"))}</small></span></div>`); }
+  const sumP=(Number(d.regel)||0)+(Number(d.kdu)||0)+(Number(d.heiz)||0)+(Number(d.mehr)||0)-(Number(d.ek)||0); if (Number(d.total)>0 && sumP>0 && Math.abs(sumP-Number(d.total))>1) out.push(`<div class="bsck warn"><span>🧮</span><span class="grow"><b>${esc(nt("bs_sum",{a:eur(sumP),b:eur(Number(d.total))}))}</b><small>${esc(nt("bs_sum_s"))}</small></span></div>`);
+  if (d.to){ const wb=addMonths(d.to,-1), n=daysTo(wb); if (n>=-31) out.push(`<div class="bsck ${n<=14?"warn":""}"><span>🔁</span><span class="grow"><b>${esc(nt("bs_wb",{d:dLong(wb,{day:"numeric",month:"long"})}))}</b><small>${esc(nt("bs_wb_s",{d:dLong(d.to,{day:"numeric",month:"long"})}))}</small></span></div>`); }
+  return out.length?`<div class="vak">${esc(nt("bs_checks"))}</div><div class="vacard bscks">${out.join("")}</div>`:""; }
+function bsNum(s){ const a=amountsIn(" "+s+" "); return a.length?a[a.length-1]:null; }
+function bsDate(s){ const m=String(s).match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/); if (!m) return null; let y=Number(m[3]); if (y<100) y+=2000; const mo=Number(m[2]), da=Number(m[1]); if (mo<1||mo>12||da<1||da>31||y<2015||y>2040) return null; return `${y}-${pad(mo)}-${pad(da)}`; }
+function bsParse(lines){ const T0=lines.map(l=>typeof l==="string"?l:l.t).filter(Boolean), d={}, F={}, low=T0.map(t=>t.toLowerCase());
+  const RX=/(\d{1,2}\.\d{1,2}\.\d{2,4})\s*(?:-|–|—|bis(?:\s+zum)?|to)\s*(\d{1,2}\.\d{1,2}\.\d{2,4})/i;
+  for (const t of T0){ const m=t.match(RX); if (m){ const a=bsDate(m[1]), b=bsDate(m[2]); if (a&&b&&b>a){ d.from=a; d.to=b; F.from=F.to=1; break; } } }
+  const pick=(re, not)=>{ for (let i=0;i<T0.length;i++){ if (re.test(low[i]) && !(not&&not.test(low[i]))){ let v=bsNum(T0[i]); if (v==null && T0[i+1]) v=bsNum(T0[i+1]); if (v!=null) return v; } } return null; };
+  const set=(k,v)=>{ if (v!=null && v>0 && v<20000){ d[k]=v; F[k]=1; } };
+  set("regel", pick(/regelbedarf|regelsatz|regelleistung/));
+  set("kdu", pick(/unterkunft|grundmiete|kaltmiete|miete|wohnkosten|kosten der unterkunft/, /heiz/));
+  set("heiz", pick(/heiz/));
+  set("mehr", pick(/mehrbedarf/));
+  set("ek", pick(/anzurechnend|anrechenbar|einkommen|erwerbs/, /freibetrag|ohne/));
+  let tot=null; for (let i=0;i<T0.length;i++) if (/gesamt|insgesamt|zahlbetrag|auszahlungsbetrag|leistungsanspruch|monatlich|zu zahlen|summe/.test(low[i])){ const a=amountsIn(" "+T0[i]+" ").concat(T0[i+1]?amountsIn(" "+T0[i+1]+" "):[]); for (const v of a) if (v>(tot||0) && v<20000) tot=v; }
+  set("total", tot);
+  for (let i=0;i<Math.min(T0.length,25);i++){ if (RX.test(T0[i])) continue; if (/datum|vom|den/.test(low[i]) || i<12){ const x=bsDate(T0[i]); if (x && x<=isoToday()){ d.date=x; F.date=1; break; } } }
+  if (/änderungsbescheid|aenderungsbescheid/.test(low.join(" "))) d.kind="aend"; else if (/ablehnung|abgelehnt/.test(low.join(" "))) d.kind="ab";
+  return {d, F}; }
+async function bsScan(file){ let img; try{ img=await tmShrink(file); }catch(_){ toast(nt("bs_err_img")); return; }
+  BS.img=img; BS.st=1; bsRender(); const t0=performance.now(); let lines=[];
+  try{ lines=await ocrDataUrl(img); }catch(e){ lines=[]; }
+  const wait=Math.max(0, 1800-(performance.now()-t0)); await new Promise(r=>setTimeout(r,RMo()?0:wait));
+  const {d,F}=bsParse(lines||[]); BS.d={kind:"bew", use:true, terms:true, ...d}; BS.found=F; BS.st=2; BS.scanned=true; bsRender();
+  if (!Object.keys(F).length) toast(nt("bs_nothing")); }
+function bsReadForm(){ const bg=$("bsBg"), d={...(BS.d||{})}; bg.querySelectorAll("[data-bsf]").forEach(i=>{ const k=i.dataset.bsf; if (i.type==="date"||i.tagName==="SELECT") d[k]=i.value||""; else { const v=(i.value||"").trim(); d[k]=v===""?"":(parseAmt(v)||0); } }); d.use=$("bsUse").checked; d.terms=$("bsTerms").checked; return d; }
+document.addEventListener("click", async e=>{
+  const op=e.target.closest("[data-bsopen]"); if (op){ e.preventDefault(); bsOpen(); return; }
+  const bg=$("bsBg"); if (!bg||bg.hidden||!bg.contains(e.target)) return;
+  const pk=e.target.closest("[data-bspick]"); if (pk){ $(pk.dataset.bspick==="cam"?"bsCam":"bsFile").click(); return; }
+  if (e.target.closest("[data-bsmanual]")){ BS.d={kind:"bew", use:true, terms:true}; BS.found={}; BS.img=null; BS.edit=null; BS.st=2; bsRender(); return; }
+  const ed=e.target.closest("[data-bsedit]"); if (ed){ const x=bsList().find(b=>b.id===ed.dataset.bsedit); if (x){ BS.d={...x}; BS.edit=x.id; BS.img=null; BS.found={}; BS.st=2; bsRender(); } return; }
+  if (e.target.closest("[data-bsback]")){ BS.st=0; BS.img=null; bsRender(); return; }
+  if (e.target.closest("[data-bszoom]")){ tmShow(BS.img); return; }
+  const vw=e.target.closest("[data-bsview]"); if (vw){ const img=await rcptGet("bs-"+vw.dataset.bsview); if (img) tmShow(img); return; }
+  if (e.target.closest("[data-bssum]")){ const d=bsReadForm(), s=(Number(d.regel)||0)+(Number(d.kdu)||0)+(Number(d.heiz)||0)+(Number(d.mehr)||0)-(Number(d.ek)||0); d.total=Math.round(s*100)/100; BS.d=d; bsRender(); return; }
+  const dl=e.target.closest("[data-bsdel]"); if (dl){ const j=jlCfg(); j.bescheide=bsList().filter(x=>x.id!==dl.dataset.bsdel); j.terms=j.terms.filter(t=>t.bs!==dl.dataset.bsdel); await saveSettings(); BS.st=0; bsRender(); return; }
+  if (e.target.closest("[data-bssave]")){ const d=bsReadForm(); if (!(Number(d.total)>0) && !(Number(d.regel)>0)){ toast(nt("bs_need")); return; }
+    const j=jlCfg(), id=BS.edit||newId(), rec={id, kind:d.kind||"bew", from:d.from||"", to:d.to||"", regel:Number(d.regel)||0, kdu:Number(d.kdu)||0, heiz:Number(d.heiz)||0, mehr:Number(d.mehr)||0, ek:Number(d.ek)||0, total:Number(d.total)||0, date:d.date||"", use:d.use, terms:d.terms};
+    rec.wid=rec.date?addMonths(addDays(rec.date,4),1):""; if (BS.img){ try{ await rcptPut("bs-"+id, BS.img); rec.img=1; }catch(_){} } else if ((bsList().find(x=>x.id===id)||{}).img) rec.img=1;
+    j.bescheide=[...bsList().filter(x=>x.id!==id), rec];
+    j.terms=j.terms.filter(t=>t.bs!==id);
+    if (rec.terms){ if (rec.wid && daysTo(rec.wid)>=0) j.terms.push({id:newId(), bs:id, k:"frist", n:nt("bs_t_w"), d:rec.wid, t:"", bring:[{n:nt("bs_t_w_b"),ok:false}]});
+      if (rec.to){ const wb=addMonths(rec.to,-1); if (daysTo(rec.to)>=0) j.terms.push({id:newId(), bs:id, k:"frist", n:nt("bs_t_wb"), d:daysTo(wb)>=0?wb:isoToday(), t:"", bring:[{n:nt("bs_t_wb_b"),ok:false}]}); } }
+    if (rec.use && rec.total>0 && (!rec.to || rec.to>=isoToday())) j.amount=rec.total;
+    await saveSettings(); const sb=e.target.closest("[data-bssave]").getBoundingClientRect(); hbBurst(document.body, sb.left+sb.width/2, sb.top, 24); toast(nt("bs_saved")); BS.st=0; BS.img=null; bsRender(true); return; }
+});
+document.addEventListener("change", e=>{ const id=e.target.id; if (id==="bsCam"||id==="bsFile"){ const f=e.target.files&&e.target.files[0]; e.target.value=""; if (f) bsScan(f); }
+  else if (e.target.dataset&&e.target.dataset.bsf && $("bsBg") && !$("bsBg").hidden){ BS.d=bsReadForm(); const ck=$("bsBg").querySelector(".bscks"); const html=bsChecks(BS.d); const tmp=document.createElement("div"); tmp.innerHTML=html; const prev=ck?ck.previousElementSibling:null; if (ck){ ck.remove(); if (prev&&prev.classList.contains("vak")) prev.remove(); } const form=$("bsBg").querySelector(".bsform"); if (form) form.after(...tmp.childNodes); const sm=$("bsBg").querySelector("[data-bssum]"); if (sm){ const d=BS.d; sm.textContent="= "+eur((Number(d.regel)||0)+(Number(d.kdu)||0)+(Number(d.heiz)||0)+(Number(d.mehr)||0)-(Number(d.ek)||0)); } } });
 
 /* Events */
 document.addEventListener("click", async e => {
