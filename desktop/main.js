@@ -149,8 +149,9 @@ function createWindow() {
   });
   win.on("app-command", (e, cmd) => { if (cmd === "browser-backward") goBack(); });
   win.webContents.on("focus", () => { lastFocus = "app"; });
+  win.on("restore", () => { setTimeout(() => { try { if (lastFocus !== "page") win.webContents.focus(); } catch (err) {} }, 0); });
   win.on("focus", () => { setTimeout(() => { try {
-    if (lastFocus === "page" && pageView && pageShown && !pageView.webContents.isDestroyed()) pageView.webContents.focus();
+    if (lastFocus === "page" && pageView && pageShown && pageView.getVisible() && !pageView.webContents.isDestroyed()) pageView.webContents.focus();
     else win.webContents.focus();
   } catch (err) {} }, 0); });
 
@@ -757,7 +758,7 @@ ipcMain.on("pageOpen", (e, url, r) => {
   pageSend();
 });
 ipcMain.on("pageBounds", (e, r) => { if (pageView && pageShown && r) pageView.setBounds(pageRect(r)); });
-ipcMain.on("pageShow", (e, on) => { if (pageView && pageShown) pageView.setVisible(!!on); if (!on && win) win.webContents.focus(); });
+ipcMain.on("pageShow", (e, on) => { if (pageView && pageShown) pageView.setVisible(!!on); if (!on && win){ lastFocus = "app"; win.webContents.focus(); } });
 ipcMain.on("pageNav", (e, cmd) => {
   if (!pageView) return; const wc = pageView.webContents;
   if (cmd === "back" && wc.canGoBack()) wc.goBack();

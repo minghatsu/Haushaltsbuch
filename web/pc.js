@@ -348,7 +348,7 @@ if (IS_PC){
         const dom=tiles().map(t=>t.dataset.hb), min=PCH().min, it=dom[Symbol.iterator]();
         PCH().order=homeOrder().map(k=>min.includes(k) || !dom.includes(k) ? k : it.next().value); save(); });
   };
-  document.addEventListener("pointerup", drop); document.addEventListener("pointercancel", drop);
+  document.addEventListener("pointerup", drop); document.addEventListener("pointercancel", drop); addEventListener("blur", ()=>drop());
   decorate();
 }
 /* Hell / Dunkel */
@@ -848,8 +848,13 @@ if (IS_PC){
   let ghost=null;
   root.addEventListener("dragstart", e=>{ const c=e.target.closest && e.target.closest(".pcfc"); if (!c) return; if (e.target.closest("input,textarea,select") || c.querySelector("#fxAmtIn")){ e.preventDefault(); return; } popClose(); F.drag=c.dataset.pcfid; e.dataTransfer.effectAllowed="move"; try { e.dataTransfer.setData("text/plain", F.drag); } catch(_){}
     ghost=c.cloneNode(true); ghost.classList.add("pcfghost"); ghost.style.width=c.offsetWidth+"px"; document.body.appendChild(ghost); try { e.dataTransfer.setDragImage(ghost, 24, 18); } catch(_){}
-    setTimeout(()=>{ c.classList.add("drag"); root.classList.add("dragging"); },0); });
-  root.addEventListener("dragend", ()=>{ F.drag=null; if (ghost){ ghost.remove(); ghost=null; } root.classList.remove("dragging"); root.querySelectorAll(".drag,.over").forEach(x=>x.classList.remove("drag","over")); });
+    const id=F.drag; setTimeout(()=>{ if (F.drag!==id) return; c.classList.add("drag"); root.classList.add("dragging"); },0); });
+  const unDrag=()=>{ F.drag=null; if (ghost){ ghost.remove(); ghost=null; } document.querySelectorAll(".pcfghost").forEach(x=>x.remove()); root.classList.remove("dragging"); root.querySelectorAll(".drag,.over").forEach(x=>x.classList.remove("drag","over")); root.querySelectorAll(".pcfc,.pcfadd").forEach(x=>{ if (x.style.pointerEvents==="none" && !x.getAnimations().length) x.style.pointerEvents=""; }); };
+  root.addEventListener("dragend", unDrag);
+  document.addEventListener("mousedown", ()=>{ if (F.drag || root.classList.contains("dragging")) unDrag(); }, true);
+  const wake=()=>{ if (document.visibilityState==="hidden") return; unDrag();
+    if (!pop.hidden){ const a=document.activeElement; if (!a || a===document.body || !pop.contains(a)){ const i=pop.querySelector("input,select"); if (i) i.focus({preventScroll:true}); } } };
+  addEventListener("focus", wake); document.addEventListener("visibilitychange", wake);
   root.addEventListener("dragover", e=>{ if (!F.drag) return; const d=e.target.closest("[data-pcfday]"); if (!d || d.classList.contains("x")) return; e.preventDefault(); root.querySelectorAll(".over").forEach(x=>x!==d&&x.classList.remove("over")); d.classList.add("over"); });
   root.addEventListener("dragleave", e=>{ const d=e.target.closest("[data-pcfday]"); if (d && !d.contains(e.relatedTarget)) d.classList.remove("over"); });
   root.addEventListener("drop", async e=>{ const d=e.target.closest("[data-pcfday]"), id=F.drag; if (!d || !id) return; e.preventDefault(); F.drag=null;
@@ -866,7 +871,8 @@ if (IS_PC){
     pop.style.left=x+"px"; pop.style.top=Math.max(12,yy)+"px"; pop.style.setProperty("--ax", (r.left+r.width/2-x)+"px"); pop.classList.toggle("up", up);
     if (!pcCalm()) pop.animate([{opacity:0,transform:`translateY(${up?8:-8}px) scale(.92)`},{opacity:1,transform:"none"}],{duration:260,easing:BO});
   }
-  function popClose(){ if (pop.hidden) return; const done=()=>{ pop.hidden=true; pop.innerHTML=""; popFor=null; };
+  let popGen=0;
+  function popClose(){ if (pop.hidden) return; const g=++popGen, done=()=>{ if (g!==popGen) return; pop.hidden=true; pop.innerHTML=""; popFor=null; };
     if (pcCalm()) return done(); pop.animate([{opacity:1,transform:"none"},{opacity:0,transform:"scale(.94)"}],{duration:150,easing:"ease-in"}).onfinish=done; }
   const field=(lbl,inner)=>`<label class="pf"><span>${lbl}</span>${inner}</label>`;
   function form(f, day){
@@ -881,13 +887,13 @@ if (IS_PC){
       <div class="small muted pnote">${f?`Änderungen gelten ab ${esc(mon)} – frühere Monate bleiben, wie sie waren.`:`Gilt ab ${esc(mon)} für alle folgenden Monate.`}</div>
       <div class="pa">${f?`<button class="btn pdel" data-pfdel>${SV.bin}<span>Löschen</span></button>`:""}<span style="flex:1"></span><button class="btn" data-pfx>Abbrechen</button><button class="btn primary" data-pfok>${f?"Speichern":"Eintragen"}</button></div>`;
   }
-  function popEdit(id, anchor, del){ const f=S.fixed.find(x=>x.id===id); if (!f || !anchor) return; popFor={id, anchor}; pop.innerHTML=form(f, dayOf(f,UI.ym)); pop.hidden=false; place(anchor);
+  function popEdit(id, anchor, del){ const f=S.fixed.find(x=>x.id===id); if (!f || !anchor) return; popGen++; pop.getAnimations().forEach(a=>a.cancel()); popFor={id, anchor}; pop.innerHTML=form(f, dayOf(f,UI.ym)); pop.hidden=false; place(anchor);
     const el=pop.querySelector(del?"[data-pfdel]":"[data-pf=name]"); if (el){ el.focus(); if (el.select) el.select(); } }
   const seg=m=>`<div class="rfseg"><button class="${m==="fix"?"on":""}" data-pfmode="fix">📅 Fixkosten</button><button class="${m==="rate"?"on rate":""}" data-pfmode="rate">🏦 Rate / Schulden</button></div>`;
   function newHtml(day, m){ if (m==="rate") return `<div class="ph"><b>Neue Rate</b><button class="px" data-pfx aria-label="Schließen">${SV.x}</button></div>${seg(m)}<div class="rfroot">${rateFormHtml(day)}</div>
       <div class="pa"><span style="flex:1"></span><button class="btn" data-pfx>Abbrechen</button><button class="btn primary rfgo" data-pfok>Rate anlegen</button></div>`;
     return form(null, day).replace('</div>', '</div>'+seg(m)); }
-  function popNew(day, anchor, m){ if (!anchor) return; popFor={id:null, day, anchor, mode:m||"fix"}; pop.innerHTML=newHtml(day, popFor.mode); pop.hidden=false; place(anchor); const i=pop.querySelector('[data-pf=name],[data-rf=name]'); if (i) i.focus(); }
+  function popNew(day, anchor, m){ if (!anchor) return; popGen++; pop.getAnimations().forEach(a=>a.cancel()); popFor={id:null, day, anchor, mode:m||"fix"}; pop.innerHTML=newHtml(day, popFor.mode); pop.hidden=false; place(anchor); const i=pop.querySelector('[data-pf=name],[data-rf=name]'); if (i) i.focus(); }
   const val=k=>{ const el=pop.querySelector(`[data-pf="${k}"]`); return el?el.value:""; };
   async function popSave(){
     if (popFor && !popFor.id && popFor.mode==="rate"){ const r=rateRead(pop), err=rateCheck(r); if (err){ toast(err); return; } popClose(); const n=await rateCreate(r); if (n) toast(`${n} als Rate eingetragen`); return; }
