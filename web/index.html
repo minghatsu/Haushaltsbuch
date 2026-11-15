@@ -1778,6 +1778,173 @@ html.pc .fanb.fanx,.fan:not(.wheel) .fanb.fanx,.fan:not(.wheel) .fanhint,.fan:no
 .fandots b{color:#fff;font-size:18px;opacity:.85;animation:fannud 1.6s ease-in-out infinite}.fandots b:last-child{animation-direction:reverse}
 @keyframes fannud{0%,100%{transform:none}50%{transform:translateX(-4px)}}
 .fan.wheel{touch-action:none}
+/* Neue Funktionen */
+.hbodo{display:inline-flex;line-height:1;height:1em;overflow:hidden;vertical-align:bottom;font-variant-numeric:tabular-nums}
+.hbodo .hc{display:inline-block;height:1em;overflow:hidden}.hbodo .hs{display:flex;flex-direction:column;transition:transform 1.1s cubic-bezier(.2,1,.25,1)}.hbodo .hs span,.hbodo .hc>span{height:1em;line-height:1em;display:block}
+.hbconf{position:absolute;width:9px;height:13px;border-radius:2px;z-index:600;pointer-events:none}
+body>.hbconf{position:fixed}
+.hbcoin{position:fixed;z-index:700;left:0;top:0;width:32px;height:32px;margin:-16px 0 0 -16px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3c4,#f1b51c 55%,#c98a00);box-shadow:0 4px 10px rgba(0,0,0,.3),inset 0 -2px 0 rgba(0,0,0,.15);display:grid;place-items:center;font:900 13px var(--f-body);color:#7a4c00;pointer-events:none}
+.vak{font-size:11.5px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:14px 4px 7px}
+.vacard{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+/* 1A */
+.vaalert{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:20px;background:linear-gradient(135deg,var(--bad-soft),color-mix(in srgb,var(--bad-soft) 70%,var(--bad) 12%));margin-bottom:4px;box-shadow:0 10px 26px -14px color-mix(in srgb,var(--bad) 60%,transparent)}
+.vaalert b{display:block;color:var(--bad);font-size:14.5px}.vaalert small{color:color-mix(in srgb,var(--bad) 70%,var(--fg));font-size:12.5px;font-weight:600}
+.vaalert.in{animation:vaIn .7s cubic-bezier(.2,1.4,.4,1)}@keyframes vaIn{from{opacity:0;transform:translateY(-16px) scale(.96)}}
+.vabell{font-size:26px;display:inline-block;transform-origin:50% 8%;position:relative}
+.vabell.ring{animation:vaRing 1.1s ease-in-out .5s}@keyframes vaRing{0%,100%{transform:rotate(0)}10%{transform:rotate(22deg)}20%{transform:rotate(-20deg)}30%{transform:rotate(16deg)}40%{transform:rotate(-12deg)}50%{transform:rotate(7deg)}60%{transform:rotate(-3deg)}}
+.vabell.ring::before,.vabell.ring::after{content:"";position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px;border-radius:50%;border:2px solid var(--bad);opacity:0;animation:vaWave 1.2s ease-out .5s}.vabell.ring::after{animation-delay:.8s}
+@keyframes vaWave{from{transform:scale(.6);opacity:.7}to{transform:scale(2.3);opacity:0}}
+.varow{border-top:1px solid var(--line)}.varow:first-child{border-top:0}
+.vahead{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:11px 14px;text-align:start;cursor:pointer;color:var(--fg);font-family:var(--f-body);transition:background .2s}
+.varow.open .vahead,.vahead:active{background:color-mix(in srgb,var(--bad-soft) 45%,transparent)}.varow.k-grn.open .vahead,.varow.k-free.open .vahead,.varow.k-done.open .vahead{background:var(--sunk)}
+.vaic{position:relative;flex:none;width:44px;height:44px;display:grid;place-items:center}.vaic>*:first-child{transform:scale(.88)}
+.varing{position:absolute;inset:-2px;width:48px;height:48px;transform:rotate(-90deg)}
+.varing circle{fill:none;stroke-width:3.2;stroke-linecap:round}.varing .bg{stroke:var(--line)}
+.varing .fg{transition:stroke-dashoffset 1.4s cubic-bezier(.3,0,.2,1),stroke .5s}
+.k-red .varing .fg{stroke:var(--bad)}.k-amb .varing .fg{stroke:var(--warn)}.k-grn .varing .fg{stroke:var(--good)}.k-done .varing .fg{stroke:var(--good)}
+.van{flex:1;min-width:0}.van b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.van small{color:var(--muted);font-size:12px;font-weight:600}
+.vab{flex:none;font-size:11.5px;font-weight:800;padding:5px 10px;border-radius:999px;white-space:nowrap;transition:background .5s,color .5s}
+.b-red{background:var(--bad-soft);color:var(--bad);animation:vaPul 1.6s ease-in-out infinite}.b-amb{background:var(--warn-soft);color:var(--warn)}.b-grn,.b-done{background:var(--good-soft);color:var(--good)}.b-free,.b-nodate{background:var(--sunk);color:var(--muted)}
+.vab.cnt{background:var(--good-soft);color:var(--good);animation:none}.vab.pop{animation:vaPop .5s cubic-bezier(.3,1.7,.5,1),vaPul 1.6s ease-in-out .5s infinite}.b-amb.pop{animation:vaPop .5s cubic-bezier(.3,1.7,.5,1)}
+@keyframes vaPop{0%{transform:scale(.8)}60%{transform:scale(1.15)}100%{transform:none}}
+@keyframes vaPul{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--bad) 45%,transparent)}60%{box-shadow:0 0 0 8px transparent}}
+.vadet{padding:4px 14px 14px}
+.vatl{position:relative;height:56px;margin:8px 2px 2px}
+.vatl-l{position:absolute;left:0;right:0;top:24px;height:8px;border-radius:4px;background:var(--sunk);overflow:hidden}
+.vatl-l i{display:block;height:100%;width:var(--w);background:linear-gradient(90deg,var(--good),var(--warn) 70%,var(--bad));border-radius:4px;animation:vaW 1.4s cubic-bezier(.3,0,.2,1)}@keyframes vaW{from{width:0}}
+.vatl-m{position:absolute;top:14px;left:var(--x);width:4px;height:28px;margin-left:-2px;border-radius:2px;background:var(--fg);animation:vaX 1.4s cubic-bezier(.3,0,.2,1)}@keyframes vaX{from{left:0}}
+.vatl-m b{position:absolute;bottom:31px;left:50%;transform:translateX(-50%);font-size:10.5px;white-space:nowrap;background:var(--fg);color:var(--bg);padding:2px 7px;border-radius:6px}
+.vatl-f{position:absolute;right:0;top:12px;width:4px;height:32px;border-radius:2px;background:var(--bad)}.vatl-f b{position:absolute;top:35px;right:0;font-size:10.5px;color:var(--bad);white-space:nowrap}
+.vainfo{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;font-weight:700;color:var(--muted);margin:8px 2px 10px}
+.vabtns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.vakb{flex:1.4;min-width:150px;height:46px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font:800 14.5px var(--f-body);cursor:pointer;position:relative;overflow:hidden}
+.vakb.hot{background:var(--bad);color:#fff}.vakb::after{content:"";position:absolute;top:0;bottom:0;width:50%;left:-70%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);animation:vaShn 2.6s ease-in-out infinite}@keyframes vaShn{0%{left:-70%}60%,100%{left:130%}}
+.vadone{flex:1;min-width:120px;height:46px;border:0;border-radius:14px;background:var(--sunk);color:var(--fg);font:700 13.5px var(--f-body);cursor:pointer;transition:background .3s,color .3s}.vadone.on{background:var(--good-soft);color:var(--good);font-weight:800}
+.valt{width:100%;min-height:330px;font:500 13px/1.5 ui-monospace,Menlo,Consolas,monospace;padding:12px;border-radius:14px;resize:vertical;max-width:none;text-align:start}
+.vabtns .btn{flex:1}
+/* 2B */
+.fcmini{display:flex;align-items:center;gap:10px;width:100%;border:0;background:var(--surface);border-radius:20px;padding:12px 14px;box-shadow:var(--shadow);cursor:pointer;text-align:start;color:var(--fg);font-family:var(--f-body)}
+.fcmini .fct{flex:1;min-width:0}.fcmini small{display:block;color:var(--muted);font-size:12px;font-weight:700}.fcmini b{display:block;font-size:20px;font-weight:900;letter-spacing:-.01em}
+.fcmini em{font-style:normal;font-size:12px;font-weight:800;color:var(--bad)}.fcmini em.ok{color:var(--good)}.fcmini.warn{background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--bad-soft) 60%,var(--surface)))}
+.fcmini svg{flex:none}.vapcb{margin:8px 0 2px}.fcpcw{margin-bottom:12px}html.pc .hlcard{margin-bottom:12px}.fcchev{color:var(--faint);font-size:22px;font-weight:300}
+.fccard{background:var(--surface);border-radius:22px;padding:14px;box-shadow:var(--shadow)}
+.fccard>small{color:var(--muted);font-size:12px;font-weight:700}.fcbig{font-size:38px;font-weight:900;letter-spacing:-.02em;margin:2px 0 10px}
+.fcwrap{position:relative;height:190px;touch-action:none;cursor:crosshair;margin-top:6px}.fcsvg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.fctl{stroke:var(--fg);stroke-width:1.2;stroke-dasharray:3 3;opacity:.6}
+.fczl{position:absolute;left:6px;transform:translateY(4px);font-size:10.5px;font-weight:800;color:var(--bad)}
+.fchead{position:absolute;width:13px;height:13px;margin:-6.5px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent),0 0 14px var(--accent);opacity:0;transition:opacity .3s}.fchead.on{opacity:1}
+.fcchip{position:absolute;transform:translate(-50%,-110%) scale(0);font-size:11px;font-weight:800;padding:4px 8px;border-radius:8px;white-space:nowrap;transition:transform .5s cubic-bezier(.3,1.7,.5,1);pointer-events:none;z-index:2}
+.fcchip.on{transform:translate(-50%,-110%) scale(1)}.fcchip.dk{background:var(--fg);color:var(--bg);transform:translate(-50%,-30%) scale(0)}.fcchip.dk.on{transform:translate(-50%,-30%) scale(1)}.fcchip.gn{background:var(--good-soft);color:var(--good)}
+.fcmin{position:absolute;width:14px;height:14px;margin:-7px;border-radius:50%;background:var(--bad);transform:translateY(-60px) scale(0);pointer-events:none}
+.fcmin.on{animation:fcDrop .75s cubic-bezier(.3,0,.3,1) forwards}@keyframes fcDrop{0%{transform:translateY(-60px) scale(1)}60%{transform:translateY(0) scale(1.25)}80%{transform:translateY(-6px) scale(1)}100%{transform:none}}
+.fcmin i{position:absolute;inset:0;border-radius:50%;background:var(--bad);animation:fcRip 1.5s ease-out .7s infinite}@keyframes fcRip{from{transform:scale(1);opacity:.6}to{transform:scale(4);opacity:0}}
+.fcscr{position:absolute;top:22px;bottom:0;width:2px;margin-left:-1px;background:linear-gradient(var(--fg),transparent);opacity:0;transition:opacity .2s;pointer-events:none}.fcscr.on{opacity:1}
+.fctip{position:absolute;top:-24px;left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);font-size:12px;font-weight:800;padding:5px 9px;border-radius:9px;white-space:nowrap}.fctip.bad{background:var(--bad);color:#fff}.fctip.past{background:var(--accent);color:var(--accent-ink)}
+.fcax{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--muted);margin-top:4px}
+.fchint{margin:8px 0 0;font-size:12px;color:var(--muted);text-align:center}
+.fcwarn,.fcgood{margin-top:10px;border-radius:18px;padding:12px 14px;opacity:0;transform:translateY(14px);transition:opacity .5s,transform .6s cubic-bezier(.2,1.3,.4,1)}
+.fcwarn{background:linear-gradient(135deg,var(--bad-soft),color-mix(in srgb,var(--bad-soft) 70%,var(--bad) 12%))}.fcwarn b{display:block;color:var(--bad);font-size:14.5px}.fcwarn span{font-size:13px;font-weight:600}
+.fcgood{background:var(--good-soft)}.fcgood b{display:block;color:var(--good);font-size:14.5px}.fcgood span{font-size:13px;font-weight:600}
+.fcwarn.on,.fcgood.on{opacity:1;transform:none}.fcwarn.shake{animation:fcShk .5s}@keyframes fcShk{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+.fcmami{display:flex;gap:9px;align-items:flex-start;margin-top:12px;opacity:0;transform:translateY(12px);transition:all .5s cubic-bezier(.2,1.3,.4,1)}.fcmami.on{opacity:1;transform:none}
+.fcmami>.mav,.hlmami>.mav{width:40px;height:40px;flex:none}
+.fcmami .bub,.hlmami .bub{background:var(--surface);border-radius:16px 16px 16px 4px;padding:9px 12px;font-size:13.5px;font-weight:600;line-height:1.4;box-shadow:var(--shadow);min-height:20px}
+.typ::after{content:"▍";animation:hbBlk .7s steps(1) infinite;color:var(--accent)}@keyframes hbBlk{50%{opacity:0}}
+.fcrows{margin-top:6px}.fcr{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--line);font-size:14px}.fcr:first-child{border-top:0}
+.fcd{flex:none;width:52px;font-size:12px;font-weight:800;color:var(--muted)}.fcr b.neg{color:var(--bad)}.fcr b.pos{color:var(--good)}
+/* 3A */
+.srhero{position:relative;overflow:hidden;border-radius:22px;padding:16px 18px;color:#fff;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 60%,#3fb98a));margin-bottom:10px;transition:box-shadow .3s}
+html[data-theme=dark] .srhero,:root:not([data-theme=light]) .srhero{color:#fff}
+.srhero small{font-size:12px;font-weight:700;opacity:.85}.srhero>span{font-size:13px;font-weight:600;opacity:.9}.srbig{font-size:36px;font-weight:900;letter-spacing:-.02em;margin:2px 0}
+.srhero.glow{animation:srGlow 1s ease-out}@keyframes srGlow{0%{box-shadow:0 0 0 0 rgba(255,227,122,.9)}100%{box-shadow:0 0 0 18px rgba(255,227,122,0)}}
+.srsh{position:absolute;top:0;bottom:0;width:50%;left:-70%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);animation:vaShn 3.2s ease-in-out infinite 1s;pointer-events:none}
+.srcard{background:var(--surface);border-radius:20px;padding:4px 14px;margin-bottom:10px;box-shadow:var(--shadow);transition:box-shadow .45s}
+.srcard.act{box-shadow:0 0 0 2px var(--accent),0 12px 28px -16px color-mix(in srgb,var(--accent) 70%,transparent)}
+.srrow{display:flex;align-items:center;gap:12px;padding:10px 0}.srrow .ic{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:20px;flex:none;background:var(--sunk)}
+.srrow .grow b{display:block;font-size:15px}.srrow .grow small{color:var(--muted);font-size:12px;font-weight:600}
+.srtog{flex:none;width:50px;height:30px;border-radius:15px;border:0;background:var(--line);position:relative;cursor:pointer;transition:background .35s;padding:0}
+.srtog::after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:transform .5s cubic-bezier(.3,1.8,.5,1)}
+.srtog.on{background:var(--accent)}.srtog.on::after{transform:translateX(20px)}
+.srmore{max-height:0;overflow:hidden;opacity:0;transition:max-height .5s cubic-bezier(.3,1,.3,1),opacity .4s}.srmore.on{max-height:200px;opacity:1;padding-bottom:12px}
+.srgain{font-size:12.5px;font-weight:800;color:var(--good);padding-left:54px}
+.srsel{display:flex;align-items:center;gap:8px;padding-left:54px;margin-top:8px;font-size:13px;font-weight:700;color:var(--muted)}.srsel select{max-width:220px;padding:6px 10px;height:auto}
+.srseg{display:flex;gap:6px;padding-left:54px;margin-top:8px}.srseg button{border:0;border-radius:10px;padding:7px 12px;background:var(--sunk);color:var(--fg);font:700 13px var(--f-body);cursor:pointer}.srseg button.on{background:var(--accent);color:var(--accent-ink)}
+.srskip{margin:10px 0 0 54px;border:0;border-radius:12px;padding:10px 14px;background:var(--sunk);color:var(--fg);font:800 13.5px var(--f-body);cursor:pointer}.srskip:active{transform:scale(.96)}
+#srPill{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));width:min(360px,calc(100vw - 32px));transform:translate(-50%,160%);display:flex;align-items:center;gap:12px;background:#14201B;color:#fff;border-radius:20px;padding:12px 16px;z-index:650;box-shadow:0 20px 40px -10px rgba(0,0,0,.5);transition:transform .6s cubic-bezier(.2,1.4,.4,1);pointer-events:none}
+#srPill.on{transform:translate(-50%,0)}#srPill .sri{font-size:24px}#srPill b{display:block;font-size:12.5px;opacity:.8}#srPill .sra{font-size:20px;font-weight:900}
+#srPill .srp{font-size:16px;font-weight:900;color:#7ff0c2;opacity:0;transform:translateY(8px);transition:all .4s}#srPill .srp.on{opacity:1;transform:none}
+html.pc #srPill{bottom:30px}
+.tab.srbump{animation:srBump .6s cubic-bezier(.3,1.7,.5,1)}@keyframes srBump{40%{transform:scale(1.25)}}
+/* 4A */
+.hlcard{display:flex;align-items:center;gap:12px;width:100%;border:0;cursor:pointer;text-align:start;border-radius:22px;padding:14px 16px;color:#fff;font-family:var(--f-body);position:relative;overflow:hidden;background:linear-gradient(120deg,#3d63a8,#7a3b8f 45%,#e0577f 75%,#e8a200);background-size:200% 200%;animation:hlCardBg 6s ease-in-out infinite alternate;box-shadow:0 14px 30px -14px rgba(122,59,143,.7)}
+@keyframes hlCardBg{to{background-position:100% 100%}}
+.hlcard::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent);animation:vaShn 3s ease-in-out infinite}
+.hlcard b{display:block;font-size:15.5px}.hlcard small{font-size:12.5px;opacity:.9;font-weight:600}.hlsp{font-size:26px;animation:hlSp 2s ease-in-out infinite}@keyframes hlSp{50%{transform:rotate(18deg) scale(1.15)}}
+.hlgo{font-size:24px;font-weight:300}.hlcard.seen{padding:10px 14px;animation:none;background:linear-gradient(120deg,#3d63a8,#7a3b8f);box-shadow:none}.hlcard.seen b{font-size:14px}
+#hlBg{position:fixed;inset:0;z-index:900;background:#000;opacity:0;transition:opacity .35s;display:grid;place-items:center;color:#fff;font-family:var(--f-body)}
+#hlBg.on{opacity:1}
+.hlph{position:relative;width:100%;height:100%;overflow:hidden;perspective:900px;transform:scale(.94);transition:transform .45s cubic-bezier(.2,1,.3,1)}#hlBg.on .hlph{transform:none}
+html.pc #hlBg{background:rgba(5,15,11,.82);backdrop-filter:blur(8px)}html.pc .hlph{width:420px;height:min(860px,92vh);border-radius:28px;box-shadow:0 40px 90px -20px rgba(0,0,0,.7)}
+.hlph.shake{animation:fcShk .45s}
+.hlmesh{position:absolute;inset:-30%;filter:blur(46px) saturate(1.2)}.hlmesh i{position:absolute;width:62%;height:62%;border-radius:50%;transition:background 1.2s;animation:hlBlob 6s ease-in-out infinite alternate}
+.hlmesh i:nth-child(1){left:0;top:0}.hlmesh i:nth-child(2){right:0;top:18%;animation-delay:-2s;animation-duration:7s}.hlmesh i:nth-child(3){left:18%;bottom:0;animation-delay:-4s;animation-duration:8s}
+@keyframes hlBlob{to{transform:translate(18%,22%) scale(1.35)}}
+.hlgrain{position:absolute;inset:0;opacity:.1;mix-blend-mode:overlay;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:3px 3px}
+.hlparts i{position:absolute;bottom:-10px;border-radius:50%;background:#fff;opacity:.55;animation:hlFl linear infinite}@keyframes hlFl{to{transform:translateY(-110vh)}}
+.hlbars{position:absolute;left:14px;right:14px;top:calc(12px + env(safe-area-inset-top));display:flex;gap:4px;z-index:40}.hlbars i{flex:1;height:3.5px;border-radius:2px;background:rgba(255,255,255,.28);overflow:hidden}.hlbars u{display:block;height:100%;width:0;background:#fff}
+.hlhead{position:absolute;left:14px;right:10px;top:calc(24px + env(safe-area-inset-top));display:flex;align-items:center;gap:8px;z-index:40;font-size:13px;font-weight:700}.hlhead>b{width:28px;height:28px;border-radius:50%;background:#fff;color:#147a5b;display:grid;place-items:center;font-weight:900}.hlhead span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hlx{width:38px;height:38px;border:0;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-size:16px;cursor:pointer}
+.hlsl{position:absolute;inset:0;padding:calc(84px + env(safe-area-inset-top)) 24px 24px;z-index:20;visibility:hidden}.hlsl.on{visibility:visible}.hlsl.c{text-align:center}
+.hlk{font-size:13px;font-weight:800;letter-spacing:.16em;opacity:.85}
+.hlh2{font-size:28px;font-weight:900;line-height:1.12;margin-top:8px;letter-spacing:-.01em}
+.hlsub{font-size:16px;font-weight:700;opacity:.85;margin-top:8px}
+.hlbig{font-size:60px;font-weight:900;letter-spacing:-.03em;position:relative}
+.hlw{display:inline-block;opacity:0;transform:translateY(34px) rotate(5deg);filter:blur(8px)}.hlsl .hlw.on{animation:hlWup .8s cubic-bezier(.2,1.4,.4,1) forwards}@keyframes hlWup{to{opacity:1;transform:none;filter:none}}
+.hlsl .hlk.hlw,.hlsl .hlh2.hlw,.hlsl .hlsub.hlw{display:block}
+.hllet{display:flex;flex-wrap:wrap;font-size:clamp(40px,14vw,64px);font-weight:900;letter-spacing:-.03em;margin:8px 0 22px}html.pc .hllet{font-size:58px}
+.hllet span{display:inline-block;opacity:0;transform:translateY(-120px) rotateX(90deg);transform-origin:50% 100%}.hllet span.on{animation:hlDrop .9s cubic-bezier(.2,1.5,.4,1) forwards}@keyframes hlDrop{to{opacity:1;transform:none}}
+.hlring{position:absolute;left:50%;top:calc(155px + env(safe-area-inset-top));width:300px;height:300px;margin-left:-150px;transform:rotate(-90deg)}.hlring circle{fill:none;stroke-width:9;stroke-linecap:round}.hlring .bg{stroke:rgba(255,255,255,.15)}.hlring .fg{stroke:#ffd36b;stroke-dasharray:0 277}
+.hlstamp{display:inline-block;font-size:22px;font-weight:900;padding:8px 16px;border:4px solid #ffd36b;color:#ffd36b;border-radius:14px;transform:rotate(-12deg) scale(3);opacity:0}.hlstamp.up{border-color:#ffb3b3;color:#ffb3b3}
+.hlstamp.on{animation:hlStp .5s cubic-bezier(.5,0,.6,1.6) forwards}@keyframes hlStp{to{transform:rotate(-8deg) scale(1);opacity:1}}
+.hlpod{display:flex;align-items:flex-end;gap:10px;height:330px;margin-top:22px}.hlpod>div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-width:0}
+.hlpod .em{font-size:44px;opacity:0;transform:translateY(-220px)}.hlpod .em.on{animation:hlEm .8s cubic-bezier(.3,1.6,.5,1) forwards}@keyframes hlEm{to{opacity:1;transform:none}}
+.hlpod .bl{width:100%;height:0;border-radius:16px 16px 6px 6px;transition:height 1s cubic-bezier(.25,1.3,.4,1);display:flex;flex-direction:column;align-items:center;padding-top:10px;font-size:30px;font-weight:900;overflow:hidden}.hlpod .bl small{font-size:13px;font-weight:700;opacity:.9}
+.hlpod .nm{font-size:13.5px;font-weight:800;margin-top:8px;opacity:0;transition:opacity .5s;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hlpod .nm.on{opacity:1}
+.hlhm{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:22px}.hlhm b{font-size:11px;text-align:center;opacity:.7}
+.hlhm i{height:clamp(30px,8vw,40px);border-radius:9px;font-style:normal;font-size:10.5px;font-weight:700;display:grid;place-items:center;transform:scale(0);background:rgba(255,255,255,calc(.1 + var(--v)*.75));color:rgba(255,255,255,.85)}
+.hlhm i[style*="--v:0."],.hlhm i.hot{color:#fff}.hlhm i.x{visibility:hidden}.hlhm i.on{animation:hlPop .45s cubic-bezier(.3,1.7,.5,1) forwards}@keyframes hlPop{to{transform:scale(1)}}
+.hlhm i.hot{outline:3px solid #fff;background:#ff5f7a}
+.hlcall{position:absolute;transform:translate(-50%,-100%) scale(0);transform-origin:50% 100%;background:#fff;color:#1d2a24;border-radius:14px;padding:8px 12px;font-size:14px;font-weight:800;white-space:nowrap;transition:transform .5s cubic-bezier(.3,1.7,.5,1);box-shadow:0 14px 30px -10px rgba(0,0,0,.5)}.hlcall.on{transform:translate(-50%,-100%) scale(1)}
+.hlcall::after{content:"";position:absolute;left:50%;bottom:-6px;width:12px;height:12px;margin-left:-6px;background:#fff;transform:rotate(45deg)}
+.hljar{position:relative;width:180px;height:225px;margin:16px auto 6px}.hljar svg{width:100%;height:100%}
+.hljar .w1{animation:hlWv1 1.6s linear infinite}.hljar .w2{animation:hlWv2 2.1s linear infinite}@keyframes hlWv1{to{transform:translateX(100px)}}@keyframes hlWv2{to{transform:translateX(-100px)}}
+.hlflip{width:min(300px,82%);height:390px;margin:24px auto 0;position:relative;transform-style:preserve-3d;transition:transform 1.2s cubic-bezier(.5,-.2,.3,1.3)}.hlflip.on{transform:rotateY(180deg)}
+.hlflip>div{position:absolute;inset:0;border-radius:26px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.hlflip .fr{background:rgba(255,255,255,.14);border:2px dashed rgba(255,255,255,.5);font-size:80px;font-weight:900}
+.hlflip .bk{transform:rotateY(180deg);background:linear-gradient(160deg,#fff7e0,#ffd9a0);color:#5a3200;padding:18px}.hlflip .bk p{font-size:14px;font-weight:600;line-height:1.4;margin:0 4px 10px}
+.hlflip .bk::after{content:"";position:absolute;top:0;bottom:0;width:50%;left:-70%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.8),transparent);animation:vaShn 2.6s ease-in-out infinite 1.4s}
+.hlflip .tr{display:inline-block;margin:4px;padding:7px 12px;border-radius:999px;background:#5a3200;color:#ffe9c2;font-size:12.5px;font-weight:800;transform:scale(0)}.hlflip .tr.on{animation:hlPop .45s cubic-bezier(.3,1.7,.5,1) forwards}
+.hlrays{position:absolute;left:50%;top:120px;width:520px;height:520px;margin-left:-260px;background:repeating-conic-gradient(rgba(255,255,255,.12) 0 9deg,transparent 9deg 18deg);border-radius:50%;-webkit-mask:radial-gradient(circle,#000 15%,transparent 68%);mask:radial-gradient(circle,#000 15%,transparent 68%);animation:hlSpin 18s linear infinite}@keyframes hlSpin{to{transform:rotate(360deg)}}
+.hlmed{display:flex;justify-content:center;gap:16px;margin-top:10px;min-height:300px;position:relative}
+.md{display:flex;flex-direction:column;align-items:center;transform-origin:50% 0;transform:translateY(-460px);width:96px}.md.on{animation:hlMd 1.4s cubic-bezier(.3,1.3,.5,1) forwards}
+@keyframes hlMd{0%{transform:translateY(-460px)}55%{transform:translateY(0) rotate(10deg)}75%{transform:rotate(-6deg)}90%{transform:rotate(3deg)}100%{transform:none}}
+.md .rb{width:26px;height:110px;background:linear-gradient(90deg,#e04848 0 33%,#fff 33% 66%,#3d63a8 66%);clip-path:polygon(0 0,100% 0,100% 100%,50% 88%,0 100%)}
+.md .co{width:86px;height:86px;border-radius:50%;margin-top:-10px;display:grid;place-items:center;font-size:40px;box-shadow:inset 0 -6px 0 rgba(0,0,0,.18),0 10px 20px rgba(0,0,0,.35),0 0 0 5px rgba(255,255,255,.35);position:relative;overflow:hidden}
+.md .co::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);animation:vaShn 2.6s ease-in-out infinite}
+.md.gold .co{background:radial-gradient(circle at 35% 30%,#fff3c4,#f1b51c 60%,#b57d00)}.md.silver .co{background:radial-gradient(circle at 35% 30%,#fff,#c9d3da 60%,#8a979f)}.md.bronze .co{background:radial-gradient(circle at 35% 30%,#ffd9b0,#c9773a 60%,#8a4a17)}
+.md.silver .rb{background:linear-gradient(90deg,#147a5b 0 33%,#fff 33% 66%,#147a5b 66%)}.md.bronze .rb{background:linear-gradient(90deg,#c27c0e 0 33%,#fff 33% 66%,#c27c0e 66%)}
+.md b{margin-top:12px;font-size:13px;font-weight:800;text-align:center;line-height:1.25}
+.hlcoll{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;position:relative;z-index:45}
+.hlcoll .t{border-radius:20px;padding:12px;color:#fff;box-shadow:0 14px 30px -12px rgba(0,0,0,.5);min-height:110px;text-align:start;border:0;font-family:var(--f-body)}
+.hlcoll .t b{display:block;font-size:26px;font-weight:900}.hlcoll .t small{font-size:12px;font-weight:700;opacity:.85;display:block}
+.hlcoll .a{background:linear-gradient(160deg,#3d63a8,#1a2f5c)}.hlcoll .b{background:linear-gradient(160deg,#e8a200,#9a5a00);grid-row:span 2}.hlcoll .c{background:linear-gradient(160deg,#1fae7a,#0b4a37)}
+.hlcoll .d{background:linear-gradient(160deg,#ffd9a0,#e0a060);color:#5a3200}.hlcoll .e{background:linear-gradient(160deg,#7a3b8f,#2e1440)}
+.hlcoll .f{background:#fff;color:#147a5b;font-size:17px;font-weight:900;min-height:56px;display:grid;place-items:center;cursor:pointer;animation:hlPulse 1.6s ease-in-out infinite 1.5s}@keyframes hlPulse{50%{transform:scale(1.05)}}
+.hlmami{position:absolute;left:20px;right:20px;bottom:calc(26px + env(safe-area-inset-bottom));display:flex;gap:9px;align-items:flex-start;z-index:35;opacity:0;transform:translateY(26px);transition:all .55s cubic-bezier(.2,1.4,.4,1);pointer-events:none}.hlmami.on{opacity:1;transform:none}
+.hlmami .bub{color:var(--fg)}
+.hltap{position:absolute;top:80px;bottom:0;z-index:30}.hltap.l{left:0;width:32%}.hltap.r{right:0;width:68%}
+.hlsl[data-i="7"].on~.hltap.r{bottom:120px}
+@media (prefers-reduced-motion: reduce){.hlw,.hllet span,.hlpod .em,.md,.hlflip,.hlhm i,.hlstamp{animation:none!important;opacity:1!important;transform:none!important;filter:none!important}.hlflip.on{transform:rotateY(180deg)!important}.hlpod .bl{transition:none}}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -2123,6 +2290,8 @@ function LOCD(){ const l=LANGS.find(x=>x[0]===LANG); return l?l[2]:"de-DE"; }
 (function(){ const N={"Drehen für mehr": ["Turn for more", "Daha fazlası için çevir", "Поверни, чтобы увидеть ещё", "Поверни, щоб побачити ще", "Obróć, aby zobaczyć więcej", "أدِر للمزيد", "Rotește pentru mai mult"], "Profil": ["Profile", "Profil", "Профиль", "Профіль", "Profil", "الملف الشخصي", "Profil"], "Hilfe": ["Help", "Yardım", "Помощь", "Допомога", "Pomoc", "مساعدة", "Ajutor"]}, LL=["en","tr","ru","uk","pl","ar","ro"];
   for (const [k,v] of Object.entries(N)){ let i=I18N_K.indexOf(k); if (i<0){ I18N_K.push(k); i=I18N_K.length-1; } LL.forEach((l,j)=>{ const a=(I18N_T[l]=I18N_T[l]||[]); if (!a[i]) a[i]=v[j]; }); } })();
 (function(){ const N={"QR-Code": ["QR code", "QR kod", "QR-код", "QR-код", "Kod QR", "رمز QR", "Cod QR"]}, LL=["en","tr","ru","uk","pl","ar","ro"];
+  for (const [k,v] of Object.entries(N)){ let i=I18N_K.indexOf(k); if (i<0){ I18N_K.push(k); i=I18N_K.length-1; } LL.forEach((l,j)=>{ const a=(I18N_T[l]=I18N_T[l]||[]); if (!a[i]) a[i]=v[j]; }); } })();
+(function(){ const N={"Sparregeln": ["Saving rules", "Birikim kuralları", "Правила накоплений", "Правила заощаджень", "Zasady oszczędzania", "قواعد الادخار", "Reguli de economisire"], "einschalten": ["turn on", "aç", "включить", "увімкнути", "włącz", "تفعيل", "activează"]}, LL=["en","tr","ru","uk","pl","ar","ro"];
   for (const [k,v] of Object.entries(N)){ let i=I18N_K.indexOf(k); if (i<0){ I18N_K.push(k); i=I18N_K.length-1; } LL.forEach((l,j)=>{ const a=(I18N_T[l]=I18N_T[l]||[]); if (!a[i]) a[i]=v[j]; }); } })();
 const I18N = (()=>{
   const NUM=/\d[\d.,]*/g, MRE=new RegExp("\\b("+MONTHS.join("|")+")\\b","g");
@@ -3667,7 +3836,8 @@ function renderZukunft(){ const el=document.querySelector(`[data-view="zukunft"]
     <div class="card areacard">${areaHead("Sparen &amp; Schulden","invest","Einstellungen Sparen")}<div class="agrid">
       ${areaTile(ic("piggy",22),"Ziele",goals.length?`${goals.length}`:"anlegen",'data-go="ziele"')}
       ${areaTile(ic("chart",22),"Anlegen","Zinseszins & Vergleich",'data-accgo="invest"')}
-      ${areaTile(ic("bank",22),"Schulden",debts>0?E(debts):"keine",'data-accgo="schulden"')}</div></div>
+      ${areaTile(ic("bank",22),"Schulden",debts>0?E(debts):"keine",'data-accgo="schulden"')}
+      ${(()=>{ const tt=srTotal(), on=SR_DEF.some(([k])=>(srCfg()[k]||{}).on); return areaTile("🪙","Sparregeln",on?E(tt):"einschalten",'data-sropen'); })()}</div></div>
     ${goalsRings()}${UI.goalsOpen||UI.goalEdit?goalsCard():""}${debtRings()}${invTile()}`;
 }
 
@@ -4002,24 +4172,11 @@ document.addEventListener("click", async e=>{
 
 function aboCfg(){ return S.settings.abos||{}; }
 function aboDeadline(a){ if (!a||!a.end) return null; const d=new Date(a.end+"T12:00"); d.setMonth(d.getMonth()-(Number(a.notice)||0)); return isoOf(d); }
-function renderAbos(){ const el=$("abosEd"); if (!el) return; if (el.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) return;
-  const A=aboCfg(), today=isoToday();
-  const list=S.fixed.filter(f=>!debtFor(f.id) && (fixArea(f)==="Abos & Handy" || A[f.id])).map(f=>({f,a:A[f.id]||{},dl:aboDeadline(A[f.id])})).sort((x,y)=>(x.dl||"9999").localeCompare(y.dl||"9999")||String(x.f.name).localeCompare(String(y.f.name)));
-  if (!list.length){ el.innerHTML=`<p class="small muted">Noch keine Abos. Leg sie unter „Fixkosten“ an (z. B. Netflix, Handy, Fitnessstudio) – hier trägst du dann Laufzeit und Kündigungsfrist ein.</p>`; return; }
-  const sumM=sum(S.fixed,f=>{ const a=planAmt(f, ymOf(new Date())); return (f.rhythm||"monatlich")==="monatlich"?a:0; });
-  el.innerHTML=`<p class="small muted" style="margin:0 0 10px">Trag ein, bis wann ein Vertrag läuft und wie lange vorher du kündigen musst. Die App erinnert dich 30 Tage vor der Frist.</p>
-    ${list.map(({f,a,dl})=>{ const days=dl?Math.round((new Date(dl+"T12:00")-new Date(today+"T12:00"))/864e5):null;
-      return `<div class="abo"><div class="abh">${(()=>{ const b=brandFor(f.name); return b?brandBadge(b):tile("ausgabe",f.cat||f.name); })()}<span class="n"><b>${esc(f.name)}</b><small>${esc(eur(listAmt(f, ymOf(new Date()))))} · ${esc(f.rhythm||"monatlich")}</small></span>${dl?`<span class="pill ${days<0?"":days<=30?"bad":"ok"}">${days<0?"Frist vorbei":days<=30?`noch ${days} T.`:`kündbar bis ${new Date(dl+"T12:00").toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"2-digit"})}`}</span>`:""}</div>
-        <div class="grid2"><div class="field"><label>Läuft bis / verlängert sich am</label><input class="in" type="date" data-aboend="${esc(f.id)}" value="${esc(a.end||"")}"></div>
-        <div class="field"><label>Kündigungsfrist</label><select class="in" data-abonot="${esc(f.id)}">${[[0,"jederzeit"],[0.5,"2 Wochen"],[1,"1 Monat"],[2,"2 Monate"],[3,"3 Monate"],[6,"6 Monate"]].map(([v,l])=>`<option value="${v}" ${Number(a.notice||0)===v?"selected":""}>${l}</option>`).join("")}</select></div></div></div>`; }).join("")}`;
-}
 document.addEventListener("change", e=>{ const t=e.target; const id=t.dataset&&(t.dataset.aboend||t.dataset.abonot); if (!id) return;
   const A=S.settings.abos={...(S.settings.abos||{})}; const a=A[id]={...(A[id]||{})};
   if (t.dataset.aboend!=null) a.end=t.value||""; else a.notice=Number(t.value)||0;
   if (!a.end && !a.notice && !a.abo) delete A[id]; t.blur(); saveSettings(); renderAbos(); if (UI.view==="fix") render(); });
-function aboHints(hints){ const A=aboCfg(), today=isoToday();
-  for (const f of S.fixed){ const dl=aboDeadline(A[f.id]); if (!dl) continue; const d=Math.round((new Date(dl+"T12:00")-new Date(today+"T12:00"))/864e5);
-    if (d>=0 && d<=30) hints.push({k:"abo", lvl:"warn", t:`${f.name}: kündigen bis ${new Date(dl+"T12:00").toLocaleDateString("de-DE")}`, s:d===0?"Heute ist der letzte Tag.":`Noch ${d} ${d===1?"Tag":"Tage"} – sonst verlängert sich der Vertrag.`}); } }
+
 
 function exportCsv(from, to){
   const rows=[["Datum","Art","Kategorie","Text","Betrag"]];
@@ -4842,6 +4999,7 @@ function renderHome(){
   const openFx = [];
 
   $("v-home").innerHTML = `
+    ${ym===cur?hlCard():""}${ym===cur&&document.documentElement.classList.contains("pc")?`<div class="fcpcw">${fcMini()}</div>`:""}
     ${S.settings.work===undefined?`<div class="card workq"><b>Wie verdienst du dein Geld?</b><span class="small muted">Dann zeigt die App nur, was zu dir passt.</span>${workPicker("", UI.workGrp||"", "setwork")}</div>`:S.settings.extra===undefined&&S.settings.work!==undefined&&UI.askExtra?`<div class="card workq"><b>Verdienst du noch etwas dazu?</b><span class="small muted">Du kannst mehreres anhaken.</span>${extraPicker(S.settings.work, UI.exSel||[], "homeextra")}<button class="btn primary" data-homeexok="1" style="margin-top:10px">Fertig</button></div>`:""}
     ${needStart?`<div class="notice info"><span>Trag einmal deinen Kontostand vom 1.1.${y} ein, dann stimmt die Rechnung.</span><button class="btn primary" data-go="more" data-scroll="sStart">Eintragen</button></div>`:""}
     ${hasProfile()?joblessTop(ym, free, c):""}
@@ -4853,6 +5011,7 @@ function renderHome(){
           return `<button data-go="year" aria-label="Noch ${eur0(v)} pro Tag für ${left} Tage"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small><span>Noch pro Tag</span> · <span>${left} ${left===1?"Tag":"Tage"}</span></small><b>${esc(eur0(v))}</b></span>${(()=>{ const d=new Date().getDate(), sp=sum(c.tx.filter(hxOut),t=>t.amount); return `<span class="hkavg"><small>bisher Ø</small><b>${esc(eur0(sp/Math.max(1,d)))}</b><small>pro Tag</small></span>`; })()}</button>`; })()
         : `<button data-go="year"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small>Ø pro Tag ausgegeben</small><b>${esc(eur0(c.expenses/Math.max(1, daysIn(ym))))}</b></span></button>`}
       </div>
+      ${ym===cur?fcMini():""}
     </div>
     ${homeHub(ym, c)}
     ${homeBlocks({
@@ -5744,7 +5903,7 @@ function debtRings(){
 const GOAL_COLORS = ["#1F8A70","#3B6FD8","#C2573A","#8A4FD1","#C9921B","#2A9DB0"];
 function goalSaved(g){
   if (g.account){ const b=accountBalance(g.account, isoToday()); if (b!==null) return {v:b, linked:true}; }
-  return {v:(Number(g.start)||0)+sum(g.log||[],x=>Number(x.v)||0), linked:false};
+  return {v:(Number(g.start)||0)+sum(g.log||[],x=>Number(x.v)||0)+(typeof srForGoal==="function"?srForGoal(g.id):0), linked:false};
 }
 function monthsLeft(due){ if (!due) return 0; const [y,m]=due.split("-").map(Number), n=new Date(); return Math.max(1,(y-n.getFullYear())*12+(m-(n.getMonth()+1))+1); }
 function goalsCard(){
@@ -8085,6 +8244,7 @@ async function saveTx(){
   if (date.slice(0,7)!==UI.ym){ UI.ym=date.slice(0,7); render(); }
   if (editing){ toast("Geändert", old ? ()=>safe(()=>saveTxDoc(id, plainTx(old), S.tx.find(t=>t.id===id))) : null); }
   else toast(`${eur(doc.amount)} gespeichert`, ()=>safe(()=>delTxDoc(S.tx.find(t=>t.id===id))));
+  if (!editing) try{ srAfterSave(doc); }catch(_){}
   if (afaBig(doc) && !doc.afa && (!old || !afaBig(old))) setTimeout(()=>afaAsk(id), 450);
 }
 async function deleteTx(){
@@ -8096,6 +8256,488 @@ async function deleteTx(){
   const img = hasReceipt(id) ? await rcptGet(id) : null;
   if (await safe(()=>delTxDoc(old))){ if (img) await rcptDel(id); closeSheet(); toast("Gelöscht", async ()=>{ await safe(()=>restoreTx(old)); if (img) await rcptPut(id, img); render(); }); }
 }
+
+const NT={
+fc_mami_w0:["Uff, {a} – das wird eng. Schau, welche Fixkosten du verschieben oder kündigen kannst. Ich helfe dir! 💚","Phew, {a} – that’s tight. Check which fixed costs you can postpone or cancel. I’ll help! 💚","Of {a} – sıkışık olacak. Hangi sabit giderleri erteleyebileceğine ya da iptal edebileceğine bak. Yardım ederim! 💚","Ох, {a} – будет туго. Посмотри, какие постоянные расходы можно перенести или отменить. Я помогу! 💚","Ох, {a} – буде скрутно. Подивись, які постійні витрати можна перенести чи скасувати. Я допоможу! 💚","Uff, {a} – będzie ciasno. Sprawdź, które stałe koszty możesz przesunąć lub wypowiedzieć. Pomogę! 💚","أوف يا {a} – سيكون الأمر ضيقًا. انظر أي التكاليف الثابتة يمكنك تأجيلها أو إلغاؤها. سأساعدك! 💚","Uf, {a} – va fi strâmt. Vezi ce costuri fixe poți amâna sau anula. Te ajut! 💚"],
+va_left:["noch {n} Tage","{n} days left","{n} gün kaldı","ещё {n} дн.","ще {n} дн.","jeszcze {n} dni","باقي {n} يوم","încă {n} zile"],
+va_ind:["in {n} Tagen","in {n} days","{n} gün sonra","через {n} дн.","через {n} дн.","za {n} dni","بعد {n} يوم","în {n} zile"],
+va_inm:["in {n} Monaten","in {n} months","{n} ay sonra","через {n} мес.","через {n} міс.","za {n} mies.","بعد {n} أشهر","în {n} luni"],
+va_run:["läuft","running","devam ediyor","действует","діє","trwa","ساري","în curs"],
+va_free:["jederzeit","anytime","her zaman","в любое время","будь-коли","w każdej chwili","في أي وقت","oricând"],
+va_nodate:["Datum fehlt","date missing","tarih eksik","нет даты","немає дати","brak daty","التاريخ ناقص","lipsește data"],
+va_done:["gekündigt ✓","cancelled ✓","iptal edildi ✓","расторгнут ✓","розірвано ✓","wypowiedziana ✓","تم الإلغاء ✓","reziliat ✓"],
+va_empty:["Noch keine Verträge. Leg sie unter „Fixkosten“ an (z. B. Handy, Strom, Fitnessstudio) – hier siehst du dann, wann du kündigen kannst.","No contracts yet. Add them under “Fixed costs” (e.g. phone, electricity, gym) – here you’ll see when you can cancel.","Henüz sözleşme yok. „Sabit giderler“ altında ekle (ör. telefon, elektrik, spor salonu) – burada ne zaman iptal edebileceğini görürsün.","Договоров пока нет. Добавь их в «Постоянные расходы» (телефон, электричество, спортзал) – здесь увидишь, когда можно расторгнуть.","Договорів поки немає. Додай їх у «Постійні витрати» (телефон, електрика, спортзал) – тут побачиш, коли можна розірвати.","Brak umów. Dodaj je w „Stałe koszty” (np. telefon, prąd, siłownia) – tutaj zobaczysz, kiedy możesz wypowiedzieć.","لا توجد عقود بعد. أضفها في «التكاليف الثابتة» (مثل الهاتف والكهرباء والنادي) – وهنا سترى متى يمكنك الإلغاء.","Încă nu ai contracte. Adaugă-le la „Costuri fixe” (ex. telefon, curent, sală) – aici vezi când le poți rezilia."],
+va_until:["bis {d}","until {d}","{d} tarihine kadar","до {d}","до {d}","do {d}","حتى {d}","până la {d}"],
+va_al1:["1 Vertrag jetzt kündbar","1 contract can be cancelled now","1 sözleşme şimdi iptal edilebilir","1 договор можно расторгнуть сейчас","1 договір можна розірвати зараз","1 umowę możesz teraz wypowiedzieć","يمكن إلغاء عقد واحد الآن","1 contract poate fi reziliat acum"],
+va_aln:["{n} Verträge jetzt kündbar","{n} contracts can be cancelled now","{n} sözleşme şimdi iptal edilebilir","{n} договора можно расторгнуть сейчас","{n} договори можна розірвати зараз","{n} umowy możesz teraz wypowiedzieć","يمكن إلغاء {n} عقود الآن","{n} contracte pot fi reziliate acum"],
+va_al_s:["Sonst verlängern sie sich automatisch","Otherwise they renew automatically","Yoksa otomatik olarak uzar","Иначе они продлятся автоматически","Інакше вони продовжаться автоматично","W przeciwnym razie przedłużą się automatycznie","وإلا ستتجدد تلقائيًا","Altfel se prelungesc automat"],
+va_con:["Verträge mit Laufzeit","Contracts with a term","Süreli sözleşmeler","Договоры со сроком","Договори зі строком","Umowy terminowe","عقود محددة المدة","Contracte pe durată determinată"],
+va_abo:["Jederzeit kündbar","Cancel anytime","Her zaman iptal edilebilir","Можно расторгнуть в любое время","Можна розірвати будь-коли","Do wypowiedzenia w każdej chwili","يمكن إلغاؤها في أي وقت","Se pot rezilia oricând"],
+va_tip:["Tippe auf einen Vertrag, um Laufzeit und Frist einzutragen. Die App erinnert dich 30 Tage vorher.","Tap a contract to enter its term and notice period. The app reminds you 30 days before.","Süre ve fesih süresini girmek için bir sözleşmeye dokun. Uygulama seni 30 gün önce hatırlatır.","Нажми на договор, чтобы указать срок и период уведомления. Приложение напомнит за 30 дней.","Натисни на договір, щоб вказати строк і період повідомлення. Застосунок нагадає за 30 днів.","Stuknij umowę, aby wpisać okres i termin wypowiedzenia. Aplikacja przypomni 30 dni wcześniej.","اضغط على عقد لإدخال مدته ومهلة الإلغاء. سيذكّرك التطبيق قبل 30 يومًا.","Atinge un contract ca să introduci durata și termenul de preaviz. Aplicația îți amintește cu 30 de zile înainte."],
+va_today:["heute","today","bugün","сегодня","сьогодні","dziś","اليوم","azi"],
+va_dl:["Frist {d}","Deadline {d}","Son gün {d}","Срок {d}","Термін {d}","Termin {d}","المهلة {d}","Termen {d}"],
+va_lastday:["Heute ist der letzte Tag!","Today is the last day!","Bugün son gün!","Сегодня последний день!","Сьогодні останній день!","Dziś ostatni dzień!","اليوم هو آخر يوم!","Azi e ultima zi!"],
+va_daysleft:["Noch {n} Tage zum Kündigen","{n} days left to cancel","İptal için {n} gün kaldı","Ещё {n} дн. на расторжение","Ще {n} дн. на розірвання","Jeszcze {n} dni na wypowiedzenie","باقي {n} يوم للإلغاء","Mai ai {n} zile pentru reziliere"],
+va_renew:["Sonst +12 Monate · {n}","Otherwise +12 months · {n}","Yoksa +12 ay · {n}","Иначе +12 мес. · {n}","Інакше +12 міс. · {n}","Inaczej +12 mies. · {n}","وإلا +12 شهرًا · {n}","Altfel +12 luni · {n}"],
+va_end:["Läuft bis / verlängert sich am","Runs until / renews on","Bitiş / yenilenme tarihi","Действует до / продлевается","Діє до / продовжується","Obowiązuje do / przedłuża się","ساري حتى / يتجدد في","Valabil până la / se prelungește pe"],
+va_notice:["Kündigungsfrist","Notice period","Fesih süresi","Срок уведомления","Строк повідомлення","Okres wypowiedzenia","مهلة الإلغاء","Termen de preaviz"],
+va_n0:["jederzeit","anytime","her zaman","в любое время","будь-коли","w każdej chwili","في أي وقت","oricând"],
+va_n05:["2 Wochen","2 weeks","2 hafta","2 недели","2 тижні","2 tygodnie","أسبوعان","2 săptămâni"],
+va_n1:["1 Monat","1 month","1 ay","1 месяц","1 місяць","1 miesiąc","شهر واحد","1 lună"],
+va_n2:["2 Monate","2 months","2 ay","2 месяца","2 місяці","2 miesiące","شهران","2 luni"],
+va_n3:["3 Monate","3 months","3 ay","3 месяца","3 місяці","3 miesiące","3 أشهر","3 luni"],
+va_n6:["6 Monate","6 months","6 ay","6 месяцев","6 місяців","6 miesięcy","6 أشهر","6 luni"],
+va_write:["Kündigung schreiben","Write cancellation","İptal yazısı yaz","Написать расторжение","Написати розірвання","Napisz wypowiedzenie","اكتب طلب الإلغاء","Scrie rezilierea"],
+va_isdone:["Gekündigt","Cancelled","İptal edildi","Расторгнут","Розірвано","Wypowiedziana","تم الإلغاء","Reziliat"],
+va_mark:["Schon gekündigt","Already cancelled","Zaten iptal edildi","Уже расторгнут","Уже розірвано","Już wypowiedziana","تم إلغاؤه بالفعل","Deja reziliat"],
+va_lt_t:["Kündigung {x}","Cancel {x}","{x} iptali","Расторжение {x}","Розірвання {x}","Wypowiedzenie {x}","إلغاء {x}","Reziliere {x}"],
+va_lt_de:["Das Schreiben ist auf Deutsch – so verstehen es deutsche Anbieter. Ergänze Adresse und Kundennummer.","The letter is in German so German providers understand it. Add your address and customer number.","Mektup Almanca – Alman firmalar böyle anlar. Adresini ve müşteri numaranı ekle.","Письмо на немецком – так его поймут немецкие компании. Добавь адрес и номер клиента.","Лист німецькою – так його зрозуміють німецькі компанії. Додай адресу й номер клієнта.","Pismo jest po niemiecku – tak zrozumieją je niemieckie firmy. Uzupełnij adres i numer klienta.","الخطاب بالألمانية لتفهمه الشركات الألمانية. أضف عنوانك ورقم العميل.","Scrisoarea e în germană, ca să o înțeleagă firmele germane. Completează adresa și numărul de client."],
+va_copy:["Kopieren","Copy","Kopyala","Копировать","Копіювати","Kopiuj","نسخ","Copiază"],
+va_send:["Senden / Teilen","Send / Share","Gönder / Paylaş","Отправить","Надіслати","Wyślij / Udostępnij","إرسال / مشاركة","Trimite / Distribuie"],
+va_lt_tip:["Tipp: Schick die Kündigung per E-Mail oder über das Kundenportal und heb die Bestätigung auf.","Tip: send it by email or the customer portal and keep the confirmation.","İpucu: E-posta ya da müşteri portalı üzerinden gönder ve onayı sakla.","Совет: отправь по e-mail или через личный кабинет и сохрани подтверждение.","Порада: надішли e-mail або через кабінет клієнта й збережи підтвердження.","Wskazówka: wyślij e-mailem lub przez portal klienta i zachowaj potwierdzenie.","نصيحة: أرسله بالبريد الإلكتروني أو عبر بوابة العملاء واحتفظ بالتأكيد.","Sfat: trimite-o pe e-mail sau prin portalul clientului și păstrează confirmarea."],
+va_copied:["Kopiert","Copied","Kopyalandı","Скопировано","Скопійовано","Skopiowano","تم النسخ","Copiat"],
+va_after:["Gesendet? Dann markier den Vertrag als gekündigt.","Sent? Then mark the contract as cancelled.","Gönderdin mi? O zaman sözleşmeyi iptal edildi olarak işaretle.","Отправил? Тогда отметь договор как расторгнутый.","Надіслав? Тоді познач договір як розірваний.","Wysłane? To oznacz umowę jako wypowiedzianą.","أرسلته؟ إذن علّم العقد كملغى.","Ai trimis? Atunci marchează contractul ca reziliat."],
+va_hint:["kündigen bis {d}","cancel by {d}","{d} tarihine kadar iptal et","расторгнуть до {d}","розірвати до {d}","wypowiedz do {d}","ألغِ قبل {d}","reziliază până la {d}"],
+va_hint_s:["Noch {n} Tage – sonst verlängert sich der Vertrag.","{n} days left – otherwise the contract renews.","{n} gün kaldı – yoksa sözleşme uzar.","Ещё {n} дн. – иначе договор продлится.","Ще {n} дн. – інакше договір продовжиться.","Jeszcze {n} dni – inaczej umowa się przedłuży.","باقي {n} يوم – وإلا سيتجدد العقد.","Mai sunt {n} zile – altfel contractul se prelungește."],
+fc_title:["Vorschau bis Monatsende","Forecast to month end","Ay sonuna kadar tahmin","Прогноз до конца месяца","Прогноз до кінця місяця","Prognoza do końca miesiąca","توقّع حتى نهاية الشهر","Prognoză până la final de lună"],
+fc_end:["Am {d} voraussichtlich","Expected on {d}","{d} tahmini","Ожидается на {d}","Очікується на {d}","Przewidywane na {d}","المتوقع في {d}","Estimat pe {d}"],
+fc_tight:["Am {d} wird's knapp","Money gets tight on {d}","{d} günü sıkışık olacak","{d} будет туго","{d} буде скрутно","{d} będzie ciasno","سيكون المال ضيقًا في {d}","Pe {d} va fi strâmt"],
+fc_ok:["Du kommst gut durch den Monat","You’ll get through the month fine","Ayı rahat çıkarırsın","Ты спокойно доживёшь до конца месяца","Ти спокійно доживеш до кінця місяця","Spokojnie przetrwasz miesiąc","ستتجاوز الشهر براحة","Treci liniștit prin lună"],
+fc_under:["unter {n}","below {n}","{n} altı","ниже {n}","нижче {n}","poniżej {n}","أقل من {n}","sub {n}"],
+fc_today:["heute","today","bugün","сегодня","сьогодні","dziś","اليوم","azi"],
+fc_scrub:["Mit dem Finger über die Kurve fahren","Slide your finger along the curve","Parmağını eğri üzerinde gezdir","Проведи пальцем по кривой","Проведи пальцем по кривій","Przesuń palcem po krzywej","مرّر إصبعك على المنحنى","Glisează degetul pe curbă"],
+fc_tight_s:["Nur noch etwa {n} auf dem Konto – bis wieder Geld reinkommt.","Only about {n} left – until money comes in again.","Hesapta sadece yaklaşık {n} kalacak – tekrar para gelene kadar.","Останется лишь около {n} – пока снова не придут деньги.","Залишиться лише близько {n} – доки знову не надійдуть гроші.","Zostanie tylko około {n} – zanim znów wpłyną pieniądze.","سيبقى نحو {n} فقط – حتى تصل أموال جديدة.","Rămân doar cam {n} – până intră din nou bani."],
+fc_good:["Sieht gut aus","Looks good","İyi görünüyor","Выглядит хорошо","Виглядає добре","Wygląda dobrze","يبدو جيدًا","Arată bine"],
+fc_good_s:["Am Monatsende bleiben dir voraussichtlich {n}.","You should have about {n} left at month end.","Ay sonunda tahminen {n} kalır.","В конце месяца должно остаться около {n}.","Наприкінці місяця має залишитися близько {n}.","Na koniec miesiąca powinno zostać około {n}.","يُتوقع أن يبقى لديك نحو {n} في نهاية الشهر.","La final de lună ar trebui să-ți rămână cam {n}."],
+fc_next:["Kommt noch diesen Monat","Still coming this month","Bu ay daha gelecek","Ещё в этом месяце","Ще цього місяця","Jeszcze w tym miesiącu","المتبقي هذا الشهر","Urmează luna asta"],
+fc_none:["Keine festen Zahlungen mehr offen.","No fixed payments left.","Açık sabit ödeme kalmadı.","Постоянных платежей больше нет.","Постійних платежів більше немає.","Brak otwartych stałych płatności.","لا توجد مدفوعات ثابتة متبقية.","Nu mai sunt plăți fixe deschise."],
+fc_how:["Gerechnet mit deinen offenen Fixkosten, erwarteten Einnahmen und ca. {n} Ausgaben pro Tag.","Based on open fixed costs, expected income and about {n} spending per day.","Açık sabit giderler, beklenen gelirler ve günlük yaklaşık {n} harcamayla hesaplandı.","С учётом открытых постоянных расходов, ожидаемых доходов и примерно {n} трат в день.","З урахуванням відкритих постійних витрат, очікуваних доходів і приблизно {n} витрат на день.","Uwzględnia otwarte stałe koszty, spodziewane wpływy i ok. {n} wydatków dziennie.","محسوب بالتكاليف الثابتة المتبقية والدخل المتوقع ونحو {n} إنفاقًا يوميًا.","Calculat cu costurile fixe rămase, veniturile așteptate și cam {n} cheltuieli pe zi."],
+fc_mami_w:["Tipp, {a}: Mit {n} am Tag kommst du entspannt bis zum {d}. 💚","Tip, {a}: with {n} a day you’ll get to {d} relaxed. 💚","İpucu {a}: Günde {n} ile {d} tarihine rahat ulaşırsın. 💚","Совет, {a}: тратя {n} в день, спокойно дотянешь до {d}. 💚","Порада, {a}: витрачаючи {n} на день, спокійно дотягнеш до {d}. 💚","Wskazówka, {a}: z {n} dziennie spokojnie dociągniesz do {d}. 💚","نصيحة يا {a}: بـ {n} يوميًا ستصل إلى {d} براحة. 💚","Sfat, {a}: cu {n} pe zi ajungi liniștit până pe {d}. 💚"],
+fc_mami_ok:["Super, {a}! Am Monatsende bleiben dir etwa {n}. Vielleicht was davon sparen? 🐷","Great, {a}! About {n} left at month end. Maybe save some? 🐷","Harika {a}! Ay sonunda yaklaşık {n} kalıyor. Biraz biriktirsen? 🐷","Отлично, {a}! В конце месяца останется около {n}. Может, отложить часть? 🐷","Чудово, {a}! Наприкінці місяця залишиться близько {n}. Може, відкласти трохи? 🐷","Super, {a}! Na koniec miesiąca zostanie ok. {n}. Może coś odłożysz? 🐷","رائع يا {a}! سيبقى نحو {n} في نهاية الشهر. ربما تدّخر بعضه؟ 🐷","Super, {a}! La final de lună rămân cam {n}. Poate pui ceva deoparte? 🐷"],
+sr_title:["Sparregeln","Saving rules","Birikim kuralları","Правила накоплений","Правила заощаджень","Zasady oszczędzania","قواعد الادخار","Reguli de economisire"],
+sr_saved:["Durch Regeln gespart","Saved by rules","Kurallarla biriktirilen","Накоплено по правилам","Заощаджено за правилами","Zaoszczędzone dzięki zasadom","المدّخر عبر القواعد","Economisit prin reguli"],
+sr_hero_s:["läuft ganz von allein","runs all by itself","tamamen kendiliğinden işler","работает само","працює само","działa samo","يعمل تلقائيًا","merge de la sine"],
+sr_nogoal:["Leg zuerst ein Sparziel an – dorthin fließt das Geld.","Create a savings goal first – that’s where the money goes.","Önce bir birikim hedefi oluştur – para oraya gider.","Сначала создай цель – туда пойдут деньги.","Спочатку створи ціль – туди підуть гроші.","Najpierw utwórz cel – tam trafią pieniądze.","أنشئ هدف ادخار أولًا – إليه تذهب الأموال.","Creează întâi un obiectiv – acolo merg banii."],
+sr_goal_btn:["Sparziel anlegen","Create goal","Hedef oluştur","Создать цель","Створити ціль","Utwórz cel","إنشاء هدف","Creează obiectiv"],
+sr_round:["Aufrunden","Round up","Yukarı yuvarla","Округление","Округлення","Zaokrąglanie","التقريب","Rotunjire"],
+sr_round_s:["Jede Ausgabe auf volle Euro – der Rest wird gespart","Every purchase rounded to the next euro – the change is saved","Her harcama tam euroya yuvarlanır – fark biriktirilir","Каждая покупка до целого евро – сдача копится","Кожна покупка до цілого євро – решта заощаджується","Każdy wydatek do pełnego euro – reszta trafia do oszczędności","كل مشتريات تُقرَّب لليورو التالي – والفرق يُدّخر","Fiecare cheltuială rotunjită la euro – restul se economisește"],
+sr_rest:["Rest vom Monat","Month-end leftover","Ay sonu kalanı","Остаток месяца","Залишок місяця","Reszta z miesiąca","المتبقي من الشهر","Restul lunii"],
+sr_rest_s:["Was am Monatsende übrig ist, wird gespart","Whatever is left at month end gets saved","Ay sonunda kalan biriktirilir","Остаток в конце месяца откладывается","Залишок наприкінці місяця відкладається","To, co zostanie na koniec miesiąca, jest odkładane","ما يتبقى في نهاية الشهر يُدّخر","Ce rămâne la final de lună se economisește"],
+sr_pay:["Gehalts-Regel","Paycheck rule","Maaş kuralı","Правило зарплаты","Правило зарплати","Zasada wypłaty","قاعدة الراتب","Regula salariului"],
+sr_pay_s:["{n} % von jeder Einnahme","{n} % of every income","Her gelirin %{n}'i","{n} % от каждого дохода","{n} % від кожного доходу","{n} % z każdego wpływu","{n} ٪ من كل دخل","{n} % din fiecare venit"],
+sr_skip:["Verzichts-Regel","Skip-it rule","Vazgeçme kuralı","Правило отказа","Правило відмови","Zasada rezygnacji","قاعدة الاستغناء","Regula renunțării"],
+sr_skip_s:["Auf etwas verzichtet? Dann {n} gespart","Skipped something? Then {n} saved","Bir şeyden vazgeçtin mi? {n} biriktirildi","Отказался от чего-то? Значит, {n} отложено","Відмовився від чогось? Тоді {n} відкладено","Zrezygnowałeś z czegoś? To {n} odłożone","استغنيت عن شيء؟ إذن ادّخرت {n}","Ai renunțat la ceva? Atunci ai economisit {n}"],
+sr_skip_btn:["Heute verzichtet (+{n})","Skipped it today (+{n})","Bugün vazgeçtim (+{n})","Сегодня отказался (+{n})","Сьогодні відмовився (+{n})","Dziś zrezygnowałem (+{n})","استغنيت اليوم (+{n})","Am renunțat azi (+{n})"],
+sr_g_month:["+ {n} diesen Monat","+ {n} this month","Bu ay + {n}","+ {n} в этом месяце","+ {n} цього місяця","+ {n} w tym miesiącu","+ {n} هذا الشهر","+ {n} luna asta"],
+sr_g_last:["letzter Monat: + {n}","last month: + {n}","geçen ay: + {n}","прошлый месяц: + {n}","минулий місяць: + {n}","poprzedni miesiąc: + {n}","الشهر الماضي: + {n}","luna trecută: + {n}"],
+sr_g_rest:["aktiv · zählt am Monatsende","active · counts at month end","aktif · ay sonunda sayılır","активно · считается в конце месяца","активно · рахується наприкінці місяця","aktywne · liczy się na koniec miesiąca","مفعّل · يُحتسب في نهاية الشهر","activ · se socotește la final de lună"],
+sr_g_wait:["aktiv · ab jetzt","active · from now on","aktif · şu andan itibaren","активно · с этого момента","активно · відтепер","aktywne · od teraz","مفعّل · من الآن","activ · de acum"],
+sr_how:["Die App rechnet aus, wie viel du zurücklegen solltest, und zählt es zu deinem Sparziel. Überweis den Betrag einfach auf dein Sparkonto.","The app calculates how much to put aside and adds it to your goal. Just transfer it to your savings account.","Uygulama ne kadar ayırman gerektiğini hesaplar ve hedefine ekler. Tutarı birikim hesabına aktar.","Приложение считает, сколько отложить, и добавляет это к цели. Просто переведи сумму на сберегательный счёт.","Застосунок рахує, скільки відкласти, і додає це до цілі. Просто переказуй суму на ощадний рахунок.","Aplikacja liczy, ile odłożyć, i dolicza to do celu. Po prostu przelej kwotę na konto oszczędnościowe.","يحسب التطبيق ما يجب ادّخاره ويضيفه إلى هدفك. فقط حوّل المبلغ إلى حساب التوفير.","Aplicația calculează cât să pui deoparte și adaugă la obiectiv. Transferă suma în contul de economii."],
+sr_pill:["Aufgerundet","Rounded up","Yukarı yuvarlandı","Округлено","Округлено","Zaokrąglono","تم التقريب","Rotunjit"],
+hl_card:["Dein {m}-Rückblick ist da ✨","Your {m} highlights are here ✨","{m} özetin hazır ✨","Твои итоги за {m} готовы ✨","Твої підсумки за {m} готові ✨","Twoje podsumowanie: {m} ✨","ملخّص شهر {m} جاهز ✨","Rezumatul pentru {m} e gata ✨"],
+hl_card_s:["Tippen – dein Monat als kleine Show","Tap – your month as a little show","Dokun – ayın küçük bir gösteri olarak","Нажми – твой месяц как маленькое шоу","Натисни – твій місяць як маленьке шоу","Stuknij – twój miesiąc jako mały pokaz","اضغط – شهرك كعرض صغير","Atinge – luna ta ca un mic spectacol"],
+hl_card_again:["{m}-Highlights nochmal ansehen","Watch {m} highlights again","{m} özetini tekrar izle","Посмотреть итоги за {m} снова","Переглянути підсумки за {m} знову","Obejrzyj ponownie: {m}","شاهد ملخّص {m} مجددًا","Revezi rezumatul pentru {m}"],
+hl_title:["{m}-Highlights","{m} highlights","{m} özeti","Итоги: {m}","Підсумки: {m}","Podsumowanie: {m}","ملخّص {m}","Rezumat {m}"],
+hl_close:["Schließen","Close","Kapat","Закрыть","Закрити","Zamknij","إغلاق","Închide"],
+hl_your:["DEIN","YOUR","SENİN","ТВОЙ","ТВІЙ","TWÓJ","شهرك","LUNA TA"],
+hl_ready:["Bereit für deine Highlights?","Ready for your highlights?","Özetine hazır mısın?","Готов к своим итогам?","Готовий до своїх підсумків?","Gotowy na podsumowanie?","هل أنت جاهز لملخّصك؟","Ești gata pentru rezumat?"],
+hl_spent:["AUSGEGEBEN IM {m}","SPENT IN {m}","{m} AYINDA HARCANAN","ПОТРАЧЕНО: {m}","ВИТРАЧЕНО: {m}","WYDANE: {m}","المصروف في {m}","CHELTUIT ÎN {m}"],
+hl_of:["von {n} Einnahmen","of {n} income","{n} gelirden","из {n} дохода","з {n} доходу","z {n} wpływów","من دخل {n}","din {n} venit"],
+hl_less:["−{n} % zum {m}","−{n} % vs {m}","{m} ayına göre −%{n}","−{n} % к {m}","−{n} % до {m}","−{n} % wobec: {m}","−{n} ٪ مقارنة بـ {m}","−{n} % față de {m}"],
+hl_more:["+{n} % zum {m}","+{n} % vs {m}","{m} ayına göre +%{n}","+{n} % к {m}","+{n} % до {m}","+{n} % wobec: {m}","+{n} ٪ مقارنة بـ {m}","+{n} % față de {m}"],
+hl_pod:["DEIN SIEGERTREPPCHEN","YOUR PODIUM","SENİN KÜRSÜN","ТВОЙ ПЬЕДЕСТАЛ","ТВІЙ П’ЄДЕСТАЛ","TWOJE PODIUM","منصّة التتويج","PODIUMUL TĂU"],
+hl_pod_s:["Hier ging dein Geld hin","This is where your money went","Paran buraya gitti","Вот куда ушли деньги","Ось куди пішли гроші","Tu poszły twoje pieniądze","هنا ذهبت أموالك","Aici s-au dus banii"],
+hl_heat:["DEIN MONAT IN FARBE","YOUR MONTH IN COLOR","AYIN RENKLERDE","ТВОЙ МЕСЯЦ В ЦВЕТЕ","ТВІЙ МІСЯЦЬ У КОЛЬОРІ","TWÓJ MIESIĄC W KOLORZE","شهرك بالألوان","LUNA TA ÎN CULORI"],
+hl_heat_s:["Je heller, desto teurer der Tag","The brighter, the pricier the day","Ne kadar parlaksa gün o kadar pahalı","Чем ярче, тем дороже день","Що яскравіше, то дорожчий день","Im jaśniej, tym droższy dzień","كلما كان أفتح كان اليوم أغلى","Cu cât mai luminos, cu atât ziua e mai scumpă"],
+hl_calm:["Ruhigster Tag: {d} · {n} 🧘","Calmest day: {d} · {n} 🧘","En sakin gün: {d} · {n} 🧘","Самый спокойный день: {d} · {n} 🧘","Найспокійніший день: {d} · {n} 🧘","Najspokojniejszy dzień: {d} · {n} 🧘","أهدأ يوم: {d} · {n} 🧘","Cea mai liniștită zi: {d} · {n} 🧘"],
+hl_saved:["ÜBRIG GEBLIEBEN","LEFT OVER","ARTAN","ОСТАЛОСЬ","ЗАЛИШИЛОСЯ","ZOSTAŁO","المتبقي","RĂMAS"],
+hl_tight:["MEHR AUSGEGEBEN","SPENT MORE","DAHA FAZLA HARCANDI","ПОТРАЧЕНО БОЛЬШЕ","ВИТРАЧЕНО БІЛЬШЕ","WYDANO WIĘCEJ","صرفت أكثر","CHELTUIT MAI MULT"],
+hl_rate:["{n} % deiner Einnahmen sind übrig","{n} % of your income is left","Gelirinin %{n}'i kaldı","Осталось {n} % дохода","Залишилося {n} % доходу","Zostało {n} % wpływów","تبقّى {n} ٪ من دخلك","A rămas {n} % din venit"],
+hl_tight_s:["Knapper Monat – nächster wird besser 💪","A tight month – the next one will be better 💪","Zor bir aydı – sonraki daha iyi olacak 💪","Тяжёлый месяц – следующий будет лучше 💪","Важкий місяць – наступний буде кращим 💪","Ciężki miesiąc – następny będzie lepszy 💪","شهر صعب – القادم أفضل 💪","Lună grea – următoarea va fi mai bună 💪"],
+hl_goal:["{g}: {n} % geschafft","{g}: {n} % done","{g}: %{n} tamam","{g}: {n} % готово","{g}: {n} % готово","{g}: {n} % gotowe","{g}: {n} ٪ مكتمل","{g}: {n} % realizat"],
+hl_type:["DEIN GELD-TYP","YOUR MONEY TYPE","PARA TİPİN","ТВОЙ ДЕНЕЖНЫЙ ТИП","ТВІЙ ГРОШОВИЙ ТИП","TWÓJ TYP FINANSOWY","نوعك المالي","TIPUL TĂU DE BANI"],
+hl_t_owl:["Spar-Eule","Saving Owl","Birikimci Baykuş","Сова-копилка","Сова-скарбничка","Oszczędna Sowa","البومة المدّخرة","Bufnița econoamă"],
+hl_t_owl_s:["Du hast richtig viel zur Seite gelegt – sehr weise!","You put a lot aside – very wise!","Epey kenara koydun – çok akıllıca!","Ты отложил очень много – мудро!","Ти відклав дуже багато – мудро!","Odłożyłeś naprawdę dużo – bardzo mądrze!","ادّخرت كثيرًا – تصرّف حكيم!","Ai pus mult deoparte – foarte înțelept!"],
+hl_t_fox:["Schnäppchen-Fuchs","Bargain Fox","Fırsat Tilkisi","Лис-экономист","Лис-економіст","Okazyjny Lis","ثعلب العروض","Vulpea chilipirurilor"],
+hl_t_fox_s:["Du hast deutlich weniger ausgegeben als im Vormonat – clever!","You spent a lot less than last month – clever!","Geçen aya göre çok daha az harcadın – zekice!","Ты потратил намного меньше, чем в прошлом месяце – умно!","Ти витратив набагато менше, ніж минулого місяця – розумно!","Wydałeś dużo mniej niż w poprzednim miesiącu – sprytnie!","صرفت أقل بكثير من الشهر الماضي – ذكي!","Ai cheltuit mult mai puțin decât luna trecută – isteț!"],
+hl_t_sq:["Kleinkram-Eichhörnchen","Little-things Squirrel","Ufak Tefek Sincabı","Белка мелочей","Білка дрібниць","Wiewiórka drobiazgów","سنجاب الأشياء الصغيرة","Veverița mărunțișurilor"],
+hl_t_sq_s:["Viele kleine Einkäufe – die summieren sich schnell!","Lots of small buys – they add up fast!","Çok sayıda küçük alışveriş – hızla birikir!","Много мелких покупок – они быстро складываются!","Багато дрібних покупок – вони швидко складаються!","Dużo drobnych zakupów – szybko się sumują!","مشتريات صغيرة كثيرة – تتراكم بسرعة!","Multe cumpărături mici – se adună repede!"],
+hl_t_party:["Wochenend-Held","Weekend Hero","Hafta Sonu Kahramanı","Герой выходных","Герой вихідних","Bohater weekendu","بطل نهاية الأسبوع","Eroul de weekend"],
+hl_t_party_s:["Am Wochenende geht’s bei dir richtig los!","Your weekends are where it happens!","Hafta sonları senin için asıl eğlence!","По выходным у тебя всё самое интересное!","На вихідних у тебе все найцікавіше!","W weekendy dzieje się u ciebie najwięcej!","عطلة نهاية الأسبوع هي وقتك!","În weekend se întâmplă totul la tine!"],
+hl_t_food:["Genießer","Foodie","Gurme","Гурман","Гурман","Smakosz","الذوّاق","Gurmand"],
+hl_t_food_s:["Essen steht bei dir ganz oben – Hauptsache lecker!","Food comes first – as long as it’s tasty!","Yemek senin için birinci sırada – yeter ki lezzetli olsun!","Еда у тебя на первом месте – лишь бы вкусно!","Їжа в тебе на першому місці – аби смачно!","Jedzenie jest u ciebie na pierwszym miejscu – byle smacznie!","الطعام أولًا عندك – المهم أن يكون لذيذًا!","Mâncarea e pe primul loc – important e să fie gustoasă!"],
+hl_t_pro:["Alltags-Profi","Everyday Pro","Günlük Profesyonel","Профи будней","Профі буднів","Codzienny profesjonalista","محترف اليوميات","Profesionist de zi cu zi"],
+hl_t_pro_s:["Ausgeglichen und mit Plan – so geht Haushalt!","Balanced and planned – that’s how it’s done!","Dengeli ve planlı – işte böyle!","Сбалансированно и по плану – вот как надо!","Збалансовано і за планом – ось як треба!","Zrównoważenie i z planem – tak to się robi!","متوازن ومخطط – هكذا تكون الإدارة!","Echilibrat și cu plan – așa se face!"],
+hl_tr_day:["Lieblingstag: {d}","Favorite day: {d}","Favori gün: {d}","Любимый день: {d}","Улюблений день: {d}","Ulubiony dzień: {d}","يومك المفضل: {d}","Ziua preferată: {d}"],
+hl_tr_buys:["{n} Einkäufe","{n} purchases","{n} alışveriş","{n} покупок","{n} покупок","{n} zakupów","{n} عملية شراء","{n} cumpărături"],
+hl_tr_avg:["Ø {n} pro Einkauf","Ø {n} per purchase","Alışveriş başı Ø {n}","Ø {n} за покупку","Ø {n} за покупку","Ø {n} na zakup","المتوسط {n} لكل عملية","Ø {n} pe cumpărătură"],
+hl_badges:["ABZEICHEN VERDIENT","BADGES EARNED","KAZANILAN ROZETLER","ПОЛУЧЕННЫЕ ЗНАЧКИ","ОТРИМАНІ ЗНАЧКИ","ZDOBYTE ODZNAKI","الشارات المكتسبة","INSIGNE CÂȘTIGATE"],
+hl_b_budget:["Budget gehalten","Budget kept","Bütçeye uyuldu","Бюджет соблюдён","Бюджет дотримано","Budżet utrzymany","التزمت بالميزانية","Buget respectat"],
+hl_b_less:["Weniger als im Vormonat","Less than last month","Geçen aydan az","Меньше, чем в прошлом месяце","Менше, ніж минулого місяця","Mniej niż w poprzednim miesiącu","أقل من الشهر الماضي","Mai puțin ca luna trecută"],
+hl_b_saved:["Im Plus geblieben","Stayed in the plus","Artıda kaldın","Остался в плюсе","Залишився в плюсі","Na plusie","بقيت في الموجب","Ai rămas pe plus"],
+hl_b_streak:["{n} Tage eingetragen","{n} days logged","{n} gün kayıt","{n} дней с записями","{n} днів із записами","{n} dni z wpisami","{n} أيام مسجلة","{n} zile înregistrate"],
+hl_b_bons:["{n} Kassenbons fotografiert","{n} receipts snapped","{n} fiş çekildi","{n} чеков сфотографировано","{n} чеків сфотографовано","{n} paragonów zrobionych","{n} إيصالات مصوّرة","{n} bonuri fotografiate"],
+hl_b_fix:["Alle Fixkosten abgehakt","All fixed costs checked","Tüm sabit giderler işaretlendi","Все постоянные расходы отмечены","Усі постійні витрати відмічено","Wszystkie stałe koszty odhaczone","تم تأشير كل التكاليف الثابتة","Toate costurile fixe bifate"],
+hl_b_start:["Dranbleiben zahlt sich aus","Sticking with it pays off","Devam etmek kazandırır","Постоянство окупается","Сталість окупається","Wytrwałość się opłaca","المثابرة تؤتي ثمارها","Perseverența se plătește"],
+hl_b_one:["1 neues Abzeichen!","1 new badge!","1 yeni rozet!","1 новый значок!","1 новий значок!","1 nowa odznaka!","شارة جديدة!","1 insignă nouă!"],
+hl_b_n:["{n} neue Abzeichen!","{n} new badges!","{n} yeni rozet!","{n} новых значка!","{n} нових значки!","{n} nowe odznaki!","{n} شارات جديدة!","{n} insigne noi!"],
+hl_sum:["Zusammengefasst","In a nutshell","Özetle","Коротко","Коротко","W skrócie","باختصار","Pe scurt"],
+hl_c_spent:["Ausgaben","Spending","Harcama","Расходы","Витрати","Wydatki","المصروفات","Cheltuieli"],
+hl_c_vs:["zum {m}","vs {m}","{m} ayına göre","к {m}","до {m}","wobec: {m}","مقارنة بـ {m}","față de {m}"],
+hl_c_top:["Top-Bereich","Top area","En çok","Главная категория","Головна категорія","Główna kategoria","الأعلى","Categoria de top"],
+hl_c_saved:["Übrig","Left over","Artan","Осталось","Залишилося","Zostało","المتبقي","Rămas"],
+hl_c_type:["Geld-Typ","Money type","Para tipi","Денежный тип","Грошовий тип","Typ finansowy","النوع المالي","Tip de bani"],
+hl_c_badges:["Abzeichen","Badges","Rozetler","Значки","Значки","Odznaki","الشارات","Insigne"],
+hl_share:["Teilen","Share","Paylaş","Поделиться","Поділитися","Udostępnij","مشاركة","Distribuie"],
+hl_saved_img:["Bild gespeichert","Image saved","Görsel kaydedildi","Изображение сохранено","Зображення збережено","Obraz zapisany","تم حفظ الصورة","Imagine salvată"],
+hl_m0:["Hallo {a}! Lass uns deinen Monat feiern 🥳","Hi {a}! Let’s celebrate your month 🥳","Merhaba {a}! Ayını kutlayalım 🥳","Привет, {a}! Давай отметим твой месяц 🥳","Привіт, {a}! Відсвяткуймо твій місяць 🥳","Cześć, {a}! Świętujmy twój miesiąc 🥳","مرحبًا يا {a}! لنحتفل بشهرك 🥳","Salut, {a}! Hai să-ți sărbătorim luna 🥳"],
+hl_m1:["Jeder Euro ist erfasst – stark, {a}!","Every euro tracked – great, {a}!","Her euro kayıtlı – harika {a}!","Каждый евро учтён – отлично, {a}!","Кожне євро враховане – чудово, {a}!","Każde euro zapisane – świetnie, {a}!","كل يورو مسجّل – رائع يا {a}!","Fiecare euro înregistrat – super, {a}!"],
+hl_m1_good:["{n} % weniger – ich bin stolz auf dich, {a}! 👏","{n} % less – I’m proud of you, {a}! 👏","%{n} daha az – seninle gurur duyuyorum {a}! 👏","На {n} % меньше – горжусь тобой, {a}! 👏","На {n} % менше – пишаюся тобою, {a}! 👏","{n} % mniej – jestem z ciebie dumna, {a}! 👏","أقل بـ {n} ٪ – أنا فخورة بك يا {a}! 👏","Cu {n} % mai puțin – sunt mândră de tine, {a}! 👏"],
+hl_m2:["Platz 1: {c} 🥇","Number 1: {c} 🥇","1 numara: {c} 🥇","Первое место: {c} 🥇","Перше місце: {c} 🥇","Miejsce 1: {c} 🥇","المركز الأول: {c} 🥇","Locul 1: {c} 🥇"],
+hl_m2_bud:["{c} auf Platz 1 – aber {n} unter Budget 👏","{c} is number 1 – but {n} under budget 👏","{c} 1 numara – ama bütçenin {n} altında 👏","{c} на первом месте – но на {n} ниже бюджета 👏","{c} на першому місці – але на {n} нижче бюджету 👏","{c} na 1. miejscu – ale {n} poniżej budżetu 👏","{c} في المركز الأول – لكن أقل من الميزانية بـ {n} 👏","{c} pe locul 1 – dar cu {n} sub buget 👏"],
+hl_m2_none:["Noch wenig Daten – nächsten Monat wird’s spannender!","Not much data yet – next month gets more exciting!","Henüz az veri var – gelecek ay daha heyecanlı!","Пока мало данных – в следующем месяце будет интереснее!","Поки мало даних – наступного місяця буде цікавіше!","Mało danych – w przyszłym miesiącu będzie ciekawiej!","البيانات قليلة – الشهر القادم سيكون أمتع!","Încă puține date – luna viitoare va fi mai interesant!"],
+hl_m4:["So füllt sich dein Glas – weiter so, {a}! 🐷","That’s how your jar fills up – keep going, {a}! 🐷","Kavanozun böyle doluyor – devam {a}! 🐷","Так наполняется твоя банка – так держать, {a}! 🐷","Так наповнюється твоя банка – так тримати, {a}! 🐷","Tak napełnia się twój słoik – tak trzymaj, {a}! 🐷","هكذا يمتلئ برطمانك – استمر يا {a}! 🐷","Așa se umple borcanul – ține-o tot așa, {a}! 🐷"],
+hl_m4_t:["Kopf hoch, {a} – wir schaffen das zusammen 💚","Chin up, {a} – we’ll manage together 💚","Moralini bozma {a} – birlikte başaracağız 💚","Не вешай нос, {a} – вместе справимся 💚","Не сумуй, {a} – разом впораємося 💚","Głowa do góry, {a} – razem damy radę 💚","ارفع رأسك يا {a} – سننجح معًا 💚","Capul sus, {a} – reușim împreună 💚"],
+hl_m6:["Ich bin so stolz auf dich, {a}! 💚","I’m so proud of you, {a}! 💚","Seninle çok gurur duyuyorum {a}! 💚","Я так горжусь тобой, {a}! 💚","Я так пишаюся тобою, {a}! 💚","Jestem z ciebie taka dumna, {a}! 💚","أنا فخورة بك جدًا يا {a}! 💚","Sunt atât de mândră de tine, {a}! 💚"]
+};
+
+/* ===== Neue Funktionen: Vertrags-Ampel · Vorschau · Sparregeln · Monats-Highlights ===== */
+function nt(k, v){ const a=NT[k]; let s=a ? (a[Math.max(0,ML.indexOf(LANG))]||a[0]) : k; if (v) for (const [x,y] of Object.entries(v)) s=s.split("{"+x+"}").join(y); return s; }
+const RMo=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+const E0=v=>eur0(v), E2=v=>eur(v);
+function fxDate(iso, o){ return new Date(iso+"T12:00").toLocaleDateString(cLoc(), o||{day:"numeric", month:"short"}); }
+function monName(ym, o){ const [y,m]=ymParts(ym); return new Intl.DateTimeFormat(cLoc(), {month:o||"long"}).format(new Date(y,m-1,1)); }
+/* Zählwerk */
+function hbOdo(el, str, dur){ if (!el) return; if (RMo()){ el.textContent=str; el._s=str; return; } const prev=el._s||""; el.classList.add("hbodo");
+  if (prev.length!==str.length || !el.querySelector(".hc")){ el.innerHTML=[...str].map(ch=>/\d/.test(ch)?`<span class="hc"><span class="hs">${"0123456789".split("").map(d=>`<span>${d}</span>`).join("")}</span></span>`:`<span class="hc"><span>${ch===" "||ch===" "?"&nbsp;":esc(ch)}</span></span>`).join(""); }
+  el._s=str; requestAnimationFrame(()=>requestAnimationFrame(()=>{ [...str].forEach((ch,i)=>{ const c=el.children[i], st=c&&c.querySelector(".hs"); if (st){ if (dur) st.style.transitionDuration=dur+"ms"; st.style.transitionDelay=(i*45)+"ms"; st.style.transform=`translateY(${-Number(ch)}em)`; } }); })); }
+function hbConfetti(root, n, y0){ if (RMo()||!root) return; const C=["#ffd36b","#ff9db8","#7fc8ff","#b6f0c9","#ffffff","#c4a5ff"], W=root.clientWidth||360, H=root.clientHeight||800;
+  for (let i=0;i<(n||36);i++){ const c=document.createElement("i"); c.className="hbconf"; c.style.left=(Math.random()*W)+"px"; c.style.top=((y0||-20))+"px"; c.style.background=C[i%C.length]; root.appendChild(c);
+    c.animate([{transform:"translateY(0) rotate(0)"},{transform:`translate(${(Math.random()-.5)*140}px,${H+60}px) rotate(${Math.random()*900}deg)`}],{duration:2000+Math.random()*1500, delay:Math.random()*300, easing:"cubic-bezier(.2,.6,.4,1)", fill:"forwards"}).finished.then(()=>c.remove()).catch(()=>c.remove()); } }
+function hbBurst(root, x, y, n){ if (RMo()||!root) return; for (let i=0;i<(n||22);i++){ const c=document.createElement("i"); c.className="hbconf"; c.style.left="0"; c.style.top="0"; c.style.background=["#ffd36b","#fff","#ff9db8","#7fc8ff"][i%4]; root.appendChild(c); const a=Math.random()*Math.PI*2, d=70+Math.random()*110;
+  c.animate([{transform:`translate(${x}px,${y}px) scale(1)`,opacity:1},{transform:`translate(${x+Math.cos(a)*d}px,${y+Math.sin(a)*d+50}px) rotate(${Math.random()*600}deg) scale(.6)`,opacity:0}],{duration:1000+Math.random()*500,easing:"cubic-bezier(.1,.7,.3,1)",fill:"forwards"}).finished.then(()=>c.remove()).catch(()=>c.remove()); } }
+function hbSheet(id, title){ let bg=$(id); if (!bg){ bg=document.createElement("div"); bg.id=id; bg.className="hobg"; bg.innerHTML=`<div class="hosh" role="dialog" aria-modal="true"><div class="hohd"><b data-noi18n class="hbst"></b><button class="hox" data-hbclose="${id}" aria-label="Schließen">✕</button></div><div class="hobody" data-noi18n></div></div>`; document.body.appendChild(bg); }
+  bg.querySelector(".hbst").textContent=title; bg.hidden=false; bg._lk=!document.body.classList.contains("locked"); document.body.classList.add("locked"); requestAnimationFrame(()=>bg.classList.add("show")); return bg.querySelector(".hobody"); }
+function hbSheetClose(id){ const bg=$(id); if (!bg||bg.hidden) return; bg.classList.remove("show"); if (bg._lk) document.body.classList.remove("locked"); setTimeout(()=>{ bg.hidden=true; }, 220); }
+document.addEventListener("click", e=>{ const c=e.target.closest("[data-hbclose]"); if (c){ hbSheetClose(c.dataset.hbclose); return; } const bg=e.target.classList&&e.target.classList.contains("hobg")&&e.target.id&&["vaBg","fcBg","srBg"].includes(e.target.id)?e.target:null; if (bg) hbSheetClose(bg.id); });
+
+/* ---------- 1A Vertrags-Ampel ---------- */
+function vaEff(a){ if (!a||!a.end) return null; let end=new Date(a.end+"T12:00"), today=new Date(isoToday()+"T12:00"), n=0;
+  const nn=Number(a.notice)||0, dlOf=en=>{ const d=new Date(en); if (nn===0.5){ d.setDate(d.getDate()-14); return d; } const y=d.getFullYear(), m=d.getMonth()-nn, last=new Date(y,m+1,0).getDate(); return new Date(y, m, Math.min(d.getDate(), last), 12); };
+  while (dlOf(end)<today && n<20){ end.setFullYear(end.getFullYear()+1); n++; }
+  return {end:isoOf(end), dl:isoOf(dlOf(end)), rolled:n>0}; }
+function vaStat(f, a){ a=a||{}; if (a.cancelled) return {k:"done"}; const e=vaEff(a);
+  if (!e) return {k: (Number(a.notice)||0)>0 ? "nodate" : "free"};
+  const days=Math.round((new Date(e.dl+"T12:00")-new Date(isoToday()+"T12:00"))/864e5);
+  return {k: days<=30?"red":days<=90?"amb":"grn", days, ...e}; }
+function vaBadge(s){ if (s.k==="red") return nt("va_left",{n:`<span class="vad" data-to="${s.days}">${s.days}</span>`});
+  if (s.k==="amb") return s.days>60 ? nt("va_inm",{n:String(Math.round(s.days/30))}) : nt("va_ind",{n:`<span class="vad" data-to="${s.days}">${s.days}</span>`});
+  return {grn:nt("va_run"), free:nt("va_free"), nodate:nt("va_nodate"), done:nt("va_done")}[s.k]; }
+const VA={open:null, anim:false};
+function renderAbos(){ const el=$("abosEd"); if (!el) return; { const sp=UI.view+"|"+UI.sp; if (VA.sp!==sp){ VA.sp=sp; if (UI.sp==="abos") VA.anim=true; } } if (el.contains(document.activeElement) && /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  el.setAttribute("data-noi18n",""); const A=aboCfg(), ym=ymOf(new Date());
+  const all=S.fixed.filter(f=>!debtFor(f.id) && (fixArea(f)==="Abos & Handy" || A[f.id])).map(f=>({f, a:A[f.id]||{}, s:vaStat(f, A[f.id])}));
+  if (!all.length){ el.innerHTML=`<p class="small muted">${esc(nt("va_empty"))}</p>`; return; }
+  const ord={red:0,amb:1,nodate:2,grn:3,done:4,free:5}; all.sort((x,y)=>(ord[x.s.k]-ord[y.s.k]) || ((x.s.days??9e9)-(y.s.days??9e9)) || String(x.f.name).localeCompare(String(y.f.name)));
+  const con=all.filter(x=>x.s.k!=="free"), ab=all.filter(x=>x.s.k==="free"), reds=con.filter(x=>x.s.k==="red");
+  const row=({f,a,s})=>{ const op=VA.open===f.id, amt=listAmt(f, ym);
+    return `<div class="varow k-${s.k} ${op?"open":""}" data-vaid="${esc(f.id)}"><button type="button" class="vahead" data-vatog="${esc(f.id)}" aria-expanded="${op}">
+      ${vaIcon(f,s)}
+      <span class="van"><b>${esc(T(f.name))}</b><small>${esc(eur(amt))}${s.end?` · ${esc(nt("va_until",{d:fxDate(s.end,{day:"2-digit",month:"2-digit"})}))}`:""}</small></span>
+      <span class="vab b-${s.k}">${vaBadge(s)}</span></button>
+      ${op?vaDetail(f,a,s,amt):""}</div>`; };
+  el.innerHTML=`${reds.length?`<div class="vaalert ${VA.anim?"in":""}"><span class="vabell ${VA.anim?"ring":""}">🔔</span><div><b>${esc(reds.length===1?nt("va_al1"):nt("va_aln",{n:reds.length}))}</b><small>${esc(nt("va_al_s"))}</small></div></div>`:""}
+    ${con.length?`<div class="vak">${esc(nt("va_con"))}</div><div class="vacard">${con.map(row).join("")}</div>`:""}
+    ${ab.length?`<div class="vak">${esc(nt("va_abo"))}</div><div class="vacard">${ab.map(row).join("")}</div>`:""}
+    <p class="small muted" style="margin:10px 4px 0">${esc(nt("va_tip"))}</p>`;
+  if (VA.anim){ VA.anim=false; vaAnimate(el); } }
+function vaIcon(f, s){ const frac=s.days!=null?Math.max(0.04,Math.min(1,s.days/120)):(s.k==="done"?1:0), C=2*Math.PI*21, b=brandFor(f.name), icn=b?brandBadge(b):tile("ausgabe",f.cat||f.name);
+  return `<span class="vaic">${icn}${s.days!=null||s.k==="done"?`<svg class="varing" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" class="bg"/><circle cx="24" cy="24" r="21" class="fg" style="stroke-dasharray:${C.toFixed(1)};stroke-dashoffset:${(C*(1-frac)).toFixed(1)}" data-off="${(C*(1-frac)).toFixed(1)}" data-c="${C.toFixed(1)}"/></svg>`:""}</span>`; }
+function vaAlert(n, anim){ return n?`<div class="vaalert ${anim?"in":""}" data-noi18n><span class="vabell ${anim?"ring":""}">🔔</span><div><b>${esc(n===1?nt("va_al1"):nt("va_aln",{n}))}</b><small>${esc(nt("va_al_s"))}</small></div></div>`:""; }
+function vaDetail(f, a, s, amt){ const pos=s.days!=null?Math.max(.04,Math.min(.96,1-s.days/365)):.5, yr=(f.rhythm||"monatlich")==="monatlich"?amt*12:amt;
+  return `<div class="vadet">${s.dl?`<div class="vatl"><div class="vatl-l"><i style="--w:${(pos*100).toFixed(1)}%"></i></div><div class="vatl-m" style="--x:${(pos*100).toFixed(1)}%"><b>${esc(nt("va_today"))}</b></div><div class="vatl-f"><b>${esc(nt("va_dl",{d:fxDate(s.dl,{day:"2-digit",month:"2-digit"})}))}</b></div></div>
+      <div class="vainfo"><span>${esc(s.days===0?nt("va_lastday"):nt("va_daysleft",{n:s.days}))}</span><span>${esc(nt("va_renew",{n:eur0(yr)}))}</span></div>`:""}
+    <div class="grid2"><div class="field"><label>${esc(nt("va_end"))}</label><input class="in" type="date" data-aboend="${esc(f.id)}" value="${esc(a.end||"")}"></div>
+      <div class="field"><label>${esc(nt("va_notice"))}</label><select class="in" data-abonot="${esc(f.id)}">${[[0,"va_n0"],[0.5,"va_n05"],[1,"va_n1"],[2,"va_n2"],[3,"va_n3"],[6,"va_n6"]].map(([v,l])=>`<option value="${v}" ${Number(a.notice||0)===v?"selected":""}>${esc(nt(l))}</option>`).join("")}</select></div></div>
+    <div class="vabtns">${s.k!=="done"&&a.end?`<button type="button" class="vakb ${s.k==="red"?"hot":""}" data-valetter="${esc(f.id)}">✉️ ${esc(nt("va_write"))}</button>`:""}
+      <button type="button" class="vadone ${s.k==="done"?"on":""}" data-vadone="${esc(f.id)}">${s.k==="done"?"✓ "+esc(nt("va_isdone")):esc(nt("va_mark"))}</button></div></div>`; }
+function vaAnimate(el){ if (RMo()) return; const t0=performance.now(), D=1300;
+  el.querySelectorAll(".varing .fg").forEach(c=>{ const off=Number(c.dataset.off), C=Number(c.dataset.c); c.style.transition="none"; c.style.strokeDashoffset=C*0.02; requestAnimationFrame(()=>requestAnimationFrame(()=>{ c.style.transition="stroke-dashoffset 1.4s cubic-bezier(.3,0,.2,1)"; c.style.strokeDashoffset=off; })); });
+  const ds=[...el.querySelectorAll(".vad")]; ds.forEach(d=>{ d._to=Number(d.dataset.to); d._fr=d._to+15; d.textContent=d._fr; });
+  el.querySelectorAll(".vab.b-red,.vab.b-amb").forEach(b=>{ b.classList.add("cnt"); });
+  const f=t=>{ const k=Math.min(1,(t-t0)/D), e=1-Math.pow(1-k,3); ds.forEach(d=>{ d.textContent=Math.round(d._fr+(d._to-d._fr)*e); }); if (k<1) requestAnimationFrame(f); else el.querySelectorAll(".vab.cnt").forEach(b=>{ b.classList.remove("cnt"); b.classList.add("pop"); }); };
+  requestAnimationFrame(f); }
+function vaLetter(id){ const f=S.fixed.find(x=>x.id===id); if (!f) return; const a=aboCfg()[id]||{}, s=vaStat(f,a), nm=String(S.settings.name||"").trim();
+  const end=s.end?new Date(s.end+"T12:00").toLocaleDateString("de-DE"):"";
+  const txt=`${nm||"[Vorname Nachname]"}\n[Straße Hausnummer]\n[PLZ Ort]\n\nAn: ${f.name}\n\n${new Date().toLocaleDateString("de-DE")}\n\nKündigung meines Vertrags „${f.name}“\nKunden-/Vertragsnummer: [bitte eintragen]\n\nSehr geehrte Damen und Herren,\n\nhiermit kündige ich meinen Vertrag fristgerecht${end?` zum ${end}`:""}, hilfsweise zum nächstmöglichen Zeitpunkt.\n\nBitte bestätigen Sie mir die Kündigung und das genaue Vertragsende schriftlich.\n\nMit freundlichen Grüßen\n${nm||"[Vorname Nachname]"}`;
+  const b=hbSheet("vaBg", "✉️ "+nt("va_lt_t",{x:T(f.name)}));
+  b.innerHTML=`<p class="hosub">${esc(nt("va_lt_de"))}</p><textarea class="in valt" id="vaTxt" rows="16" spellcheck="false">${esc(txt)}</textarea>
+    <div class="vabtns" style="margin-top:12px"><button type="button" class="btn" data-vacopy>${esc(nt("va_copy"))}</button><button type="button" class="btn primary" data-vasend="${esc(id)}">${esc(nt("va_send"))}</button></div>
+    <p class="small muted" style="margin:10px 4px 0">${esc(nt("va_lt_tip"))}</p>`; }
+document.addEventListener("click", async e=>{
+  const tg=e.target.closest("[data-vatog]"); if (tg){ const id=tg.dataset.vatog; VA.open=VA.open===id?null:id; renderAbos(); if (VA.open){ const r=document.querySelector(`.varow[data-vaid="${CSS.escape(id)}"]`); if (r && !RMo()){ const d=r.querySelector(".vadet"); if (d) d.animate([{opacity:0,transform:"translateY(-8px)"},{opacity:1,transform:"none"}],{duration:380,easing:"cubic-bezier(.2,1,.3,1)"}); } } return; }
+  const lt=e.target.closest("[data-valetter]"); if (lt){ vaLetter(lt.dataset.valetter); return; }
+  const dn=e.target.closest("[data-vadone]"); if (dn){ const id=dn.dataset.vadone, A=S.settings.abos={...(S.settings.abos||{})}, a=A[id]={...(A[id]||{})}; if (a.cancelled) delete a.cancelled; else { a.cancelled=isoToday(); setTimeout(()=>{ const r=document.querySelector(`.varow[data-vaid="${CSS.escape(id)}"] .vadone`); if (r){ const bb=r.getBoundingClientRect(); hbBurst(document.body, bb.left+bb.width/2, bb.top, 18); } }, 60); } await saveSettings(); renderAbos(); return; }
+  if (e.target.closest("[data-vacopy]")){ const t=$("vaTxt"); try{ await navigator.clipboard.writeText(t.value); toast(nt("va_copied")); }catch(_){ t.select(); } return; }
+  const sd=e.target.closest("[data-vasend]"); if (sd){ const t=$("vaTxt").value, f=S.fixed.find(x=>x.id===sd.dataset.vasend), subj="Kündigung "+(f?f.name:"");
+    try{ if (navigator.share && !NATIVE){ await navigator.share({title:subj, text:t}); } else { const u=`mailto:?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(t)}`; try{ window.open(u,"_blank"); }catch(_){ location.href=u; } } }catch(err){ if (err&&err.name==="AbortError") return; }
+    hbSheetClose("vaBg"); toast(nt("va_after"), async ()=>{ const A=S.settings.abos={...(S.settings.abos||{})}; A[sd.dataset.vasend]={...(A[sd.dataset.vasend]||{}), cancelled:isoToday()}; await saveSettings(); renderAbos(); }, nt("va_mark"), 9000); return; }
+});
+function aboHints(hints){ const A=aboCfg();
+  for (const f of S.fixed){ const s=vaStat(f, A[f.id]); if (s.k!=="red") continue;
+    hints.push({k:"abo", lvl:"warn", t:`${f.name}: ${nt("va_hint",{d:fxDate(s.dl,{day:"numeric",month:"long"})})}`, s:s.days===0?nt("va_lastday"):nt("va_hint_s",{n:s.days})}); } }
+
+/* ---------- 2B Vorschau / Kontostand-Kurve ---------- */
+function fcMainBal(){ const has=(S.settings.accountAnchors||{})["Hauptkonto"]; if (has){ const b=accountBalance("Hauptkonto", isoToday()); if (b!=null) return b; } return yearCum(ymOf(new Date())).balance; }
+function fcCalc(){ const ym=ymOf(new Date()), dim=daysIn(ym), d0=new Date().getDate(), bal0=fcMainBal(), c=monthCalc(ym), paid=(S.months[ym]&&S.months[ym].paid)||{};
+  const sg=t=>t.kind==="einnahme"||(t.kind==="umbuchung"&&t._k0==="einnahme")?t.amount:(["ausgabe","betrieb","vorauszahlung"].includes(t.kind)?-t.amount:0);
+  const delta=Array(dim+2).fill(0); for (const t of c.tx){ const d=Number(t.date.slice(8,10)); if (d<=d0) delta[d]+=sg(t); }
+  for (const [fid,amt] of Object.entries(paid)){ const f=S.fixed.find(x=>x.id===fid); const d=Math.min(d0, (f&&payDay(f,ym))||1); delta[d]-=Number(amt)||0; }
+  const pts=[]; let b=bal0; const past=[]; for (let d=d0; d>=1; d--){ past[d]=b; b-=delta[d]; }
+  for (let d=1; d<=d0; d++) pts.push({d, v:past[d], f:false});
+  const varT=sum(c.tx.filter(t=>(t.kind==="ausgabe"||t.kind==="betrieb")&&Number(t.date.slice(8,10))<=d0),t=>t.amount);
+  let avg=varT/Math.max(1,d0); if (d0<6){ const p=monthCalc(shiftYm(ym,-1)); avg=Math.max(avg, sum(p.tx.filter(t=>t.kind==="ausgabe"||t.kind==="betrieb"),t=>t.amount)/daysIn(shiftYm(ym,-1))); }
+  const fut=Array(dim+2).fill(0), fixL=[]; for (const f of fixedForMonth(ym,true)){ if (f.id in paid) continue; let d=payDay(f,ym)||d0+1; if (d<=d0) d=Math.min(dim,d0+1); const a=planAmt(f,ym); fut[d]-=a; fixL.push({d,a,n:f.name}); }
+  const inc=[]; const prev=monthCalc(shiftYm(ym,-1)).tx.filter(t=>t.kind==="einnahme"&&t.amount>=50);
+  for (const t of prev){ const got=c.tx.some(x=>x.kind==="einnahme"&&x.cat===t.cat&&Math.abs(x.amount-t.amount)<t.amount*0.3); if (got) continue; let d=Math.min(dim,Number(t.date.slice(8,10))); if (d<=d0) continue; fut[d]+=t.amount; inc.push({d, v:t.amount, n:t.cat||""}); }
+  b=bal0; for (let d=d0+1; d<=dim; d++){ b+=fut[d]-avg; pts.push({d, v:b, f:true}); }
+  const future=pts.filter(p=>p.f); let min=null; for (const p of future) if (!min||p.v<min.v) min=p;
+  const thr=100, warn=!!(min && min.v<thr), end=pts[pts.length-1].v;
+  let allow=null; if (warn){ const before=sum(fixL.filter(x=>x.d<=min.d),x=>x.a), daysTo=Math.max(1,min.d-d0); allow=Math.max(0,(bal0-before-thr)/daysTo); }
+  return {ym, dim, d0, bal0, pts, end, min, inc:inc.sort((a,b)=>b.v-a.v), thr, warn, allow, avg, has:S.tx.length>0}; }
+function fcPath(pts, X, Y){ if (!pts.length) return ""; let s=`M${X(pts[0].d).toFixed(1)} ${Y(pts[0].v).toFixed(1)}`;
+  for (let i=1;i<pts.length;i++){ const p0=pts[Math.max(0,i-2)], p1=pts[i-1], p2=pts[i], p3=pts[Math.min(pts.length-1,i+1)];
+    const c1x=X(p1.d)+(X(p2.d)-X(p0.d))/6, c1y=Y(p1.v)+(Y(p2.v)-Y(p0.v))/6, c2x=X(p2.d)-(X(p3.d)-X(p1.d))/6, c2y=Y(p2.v)-(Y(p3.v)-Y(p1.v))/6;
+    s+=` C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${X(p2.d).toFixed(1)} ${Y(p2.v).toFixed(1)}`; } return s; }
+function fcScale(F, W, H, pad){ const vs=F.pts.map(p=>p.v).concat([F.thr*0.5]); let lo=Math.min(...vs), hi=Math.max(...vs); if (hi-lo<50) hi=lo+50; const r=hi-lo; lo-=r*0.1; hi+=r*0.12; pad=pad||0;
+  return {X:d=>pad+(d-1)/(F.dim-1)*(W-pad*2), Y:v=>H-(v-lo)/(hi-lo)*H, lo, hi}; }
+function fcMini(){ if (!S.tx.length) return ""; const F=fcCalc(); if (!F.pts.length) return ""; const W=120, H=40, {X,Y}=fcScale(F,W,H,2), pa=F.pts.filter(p=>!p.f), fu=F.pts.filter(p=>p.f||p.d===F.d0);
+  return `<button type="button" class="fcmini ${F.warn?"warn":""}" data-fcopen data-noi18n><span class="fct"><small>${esc(nt("fc_end",{d:fxDate(lastDayOf(F.ym))}))}</small><b>${esc(E0(F.end))}</b>${F.warn?`<em>⚠ ${esc(nt("fc_tight",{d:fxDate(F.ym+"-"+pad(F.min.d))}))}</em>`:`<em class="ok">${esc(nt("fc_ok"))}</em>`}</span>
+    <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><path d="${fcPath(pa,X,Y)}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/><path d="${fcPath(fu,X,Y)}" fill="none" stroke="${F.warn?"var(--bad)":"var(--accent)"}" stroke-width="2" stroke-dasharray="2 4" stroke-linecap="round"/>${F.warn?`<circle cx="${X(F.min.d).toFixed(1)}" cy="${Y(F.min.v).toFixed(1)}" r="3.2" fill="var(--bad)"/>`:""}</svg><span class="fcchev">›</span></button>`; }
+const FC={};
+function fcOpen(){ const F=fcCalc(); FC.F=F; const b=hbSheet("fcBg", nt("fc_title")); const W=330, H=190, {X,Y,lo,hi}=fcScale(F,W,H,0);
+  const pa=F.pts.filter(p=>!p.f), fu=F.pts.filter(p=>p.f||p.d===F.d0), thrY=Math.min(H,Math.max(0,Y(F.thr))), today=F.pts.find(p=>p.d===F.d0), x0=X(F.d0);
+  const pc=v=>(v/W*100).toFixed(2)+"%", pv=v=>(v/H*100).toFixed(2)+"%", I=F.inc[0];
+  b.innerHTML=`<div class="fccard"><small>${esc(nt("fc_end",{d:fxDate(lastDayOf(F.ym),{day:"numeric",month:"long"})}))}</small><div class="fcbig"><span id="fcN">${esc(E0(F.end))}</span></div>
+    <div class="fcwrap" id="fcW"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="fcsvg">
+      <defs><linearGradient id="fcga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".28"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient>
+      <linearGradient id="fcgz" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="var(--bad)" stop-opacity=".35"/><stop offset="1" stop-color="var(--bad)" stop-opacity=".08"/></linearGradient>
+      <clipPath id="fcca"><rect id="fcCA" x="0" y="0" width="${RMo()?x0+2:0}" height="${H}"/></clipPath><clipPath id="fccf"><rect id="fcCF" x="${x0}" y="0" width="${RMo()?W:0}" height="${H}"/></clipPath></defs>
+      ${F.warn||F.min&&F.min.v<F.thr*3?`<rect id="fcZ" x="0" y="${RMo()?thrY:H}" width="${W}" height="${RMo()?H-thrY:0}" fill="url(#fcgz)"/>`:""}
+      <g clip-path="url(#fcca)"><path d="${fcPath(pa,X,Y)} L${X(F.d0)} ${H} L0 ${H}Z" fill="url(#fcga)"/><path id="fcP" d="${fcPath(pa,X,Y)}" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" vector-effect="non-scaling-stroke"/></g>
+      <g clip-path="url(#fccf)"><path id="fcF" d="${fcPath(fu,X,Y)}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round" vector-effect="non-scaling-stroke"/></g>
+      <line x1="${x0}" x2="${x0}" y1="0" y2="${H}" class="fctl" vector-effect="non-scaling-stroke"/></svg>
+      ${F.warn||F.min&&F.min.v<F.thr*3?`<span class="fczl" style="top:${pv(thrY)}">${esc(nt("fc_under",{n:E0(F.thr)}))}</span>`:""}
+      <span class="fchead" id="fcH" style="left:0;top:${pv(Y(F.pts[0].v))}"></span>
+      <span class="fcchip dk" id="fcT" style="left:${pc(x0)};top:0">${esc(nt("fc_today"))}</span>
+      ${I?`<span class="fcchip gn" id="fcI" style="left:${pc(X(I.d))};top:${pv(Math.max(18,Y(Math.max(...F.pts.filter(p=>p.d>=I.d).map(p=>p.v)))))}">💼 +${esc(E0(I.v))}</span>`:""}
+      ${F.warn?`<span class="fcmin" id="fcM" style="left:${pc(X(F.min.d))};top:${pv(Y(F.min.v))}"><i></i></span>`:""}
+      <div class="fcscr" id="fcS"><span class="fctip" id="fcTip"></span></div></div>
+    <div class="fcax"><span>${esc(fxDate(F.ym+"-01"))}</span><span>${esc(nt("fc_today"))}</span><span>${esc(fxDate(lastDayOf(F.ym)))}</span></div>
+    <p class="fchint">👆 ${esc(nt("fc_scrub"))}</p></div>
+    ${F.warn?`<div class="fcwarn" id="fcWarn"><b>⚠ ${esc(nt("fc_tight",{d:fxDate(F.ym+"-"+pad(F.min.d),{day:"numeric",month:"long"})}))}</b><span>${esc(nt("fc_tight_s",{n:E0(Math.max(0,F.min.v))}))}</span></div>`:`<div class="fcgood" id="fcWarn"><b>✓ ${esc(nt("fc_good"))}</b><span>${esc(nt("fc_good_s",{n:E0(F.end)}))}</span></div>`}
+    <div class="fcmami" id="fcMa">${mAv?mAv(null):"👩"}<div class="bub"><span id="fcMt"></span></div></div>
+    <div class="fcrows"><div class="vak">${esc(nt("fc_next"))}</div>${fcNextRows(F)}</div>
+    <p class="small muted" style="margin:10px 4px 0">${esc(nt("fc_how",{n:E0(F.avg)}))}</p>`;
+  fcAnim(F, X, Y, W, H); fcScrub(F, X, Y, W); }
+function fcNextRows(F){ const ym=F.ym, paid=(S.months[ym]&&S.months[ym].paid)||{}, L=[];
+  for (const f of fixedForMonth(ym,true)){ if (f.id in paid) continue; let d=payDay(f,ym)||F.d0+1; if (d<=F.d0) d=Math.min(F.dim,F.d0+1); L.push({d, n:T(f.name), v:-planAmt(f,ym)}); }
+  for (const i of F.inc) L.push({d:i.d, n:T(i.n||"Einnahme"), v:i.v}); L.sort((a,b)=>a.d-b.d);
+  if (!L.length) return `<p class="small muted">${esc(nt("fc_none"))}</p>`;
+  return `<div class="vacard">${L.slice(0,8).map(x=>`<div class="fcr"><span class="fcd">${esc(fxDate(ym+"-"+pad(x.d),{day:"numeric",month:"short"}))}</span><span class="grow">${esc(x.n)}</span><b class="${x.v<0?"neg":"pos"}">${x.v<0?"−":"+"}${esc(eur(Math.abs(x.v)))}</b></div>`).join("")}</div>`; }
+async function fcAnim(F, X, Y, W, H){ const tok=FC.tok=(FC.tok||0)+1, live=()=>FC.tok===tok && !$("fcBg").hidden, w=ms=>new Promise(r=>setTimeout(r,ms));
+  const tip=F.warn ? ((F.allow||0)<5 ? nt("fc_mami_w0") : nt("fc_mami_w",{n:E0(F.allow||0),d:fxDate(F.ym+"-"+pad(F.min.d),{day:"numeric",month:"long"})})) : nt("fc_mami_ok",{n:E0(F.end)});
+  if (RMo()){ $("fcMt").textContent=mFill(tip); ["fcT","fcI","fcM","fcWarn","fcMa"].forEach(i=>{ const e=$(i); if (e) e.classList.add("on"); }); return; }
+  hbOdo($("fcN"), E0(F.pts.find(p=>p.d===F.d0).v)); await w(350);
+  const P=$("fcP"), H0=$("fcH"), pa=F.pts.filter(p=>!p.f), fu=F.pts.filter(p=>p.f||p.d===F.d0), x0=X(F.d0);
+  const along=(arr,k)=>{ const tx=X(arr[0].d)+(X(arr[arr.length-1].d)-X(arr[0].d))*k; let i=1; while (i<arr.length-1 && X(arr[i].d)<tx) i++; const a=arr[i-1], b=arr[i]||a, q=b===a?0:(tx-X(a.d))/(X(b.d)-X(a.d)); return [tx, Y(a.v+(b.v-a.v)*q)]; };
+  const run=(ms,f)=>new Promise(r=>{ const t0=performance.now(), g=t=>{ if (!live()) return r(); const k=Math.min(1,(t-t0)/ms); f(k); if (k<1) requestAnimationFrame(g); else r(); }; requestAnimationFrame(g); });
+  H0.classList.add("on");
+  await run(1100,k=>{ const e=1-Math.pow(1-k,3), [x,y]=along(pa.length>1?pa:[pa[0],pa[0]],e); $("fcCA").setAttribute("width", x+2); H0.style.left=(x/W*100)+"%"; H0.style.top=(y/H*100)+"%"; });
+  if (!live()) return; $("fcT").classList.add("on"); await w(300); hbOdo($("fcN"), E0(F.end));
+  await run(1500,k=>{ const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2, [x,y]=along(fu.length>1?fu:[fu[0],fu[0]],e); $("fcCF").setAttribute("width", Math.max(0,x-x0+2)); H0.style.left=(x/W*100)+"%"; H0.style.top=(y/H*100)+"%"; });
+  if (!live()) return; H0.classList.remove("on");
+  const Z=$("fcZ"); if (Z){ const thrY=Math.min(H,Math.max(0,Y(F.thr))); await run(650,k=>{ const e=1-Math.pow(1-k,3); Z.setAttribute("y", H-(H-thrY)*e); Z.setAttribute("height",(H-thrY)*e); }); }
+  if ($("fcM")) $("fcM").classList.add("on"); await w(F.warn?650:100); if ($("fcI")) $("fcI").classList.add("on"); await w(400);
+  const wn=$("fcWarn"); if (wn){ wn.classList.add("on"); if (F.warn){ await w(450); wn.classList.add("shake"); } } await w(500); if (!live()) return;
+  $("fcMa").classList.add("on"); await w(350); const mt=$("fcMt"), s=mFill(tip); mt.classList.add("typ"); for (const ch of s){ if (!live()) return; mt.textContent+=ch; await w(18); } mt.classList.remove("typ"); }
+function fcScrub(F, X, Y, W){ const wr=$("fcW"), sc=$("fcS"), tp=$("fcTip"); if (!wr) return;
+  const show=cx=>{ const r=wr.getBoundingClientRect(), k=Math.max(0,Math.min(1,(cx-r.left)/r.width)), d=Math.max(1,Math.min(F.dim,Math.round(1+k*(F.dim-1)))), p=F.pts.find(x=>x.d===d)||F.pts[F.pts.length-1];
+    sc.style.left=(X(d)/W*100)+"%"; sc.classList.add("on"); tp.textContent=`${E0(p.v)} · ${fxDate(F.ym+"-"+pad(d))}`; tp.className="fctip"+(p.v<F.thr?" bad":p.f?"":" past"); };
+  wr.addEventListener("pointerdown", e=>{ wr.setPointerCapture(e.pointerId); show(e.clientX); }); wr.addEventListener("pointermove", e=>{ if (e.buttons||e.pointerType==="mouse") show(e.clientX); });
+  wr.addEventListener("pointerleave", ()=>sc.classList.remove("on")); wr.addEventListener("pointerup", e=>{ if (e.pointerType!=="mouse") setTimeout(()=>sc.classList.remove("on"),1200); }); }
+document.addEventListener("click", e=>{ if (e.target.closest("[data-fcopen]")){ e.preventDefault(); fcOpen(); } });
+
+/* ---------- 3A Sparregeln ---------- */
+const SR_DEF=[["round","🪙"],["rest","📅"],["pay","💼"],["skip","🚫"]];
+function srCfg(){ return S.settings.srules||{}; }
+function srGoals(){ return (S.settings.goals||[]).filter(g=>!g.account); }
+function srAmt(k, r, onlyYm){ r=r||{}; if (!r.on||!r.from) return 0; const from=r.from, inYm=d=>!onlyYm||d.startsWith(onlyYm);
+  if (k==="round") return sum(S.tx.filter(t=>t.kind==="ausgabe"&&t.date>=from&&inYm(t.date)&&!isWithdrawCat(t.cat)),t=>{ const a=Math.round(t.amount*100), u=Math.ceil(a/100)*100; return (u-a)/100; });
+  if (k==="pay") return sum(S.tx.filter(t=>t.kind==="einnahme"&&t.date>=from&&inYm(t.date)&&incArt(t.cat)!=="sonstige"),t=>t.amount*(Number(r.pct)||5)/100);
+  if (k==="skip") return sum((r.log||[]).filter(x=>x.d>=from&&inYm(x.d)),x=>Number(x.v)||0);
+  if (k==="rest"){ const cur=ymOf(new Date()); let s=0; for (let ym=shiftYm(from.slice(0,7),1); ym<cur; ym=shiftYm(ym,1)){ if (onlyYm&&ym!==onlyYm) continue; const n=monthCalc(ym).net; if (n>0) s+=n*(Number(r.pct)||100)/100; } return s; }
+  return 0; }
+function srTotal(){ const C=srCfg(); return sum(SR_DEF,([k])=>srAmt(k,C[k])); }
+function srForGoal(gid){ const C=srCfg(), G=srGoals(); return sum(SR_DEF,([k])=>{ const r=C[k]; if (!r||!r.on) return 0; const g=r.goal||(G[0]&&G[0].id); return g===gid?srAmt(k,r):0; }); }
+function srGain(k, r){ const ym=ymOf(new Date());
+  if (k==="rest"){ const p=shiftYm(ym,-1), v=srAmt("rest",r,p); return v>0?nt("sr_g_last",{n:E2(v)}):nt("sr_g_rest"); }
+  const v=srAmt(k,r,ym); return v>0?nt("sr_g_month",{n:E2(v)}):nt("sr_g_wait"); }
+function srOpen(){ const b=hbSheet("srBg", nt("sr_title")); srRender(true); }
+function srRender(first){ const bg=$("srBg"); if (!bg||bg.hidden) return; const b=bg.querySelector(".hobody"), C=srCfg(), G=srGoals(), tot=srTotal();
+  b.innerHTML=`<div class="srhero ${first?"":"still"}" id="srH"><small>${esc(nt("sr_saved"))}</small><div class="srbig"><span id="srN">${esc(E2(first&&!RMo()?0:tot))}</span></div><span>${esc(nt("sr_hero_s"))}</span><i class="srsh"></i></div>
+    ${G.length?"":`<div class="notice info"><span>${esc(nt("sr_nogoal"))}</span><button class="btn primary" data-go="ziele" data-hbclose="srBg">${esc(nt("sr_goal_btn"))}</button></div>`}
+    ${SR_DEF.map(([k,icn])=>{ const r=C[k]||{}, on=!!r.on, gid=r.goal||(G[0]&&G[0].id)||"";
+      return `<div class="srcard ${on?"act":""}" data-srk="${k}"><div class="srrow"><span class="ic">${icn}</span><span class="grow"><b>${esc(nt("sr_"+k))}</b><small>${esc(nt("sr_"+k+"_s",{n:k==="pay"?String(r.pct||5):k==="skip"?E2(Number(r.amt)||3):""}))}</small></span>
+        <button type="button" class="srtog ${on?"on":""}" role="switch" aria-checked="${on}" data-srtog="${k}" aria-label="${esc(nt("sr_"+k))}"></button></div>
+        <div class="srmore ${on?"on":""}"><div class="srgain">✓ ${esc(srGain(k,r))}</div>
+          ${G.length>1?`<label class="srsel"><span>→</span><select class="in" data-srgoal="${k}">${G.map(g=>`<option value="${esc(g.id)}" ${g.id===gid?"selected":""}>${esc(g.name)}</option>`).join("")}</select></label>`:G.length?`<div class="srsel"><span>→ ${esc(G[0].name)}</span></div>`:""}
+          ${k==="pay"?`<div class="srseg">${[3,5,10].map(p=>`<button type="button" class="${(r.pct||5)===p?"on":""}" data-srpct="${p}">${p} %</button>`).join("")}</div>`:""}
+          ${k==="skip"?`<button type="button" class="srskip" data-srskip>🙅 ${esc(nt("sr_skip_btn",{n:E2(Number(r.amt)||3)}))}</button>`:""}</div></div>`; }).join("")}
+    <p class="small muted" style="margin:10px 4px 0">${esc(nt("sr_how"))}</p>`;
+  if (first && !RMo()){ b.querySelectorAll(".srcard").forEach((c,i)=>c.animate([{opacity:0,transform:"translateY(16px)",filter:"blur(6px)"},{opacity:1,transform:"none",filter:"none"}],{duration:600,delay:120+i*90,easing:"cubic-bezier(.2,1.2,.35,1)",fill:"backwards"})); setTimeout(()=>hbOdo($("srN"), E2(tot), 1400), 300); } }
+async function srSet(k, patch){ const C=S.settings.srules={...(S.settings.srules||{})}; C[k]={...(C[k]||{}), ...patch}; await saveSettings(); }
+document.addEventListener("click", async e=>{
+  if (e.target.closest("[data-sropen]")){ e.preventDefault(); srOpen(); return; }
+  const tg=e.target.closest("[data-srtog]"); if (tg){ const k=tg.dataset.srtog, r=srCfg()[k]||{}, on=!r.on; tg.classList.toggle("on",on);
+    const card=tg.closest(".srcard"); card.classList.toggle("act",on); card.querySelector(".srmore").classList.toggle("on",on);
+    if (on && !RMo()){ const bb=tg.getBoundingClientRect(); hbBurst(document.body, bb.left+bb.width/2, bb.top+bb.height/2, 14); }
+    await srSet(k, on?{on:true, from:r.from||isoToday(), goal:r.goal||(srGoals()[0]&&srGoals()[0].id)||""}:{on:false});
+    setTimeout(()=>{ srRender(); hbOdo($("srN"), E2(srTotal())); }, 420); return; }
+  const pc=e.target.closest("[data-srpct]"); if (pc){ await srSet("pay",{pct:Number(pc.dataset.srpct)}); srRender(); return; }
+  if (e.target.closest("[data-srskip]")){ const r=srCfg().skip||{}, v=Number(r.amt)||3; await srSet("skip",{log:[...(r.log||[]),{d:isoToday(),v}]}); const btn=e.target.closest("[data-srskip]"); srCoin(btn, $("srH"), ()=>{ hbOdo($("srN"), E2(srTotal())); const h=$("srH"); if (h){ h.classList.remove("glow"); void h.offsetWidth; h.classList.add("glow"); } }); setTimeout(()=>srRender(),1300); return; }
+});
+document.addEventListener("change", async e=>{ const g=e.target.dataset&&e.target.dataset.srgoal; if (g){ await srSet(g,{goal:e.target.value}); srRender(); } });
+function srCoin(from, to, done, label){ if (!from||!to||RMo()){ if (done) done(); return; } const a=from.getBoundingClientRect(), b=to.getBoundingClientRect(), x0=a.left+a.width/2, y0=a.top+a.height/2, x1=b.left+b.width/2, y1=b.top+b.height/2;
+  const c=document.createElement("div"); c.className="hbcoin"; c.textContent="€"; document.body.appendChild(c); const cx=(x0+x1)/2+40, cy=Math.min(y0,y1)-140, K=[];
+  for (let i=0;i<=28;i++){ const t=i/28, u=1-t; K.push({offset:t, transform:`translate(${u*u*x0+2*u*t*cx+t*t*x1}px,${u*u*y0+2*u*t*cy+t*t*y1}px) rotateY(${t*720}deg) scale(${1+.35*Math.sin(Math.PI*t)})`}); }
+  c.animate(K,{duration:950,easing:"cubic-bezier(.5,0,.3,1)"}).finished.then(()=>{ c.remove(); hbBurst(document.body, x1, y1, 10); if (done) done(); }).catch(()=>c.remove()); }
+function srAfterSave(doc){ const r=srCfg().round; if (!r||!r.on||doc.kind!=="ausgabe"||isWithdrawCat(doc.cat)) return; const a=Math.round(doc.amount*100), u=Math.ceil(a/100)*100, d=(u-a)/100; if (d<=0) return;
+  let p=$("srPill"); if (!p){ p=document.createElement("div"); p.id="srPill"; p.setAttribute("data-noi18n",""); document.body.appendChild(p); }
+  p.innerHTML=`<span class="sri">🪙</span><span class="grow"><b>${esc(nt("sr_pill"))}</b><span class="sra" id="srPA">${esc(E2(doc.amount))}</span></span><span class="srp" id="srPP">+${esc(E2(d))}</span>`;
+  p.className=""; void p.offsetWidth; p.classList.add("on");
+  setTimeout(()=>hbOdo($("srPA"), E2(u/100)), 700); setTimeout(()=>{ $("srPP").classList.add("on"); }, 1500);
+  setTimeout(()=>{ const tab=document.querySelector('.tabs .tab[data-go="zukunft"]'); srCoin($("srPP"), tab||document.body, ()=>{ if (tab){ tab.classList.remove("srbump"); void tab.offsetWidth; tab.classList.add("srbump"); } }); }, 2000);
+  setTimeout(()=>p.classList.remove("on"), 3300); }
+
+/* ---------- 4A Monats-Highlights ---------- */
+const HL_EMO=[[/lebensm|essen|super|rewe|aldi|lidl|edeka|food|grocer/i,"🛒"],[/wohn|miete|haus|pflicht|nebenk|strom|rent/i,"🏠"],[/spaß|freizeit|fun|kino|hobby|urlaub|reise/i,"🎉"],[/tank|park|auto|kfz|bahn|ticket|fahr/i,"⛽"],[/restaurant|café|cafe|bäcker|liefer|imbiss/i,"🍕"],[/kleid|mode|shopping|kauf/i,"🛍️"],[/gesund|apothe|arzt|drog/i,"💊"],[/kind|baby|schule/i,"🧸"],[/abo|handy|internet|netflix|spotify|stream/i,"📱"],[/büro|material|betrieb/i,"💼"],[/versich/i,"🛡️"]];
+function hlEmo(c){ for (const [re,e] of HL_EMO) if (re.test(c||"")) return e; return "💸"; }
+function hlData(ym){ const c=monthCalc(ym), pc=monthCalc(shiftYm(ym,-1)), dim=daysIn(ym), out=c.tx.filter(t=>t.kind==="ausgabe"||t.kind==="betrieb"), paid=(S.months[ym]&&S.months[ym].paid)||{};
+  const by={}; for (const t of out) by[t.cat||"Sonstiges"]=(by[t.cat||"Sonstiges"]||0)+t.amount;
+  for (const [fid,a] of Object.entries(paid)){ const f=S.fixed.find(x=>x.id===fid); const k=(f&&(fixArea(f)||f.cat))||"Fixkosten"; by[k]=(by[k]||0)+(Number(a)||0); }
+  const top=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>({k,v,e:hlEmo(k)}));
+  const days=Array(dim+1).fill(0); for (const t of out) days[Number(t.date.slice(8,10))]+=t.amount;
+  let hot=1, calm=1; for (let d=1; d<=dim; d++){ if (days[d]>days[hot]) hot=d; if (days[d]<days[calm]) calm=d; }
+  const delta=pc.expenses>0?Math.round((c.expenses/pc.expenses-1)*100):null, net=c.income-c.expenses, rate=c.income>0?net/c.income:0;
+  const n=out.length, avgBuy=n?sum(out,t=>t.amount)/n:0, wkend=sum(out.filter(t=>[0,6].includes(new Date(t.date+"T12:00").getDay())),t=>t.amount), wd={};
+  for (const t of out){ const k=new Date(t.date+"T12:00").getDay(); wd[k]=(wd[k]||0)+1; } const busy=Object.entries(wd).sort((a,b)=>b[1]-a[1])[0];
+  let type="pro"; if (rate>=0.2) type="owl"; else if (delta!=null&&delta<=-10) type="fox"; else if (n>=40&&avgBuy<15) type="squirrel"; else if (wkend>sum(out,t=>t.amount)*0.45) type="party"; else if (top[0]&&/lebensm|essen|restaurant|café|bäcker/i.test(top[0].k)) type="foodie";
+  const traits=[]; if (busy) traits.push(nt("hl_tr_day",{d:new Intl.DateTimeFormat(cLoc(),{weekday:"long"}).format(new Date(2024,0,7+Number(busy[0])))}));
+  traits.push(nt("hl_tr_buys",{n:String(n)})); if (avgBuy) traits.push(nt("hl_tr_avg",{n:E0(avgBuy)}));
+  const bud=S.settings.budgets||{}, budOk=Object.entries(bud).filter(([,v])=>+v>0), budHeld=budOk.length&&budOk.every(([k,v])=>(by[k]||0)<=+v);
+  const tDays=new Set(c.tx.map(t=>t.date)).size, rc=c.tx.filter(t=>hasReceipt(t.id)).length, badges=[];
+  if (budHeld) badges.push(["🏆","hl_b_budget","gold"]); if (delta!=null&&delta<0) badges.push(["📉","hl_b_less","silver"]); if (net>0) badges.push(["🐷","hl_b_saved","gold"]);
+  if (tDays>=12) badges.push(["🔥","hl_b_streak","silver",{n:String(tDays)}]); if (rc>=5) badges.push(["📸","hl_b_bons","bronze",{n:String(rc)}]); if (c.fixOpen<=0.01&&fixedForMonth(ym,true).length) badges.push(["✅","hl_b_fix","bronze"]);
+  if (!badges.length) badges.push(["🌱","hl_b_start","bronze"]);
+  const goal=(S.settings.goals||[])[0], gp=goal&&Number(goal.target)>0?Math.min(1,goalSaved(goal).v/Number(goal.target)):null;
+  return {ym, c, pc, top, days, dim, hot, calm, delta, net, rate, type, traits, badges:badges.slice(0,3), goal, gp, n}; }
+function hlShould(){ const cur=ymOf(new Date()), p=shiftYm(cur,-1); const n=S.tx.filter(t=>(t.date||"").startsWith(p)).length; return n>=5?p:null; }
+function hlCard(){ const p=hlShould(); if (!p) return ""; const seen=S.settings.hlSeen===p;
+  return `<button type="button" class="hlcard ${seen?"seen":""}" data-hlopen="${p}" data-noi18n><span class="hlsp">✨</span><span class="grow"><b>${esc(nt(seen?"hl_card_again":"hl_card",{m:monName(p)}))}</b>${seen?"":`<small>${esc(nt("hl_card_s"))}</small>`}</span><span class="hlgo">›</span></button>`; }
+const HL={i:0, t:0, paused:false};
+const HL_MESH=[["#1fae7a","#0b4a37","#4cc9a0"],["#3d63a8","#1a2f5c","#7f9cf5"],["#e8a200","#9a3d00","#ffcf5c"],["#d0457f","#3a1053","#ff8fb1"],["#1d9a6c","#0b3b4a","#5ee0b0"],["#ff8a3d","#7a2a00","#ffd29a"],["#7a3b8f","#2e1440","#d06bd4"],["#147a5b","#0b2f40","#3d63a8"]];
+const HL_DUR=[5200,6500,6800,6800,6500,7200,6800,0];
+function hlOpen(ym){ const D=hlData(ym); HL.D=D; HL.i=0; HL.paused=false; if (S.settings.hlSeen!==ym){ S.settings.hlSeen=ym; saveSettings(); }
+  let o=$("hlBg"); if (o) o.remove(); o=document.createElement("div"); o.id="hlBg"; o.setAttribute("data-noi18n",""); o.setAttribute("role","dialog"); o.setAttribute("aria-modal","true"); o.setAttribute("aria-label",nt("hl_title",{m:monName(ym)}));
+  const M=monName(ym).toUpperCase(), c=D.c, T3=D.top, prevM=monName(shiftYm(ym,-1)), first=new Date(ym+"-01T12:00").getDay(), off=(first+6)%7, mx=Math.max(1,...D.days);
+  const TY={owl:["🦉","hl_t_owl"],fox:["🦊","hl_t_fox"],squirrel:["🐿️","hl_t_sq"],party:["🎉","hl_t_party"],foodie:["🍝","hl_t_food"],pro:["🧭","hl_t_pro"]}[D.type];
+  const podH=[150,210,110], podOrder=[1,0,2], podC=[["#ffe08a","#e8a200"],["#7fc8ff","#3d7fd0"],["#ffb3c8","#e0577f"]];
+  o.innerHTML=`<div class="hlph"><div class="hlmesh" id="hlMesh"><i></i><i></i><i></i></div><div class="hlgrain"></div><div class="hlparts">${[...Array(22)].map(()=>`<i style="left:${(Math.random()*100).toFixed(1)}%;animation-duration:${(8+Math.random()*10).toFixed(1)}s;animation-delay:${(-Math.random()*10).toFixed(1)}s;width:${(2+Math.random()*3).toFixed(1)}px;height:${(2+Math.random()*3).toFixed(1)}px"></i>`).join("")}</div>
+   <div class="hlbars">${HL_DUR.map(()=>"<i><u></u></i>").join("")}</div>
+   <div class="hlhead"><b>M</b><span>${esc(nt("hl_title",{m:monName(ym)}))}</span><button type="button" class="hlx" data-hlclose aria-label="${esc(nt("hl_close"))}">✕</button></div>
+   <div class="hlsl" data-i="0"><div class="hlk hlw">${esc(nt("hl_your"))}</div><div class="hllet">${[...M].map(ch=>`<span>${esc(ch)}</span>`).join("")}</div><div class="hlh2"><span class="hlw">${esc(nt("hl_ready"))}</span> <span class="hlw">👀</span></div></div>
+   <div class="hlsl c" data-i="1"><div class="hlk hlw">${esc(nt("hl_spent",{m:M}))}</div><svg class="hlring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="bg"/><circle cx="50" cy="50" r="44" class="fg" id="hlRing"/></svg>
+     <div class="hlbig" style="margin-top:150px"><span id="hlN1">0 €</span></div>${c.income>0?`<div class="hlw hlsub">${esc(nt("hl_of",{n:E0(c.income)}))}</div>`:""}
+     ${D.delta!=null?`<div style="margin-top:140px"><span class="hlstamp ${D.delta>0?"up":""}" id="hlSt">${esc(nt(D.delta>0?"hl_more":"hl_less",{n:String(Math.abs(D.delta)),m:prevM}))}</span></div>`:""}</div>
+   <div class="hlsl" data-i="2"><div class="hlk hlw">${esc(nt("hl_pod"))}</div><div class="hlh2 hlw">${esc(nt("hl_pod_s"))}</div>
+     <div class="hlpod">${podOrder.map(j=>{ const x=T3[j]; if (!x) return `<div></div>`; return `<div><span class="em">${x.e}</span><div class="bl" style="background:linear-gradient(${podC[j][0]},${podC[j][1]})" data-h="${podH[j]}">${j+1}<small>${esc(E0(x.v))}</small></div><span class="nm">${esc(T(x.k))}</span></div>`; }).join("")}</div></div>
+   <div class="hlsl" data-i="3"><div class="hlk hlw">${esc(nt("hl_heat"))}</div><div class="hlh2 hlw">${esc(nt("hl_heat_s"))}</div>
+     <div class="hlhm">${[...Array(7).keys()].map(i=>`<b>${esc(new Intl.DateTimeFormat(cLoc(),{weekday:"narrow"}).format(new Date(2024,0,1+i)))}</b>`).join("")}${"<i class='x'></i>".repeat(off)}${[...Array(D.dim).keys()].map(i=>{ const d=i+1, v=D.days[d]/mx; return `<i data-d="${d}" style="--v:${v.toFixed(3)}" class="${d===D.hot?"hot":""}">${d}</i>`; }).join("")}</div>
+     <div class="hlcall" id="hlCall">${esc(new Intl.DateTimeFormat(cLoc(),{weekday:"short",day:"numeric"}).format(new Date(ym+"-"+pad(D.hot)+"T12:00")))} · ${esc(E0(D.days[D.hot]))}</div>
+     <div class="hlw hlsub" style="margin-top:16px">${esc(nt("hl_calm",{d:new Intl.DateTimeFormat(cLoc(),{weekday:"short",day:"numeric"}).format(new Date(ym+"-"+pad(D.calm)+"T12:00")),n:E0(D.days[D.calm])}))}</div></div>
+   <div class="hlsl c" data-i="4"><div class="hlk hlw">${esc(nt(D.net>0?"hl_saved":"hl_tight"))}</div><div class="hlbig"><span id="hlN4">0 €</span></div>
+     <div class="hljar"><svg viewBox="0 0 200 250"><defs><clipPath id="hlJc"><path d="M50 30h100v18c22 10 30 30 30 52v120a24 24 0 0 1-24 24H44a24 24 0 0 1-24-24V100c0-22 8-42 30-52z"/></clipPath></defs><path d="M50 30h100v18c22 10 30 30 30 52v120a24 24 0 0 1-24 24H44a24 24 0 0 1-24-24V100c0-22 8-42 30-52z" fill="rgba(255,255,255,.12)" stroke="#fff" stroke-width="5"/>
+       <g clip-path="url(#hlJc)"><g id="hlWv" style="transform:translateY(250px);transition:transform 2.2s cubic-bezier(.3,1,.3,1)"><path class="w1" d="M-200 10 q25 -12 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 V300 H-200z" fill="#3cc28d"/><path class="w2" d="M-200 18 q25 -10 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 V300 H-200z" fill="#1d9a6c"/></g></g><rect x="44" y="16" width="112" height="20" rx="7" fill="#fff"/></svg></div>
+     <div class="hlw hlsub">${D.net>0&&c.income>0?esc(nt("hl_rate",{n:String(Math.round(D.rate*100))})):esc(nt("hl_tight_s"))}</div>${D.goal&&D.gp!=null?`<div class="hlw hlsub" style="opacity:1;font-weight:800">🎯 ${esc(nt("hl_goal",{g:D.goal.name,n:String(Math.round(D.gp*100))}))}</div>`:""}</div>
+   <div class="hlsl c" data-i="5"><div class="hlk hlw">${esc(nt("hl_type"))}</div><div class="hlflip" id="hlFl"><div class="fr">?</div><div class="bk"><div style="font-size:78px">${TY[0]}</div><div class="hlh2" style="margin:2px 0 6px">${esc(nt(TY[1]))}</div><p>${esc(nt(TY[1]+"_s"))}</p><div>${D.traits.map(t=>`<span class="tr">${esc(t)}</span>`).join("")}</div></div></div></div>
+   <div class="hlsl c" data-i="6"><div class="hlrays"></div><div class="hlk hlw" style="position:relative">${esc(nt("hl_badges"))}</div><div class="hlmed">${D.badges.map(([e,k,m,v])=>`<div class="md ${m}"><div class="rb"></div><div class="co">${e}</div><b>${esc(nt(k,v))}</b></div>`).join("")}</div>
+     <div class="hlh2 hlw" style="margin-top:22px;position:relative">${esc(nt(D.badges.length===1?"hl_b_one":"hl_b_n",{n:String(D.badges.length)}))} 🎉</div></div>
+   <div class="hlsl" data-i="7"><div class="hlk hlw">${esc(nt("hl_your"))} ${esc(M)}</div><div class="hlh2 hlw">${esc(nt("hl_sum"))}</div>
+     <div class="hlcoll"><div class="t a"><small>${esc(nt("hl_c_spent"))}</small><b>${D.delta!=null?(D.delta>0?"+":"−")+Math.abs(D.delta)+" %":esc(E0(c.expenses))}</b><small>${D.delta!=null?esc(nt("hl_c_vs",{m:prevM})):""}</small></div>
+      <div class="t b"><small>${esc(nt("hl_c_top"))}</small><div style="font-size:44px;margin:8px 0">${T3[0]?T3[0].e:"💸"}</div><b>${esc(T3[0]?T(T3[0].k):"–")}</b></div>
+      <div class="t c"><small>${esc(nt("hl_c_saved"))}</small><b>${D.net>0?Math.round(D.rate*100)+" %":"–"}</b><small>🐷</small></div>
+      <div class="t d"><small>${esc(nt("hl_c_type"))}</small><b style="font-size:19px">${TY[0]} ${esc(nt(TY[1]))}</b></div>
+      <div class="t e"><small>${esc(nt("hl_c_badges"))}</small><div style="font-size:28px;margin-top:6px">${D.badges.map(b=>b[0]).join("")}</div></div>
+      <button type="button" class="t f" data-hlshare>${esc(nt("hl_share"))} ↗</button></div></div>
+   <div class="hlmami" id="hlMa">${mAv?mAv(null):"👩"}<div class="bub" id="hlMt"></div></div>
+   <div class="hltap l" data-hlprev></div><div class="hltap r" data-hlnext></div></div>`;
+  document.body.appendChild(o); document.body.classList.add("locked"); requestAnimationFrame(()=>o.classList.add("on")); hlGo(0); }
+function hlMami(t){ const m=$("hlMa"); if (!m) return; m.classList.remove("on"); clearTimeout(HL.mt); HL.mt=setTimeout(()=>{ $("hlMt").textContent=mFill(t); m.classList.add("on"); }, 260); }
+function hlGo(i){ const o=$("hlBg"); if (!o) return; const D=HL.D, N=HL_DUR.length; if (i<0) i=0; if (i>=N){ hlClose(); return; } HL.i=i; clearTimeout(HL.t); clearTimeout(HL.mt); $("hlMa").classList.remove("on");
+  [...$("hlMesh").children].forEach((b,j)=>b.style.background=HL_MESH[i][j]);
+  [...o.querySelectorAll(".hlbars u")].forEach((u,j)=>{ u.style.transition="none"; u.style.width=j<i?"100%":"0"; });
+  o.querySelectorAll(".hlsl").forEach(s=>s.classList.toggle("on", Number(s.dataset.i)===i)); const sl=o.querySelector(`.hlsl[data-i="${i}"]`), R=RMo();
+  sl.querySelectorAll(".hlw").forEach(e=>e.classList.remove("on")); if (!R) sl.animate([{opacity:0,transform:"scale(1.06)",filter:"blur(10px)"},{opacity:1,transform:"none",filter:"none"}],{duration:650,easing:"cubic-bezier(.2,1,.3,1)"});
+  sl.querySelectorAll(".hlw").forEach((e,k)=>setTimeout(()=>e.classList.add("on"), R?0:120+k*120));
+  const dur=HL_DUR[i]; if (dur){ const u=o.querySelectorAll(".hlbars u")[i]; requestAnimationFrame(()=>requestAnimationFrame(()=>{ u.style.transition=`width ${dur}ms linear`; u.style.width="100%"; })); HL.t=setTimeout(()=>{ if (!HL.paused) hlGo(i+1); }, dur); HL.end=performance.now()+dur; }
+  else o.querySelectorAll(".hlbars u")[i].style.width="100%";
+  const S2=(f,ms)=>setTimeout(()=>{ if (HL.i===i && $("hlBg")) f(); }, R?0:ms), ph=o.querySelector(".hlph");
+  if (i===0){ sl.querySelectorAll(".hllet span").forEach((s,k)=>S2(()=>s.classList.add("on"),250+k*100)); S2(()=>hbConfetti(ph,44),1200); S2(()=>hlMami(nt("hl_m0")),1800); }
+  if (i===1){ S2(()=>hbOdo($("hlN1"),E0(D.c.expenses),1700),250); const rg=$("hlRing"); rg.style.transition="none"; rg.style.strokeDasharray="0 277"; S2(()=>{ rg.style.transition="stroke-dasharray 2.2s cubic-bezier(.2,1,.3,1)"; rg.style.strokeDasharray=`${(277*Math.min(1,D.c.income>0?D.c.expenses/D.c.income:0.75)).toFixed(1)} 277`; },300);
+    const st=$("hlSt"); if (st){ st.classList.remove("on"); S2(()=>{ st.classList.add("on"); S2(()=>{ ph.classList.remove("shake"); void ph.offsetWidth; ph.classList.add("shake"); const r=st.getBoundingClientRect(), p=ph.getBoundingClientRect(); hbBurst(ph, r.left-p.left+r.width/2, r.top-p.top+r.height/2, 20); },420); },2400); }
+    S2(()=>hlMami(D.delta!=null&&D.delta<0?nt("hl_m1_good",{n:String(Math.abs(D.delta))}):nt("hl_m1")),3300); }
+  if (i===2){ const cols=[...sl.querySelectorAll(".hlpod>div")]; cols.forEach(cl=>{ const b=cl.querySelector(".bl"); if (b){ b.style.transition="none"; b.style.height="0"; } const em=cl.querySelector(".em"); if (em) em.classList.remove("on"); const nm=cl.querySelector(".nm"); if (nm) nm.classList.remove("on"); });
+    [2,0,1].forEach((j,k)=>S2(()=>{ const b=cols[j]&&cols[j].querySelector(".bl"); if (b){ b.style.transition=""; b.style.height=b.dataset.h+"px"; } },500+k*330));
+    [2,0,1].forEach((j,k)=>S2(()=>{ const cl=cols[j]; if (!cl) return; const em=cl.querySelector(".em"), nm=cl.querySelector(".nm"); if (em) em.classList.add("on"); if (nm) nm.classList.add("on"); if (j===1&&em){ setTimeout(()=>{ const r=em.getBoundingClientRect(), p=ph.getBoundingClientRect(); hbBurst(ph, r.left-p.left+r.width/2, r.top-p.top+r.height/2, 24); },500); } },1700+k*260));
+    const t0=D.top[0], bu=t0&&(S.settings.budgets||{})[t0.k]; S2(()=>hlMami(t0?(bu&&t0.v<=+bu?nt("hl_m2_bud",{c:T(t0.k),n:E0(+bu-t0.v)}):nt("hl_m2",{c:T(t0.k)})):nt("hl_m2_none")),3300); }
+  if (i===3){ const cells=[...sl.querySelectorAll(".hlhm i[data-d]")]; cells.forEach(c=>c.classList.remove("on")); $("hlCall").classList.remove("on");
+    cells.forEach((c,k)=>{ const idx=k+hlOff(D.ym), r=Math.floor(idx/7), col=idx%7; S2(()=>c.classList.add("on"),300+(r+col)*85); }); S2(()=>{ const h=sl.querySelector(".hlhm i.hot"), cl=$("hlCall"); if (h){ const r=h.getBoundingClientRect(), p=sl.getBoundingClientRect(); cl.style.left=(r.left-p.left+r.width/2)+"px"; cl.style.top=(r.top-p.top-10)+"px"; cl.classList.add("on"); } },1900); }
+  if (i===4){ const wv=$("hlWv"); wv.style.transition="none"; wv.style.transform="translateY(250px)"; S2(()=>hbOdo($("hlN4"),E0(Math.abs(D.net)),2000),300);
+    const lvl=D.net>0?Math.max(.15,Math.min(.9,D.rate*2.2)):.08; S2(()=>{ wv.style.transition=""; wv.style.transform=`translateY(${(240-200*lvl).toFixed(0)}px)`; },900);
+    if (!R){ const jar=sl.querySelector(".hljar"); for (let k=0;k<(D.net>0?12:3);k++) S2(()=>{ const r=jar.getBoundingClientRect(), p=ph.getBoundingClientRect(), x1=r.left-p.left+r.width/2, y1=r.top-p.top+50, cn=document.createElement("div"); cn.className="hbcoin"; cn.style.position="absolute"; cn.textContent="€"; ph.appendChild(cn); const x0=30+Math.random()*(p.width-60);
+      cn.animate([{transform:`translate(${x0}px,40px) rotate(0)`},{transform:`translate(${x1+(Math.random()-.5)*60}px,${y1}px) rotate(540deg)`,opacity:1},{transform:`translate(${x1}px,${y1+60}px) scale(.4)`,opacity:0}],{duration:1000,easing:"cubic-bezier(.5,0,.6,1)",fill:"forwards"}).finished.then(()=>cn.remove()).catch(()=>cn.remove()); },350+k*110); }
+    S2(()=>hlMami(D.net>0?nt("hl_m4"):nt("hl_m4_t")),3400); }
+  if (i===5){ const fl=$("hlFl"); fl.classList.remove("on"); sl.querySelectorAll(".tr").forEach(t=>t.classList.remove("on")); S2(()=>{ if (!R) fl.animate([{transform:"rotateZ(0)"},{transform:"rotateZ(-4deg)"},{transform:"rotateZ(4deg)"},{transform:"rotateZ(0)"}],{duration:500}); },900);
+    S2(()=>{ fl.classList.add("on"); },1500); S2(()=>{ const r=fl.getBoundingClientRect(), p=ph.getBoundingClientRect(); hbBurst(ph, r.left-p.left+r.width/2, r.top-p.top+r.height/2, 30); },2500); sl.querySelectorAll(".tr").forEach((t,k)=>S2(()=>t.classList.add("on"),2800+k*160)); }
+  if (i===6){ const ms=[...sl.querySelectorAll(".md")]; ms.forEach(m=>m.classList.remove("on")); ms.forEach((m,k)=>S2(()=>m.classList.add("on"),400+k*380)); S2(()=>hbConfetti(ph,60),1900); S2(()=>hlMami(nt("hl_m6")),2600); }
+  if (i===7){ const ts=[...sl.querySelectorAll(".hlcoll .t")]; ts.forEach((t,k)=>{ if (R) return; const dx=(Math.random()-.5)*600, dy=400+Math.random()*200, r=(Math.random()-.5)*60; t.animate([{opacity:0,transform:`translate(${dx}px,${dy}px) rotate(${r}deg) scale(.6)`},{opacity:1,transform:"none"}],{duration:900,delay:250+k*150,easing:"cubic-bezier(.2,1.25,.35,1)",fill:"backwards"}); }); }
+}
+function hlOff(ym){ return (new Date(ym+"-01T12:00").getDay()+6)%7; }
+function hlClose(){ const o=$("hlBg"); clearTimeout(HL.t); clearTimeout(HL.mt); if (!o) return; o.classList.remove("on"); document.body.classList.remove("locked"); setTimeout(()=>{ o.remove(); render(); }, 320); }
+async function hlShare(){ const D=HL.D; if (!D) return; const cv=document.createElement("canvas"); cv.width=1080; cv.height=1350; const g=cv.getContext("2d");
+  const gr=g.createLinearGradient(0,0,1080,1350); gr.addColorStop(0,"#147a5b"); gr.addColorStop(1,"#0b2f40"); g.fillStyle=gr; g.fillRect(0,0,1080,1350);
+  const TY={owl:["🦉","hl_t_owl"],fox:["🦊","hl_t_fox"],squirrel:["🐿️","hl_t_sq"],party:["🎉","hl_t_party"],foodie:["🍝","hl_t_food"],pro:["🧭","hl_t_pro"]}[D.type];
+  g.fillStyle="#7ff0c2"; g.font="800 40px Inter, system-ui, sans-serif"; g.fillText(nt("hl_title",{m:monName(D.ym)}).toUpperCase(),80,140);
+  g.fillStyle="#fff"; g.font="900 96px Inter, system-ui, sans-serif"; g.fillText(monName(D.ym),80,250);
+  const box=(x,y,w,h,c1,c2,lines)=>{ const gg=g.createLinearGradient(x,y,x+w,y+h); gg.addColorStop(0,c1); gg.addColorStop(1,c2); g.fillStyle=gg; g.beginPath(); g.roundRect(x,y,w,h,40); g.fill(); let yy=y+70; for (const [t,f,col] of lines){ g.fillStyle=col||"#fff"; g.font=f; g.fillText(t,x+40,yy); yy+=parseInt(f.split(" ")[1])+22; } };
+  box(80,320,440,300,"#3d63a8","#1a2f5c",[[nt("hl_c_spent"),"700 34px Inter"],[D.delta!=null?(D.delta>0?"+":"−")+Math.abs(D.delta)+" %":"–","900 96px Inter"],[D.delta!=null?nt("hl_c_vs",{m:monName(shiftYm(D.ym,-1))}):"","600 30px Inter"]]);
+  box(560,320,440,300,"#e8a200","#9a5a00",[[nt("hl_c_top"),"700 34px Inter"],[(D.top[0]?D.top[0].e:"💸"),"400 96px Inter"],[D.top[0]?T(D.top[0].k):"–","900 44px Inter"]]);
+  box(80,660,440,300,"#1fae7a","#0b4a37",[[nt("hl_c_saved"),"700 34px Inter"],[D.net>0?Math.round(D.rate*100)+" %":"–","900 96px Inter"],["🐷","400 50px Inter"]]);
+  box(560,660,440,300,"#ffd9a0","#e0a060",[[nt("hl_c_type"),"700 34px Inter","#5a3200"],[TY[0],"400 96px Inter","#5a3200"],[nt(TY[1]),"900 40px Inter","#5a3200"]]);
+  box(80,1000,920,200,"#7a3b8f","#2e1440",[[nt("hl_c_badges"),"700 34px Inter"],[D.badges.map(b=>b[0]).join("  "),"400 80px Inter"]]);
+  g.fillStyle="rgba(255,255,255,.75)"; g.font="700 32px Inter"; g.fillText("Finanz MAMI",80,1290);
+  const url=cv.toDataURL("image/jpeg",0.9), name=`finanz-mami-${D.ym}.jpg`;
+  if (window.AndroidBridge && (AndroidBridge.shareImage||AndroidBridge.saveFileB64)) return rcptShare(url, name);
+  try{ const bl=await (await fetch(url)).blob(), f=new File([bl],name,{type:"image/jpeg"}); if (navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f], title:"Finanz MAMI"}); return; } }catch(err){ if (err&&err.name==="AbortError") return; }
+  const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); toast(nt("hl_saved_img")); }
+document.addEventListener("click", e=>{ const op=e.target.closest("[data-hlopen]"); if (op){ e.preventDefault(); hlOpen(op.dataset.hlopen); return; }
+  if (!$("hlBg")) return; if (e.target.closest("[data-hlclose]")){ hlClose(); return; } if (e.target.closest("[data-hlshare]")){ hlShare(); return; }
+  if (e.target.closest("[data-hlnext]")){ hlGo(HL.i+1); return; } if (e.target.closest("[data-hlprev]")){ hlGo(HL.i-1); return; } });
+document.addEventListener("pointerdown", e=>{ if (!e.target.closest||!e.target.closest(".hltap")) return; HL.paused=true; HL.pd=performance.now(); clearTimeout(HL.t); const u=document.querySelectorAll("#hlBg .hlbars u")[HL.i]; if (u){ const w=getComputedStyle(u).width; u.style.transition="none"; u.style.width=w; } });
+document.addEventListener("pointerup", e=>{ if (!HL.paused) return; const held=performance.now()-(HL.pd||0); HL.paused=false; if (held>350){ e.preventDefault(); const i=HL.i, rest=Math.max(800,(HL.end||0)-(HL.pd||0)); HL.end=performance.now()+rest; const u=document.querySelectorAll("#hlBg .hlbars u")[i]; if (u&&HL_DUR[i]){ u.style.transition=`width ${rest}ms linear`; u.style.width="100%"; HL.t=setTimeout(()=>{ if (HL.i===i) hlGo(i+1); }, rest); } HL.skipClick=true; setTimeout(()=>HL.skipClick=false,50); } });
+document.addEventListener("click", e=>{ if (HL.skipClick && e.target.closest(".hltap")){ e.stopImmediatePropagation(); } }, true);
+document.addEventListener("keydown", e=>{ if (!$("hlBg")) return; if (e.key==="Escape") hlClose(); else if (e.key==="ArrowRight") hlGo(HL.i+1); else if (e.key==="ArrowLeft") hlGo(HL.i-1); });
 
 /* Events */
 document.addEventListener("click", async e => {
