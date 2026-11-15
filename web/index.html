@@ -3390,9 +3390,10 @@ function debtPlan(d){ return (Array.isArray(d.plan)?d.plan:[]).filter(r=>r && /^
 function debtPayment(d, f, ym, cur){
   const m=S.months[ym];
   if (m && m.paid && d.fixedId in m.paid) return Number(m.paid[d.fixedId])||0;
-  if (d.auto && f && ym<=cur && dueIn(f, ym)) return planAmt(f, ym);
+  if (d.auto && f && ym<=cur && dueIn(f, ym)){ if (ym===cur){ const dd=payDay(f, ym); if (dd && new Date().getDate()<dd) return 0; } return planAmt(f, ym); }
   return 0;
 }
+function payDay(f, ym){ let d=null; if (Array.isArray(f.days)) for (const e of f.days) if (e.from<=ym) d=e.day; if (d==null && f.day>=1) d=f.day; return d>=1 ? Math.min(daysIn(ym), d|0) : null; }
 function debtState(d){
   const cur=ymOf(new Date()), f=S.fixed.find(x=>x.id===d.fixedId), start=Number(d.start)||0;
   const extras=debtExtras(d), extraSum=sum(extras,x=>Number(x.a)||0), plan=debtPlan(d), z=(Number(d.zins)||0)/100/12;
