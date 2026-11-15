@@ -7382,10 +7382,11 @@ function ocrPick(cands){ let best=null, bs=-1; for (const L of cands){ if (!L ||
 async function ocrUpscale(img, f){ const im=await loadImg(img), k=Math.min(f, 4000/Math.max(im.naturalWidth, im.naturalHeight)); if (k<=1.05) return null;
   const c=document.createElement("canvas"); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); const g=c.getContext("2d"); g.imageSmoothingEnabled=true; g.imageSmoothingQuality="high"; g.drawImage(im,0,0,c.width,c.height); return c.toDataURL("image/jpeg",0.9); }
 async function ocrBest(img, first){
-  const ocr=u=>canNativeOcr() ? ocrDataUrl(u) : scanImageFile(u);
-  const c=[first||null]; if (!first || ocrScore(first)<1000){ try { c.push(await ocr(img)); } catch(e){} }
-  if (ocrScore(ocrPick(c))<1000){ for (const f of [2,3]){ try { const up=await ocrUpscale(img, f); if (!up) break; const L=await ocr(up); c.push(L); if (ocrScore(L)>=1000) break; } catch(e){} } }
-  return ocrPick(c); }
+  const ocr=u=>canNativeOcr() ? ocrDataUrl(u) : scanImageFile(u); let err=null, tries=0;
+  const c=[first||null]; if (!first || ocrScore(first)<1000){ tries++; try { c.push(await ocr(img)); } catch(e){ err=e; } }
+  if (!err && ocrScore(ocrPick(c))<1000){ for (const f of [2,3]){ try { const up=await ocrUpscale(img, f); if (!up) break; tries++; const L=await ocr(up); c.push(L); if (ocrScore(L)>=1000) break; } catch(e){ err=e; break; } } }
+  try { const im=await loadImg(img); window.HB_OCRINFO={w:im.naturalWidth, h:im.naturalHeight, tries, err:err?String(err.message||err):"", native:canNativeOcr()}; } catch(_){}
+  const best=ocrPick(c); if (!best.length && err) throw err; return best; }
 async function zBonFromStored(id, img){
   const t=S.tx.find(x=>x.id===id); if (!t || !img || (t.items&&t.items.length) || t.kind!=="ausgabe" || ZB_TRIED.has(id)) return; ZB_TRIED.add(id);
   const v0=RCPT.v[id]||0;
@@ -7448,7 +7449,7 @@ document.addEventListener("click", e=>{
   if (e.target.closest("[data-zbtg]")){ UI.zbOpen=!UI.zbOpen; const p=document.querySelector("#zBonBox .zbpaper"), h=document.querySelector("#zBonBox .zbh");
     if (p){ p.classList.toggle("on", UI.zbOpen); h.setAttribute("aria-expanded", UI.zbOpen); const sm=h.querySelector("small"); if (sm) sm.innerHTML=sm.innerHTML.replace(/Einrollen|Ausrollen/, UI.zbOpen?"Einrollen":"Ausrollen"); } return; }
   if (e.target.closest("[data-zbre]")){ zBonReread(); return; }
-  if (e.target.closest("[data-zbraw]")){ const L=window.HB_OCR; if (!L){ toast("Erst „Bon neu lesen“ tippen"); return; } const txt=JSON.stringify(L.map(l=>({t:l.t,x:l.x,y:l.y,w:l.w,h:l.h}))); (async()=>{ try{ await navigator.clipboard.writeText(txt); toast("Lesedaten kopiert – einfach im Chat einfügen"); }catch(_){ toast("Kopieren ging nicht"); } })(); return; }
+  if (e.target.closest("[data-zbraw]")){ const L=window.HB_OCR; if (!L){ toast("Erst „Bon neu lesen“ tippen"); return; } const txt=JSON.stringify({info:window.HB_OCRINFO||null, lines:L.map(l=>({t:l.t,x:l.x,y:l.y,w:l.w,h:l.h}))}); (async()=>{ try{ await navigator.clipboard.writeText(txt); toast("Lesedaten kopiert – einfach im Chat einfügen"); }catch(_){ toast("Kopieren ging nicht"); } })(); return; }
   const i=e.target.closest("[data-zbi]"); if (i){ zBonAsk(+i.dataset.zbi); return; }
   const ok=e.target.closest("[data-zbok]"); if (ok){ zBonSave(+ok.dataset.zbok); return; }
   if (e.target.closest("[data-zbno]")){ const b=$("zbBub"); if (b){ b.hidden=true; b.classList.remove("on"); } return; }
@@ -7463,7 +7464,7 @@ async function zBonReread(){
     const t=id && S.tx.find(x=>x.id===id); if (t){ const d=plainTx(t); d.items=UI.scanItems.items; if (UI.scanItems.shop) d.ishop=UI.scanItems.shop; await safe(()=>saveTxDoc(id, d, t)); }
     const sm=its.reduce((a,i)=>a+i.p,0);
     toast(`${its.length} Artikel gelesen · zusammen ${eur(sm)}${tot!=null&&Math.abs(sm-tot)>0.02?` – auf dem Bon steht ${eur(tot)}`:""}`, null, null, 5000);
-  } catch(e){ scanWorking(false); try { scanBusy(false); } catch(_){} toast("Bon konnte nicht gelesen werden"); } }
+  } catch(e){ scanWorking(false); try { scanBusy(false); } catch(_){} toast("Bon konnte nicht gelesen werden"+(e&&e.message?": "+e.message:""), null, null, 6000); } }
 async function rcptSwapNow(id, img){
   const t=S.tx.find(x=>x.id===id); if (!t || !img) return;
   try { await rcptPut(id, img); } catch(e){ toast("Beleg konnte nicht gespeichert werden"); return; }
