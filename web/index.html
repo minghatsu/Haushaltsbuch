@@ -748,6 +748,7 @@ textarea.in{font-family:inherit;line-height:1.45}
 .zbit span{font-variant-numeric:tabular-nums;white-space:nowrap}
 .zbsum{border-top:1px dashed #999;margin-top:6px;padding-top:6px;font-weight:800}
 .zbtip{display:block;margin-top:10px;font-family:var(--f-body,system-ui);color:#7b8079;font-size:11.5px;text-align:center}
+.zbact{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}.zbact .btn{font-family:var(--f-body,system-ui)}
 .zbbub{position:absolute;left:10px;right:10px;z-index:5;background:#1d2420;color:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 10px 28px rgba(0,0,0,.35);opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s}
 .zbbub.on{opacity:1;transform:none}.zbbub small{opacity:.8;font-size:12px}
 .zbbub .in{width:100%;margin:6px 0;background:#fff;color:#1d2420}
@@ -7380,7 +7381,7 @@ async function zBonFromStored(id, img){
   const t=S.tx.find(x=>x.id===id); if (!t || !img || (t.items&&t.items.length) || t.kind!=="ausgabe" || ZB_TRIED.has(id)) return; ZB_TRIED.add(id);
   const v0=RCPT.v[id]||0;
   try { scanWorking(true);
-    const L = canNativeOcr() ? await ocrDataUrl(img) : await scanImageFile(img);
+    const L = canNativeOcr() ? await ocrDataUrl(img) : await scanImageFile(img); window.HB_OCR=L;
     scanWorking(false); try { scanBusy(false); } catch(_){}
     const its=receiptItems(L||[]); if (!its.length){ if (UI.editId===id) toast("Auf dem gespeicherten Bon wurden keine Artikel erkannt", null, null, 4000); return; }
     const t2=S.tx.find(x=>x.id===id); if (!t2 || (RCPT.v[id]||0)!==v0 || (t2.items&&t2.items.length) || (UI.editId===id && (UI.scanItems || UI.rcpt.state!=="stored"))) return;
@@ -7421,7 +7422,7 @@ function zBonRender(keepBub){
   const sh=SHOPS.find(x=>x.id===src.shop), its=src.items.map(i=>({...i, ...zaName(i.r, src.shop)})), unk=its.filter(i=>!i.sure).length, open=!!UI.zbOpen;
   el.hidden=false;
   el.innerHTML=`<button class="zbh" data-zbtg="1" aria-expanded="${open}"><span class="zbic">🧾</span><span class="grow"><b>Kassenzettel</b><small>${its.length} Artikel${unk?` · <em>${unk} unklar</em>`:""} · antippen zum ${open?"Einrollen":"Ausrollen"}</small></span><span class="zbch">▾</span></button>
-    <div class="zbpaper${open?" on":""}"><div class="zbhd">${esc(sh?sh.name:"Kassenzettel")}</div>${its.map((i,k)=>`<div class="zbit"><button class="${i.sure?"":"u"}" data-zbi="${k}" aria-label="${esc(i.n)} – Namen ändern">${esc(i.n)}</button><span>${zbEur(i.p)}</span></div>`).join("")}<div class="zbit zbsum"><span>SUMME</span><span>${zbEur(its.reduce((a,i)=>a+i.p,0))}</span></div><small class="zbtip">${unk?"Unterstrichenes antippen und richtig benennen – gilt dann immer.":"Namen antippen, um ihn zu ändern."}</small></div>
+    <div class="zbpaper${open?" on":""}"><div class="zbhd">${esc(sh?sh.name:"Kassenzettel")}</div>${its.map((i,k)=>`<div class="zbit"><button class="${i.sure?"":"u"}" data-zbi="${k}" aria-label="${esc(i.n)} – Namen ändern">${esc(i.n)}</button><span>${zbEur(i.p)}</span></div>`).join("")}<div class="zbit zbsum"><span>SUMME</span><span>${zbEur(its.reduce((a,i)=>a+i.p,0))}</span></div><small class="zbtip">${unk?"Unterstrichenes antippen und richtig benennen – gilt dann immer.":"Namen antippen, um ihn zu ändern."}</small><div class="zbact"><button class="btn small" data-zbre="1">↻ Bon neu lesen</button>${updKey()?`<button class="btn small" data-zbraw="1">Lesedaten kopieren</button>`:""}</div></div>
     <div class="zbbub" id="zbBub" hidden></div>`;
 }
 function zBonAsk(k){
@@ -7437,11 +7438,23 @@ function zBonSave(k){ const src=zBonSrc(), it=src&&src.items[k], v=($("zbIn")||{
 document.addEventListener("click", e=>{
   if (e.target.closest("[data-zbtg]")){ UI.zbOpen=!UI.zbOpen; const p=document.querySelector("#zBonBox .zbpaper"), h=document.querySelector("#zBonBox .zbh");
     if (p){ p.classList.toggle("on", UI.zbOpen); h.setAttribute("aria-expanded", UI.zbOpen); const sm=h.querySelector("small"); if (sm) sm.innerHTML=sm.innerHTML.replace(/Einrollen|Ausrollen/, UI.zbOpen?"Einrollen":"Ausrollen"); } return; }
+  if (e.target.closest("[data-zbre]")){ zBonReread(); return; }
+  if (e.target.closest("[data-zbraw]")){ const L=window.HB_OCR; if (!L){ toast("Erst „Bon neu lesen“ tippen"); return; } const txt=JSON.stringify(L.map(l=>({t:l.t,x:l.x,y:l.y,w:l.w,h:l.h}))); (async()=>{ try{ await navigator.clipboard.writeText(txt); toast("Lesedaten kopiert – einfach im Chat einfügen"); }catch(_){ toast("Kopieren ging nicht"); } })(); return; }
   const i=e.target.closest("[data-zbi]"); if (i){ zBonAsk(+i.dataset.zbi); return; }
   const ok=e.target.closest("[data-zbok]"); if (ok){ zBonSave(+ok.dataset.zbok); return; }
   if (e.target.closest("[data-zbno]")){ const b=$("zbBub"); if (b){ b.hidden=true; b.classList.remove("on"); } return; }
 });
 document.addEventListener("keydown", e=>{ if (e.target.id==="zbIn" && e.key==="Enter"){ e.preventDefault(); const ok=document.querySelector("[data-zbok]"); if (ok) ok.click(); } if (e.target.id==="zbIn" && e.key==="Escape"){ e.stopPropagation(); const b=$("zbBub"); if (b) b.hidden=true; } }, true);
+async function zBonReread(){
+  const id=UI.editId; let img=UI.rcpt&&UI.rcpt.img; if (!img && id && hasReceipt(id)) img=await rcptGet(id); if (!img){ toast("Kein Belegfoto da"); return; }
+  try { scanWorking(true); const L = canNativeOcr() ? await ocrDataUrl(img) : await scanImageFile(img); scanWorking(false); try { scanBusy(false); } catch(_){} window.HB_OCR=L;
+    const its=receiptItems(L||[]); let tot=null; try { tot=parseReceipt(L).amount; } catch(_){}
+    if (!its.length){ toast("Auf dem Foto wurden keine Artikel erkannt", null, null, 4000); return; }
+    UI.scanItems={items:its.map(i=>({r:i.n, p:i.p})), shop:zaShopId(parseReceipt(L).shop||$("fNote").value)}; UI.zbOpen=true; zBonRender();
+    const t=id && S.tx.find(x=>x.id===id); if (t){ const d=plainTx(t); d.items=UI.scanItems.items; if (UI.scanItems.shop) d.ishop=UI.scanItems.shop; await safe(()=>saveTxDoc(id, d, t)); }
+    const sm=its.reduce((a,i)=>a+i.p,0);
+    toast(`${its.length} Artikel gelesen · zusammen ${eur(sm)}${tot!=null&&Math.abs(sm-tot)>0.02?` – auf dem Bon steht ${eur(tot)}`:""}`, null, null, 5000);
+  } catch(e){ scanWorking(false); try { scanBusy(false); } catch(_){} toast("Bon konnte nicht gelesen werden"); } }
 async function rcptSwapNow(id, img){
   const t=S.tx.find(x=>x.id===id); if (!t || !img) return;
   try { await rcptPut(id, img); } catch(e){ toast("Beleg konnte nicht gespeichert werden"); return; }
@@ -7829,7 +7842,7 @@ async function runScan(source, attachOnly, fresh){
       try { let L=lines||[];
         if (canNativeOcr()){ scanWorking(true); try { const l2=await ocrDataUrl(img); if (l2 && l2.length) L=l2; } catch(e){} scanWorking(false); }
         else if (!L.length) L=await scanImageFile(img);
-        const its=receiptItems(L||[]);
+        window.HB_OCR=L; const its=receiptItems(L||[]);
         if (its.length){ const pr=parseReceipt(L); UI.scanItems={items:its.map(i=>({r:i.n, p:i.p})), shop:zaShopId(pr.shop||$("fNote").value)}; UI.zbOpen=true; zBonRender();
           if (!UI.editId) toast(`${its.length} Artikel vom Bon gelesen – wird mit der Buchung gespeichert`, null, null, 4000); }
         else { const ct=UI.editId && S.tx.find(x=>x.id===UI.editId); if (ct && ct.items && ct.items.length){ UI.scanItems={items:[], shop:null, cleared:true}; zBonRender(); } }
