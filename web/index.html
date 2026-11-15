@@ -7332,7 +7332,7 @@ document.addEventListener("change", e=>{
 });
 
 /* Belegfotos */
-const RCPT = { db:null, ids:new Set() };
+const RCPT = { db:null, ids:new Set(), v:{} };
 function rcptDb(){
   if (!RCPT.db) RCPT.db = new Promise((ok,bad)=>{ try { const r=indexedDB.open("haushaltsbuch-belege",1); r.onupgradeneeded=()=>r.result.createObjectStore("r"); r.onsuccess=()=>ok(r.result); r.onerror=()=>bad(r.error); } catch(e){ bad(e); } });
   return RCPT.db;
@@ -7341,11 +7341,11 @@ async function rcptOp(mode, fn){ const d=await rcptDb(); return new Promise((ok,
 const rcptSeal = img => { if (!SEAL_ON || !img) return {img}; const e=window.AndroidBridge.seal(String(img)); return e && e.slice(0,3)==="v1:" ? {img:e, s:1} : {img}; };
 const rcptOpen = v => { if (!v || !v.img) return null; if (!v.s) return v.img; const r=window.AndroidBridge && window.AndroidBridge.unseal ? window.AndroidBridge.unseal(v.img) : "\u0000fail"; return r==="\u0000fail" ? null : r; };
 async function rcptGet(id){ try { return rcptOpen(await rcptOp("readonly", st=>st.get(id))); } catch(e){ return null; } }
-async function rcptPut(id, img, fromSync){ await rcptOp("readwrite", st=>st.put({...rcptSeal(img), ts:Date.now()}, id)); RCPT.ids.add(id); if (!fromSync) rqAdd(id); }
+async function rcptPut(id, img, fromSync){ await rcptOp("readwrite", st=>st.put({...rcptSeal(img), ts:Date.now()}, id)); RCPT.ids.add(id); RCPT.v[id]=(RCPT.v[id]||0)+1; if (!fromSync) rqAdd(id); }
 async function rcptSealOld(){ if (!SEAL_ON) return; for (const id of [...RCPT.ids]){ try {
     const v=await rcptOp("readonly", st=>st.get(id)); if (!v || v.s || !v.img) continue;
     await rcptOp("readwrite", st=>st.put({...rcptSeal(v.img), ts:v.ts||Date.now()}, id)); await new Promise(r=>setTimeout(r,30)); } catch(e){} } }
-async function rcptDel(id, fromSync){ await rcptOp("readwrite", st=>st.delete(id)); const had=RCPT.ids.delete(id); if (!fromSync && had) rqAdd(id); }
+async function rcptDel(id, fromSync){ await rcptOp("readwrite", st=>st.delete(id)); const had=RCPT.ids.delete(id); RCPT.v[id]=(RCPT.v[id]||0)+1; if (!fromSync && had) rqAdd(id); }
 function hasReceipt(id){ return RCPT.ids.has(id); }
 rcptOp("readonly", st=>st.getAllKeys()).then(k=>{ (k||[]).forEach(x=>RCPT.ids.add(x)); if ((k||[]).length){ render(); setTimeout(rcptSealOld, 4000); } }).catch(()=>{});
 async function shrinkImage(file){
@@ -7439,6 +7439,18 @@ document.addEventListener("click", e=>{
   if (e.target.closest("[data-zbno]")){ const b=$("zbBub"); if (b){ b.hidden=true; b.classList.remove("on"); } return; }
 });
 document.addEventListener("keydown", e=>{ if (e.target.id==="zbIn" && e.key==="Enter"){ e.preventDefault(); const ok=document.querySelector("[data-zbok]"); if (ok) ok.click(); } if (e.target.id==="zbIn" && e.key==="Escape"){ e.stopPropagation(); const b=$("zbBub"); if (b) b.hidden=true; } }, true);
+async function rcptSwapNow(id, img){
+  const t=S.tx.find(x=>x.id===id); if (!t || !img) return;
+  try { await rcptPut(id, img); } catch(e){ toast("Beleg konnte nicht gespeichert werden"); return; }
+  ZB_TRIED.add(id);
+  const si=UI.scanItems, d=plainTx(t);
+  if (si && si.cleared){ delete d.items; delete d.ishop; } else if (si && si.items && si.items.length){ d.items=si.items; if (si.shop) d.ishop=si.shop; else delete d.ishop; }
+  if (si && (si.cleared || (si.items && si.items.length))) await safe(()=>saveTxDoc(id, d, t));
+  if (UI.editId===id){ UI.rcpt={state:"stored", img}; renderRcptRow(); }
+  render();
+  const n=si&&si.items?si.items.length:0;
+  toast(n?`Beleg ersetzt · ${n} Artikel gelesen`:si&&si.cleared?"Beleg ersetzt · keine Artikel erkannt":"Beleg ersetzt", null, null, 4000);
+}
 async function rcptSaveFor(id){
   const r=UI.rcpt;
   try { if (r.state==="new" && r.img){ await rcptPut(id, r.img); render(); } else if (r.state==="removed" && hasReceipt(id)){ await rcptDel(id); render(); } }
@@ -7780,9 +7792,10 @@ async function runScan(source, attachOnly, fresh){
         else if (!L.length) L=await scanImageFile(img);
         const its=receiptItems(L||[]);
         if (its.length){ const pr=parseReceipt(L); UI.scanItems={items:its.map(i=>({r:i.n, p:i.p})), shop:zaShopId(pr.shop||$("fNote").value)}; UI.zbOpen=true; zBonRender();
-          toast(`${its.length} Artikel vom Bon gelesen – wird mit der Buchung gespeichert`, null, null, 4000); }
-        else { const ct=UI.editId && S.tx.find(x=>x.id===UI.editId); if (ct && ct.items && ct.items.length){ UI.scanItems={items:[], shop:null, cleared:true}; zBonRender(); toast("Auf dem neuen Foto wurden keine Artikel erkannt – der alte Kassenzettel wird ersetzt", null, null, 5000); } }
+          if (!UI.editId) toast(`${its.length} Artikel vom Bon gelesen – wird mit der Buchung gespeichert`, null, null, 4000); }
+        else { const ct=UI.editId && S.tx.find(x=>x.id===UI.editId); if (ct && ct.items && ct.items.length){ UI.scanItems={items:[], shop:null, cleared:true}; zBonRender(); } }
       } catch(e){ scanWorking(false); scanBusy(false); }
+      if (UI.editId) await rcptSwapNow(UI.editId, img);
       return; }
     const r = parseReceipt(lines||[]);
     if (r.amount==null){ toast("Auf der Quittung wurde kein Betrag gefunden"); return; }

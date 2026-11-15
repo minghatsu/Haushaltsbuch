@@ -671,7 +671,7 @@ if (IS_PC){
     const st=n=>{ if (!el.isConnected) return; const k=Math.min(1,(n-t0)/ms); el.textContent=amtTxt(t, v*e(k)); if (k<1) requestAnimationFrame(st); }; requestAnimationFrame(st); }
   async function det(anim){
     const box=$("pcDet"); if (!box) return; const t=B.sel && S.tx.find(x=>x.id===B.sel);
-    const sig=t ? JSON.stringify([t, hasReceipt(t.id), B.arm===t.id, LANG]) : "none|"+LANG;
+    const sig=t ? JSON.stringify([t, hasReceipt(t.id), RCPT.v[t.id]||0, B.arm===t.id, LANG]) : "none|"+LANG;
     if (sig===B.sig && !anim) return; B.sig=sig;
     if (!t){ box.innerHTML=`<div class="pcdnone"><span class="pcdhand">${ic("receipt",34)}</span><b>Buchung anklicken</b><span class="muted">dann erscheint sie hier groß – mit Beleg</span></div>`; box.classList.add("empty"); return; }
     box.classList.remove("empty");
