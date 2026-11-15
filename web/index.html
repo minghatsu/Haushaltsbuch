@@ -7377,11 +7377,20 @@ function renderRcptRow(){
 }
 /* der Kassenzettel in der Buchung */
 const ZB_TRIED=new Set();
+function ocrScore(L){ try { const its=receiptItems(L||[]); if (!its.length) return 0; let tot=null; try { tot=parseReceipt(L).amount; } catch(_){} const sm=its.reduce((a,i)=>a+i.p,0); return (tot!=null && Math.abs(sm-tot)<0.02 ? 1000 : 0)+its.length; } catch(e){ return 0; } }
+function ocrPick(cands){ let best=null, bs=-1; for (const L of cands){ if (!L || !L.length) continue; const sc=ocrScore(L); if (sc>bs){ bs=sc; best=L; } } return best||[]; }
+async function ocrUpscale(img, f){ const im=await loadImg(img), k=Math.min(f, 4000/Math.max(im.naturalWidth, im.naturalHeight)); if (k<=1.05) return null;
+  const c=document.createElement("canvas"); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); const g=c.getContext("2d"); g.imageSmoothingEnabled=true; g.imageSmoothingQuality="high"; g.drawImage(im,0,0,c.width,c.height); return c.toDataURL("image/jpeg",0.9); }
+async function ocrBest(img, first){
+  const ocr=u=>canNativeOcr() ? ocrDataUrl(u) : scanImageFile(u);
+  const c=[first||null]; if (!first || ocrScore(first)<1000){ try { c.push(await ocr(img)); } catch(e){} }
+  if (ocrScore(ocrPick(c))<1000){ for (const f of [2,3]){ try { const up=await ocrUpscale(img, f); if (!up) break; const L=await ocr(up); c.push(L); if (ocrScore(L)>=1000) break; } catch(e){} } }
+  return ocrPick(c); }
 async function zBonFromStored(id, img){
   const t=S.tx.find(x=>x.id===id); if (!t || !img || (t.items&&t.items.length) || t.kind!=="ausgabe" || ZB_TRIED.has(id)) return; ZB_TRIED.add(id);
   const v0=RCPT.v[id]||0;
   try { scanWorking(true);
-    const L = canNativeOcr() ? await ocrDataUrl(img) : await scanImageFile(img); window.HB_OCR=L;
+    const L = await ocrBest(img); window.HB_OCR=L;
     scanWorking(false); try { scanBusy(false); } catch(_){}
     const its=receiptItems(L||[]); if (!its.length){ if (UI.editId===id) toast("Auf dem gespeicherten Bon wurden keine Artikel erkannt", null, null, 4000); return; }
     const t2=S.tx.find(x=>x.id===id); if (!t2 || (RCPT.v[id]||0)!==v0 || (t2.items&&t2.items.length) || (UI.editId===id && (UI.scanItems || UI.rcpt.state!=="stored"))) return;
@@ -7397,7 +7406,7 @@ async function zBonBackfill(){
   let n=0;
   for (const t of todo){ if (document.hidden) await new Promise(r=>setTimeout(r,5000)); ZB_TRIED.add(t.id); done[t.items&&t.items.length?t.id+"~2":t.id]=1; try{ localStorage.setItem("hb-zbtried", JSON.stringify(done)); }catch(_){}
     try { const v0=RCPT.v[t.id]||0, img=await rcptGet(t.id); if (!img) continue;
-      const L = canNativeOcr() ? await ocrDataUrl(img) : await (async()=>{ await loadTesseract(); const r=await window.Tesseract.recognize(img,"deu"); return ((r.data&&r.data.lines)||[]).map(l=>({t:l.text.trim(), x:l.bbox.x0, y:l.bbox.y0, w:l.bbox.x1-l.bbox.x0, h:l.bbox.y1-l.bbox.y0})).filter(l=>l.t); })();
+      const L = canNativeOcr() ? await ocrBest(img) : await (async()=>{ await loadTesseract(); const r=await window.Tesseract.recognize(img,"deu"); return ((r.data&&r.data.lines)||[]).map(l=>({t:l.text.trim(), x:l.bbox.x0, y:l.bbox.y0, w:l.bbox.x1-l.bbox.x0, h:l.bbox.y1-l.bbox.y0})).filter(l=>l.t); })();
       const its=receiptItems(L||[]); if (!its.length) continue;
       const t2=S.tx.find(x=>x.id===t.id); if (!t2 || (RCPT.v[t.id]||0)!==v0 || UI.editId===t.id) continue;
       if (t2.items&&t2.items.length){ const ns=its.reduce((a,i)=>a+i.p,0); if (!bad(t2) || Math.abs(ns-t2.amount)>=Math.abs(isum(t2)-t2.amount)) continue; }
@@ -7447,7 +7456,7 @@ document.addEventListener("click", e=>{
 document.addEventListener("keydown", e=>{ if (e.target.id==="zbIn" && e.key==="Enter"){ e.preventDefault(); const ok=document.querySelector("[data-zbok]"); if (ok) ok.click(); } if (e.target.id==="zbIn" && e.key==="Escape"){ e.stopPropagation(); const b=$("zbBub"); if (b) b.hidden=true; } }, true);
 async function zBonReread(){
   const id=UI.editId; let img=UI.rcpt&&UI.rcpt.img; if (!img && id && hasReceipt(id)) img=await rcptGet(id); if (!img){ toast("Kein Belegfoto da"); return; }
-  try { scanWorking(true); const L = canNativeOcr() ? await ocrDataUrl(img) : await scanImageFile(img); scanWorking(false); try { scanBusy(false); } catch(_){} window.HB_OCR=L;
+  try { scanWorking(true); const L = await ocrBest(img); scanWorking(false); try { scanBusy(false); } catch(_){} window.HB_OCR=L;
     const its=receiptItems(L||[]); let tot=null; try { tot=parseReceipt(L).amount; } catch(_){}
     if (!its.length){ toast("Auf dem Foto wurden keine Artikel erkannt", null, null, 4000); return; }
     UI.scanItems={items:its.map(i=>({r:i.n, p:i.p})), shop:zaShopId(parseReceipt(L).shop||$("fNote").value)}; UI.zbOpen=true; zBonRender();
@@ -7840,7 +7849,7 @@ async function runScan(source, attachOnly, fresh){
     if (img){ UI.rcpt={state:"new", img}; renderRcptRow(); }
     if (attachOnly){ if (!img){ toast("Das Foto konnte nicht übernommen werden"); return; }
       try { let L=lines||[];
-        if (canNativeOcr()){ scanWorking(true); try { const l2=await ocrDataUrl(img); if (l2 && l2.length) L=l2; } catch(e){} scanWorking(false); }
+        if (canNativeOcr()){ scanWorking(true); try { L=await ocrBest(img, L.length?L:null); } catch(e){} scanWorking(false); }
         else if (!L.length) L=await scanImageFile(img);
         window.HB_OCR=L; const its=receiptItems(L||[]);
         if (its.length){ const pr=parseReceipt(L); UI.scanItems={items:its.map(i=>({r:i.n, p:i.p})), shop:zaShopId(pr.shop||$("fNote").value)}; UI.zbOpen=true; zBonRender();

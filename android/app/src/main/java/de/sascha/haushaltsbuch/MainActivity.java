@@ -314,7 +314,7 @@ public class MainActivity extends Activity {
             o.inJustDecodeBounds = true;
             try (InputStream is = getContentResolver().openInputStream(uri)) { BitmapFactory.decodeStream(is, null, o); }
             int max = Math.max(o.outWidth, o.outHeight), sample = 1;
-            while (max / (sample * 2) >= 1600) sample *= 2;
+            while (max / (sample * 2) >= 2600) sample *= 2;
             BitmapFactory.Options o2 = new BitmapFactory.Options();
             o2.inSampleSize = sample;
             Bitmap bm;
@@ -325,13 +325,13 @@ public class MainActivity extends Activity {
                 int or = new ExifInterface(is).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
                 rot = or == ExifInterface.ORIENTATION_ROTATE_90 ? 90 : or == ExifInterface.ORIENTATION_ROTATE_180 ? 180 : or == ExifInterface.ORIENTATION_ROTATE_270 ? 270 : 0;
             } catch (Exception ignored) {}
-            float k = Math.min(1f, 1600f / Math.max(bm.getWidth(), bm.getHeight()));
+            float k = Math.min(1f, Math.min(2600f / Math.max(bm.getWidth(), bm.getHeight()), 1300f / Math.min(bm.getWidth(), bm.getHeight())));
             Matrix mx = new Matrix();
             mx.postScale(k, k);
             mx.postRotate(rot);
             Bitmap out = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), mx, true);
             ByteArrayOutputStream bo = new ByteArrayOutputStream();
-            out.compress(Bitmap.CompressFormat.JPEG, 72, bo);
+            out.compress(Bitmap.CompressFormat.JPEG, 80, bo);
             return "data:image/jpeg;base64," + Base64.encodeToString(bo.toByteArray(), Base64.NO_WRAP);
         } catch (Exception e) {
             return null;
