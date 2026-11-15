@@ -2649,8 +2649,8 @@ function tourSteps(){ const w=S.settings.work, g=workGroup(w);
     {sel:'[data-hb="debts"]', ic:"bank", t:"Kredite & Schulden", p:["Was noch offen ist und wann du schuldenfrei bist. Raten aus den Fixkosten werden automatisch abgezogen."]},
     {sel:".tabs .tab.plus", ic:"receipt", t:"Eintragen", p:["Tippe auf Plus für eine Ausgabe oder Einnahme."]},
     {sel:".tabs .tab.plus", ic:"camera", t:"Kassenbon & Kontoauszug", p:["Im Plus-Menü kannst du einen Kassenbon fotografieren oder deinen Kontoauszug (CSV) importieren – die App sortiert alles ein."]},
-    {sel:'.tabs .tab[data-go="list"]', ic:"list", t:"Buchungen", p:["Alle Ein- und Ausgaben mit Kalender und Suche. Antippen zum Ändern."]},
-    {sel:'.tabs .tab[data-go="fix"]', ic:"repeat", t:"Fixkosten & Termine", p:["Miete, Handy, Abos – einmal anlegen, die App plant sie jeden Monat ein.", fix]},
+    {sel:'.tabs .tab[data-go="list"]', ic:"check", t:"Buchungen", p:["Alle Ein- und Ausgaben mit Kalender und Suche. Antippen zum Ändern."]},
+    {sel:'.tabs .tab[data-go="fix"]', ic:"list", t:"Fixkosten & Termine", p:["Miete, Handy, Abos – einmal anlegen, die App plant sie jeden Monat ein.", fix]},
     {sel:'.tabs .tab[data-go="shop"]', ic:"cart", t:"Einkaufen", p:["Deine Einkaufsliste mit Läden und Preisen – auch zum Teilen mit anderen."]},
     {sel:'.tabs .tab[data-go="year"]', ic:"insight", t:"Analyse", p:[ana, "Oben wählst du Auswertung, Planung oder Steuer."]},
     {sel:"#bellBtn", ic:"bell", t:"Hinweise", p:["Die Glocke erinnert an Fälliges – z. B. Rechnungen, Fristen oder ein Budget, das knapp wird."]},
@@ -2700,7 +2700,7 @@ const PTOUR_FN=()=>({
     {sel:"#astack,.pcbal,.cashcard,.hkpi", ic:"wallet", t:"Dein Geld auf einen Blick", p:["Hier steht, was heute auf deinen Konten ist – mit Spaces zusammengerechnet.", IS_PC?"Darunter siehst du, wie viel du bis Monatsende noch pro Tag ausgeben kannst.":"Wisch die Karte zur Seite, um einzelne Konten und Spaces zu sehen."]},
     {sel:"#monthpill,.pcmonth", ic:"cal", t:"Monat wechseln", p:["Mit den Pfeilen blätterst du in frühere Monate.", "Alle Seiten zeigen dann diesen Monat – Buchungen, Fixkosten und Analyse."]},
     {sel:'#v-home .hblock[data-hb="budgets"]', ic:"target", t:"Budgets", p:["Zeigt, wie viel von deinem Monatsbudget noch frei ist.", "Budgets legst du unter Einstellungen › Monatsbudgets fest."]},
-    {sel:'#v-home .hblock[data-hb="fix"]', ic:"repeat", t:"Fixkosten", p:["Was diesen Monat fest abgeht – Miete, Abos, Raten.", "Antippen führt zur Fixkosten-Seite zum Abhaken."]},
+    {sel:'#v-home .hblock[data-hb="fix"]', ic:"list", t:"Fixkosten", p:["Was diesen Monat fest abgeht – Miete, Abos, Raten.", "Antippen führt zur Fixkosten-Seite zum Abhaken."]},
     {sel:'#v-home .hblock[data-hb="invest"]', ic:"piggy", t:"Sparen & Anlegen", p:["Zinseszins-Rechner, Vergleich und deine Anlage-Ziele.", "Oben in der Kachel umschalten, „Öffnen“ für alle Einstellungen."]},
     {sel:IS_PC?"#pcDock,#v-home .pctl":"[data-scroll=\"homeEd\"]", ic:"sliders", t:"Startseite anpassen", p:[IS_PC?"Kacheln am Griff oben links verschieben. Das Minus legt eine Kachel rechts in die Leiste – von dort holst du sie zurück.":"Hier blendest du Kacheln ein oder aus und sortierst sie, wie du willst."]},
     {sel:".tabs .tab.plus,.pcfab,[data-addmenu]", ic:"plus", t:"Neu eintragen", p:["Das Plus öffnet: von Hand eintragen, Beleg fotografieren (Quittung, Rechnung oder Kontoauszug) oder Kontoauszug importieren."]},
@@ -2714,7 +2714,7 @@ const PTOUR_FN=()=>({
     {sel:"#pcDet", ic:"camera", t:"Details & Beleg", p:["Hier erscheint die gewählte Buchung groß – mit Belegfoto, das du ersetzen oder hinzufügen kannst."]},
   ]},
   fix:{t:"Fixkosten", s:[
-    {sel:".pcfsum,.fsum", ic:"repeat", t:"Fest verplant", p:["Was diesen Monat sicher abgeht und wie viel davon schon bezahlt ist.", "Nur Abgehaktes zählt in deinen Zahlen – so ist nichts doppelt."]},
+    {sel:".pcfsum,.fsum", ic:"list", t:"Fest verplant", p:["Was diesen Monat sicher abgeht und wie viel davon schon bezahlt ist.", "Nur Abgehaktes zählt in deinen Zahlen – so ist nichts doppelt."]},
     {sel:".pcfcalc,.fgroup", ic:"check", t:"Abhaken", p:[IS_PC?"Posten anklicken = bezahlt. Am Rand ziehen = anderer Tag. Das + in einem Tag legt dort einen neuen Posten an.":"Kachel antippen = bezahlt. Betrag antippen = nur für diesen Monat ändern.", "Beim Kontoauszug-Import hakt die App passende Posten selbst ab."]},
     {sel:".pcfgr,.fgroup:nth-of-type(2)", ic:"tag", t:"Gruppen", p:["Wohnen, Auto, Abos, Sparen … – die App sortiert deine Posten automatisch ein und zeigt, wie viel je Gruppe abgeht."]},
     {sel:"#payAll", ic:"check", t:"Alle abhaken", p:["Wenn alles bezahlt ist: ein Klick hakt den ganzen Monat ab."]},
@@ -4071,7 +4071,7 @@ function homeBlocks(html){
 }
 function renderHomeEd(){
   const el=$("homeEd"); if (!el) return; homeMig(); const hid=new Set(S.settings.homeHidden||[]), o=homeOrder();
-  const BIC={cash:"cash",quick:"bolt",budgets:"target",fix:"repeat",tax:"shield",goals:"piggy",debts:"bank",recent:"list",offers:"cart",gemeinsam:"heart",...HX_IC};
+  const BIC={cash:"cash",quick:"bolt",budgets:"target",fix:"list",tax:"shield",goals:"piggy",debts:"bank",recent:"check",offers:"cart",gemeinsam:"heart",...HX_IC};
   const vis=o.filter(k=>k!=="tax"||hasSelf());
   el.innerHTML = `<div class="bgrid3" id="homeGrid">${vis.map(k=>{ const name=(HOME_BLOCKS.find(b=>b[0]===k)||[k,k])[1], off=hid.has(k);
     return `<div class="bt3${off?" off":""}" data-hk="${k}" role="button" tabindex="0" aria-pressed="${!off}" aria-label="${esc(name)} ${off?"ausgeblendet":"angezeigt"}"><span class="bti">${ic(BIC[k]||"dots",20)}</span><b>${esc(name)}</b><i class="bchk">${ic(off?"plus":"check",12)}</i></div>`; }).join("")}</div>`
@@ -4239,13 +4239,13 @@ function fxContract(f){ if (debtFor(f.id)) return ""; const a=aboCfg()[f.id]||{}
 document.addEventListener("click", e=>{ if (e.target.closest("[data-goalnew]")){ UI.goalNew=!UI.goalNew; render(); return; } if (e.target.closest("#goalAddRing,#goalFirst,[data-invopen]")) UI.goalNew=false; });
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-fxcon]"); if (!b) return; UI.fxCon=b.dataset.fxcon; render(); });
 function fixedAreas(ym){
-  if (!S.fixed.length) return `<div class="card" style="order:5"><div class="card-head"><h2>${hIc("repeat")}Fixkosten</h2><button class="link" data-go="fix">Eintragen ${ic("right",16)}</button></div><span class="small muted">Trag Miete, Versicherungen und Abos einmal ein – dann siehst du hier, wohin dein festes Geld geht.</span></div>`;
+  if (!S.fixed.length) return `<div class="card" style="order:5"><div class="card-head"><h2>${hIc("list")}Fixkosten</h2><button class="link" data-go="fix">Eintragen ${ic("right",16)}</button></div><span class="small muted">Trag Miete, Versicherungen und Abos einmal ein – dann siehst du hier, wohin dein festes Geld geht.</span></div>`;
   const c=monthCalc(ym), list=S.fixed.filter(f=>dueIn(f,ym)), total=sum(list,f=>planAmt(f,ym));
   const by={}; for (const f of list) by[fixArea(f)]=(by[fixArea(f)]||0)+planAmt(f,ym);
   const areas=Object.entries(by).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
   const cols=["var(--c5)","var(--c1)","var(--c2)","var(--c4)","var(--c3)","var(--c6)","var(--line)"];
   const paidN=list.filter(f=>f.id in c.paid).length, inc=c.income;
-  return `<div class="card" style="order:5"><div class="card-head"><h2>${hIc("repeat")}Fixkosten</h2><button class="link" data-go="fix">Abhaken ${ic("right",16)}</button></div>
+  return `<div class="card" style="order:5"><div class="card-head"><h2>${hIc("list")}Fixkosten</h2><button class="link" data-go="fix">Abhaken ${ic("right",16)}</button></div>
     <div class="meta-row" style="margin-bottom:8px"><span class="small muted">Im ${esc(MONTHS[ymParts(ym)[1]-1])} fest verplant</span><b style="font-family:var(--f-display);font-size:22px;font-weight:800;letter-spacing:-.02em">${esc(eur0(total))}</b></div>
     <div class="fstack">${areas.map(([a,v],i)=>`<div style="flex:${v};background:${cols[i%cols.length]}" title="${esc(a)}: ${esc(eur(v))}">${v/total>0.16?esc(a):""}</div>`).join("")}</div>
     <div class="fleg">${areas.map(([a,v],i)=>`<div><i style="background:${cols[i%cols.length]}"></i><span>${esc(a)}</span><b>${esc(eur0(v))}</b></div>`).join("")}</div>
@@ -4268,7 +4268,7 @@ function recentTimeline(c){
   tx=tx.slice(0, UI.wide?8:6);
   const today=isoToday(), yest=isoOf(new Date(Date.now()-864e5));
   const when=d=> d===today?"Heute":d===yest?"Gestern":shortDate(d);
-  return `<div class="card" style="order:8"><div class="card-head"><h2>${hIc("receipt")}Letzte Buchungen</h2>${c.tx.length?`<button class="link" data-go="list">Alle ${ic("right",16)}</button>`:""}</div>
+  return `<div class="card" style="order:8"><div class="card-head"><h2>${hIc("check")}Letzte Buchungen</h2>${c.tx.length?`<button class="link" data-go="list">Alle ${ic("right",16)}</button>`:""}</div>
     ${c.tx.length?`<div class="tlchips">${[["alle","Alle"],["aus","Ausgaben"],["ein","Einnahmen"]].map(([k,l])=>`<button class="fchip" data-recentf="${k}" aria-pressed="${f===k}">${l}</button>`).join("")}</div>`:""}
     ${c.tx.length ? (tx.length?`<div class="tline">${tx.map(t=>tlRow(t, when(t.date))).join("")}</div>`:`<span class="small muted">Keine ${f==="ein"?"Einnahmen":"Ausgaben"} in diesem Monat.</span>`)
       : emptyState("receipt","Noch keine Buchungen","Alles, was du einträgst, erscheint hier.", `<button class="btn primary" data-add="ausgabe">Erste Buchung eintragen</button>`)}
@@ -4345,7 +4345,7 @@ function homeExtra({ym, cur, c, g, mainName, mainBal, asOf}){
       ${top.length?`<div class="tline">${top.map(t=>tlRow(t, shortDate(t.date))).join("")}</div>`:`<span class="small muted">Keine Ausgaben in diesem Monat</span>`}</div>`; }
   { const noCat=c.tx.filter(t=>hxOut(t) && (!t.cat || t.cat==="Sonstiges")).length, noRc=spentList.filter(t=>t.amount>=50 && !hasReceipt(t.id)).length;
     const A=aboCfg(), td=isoToday(), dl=S.fixed.filter(f=>{ const d=aboDeadline(A[f.id]); return d && d>=td && (new Date(d+"T12:00")-new Date(td+"T12:00"))/864e5<=30; }).length;
-    const items=[[noCat,"Buchungen ohne Kategorie","list","tag"],[ym<=cur?c.openCount:0,"Fixkosten noch nicht abgehakt","fix","repeat"],[noRc,"Ausgaben ab 50 € ohne Beleg","list","receipt"],[dl,"Abo-Kündigungsfrist läuft bald ab","fix","alert"]].filter(x=>x[0]>0);
+    const items=[[noCat,"Buchungen ohne Kategorie","list","tag"],[ym<=cur?c.openCount:0,"Fixkosten noch nicht abgehakt","fix","list"],[noRc,"Ausgaben ab 50 € ohne Beleg","list","receipt"],[dl,"Abo-Kündigungsfrist läuft bald ab","fix","alert"]].filter(x=>x[0]>0);
     out.todo = `<div class="card">${hxHead("todo","Zu erledigen")}
       ${items.length ? `<div class="hxlist">${items.map(([n,l,go,i])=>`<button class="hxrow hxbtn" data-go="${go}"><span class="hxn">${n}</span><span class="grow">${ic(i,16)} <span>${esc(l)}</span></span>${ic("right",16)}</button>`).join("")}</div>`
         : `<div class="hxok">${ic("check",18)}<span>Alles erledigt</span></div>`}</div>`; }
@@ -5098,7 +5098,7 @@ function renderFix(){
         <button class="fgh" data-fxgroup="${esc(a)}" aria-expanded="${open}"><span class="gi">${ic(AREA_IC[a]||"dots",19)}</span><span class="n"><b>${esc(a)}</b><span class="small muted">${esc(fs.map(f=>f.name).slice(0,3).join(", "))}${fs.length>3?" …":""}</span></span><span class="a"><b>${esc(eur0(gs))}</b><span class="small muted">${sp} von ${fs.length}</span></span>${ic(open?"up":"down",18)}</button>
         <div class="pbar sm"><i style="width:${fs.length?Math.round(sp/fs.length*100):0}%"></i></div>
         ${open?`<div class="fgrid">${fs.map(tileHtml).join("")}</div>`:""}
-      </div>`; }).join("") || `<div class="card">${emptyState("repeat","Noch keine Fixkosten","Trag Miete, Versicherungen und Abos einmal ein.")}</div>`}
+      </div>`; }).join("") || `<div class="card">${emptyState("list","Noch keine Fixkosten","Trag Miete, Versicherungen und Abos einmal ein.")}</div>`}
     <div class="row-btns">${nPaid<all.length?`<button class="btn" id="payAll">Alle abhaken</button>`:""}<button class="btn" id="fixEditBtn">Liste bearbeiten</button></div>`;
 }
 function debtFor(fid){ return S.debts.find(d=>d.fixedId===fid); }
@@ -5163,7 +5163,7 @@ const AGRP = {
   krank:["Krankengeld",["kgverlauf","kgende","zuzahl","tax"]]
 };
 const anaGrp = () => AGRP[S.settings.work] || AGRP.beides;
-const ATL = {goal:["Sparziele","#2f7fb8","piggy"], fix:["Fixkosten","#0f766e","repeat"], hourly:["Stundenlohn","#15803d","cash"], beihilfe:["Beihilfe","#0e7490","health"],
+const ATL = {goal:["Sparziele","#2f7fb8","piggy"], fix:["Fixkosten","#0f766e","list"], hourly:["Stundenlohn","#15803d","cash"], beihilfe:["Beihilfe","#0e7490","health"],
   bab:["BAB-Check","#4d7c0f","book"], mjgrenze:["Grenze","#c27c0e","target"], quellen:["Quellen","#047857","list"], ruecklage:["Rücklage","#3f6212","piggy"],
   pots:["Töpfe","#15803d","target"], mini:["Minijob","#4d7c0f","case"], terms:["Termine","#0e7490","cal"], nachweis:["Nachweis","#047857","doc"],
   bafoeg:["BAföG","#15803d","book"], nebenjob:["Nebenjob","#4d7c0f","case"], rueck:["Rückzahlung","#0e7490","bank"],
@@ -5752,7 +5752,7 @@ function renderNotifyEd(){
   const el=$("notifyEd"); if (!el) return;
   if (!CAN_NOTIFY){ el.innerHTML=`<div class="notice info"><span>Benachrichtigungen gibt es in der Handy- und PC-App. Dort kannst du hier einstellen, worüber sie dich informiert – auch wenn die App geschlossen ist.</span></div>`; return; }
   const c=notifyCfg(), perm=notifyPerm(), on=c.on&&perm==="granted";
-  const NI={budget:["target","#c27c0e"],minus:["minus","#b23a3a"],reserve:["shield","#3d63a8"],debt:["bank","#7a5bc2"],goal:["piggy","#2e9c74"],fix:["repeat","#1a7a5c"],daily:["plus","#d4813a"],imp:["arrowDown","#3d63a8"],tax:["receipt","#c27c0e"],month:["chart","#7a5bc2"],week:["chart","#2e9c74"],hour:["bell","#6b7a72"]};
+  const NI={budget:["target","#c27c0e"],minus:["minus","#b23a3a"],reserve:["shield","#3d63a8"],debt:["bank","#7a5bc2"],goal:["piggy","#2e9c74"],fix:["list","#1a7a5c"],daily:["plus","#d4813a"],imp:["arrowDown","#3d63a8"],tax:["receipt","#c27c0e"],month:["chart","#7a5bc2"],week:["chart","#2e9c74"],hour:["bell","#6b7a72"]};
   const nic=k=>{ const [i,col]=NI[k]||["bell","var(--accent)"]; return `<span class="nic" style="--tc:${themeCol(col)}">${ic(i,18)}</span>`; };
   const sw=(k,t,d)=>`<div class="switch nrow">${nic(k)}<label for="nf-${k}"><b>${t}</b><br><span class="small muted">${d}</span></label><input type="checkbox" id="nf-${k}" data-nf="${k}" ${c[k]?"checked":""} ${on?"":"disabled"}></div>`;
   const sel=(k,t,d,opts)=>`<div class="nrow nsel">${nic(k)}<div class="nsl"><label for="nf-${k}"><b>${t}</b></label>${d?`<span class="small muted">${d}</span>`:""}<select class="in" id="nf-${k}" data-nf="${k}" ${on?"":"disabled"}>${opts.map(([v,l])=>`<option value="${v}" ${String(c[k])===v?"selected":""}>${l}</option>`).join("")}</select></div></div>`;
@@ -6702,7 +6702,7 @@ $("spBg").addEventListener("click", e=>{ if (e.target===$("spBg") || e.target.cl
 document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("spBg").hidden) spSheetClose(); });
 /* Farben */
 const COLSW=["#1a7a5c","#2e9c74","#0f8a8a","#2f7fb8","#3d63a8","#5b4fc7","#7a5bc2","#a64ca6","#d14d72","#c2410c","#d4813a","#c27c0e","#8a6d1f","#4d7c0f","#5b6472","#1f2937"];
-const TABDEF={home:["Start","#1a7a5c","home"],list:["Buchungen","#3d63a8","list"],fix:["Fixkosten","#c27c0e","repeat"],shop:["Einkauf","#0f8a8a","cart"],year:["Analyse","#d14d72","chart"],more:["Optionen","#5b6472","sliders"]};
+const TABDEF={home:["Start","#1a7a5c","home"],list:["Buchungen","#3d63a8","check"],fix:["Fixkosten","#c27c0e","list"],shop:["Einkauf","#0f8a8a","cart"],year:["Analyse","#d14d72","chart"],more:["Optionen","#5b6472","sliders"]};
 const PACK_MAIN={gruen:["#147A5B","#2e9c74"], ozean:["#0369a1","#0891b2"], sonne:["#ea580c","#db2777"], beere:["#7c3aed","#be185d"], erde:["#8a5a3a","#a16207"], wald:["#166534","#3f6212"], nacht:["#4338ca","#1e293b"], pastell:["#6b9bd1","#d17ba6"], mono:["#374151","#6b7280"]};
 function applyPack(){ const r=document.documentElement, t=(S.settings&&S.settings.theme)||"gruen", P=PACK_MAIN[t];
   if (!P){ r.removeAttribute("data-pack"); r.style.removeProperty("--pk"); r.style.removeProperty("--pk2"); return; }

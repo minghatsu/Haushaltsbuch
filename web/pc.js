@@ -261,7 +261,7 @@ if (IS_PC){
 /* Start */
 if (IS_PC){
   const PCH=()=>{ const h=S.settings.pcHome||(S.settings.pcHome={}); h.order=Array.isArray(h.order)?h.order:[]; h.min=Array.isArray(h.min)?h.min:[]; return h; };
-  const BIC={cash:"cash",budgets:"target",fix:"repeat",tax:"shield",goals:"piggy",debts:"bank",recent:"list",gemeinsam:"heart",offers:"cart",...HX_IC};
+  const BIC={cash:"cash",budgets:"target",fix:"list",tax:"shield",goals:"piggy",debts:"bank",recent:"check",gemeinsam:"heart",offers:"cart",...HX_IC};
   const name=k=>(HOME_BLOCKS.find(b=>b[0]===k)||[k,k])[1];
   const _k2=accTabKeys; accTabKeys = t => _k2(t).filter(k=>k!=="start");
   homeOrder = () => { const o=[...new Set(PCH().order)].filter(k=>HOME_BLOCKS.some(b=>b[0]===k)); for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; };
