@@ -575,16 +575,45 @@ if (IS_PC){
   const DS={busy:false, d:null, err:"", t:0};
   async function dsLoad(force){ if (DS.busy || (!force && Date.now()-DS.t<60e3)) return; DS.busy=true; DS.err="";
     try { DS.d=await devReq("devstats"); DS.t=Date.now(); } catch(e){ DS.err=e.message||"Server nicht erreichbar"; } finally { DS.busy=false; window.pcRelPaint(); } }
+  const FM={phone:"📱",tablet:"📲",pc:"💻",laptop:"💻"}, FN={phone:"Handy",tablet:"Tablet",pc:"PC",laptop:"PC"};
+  const vnum=v=>{ const m=String(v||"").match(/(\d+)\.(\d+)\.(\d+)/); return m?(+m[1])*1e6+(+m[2])*1e3+(+m[3]):0; };
+  const agoD=t=>{ if (!t) return "noch nie"; const d=Math.floor((Date.now()/1000-t)/86400); return d<=0?"heute":d===1?"gestern":`vor ${d} Tagen`; };
+  const kop=(ic,t,sub)=>`<div class="pcdtop2"><span class="ic">${ic}</span><span><b>${t}</b><small>${sub}</small></span></div>`;
+  function relPanel(){ setTimeout(()=>{ try { relLoad(); } catch(_){} }, 0);
+    const mine=relNum(REL.mineBody,"web"), ow=relNum(REL.allBody,"web"), D=[["handy","Handy","📱",ow],["tablet","Tablet","📲",relNum(REL.allBody,"webt")||ow],["pc","PC","💻",relNum(REL.allBody,"webp")||ow]];
+    const behind=D.filter(([,,,n])=>mine&&n!==mine), sel=D.filter(([k,,,n])=>REL.sel[k]&&n!==mine), loaded=!!mine;
+    const head = !loaded ? kop("🚀","Wird geladen …","Versionen werden abgefragt") : behind.length ? kop("🚀",`${esc(verName(mine))} bereit`,`Tester haben noch ${esc([...new Set(behind.map(d=>verName(d[3])))].join(" / "))}`) : kop("✅","Alles aktuell",`Alle haben ${esc(verName(mine))}`);
+    const cards=D.map(([k,l,ic,n])=>{ const same=loaded&&n===mine;
+      return `<label class="pcrdev ${same?"same":""}"><span class="ic">${ic}</span><span class="tx"><b>${l}</b><small>${same?esc(verName(mine)):`<s>${n?esc(verName(n)):"…"}</s> → ${loaded?esc(verName(mine)):"…"}`}</small></span>${loaded?`<span class="pcbadge ${same?"g":"o"}">${same?"aktuell ✓":"neuer da"}</span>`:""}<input type="checkbox" class="pcsw" data-relsel="${k}" ${REL.sel[k]&&!same?"checked":""} ${same?"disabled":""}></label>`; }).join("");
+    return `${head}${cards}<button class="btn ${REL.arm?"danger":"primary"} pcrgo" id="relGo" ${REL.busy||!sel.length||!loaded?"disabled":""}>${REL.busy?"Wird freigegeben …":REL.arm?"Wirklich freigeben?":!loaded?"…":sel.length?`${esc(verName(mine))} freigeben für ${sel.map(d=>d[1]).join(", ")}`:"Nichts ausgewählt"}</button>
+      ${REL.msg?`<span class="small" style="display:block;margin-top:8px;color:${/geklappt|unterwegs/.test(REL.msg)?"var(--good)":"var(--bad)"}">${esc(REL.msg)}</span>`:""}`; }
+  function testerPanel(d){
+    const T=(d.testers||[]), newest=Math.max(0,...T.map(t=>vnum(t.ver)), ...(d.versions||[]).map(v=>vnum(v.ver))), now=Date.now()/1000;
+    const st=t=>!t.seen||now-t.seen>14*86400?"in":vnum(t.ver)>=newest?"ok":"old";
+    const F=UI.dsF||"all", Q=(UI.dsQ||"").toUpperCase().trim();
+    const fit=t=>(!Q||t.code.includes(Q)) && (F==="all"||(F==="old"&&st(t)==="old")||(F==="in"&&st(t)==="in")||(F==="phone"&&t.form==="phone")||(F==="tablet"&&t.form==="tablet")||(F==="pc"&&(t.form==="pc"||t.form==="laptop")));
+    const n={ok:0,old:0,in:0}; T.forEach(t=>n[st(t)]++); const N=T.length||1, act=n.ok+n.old;
+    const head=kop("👥",`${T.length} ${T.length===1?"Tester":"Tester"}`, T.length?`${act} ${act===1?"war":"waren"} in den letzten 14 Tagen aktiv`:"Noch niemand freigeschaltet – verschick einen Code");
+    const bar=T.length?`<div class="pcstack"><i style="width:${n.ok/N*100}%;background:var(--good)"></i><i style="width:${n.old/N*100}%;background:var(--warn)"></i><i style="width:${n.in/N*100}%;background:var(--line)"></i></div>
+      <div class="pcstl"><span>🟢 ${n.ok} aktuell</span><span>🟠 ${n.old} veraltet</span><span>⚪ ${n.in} inaktiv</span></div>`:"";
+    const chips=[["all",`Alle ${T.length}`],["old",`Veraltet ${n.old}`],["in",`Inaktiv ${n.in}`],["phone","📱 Handy"],["tablet","📲 Tablet"],["pc","💻 PC"]];
+    const ctl=T.length?`<input class="in pcdsq" id="dsQ" placeholder="🔍 Code suchen …" value="${esc(UI.dsQ||"")}" autocomplete="off"><div class="pcdsf">${chips.map(([k,l])=>`<button class="${F===k?"on":""}" data-dsf="${k}">${l}</button>`).join("")}</div>`:"";
+    const row=t=>{ const s=st(t); return `<div class="pcdtr"><tt>${esc(t.code)}</tt><span class="dv" title="${esc(FN[t.form]||"unbekannt")}">${FM[t.form]||"❔"}</span><span class="pcbadge ${s==="ok"?"g":vnum(t.ver)&&newest-vnum(t.ver)>=1000?"r":s==="in"?"":"o"}">${t.ver?esc("v"+t.ver.replace(/^v/,"")):"–"}</span><span class="ag">${agoD(t.seen)}</span></div>`; };
+    const open=UI.dsOpen||{old:true,in:false,ok:false};
+    const grp=(k,ic,l)=>{ const L=T.filter(t=>st(t)===k&&fit(t)).sort((a,b)=>(b.seen||0)-(a.seen||0)); if (!L.length) return ""; const o=Q||F!=="all"?true:!!open[k], lim=UI.dsMore&&UI.dsMore[k]?999:8;
+      return `<div class="pcdgrp"><button class="pcdgh" data-dsgrp="${k}"><span>${ic} ${l}</span><em>${L.length} ${o?"▴":"▾"}</em></button>${o?L.slice(0,lim).map(row).join("")+(L.length>lim?`<button class="pcdmore" data-dsmore="${k}">+ ${L.length-lim} weitere</button>`:""):""}</div>`; };
+    const groups=grp("old","🟠","Veraltet – Update noch nicht da")+grp("in","⚪","Länger nicht aktiv")+grp("ok","🟢","Aktuell");
+    return head+bar+ctl+(T.length?(groups||`<p class="small muted" style="padding:10px 2px">Niemand passt zum Filter.</p>`):"");
+  }
+  function codesPanel(d){ const I=[...(d.invites||[])].sort((a,b)=>(+a.used)-(+b.used)), open=I.filter(i=>!+i.used);
+    const head=kop("🎟️",`${open.length} ${open.length===1?"Code":"Codes"} offen`, `${I.length-open.length} schon benutzt · jeder Code gilt für eine Person`);
+    const row=i=>{ const u=+i.used; return `<div class="pcdcode ${u?"used":""}"><span class="dot" style="background:${u?"var(--good)":"var(--warn)"}"></span><tt>${esc(i.code)}</tt><span class="pcbadge ${u?"g":"o"}">${u?`benutzt${i.last?" "+new Date(i.last*1000).toLocaleDateString("de-DE",{day:"numeric",month:"numeric"}):""}`:"wartet"}</span>${u?"":`<button class="pccp" data-dscopy="${esc(i.code)}">Kopieren</button>`}</div>`; };
+    return head+`<button class="btn primary pcrgo" data-invopen="1" style="margin:0 0 10px">＋ Code für neuen Tester</button>`+(I.length?I.map(row).join(""):`<p class="small muted">Noch keine Einladung verschickt.</p>`); }
   function devPanelHtml(){ const tab=UI.devTab||"rel";
-    const tabs=`<div class="seg pcdevseg">${[["rel","Freigabe"],["stat","Tester"],["test","Testdaten"]].map(([k,l])=>`<button class="${tab===k?"on":""}" data-devtab="${k}">${l}</button>`).join("")}</div>`;
-    if (tab==="rel") return tabs+relCardHtml();
-    if (tab==="stat"){ const d=DS.d; if (!d) return tabs+`<p class="small muted" style="padding:14px 0">${DS.err?esc(DS.err):"Wird geladen …"}</p>`;
-      const fm={phone:"Handy",tablet:"Tablet",pc:"PC",laptop:"Laptop"}, byV={};
-      for (const v of d.versions||[]){ const k="v"+(v.ver||"?"); (byV[k]=byV[k]||[]).push(v); }
-      const inv=(d.invites||[]).map(i=>`<div class="pcdsr"><b>${i.lvl==0?"👑 Von dir":"Von Tester"}</b><span>${esc(i.code)}</span><em>${+i.used?`benutzt${i.last?" am "+esc(new Date(i.last*1000).toLocaleDateString("de-DE")):""}`:"noch offen"}</em></div>`).join("") || `<p class="small muted">Noch keine Einladung verschickt.</p>`;
-      const ver=Object.entries(byV).map(([k,L])=>`<div class="pcdsr"><b>${esc(k)}</b><span>${L.map(v=>`${v.n}× ${fm[v.form]||v.form}${v.role==="dev"?" (du)":""}`).join(" · ")}</span></div>`).join("") || `<p class="small muted">Noch keine Meldungen – die Apps melden sich einmal am Tag.</p>`;
-      return tabs+`<div class="pcds"><div class="pcdsk"><div><b>${d.activations|0}</b><small>freigeschaltet</small></div><div><b>${d.active7|0}</b><small>aktiv (7 Tage)</small></div></div>
-        <h4>Einladungen</h4>${inv}<h4>Versionen (14 Tage)</h4>${ver}<button class="link small" data-dsreload="1">Neu laden</button></div>`; }
+    const tabs=`<div class="seg pcdevseg">${[["rel","Freigabe"],["stat","Tester"],["codes","Codes"],["test","Testdaten"]].map(([k,l])=>`<button class="${tab===k?"on":""}" data-devtab="${k}">${l}</button>`).join("")}</div>`;
+    if (tab==="rel") return tabs+relPanel();
+    if (tab==="stat"||tab==="codes"){ const d=DS.d; if (!d) return tabs+`<p class="small muted" style="padding:14px 0">${DS.err?esc(DS.err):"Wird geladen …"}</p>`;
+      return tabs+`<div class="pcds">${tab==="stat"?testerPanel(d):codesPanel(d)}<button class="pccp" style="margin-top:10px" data-dsreload="1">↻ Neu laden</button></div>`; }
     const coupled=!!SYNC.token;
     return tabs+`<div class="pcds"><p class="small muted" style="margin:6px 0 10px">Nur für ein Testgerät: füllt die App mit Beispiel-Buchungen der letzten 3 Monate oder setzt sie komplett zurück.</p>
       ${coupled?`<div class="notice warn"><span>Dieses Gerät ist gekoppelt – Testdaten würden auf alle deine Geräte übertragen. Deshalb hier gesperrt.</span></div>`:
@@ -599,7 +628,12 @@ if (IS_PC){
     for (const [name,amount] of F) await put("fixed", newId(), {name, amount, kind:"privat", order:k++, test:true});
     render(); toast(`${n} Test-Buchungen und ${F.length} Fixkosten angelegt`); }
   document.addEventListener("click", async e=>{
-    const t=e.target.closest("[data-devtab]"); if (t){ UI.devTab=t.dataset.devtab; if (UI.devTab==="stat") dsLoad(); window.pcRelPaint(); return; }
+    const t=e.target.closest("[data-devtab]"); if (t){ UI.devTab=t.dataset.devtab; if (UI.devTab==="stat"||UI.devTab==="codes") dsLoad(); window.pcRelPaint(); return; }
+    const f=e.target.closest("[data-dsf]"); if (f){ UI.dsF=f.dataset.dsf; window.pcRelPaint(); return; }
+    const g=e.target.closest("[data-dsgrp]"); if (g){ const k=g.dataset.dsgrp, o=UI.dsOpen||(UI.dsOpen={old:true,in:false,ok:false}); o[k]=!o[k]; window.pcRelPaint(); return; }
+    const mo=e.target.closest("[data-dsmore]"); if (mo){ (UI.dsMore=UI.dsMore||{})[mo.dataset.dsmore]=true; window.pcRelPaint(); return; }
+    const cp=e.target.closest("[data-dscopy]"); if (cp){ try { await navigator.clipboard.writeText(cp.dataset.dscopy); toast("Code kopiert"); } catch(_){ toast(cp.dataset.dscopy); } return; }
+    if (e.target.closest("[data-invopen]") && $("pcRelPop")) $("pcRelPop").remove();
     if (e.target.closest("[data-dsreload]")){ dsLoad(true); return; }
     if (e.target.closest("[data-testfill]")){ if (SYNC.token) return; await testFill(); return; }
     if (e.target.closest("[data-testwipe]")){ if (SYNC.token) return; if (!UI.testArm){ UI.testArm=true; window.pcRelPaint(); setTimeout(()=>{ UI.testArm=false; window.pcRelPaint(); }, 5000); return; } UI.testArm=false; $("pcRelPop")?.remove(); await wipeAll(); toast("Alles zurückgesetzt"); return; }
@@ -607,8 +641,9 @@ if (IS_PC){
   window.pcRelPaint=()=>{ try { relBtn(); const pop=$("pcRelPop"); if (pop) pop.innerHTML=devPanelHtml(); } catch(_){} };
   document.addEventListener("click", e=>{ const pop=$("pcRelPop");
     if (e.target.closest("#pcRel")){ if (pop){ pop.remove(); return; } const r=e.target.closest("#pcRel").getBoundingClientRect(); const el=document.createElement("div"); el.id="pcRelPop"; el.className="pcrelpop";
-      el.style.top=(r.bottom+10)+"px"; el.style.left=Math.max(12, Math.min(innerWidth-342, r.right-330))+"px"; el.innerHTML=devPanelHtml(); document.body.appendChild(el); relLoad(true); if ((UI.devTab||"rel")==="stat") dsLoad(); return; }
+      el.style.top=(r.bottom+10)+"px"; el.style.left=Math.max(12, Math.min(innerWidth-342, r.right-330))+"px"; el.innerHTML=devPanelHtml(); document.body.appendChild(el); relLoad(true); if (["stat","codes"].includes(UI.devTab||"rel")) dsLoad(); return; }
     if (pop && !e.target.closest("#pcRelPop") && document.contains(e.target)) pop.remove(); });
+  document.addEventListener("input", e=>{ if (e.target.id!=="dsQ") return; UI.dsQ=e.target.value; const pos=e.target.selectionStart; window.pcRelPaint(); const q=$("dsQ"); if (q){ q.focus(); try { q.setSelectionRange(pos,pos); } catch(_){} } });
   const _r5=render; render = (...a) => { const x=_r5(...a); try { relBtn(); } catch(e){} return x; };
   setTimeout(()=>{ relBtn(); relLoad(); }, 4000); setInterval(()=>{ if (document.visibilityState==="visible") relLoad(); }, 10*60e3);
 }

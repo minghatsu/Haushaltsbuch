@@ -238,7 +238,13 @@ try {
         $vers = q('SELECT ver, form, role, COUNT(*) AS n FROM pings WHERE t > ? GROUP BY ver, form, role ORDER BY ver DESC', [$since])->fetchAll(PDO::FETCH_ASSOC);
         $act7 = (int)q('SELECT COUNT(*) FROM pings WHERE t > ?', [time() - 7 * 86400])->fetchColumn();
         $acts = (int)q('SELECT COUNT(*) FROM acts')->fetchColumn();
-        out(['invites' => $inv, 'versions' => $vers, 'active7' => $act7, 'activations' => $acts]);
+        $testers = [];
+        foreach (q('SELECT a.code, a.dev, a.t, i.lvl FROM acts a JOIN invites i ON i.code = a.code ORDER BY a.t DESC LIMIT 500')->fetchAll(PDO::FETCH_ASSOC) as $x) {
+            $p = q('SELECT ver, form, role, t FROM pings WHERE h = ?', [hash('sha256', 'ping|' . $x['dev'])])->fetch(PDO::FETCH_ASSOC);
+            if ($p && $p['role'] === 'dev') continue;
+            $testers[] = ['code' => $x['code'], 'since' => (int)$x['t'], 'ver' => $p ? $p['ver'] : '', 'form' => $p ? $p['form'] : '', 'seen' => $p ? (int)$p['t'] : 0];
+        }
+        out(['invites' => $inv, 'versions' => $vers, 'active7' => $act7, 'activations' => $acts, 'testers' => $testers]);
     }
     if ($a === 'feedlist') {
         devCheck(); $list = [];

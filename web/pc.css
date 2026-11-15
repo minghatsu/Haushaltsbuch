@@ -902,3 +902,27 @@ html.pc .pcaq:hover,html.pc .pcaq.on{background:var(--accent);color:var(--accent
 html.pc .pcahelp{font-size:13px;line-height:1.45;color:var(--muted);background:var(--surface,#fff);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 30px 10px 0}
 html.pc .pcahelp b{color:var(--fg)}
 html.pc .pcarl>.pcaq{top:12px}html.pc .pcarl .pcach{padding-right:34px}html.pc .pcarl>.pcasay{margin:4px 0 8px}
+html.pc .pcrelpop{width:400px}
+html.pc .pcdtop2{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;border-radius:16px;padding:13px 14px;margin:8px 0 10px}
+html.pc .pcdtop2 .ic{font-size:26px}html.pc .pcdtop2 b{display:block;font:800 21px var(--f-display);line-height:1.15}html.pc .pcdtop2 small{display:block;opacity:.85;font-size:12px;margin-top:2px}
+html.pc .pcrdev{display:flex;align-items:center;gap:10px;background:var(--sunk);border-radius:14px;padding:9px 10px;margin-bottom:7px;cursor:pointer}
+html.pc .pcrdev .ic{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);display:grid;place-items:center;font-size:17px;flex:none}
+html.pc .pcrdev .tx{flex:1;min-width:0;display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:1px}html.pc .pcrdev .tx b{display:block;font-size:14px}html.pc .pcrdev .tx small{display:block;font:600 12px ui-monospace,monospace;color:var(--muted)}html.pc .pcrdev .tx s{opacity:.6}
+html.pc .pcbadge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+html.pc .pcbadge.g{background:var(--good-soft);color:var(--good)}html.pc .pcbadge.o{background:var(--warn-soft);color:var(--warn)}html.pc .pcbadge.r{background:var(--bad-soft);color:var(--bad)}
+html.pc .pcsw{appearance:none;-webkit-appearance:none;width:38px;height:22px;border-radius:99px;background:var(--line);position:relative;cursor:pointer;flex:none;margin:0;transition:background .2s}
+html.pc .pcsw:after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 2px #0003}
+html.pc .pcsw:checked{background:var(--accent)}html.pc .pcsw:checked:after{left:19px}html.pc .pcsw:disabled{opacity:.4;cursor:default}
+html.pc .pcrgo{width:100%;justify-content:center;margin-top:4px}
+html.pc .pcstack{display:flex;height:11px;border-radius:7px;overflow:hidden;background:var(--sunk);margin:2px 0 5px}html.pc .pcstack i{display:block}
+html.pc .pcstl{display:flex;gap:12px;font-size:11.5px;color:var(--muted);margin-bottom:9px}
+html.pc .pcdsq{width:100%;margin-bottom:8px;padding:8px 11px;font-size:13px}
+html.pc .pcdsf{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}html.pc .pcdsf button{border:0;font:700 12px var(--f-body);border-radius:99px;padding:5px 10px;background:var(--sunk);color:var(--muted);cursor:pointer}html.pc .pcdsf button.on{background:var(--accent);color:var(--accent-ink)}
+html.pc .pcdgrp{background:var(--sunk);border-radius:14px;margin-bottom:8px;overflow:hidden}
+html.pc .pcdgh{display:flex;width:100%;align-items:center;gap:8px;border:0;background:none;padding:10px 12px;font:700 13.5px var(--f-body);color:var(--fg);cursor:pointer;text-align:left}html.pc .pcdgh em{margin-left:auto;font-style:normal;color:var(--muted)}
+html.pc .pcdtr{display:flex;align-items:center;gap:9px;padding:7px 12px;border-top:1px solid var(--line);font-size:12.5px}
+html.pc .pcdtr tt{font:700 12.5px ui-monospace,monospace;letter-spacing:.06em;width:64px}html.pc .pcdtr .dv{width:22px}html.pc .pcdtr .ag{margin-left:auto;color:var(--muted);font-size:11.5px}
+html.pc .pcdmore{border:0;background:none;color:var(--accent);font:700 12px var(--f-body);padding:8px 12px;cursor:pointer}
+html.pc .pcdcode{display:flex;align-items:center;gap:9px;background:var(--sunk);border-radius:12px;padding:8px 10px;margin-bottom:6px}html.pc .pcdcode tt{font:700 14px ui-monospace,monospace;letter-spacing:.12em;flex:1}html.pc .pcdcode.used{opacity:.75}
+html.pc .pcdcode .dot,html.pc .pcds .dot{width:9px;height:9px;border-radius:50%;flex:none}
+html.pc .pccp{border:0;background:var(--accent-soft);color:var(--accent);font:700 11.5px var(--f-body);border-radius:8px;padding:5px 9px;cursor:pointer}
