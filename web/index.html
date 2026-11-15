@@ -7378,11 +7378,12 @@ function renderRcptRow(){
 const ZB_TRIED=new Set();
 async function zBonFromStored(id, img){
   const t=S.tx.find(x=>x.id===id); if (!t || !img || (t.items&&t.items.length) || t.kind!=="ausgabe" || ZB_TRIED.has(id)) return; ZB_TRIED.add(id);
+  const v0=RCPT.v[id]||0;
   try { scanWorking(true);
     const L = canNativeOcr() ? await ocrDataUrl(img) : await scanImageFile(img);
     scanWorking(false); try { scanBusy(false); } catch(_){}
     const its=receiptItems(L||[]); if (!its.length){ if (UI.editId===id) toast("Auf dem gespeicherten Bon wurden keine Artikel erkannt", null, null, 4000); return; }
-    const t2=S.tx.find(x=>x.id===id); if (!t2) return;
+    const t2=S.tx.find(x=>x.id===id); if (!t2 || (RCPT.v[id]||0)!==v0 || (t2.items&&t2.items.length) || (UI.editId===id && (UI.scanItems || UI.rcpt.state!=="stored"))) return;
     const doc={...plainTx(t2), items:its.map(i=>({r:i.n, p:i.p}))}, sid=zaShopId(parseReceipt(L).shop||t2.note); if (sid) doc.ishop=sid;
     await saveTxDoc(id, doc, t2);
     if (UI.editId===id && !UI.scanItems){ UI.zbOpen=true; zBonRender(); }
@@ -7393,10 +7394,10 @@ async function zBonBackfill(){
   const todo=S.tx.filter(t=>t.kind==="ausgabe" && hasReceipt(t.id) && !(t.items&&t.items.length) && !done[t.id] && !ZB_TRIED.has(t.id)).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,40);
   let n=0;
   for (const t of todo){ if (document.hidden) await new Promise(r=>setTimeout(r,5000)); ZB_TRIED.add(t.id); done[t.id]=1; try{ localStorage.setItem("hb-zbtried", JSON.stringify(done)); }catch(_){}
-    try { const img=await rcptGet(t.id); if (!img) continue;
+    try { const v0=RCPT.v[t.id]||0, img=await rcptGet(t.id); if (!img) continue;
       const L = canNativeOcr() ? await ocrDataUrl(img) : await (async()=>{ await loadTesseract(); const r=await window.Tesseract.recognize(img,"deu"); return ((r.data&&r.data.lines)||[]).map(l=>({t:l.text.trim(), x:l.bbox.x0, y:l.bbox.y0, w:l.bbox.x1-l.bbox.x0, h:l.bbox.y1-l.bbox.y0})).filter(l=>l.t); })();
       const its=receiptItems(L||[]); if (!its.length) continue;
-      const t2=S.tx.find(x=>x.id===t.id); if (!t2 || (t2.items&&t2.items.length)) continue;
+      const t2=S.tx.find(x=>x.id===t.id); if (!t2 || (t2.items&&t2.items.length) || (RCPT.v[t.id]||0)!==v0 || UI.editId===t.id) continue;
       const doc={...plainTx(t2), items:its.map(i=>({r:i.n, p:i.p}))}, sid=zaShopId(parseReceipt(L).shop||t2.note); if (sid) doc.ishop=sid;
       if (await saveTxDoc(t.id, doc, t2).then(()=>true,()=>false)) n++;
     } catch(e){}
