@@ -226,6 +226,13 @@ try {
         q('INSERT OR REPLACE INTO pings (h, ver, form, role, t) VALUES (?, ?, ?, ?, ?)', [hash('sha256', 'ping|' . $dev), substr($ver, 0, 12), $form, $role, time()]);
         out(['ok' => true]);
     }
+    if ($a === 'invdel') {
+        devCheck(); $b = body();
+        $c = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)($b['c'] ?? '')));
+        if ($c === '') fail('Code fehlt', 400);
+        q("UPDATE invites SET off = 1, owner = owner || '~' || ? WHERE code = ?", [(string)time(), $c]);
+        out(['ok' => true]);
+    }
     // Dev-Übersicht
     if ($a === 'devstats') {
         devCheck();

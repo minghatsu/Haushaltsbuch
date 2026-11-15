@@ -926,3 +926,4 @@ html.pc .pcdmore{border:0;background:none;color:var(--accent);font:700 12px var(
 html.pc .pcdcode{display:flex;align-items:center;gap:9px;background:var(--sunk);border-radius:12px;padding:8px 10px;margin-bottom:6px}html.pc .pcdcode tt{font:700 14px ui-monospace,monospace;letter-spacing:.12em;flex:1}html.pc .pcdcode.used{opacity:.75}
 html.pc .pcdcode .dot,html.pc .pcds .dot{width:9px;height:9px;border-radius:50%;flex:none}
 html.pc .pccp{border:0;background:var(--accent-soft);color:var(--accent);font:700 11.5px var(--f-body);border-radius:8px;padding:5px 9px;cursor:pointer}
+html.pc .pcdel{border:0;background:none;cursor:pointer;font:700 11.5px var(--f-body);color:var(--muted);border-radius:8px;padding:5px 7px;opacity:.7}html.pc .pcdel:hover{opacity:1;background:var(--bad-soft)}html.pc .pcdel.arm{opacity:1;background:var(--bad);color:#fff}
