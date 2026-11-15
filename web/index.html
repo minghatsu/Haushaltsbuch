@@ -8108,15 +8108,16 @@ function validTarget(t){
   if (k==="ausgabe"||k==="betrieb") return cats(k).includes(v);
   return false;
 }
-function targetOptions(sel, positive){
+function targetOptions(sel, positive, mg){
   const o=(v,l)=>`<option value="${esc(v)}" ${v===sel?"selected":""}>${esc(l)}</option>`;
+  const mo = mg ? `<optgroup label="Schon eingetragen">${o("merge|"+mg.id, "= "+mg.note+" ("+shortDate(mg.date)+") verknüpfen")}</optgroup>` : "";
   const grp=(label, items)=> items.length?`<optgroup label="${esc(label)}">${items.join("")}</optgroup>`:"";
   const inc = grp("Einnahme", incCats().map(c=>o("einnahme|"+c.name, c.name)));
   const out = grp("Ausgabe privat", cats("ausgabe").map(c=>o("ausgabe|"+c, c)))
     + (positive ? "" : grp("Fixkosten abhaken", fixedSorted().map(f=>o("fix|"+f.id, f.name+" ("+eur(f.amount)+")"))))
     + grp("Ausgabe betrieblich", cats("betrieb").map(c=>o("betrieb|"+c, c)))
     + grp("Sonstiges", [o("vz|","Steuer-Vorauszahlung")]);
-  return (positive ? inc+out : out+inc) + o("skip|","Nicht übernehmen");
+  return mo + (positive ? inc+out : out+inc) + o("skip|","Nicht übernehmen");
 }
 async function readFileText(file){
   const buf = await file.arrayBuffer();
@@ -8622,6 +8623,19 @@ document.addEventListener("change", e=>{
   s[el.dataset.acctbal]={date:isoOf(new Date()), balance:Math.round(v*100)/100};
   S.settings.accountAnchors=s; el.value=""; el.blur(); saveSettings(); toast("Gespeichert"); render();
 });
+function mergeMatch(items){
+  const day=d=>new Date(d+"T12:00:00").getTime()/864e5, used=new Set();
+  const pool=S.tx.filter(t=>!t.importKey && t.date && t.pay!=="bar" && t.kind!=="umbuchung" && t.kind!=="abhebung");
+  const cand=items.filter(it=>!it.dup && !it.internal && !it.ppDup).sort((a,b)=>a.date.localeCompare(b.date));
+  for (const it of cand){
+    const a=Math.abs(it.amount), d=day(it.date); let best=null, bd=9;
+    for (const t of pool){ if (used.has(t) || Math.abs(Number(t.amount)-a)>0.005) continue;
+      if ((it.amount>0)!==(t.kind==="einnahme")) continue;
+      const g=d-day(t.date); if (g<-1 || g>4) continue; const sc=Math.abs(g)+(nrm(t.note||"")&&nrm(it.alias||it.payee||"").includes(nrm(t.note).split(" ")[0])?-0.5:0);
+      if (sc<bd){ bd=sc; best=t; } }
+    if (best){ used.add(best); it.merge={id:best.id, note:best.note||best.cat||"Buchung", date:best.date}; it.target="merge|"+best.id; it.sure=true; it.maybeDup=false; }
+  }
+}
 function ppMatch(items, isPP){
   const RX=/paypal/, day=d=>new Date(d+"T12:00:00").getTime()/864e5, used=new Set();
   const pool=S.tx.filter(t=>t.kind!=="einnahme" && t.date);
@@ -8660,11 +8674,13 @@ function buildItems(){
     it.key=key; it.ignored = ignored.has(key) && !keys.has(key); it.dup = keys.has(key) || (it.ignored && !imp.showIgnored);
     if (imp.pdf && !it.dup){ const sk=date+"|"+Math.abs(amount).toFixed(2); if ((soft[sk]||0)>0){ soft[sk]--; it.maybeDup=true; } }
     const ppInternal = m.paypal && /bankgutschrift|bankkonto|vom nutzer eingeleitete abbuchung|abbuchung auf bankkonto|einzahlung|währungsumrechnung|waehrungsumrechnung|currency conversion|bank deposit|withdrawal|general authorization|allgemeine autorisierung/.test(nrm(it.type+" "+it.ref));
-    const s = (spaces.has(nrm(it.payee)) || ppInternal) ? {target:"skip|", sure:true, internal:true} : suggest(it); it.internal=!!s.internal; it.target=s.target; it.sure=s.sure; it.learned=!!s.learned; it.remember=false;
+    { const al=(S.settings.payeeAlias||{})[nrm(it.payee)]; if (al) it.alias=al; }
+    const s = (spaces.has(nrm(it.payee)) || ppInternal) ? {target:"skip|", sure:true, internal:true} : suggest(it.alias && !(S.settings.rules||[]).some(r=>r.match===nrm(it.payee))?{...it, payee:it.alias}:it); it.internal=!!s.internal; it.target=s.target; it.sure=s.sure; it.learned=!!s.learned; it.remember=false;
     if (it.maybeDup){ it.target="skip|"; it.sure=true; }
     items.push(it);
   }
   ppMatch(items, !!m.paypal);
+  mergeMatch(items);
   items.sort((a,b)=>b.date.localeCompare(a.date));
   imp.items = items;
   refBackfill(items);
@@ -8740,10 +8756,10 @@ function renderImport(){
       ${fresh.some(i=>i.payee)?`<label class="rem" style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;padding:10px 12px;margin-bottom:6px;background:var(--sunk);border-radius:12px;cursor:pointer"><input type="checkbox" id="impAll" data-impall="1" style="width:19px;height:19px;accent-color:var(--accent)" ${fresh.filter(i=>i.payee).every(i=>i.remember)?"checked":""}>Alle markieren <span class="small muted" style="font-weight:600">(alle Empfänger merken)</span></label>`:""}
       ${fresh.length ? fresh.map(it=>{ const idx=imp.items.indexOf(it), pos=it.amount>0;
         const selfNote = it.target.startsWith("einnahme|") && incArt(it.target.slice(9))==="selbst" && !S.settings.kleinunternehmer ? `<span class="small muted">davon netto: ${esc(eur(it.amount/(1+vat)))}</span>` : "";
-        return `<div class="imp" data-imp="${idx}"><div style="min-width:0"><div class="who">${esc(it.payee||it.ref||"Ohne Namen")}</div><div class="ref">${esc(shortDate(it.date))}${it.ref&&it.payee?" · "+esc(it.ref):""}</div></div>
+        return `<div class="imp" data-imp="${idx}"><div style="min-width:0"><div class="who">${esc(it.alias||it.payee||it.ref||"Ohne Namen")}${it.alias?` <span class="small muted" style="font-weight:500">(${esc(it.payee)})</span>`:""}</div><div class="ref">${esc(shortDate(it.date))}${it.ref&&it.payee?" · "+esc(it.ref):""}</div></div>
           <div class="amt ${pos?"inc":""}" style="text-align:right">${pos?"+":"−"} ${esc(eur(Math.abs(it.amount)))}</div>
-          <div class="ctl"><select class="in" id="imp-${idx}" data-imptarget="${idx}" aria-label="Zuordnung" style="${it.sure?"":"border-color:var(--warn)"}">${targetOptions(it.target,pos)}</select>
-          ${it.ppDup&&it.target==="skip|"?`<span class="pill warn" title="${esc(it.ppWith)}">schon über ${it.ppDup==="bank"?"die Bank":"PayPal"} drin</span>`:it.maybeDup&&it.target==="skip|"?`<span class="pill warn">schon vorhanden?</span>`:it.internal?`<span class="pill">Umbuchung Space</span>`:it.learned?`<span class="pill ok">gemerkt</span>`:!it.sure?`<span class="pill warn">prüfen</span>`:""}
+          <div class="ctl"><select class="in" id="imp-${idx}" data-imptarget="${idx}" aria-label="Zuordnung" style="${it.sure?"":"border-color:var(--warn)"}">${targetOptions(it.target,pos,it.merge)}</select>
+          ${it.merge&&it.target.startsWith("merge|")?`<span class="pill ok">mit „${esc(it.merge.note)}“ verknüpft</span>`:it.ppDup&&it.target==="skip|"?`<span class="pill warn" title="${esc(it.ppWith)}">schon über ${it.ppDup==="bank"?"die Bank":"PayPal"} drin</span>`:it.maybeDup&&it.target==="skip|"?`<span class="pill warn">schon vorhanden?</span>`:it.internal?`<span class="pill">Umbuchung Space</span>`:it.learned?`<span class="pill ok">gemerkt</span>`:!it.sure?`<span class="pill warn">prüfen</span>`:""}
           ${it.payee?`<label class="rem"><input type="checkbox" data-impremember="${idx}" ${it.remember?"checked":""}>${esc(it.payee.length>22?it.payee.slice(0,22)+"…":it.payee)} merken</label>`:""}${selfNote}</div></div>`; }).join("")
         : emptyState("check","Alles schon importiert","In dieser Datei sind keine neuen Buchungen.")}
     </div>
@@ -8761,9 +8777,12 @@ async function withRetry(fn){
 async function commitImport(){
   const imp=UI.imp; if (!imp || !imp.items || UI.importing) return;
   const fresh=imp.items.filter(i=>!i.dup), vat=(Number(S.settings.vatRate)||0)/100;
-  const months={}, bundles={}; let nTx=0, nFix=0, lastYm=null;
+  const months={}, bundles={}, edits={}, tasks0=[], alias={...(S.settings.payeeAlias||{})}; let nTx=0, nFix=0, nMerge=0, lastYm=null; const mRules=[];
   for (const it of fresh){
     const [k,v]=it.target.split("|"); if (k==="skip") continue;
+    if (k==="merge"){ const t=S.tx.find(x=>x.id===v); if (!t) continue; const d=plainTx(t); d.importKey=it.key; if (it.payee) d.bank=String(it.payee).trim().slice(0,80); const ref=String(it.ref||"").replace(/\s+/g," ").trim().slice(0,120); if (ref && !d.ref) d.ref=ref;
+      if (t._b) (edits[t._b]=edits[t._b]||{})[t.id]=d; else tasks0.push(()=>put("tx", t.id, d));
+      const pk=nrm(it.payee||""), tn=String(t.note||"").trim(); if (pk && tn && !pk.includes(nrm(tn).split(" ")[0]||"~")) alias[pk]=tn.slice(0,40); if (pk && t.cat && ["ausgabe","betrieb","einnahme"].includes(t.kind)) mRules.push([pk, t.kind+"|"+t.cat]); nMerge++; continue; }
     const ym=it.date.slice(0,7); if (!lastYm || ym>lastYm) lastYm=ym;
     if (k==="fix"){
       const m = months[ym] || (months[ym] = clone(S.months[ym]||{paid:{}}));
@@ -8772,16 +8791,18 @@ async function commitImport(){
       m.paid[v]=Math.round(((m._fresh[v]?(m.paid[v]||0):0)+Math.abs(it.amount))*100)/100;
       m.paidKeys[v]=it.key; m.importKeys=[...(m.importKeys||[]), it.key]; m._fresh[v]=true; nFix++;
     } else {
-      let amount=Math.abs(it.amount), note=(it.payee||"").trim().slice(0,80);
+      let amount=Math.abs(it.amount), note=(it.alias||it.payee||"").trim().slice(0,80);
       const doc={ date:it.date, amount:Math.round(amount*100)/100, kind:k==="vz"?"vorauszahlung":k, cat:k==="vz"?"Steuer-Vorauszahlung":v, note, ts:ordTs(it), importKey:it.key, source:(imp.map.paypal?"paypal":"n26") };
       const ref=String(it.ref||"").replace(/\s+/g," ").trim().slice(0,120); if (ref) doc.ref=ref;
       if (k==="einnahme" && incArt(v)==="selbst" && !S.settings.kleinunternehmer) doc.net=Math.round(amount/(1+vat)*100)/100;
       (bundles[ym]=bundles[ym]||{})[newId()+nTx.toString(36)]=doc; nTx++;
     }
   }
-  const tasks=[];
+  const tasks=[...tasks0];
+  for (const b of Object.keys(edits)) if (!bundles[b]) bundles[b]={};
   for (const [ym, add] of Object.entries(bundles)){
     let part=1, docId=ym, items=clone(S.txb[docId]||{});
+    for (const [eb, ed] of Object.entries(edits)) if (eb===docId) Object.assign(items, ed);
     for (const [id,doc] of Object.entries(add)){
       items[id]=doc;
       if (JSON.stringify(items).length > 200000){ delete items[id]; const full=items, fid=docId; tasks.push(()=>put("txb", fid, {items:full})); part++; docId=ym+"_"+part; items=clone(S.txb[docId]||{}); items[id]=doc; }
@@ -8790,18 +8811,20 @@ async function commitImport(){
   }
   for (const [ym,m] of Object.entries(months)){ delete m._fresh; tasks.push(()=>put("months", ym, m)); }
   const rules = clone(S.settings.rules||[]);
-  for (const it of fresh){ if (!it.remember || !it.payee || it.internal || (!it.sure && !it.userSet)) continue; const match=nrm(it.payee); const i=rules.findIndex(r=>r.match===match); if (i>=0) rules[i].target=it.target; else rules.push({match, target:it.target}); }
+  for (const it of fresh){ if (!it.remember || !it.payee || it.internal || it.target.startsWith("merge") || (!it.sure && !it.userSet)) continue; const match=nrm(it.payee); const i=rules.findIndex(r=>r.match===match); if (i>=0) rules[i].target=it.target; else rules.push({match, target:it.target}); }
+  for (const [m,tg] of mRules) if (!rules.some(r=>r.match===m)) rules.push({match:m, target:tg});
   const skipped = fresh.filter(i=>i.target.startsWith("skip")).map(i=>i.key);
   UI.importing = {done:0, total:tasks.length+1};
   renderImport();
   try {
     await runLimited(tasks, 4, ()=>{ UI.importing.done++; renderImport(); });
     S.settings.rules = rules.slice(-400);
+    if (nMerge) S.settings.payeeAlias = Object.fromEntries(Object.entries(alias).slice(-500));
     const takenKeys = new Set(fresh.filter(i=>!i.target.startsWith("skip")).map(i=>i.key));
     S.settings.ignoredKeys = [...new Set([...(S.settings.ignoredKeys||[]).filter(k=>!takenKeys.has(k)), ...skipped])].slice(-3000);
     if (!mem) await withRetry(()=>db.doc("app/settings").set(clone(S.settings)));
     UI.importing=null; UI.imp=null; UI.view="list"; if (lastYm) UI.ym=lastYm; render(); window.scrollTo({top:0});
-    toast(`${nTx} Buchungen übernommen${nFix?`, ${nFix} Fixkosten abgehakt`:""}`);
+    toast(`${nTx} Buchungen übernommen${nFix?`, ${nFix} Fixkosten abgehakt`:""}${nMerge?`, ${nMerge} mit vorhandenen verknüpft`:""}`);
     setTimeout(()=>{ try { if (recurCands().length){ RECUR_TOLD=true; recurSheet(); } } catch(e){} }, 900);
   } catch(e){
     UI.importing=null; reportErr(e);
