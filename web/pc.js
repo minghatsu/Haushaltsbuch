@@ -1289,11 +1289,14 @@ if (IS_PC){
 }
 if (IS_PC){
   const sg=v=>(v>=0?"+ ":"− ")+eur0(Math.abs(v));
+  const say=h=>`<div class="pcasay">${h}</div>`, help=t=>`<button class="pcaq" data-pcaq aria-label="Was sehe ich hier?">?</button><div class="pcahelp" hidden>${t}</div>`;
+  const lst=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" und "+a[a.length-1];
   const netBars=(pts,onIdx)=>{ const W=520,H=118,n=pts.length,bw=W/n, vals=pts.filter(p=>!p.fut).map(p=>Math.abs(p.v)), mx=Math.max(1,...vals), mid=H/2;
-    let s=`<svg class="pcab" viewBox="0 0 ${W} ${H+24}" role="img" aria-label="Übrig pro Monat"><line x1="0" x2="${W}" y1="${mid}" y2="${mid}" stroke="var(--line)" stroke-dasharray="4 5"/>`;
+    let s=`<svg class="pcab" viewBox="0 -18 ${W} ${H+42}" role="img" aria-label="Übrig pro Monat"><line x1="0" x2="${W}" y1="${mid}" y2="${mid}" stroke="var(--line)" stroke-dasharray="4 5"/>`;
     pts.forEach((p,i)=>{ const h=p.fut?0:Math.max(3,Math.abs(p.v)/mx*(mid-6)), x=i*bw+bw*.22, w=bw*.56, y=p.v>=0?mid-h:mid, on=i===onIdx;
       const c=p.v>=0?"var(--good)":"var(--bad)";
       s+=`<g class="pcabg" data-pcaym="${p.ym}" style="--i:${i}"><rect x="${i*bw}" y="0" width="${bw}" height="${H+24}" fill="transparent"/>${p.fut?"":`<rect class="b" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(7,w/3).toFixed(1)}" fill="${c}" opacity="${on?1:.38}"/>`}
+        ${p.fut||!p.has?"":`<text x="${(x+w/2).toFixed(1)}" y="${(p.v>=0?y-6:mid-6).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="${c}">${p.v>=0?"+":"−"}${esc(eur0(Math.abs(p.v)).replace(/\s?€/,""))}</text>`}
         <text x="${(x+w/2).toFixed(1)}" y="${H+18}" text-anchor="middle" font-size="13" font-weight="${on?800:500}" fill="${on?"var(--fg)":"var(--muted)"}">${esc(p.l)}</text></g>`.replace('<g class="pcabg"', `<g class="pcabg"${TT({h:p.t+" "+p.ym.slice(0,4), c:p.fut?"var(--line)":c, r:[[p.v>=0?"Übrig":"Mehr ausgegeben", p.fut?"–":sg(p.v), c]]})}`); });
     return s+`</svg>`; };
   const yearBars=(rows,ym)=>{ const W=520,H=124,cw=W/12, mx=Math.max(1,...rows.map(r=>Math.max(r.c.income,r.c.expenses)));
@@ -1314,7 +1317,7 @@ if (IS_PC){
     for (const t of tiles) if (t.k==="calc"){ const m=String(t.sub||"").match(/^Stand heute (.+?) · frei (.+)$/); if (m && m[1]===m[2]){ t.sub="Stand heute "+m[1]; t.short=String(t.short||"").replace(/^frei\s+/,""); } }
     const rowsFor=ks=>{ const ts=tiles.filter(t=>ks.includes(t.k)&&!skip(t)).sort((p,q)=>ks.indexOf(p.k)-ks.indexOf(q.k)); return ts.length?`<div class="card pcarl"><div class="arl">${ts.map(row).join("")}</div></div>`:""; };
     const M=true, net=mc.net, expn=mc.expenses;
-    const pts=Array.from({length:6},(_,k)=>{ const m=shiftYm(ym,k-5); return {ym:m, l:MSHORT[ymParts(m)[1]-1], t:MONTHS[ymParts(m)[1]-1], v:monthCalc(m).net}; });
+    const pts=Array.from({length:6},(_,k)=>{ const m=shiftYm(ym,k-5); return {ym:m, l:MSHORT[ymParts(m)[1]-1], t:MONTHS[ymParts(m)[1]-1], v:monthCalc(m).net, has:(c=>c.tx.length>0||c.expenses>0||c.income>0)(monthCalc(m)), fut:m>cur}; });
     const hist=Array.from({length:12},(_,k)=>{ const m=shiftYm(ym,k-11), c=monthCalc(m); return {ym:m, i:ymParts(m)[1], v:c.expenses, has:c.tx.length>0||c.expenses>0}; });
     const withData=hist.filter(h=>h.has), avg=withData.length?sum(withData,h=>h.v)/withData.length:0;
     const line=(()=>{ const W=520,H=140, n=hist.length, mx=Math.max(1,...hist.map(h=>h.v), avg)*1.08, X=i=>10+i*(W-20)/(n-1), Y=v=>H-v/mx*(H-8);
@@ -1326,9 +1329,19 @@ if (IS_PC){
     const isCur=ym===cur, past=withData.filter(h=>h.ym!==ym), avgP=past.length?sum(past,h=>h.v)/past.length:0, frac=isCur?Math.min(1,new Date().getDate()/daysIn(ym)):1;
     const dAvg=avgP&&(!isCur||new Date().getDate()>=3)?Math.round((expn-avgP*frac)/(avgP*frac)*100):null;
     const chip=(p,inv)=>p==null?"":`<span class="pcachg ${(inv?-p:p)>0?"up":"dn"}">${p>0?"+":p<0?"−":"±"}${Math.abs(p)} %</span>`;
+    const s1=(()=>{ if (!withData.length) return "Hier siehst du bald, wie viel du jeden Monat ausgibst.";
+      if (isCur && expn===0) return `Im ${esc(mn)} ist noch nichts ausgegeben.`;
+      if (!avgP) return `Im ${esc(mn)} hast du <b>${esc(eur0(expn))}</b> ausgegeben. Zum Vergleich fehlen noch frühere Monate.`;
+      const ref=avgP*frac, d=expn-ref, pc=Math.abs(d)/ref;
+      if (pc<0.05) return isCur?`Bis heute gibst du <b>ungefähr so viel</b> aus wie sonst bis zu diesem Tag.`:`Du hast <b>ungefähr so viel</b> ausgegeben wie in einem normalen Monat (Ø ${esc(eur0(avgP))}).`;
+      const w=`<b class="${d>0?"bad":""}">${esc(eur0(Math.abs(d)))} ${d>0?"mehr":"weniger"}</b>`;
+      return isCur?`Bis heute hast du ${w} ausgegeben als sonst bis zum ${new Date().getDate()}. (Ø ${esc(eur0(avgP))} im ganzen Monat).`:`Du hast ${w} ausgegeben als in einem normalen Monat (Ø ${esc(eur0(avgP))}).`; })();
+    const s2=(()=>{ const done=pts.filter(p=>p.has&&!p.fut&&!(p.ym===cur)), neg=done.filter(p=>p.v<0), pos=done.filter(p=>p.v>=0);
+      let t = !done.length ? "Hier siehst du bald, ob am Monatsende Geld übrig bleibt." : !neg.length ? `In <b>allen ${done.length} Monaten</b> ist Geld übrig geblieben.` : !pos.length ? `In <b class="bad">allen ${done.length} Monaten</b> hast du mehr ausgegeben als reinkam.` : `In <b class="bad">${neg.length} von ${done.length} Monaten</b> hast du mehr ausgegeben als reinkam. Übrig blieb etwas im ${esc(lst(pos.map(p=>p.t)))}.`;
+      const c=pts.find(p=>p.ym===cur); if (c && c.has) t+=` Im ${esc(c.t)} bisher: <b class="${c.v<0?"bad":""}">${esc(sg(c.v))}</b>.`; return t; })();
     const col1=`<div class="pcac"><div class="pcah"><h2>Verlauf</h2><span>letzte 12 Monate</span></div>
-      <div class="card pcabig" data-anaopen="trend"><small>Ausgaben im ${esc(mn)}</small><div style="display:flex;align-items:baseline;gap:10px"><div class="pcan">${esc(eur0(expn))}</div>${dAvg!=null?chip(dAvg)+`<span class="pcas" style="margin:0">${isCur?"zum Ø bis heute":"zum Ø"}</span>`:""}</div>${line}</div>
-      <div class="card pcabig" data-anaopen="kpi"><small>${net>=0?"Übrig":"Mehr ausgegeben"} pro Monat</small>${netBars(pts,5)}</div></div>`;
+      <div class="card pcabig" data-anaopen="trend">${help("Die rote Linie zeigt, wie viel du in jedem der letzten 12 Monate ausgegeben hast. Die gestrichelte Linie ist dein Durchschnitt. Ein Punkt über der gestrichelten Linie heißt: in dem Monat mehr ausgegeben als sonst. Klick auf einen Monat, um ihn anzusehen.")}<small>Ausgaben im ${esc(mn)}</small><div style="display:flex;align-items:baseline;gap:10px"><div class="pcan">${esc(eur0(expn))}</div></div>${say(s1)}${line}</div>
+      <div class="card pcabig" data-anaopen="kpi">${help("Pro Monat: Einnahmen minus Ausgaben. <b>Grün</b> = es ist Geld übrig geblieben. <b>Rot</b> = du hast mehr ausgegeben als reinkam. Die Zahl über dem Balken ist der Betrag in Euro.")}<small>Übrig pro Monat</small>${say(s2)}${netBars(pts,5)}</div></div>`;
     const prevM=Array.from({length:6},(_,k)=>monthCalc(shiftYm(ym,-(k+1)))).filter(c=>c.tx.length||c.expenses>0), avgOf={};
     for (const c of prevM) for (const [n,v] of catTotals(c.tx, c.fixPaid)) avgOf[n]=(avgOf[n]||0)+v/prevM.length;
     const ct=catTotals(mc.tx, mc.fixPaid).slice(0,6);
@@ -1340,19 +1353,24 @@ if (IS_PC){
         return `<g class="pcabg" data-pcaym="${r.ym}" style="--i:${i}"><rect x="${x}" y="0" width="${cw}" height="${H+22}" fill="transparent"/><rect class="b" x="${(x+cw/2-10).toFixed(1)}" y="${(H-hb).toFixed(1)}" width="9" height="${hb.toFixed(1)}" rx="3" fill="var(--faint)" opacity=".55"/>${ha?`<rect class="b" x="${(x+cw/2+1).toFixed(1)}" y="${(H-ha).toFixed(1)}" width="9" height="${ha.toFixed(1)}" rx="3" fill="var(--bad)"/>`:""}
           <text x="${(x+cw/2).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="11" font-weight="${r.ym===ym?800:500}" fill="${r.ym===ym?"var(--fg)":"var(--muted)"}">${esc(MSHORT[i].slice(0,1))}</text></g>`.replace('<g class="pcabg"', `<g class="pcabg"${(()=>{ const fut=r.ym>cur, pp=!fut&&lastY[i]>0?Math.round((r.c.expenses-lastY[i])/lastY[i]*100):null; return TT({h:MONTHS[i], c:"var(--bad)", r:[[String(y),fut?"–":eur0(r.c.expenses),"var(--bad)"],[String(y-1),eur0(lastY[i]),"var(--faint)",1]], f:pp==null?"":pp===0?"gleich wie "+(y-1):(pp>0?"+":"−")+Math.abs(pp)+" % zu "+(y-1), fc:pp>0?"var(--bad)":"var(--good)"}); })()}`); }).join("")}</svg>`; })();
     const ytd=sum(rows.filter(r=>r.ym<=ym),r=>r.c.expenses), ytdL=sum(lastY.slice(0,mi),v=>v), dY=ytdL>0?Math.round((ytd-ytdL)/ytdL*100):null;
+    const s3=(()=>{ const d=ct.map(([c,v])=>({c, v, a:avgOf[c]||0})).filter(x=>x.a>0).map(x=>({...x, d:x.v-x.a})); const up=d.filter(x=>x.d>Math.max(10,x.a*.1)).sort((a,b)=>b.d-a.d)[0], dn=d.filter(x=>-x.d>Math.max(10,x.a*.1)).sort((a,b)=>a.d-b.d)[0];
+      if (!up && !dn) return d.length?"Alle Bereiche liegen ungefähr im üblichen Rahmen.":"Zum Vergleich fehlen noch frühere Monate.";
+      return [up?`Mehr als sonst: <b class="bad">${esc(up.c)}</b> (${esc(eur0(up.d))} mehr)`:"", dn?`Weniger als sonst: <b>${esc(dn.c)}</b> (${esc(eur0(-dn.d))} weniger)`:""].filter(Boolean).join(". ")+"."; })();
+    const s4=!hasLast||dY==null?`Bis ${esc(mn)} hast du ${y} <b>${esc(eur0(ytd))}</b> ausgegeben. Von ${y-1} gibt es noch keine Zahlen zum Vergleich.`:Math.abs(dY)<3?`Bis ${esc(mn)} hast du ${y} <b>ungefähr so viel</b> ausgegeben wie ${y-1}.`:`Bis ${esc(mn)} hast du ${y} <b class="${ytd>ytdL?"bad":""}">${esc(eur0(Math.abs(ytd-ytdL)))} ${ytd>ytdL?"mehr":"weniger"}</b> ausgegeben als ${y-1} im gleichen Zeitraum.`;
     const col2=`<div class="pcac"><div class="pcah"><h2>Kategorien im Vergleich</h2></div>
-      ${ct.length?`<div class="card pcarl"><div class="pcach"><b>${esc(mn)} gegen deinen Schnitt</b><button data-anaopen="cat">Alle ›</button></div>${catRows}</div>`:`<div class="card pcarl muted pcaempty">Im ${esc(mn)} ist noch nichts gebucht.</div>`}
-      <div class="card pcabig" data-anaopen="io"><small>${y} gegen ${y-1}</small><div style="display:flex;align-items:baseline;gap:10px;margin-top:4px"><b style="font-size:22px">${esc(eur0(ytd))}</b>${hasLast&&dY!=null?chip(dY)+`<span class="pcas" style="margin:0">zu ${y-1} bis ${esc(mn)}</span>`:`<span class="pcas" style="margin:0">ausgegeben bis ${esc(mn)}</span>`}</div>
+      ${ct.length?`<div class="card pcarl">${help("Jede Zeile ist ein Bereich, z. B. Lebensmittel. Rechts steht, was du diesen Monat dafür ausgegeben hast. Die Prozentzahl vergleicht mit deinem Schnitt der 6 Monate davor: <b>rot</b> = mehr als sonst, <b>grün</b> = weniger.")}<div class="pcach"><b>${esc(mn)} gegen deinen Schnitt</b><button data-anaopen="cat">Alle ›</button></div>${say(s3)}${catRows}</div>`:`<div class="card pcarl muted pcaempty">Im ${esc(mn)} ist noch nichts gebucht.</div>`}
+      <div class="card pcabig" data-anaopen="io">${help(`Pro Monat zwei Balken: <b>rot</b> = ${y}, <b>grau</b> = ${y-1}. Ist der rote Balken kleiner als der graue, hast du in dem Monat weniger ausgegeben als im Vorjahr. Fahr mit der Maus über einen Monat für die genauen Beträge.`)}<small>${y} gegen ${y-1}</small><div style="display:flex;align-items:baseline;gap:10px;margin-top:4px"><b style="font-size:22px">${esc(eur0(ytd))}</b><span class="pcas" style="margin:0">ausgegeben bis ${esc(mn)}</span></div>${say(s4)}
         <div class="pcalg"><span><i style="background:var(--bad)"></i>${y}</span><span><i style="background:var(--faint);opacity:.55"></i>${y-1}</span></div>${cmp}</div>
       ${rowsFor(["calc","plan"])}</div>`;
     const tt=tiles.find(t=>t.k==="tax"); let tx=null; try { tx=taxCalc(y); } catch(e){}
     const box=(l,v)=>`<div><small>${l}</small><b>${v}</b></div>`;
     const col3=`<div class="pcac"><div class="pcah"><h2>${esc(g3n)}</h2><span>${y} · Schätzung</span></div>
-      ${tt?`<div class="card pcabig" data-anaopen="tax"><small>Voraussichtlich</small><div class="pcan">${esc(tt.short||"")}</div><div class="pcas">${tt.sub||""}</div>
+      ${tt?`<div class="card pcabig" data-anaopen="tax">${help("Grobe Schätzung deiner Einkommensteuer für das ganze Jahr, berechnet aus deinen Buchungen. <b>Plus</b> = du musst voraussichtlich nachzahlen, <b>Minus</b> = du bekommst etwas zurück, <b>± 0 €</b> = weder noch. „Zu versteuern“ ist dein Einkommen nach Abzügen.")}<small>Voraussichtlich</small><div class="pcan">${esc(tt.short||"")}</div><div class="pcas">${tt.sub||""}</div>
         ${tx?`<div class="pcabox">${box("Zu versteuern",esc(eur0(tx.zve)))}${hasSelf()?box("Rücklage",esc(eur0(tx.resBal||0))):box("Steuern gesamt",esc(eur0((tx.mine?tx.mine.total:0)+(tx.gewst||0))))}</div>`:""}</div>`:""}
       ${rowsFor(g3[1])}</div>`;
     return `<div class="pcana">${col1}${col2}${col3}</div>`;
   };
+  document.addEventListener("click", e=>{ const q=e.target.closest("[data-pcaq]"); if (!q) return; e.stopPropagation(); e.preventDefault(); const h=q.nextElementSibling; if (h){ h.hidden=!h.hidden; q.classList.toggle("on", !h.hidden); } }, true);
   document.addEventListener("click", e=>{ const g=e.target.closest("[data-pcaym]"); if (!g || UI.view!=="year") return; e.stopPropagation(); if (g.dataset.pcaym===UI.ym) return; UI.ym=g.dataset.pcaym; render(); }, true);
   const yv=document.getElementById("v-year"); if (yv) yv.classList.add("pca");
 }
