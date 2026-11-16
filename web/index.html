@@ -1983,7 +1983,7 @@ html.pc #hlBg{background:rgba(5,15,11,.82);backdrop-filter:blur(8px)}html.pc .hl
 .bsintro{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:22px 16px;border-radius:22px;background:var(--surface);box-shadow:var(--shadow);margin-bottom:10px}.bsintro b{font-size:16.5px}.bsintro span{font-size:13px;color:var(--muted);font-weight:600}
 .bsdoc{position:relative;font-size:54px;line-height:1;margin-bottom:6px;overflow:hidden;padding:4px 8px}.bsdoc i{position:absolute;left:0;right:0;top:0;height:3px;background:var(--accent);box-shadow:0 0 12px 3px color-mix(in srgb,var(--accent) 60%,transparent);animation:bsBeam 2s ease-in-out infinite alternate}
 @keyframes bsBeam{from{top:6%}to{top:90%}}
-.bsbtns{display:flex;gap:8px}html.pc .bsbtns .vakb[data-brpick="cam"],html.pc .bsbtns .vakb[data-stbpick="cam"],html.pc .bsbtns .vakb[data-bspick="cam"]{display:none}html.pc .bsbtns .vadone{flex:1}.bsbtns .vakb{flex:1.3}.bsbtns .vadone{flex:1}
+.ocrraw{margin:10px 4px 0;font-size:13px;color:var(--muted)}.ocrraw summary{cursor:pointer;font-weight:600;color:var(--accent)}.ocrraw pre{white-space:pre-wrap;max-height:240px;overflow:auto;background:var(--card);border-radius:12px;padding:10px;margin-top:6px;font-size:12px;animation:ocrIn .35s ease}@keyframes ocrIn{from{opacity:0;transform:translateY(-6px)}}.bsbtns{display:flex;gap:8px}html.pc .bsbtns .vakb[data-brpick="cam"],html.pc .bsbtns .vakb[data-stbpick="cam"],html.pc .bsbtns .vakb[data-bspick="cam"]{display:none}html.pc .bsbtns .vadone{flex:1}.bsbtns .vakb{flex:1.3}.bsbtns .vadone{flex:1}
 .bsscan{position:relative;border-radius:20px;overflow:hidden;box-shadow:var(--shadow-lg);max-height:62vh;background:#000}.bsscan img{display:block;width:100%;max-height:62vh;object-fit:contain;opacity:.92}
 .bsbeam{position:absolute;left:0;right:0;top:0;height:4px;background:var(--accent);box-shadow:0 0 22px 8px color-mix(in srgb,var(--accent) 55%,transparent);animation:bsBeam 1.3s ease-in-out infinite alternate}
 .bscorner{position:absolute;inset:10px;border:3px solid var(--accent);border-radius:16px;clip-path:polygon(0 0,18% 0,18% 4%,4% 4%,4% 18%,0 18%,0 82%,4% 82%,4% 96%,18% 96%,18% 100%,0 100%,0 0,100% 0,100% 100%,82% 100%,82% 96%,96% 96%,96% 82%,100% 82%,100% 18%,96% 18%,96% 4%,82% 4%,82% 0);animation:bsPul 1.2s ease-in-out infinite}@keyframes bsPul{50%{opacity:.5}}
@@ -8692,6 +8692,7 @@ stb_h_ein_s:["Stimmt alles im Bescheid? Danach ist er nicht mehr änderbar.", "I
 stb_h_pay:["Steuer-Nachzahlung {n} fällig am {d}", "Tax back payment {n} due on {d}", "{n} vergi ek ödemesi {d} tarihinde", "Доплата налога {n} до {d}", "Доплата податку {n} до {d}", "Dopłata podatku {n} do {d}", "دفع ضريبي إضافي {n} مستحق في {d}", "Plată suplimentară impozit {n} scadentă pe {d}"],
 stb_h_pay_s:["Sorg dafür, dass genug auf dem Konto ist.", "Make sure there's enough in your account.", "Hesabında yeterli para olduğundan emin ol.", "Позаботься, чтобы на счёте хватало денег.", "Подбай, щоб на рахунку вистачало грошей.", "Zadbaj, by na koncie było dość pieniędzy.", "تأكد من وجود رصيد كافٍ في حسابك.", "Asigură-te că ai destui bani în cont."],
 stb_priv:["Bild und Daten bleiben bei dir. Das ist eine Organisationshilfe, keine Steuerberatung.", "Image and data stay with you. This helps you organise – it's not tax advice.", "Görsel ve veriler sende kalır. Bu bir düzen yardımıdır, vergi danışmanlığı değildir.", "Фото и данные остаются у тебя. Это помощь в организации, а не налоговая консультация.", "Фото й дані залишаються в тебе. Це допомога в організації, а не податкова консультація.", "Zdjęcie i dane zostają u ciebie. To pomoc w organizacji, nie doradztwo podatkowe.", "تبقى الصورة والبيانات لديك. هذه مساعدة تنظيمية وليست استشارة ضريبية.", "Imaginea și datele rămân la tine. E un ajutor de organizare, nu consultanță fiscală."],
+ocr_raw:["Erkannten Text zeigen","Show recognized text","Tanınan metni göster","Показать распознанный текст","Показати розпізнаний текст","Pokaż rozpoznany tekst","عرض النص المتعرف عليه","Arată textul recunoscut"],
 stb_pdf_err:["PDF konnte nicht gelesen werden", "Couldn't read the PDF", "PDF okunamadı", "Не удалось прочитать PDF", "Не вдалося прочитати PDF", "Nie udało się odczytać PDF", "تعذّرت قراءة ملف PDF", "PDF-ul nu a putut fi citit"],
 stb_vzq:["/Quartal", "/quarter", "/çeyrek", "/квартал", "/квартал", "/kwartał", "/ربع", "/trimestru"],
 stb_c_year:["Jahr {y}", "Year {y}", "Yıl {y}", "Год {y}", "Рік {y}", "Rok {y}", "السنة {y}", "Anul {y}"],
@@ -9361,7 +9362,12 @@ function tmForm(){ const t=TM2.edit?tmList().find(x=>x.id===TM2.edit)||{}:{}, P=
     <div class="vabtns">${TM2.edit?`<button type="button" class="btn danger" data-tmdel="${esc(TM2.edit)}">${esc(nt("tm_del"))}</button>`:""}<button type="button" class="btn" data-tmcancel>${esc(nt("tm_cancel"))}</button><button type="button" class="btn primary" data-tmsave>${esc(nt("tm_save"))}</button></div></div>`; }
 async function tmSaveAll(){ await saveSettings(); }
 async function tmShrink(file, mx=1600){ const url=await new Promise((ok,no)=>{ const r=new FileReader(); r.onload=()=>ok(r.result); r.onerror=no; r.readAsDataURL(file); }); const im=await loadImg(url), k=Math.min(1,mx/Math.max(im.naturalWidth,im.naturalHeight)), c=document.createElement("canvas"); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); c.getContext("2d").drawImage(im,0,0,c.width,c.height); return c.toDataURL("image/jpeg",0.85); }
-async function ocrImgFile(file){ let L=[]; try{ L=await ocrDataUrl(await tmShrink(file, 2600)); }catch(_){ L=[]; } if (!L.length){ try{ L=await ocrDataUrl(await tmShrink(file, 1600)); }catch(_){ L=[]; } } return L||[]; }
+function ocrRows(L){ const b=(L||[]).filter(l=>l&&typeof l==="object"&&l.t&&l.h>0&&l.w>0); if (b.length<3) return [];
+  const it=b.map(l=>({t:String(l.t).trim(), x:l.x, cy:l.y+l.h/2, h:l.h})).sort((a,b)=>a.cy-b.cy), rows=[];
+  for (const l of it){ const r=rows.find(r=>Math.abs(r.cy-l.cy)<Math.min(r.h,l.h)*0.55); if (r){ r.a.push(l); r.cy=(r.cy*(r.a.length-1)+l.cy)/r.a.length; } else rows.push({cy:l.cy, h:l.h, a:[l]}); }
+  return rows.sort((a,b)=>a.cy-b.cy).map(r=>({t:r.a.sort((a,b)=>a.x-b.x).map(x=>x.t).join("  "), row:1})).filter(r=>/\s{2}/.test(r.t)); }
+function ocrPlus(L){ L=L||[]; const R=ocrRows(L); window.HB_OCRTXT=(R.length?R:L).map(l=>typeof l==="string"?l:l.t).join("\n"); return R.concat(L); }
+async function ocrImgFile(file){ let L=[]; try{ L=await ocrDataUrl(await tmShrink(file, 2600)); }catch(_){ L=[]; } if (!L.length){ try{ L=await ocrDataUrl(await tmShrink(file, 1600)); }catch(_){ L=[]; } } return ocrPlus(L); }
 document.addEventListener("click", async e=>{
   const op=e.target.closest("[data-tmopen]"); if (op){ e.preventDefault(); tmOpen(op.dataset.tmopen||null); return; }
   const bg=$("tmBg"); if (!bg||bg.hidden||!bg.contains(e.target)) return; const L=tmList();
@@ -9559,7 +9565,7 @@ function stbRender(first){ const bg=$("stbBg"); if (!bg||bg.hidden) return; cons
     const acts=[d.res==="due"&&Number(d.amt)>0&&d.due?["pay",nt("stb_a_pay",{d:fxDate(d.due,{day:"numeric",month:"long"})})]:null, wid&&dLeft(wid)>=0?["ein",nt("stb_a_ein",{d:fxDate(wid,{day:"numeric",month:"long"})})]:null, Number(d.vz)>0&&d.vzFrom?["vz",nt("stb_a_vz",{n:eur0(d.vz)})]:null, hasSelf()&&rate?["pot",nt("stb_a_pot",{n:String(rate)})]:null].filter(Boolean);
     const fld=(k,l,type)=>`<div class="field ${F[k]?"bsok":""}"><label>${esc(nt(l))}</label><input class="in" ${type==="date"?'type="date"':type==="year"?'inputmode="numeric" maxlength="4"':'inputmode="decimal" placeholder="0,00"'} data-stbf="${k}" value="${type==="num"?(d[k]!=null&&d[k]!==""?esc(numStr(d[k])):""):esc(String(d[k]||""))}"></div>`;
     b.innerHTML=`${STB.img||(STB.edit&&d.img)?`<div class="bsthumb">${STB.img?`<img src="${STB.img}" alt="" data-stbzoom>`:`<button type="button" class="vadone" data-stbview="${esc(STB.edit)}">📎 ${esc(nt("bs_showimg"))}</button>`}</div>`:""}
-      ${STB.scanned?`${found?`<div class="bschips">${chips}</div>`:""}<div class="fcmami on stbma">${mAv?mAv(null):"👩"}<div class="bub">${esc(mFill(found?nt("stb_mami"):nt("stb_mami0")))}</div></div>`:""}
+      ${STB.scanned?`${found?`<div class="bschips">${chips}</div>`:""}<div class="fcmami on stbma">${mAv?mAv(null):"👩"}<div class="bub">${esc(mFill(Object.keys(F).some(k=>!["vorb","vorl","abw"].includes(k))?nt("stb_mami"):nt("stb_mami0")))}</div></div>${window.HB_OCRTXT?`<details class="ocrraw"><summary>${esc(nt("ocr_raw"))}</summary><pre>${esc(window.HB_OCRTXT)}</pre></details>`:""}`:""}
       ${acts.length?`<div class="vak">${esc(nt("stb_do"))}</div><div class="vacard stbacts">${acts.map(([k,t])=>`<label class="stbact ${A[k]?"on":""}"><input type="checkbox" data-stbact="${k}" ${A[k]?"checked":""}><span class="stbck">✓</span><span>${esc(t)}</span></label>`).join("")}</div>`:""}
       <div class="vak">${esc(nt("bs_check"))}</div>
       <div class="vacard bsform">
@@ -9598,7 +9604,7 @@ function stbNum(s){ const a=amountsIn(" "+s+" "); return a.length?a[0]:null; }
 function stbInt(s){ const m=String(s).match(/(\d{1,3}(?:\.\d{3})+|\d{4,6})(?:,\d{2})?(?!\d)/); return m?Number(m[1].replace(/\./g,"")):null; }
 function stbParse(lines){ const T0=lines.map(l=>typeof l==="string"?l:(l.t||l.text||"")).filter(Boolean), low=T0.map(t=>t.toLowerCase()), all=low.join("\n"), d={res:"due"}, F={};
   const next=(i,n)=>T0.slice(i,i+(n||2)).join("  ");
-  let m=all.match(/bescheid\s+(?:für|fuer|über das jahr)\s+(20\d\d)/)||all.match(/(?:veranlagungszeitraum|kalenderjahr|steuerjahr)\s*:?\s*(20\d\d)/)||all.match(/einkommensteuer\D{0,20}(20\d\d)/); if (m){ d.year=Number(m[1]); F.year=1; }
+  let m=all.match(/bescheid\s+(?:für|fuer|über das jahr)\s+(20\d\d)/)||all.match(/(?:für|fuer)\s+(20\d\d)\s+über/)||all.match(/bescheid\D{0,40}(20\d\d)/)||all.match(/(?:veranlagungszeitraum|kalenderjahr|steuerjahr)\s*:?\s*(20\d\d)/)||all.match(/einkommensteuer\D{0,20}(20\d\d)/); if (m){ d.year=Number(m[1]); F.year=1; }
   for (let i=0;i<T0.length;i++){ if (/zu versteuernde[sn]?\s+einkommen/.test(low[i])){ const v=stbInt(T0[i].replace(/^[^\d]*/,""))||stbInt(T0[i+1]||""); if (v){ d.zve=v; F.zve=1; break; } } }
   for (let i=0;i<T0.length;i++){ if (/festgesetzt/.test(low[i])){ for (let k=i;k<Math.min(T0.length,i+5);k++){ if (/einkommensteuer|festgesetzt/.test(low[k])){ const a=amountsIn(" "+T0[k]+" "); if (a.length){ d.est=a[0]; F.est=1; break; } } } if (d.est) break; } }
   if (!d.est) for (let i=0;i<T0.length;i++) if (/^\s*einkommensteuer\b/.test(low[i])){ const a=amountsIn(" "+T0[i]+" "); if (a.length){ d.est=a[0]; F.est=1; break; } }
@@ -9614,14 +9620,15 @@ function stbParse(lines){ const T0=lines.map(l=>typeof l==="string"?l:(l.t||l.te
   if (/vorbehalt der nachprüfung|§\s*164/.test(all)){ d.vorb=true; F.vorb=1; } if (/vorläufig|§\s*165/.test(all)){ d.vorl=true; F.vorl=1; }
   const abw=[]; for (const t of T0){ if (/(abweich|nicht anerkannt|nicht berücksichtigt|nicht abziehbar|gekürzt|konnten? nicht|nur in höhe|nicht als)/i.test(t) && t.length>12) abw.push({t:t.trim().slice(0,160), ok:false}); if (abw.length>=6) break; }
   if (abw.length){ d.abw=abw; F.abw=1; }
-  if (!d.year && d.date){ d.year=Number(d.date.slice(0,4))-1; }
+  if (!d.date){ for (let i=0;i<T0.length;i++){ const x=bsDate(T0[i]); if (x && x<=isoToday() && x>="2015" && !/10\.(03|06|09|12)\./.test(T0[i]) && !/geb|geburt/.test(low[i])){ d.date=x; F.date=1; break; } } }
+  if (!d.year && d.date){ d.year=Number(d.date.slice(0,4))-1; F.year=1; }
   return {d, F}; }
 async function stbPdf(file){ const buf=await file.arrayBuffer(); const L=await pdfLines(buf); let img=null;
   try{ const lib=await loadPdfJs(), doc=await lib.getDocument({data:new Uint8Array(buf), isEvalSupported:false}).promise, pg=await doc.getPage(1), vp=pg.getViewport({scale:1.4}), c=document.createElement("canvas"); c.width=vp.width; c.height=vp.height; await pg.render({canvasContext:c.getContext("2d"), viewport:vp}).promise; img=c.toDataURL("image/jpeg",.72); }catch(_){}
   return {lines:L.map(l=>l.text), img}; }
 async function stbScan(file){ const isPdf=/pdf/i.test(file.type||"")||/\.pdf$/i.test(file.name||""); let lines=[];
-  STB.img=null; STB.st=1; stbRender(); const t0=performance.now();
-  try{ if (isPdf){ const r=await stbPdf(file); lines=r.lines; STB.img=r.img; stbRender(); }
+  STB.img=null; window.HB_OCRTXT=""; STB.st=1; stbRender(); const t0=performance.now();
+  try{ if (isPdf){ const r=await stbPdf(file); lines=ocrPlus(r.lines); STB.img=r.img; stbRender(); }
     else { STB.img=await tmShrink(file); stbRender(); lines=await ocrImgFile(file); } }
   catch(e){ lines=[]; if (isPdf) toast(nt("stb_pdf_err")); }
   const wait=Math.max(0,2000-(performance.now()-t0)); await new Promise(r=>setTimeout(r,RMo()?0:wait));
@@ -9751,7 +9758,7 @@ function brParse(lines){ const T0=lines.map(l=>typeof l==="string"?l:(l.t||l.tex
   return {d, F}; }
 async function brScan(file){ const isPdf=/pdf/i.test(file.type||"")||/\.pdf$/i.test(file.name||""); let lines=[];
   BR.img=null; BR.st=1; brRender(); const t0=performance.now();
-  try{ if (isPdf){ const r=await stbPdf(file); lines=r.lines; BR.img=r.img; brRender(); } else { BR.img=await tmShrink(file); brRender(); lines=await ocrImgFile(file); } }
+  try{ if (isPdf){ const r=await stbPdf(file); lines=ocrPlus(r.lines); BR.img=r.img; brRender(); } else { BR.img=await tmShrink(file); brRender(); lines=await ocrImgFile(file); } }
   catch(e){ lines=[]; if (isPdf) toast(nt("stb_pdf_err")); }
   const wait=Math.max(0,2000-(performance.now()-t0)); await new Promise(r=>setTimeout(r,RMo()?0:wait));
   const {d,F}=brParse(lines||[]); BR.d=d; BR.F=F; BR.edit=null; BR.act={due:1,term:1,pay:1,wid:1}; BR.st=2; BR.scanned=true; brRender(); if (!Object.keys(F||{}).length) toast(nt("bs_nothing")); }
