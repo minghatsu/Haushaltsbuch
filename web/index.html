@@ -7640,7 +7640,7 @@ async function wizFinish(){
   if (w.bank) st.bank={id:w.bank, ...(w.bank==="andere"&&w.bankName?{name:w.bankName.trim()}:{})};
   const prevW=st.work; st.work=w.work||st.work||"beides"; st.extra=extraFor(st.work).map(x=>x[0]).filter(k=>(w.extra||[]).includes(k)); addWorkInc(st, st.work); addProfCats(st, st.work); if (prevW!==st.work && GPROF[st.work]){ const j=st.jl=st.jl||{}; j.payDay=GPROF[st.work].day; } addExtraInc(st);
   const bal=parseAmt(w.bal);
-  if (w.bal!=="" && isFinite(bal)){ st.accountAnchors={...(st.accountAnchors||{}), Hauptkonto:{date:today, balance:Math.round(bal*100)/100}}; st.startBalance={...(st.startBalance||{}), [y]:Math.round(bal*100)/100}; }
+  if (w.bal!=="" && isFinite(bal)){ st.accountAnchors={...(st.accountAnchors||{}), Hauptkonto:{date:today, balance:Math.round(bal*100)/100, ts:Date.now()}}; st.startBalance={...(st.startBalance||{}), [y]:Math.round(bal*100)/100}; }
   const bud={...(st.budgets||{})}; for (const [c,v] of Object.entries(w.bud)){ const a=parseAmt(v); if (a>0) bud[c]=Math.round(a*100)/100; } st.budgets=bud;
   const used=new Set(S.tx.map(t=>t.cat)), c2=clone(st.cats||DEFAULT_SETTINGS.cats);
   c2.einnahme=c2.einnahme.filter(x=>{ const o=typeof x==="string"?{name:x,art:"sonstige"}:x; if (used.has(o.name)) return true; if (!["selbst","beides"].includes(st.work)&&!(st.extra||[]).includes("selbst")&&o.art==="selbst") return false; if (!["angestellt","beides","azubi"].includes(st.work)&&!(st.extra||[]).includes("angestellt")&&(o.art==="lohn"||o.art==="sonderzahlung")) return false; return true; });
@@ -11431,13 +11431,20 @@ function accountNames(){
   const n=new Set(); for (const d of Object.values(memStore.acct)) for (const r of Object.values(d.rows||{})) n.add(r[0]);
   return [...n].sort((a,b)=>(b==="Hauptkonto")-(a==="Hauptkonto") || a.localeCompare(b,"de"));
 }
+/* Selbst eingetippte Buchungen (nicht aus dem Kontoauszug, nicht bar) verändern den Hauptkonto-Stand */
+function manualSign(t){ if (!t || t.importKey || t.pay==="bar" || t.source==="bank") return 0; const k=t.kind; if (k==="einnahme") return 1; if (k==="ausgabe"||k==="betrieb"||k==="vorauszahlung") return -1; return 0; }
+function manualDelta(a, lastImp, asOf){ const at=a.ts||0; let d=0;
+  for (const t of (S.tx||[])){ const sg=manualSign(t); if (!sg || !t.date || t.date>asOf || t.date<=(lastImp||"")) continue;
+    const after=t.date>a.date || (t.date===a.date && (!at || (t.ts||0)>at)); if (after) d+=sg*(Number(t.amount)||0); }
+  return d; }
 function accountBalance(name, asOf){
   const a=(S.settings.accountAnchors||{})[name]; if (!a) return null;
-  let b=Number(a.balance)||0;
+  let b=Number(a.balance)||0, last="";
   for (const d of Object.values(memStore.acct)) for (const [acc,v,date] of Object.values(d.rows||{})){
-    if (acc!==name) continue;
+    if (acc!==name) continue; if (date>last) last=date;
     if (date>a.date && date<=asOf) b+=v; else if (date<=a.date && date>asOf) b-=v;
   }
+  if (name==="Hauptkonto") b+=manualDelta(a, last, asOf);
   return Math.round(b*100)/100;
 }
 function lastDayOf(ym){ return ym+"-"+pad(daysIn(ym)); }
@@ -11457,7 +11464,7 @@ document.addEventListener("change", e=>{
   const raw=el.value.trim(); const s={...(S.settings.accountAnchors||{})};
   if (raw===""){ return; }
   const v=parseAmt(raw); if (!isFinite(v)){ toast("Bitte eine Zahl eingeben"); return; }
-  s[el.dataset.acctbal]={date:isoOf(new Date()), balance:Math.round(v*100)/100};
+  s[el.dataset.acctbal]={date:isoOf(new Date()), balance:Math.round(v*100)/100, ts:Date.now()};
   S.settings.accountAnchors=s; el.value=""; el.blur(); saveSettings(); toast("Gespeichert"); render();
 });
 function mergeMatch(items){
