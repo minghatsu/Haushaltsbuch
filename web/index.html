@@ -3336,7 +3336,8 @@ function tmRing(ring, g, first){ ring.classList.toggle("none", !g); if (!g) g={x
   if (first){ ring.animate([{opacity:0},{opacity:1}],{duration:350}); requestAnimationFrame(()=>requestAnimationFrame(()=>ring.style.transition="")); } }
 function tmPos(m){ return `translate3d(${m.x}px,${m.y}px,0)`; }
 function mHeadOut(q){ q=q||$("ptourQ"); if (!q || q._mout) return; q._mout=1; if (RMo()){ q.style.visibility="hidden"; return; } q.getAnimations().forEach(a=>a.cancel()); q.animate([{transform:"none"},{transform:"scale(1.25)",offset:.4},{transform:"scale(.2)",opacity:0}],{duration:300,easing:"ease-in",fill:"forwards"}).finished.then(()=>{ if (q._mout) q.style.visibility="hidden"; }).catch(()=>{}); }
-setInterval(()=>{ try{ const q=$("ptourQ"); if (q && q._mout && !MB.on && !MO.on && !MO.keep && TOUR.i<0 && !document.querySelector("#tourBg:not([hidden])")) mHeadIn(q); }catch(_){} }, 2500);
+function mAway(){ const tb=$("tourBg"), mb=$("mbBg"), mo=$("moBg"); const tv=tb && !tb.hidden && tb.querySelector(".tmami"), bv=mb && !mb.hidden, ov=mo && !mo.hidden; return !!(tv||bv||ov||MO.keep); }
+setInterval(()=>{ try{ const q=$("ptourQ"); if (!q || !q._mout) return; if (!mAway()){ if (MB.on && !($("mbBg")&&!$("mbBg").hidden)) MB.on=false; if (MO.on && !($("moBg")&&!$("moBg").hidden)) MO.on=false; mHeadIn(q); } }catch(_){} }, 1500);
 function mHeadIn(q){ q=q||$("ptourQ"); if (!q || !q._mout) return; q._mout=0; q.style.visibility=""; q.getAnimations().forEach(a=>a.cancel()); if (!RMo()) q.animate([{transform:"scale(.3)",opacity:0},{transform:"scale(1.25)",opacity:1,offset:.6},{transform:"none"}],{duration:480,easing:"cubic-bezier(.3,1.6,.5,1)"}); }
 function tmStart(mami, to){ const q=$("ptourQ"), FR=TM.fromRect; TM.fromRect=null; if (FR){ const mm=$("moMe"); if (mm) mm.style.visibility="hidden"; const mb=$("moBg"); if (mb) mb.classList.remove("show"); clearTimeout(MO.hideT); MO.hideT=setTimeout(()=>{ try{ moHide(); }catch(_){} }, 520); } const qr=FR||(q&&(q._mout||tourVis(q))?q.getBoundingClientRect():null), M=TM.M;
   TM.x=to.x; TM.y=to.y; mami.style.transform=tmPos(to);
@@ -4990,6 +4991,7 @@ function render(){
   notifyPlanSoon();
   if (dankeShould()) setTimeout(()=>{ if (dankeShould()) dankeOpen(); }, 500);
   if (wizShould()) setTimeout(()=>{ if (wizShould()) wizOpen(); }, 400);
+  try { if (TOUR.i>=0 && TOUR.page && PTOUR[TOUR.page] && TOUR.page!==UI.view && !['danke','mami'].includes(TOUR.page)) tourCloseNow(); } catch(_){}
   try { ptourBtn(); ptourAuto(); } catch(e){ console.warn('ptour', e); }
   try { if (S.tx.length||S.fixed.length) mbAuto(); } catch(e){ console.warn('mb', e); }
   try { uxEnter(); } catch(e){}
