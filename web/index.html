@@ -1994,6 +1994,16 @@ html.pc #hlBg{background:rgba(5,15,11,.82);backdrop-filter:blur(8px)}html.pc .hl
 .bstot{display:flex;gap:8px}.bstot .in{flex:1}.bstot .vadone{flex:none;min-width:0;padding:0 12px;height:auto}
 .bscks{padding:4px 0}.bsck{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;border-top:1px solid var(--line);font-size:13.5px}.bsck:first-child{border-top:0}.bsck>span:first-child{font-size:18px;flex:none}
 .bsck b{display:block;font-size:14px}.bsck small{color:var(--muted);font-size:12px;font-weight:600}.bsck.bad b{color:var(--bad)}.bsck.warn b{color:var(--warn)}.bsck.ok b{color:var(--good)}
+/* Konto/Space-Auswahl */
+.acctrow{margin:10px 0 0}.acctrow[hidden]{display:none}
+.karow{width:100%;display:flex;align-items:center;gap:12px;border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:18px;padding:10px 12px;cursor:pointer;color:var(--fg);text-align:start;font-family:var(--f-body)}
+.karow i,.kaopt i{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-style:normal;color:#fff;font-size:18px}
+.kat{flex:1;min-width:0}.kat b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.kat small{color:var(--muted);font-size:12px;font-weight:700}.kat .neg{color:var(--bad)}
+.kach{color:var(--accent);font:800 13px var(--f-body);white-space:nowrap}.kach em{font-style:normal;display:inline-block;transition:transform .3s}.karow[aria-expanded=true] .kach em{transform:rotate(90deg)}
+.kalist{margin-top:8px;background:var(--surface);box-shadow:var(--shadow);border-radius:18px;padding:6px}.kalist[hidden]{display:none}
+.kalh{font:800 11.5px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px 8px 4px}
+.kaopt{width:100%;display:flex;align-items:center;gap:12px;border:0;background:none;border-radius:14px;padding:8px;cursor:pointer;color:var(--fg);font:700 14px var(--f-body);text-align:start}.kaopt i{width:34px;height:34px;font-size:16px;border-radius:10px}
+.kaon{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.kaopt small{margin-left:auto;color:var(--muted);font-weight:700;font-size:12.5px}.kaopt b{color:var(--accent);margin-left:6px}.kaopt.on{background:var(--accent-soft)}.kaopt:hover{background:var(--sunk)}
 /* Briefe vom Amt */
 .brsum{padding:12px 14px}.brsum p{margin:0;padding:3px 0;font:600 14.5px/1.45 var(--f-body)}.brsum p:first-child{font-weight:800}
 .brhero.neg{background:linear-gradient(135deg,var(--bad),color-mix(in srgb,var(--bad) 65%,#f0a050))}
@@ -2360,7 +2370,7 @@ html.pc [data-view="zukunft"] .agrid{grid-template-columns:repeat(4,1fr)!importa
     </div>
     <div class="amount"><input id="fAmount" inputmode="decimal" autocomplete="off" placeholder="0,00" aria-label="Betrag in Euro"><select id="fCur" class="fcur" aria-label="Bezahlt in"><option value="EUR">€</option><option value="USD">USD</option><option value="GBP">GBP</option><option value="CHF">CHF</option><option value="TRY">TRY</option><option value="PLN">PLN</option><option value="RON">RON</option><option value="CZK">CZK</option><option value="HUF">HUF</option><option value="SEK">SEK</option><option value="DKK">DKK</option><option value="NOK">NOK</option><option value="JPY">JPY</option><option value="CNY">CNY</option><option value="CAD">CAD</option><option value="AUD">AUD</option></select></div>
     <div class="hint" id="fxHint" hidden></div>
-    <div class="payseg" id="paySeg" role="group" aria-label="Bezahlt mit" hidden><button type="button" data-pay="karte"><i>💳</i><span>Karte</span></button><button type="button" data-pay="bar"><i>💶</i><span>Bar</span></button></div>
+    <div class="payseg" id="paySeg" role="group" aria-label="Bezahlt mit" hidden><button type="button" data-pay="karte"><i>💳</i><span>Karte</span></button><button type="button" data-pay="bar"><i>💶</i><span>Bar</span></button></div><div class="acctrow" id="acctRow" hidden></div>
     <div class="hint" id="amountHint"></div>
     <div class="kpad" id="kpad" aria-label="Zahlentasten"><button data-kp="1">1</button><button data-kp="2">2</button><button data-kp="3">3</button><button data-kp="4">4</button><button data-kp="5">5</button><button data-kp="6">6</button><button data-kp="7">7</button><button data-kp="8">8</button><button data-kp="9">9</button><button data-kp=",">,</button><button data-kp="0">0</button><button data-kp="back" aria-label="Löschen"><svg class="i" viewBox="0 0 24 24"><path d="M9 5h10.5A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5H9l-6-7zM12 9.5l5 5M17 9.5l-5 5"/></svg></button></div>
     <div id="catWrap"><span class="lbl">Kategorie</span><div class="catgrid" id="catGrid"></div></div>
@@ -6061,6 +6071,7 @@ async function zFinish(){
     const date=b.date && b.date<=isoToday() && b.date>=isoOf(new Date(Date.now()-7*864e5)) ? b.date : isoToday();
     const doc={date, amount:Math.round(b.v*100)/100, kind:"ausgabe", cat:zCatFor(sh), note:sh?sh.name:(b.shop||"Einkauf"), ts:Date.now(), src:"zettel"};
     if (b.pay==="bar"){ doc.pay="bar"; if (!cashOn()) { try { await cashActivate(date, null); } catch(_){} } }
+    else if (kaOn()){ const ac=kaFor(doc.cat); if (ac!=="Hauptkonto") doc.acct=ac; }
     if (!b.img) doc.nobon=true;
     try { const its=receiptItems(b.lines||[]); if (its.length){ doc.items=its.map(i=>({r:i.n, p:i.p})); const sid=sh?sh.id:zaShopId(b.shop); if (sid) doc.ishop=sid; } } catch(_){}
     const id=mem?newId():db.collection("tx").doc().id;
@@ -8298,6 +8309,7 @@ function openSheet(kind, tx){
   UI.scanItems=null;
   $("fWk").checked = !!(tx && tx.wk);
   UI.pay = tx ? (tx.pay||"karte") : null;
+  UI.acct = tx ? kaOf(tx) : null; UI.kaManual=!!tx; UI.kaOpen=false;
   if (tx){ UI.editId=tx.id; UI.kind=tx.kind==="abhebung"?"ausgabe":tx.kind==="umbuchung"?(tx._k0||"ausgabe"):tx.kind; UI.cat=tx.cat; $("fAmount").value=numStr(tx.amount); $("fNote").value=tx.note||""; $("fDate").value=tx.date; }
   else { UI.editId=null; UI.kind=kind||"ausgabe"; UI.cat=null; $("fAmount").value=""; $("fNote").value=""; $("fDate").value = UI.ym===ymOf(new Date()) ? isoToday() : UI.ym+"-01"; }
   $("delBtn").textContent = "Löschen";
@@ -8393,7 +8405,7 @@ document.addEventListener("click", async e=>{
   if (t.closest("#cashGo")){ const v=parseAmt(($("cashStart")||{}).value||""); if (!(v>=0)){ toast("Bitte einen Betrag eintragen"); return; } await cashActivate(isoToday(), v); toast(`Bargeld: ${eur(v)}`); return; }
   const p=t.closest("[data-pay]"); if (p && t.closest("#sheetBg")){ UI.pay=p.dataset.pay; renderPay(); return; } });
 document.addEventListener("keydown", e=>{ if (e.key==="Enter" && e.target.id==="cashAmt") cashAskOk(); });
-function renderPay(){ const el=$("paySeg"); if (!el) return;
+function renderPay(){ try{ kaRender(); }catch(_){} const el=$("paySeg"); if (!el) return;
   const show=["ausgabe","einnahme","betrieb"].includes(UI.kind) && !(UI.kind==="ausgabe" && isWithdrawCat(UI.cat));
   el.hidden=!show; if (!show) return;
   el.querySelectorAll("[data-pay]").forEach(b=>{ b.classList.toggle("on", b.dataset.pay===UI.pay); b.setAttribute("aria-pressed", String(b.dataset.pay===UI.pay)); });
@@ -8437,6 +8449,7 @@ async function saveTx(){
   if (payable && !UI.pay){ toast(UI.kind==="einnahme"?"Aufs Konto oder bar?":"Mit Karte oder bar bezahlt?"); const ps=$("paySeg"); if (ps){ ps.scrollIntoView({block:"center",behavior:"smooth"}); ps.classList.remove("need"); void ps.offsetWidth; ps.classList.add("need"); } return; }
   const doc = { date, amount:Math.round(amount*100)/100, kind:UI.kind, cat:UI.kind==="vorauszahlung"?"Steuer-Vorauszahlung":(UI.cat||""), note, ts:Date.now() };
   if (payable && UI.pay==="bar") doc.pay="bar";
+  if (payable && UI.pay!=="bar" && kaOn() && UI.acct){ if (UI.acct!=="Hauptkonto") doc.acct=UI.acct; if (UI.cat){ S.settings.acctByCat={...(S.settings.acctByCat||{}), [UI.cat]:UI.acct}; try{ saveSettings(); }catch(_){} } }
   if (doc.pay==="bar" && !cashOn()) await cashActivate(date<isoToday()?date:isoToday(), null);
   const editing = UI.editId, id = editing || (mem ? newId() : db.collection("tx").doc().id);
   const old = editing ? S.tx.find(t=>t.id===id) : null;
@@ -8472,6 +8485,13 @@ async function deleteTx(){
 }
 
 const NT={
+ka_space:["Space", "Space", "Alan", "Пространство", "Простір", "Przestrzeń", "مساحة", "Spațiu"],
+ka_main:["Konto", "Account", "Hesap", "Счёт", "Рахунок", "Konto", "حساب", "Cont"],
+ka_after:["danach {n}", "then {n}", "sonra {n}", "после {n}", "після {n}", "potem {n}", "بعدها {n}", "apoi {n}"],
+ka_change:["Ändern", "Change", "Değiştir", "Изменить", "Змінити", "Zmień", "تغيير", "Schimbă"],
+ka_pick:["Von welchem Konto?", "From which account?", "Hangi hesaptan?", "С какого счёта?", "З якого рахунку?", "Z którego konta?", "من أي حساب؟", "Din ce cont?"],
+ka_pick_in:["Auf welches Konto?", "To which account?", "Hangi hesaba?", "На какой счёт?", "На який рахунок?", "Na które konto?", "إلى أي حساب؟", "În ce cont?"],
+ka_nobal:["Stand fehlt", "Balance missing", "Bakiye yok", "Нет остатка", "Немає залишку", "Brak salda", "الرصيد مفقود", "Sold lipsă"],
 br_from:["Brief vom {d}", "Letter dated {d}", "{d} tarihli mektup", "Письмо от {d}", "Лист від {d}", "Pismo z {d}", "رسالة بتاريخ {d}", "Scrisoare din {d}"],
 br_title:["Briefe vom Amt", "Official letters", "Resmi mektuplar", "Письма из ведомств", "Листи з установ", "Pisma z urzędu", "رسائل رسمية", "Scrisori oficiale"],
 br_tile_s0:["verstehen", "understand", "anla", "понять", "зрозуміти", "zrozum", "افهم", "înțelege"],
@@ -9764,6 +9784,24 @@ document.addEventListener("change", e=>{ const id=e.target.id; if (id==="brCam"|
   const a=e.target.dataset&&e.target.dataset.bract; if (a){ BR.act[a]=e.target.checked?1:0; const l=e.target.closest(".stbact"); if (l){ l.classList.toggle("on", e.target.checked); if (!RMo()) l.querySelector(".stbck").animate([{transform:"scale(.4) rotate(-20deg)"},{transform:"scale(1.2)"},{transform:"none"}],{duration:420,easing:"cubic-bezier(.3,1.6,.5,1)"}); } return; }
   if (e.target.dataset && e.target.dataset.brf && $("brBg") && !$("brBg").hidden && BR.st===2){ BR.d=brReadForm(); const s=$("brBg").querySelector(".brsum"); if (s) s.innerHTML=brSum(BR.d).map(t=>`<p>${esc(t)}</p>`).join(""); } });
 
+/* ===== Konto / Space bei der Buchung ===== */
+function kaNames(){ const s=new Set(accountNames()); for (const k of Object.keys(S.settings.accountAnchors||{})) s.add(k); if (!s.size) return []; s.add("Hauptkonto"); return [...s].sort((a,b)=>(b==="Hauptkonto")-(a==="Hauptkonto") || a.localeCompare(b,"de")); }
+function kaOn(){ return kaNames().length>1; }
+function kaFor(cat){ const m=S.settings.acctByCat||{}, n=kaNames(); const v=cat&&m[cat]; return v && n.includes(v) ? v : "Hauptkonto"; }
+function kaOf(t){ return t && t.acct ? t.acct : "Hauptkonto"; }
+function kaIcon(n){ const s=nrm(n); return n==="Hauptkonto"?"🏦":/auto|tank|kfz/.test(s)?"🚗":/einkauf|lebensmittel|essen/.test(s)?"🛒":/steuer|finanz/.test(s)?"🧾":/urlaub|reise/.test(s)?"🏖️":/spar|ruecklage|rücklage|notgroschen/.test(s)?"🐷":/monat|fix|kosten|miete/.test(s)?"📅":/kind|baby/.test(s)?"🧸":/geschenk|weihnacht/.test(s)?"🎁":"💳"; }
+function kaCol(n){ try{ const i=kaNames().indexOf(n); return acctColor(n,i)||(n==="Hauptkonto"?"var(--accent)":["#3d63a8","#c47a12","#8a4fb5","#b42318","#0f8a8a","#a0522d"][Math.max(0,i-1)%6]); }catch(_){ return "var(--accent)"; } }
+function kaRender(){ const el=$("acctRow"); if (!el) return; const show=kaOn() && ["ausgabe","einnahme","betrieb"].includes(UI.kind) && UI.pay!=="bar" && !(UI.kind==="ausgabe" && isWithdrawCat(UI.cat));
+  el.hidden=!show; if (!show){ UI.kaOpen=false; return; }
+  if (!UI.acct || !kaNames().includes(UI.acct)) UI.acct=kaFor(UI.cat);
+  const n=UI.acct, bal=accountBalance(n, isoToday()), amt=parseAmt($("fAmount").value)||0, old=UI.editId?S.tx.find(t=>t.id===UI.editId):null;
+  const sg=UI.kind==="einnahme"?1:-1, oldIn=old && kaOf(old)===n && manualSign(old) ? manualSign(old)*(Number(old.amount)||0) : 0, after=bal==null?null:bal-oldIn+sg*amt;
+  el.innerHTML=`<button type="button" class="karow" data-katoggle aria-expanded="${UI.kaOpen?"true":"false"}"><i style="background:${kaCol(n)}">${kaIcon(n)}</i><span class="kat"><b data-noi18n>${esc(n)}</b><small>${esc(n==="Hauptkonto"?nt("ka_main"):nt("ka_space"))}${after!=null?` · <span class="${after<0?"neg":""}">${esc(nt("ka_after",{n:eur(after)}))}</span>`:""}</small></span><span class="kach">${esc(nt("ka_change"))} <em>›</em></span></button>
+    <div class="kalist"${UI.kaOpen?"":" hidden"}><div class="kalh">${esc(UI.kind==="einnahme"?nt("ka_pick_in"):nt("ka_pick"))}</div>${kaNames().map(x=>{ const b=accountBalance(x, isoToday()); return `<button type="button" class="kaopt ${x===n?"on":""}" data-kapick="${esc(x)}"><i style="background:${kaCol(x)}">${kaIcon(x)}</i><span class="kaon" data-noi18n>${esc(x)}</span><small>${b==null?esc(nt("ka_nobal")):esc(eur(b))}</small>${x===n?"<b>✓</b>":""}</button>`; }).join("")}</div>`; }
+document.addEventListener("click", e=>{ const tg=e.target.closest("[data-katoggle]"); if (tg){ UI.kaOpen=!UI.kaOpen; kaRender(); const L=$("acctRow").querySelector(".kalist"); if (UI.kaOpen && L && !RMo()){ L.animate([{opacity:0,transform:"translateY(-8px)"},{opacity:1,transform:"none"}],{duration:320,easing:"cubic-bezier(.2,1.2,.35,1)"}); L.querySelectorAll(".kaopt").forEach((o,i)=>o.animate([{opacity:0,transform:"translateX(-12px)"},{opacity:1,transform:"none"}],{duration:360,delay:40+i*45,easing:"cubic-bezier(.2,1.2,.35,1)",fill:"backwards"})); L.scrollIntoView({block:"nearest",behavior:"smooth"}); } return; }
+  const pk=e.target.closest("[data-kapick]"); if (pk){ UI.acct=pk.dataset.kapick; UI.kaManual=true; UI.kaOpen=false; kaRender(); const r=$("acctRow").querySelector(".karow"); if (r && !RMo()){ r.animate([{transform:"scale(.96)"},{transform:"scale(1.02)"},{transform:"none"}],{duration:420,easing:"cubic-bezier(.3,1.6,.5,1)"}); const i=r.querySelector("i"); i.animate([{transform:"scale(.4) rotate(-20deg)"},{transform:"scale(1.2)"},{transform:"none"}],{duration:480,easing:"cubic-bezier(.3,1.6,.5,1)"}); } } });
+document.addEventListener("input", e=>{ if (e.target && e.target.id==="fAmount") kaRender(); });
+
 /* ===== Mami-Start-Briefing: wichtige Dinge beim Start ===== */
 const MB={i:0, L:[], on:false, shown:false};
 const MB_K={br:"✉️",upd:"⬇️",goal:"🎉",info:"💡",minus:"🚨",budget:"🎯",abo:"📺",term:"📅",stb:"🧾",reserve:"🛡️",beihilfe:"🏥",fc:"📉",bs:"📄"};
@@ -9938,7 +9976,7 @@ document.addEventListener("click", async e => {
   const open = t.closest("[data-open]"); if (open){ UI.ym=open.dataset.open; UI.view="home"; render(); window.scrollTo({top:0}); return; }
   const ed = t.closest("[data-edit]"); if (ed){ const tx=S.tx.find(x=>x.id===ed.dataset.edit); if (tx) openSheet(null, tx); return; }
   const kb = t.closest("#kindSeg button"); if (kb){ UI.kind=kb.dataset.kind; UI.cat=null; renderSheet(); try{ motSheet(); }catch(_){} return; }
-  const cb = t.closest("#catGrid [data-cat]"); if (cb){ UI.cat=cb.dataset.cat; renderSheet(); return; }
+  const cb = t.closest("#catGrid [data-cat]"); if (cb){ UI.cat=cb.dataset.cat; if (!UI.kaManual && !UI.editId) UI.acct=kaFor(UI.cat); renderSheet(); return; }
   const dc = t.closest("#dateChips .dchip"); if (dc){ $("fDate").value=isoDaysAgo(Number(dc.dataset.day)); renderSheet(); return; }
   const fl = t.closest("[data-filter]"); if (fl){ UI.filter=fl.dataset.filter; renderList(); return; }
   const fr = t.closest("[data-fxreset]"); if (fr){ const f=S.fixed.find(x=>x.id===fr.dataset.fxreset); if (f) await setMonthAmount(f.id, listAmt(f,UI.ym)); return; }
@@ -11433,8 +11471,8 @@ function accountNames(){
 }
 /* Selbst eingetippte Buchungen (nicht aus dem Kontoauszug, nicht bar) verändern den Hauptkonto-Stand */
 function manualSign(t){ if (!t || t.importKey || t.pay==="bar" || t.source==="bank") return 0; const k=t.kind; if (k==="einnahme") return 1; if (k==="ausgabe"||k==="betrieb"||k==="vorauszahlung") return -1; return 0; }
-function manualDelta(a, lastImp, asOf){ const at=a.ts||0; let d=0;
-  for (const t of (S.tx||[])){ const sg=manualSign(t); if (!sg || !t.date || t.date>asOf || t.date<=(lastImp||"")) continue;
+function manualDelta(a, lastImp, asOf, name){ const at=a.ts||0; let d=0;
+  for (const t of (S.tx||[])){ const sg=manualSign(t); if (!sg || !t.date || t.date>asOf || t.date<=(lastImp||"") || (t.acct||"Hauptkonto")!==(name||"Hauptkonto")) continue;
     const after=t.date>a.date || (t.date===a.date && (!at || (t.ts||0)>at)); if (after) d+=sg*(Number(t.amount)||0); }
   return d; }
 function accountBalance(name, asOf){
@@ -11444,7 +11482,7 @@ function accountBalance(name, asOf){
     if (acc!==name) continue; if (date>last) last=date;
     if (date>a.date && date<=asOf) b+=v; else if (date<=a.date && date>asOf) b-=v;
   }
-  if (name==="Hauptkonto") b+=manualDelta(a, last, asOf);
+  b+=manualDelta(a, last, asOf, name);
   return Math.round(b*100)/100;
 }
 function lastDayOf(ym){ return ym+"-"+pad(daysIn(ym)); }
