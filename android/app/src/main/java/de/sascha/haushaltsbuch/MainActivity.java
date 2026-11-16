@@ -42,6 +42,10 @@ import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.Text;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanner;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanning;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.nio.charset.StandardCharsets;
@@ -50,6 +54,9 @@ public class MainActivity extends Activity {
     private static final int FILE_REQUEST = 1;
     private static final int SCAN_CAMERA = 2;
     private static final int SCAN_GALLERY = 3;
+    private static final int SCAN_DOC = 41;
+    private static final int FILE_CAM = 42;
+    private boolean docForFile = false;
     private String scanId;
     private Uri scanUri;
     private static final String APP_URL = "file:///android_asset/index.html";
@@ -138,11 +145,19 @@ public class MainActivity extends Activity {
             public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
                 if (fileCallback != null) fileCallback.onReceiveValue(null);
                 fileCallback = callback;
+                String[] acc0 = params.getAcceptTypes();
+                boolean img0 = acc0 != null && acc0.length > 0 && acc0[0] != null && acc0[0].startsWith("image/");
+                if (params.isCaptureEnabled() && img0) { docForFile = true; startDocScan(true); return true; }
                 Intent i = new Intent(Intent.ACTION_GET_CONTENT);
                 i.addCategory(Intent.CATEGORY_OPENABLE);
                 String[] acc = params.getAcceptTypes();
                 boolean img = acc != null && acc.length > 0 && acc[0] != null && acc[0].startsWith("image/");
                 i.setType(img ? "image/*" : "*/*");
+                if (acc != null && acc.length > 1) {
+                    java.util.ArrayList<String> mt = new java.util.ArrayList<>();
+                    for (String a : acc) if (a != null && a.contains("/")) mt.add(a);
+                    if (mt.size() > 1) { i.setType("*/*"); i.putExtra(Intent.EXTRA_MIME_TYPES, mt.toArray(new String[0])); }
+                }
                 try {
                     startActivityForResult(Intent.createChooser(i, img ? "Foto auswählen" : "Datei auswählen"), FILE_REQUEST);
                 } catch (Exception e) {
@@ -225,11 +240,30 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SCAN_DOC) {
+            boolean forFile = docForFile; docForFile = false;
+            Uri page = null;
+            if (resultCode == RESULT_OK) {
+                try {
+                    GmsDocumentScanningResult r = GmsDocumentScanningResult.fromActivityResultIntent(data);
+                    if (r != null && r.getPages() != null && !r.getPages().isEmpty()) page = copyToScan(r.getPages().get(0).getImageUri());
+                } catch (Exception ignored) {}
+            }
+            if (forFile) { if (fileCallback != null) { fileCallback.onReceiveValue(page == null ? null : new Uri[]{page}); fileCallback = null; } return; }
+            if (resultCode != RESULT_OK) { scanDone(null, "cancel"); return; }
+            if (page == null) { scanDone(null, "Kein Bild erhalten"); return; }
+            recognize(page);
+            return;
+        }
         if (requestCode == SCAN_CAMERA || requestCode == SCAN_GALLERY) {
             if (resultCode != RESULT_OK) { scanDone(null, "cancel"); return; }
             Uri uri = requestCode == SCAN_CAMERA ? scanUri : (data != null ? data.getData() : null);
             if (uri == null) { scanDone(null, "Kein Bild erhalten"); return; }
             recognize(uri);
+            return;
+        }
+        if (requestCode == FILE_CAM) {
+            if (fileCallback != null) { fileCallback.onReceiveValue(resultCode == RESULT_OK && scanUri != null ? new Uri[]{scanUri} : null); fileCallback = null; }
             return;
         }
         if (requestCode == FILE_REQUEST && fileCallback != null) {
@@ -250,8 +284,66 @@ public class MainActivity extends Activity {
         });
     }
 
+    /* Dokumentenscanner (Kanten erkennen, Ecken zuschneiden, gerade ziehen) */
+    private void startDocScan(boolean forFile) {
+        try {
+            GmsDocumentScannerOptions o = new GmsDocumentScannerOptions.Builder()
+                .setGalleryImportAllowed(true)
+                .setPageLimit(1)
+                .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_JPEG)
+                .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
+                .build();
+            GmsDocumentScanner sc = GmsDocumentScanning.getClient(o);
+            sc.getStartScanIntent(this)
+                .addOnSuccessListener(is -> {
+                    try { startIntentSenderForResult(is, SCAN_DOC, null, 0, 0, 0); }
+                    catch (Exception e) { docFallback(forFile); }
+                })
+                .addOnFailureListener(e -> docFallback(forFile));
+        } catch (Throwable e) { docFallback(forFile); }
+    }
+
+    private void docFallback(boolean forFile) {
+        docForFile = false;
+        if (!forFile) { startPlainCam(); return; }
+        try {
+            if (checkSelfPermission(android.Manifest.permission.CAMERA) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                if (fileCallback != null) { fileCallback.onReceiveValue(null); fileCallback = null; }
+                requestPermissions(new String[]{android.Manifest.permission.CAMERA}, CAM_REQUEST);
+                return;
+            }
+            File dir = new File(getCacheDir(), "scan"); dir.mkdirs();
+            scanUri = FileProvider.getUriForFile(this, "de.sascha.haushaltsbuch.files", new File(dir, "foto.jpg"));
+            Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            i.putExtra(MediaStore.EXTRA_OUTPUT, scanUri);
+            i.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivityForResult(i, FILE_CAM);
+        } catch (Exception e) { if (fileCallback != null) { fileCallback.onReceiveValue(null); fileCallback = null; } }
+    }
+
+    private Uri copyToScan(Uri src) {
+        try {
+            File dir = new File(getCacheDir(), "scan"); dir.mkdirs();
+            File f = new File(dir, "dokument_" + System.currentTimeMillis() + ".jpg");
+            File[] old = dir.listFiles((d, n) -> n.startsWith("dokument_"));
+            if (old != null) for (File x : old) x.delete();
+            try (InputStream is = getContentResolver().openInputStream(src); OutputStream os = new FileOutputStream(f)) {
+                byte[] b = new byte[65536]; int n; while ((n = is.read(b)) > 0) os.write(b, 0, n);
+            }
+            return FileProvider.getUriForFile(this, "de.sascha.haushaltsbuch.files", f);
+        } catch (Exception e) { return src; }
+    }
+
     /* Beleg scannen */
     private void startScan(String source) {
+        if (!"gallery".equals(source) && !"photo".equals(source)) { startDocScan(false); return; }
+        if ("photo".equals(source)) { startPlainCam(); return; }
+        startScanOld(source);
+    }
+
+    private void startPlainCam() { startScanOld("camera"); }
+
+    private void startScanOld(String source) {
         try {
             if ("gallery".equals(source)) {
                 Intent i = new Intent(Intent.ACTION_GET_CONTENT);
@@ -377,7 +469,7 @@ public class MainActivity extends Activity {
     public void onRequestPermissionsResult(int code, String[] perms, int[] res) {
         super.onRequestPermissionsResult(code, perms, res);
         if (code == SCAN_CAM_REQUEST) {
-            if (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) startScan("camera");
+            if (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) startPlainCam();
             else scanDone(null, "Kamera nicht erlaubt");
             return;
         }
@@ -823,6 +915,9 @@ public class MainActivity extends Activity {
                 } catch (Exception e) { ocrDone(id, null, e.getMessage() == null ? "Fehler" : e.getMessage()); }
             }).start();
         }
+
+        @JavascriptInterface
+        public boolean canDocScan() { return true; }
 
         @JavascriptInterface
         public void scanReceipt(String id, String source) {

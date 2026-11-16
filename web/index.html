@@ -5621,7 +5621,7 @@ async function pfeSave(){
 })();
 function phoneCam(){ return !!(window.AndroidBridge && window.AndroidBridge.scanReceipt && !window.AndroidBridge.desktop); }
 async function avatarNative(source){
-  try { const res=await scanNative(source); if (!res || !res.img) return; setAvatar(await (await fetch(res.img)).blob()); }
+  try { const res=await scanNative(source==="camera"?"photo":source); if (!res || !res.img) return; setAvatar(await (await fetch(res.img)).blob()); }
   catch(e){ toast(e.message||"Das Foto konnte nicht geöffnet werden"); }
 }
 $("pfPick").onclick = ()=>{ if (phoneCam()) return avatarNative("gallery"); const i=$("pfFile"); i.value=""; i.click(); };
@@ -9360,7 +9360,8 @@ function tmForm(){ const t=TM2.edit?tmList().find(x=>x.id===TM2.edit)||{}:{}, P=
     <div class="srseg" style="padding:0;margin:4px 0 10px"><button type="button" class="${!tmIsFrist(t)||t.k==="termin"?"on":""}" data-tmk="termin">📍 ${esc(nt("tm_k_t"))}</button><button type="button" class="${t.k==="frist"||(t.n&&tmIsFrist(t)&&t.k!=="termin")?"on":""}" data-tmk="frist">📄 ${esc(nt("tm_k_f"))}</button></div>
     <div class="vabtns">${TM2.edit?`<button type="button" class="btn danger" data-tmdel="${esc(TM2.edit)}">${esc(nt("tm_del"))}</button>`:""}<button type="button" class="btn" data-tmcancel>${esc(nt("tm_cancel"))}</button><button type="button" class="btn primary" data-tmsave>${esc(nt("tm_save"))}</button></div></div>`; }
 async function tmSaveAll(){ await saveSettings(); }
-async function tmShrink(file){ const url=await new Promise((ok,no)=>{ const r=new FileReader(); r.onload=()=>ok(r.result); r.onerror=no; r.readAsDataURL(file); }); const im=await loadImg(url), k=Math.min(1,1600/Math.max(im.naturalWidth,im.naturalHeight)), c=document.createElement("canvas"); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); c.getContext("2d").drawImage(im,0,0,c.width,c.height); return c.toDataURL("image/jpeg",0.85); }
+async function tmShrink(file, mx=1600){ const url=await new Promise((ok,no)=>{ const r=new FileReader(); r.onload=()=>ok(r.result); r.onerror=no; r.readAsDataURL(file); }); const im=await loadImg(url), k=Math.min(1,mx/Math.max(im.naturalWidth,im.naturalHeight)), c=document.createElement("canvas"); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); c.getContext("2d").drawImage(im,0,0,c.width,c.height); return c.toDataURL("image/jpeg",0.85); }
+async function ocrImgFile(file){ let L=[]; try{ L=await ocrDataUrl(await tmShrink(file, 2600)); }catch(_){ L=[]; } if (!L.length){ try{ L=await ocrDataUrl(await tmShrink(file, 1600)); }catch(_){ L=[]; } } return L||[]; }
 document.addEventListener("click", async e=>{
   const op=e.target.closest("[data-tmopen]"); if (op){ e.preventDefault(); tmOpen(op.dataset.tmopen||null); return; }
   const bg=$("tmBg"); if (!bg||bg.hidden||!bg.contains(e.target)) return; const L=tmList();
@@ -9487,7 +9488,7 @@ function bsParse(lines){ const T0=lines.map(l=>typeof l==="string"?l:l.t).filter
   return {d, F}; }
 async function bsScan(file){ let img; try{ img=await tmShrink(file); }catch(_){ toast(nt("bs_err_img")); return; }
   BS.img=img; BS.st=1; bsRender(); const t0=performance.now(); let lines=[];
-  try{ lines=await ocrDataUrl(img); }catch(e){ lines=[]; }
+  lines=await ocrImgFile(file);
   const wait=Math.max(0, 1800-(performance.now()-t0)); await new Promise(r=>setTimeout(r,RMo()?0:wait));
   const {d,F}=bsParse(lines||[]); BS.d={kind:"bew", use:true, terms:true, ...d}; BS.found=F; BS.st=2; BS.scanned=true; bsRender();
   if (!Object.keys(F).length) toast(nt("bs_nothing")); }
@@ -9621,10 +9622,10 @@ async function stbPdf(file){ const buf=await file.arrayBuffer(); const L=await p
 async function stbScan(file){ const isPdf=/pdf/i.test(file.type||"")||/\.pdf$/i.test(file.name||""); let lines=[];
   STB.img=null; STB.st=1; stbRender(); const t0=performance.now();
   try{ if (isPdf){ const r=await stbPdf(file); lines=r.lines; STB.img=r.img; stbRender(); }
-    else { STB.img=await tmShrink(file); stbRender(); lines=await ocrDataUrl(STB.img); } }
+    else { STB.img=await tmShrink(file); stbRender(); lines=await ocrImgFile(file); } }
   catch(e){ lines=[]; if (isPdf) toast(nt("stb_pdf_err")); }
   const wait=Math.max(0,2000-(performance.now()-t0)); await new Promise(r=>setTimeout(r,RMo()?0:wait));
-  const {d,F}=stbParse(lines||[]); STB.d=d; STB.F=F; STB.edit=null; STB.act={pay:1,ein:1,vz:1,pot:1}; STB.st=2; STB.scanned=true; stbRender(); }
+  const {d,F}=stbParse(lines||[]); STB.d=d; STB.F=F; STB.edit=null; STB.act={pay:1,ein:1,vz:1,pot:1}; STB.st=2; STB.scanned=true; stbRender(); if (!Object.keys(F||{}).length) toast(nt("bs_nothing")); }
 function stbReadForm(){ const bg=$("stbBg"), d={...(STB.d||{})}; bg.querySelectorAll("[data-stbf]").forEach(i=>{ const k=i.dataset.stbf, v=(i.value||"").trim(); if (i.type==="date"||i.dataset.cal) d[k]=v; else if (k==="year") d[k]=Number(v.replace(/\D/g,""))||""; else d[k]=v===""?"":(parseAmt(v)||0); });
   const a=$("stbVorb"), b=$("stbVorl"); if (a) d.vorb=a.checked; if (b) d.vorl=b.checked; return d; }
 async function stbApply(rec, old){ const ym=d=>d.slice(0,7);
@@ -9750,10 +9751,10 @@ function brParse(lines){ const T0=lines.map(l=>typeof l==="string"?l:(l.t||l.tex
   return {d, F}; }
 async function brScan(file){ const isPdf=/pdf/i.test(file.type||"")||/\.pdf$/i.test(file.name||""); let lines=[];
   BR.img=null; BR.st=1; brRender(); const t0=performance.now();
-  try{ if (isPdf){ const r=await stbPdf(file); lines=r.lines; BR.img=r.img; brRender(); } else { BR.img=await tmShrink(file); brRender(); lines=await ocrDataUrl(BR.img); } }
+  try{ if (isPdf){ const r=await stbPdf(file); lines=r.lines; BR.img=r.img; brRender(); } else { BR.img=await tmShrink(file); brRender(); lines=await ocrImgFile(file); } }
   catch(e){ lines=[]; if (isPdf) toast(nt("stb_pdf_err")); }
   const wait=Math.max(0,2000-(performance.now()-t0)); await new Promise(r=>setTimeout(r,RMo()?0:wait));
-  const {d,F}=brParse(lines||[]); BR.d=d; BR.F=F; BR.edit=null; BR.act={due:1,term:1,pay:1,wid:1}; BR.st=2; BR.scanned=true; brRender(); }
+  const {d,F}=brParse(lines||[]); BR.d=d; BR.F=F; BR.edit=null; BR.act={due:1,term:1,pay:1,wid:1}; BR.st=2; BR.scanned=true; brRender(); if (!Object.keys(F||{}).length) toast(nt("bs_nothing")); }
 function brReadForm(){ const bg=$("brBg"), d={...(BR.d||{})}; bg.querySelectorAll("[data-brf]").forEach(i=>{ const k=i.dataset.brf, v=(i.value||"").trim();
   if (k==="docs"){ const old=d.docs||[]; d.docs=v.split(/\n+/).map(s=>s.trim()).filter(Boolean).map(t=>({t, ok:!!(old.find(o=>o.t===t)||{}).ok})); }
   else if (k==="amt") d[k]=v===""?0:(parseAmt(v)||0); else d[k]=v; });
