@@ -2003,6 +2003,21 @@ html.pc #hlBg{background:rgba(5,15,11,.82);backdrop-filter:blur(8px)}html.pc .hl
 .atile.pop .aic{animation:uxIc .5s cubic-bezier(.3,1.8,.5,1)}@keyframes uxIc{40%{transform:scale(1.22) rotate(-6deg)}}
 .top{transition:box-shadow .3s}body.scrolled .top{box-shadow:0 8px 24px -16px rgba(0,0,0,.35)}
 @media (prefers-reduced-motion: reduce){.atile,.areagear{transition:none}}
+/* Tablet/PC Layout */
+@media (min-width:640px){ html:not(.pc) [data-view="home"] .agrid{grid-template-columns:repeat(6,1fr)}
+  html:not(.pc) .hlist{display:grid!important;grid-template-columns:1fr 1fr;gap:12px;align-items:start}html:not(.pc) .hlist>*{margin:0!important}html:not(.pc) .hlist>:not(.card){grid-column:1/-1}
+  html:not(.pc) .homeTop .hkpi,html:not(.pc) .homeTop .fcmini{width:auto}
+  html:not(.pc) [data-view="beruf"] .agrid{grid-template-columns:repeat(6,1fr)}
+  html:not(.pc) [data-view="zukunft"]{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}html:not(.pc) [data-view="zukunft"]>*{margin:0!important}html:not(.pc) [data-view="zukunft"]>.ahero,html:not(.pc) [data-view="zukunft"]>.areacard{grid-column:1/-1}
+}
+@media (min-width:1000px){ html:not(.pc) [data-view="home"]{display:grid;grid-template-columns:minmax(420px,1fr) minmax(0,1fr);gap:14px;align-items:start}
+  html:not(.pc) [data-view="home"]>*{margin:0!important;min-width:0}html:not(.pc) [data-view="home"]>.hlcard{grid-column:1/-1}
+  html:not(.pc) [data-view="home"]>.homeTop{grid-row:span 3}
+  html:not(.pc) [data-view="home"] .agrid{grid-template-columns:repeat(3,1fr)}
+  html:not(.pc) [data-view="beruf"] .agrid{grid-template-columns:repeat(6,1fr)}
+}
+html.pc [data-view="zukunft"] .agrid{grid-template-columns:repeat(4,1fr)!important}
+
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
