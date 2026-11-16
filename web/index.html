@@ -3336,7 +3336,10 @@ function tmRing(ring, g, first){ ring.classList.toggle("none", !g); if (!g) g={x
   if (first){ ring.animate([{opacity:0},{opacity:1}],{duration:350}); requestAnimationFrame(()=>requestAnimationFrame(()=>ring.style.transition="")); } }
 function tmPos(m){ return `translate3d(${m.x}px,${m.y}px,0)`; }
 function mHeadOut(q){ q=q||$("ptourQ"); if (!q || q._mout) return; q._mout=1; if (RMo()){ q.style.visibility="hidden"; return; } q.getAnimations().forEach(a=>a.cancel()); q.animate([{transform:"none"},{transform:"scale(1.25)",offset:.4},{transform:"scale(.2)",opacity:0}],{duration:300,easing:"ease-in",fill:"forwards"}).finished.then(()=>{ if (q._mout) q.style.visibility="hidden"; }).catch(()=>{}); }
-function mAway(){ const tb=$("tourBg"), mb=$("mbBg"), mo=$("moBg"); const tv=tb && !tb.hidden && tb.querySelector(".tmami"), bv=mb && !mb.hidden, ov=mo && !mo.hidden; return !!(tv||bv||ov||MO.keep); }
+function mAway(){ const tb=$("tourBg"), mb=$("mbBg"), mo=$("moBg"); const tv=tb && !tb.hidden && tb.querySelector(".tmami") && TOUR.i>=0;
+  if (mb && !mb.hidden && !MB.on && !mb.classList.contains("show")){ mb.hidden=true; } if (mo && !mo.hidden && !MO.on && !MO.keep && !mo.classList.contains("show")){ mo.hidden=true; }
+  if (!document.querySelector("#mbBg:not([hidden]),#moBg:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden]),.backdrop:not([hidden])")) document.body.classList.remove("locked");
+  const bv=mb && !mb.hidden, ov=mo && !mo.hidden; return !!(tv||bv||ov||MO.keep); }
 function mHeadFix(){ try{ const q=$("ptourQ"); if (!q || !q.isConnected) return; const cs=getComputedStyle(q), gone=q._mout || cs.visibility==="hidden" || Number(cs.opacity)<.5 || q.getAnimations().some(a=>a.playState==="finished"&&a.effect&&a.effect.getComputedTiming&&a.effect.getComputedTiming().fill==="forwards");
   if (!gone || mAway()) return; if (MB.on && !($("mbBg")&&!$("mbBg").hidden)) MB.on=false; if (MO.on && !($("moBg")&&!$("moBg").hidden)) MO.on=false; q._mout=1; mHeadIn(q); }catch(_){} }
 setInterval(mHeadFix, 1200); document.addEventListener("pointerup", ()=>setTimeout(mHeadFix, 900), true); document.addEventListener("visibilitychange", ()=>{ if (!document.hidden) setTimeout(mHeadFix, 300); });
@@ -9815,10 +9818,10 @@ function mbClose(later){ const bg=$("mbBg"); if (!bg) return; MB.on=false; clear
   if (RMo()){ bg.hidden=true; document.body.classList.remove("locked"); return; }
   bg.classList.remove("show"); const m=bg.querySelector(".mbmami"), F=mbFrom()||(()=>{ const q=$("ptourQ"); return q?{q, r:q.getBoundingClientRect()}:null; })(), st=bg.querySelector(".mbstack");
   if (st) st.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateY(-20px) scale(.92)"}],{duration:280,easing:"ease-in",fill:"forwards"});
-  const done=()=>{ bg.hidden=true; document.body.classList.remove("locked"); mHeadIn(F&&F.q); };
+  let dn=0; const done=()=>{ if (dn++) return; bg.hidden=true; document.body.classList.remove("locked"); mHeadIn(F&&F.q); };
   if (m && F && F.r.width){ m.getAnimations().forEach(a=>a.cancel()); const mr=m.getBoundingClientRect(), sz=mr.width||92, to={x:F.r.left+F.r.width/2-sz/2, y:F.r.top+F.r.height/2-sz/2};
     const K=[]; const N=22, from={x:mr.left,y:mr.top}, cx=(from.x+to.x)/2-30, cy=Math.min(from.y,to.y)-50; for (let i=0;i<=N;i++){ const t=i/N,u=1-t, x=u*u*from.x+2*u*t*cx+t*t*to.x, y=u*u*from.y+2*u*t*cy+t*t*to.y, sc=1+(Math.max(.3,F.r.height/sz)-1)*t*t; K.push({transform:`translate(${(x-from.x).toFixed(1)}px,${(y-from.y).toFixed(1)}px) scale(${sc.toFixed(3)}) rotate(${(-Math.sin(t*Math.PI)*14).toFixed(1)}deg)`, opacity:t>.92?0:1, offset:t}); }
-    m.animate(K,{duration:720, delay:120, easing:"cubic-bezier(.5,0,.3,1)", fill:"forwards"}).finished.then(done).catch(done); }
+    m.animate(K,{duration:720, delay:120, easing:"cubic-bezier(.5,0,.3,1)", fill:"forwards"}).finished.then(done).catch(done); setTimeout(done, 1300); }
   else { if (m) m.animate([{opacity:1},{opacity:0}],{duration:300,fill:"forwards"}); setTimeout(done, 320); } }
 function mbAct(x){ const k=x.k; if (k==="upd"){ try{ UPD.avail&&UPD.avail.go(); }catch(_){} return; }
   if (k==="br") return brOpen(x.id); if (k==="stb") return stbOpen(); if (k==="term") return tmOpen(); if (k==="bs") return bsOpen(); if (k==="fc") return fcOpen();
@@ -9863,12 +9866,12 @@ function moTick(now){ if (!MO.on) return; const dt=Math.min(.05,(now-MO.last)/10
 function moClose(then){ const bg=$("moBg"); if (!bg||!MO.on) return; MO.on=false; cancelAnimationFrame(MO.raf); bg.classList.remove("show");
   const me=$("moMe"), q=$("ptourQ"), N=MO.nodes||[];
   if (!RMo()) N.forEach((n,i)=>n.animate([{opacity:1},{opacity:0,transform:n.style.transform.replace(/scale\([^)]*\)/,"scale(0)")}],{duration:300,delay:i*30,easing:"ease-in",fill:"forwards"}));
-  const done=()=>{ bg.hidden=true; document.body.classList.remove("locked"); mHeadIn(q); if (typeof then==="function") then(); };
+  let dn=0; const done=()=>{ if (dn++) return; bg.hidden=true; document.body.classList.remove("locked"); mHeadIn(q); if (typeof then==="function") then(); };
   if (then==="keep"){ const sy=bg.querySelector(".mosay"), bk=bg.querySelector(".moback"), hi=bg.querySelector(".mohint"); [sy,bk,hi].forEach(x=>{ if (x) x.style.visibility="hidden"; }); bg.classList.add("show"); clearTimeout(MO.hideT); MO.hideT=setTimeout(moHide, 3000); return; }
   if (me && q && !RMo()){ const r=q.getBoundingClientRect(), mr=me.getBoundingClientRect(), sz=mr.width||128; me.getAnimations().forEach(a=>a.cancel());
     const from={x:mr.left,y:mr.top}, to={x:r.left+r.width/2-sz/2, y:r.top+r.height/2-sz/2}, K=[], N2=22, cx=(from.x+to.x)/2-40, cy=Math.min(from.y,to.y)-60;
     for (let i=0;i<=N2;i++){ const t=i/N2,u=1-t, x=u*u*from.x+2*u*t*cx+t*t*to.x, y=u*u*from.y+2*u*t*cy+t*t*to.y, sc=1+(Math.max(.3,r.height/sz)-1)*t*t; K.push({transform:`translate(${(x-from.x).toFixed(1)}px,${(y-from.y).toFixed(1)}px) scale(${sc.toFixed(3)}) rotate(${(-Math.sin(t*Math.PI)*14).toFixed(1)}deg)`, opacity:t>.92?0:1, offset:t}); }
-    me.animate(K,{duration:760, delay:150, easing:"cubic-bezier(.5,0,.3,1)", fill:"forwards"}).finished.then(done).catch(done); }
+    me.animate(K,{duration:760, delay:150, easing:"cubic-bezier(.5,0,.3,1)", fill:"forwards"}).finished.then(done).catch(done); setTimeout(done, 1350); }
   else setTimeout(done, 250); }
 function moHide(){ clearTimeout(MO.hideT); const bg=$("moBg"); if (!bg || bg.hidden || MO.on) return; bg.hidden=true; if (!document.querySelector("#mbBg:not([hidden]),#tourBg:not([hidden])")) document.body.classList.remove("locked"); if (!MB.on && TOUR.i<0) mHeadIn(); }
 function moLevel(l){ const N=MO.nodes||[]; if (RMo()){ MO.lvl=l; moBuild(); return; }
