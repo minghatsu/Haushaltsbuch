@@ -1994,6 +1994,10 @@ html.pc #hlBg{background:rgba(5,15,11,.82);backdrop-filter:blur(8px)}html.pc .hl
 .bstot{display:flex;gap:8px}.bstot .in{flex:1}.bstot .vadone{flex:none;min-width:0;padding:0 12px;height:auto}
 .bscks{padding:4px 0}.bsck{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;border-top:1px solid var(--line);font-size:13.5px}.bsck:first-child{border-top:0}.bsck>span:first-child{font-size:18px;flex:none}
 .bsck b{display:block;font-size:14px}.bsck small{color:var(--muted);font-size:12px;font-weight:600}.bsck.bad b{color:var(--bad)}.bsck.warn b{color:var(--warn)}.bsck.ok b{color:var(--good)}
+/* Briefe vom Amt */
+.brsum{padding:12px 14px}.brsum p{margin:0;padding:3px 0;font:600 14.5px/1.45 var(--f-body)}.brsum p:first-child{font-weight:800}
+.brhero.neg{background:linear-gradient(135deg,var(--bad),color-mix(in srgb,var(--bad) 65%,#f0a050))}
+.brdocs{min-height:80px;resize:vertical;font:600 14px var(--f-body)}
 /* Mami-Orbit */
 .mobg{position:fixed;inset:0;z-index:1150;touch-action:none;user-select:none;-webkit-user-select:none}.mobg[hidden]{display:none}
 .modim{position:absolute;inset:0;background:rgba(8,25,18,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity .45s}
@@ -3421,6 +3425,7 @@ const PTOUR_FN=()=>({
     {sel:'[data-view="beruf"] .ahero', raw:1, ic:"receipt", t:nt("trb_hero_t"), p:[nt("trb_hero_p")]},
     {sel:'[data-view="beruf"] .areacard .agrid', raw:1, ic:"case", t:nt("trb_tiles_t"), p:[nt("trb_tiles_p")]},
     {sel:'[data-view="beruf"] [data-stbopen].atile', raw:1, ic:"doc", t:nt("trb_stb_t"), p:[nt("trb_stb_p")]},
+    {sel:'[data-view="beruf"] [data-bropen].atile', raw:1, ic:"doc", t:nt("trb_br_t"), p:[nt("trb_br_p")]},
     {sel:'[data-view="beruf"] [data-tmopen].atile', raw:1, ic:"cal", t:nt("trb_tm_t"), p:[nt("trb_tm_p")]},
     {sel:'[data-view="beruf"] [data-zvopen].atile', raw:1, ic:"cash", t:nt("trb_zv_t"), p:[nt("trb_zv_p")]},
     {sel:'[data-view="beruf"] [data-bsopen].atile', raw:1, ic:"doc", t:nt("trb_bs_t"), p:[nt("trb_bs_p")]},
@@ -4021,6 +4026,7 @@ function renderBeruf(){ const el=document.querySelector(`[data-view="beruf"]`); 
   const extra=[]; if (staat){ const m=bwMonth(ymOf(new Date())), g2=Number(bwCfg().goal)||0; extra.push(areaTile("📨","Bewerbungen",`${m.length}${g2?" / "+g2:""} im Monat`,"data-bwopen")); }
   if (isJobless()){ const j=jlCfg(), up=(j.terms||[]).filter(t=>!t.done&&t.d>=isoToday()).sort((a,c)=>a.d.localeCompare(c.d))[0], mini=Number(j.mini)||0;
     extra.push(areaTile("⏰","Termine & Fristen",up?esc(dLong(up.d,{day:"numeric",month:"short"})):"keine offen","data-tmopen"), areaTile("💶","Zuverdienst",mini?"+"+esc(eur0(jlKeep(mini))):"Rechner","data-zvopen"), areaTile("📄","Bescheid-Check",(j.bescheide||[]).length?esc(eur0((j.bescheide.slice().sort((a,c)=>(c.from||"").localeCompare(a.from||""))[0]||{}).total||0)):"scannen","data-bsopen")); }
+  { const BL=brList().filter(x=>!x.done), bn=BL.map(brNext).filter(Boolean).sort()[0]; extra.push(areaTile("✉️", esc(nt("br_title")), BL.length?`${BL.length} ${esc(nt("br_open"))}${bn?" · "+esc(fxDate(bn,{day:"numeric",month:"short"})):""}`:esc(nt("br_tile_s0")), "data-bropen")); }
   if (hasSelf()||hasJob()){ const SL=stbSorted(), l0=SL[0], v0=l0?stbAmt(l0):0; extra.push(areaTile(ic("doc",22), esc(nt("stb_title")), l0?`${v0>0?"+":v0<0?"−":"±"}${esc(eur0(Math.abs(v0)))} · ${esc(String(l0.year))}`:esc(nt("stb_tile_s0")), "data-stbopen"));
     for (const x of SL){ const w=dLeft(stbWid(x)); if (w!=null&&w>=0&&w<=14){ hints.unshift(`<button type="button" class="ahint" data-stbopen>🧾 <span data-noi18n>${esc(nt("stb_h_ein",{y:String(x.year),n:String(w)}))}</span></button>`); break; } } }
   if (hasSelf()||["angestellt","beamte","beides","azubi"].includes(S.settings.work||"beides")||hasExtra("angestellt")){ const H=hoCalc(y); extra.push(areaTile("🏠","Homeoffice",H.on?esc(eur0(H.amt)):"eintragen","data-hoopen")); }
@@ -5190,7 +5196,7 @@ function renderHome(){
       if (md.on && md.h && a.ml!==b.ml){ const plus=(a.ml-b.ml)*md.h*13/3; hints.unshift({k:"mindest", lvl:"good", t:`Neu ab ${ny}: Mindestlohn ${ml2(a.ml)} €`, s:`Du bekommst ca. ${eur0(plus)} mehr brutto im Monat. Prüf, ob es auf deiner Abrechnung steht.`}); }
       if (a.mj!==b.mj && (["minijob","studium","schule","alg","grusi"].includes(S.settings.work)||hasExtra("minijob"))) hints.push({k:"mjgrenze", lvl:"warn", t:`Neu ab ${ny}: Minijob-Grenze ${a.mj} €`, s:`vorher ${b.mj} € im Monat`}); } }
   { const nb=S.tx.filter(t=>t.nobon && !hasReceipt(t.id)).length; if (nb) hints.push({lvl:"warn", t:`${nb} ${nb===1?"Einkauf":"Einkäufe"} ohne Kassenbon`, s:"Öffne die Buchung und fotografier den Bon nach – oder tipp dort „Bon gibt’s nicht“."}); }
-  aboHints(hints); try{ tmHints(hints); }catch(_){} try{ stbHints(hints); }catch(_){}
+  aboHints(hints); try{ tmHints(hints); }catch(_){} try{ stbHints(hints); }catch(_){} try{ brHints(hints); }catch(_){}
   UI.hints=hints; updateBell();
   if (ym===cur) notifyAlerts(hints);
   const bt = g.filter(x=>x.budget).sort((a,b)=>b.v/b.budget-a.v/a.budget).slice(0,3);
@@ -8459,6 +8465,80 @@ async function deleteTx(){
 }
 
 const NT={
+br_from:["Brief vom {d}", "Letter dated {d}", "{d} tarihli mektup", "Письмо от {d}", "Лист від {d}", "Pismo z {d}", "رسالة بتاريخ {d}", "Scrisoare din {d}"],
+br_title:["Briefe vom Amt", "Official letters", "Resmi mektuplar", "Письма из ведомств", "Листи з установ", "Pisma z urzędu", "رسائل رسمية", "Scrisori oficiale"],
+br_tile_s0:["verstehen", "understand", "anla", "понять", "зрозуміти", "zrozum", "افهم", "înțelege"],
+br_intro:["Brief fotografieren – Mami sagt dir, was drin steht", "Photograph a letter – Mommy tells you what it says", "Mektubun fotoğrafını çek – Annen ne yazdığını söyler", "Сфотографируй письмо – Мама скажет, что в нём", "Сфотографуй лист – Мама скаже, що в ньому", "Zrób zdjęcie listu – Mama powie ci, co w nim jest", "صوّر الرسالة – ستخبرك ماما بمحتواها", "Fotografiază scrisoarea – Mami îți spune ce scrie"],
+br_intro_s:["Ob du was zahlen oder einreichen musst, Geld zurückbekommst und bis wann – kurz und in deiner Sprache.", "Whether you must pay or send something, get money back, and by when – short and in your language.", "Bir şey ödemen ya da göndermen mi gerekiyor, para mı geri alıyorsun ve ne zamana kadar – kısaca ve kendi dilinde.", "Нужно ли что-то платить или отправить, вернут ли деньги и до какого числа – коротко и на твоём языке.", "Чи треба щось платити або надіслати, чи повернуть гроші й до якого числа – коротко і твоєю мовою.", "Czy musisz coś zapłacić lub wysłać, czy dostaniesz zwrot i do kiedy – krótko i w twoim języku.", "هل عليك الدفع أو إرسال شيء، هل ستسترد مالًا ومتى – باختصار وبلغتك.", "Dacă trebuie să plătești sau să trimiți ceva, dacă primești bani înapoi și până când – pe scurt și în limba ta."],
+br_list:["Deine Briefe", "Your letters", "Mektupların", "Твои письма", "Твої листи", "Twoje listy", "رسائلك", "Scrisorile tale"],
+br_open:["offen", "open", "açık", "открыто", "відкрито", "otwarte", "مفتوح", "deschis"],
+br_done:["erledigt", "done", "tamam", "готово", "готово", "załatwione", "تم", "gata"],
+br_short:["Kurz gesagt", "In short", "Kısaca", "Коротко", "Коротко", "W skrócie", "باختصار", "Pe scurt"],
+br_todo:["Das musst du tun", "What you need to do", "Yapman gerekenler", "Что нужно сделать", "Що треба зробити", "Co musisz zrobić", "ما عليك فعله", "Ce trebuie să faci"],
+br_fr:["Fristen & Termine", "Deadlines & appointments", "Süreler ve randevular", "Сроки и встречи", "Терміни та зустрічі", "Terminy i spotkania", "المهل والمواعيد", "Termene și programări"],
+br_found:["Das hab ich gefunden", "Here's what I found", "Bulduklarım", "Вот что я нашла", "Ось що я знайшла", "Oto co znalazłam", "هذا ما وجدته", "Iată ce am găsit"],
+br_mami:["Ich hab den Brief gelesen, {a}! Hier kurz und knapp – du kannst alles noch ändern.", "I've read the letter, {a}! Here it is in short – you can still change everything.", "Mektubu okudum, {a}! İşte kısaca – her şeyi hâlâ değiştirebilirsin.", "Я прочитала письмо, {a}! Вот коротко – всё ещё можно изменить.", "Я прочитала лист, {a}! Ось коротко – усе ще можна змінити.", "Przeczytałam list, {a}! Oto w skrócie – wszystko możesz jeszcze zmienić.", "قرأت الرسالة يا {a}! إليك باختصار – يمكنك تغيير كل شيء.", "Am citit scrisoarea, {a}! Iată pe scurt – poți modifica totul."],
+br_mami0:["Den Brief konnte ich nicht sicher lesen, {a}. Trag das Wichtigste unten ein – den Rest mache ich.", "I couldn't read the letter reliably, {a}. Enter the key points below – I'll do the rest.", "Mektubu kesin okuyamadım, {a}. Önemli noktaları aşağıya gir – gerisini ben yaparım.", "Не удалось точно прочитать письмо, {a}. Впиши главное ниже – остальное сделаю я.", "Не вдалося точно прочитати лист, {a}. Впиши головне нижче – решту зроблю я.", "Nie odczytałam listu na pewno, {a}. Wpisz najważniejsze poniżej – resztę zrobię ja.", "لم أستطع قراءة الرسالة بدقة يا {a}. أدخل الأهم أدناه وسأتولى الباقي.", "N-am putut citi sigur scrisoarea, {a}. Introdu esențialul mai jos – restul fac eu."],
+br_k_mit:["Aufforderung zur Mitwirkung", "Request for cooperation", "Katılım talebi", "Требование содействия", "Вимога сприяння", "Wezwanie do współpracy", "طلب تعاون", "Solicitare de cooperare"],
+br_k_bes:["Bescheid", "Decision notice", "Karar", "Решение", "Рішення", "Decyzja", "قرار", "Decizie"],
+br_k_rueck:["Rückforderung", "Demand for repayment", "Geri ödeme talebi", "Требование возврата", "Вимога повернення", "Żądanie zwrotu", "طلب استرداد", "Cerere de rambursare"],
+br_k_mahn:["Mahnung", "Payment reminder", "İhtar", "Напоминание об оплате", "Нагадування про оплату", "Upomnienie", "إنذار بالدفع", "Somație de plată"],
+br_k_ein:["Einladung / Termin", "Invitation / appointment", "Davet / randevu", "Приглашение / встреча", "Запрошення / зустріч", "Zaproszenie / termin", "دعوة / موعد", "Invitație / programare"],
+br_k_anh:["Anhörung", "Hearing", "Dinleme", "Слушание", "Слухання", "Wysłuchanie", "استماع", "Audiere"],
+br_k_abl:["Ablehnung", "Rejection", "Ret", "Отказ", "Відмова", "Odmowa", "رفض", "Respingere"],
+br_k_bew:["Bewilligung", "Approval", "Onay", "Одобрение", "Схвалення", "Przyznanie", "موافقة", "Aprobare"],
+br_k_info:["Schreiben", "Letter", "Mektup", "Письмо", "Лист", "Pismo", "رسالة", "Scrisoare"],
+br_s_mit:["{s} braucht noch Unterlagen von dir.", "{s} still needs documents from you.", "{s} senden hâlâ belge istiyor.", "{s} ещё нужны от тебя документы.", "{s} ще потрібні від тебе документи.", "{s} potrzebuje jeszcze od ciebie dokumentów.", "{s} لا يزال يحتاج منك مستندات.", "{s} mai are nevoie de documente de la tine."],
+br_s_rueck:["{s} will Geld von dir zurück.", "{s} wants money back from you.", "{s} senden para geri istiyor.", "{s} требует вернуть деньги.", "{s} вимагає повернути гроші.", "{s} chce od ciebie zwrotu pieniędzy.", "{s} يريد استرداد مال منك.", "{s} vrea bani înapoi de la tine."],
+br_s_mahn:["{s} erinnert dich an eine offene Zahlung.", "{s} reminds you of an open payment.", "{s} sana açık bir ödemeyi hatırlatıyor.", "{s} напоминает о неоплаченном счёте.", "{s} нагадує про неоплачений рахунок.", "{s} przypomina o niezapłaconej kwocie.", "{s} يذكّرك بدفعة مستحقة.", "{s} îți amintește de o plată restantă."],
+br_s_ein:["{s} lädt dich zu einem Termin ein.", "{s} invites you to an appointment.", "{s} seni bir randevuya davet ediyor.", "{s} приглашает тебя на встречу.", "{s} запрошує тебе на зустріч.", "{s} zaprasza cię na spotkanie.", "{s} يدعوك إلى موعد.", "{s} te invită la o programare."],
+br_s_anh:["{s} möchte deine Sicht hören, bevor entschieden wird.", "{s} wants to hear your side before deciding.", "{s} karar vermeden önce senin görüşünü almak istiyor.", "{s} хочет услышать тебя, прежде чем решить.", "{s} хоче почути тебе, перш ніж вирішити.", "{s} chce poznać twoje zdanie przed decyzją.", "{s} يريد سماع رأيك قبل اتخاذ القرار.", "{s} vrea să-ți audă punctul de vedere înainte de decizie."],
+br_s_abl:["{s} hat deinen Antrag abgelehnt.", "{s} has rejected your application.", "{s} başvurunu reddetti.", "{s} отклонил твоё заявление.", "{s} відхилив твою заяву.", "{s} odrzucił twój wniosek.", "{s} رفض طلبك.", "{s} ți-a respins cererea."],
+br_s_bew:["{s} hat deinen Antrag bewilligt.", "{s} has approved your application.", "{s} başvurunu onayladı.", "{s} одобрил твоё заявление.", "{s} схвалив твою заяву.", "{s} przyznał ci świadczenie.", "{s} وافق على طلبك.", "{s} ți-a aprobat cererea."],
+br_s_bes:["Du hast einen Bescheid von {s} bekommen.", "You've received a decision from {s}.", "{s} senden bir karar aldın.", "Ты получил решение от {s}.", "Ти отримав рішення від {s}.", "Otrzymałeś decyzję od {s}.", "وصلك قرار من {s}.", "Ai primit o decizie de la {s}."],
+br_s_info:["Du hast ein Schreiben von {s} bekommen.", "You've received a letter from {s}.", "{s} senden bir mektup aldın.", "Ты получил письмо от {s}.", "Ти отримав лист від {s}.", "Otrzymałeś pismo od {s}.", "وصلتك رسالة من {s}.", "Ai primit o scrisoare de la {s}."],
+br_s_pay:["Du musst {n} zahlen{d}.", "You have to pay {n}{d}.", "{n} ödemen gerekiyor{d}.", "Нужно заплатить {n}{d}.", "Треба заплатити {n}{d}.", "Musisz zapłacić {n}{d}.", "عليك دفع {n}{d}.", "Trebuie să plătești {n}{d}."],
+br_s_back:["Du bekommst {n} zurück.", "You'll get {n} back.", "{n} geri alacaksın.", "Тебе вернут {n}.", "Тобі повернуть {n}.", "Dostaniesz {n} zwrotu.", "ستسترد {n}.", "Primești înapoi {n}."],
+br_s_month:["Du bekommst {n} im Monat.", "You'll receive {n} per month.", "Ayda {n} alacaksın.", "Ты будешь получать {n} в месяц.", "Ти отримуватимеш {n} на місяць.", "Będziesz dostawać {n} miesięcznie.", "ستحصل على {n} شهريًا.", "Vei primi {n} pe lună."],
+br_s_nopay:["Zahlen musst du nichts.", "You don't have to pay anything.", "Bir şey ödemen gerekmiyor.", "Платить ничего не нужно.", "Платити нічого не треба.", "Nie musisz nic płacić.", "لا يلزمك دفع أي شيء.", "Nu trebuie să plătești nimic."],
+br_s_docs:["Reiche {n} Unterlagen ein{d}.", "Send {n} documents{d}.", "{n} belge gönder{d}.", "Отправь {n} документа(ов){d}.", "Надішли {n} документ(и){d}.", "Wyślij {n} dokumenty{d}.", "أرسل {n} مستندات{d}.", "Trimite {n} documente{d}."],
+br_s_term:["Termin am {d}{t}.", "Appointment on {d}{t}.", "Randevu {d}{t}.", "Встреча {d}{t}.", "Зустріч {d}{t}.", "Termin {d}{t}.", "موعد في {d}{t}.", "Programare pe {d}{t}."],
+br_s_wid:["Widerspruch ist möglich bis {d}.", "You can object until {d}.", "{d} tarihine kadar itiraz edebilirsin.", "Возразить можно до {d}.", "Заперечити можна до {d}.", "Odwołać się możesz do {d}.", "يمكنك الاعتراض حتى {d}.", "Poți contesta până la {d}."],
+br_s_warn:["Wichtig: Sonst kann es Nachteile geben (z. B. Kürzung oder Gebühren).", "Important: otherwise there may be consequences (e.g. cuts or fees).", "Önemli: Aksi halde olumsuz sonuçlar olabilir (ör. kesinti veya ücret).", "Важно: иначе возможны последствия (например, сокращение выплат или сборы).", "Важливо: інакше можливі наслідки (наприклад, скорочення виплат або збори).", "Ważne: w przeciwnym razie mogą być konsekwencje (np. obniżka lub opłaty).", "مهم: وإلا قد تكون هناك عواقب (مثل خفض أو رسوم).", "Important: altfel pot exista consecințe (de ex. reduceri sau taxe)."],
+br_until:[" bis {d}", " by {d}", " ({d} tarihine kadar)", " до {d}", " до {d}", " do {d}", " حتى {d}", " până la {d}"],
+br_at:[" um {t}", " at {t}", " saat {t}", " в {t}", " о {t}", " o {t}", " الساعة {t}", " la ora {t}"],
+br_f_from:["Absender", "Sender", "Gönderen", "Отправитель", "Відправник", "Nadawca", "المرسل", "Expeditor"],
+br_f_kind:["Art", "Type", "Tür", "Тип", "Тип", "Rodzaj", "النوع", "Tip"],
+br_f_date:["Datum des Briefs", "Letter date", "Mektup tarihi", "Дата письма", "Дата листа", "Data listu", "تاريخ الرسالة", "Data scrisorii"],
+br_f_due:["Frist", "Deadline", "Son tarih", "Срок", "Термін", "Termin", "المهلة", "Termen"],
+br_f_term:["Termin", "Appointment", "Randevu", "Встреча", "Зустріч", "Spotkanie", "موعد", "Programare"],
+br_f_time:["Uhrzeit", "Time", "Saat", "Время", "Час", "Godzina", "الوقت", "Ora"],
+br_f_money:["Geld", "Money", "Para", "Деньги", "Гроші", "Pieniądze", "المال", "Bani"],
+br_m_none:["nichts", "nothing", "yok", "ничего", "нічого", "nic", "لا شيء", "nimic"],
+br_m_pay:["ich zahle", "I pay", "ödüyorum", "я плачу", "я плачу", "płacę", "أدفع", "plătesc"],
+br_m_back:["ich bekomme zurück", "I get back", "geri alıyorum", "мне вернут", "мені повернуть", "dostaję zwrot", "أسترد", "primesc înapoi"],
+br_m_month:["monatlich", "monthly", "aylık", "ежемесячно", "щомісяця", "miesięcznie", "شهريًا", "lunar"],
+br_f_amt:["Betrag", "Amount", "Tutar", "Сумма", "Сума", "Kwota", "المبلغ", "Sumă"],
+br_f_az:["Aktenzeichen", "Reference number", "Dosya numarası", "Номер дела", "Номер справи", "Sygnatura", "رقم الملف", "Număr de referință"],
+br_f_docs:["Einreichen (eine Zeile pro Unterlage)", "To send (one line per document)", "Gönderilecekler (her belge bir satır)", "Отправить (по строке на документ)", "Надіслати (рядок на документ)", "Do wysłania (jedna linia na dokument)", "للإرسال (سطر لكل مستند)", "De trimis (un rând pe document)"],
+br_warnck:["Bei Versäumnis drohen Nachteile", "Missing it may have consequences", "Kaçırırsan olumsuz sonuçlar olabilir", "При пропуске возможны последствия", "У разі пропуску можливі наслідки", "Przegapienie grozi konsekwencjami", "التأخر قد تكون له عواقب", "Ratarea poate avea consecințe"],
+br_a_due:["Frist {d} – Mami erinnert dich", "Deadline {d} – Mommy reminds you", "Son tarih {d} – Annen hatırlatır", "Срок {d} – Мама напомнит", "Термін {d} – Мама нагадає", "Termin {d} – Mama przypomni", "المهلة {d} – ستذكّرك ماما", "Termen {d} – Mami îți amintește"],
+br_a_term:["Termin {d} – Mami erinnert dich", "Appointment {d} – Mommy reminds you", "Randevu {d} – Annen hatırlatır", "Встреча {d} – Мама напомнит", "Зустріч {d} – Мама нагадає", "Spotkanie {d} – Mama przypomni", "موعد {d} – ستذكّرك ماما", "Programare {d} – Mami îți amintește"],
+br_a_pay:["Zahlung {n} als Buchung einplanen", "Plan payment {n} as a booking", "{n} ödemesini kayıt olarak planla", "Запланировать платёж {n}", "Запланувати платіж {n}", "Zaplanuj płatność {n}", "خطط دفعة {n} كقيد", "Planifică plata {n}"],
+br_a_wid:["Widerspruchsfrist {d} merken", "Remember objection deadline {d}", "{d} itiraz süresini kaydet", "Запомнить срок возражения {d}", "Запам'ятати термін заперечення {d}", "Zapamiętaj termin odwołania {d}", "تذكّر مهلة الاعتراض {d}", "Reține termenul de contestație {d}"],
+br_save:["Alles übernehmen", "Apply all", "Hepsini uygula", "Применить всё", "Застосувати все", "Zastosuj wszystko", "تطبيق الكل", "Aplică tot"],
+br_saved:["Brief gespeichert", "Letter saved", "Mektup kaydedildi", "Письмо сохранено", "Лист збережено", "Zapisano list", "تم حفظ الرسالة", "Scrisoare salvată"],
+br_need:["Bitte trag mindestens den Absender ein", "Please enter at least the sender", "Lütfen en az göndereni gir", "Укажи хотя бы отправителя", "Вкажи хоча б відправника", "Podaj przynajmniej nadawcę", "أدخل المرسل على الأقل", "Introdu cel puțin expeditorul"],
+br_done_btn:["Als erledigt markieren", "Mark as done", "Tamamlandı olarak işaretle", "Отметить как выполненное", "Позначити як виконане", "Oznacz jako załatwione", "وضع علامة تم", "Marchează ca rezolvat"],
+br_reopen:["Wieder öffnen", "Reopen", "Yeniden aç", "Открыть снова", "Відкрити знову", "Otwórz ponownie", "إعادة فتح", "Redeschide"],
+br_orig:["Die Unterlagen stehen so, wie sie im Brief heißen.", "Documents are listed as named in the letter.", "Belgeler mektupta geçtiği adla listelenir.", "Документы указаны так, как в письме.", "Документи вказано так, як у листі.", "Dokumenty podano tak, jak w liście.", "المستندات مذكورة كما وردت في الرسالة.", "Documentele apar cum sunt numite în scrisoare."],
+br_priv:["Bild und Daten bleiben bei dir. Mami gibt dir eine Orientierung, keine Rechtsberatung – schau bei Fristen immer ins Original.", "Image and data stay with you. Mommy gives guidance, not legal advice – always check deadlines in the original.", "Görsel ve veriler sende kalır. Annen yön gösterir, hukuki danışmanlık değildir – süreleri hep orijinalden kontrol et.", "Фото и данные остаются у тебя. Мама даёт ориентир, а не юридическую консультацию – сроки всегда проверяй в оригинале.", "Фото й дані залишаються в тебе. Мама дає орієнтир, а не юридичну консультацію – терміни завжди перевіряй в оригіналі.", "Zdjęcie i dane zostają u ciebie. Mama daje wskazówki, nie poradę prawną – terminy zawsze sprawdzaj w oryginale.", "تبقى الصورة والبيانات لديك. ماما تعطيك توجيهًا وليس استشارة قانونية – تحقق دائمًا من المهل في الأصل.", "Imaginea și datele rămân la tine. Mami îți dă o orientare, nu consultanță juridică – verifică mereu termenele în original."],
+br_h_due:["{s}: Frist {d} – noch {n} Tage", "{s}: deadline {d} – {n} days left", "{s}: son tarih {d} – {n} gün kaldı", "{s}: срок {d} – ещё {n} дн.", "{s}: термін {d} – ще {n} дн.", "{s}: termin {d} – jeszcze {n} dni", "{s}: المهلة {d} – باقي {n} يوم", "{s}: termen {d} – încă {n} zile"],
+br_h_due_s:["Schau in Mamis Brief-Übersicht, was zu tun ist.", "Check Mommy's letter overview for what to do.", "Ne yapılacağını Annen'in mektup özetinde gör.", "Посмотри в обзоре писем, что нужно сделать.", "Подивись в огляді листів, що треба зробити.", "Sprawdź w przeglądzie listów, co zrobić.", "راجع ملخص الرسائل لمعرفة ما يجب فعله.", "Vezi în prezentarea scrisorilor ce ai de făcut."],
+br_h_term:["{s}: Termin {d}{t}", "{s}: appointment {d}{t}", "{s}: randevu {d}{t}", "{s}: встреча {d}{t}", "{s}: зустріч {d}{t}", "{s}: spotkanie {d}{t}", "{s}: موعد {d}{t}", "{s}: programare {d}{t}"],
+mo_brief:["Brief", "Letter", "Mektup", "Письмо", "Лист", "List", "رسالة", "Scrisoare"],
+trb_br_t:["Briefe vom Amt verstehen", "Understand official letters", "Resmi mektupları anla", "Понимать письма из ведомств", "Розуміти листи з установ", "Zrozum pisma z urzędu", "افهم الرسائل الرسمية", "Înțelege scrisorile oficiale"],
+trb_br_p:["Fotografier jeden Brief vom Amt – ich sag dir in deiner Sprache, was drin steht, was du tun musst und bis wann.", "Photograph any official letter – I'll tell you in your language what it says, what to do and by when.", "Her resmi mektubu fotoğrafla – ne yazdığını, ne yapman gerektiğini ve ne zamana kadar olduğunu kendi dilinde söylerim.", "Сфотографируй любое письмо – я скажу на твоём языке, что в нём, что сделать и до какого числа.", "Сфотографуй будь-який лист – я скажу твоєю мовою, що в ньому, що зробити й до якого числа.", "Zrób zdjęcie każdego pisma – powiem w twoim języku, co w nim jest, co zrobić i do kiedy.", "صوّر أي رسالة رسمية – سأخبرك بلغتك بمحتواها وما عليك فعله ومتى.", "Fotografiază orice scrisoare oficială – îți spun în limba ta ce scrie, ce ai de făcut și până când."],
 mo_ask:["Fragen", "Ask", "Sor", "Спросить", "Запитати", "Zapytaj", "اسأل", "Întreabă"],
 mo_rem:["Erinnerungen", "Reminders", "Hatırlatmalar", "Напоминания", "Нагадування", "Przypomnienia", "التذكيرات", "Mementouri"],
 mo_tour:["Rundgang", "Tour", "Tur", "Тур", "Тур", "Przewodnik", "جولة", "Tur"],
@@ -9545,11 +9625,143 @@ document.addEventListener("click", async e=>{
 document.addEventListener("change", e=>{ const id=e.target.id; if (id==="stbCam"||id==="stbFile"){ const f=e.target.files&&e.target.files[0]; e.target.value=""; if (f) stbScan(f); return; }
   const a=e.target.dataset&&e.target.dataset.stbact; if (a){ STB.act[a]=e.target.checked?1:0; const l=e.target.closest(".stbact"); if (l){ l.classList.toggle("on", e.target.checked); if (!RMo()) l.querySelector(".stbck").animate([{transform:"scale(.4) rotate(-20deg)"},{transform:"scale(1.2)"},{transform:"none"}],{duration:420,easing:"cubic-bezier(.3,1.6,.5,1)"}); } } });
 
+/* ---------- Briefe vom Amt verstehen: Scan · Akte · Übersicht ---------- */
+const BR={st:0, img:null, d:null, F:{}, sel:null, edit:null, act:{due:1,term:1,pay:1,wid:1}};
+const BR_SND=[[/jobcenter/,"Jobcenter","💼"],[/agentur f(ü|ue)r arbeit|arbeitsagentur/,"Agentur für Arbeit","💼"],[/finanzamt/,"Finanzamt","🧾"],[/familienkasse|kindergeld/,"Familienkasse","👶"],[/elterngeld/,"Elterngeldstelle","👶"],[/wohngeld/,"Wohngeldstelle","🏠"],[/rentenversicherung/,"Rentenversicherung","👵"],[/beitragsservice|rundfunk/,"Beitragsservice","📺"],[/krankenkasse|\baok\b|techniker|barmer|\bdak\b|\bikk\b|\bbkk\b|knappschaft/,"Krankenkasse","🏥"],[/bafög|bafoeg|studierendenwerk/,"BAföG-Amt","🎓"],[/sozialamt|grundsicherung/,"Sozialamt","🏛️"],[/ausländerbehörde|auslaenderbehoerde|ausländeramt/,"Ausländerbehörde","🛂"],[/bürgeramt|buergeramt|stadtverwaltung|stadt [a-zäöü]+ |gemeinde|landkreis|kreisverwaltung/,"Stadt / Gemeinde","🏛️"],[/amtsgericht|landgericht|gericht/,"Gericht","⚖️"],[/inkasso/,"Inkasso","⚠️"],[/hauptzollamt|zollamt/,"Zoll","🛃"],[/bußgeld|bussgeld|ordnungsamt/,"Ordnungsamt","🚔"],[/versorgungsamt|landschaftsverband/,"Versorgungsamt","🏛️"]];
+function brList(){ return S.settings.briefe=S.settings.briefe||[]; }
+function brSorted(){ return brList().slice().sort((a,b)=>(a.done?1:0)-(b.done?1:0) || (b.date||"").localeCompare(a.date||"")); }
+function brIcon(x){ const s=(x.from||"").toLowerCase(); for (const [re,,e] of BR_SND) if (re.test(s)) return e; return "📄"; }
+function brKindT(k){ return nt("br_k_"+(k||"info")); }
+function brNext(x){ const td=isoToday(), L=[x.due&&!x.done?x.due:null, x.term&&!x.done?x.term:null, x.wid&&!x.done?x.wid:null].filter(d=>d&&d>=td).sort(); return L[0]||null; }
+function brSum(x){ const s=x.from||nt("br_k_info"), out=[], D=d=>fxDate(d,{day:"numeric",month:"long"}), U=d=>d?nt("br_until",{d:D(d)}):"";
+  out.push(nt(({mit:"br_s_mit",rueck:"br_s_rueck",mahn:"br_s_mahn",ein:"br_s_ein",anh:"br_s_anh",abl:"br_s_abl",bew:"br_s_bew",bes:"br_s_bes"})[x.kind]||"br_s_info",{s}));
+  if (x.money==="pay" && x.amt>0) out.push(nt("br_s_pay",{n:eur(x.amt),d:U(x.due)})); else if (x.money==="back" && x.amt>0) out.push(nt("br_s_back",{n:eur(x.amt)})); else if (x.money==="month" && x.amt>0) out.push(nt("br_s_month",{n:eur(x.amt)}));
+  if ((x.docs||[]).length) out.push(nt("br_s_docs",{n:String(x.docs.length),d:U(x.due)}));
+  if (x.term) out.push(nt("br_s_term",{d:D(x.term),t:x.time?nt("br_at",{t:x.time}):""}));
+  if (x.money!=="pay") out.push(nt("br_s_nopay"));
+  if (x.wid && dLeft(x.wid)>=0) out.push(nt("br_s_wid",{d:D(x.wid)}));
+  if (x.warn) out.push(nt("br_s_warn"));
+  return out; }
+function brOpen(id){ BR.st=0; BR.img=null; BR.d=null; BR.F={}; BR.edit=null; BR.sel=null; hbSheet("brBg", nt("br_title")); if (id && brList().some(x=>x.id===id)){ BR.sel=id; BR.st=3; } brRender(true); }
+function brRender(first){ const bg=$("brBg"); if (!bg||bg.hidden) return; const b=bg.querySelector(".hobody"), L=brSorted(), D=(d,o)=>esc(fxDate(d,o||{day:"numeric",month:"short"}));
+  if (BR.st===0){
+    b.innerHTML=`<div class="bsintro"><div class="bsdoc">✉️<i></i></div><b>${esc(nt("br_intro"))}</b><span>${esc(nt("br_intro_s"))}</span></div>
+      <div class="bsbtns"><button type="button" class="vakb" data-brpick="cam">📸 ${esc(nt("bs_photo"))}</button><button type="button" class="vadone" data-brpick="file">📄 ${esc(nt("stb_import"))}</button></div>
+      <button type="button" class="btn tmnew" data-brmanual>✍️ ${esc(nt("stb_manual"))}</button>
+      ${L.length?`<div class="vak">${esc(nt("br_list"))}</div><div class="vacard">${L.map(x=>{ const nx=brNext(x), n=nx?dLeft(nx):null; return `<button type="button" class="fcr tmrow" data-brsel="${esc(x.id)}"><span class="tmico">${brIcon(x)}</span><span class="grow"><b><span data-noi18n>${esc(x.from||"–")}</span> · ${esc(brKindT(x.kind))}</b><small>${x.date?D(x.date,{day:"2-digit",month:"2-digit",year:"numeric"}):""}${x.money==="pay"&&x.amt?` · −${esc(eur0(x.amt))}`:x.money==="back"&&x.amt?` · +${esc(eur0(x.amt))}`:""}${nx?` · ${esc(nt("br_f_due"))} ${D(nx)}`:""}${x.img?" · 📎":""}</small></span><span class="vab ${x.done?"b-grn":n!=null&&n<=7?"b-red":"b-amb"}">${esc(x.done?nt("br_done"):nt("br_open"))}</span></button>`; }).join("")}</div>`:""}
+      <input type="file" id="brCam" accept="image/*" capture="environment" hidden><input type="file" id="brFile" accept="image/*,application/pdf,.pdf" hidden>
+      <p class="small muted" style="margin:12px 4px 0">${esc(nt("br_priv"))}</p>`;
+    if (first||BR.anim){ BR.anim=0; stbAnim(b, ".bsintro,.bsbtns,.tmnew,.vak,.vacard"); if (!RMo()) b.querySelectorAll(".vacard .fcr").forEach((r,i)=>r.animate([{opacity:0,transform:"translateX(-16px)"},{opacity:1,transform:"none"}],{duration:420,delay:300+i*70,easing:"cubic-bezier(.2,1.2,.35,1)",fill:"backwards"})); }
+    return; }
+  if (BR.st===1){ b.innerHTML=`<div class="bsscan">${BR.img?`<img src="${BR.img}" alt="">`:`<div class="stbpdf">✉️</div>`}<i class="bsbeam"></i><span class="bscorner"></span></div><p class="bsstat"><span class="dots3"><i></i><i></i><i></i></span> ${esc(nt("bs_reading"))}</p>`; return; }
+  if (BR.st===2){ const d=BR.d||{}, F=BR.F||{}, A=BR.act, found=Object.keys(F).length, sum=brSum(d);
+    const chips=[F.from?`<span class="bschip">${brIcon(d)} <b data-noi18n>${esc(d.from)}</b></span>`:"", F.kind?`<span class="bschip">${esc(brKindT(d.kind))}</span>`:"", F.amt?`<span class="bschip">${esc(d.money==="back"?nt("stb_ref"):d.money==="month"?nt("br_m_month"):nt("stb_due"))} <b>${esc(eur(d.amt))}</b></span>`:"", F.due?`<span class="bschip">⏳ <b>${D(d.due)}</b></span>`:"", F.term?`<span class="bschip">📅 <b>${D(d.term)}${d.time?" "+esc(d.time):""}</b></span>`:"", F.docs?`<span class="bschip">📎 <b>${(d.docs||[]).length}</b></span>`:"", F.az?`<span class="bschip">#️⃣ <b data-noi18n>${esc(d.az)}</b></span>`:""].join("");
+    const acts=[d.due?["due",nt("br_a_due",{d:fxDate(d.due,{day:"numeric",month:"long"})})]:null, d.term?["term",nt("br_a_term",{d:fxDate(d.term,{day:"numeric",month:"long"})+(d.time?" "+d.time:"")})]:null, d.money==="pay"&&d.amt>0?["pay",nt("br_a_pay",{n:eur(d.amt)})]:null, d.wid&&dLeft(d.wid)>=0?["wid",nt("br_a_wid",{d:fxDate(d.wid,{day:"numeric",month:"long"})})]:null].filter(Boolean);
+    const fld=(k,l,type,ph)=>`<div class="field ${F[k]?"bsok":""}"><label>${esc(nt(l))}</label><input class="in" ${type==="date"?'type="date"':type==="num"?'inputmode="decimal" placeholder="0,00"':type==="time"?'type="time"':`placeholder="${esc(ph||"")}"`} data-brf="${k}" value="${type==="num"?(d[k]?esc(numStr(d[k])):""):esc(String(d[k]||""))}"></div>`;
+    b.innerHTML=`${BR.img||(BR.edit&&d.img)?`<div class="bsthumb">${BR.img?`<img src="${BR.img}" alt="" data-brzoom>`:`<button type="button" class="vadone" data-brview="${esc(BR.edit)}">📎 ${esc(nt("bs_showimg"))}</button>`}</div>`:""}
+      ${BR.scanned?`${found?`<div class="vak">${esc(nt("br_found"))}</div><div class="bschips">${chips}</div>`:""}<div class="fcmami on stbma">${mAv?mAv(null):"👩"}<div class="bub">${esc(mFill(found?nt("br_mami"):nt("br_mami0")))}</div></div>`:""}
+      ${d.from?`<div class="vak">${esc(nt("br_short"))}</div><div class="vacard brsum">${sum.map(t=>`<p>${esc(t)}</p>`).join("")}</div>`:""}
+      ${acts.length?`<div class="vak">${esc(nt("stb_do"))}</div><div class="vacard stbacts">${acts.map(([k,t])=>`<label class="stbact ${A[k]?"on":""}"><input type="checkbox" data-bract="${k}" ${A[k]?"checked":""}><span class="stbck">✓</span><span>${esc(t)}</span></label>`).join("")}</div>`:""}
+      <div class="vak">${esc(nt("bs_check"))}</div>
+      <div class="vacard bsform">
+        <div class="grid2">${fld("from","br_f_from","text","Jobcenter")}<div class="field ${F.kind?"bsok":""}"><label>${esc(nt("br_f_kind"))}</label><select class="in" data-brf="kind">${["mit","bes","bew","abl","rueck","mahn","ein","anh","info"].map(k=>`<option value="${k}" ${(d.kind||"info")===k?"selected":""}>${esc(brKindT(k))}</option>`).join("")}</select></div></div>
+        <div class="grid2">${fld("date","br_f_date","date")}${fld("due","br_f_due","date")}</div>
+        <div class="grid2">${fld("term","br_f_term","date")}${fld("time","br_f_time","time")}</div>
+        <div class="field"><label>${esc(nt("br_f_money"))}</label><div class="stbseg">${[["none","br_m_none"],["pay","br_m_pay"],["back","br_m_back"],["month","br_m_month"]].map(([v,l])=>`<button type="button" class="${(d.money||"none")===v?"on":""}" data-brmoney="${v}">${esc(nt(l))}</button>`).join("")}</div></div>
+        <div class="grid2">${fld("amt","br_f_amt","num")}${fld("az","br_f_az","text")}</div>
+        <div class="field ${F.docs?"bsok":""}"><label>${esc(nt("br_f_docs"))}</label><textarea class="in brdocs" rows="3" data-brf="docs" data-noi18n>${esc((d.docs||[]).map(x=>x.t||x).join("\n"))}</textarea></div>
+        <label class="kidedu"><input type="checkbox" id="brWarn" ${d.warn?"checked":""}> <span>${esc(nt("br_warnck"))}</span></label></div>
+      <div class="vabtns" style="margin-top:12px">${BR.edit?`<button type="button" class="btn danger" data-brdel="${esc(BR.edit)}">${esc(nt("tm_del"))}</button>`:`<button type="button" class="btn" data-brback>${esc(nt("tm_cancel"))}</button>`}<button type="button" class="btn primary stbgo" data-brsave>✓ ${esc(nt("br_save"))}</button></div>`;
+    if (BR.scanned && !RMo()){ b.querySelectorAll(".bschip").forEach((c,i)=>c.animate([{opacity:0,transform:"scale(.5) translateY(10px)"},{opacity:1,transform:"none"}],{duration:450,delay:150+i*110,easing:"cubic-bezier(.3,1.7,.5,1)",fill:"backwards"}));
+      const k0=b.querySelectorAll(".bschip").length*110, ma=b.querySelector(".stbma"); if (ma) ma.animate([{opacity:0,transform:"translateY(14px)"},{opacity:1,transform:"none"}],{duration:520,delay:300+k0,easing:"cubic-bezier(.2,1.3,.4,1)",fill:"backwards"});
+      b.querySelectorAll(".brsum p").forEach((p,i)=>p.animate([{opacity:0,transform:"translateY(8px)"},{opacity:1,transform:"none"}],{duration:420,delay:650+k0+i*160,easing:"cubic-bezier(.2,1.2,.35,1)",fill:"backwards"}));
+      b.querySelectorAll(".stbact").forEach((c,i)=>c.animate([{opacity:0,transform:"translateX(-18px)"},{opacity:1,transform:"none"}],{duration:420,delay:1000+k0+i*140,easing:"cubic-bezier(.2,1.2,.35,1)",fill:"backwards"})); }
+    else if (first) stbAnim(b, ".vak,.vacard,.vabtns");
+    BR.scanned=false; return; }
+  const x=brList().find(y=>y.id===BR.sel); if (!x){ BR.st=0; return brRender(true); }
+  const sum=brSum(x), tl=[], td=isoToday(), P=(d,lbl,sub)=>{ const n=dLeft(d); tl.push(`<div class="stbp ${x.done||n<0?"g":n<=3?"r":n<=10?"w":""}"><b>${esc(lbl)}</b><small>${esc(n<0?fxDate(d,{day:"numeric",month:"long"}):sub||nt("stb_ein_s",{n:String(n)}))}</small></div>`); };
+  if (x.due) P(x.due, nt("br_f_due")+" "+fxDate(x.due,{day:"numeric",month:"long"}));
+  if (x.term) P(x.term, nt("br_f_term")+" "+fxDate(x.term,{day:"numeric",month:"long"})+(x.time?" · "+x.time:""));
+  if (x.wid) P(x.wid, nt("br_s_wid",{d:fxDate(x.wid,{day:"numeric",month:"long"})}));
+  const v=x.money==="pay"?-(x.amt||0):x.money==="back"?(x.amt||0):0;
+  b.innerHTML=`<div class="srhero brhero ${x.money==="pay"&&!x.done?"neg":""}"><small><span data-noi18n>${esc(x.from||"")}</span> · ${esc(brKindT(x.kind))}</small><div class="srbig" style="font-size:${x.amt?32:26}px"><span id="brN">${x.amt?(v>0?"+":v<0?"−":"")+esc(eur(Math.abs(v)||x.amt)):brIcon(x)}</span></div><span>${x.date?esc(nt("br_from",{d:fxDate(x.date,{day:"numeric",month:"short",year:"numeric"})})):""}${x.az?` · <span data-noi18n>${esc(x.az)}</span>`:""}${x.done?" · ✓ "+esc(nt("br_done")):""}</span><i class="srsh"></i></div>
+    <div class="vak">${esc(nt("br_short"))}</div><div class="vacard brsum">${sum.map(t=>`<p>${esc(t)}</p>`).join("")}</div>
+    ${tl.length?`<div class="vak">${esc(nt("br_fr"))}</div><div class="vacard stbtl">${tl.join("")}</div>`:""}
+    ${(x.docs||[]).length?`<div class="vak">${esc(nt("br_todo"))}</div><div class="vacard tmbr">${x.docs.map((dc,i)=>`<button type="button" class="tmbi ${dc.ok?"ok":""}" data-brdoc="${i}"><span class="tmck">${dc.ok?"✓":""}</span><span class="grow" data-noi18n>${esc(dc.t)}</span></button>`).join("")}</div><p class="small muted" style="margin:6px 4px 0">${esc(nt("br_orig"))}</p>`:""}
+    <div class="vabtns" style="margin-top:12px"><button type="button" class="btn ${x.done?"":"primary"}" data-brdone>${x.done?"↺ "+esc(nt("br_reopen")):"✓ "+esc(nt("br_done_btn"))}</button><button type="button" class="btn" data-bredit>✏️ ${esc(nt("stb_edit"))}</button>${x.img?`<button type="button" class="btn" data-brview="${esc(x.id)}">📎</button>`:""}</div>
+    <button type="button" class="btn tmnew" data-brhome>‹ ${esc(nt("br_title"))}</button>`;
+  if (first||BR.anim){ BR.anim=0; stbAnim(b, ".srhero,.vak,.vacard,.vabtns,.tmnew"); if (!RMo()){ b.querySelectorAll(".brsum p").forEach((p,i)=>p.animate([{opacity:0,transform:"translateY(8px)"},{opacity:1,transform:"none"}],{duration:420,delay:280+i*140,easing:"cubic-bezier(.2,1.2,.35,1)",fill:"backwards"})); b.querySelectorAll(".stbp").forEach((p,i)=>p.animate([{opacity:0,transform:"translateX(-14px)"},{opacity:1,transform:"none"}],{duration:450,delay:500+i*130,easing:"cubic-bezier(.2,1.2,.35,1)",fill:"backwards"})); const n=$("brN"); if (n&&x.amt&&typeof hbOdo==="function"){ const t=n.textContent; n.textContent=t.replace(/\d/g,"0"); hbOdo(n,t,1200); } } } }
+function brTime(s){ const m=String(s).match(/\b([01]?\d|2[0-3])[:.]([0-5]\d)\s*uhr\b/i)||String(s).match(/\bum\s+([01]?\d|2[0-3])[:.]([0-5]\d)\b/i); return m?`${pad(Number(m[1]))}:${m[2]}`:null; }
+function brParse(lines){ const T0=lines.map(l=>typeof l==="string"?l:(l.t||l.text||"")).map(t=>String(t).trim()).filter(Boolean), low=T0.map(t=>t.toLowerCase()), all=low.join("\n"), d={money:"none", docs:[]}, F={};
+  for (const [re,nm] of BR_SND) if (re.test(all)){ d.from=nm; F.from=1; break; }
+  const K=[["mahn",/mahnung|zahlungserinnerung|säumniszuschlag|mahngebühr|letzte aufforderung/],["rueck",/erstattungsbescheid|rückforderung|rueckforderung|zu erstatten haben|überzahlung|ueberzahlung/],["anh",/anhörung|anhoerung/],["ein",/einladung|laden sie .{0,30}ein|bitte kommen sie|meldetermin|persönlich vorzusprechen/],["mit",/mitwirkung|bitte reichen sie|reichen sie .{0,60}ein|fehlende unterlagen|benötigen wir .{0,40}unterlagen|nachweise? .{0,40}vorzulegen/],["abl",/abgelehnt|ablehnung|ablehnungsbescheid/],["bew",/bewilligt|bewilligungsbescheid|wird .{0,20}gewährt|weiterbewilligung/],["bes",/bescheid|festgesetzt/]];
+  for (const [k,re] of K) if (re.test(all)){ d.kind=k; F.kind=1; break; } if (!d.kind) d.kind="info";
+  for (let i=0;i<Math.min(T0.length,25);i++){ if (/(datum|^den\b|vom\b)/.test(low[i]) || i<12){ const x=bsDate(T0[i]); if (x && x<=isoToday() && !/(bis|spätestens|zum)/.test(low[i])){ d.date=x; F.date=1; break; } } }
+  for (let i=0;i<T0.length;i++){ if (/(spätestens|spaetestens|bis zum|bis spätestens|innerhalb|bis\s+\d{1,2}\.)/.test(low[i]) && !/(zeitraum|bewilligungszeitraum|vom .{0,12}bis)/.test(low[i])){ const x=bsDate(T0[i]+" "+(T0[i+1]||"")); if (x && x>=(d.date||"2015-01-01")){ d.due=x; F.due=1; break; } } }
+  if (d.kind==="ein"||/termin|einladung|vorsprache/.test(all)){ for (let i=0;i<T0.length;i++){ const tm=brTime(T0[i]); if (tm){ const x=bsDate(T0[i])||bsDate(T0[i-1]||"")||bsDate(T0[i+1]||""); if (x && x>=(d.date||"2015-01-01")){ d.term=x; d.time=tm; F.term=1; break; } } } }
+  const pick=re=>{ for (let i=0;i<T0.length;i++) if (re.test(low[i])){ const a=amountsIn(" "+T0[i]+" ").concat(amountsIn(" "+(T0[i+1]||"")+" ").slice(0,1)); if (a.length) return Math.max(...a); } return null; };
+  let v=pick(/(zu zahlen|bitte (überweisen|zahlen)|zahlen sie|offener betrag|gesamtbetrag|forderung|rückforderung|erstattungsbetrag|zu erstatten|mahngebühr|fälliger betrag|beitragsrückstand|nachzahlung von ihnen)/); if (v){ d.money="pay"; d.amt=v; F.amt=1; }
+  if (!v){ v=pick(/(wird (ihnen )?erstattet|erstattung|gutschrift|überwiesen wir|zahlen wir (ihnen)?|nachzahlung an sie|erhalten sie eine nachzahlung)/); if (v){ d.money="back"; d.amt=v; F.amt=1; } }
+  if (!v && d.kind==="bew"){ v=pick(/(monatlich|gesamtanspruch|zahlbetrag|leistungsanspruch|auszahlungsbetrag)/); if (v){ d.money="month"; d.amt=v; F.amt=1; } }
+  for (let i=0;i<T0.length;i++){ const m=T0[i].match(/(aktenzeichen|az\.?|geschäftszeichen|bg-nummer|bg-nr\.?|kundennummer|kunden-nr\.?|steuernummer|beitragsnummer|vorgangsnummer)\s*:?\s*([A-Za-z0-9][A-Za-z0-9\/\-. ]{3,24})/i); if (m){ d.az=m[2].trim(); F.az=1; break; } }
+  let inList=false; for (let i=0;i<T0.length;i++){ const l=low[i], t=T0[i];
+    if (/(folgende unterlagen|folgenden unterlagen|folgende nachweise|bitte reichen sie|fehlen noch|benötigen wir|vorzulegen)/.test(l)){ inList=true; const m=t.match(/(?:reichen sie|benötigen wir|vorlegen?)\s+(.{6,80}?)\s+(?:ein|bis|vor)\b/i); if (m && !/folgende/i.test(m[1])) d.docs.push({t:m[1].trim(),ok:false}); continue; }
+    if (inList){ if (/^\s*([-–•·*▪]|\d{1,2}[.)])\s*/.test(t) || (/(kontoauszug|nachweis|bescheinigung|kopie|abrechnung|vertrag|lohn|gehalt|ausweis|bescheid|formular|anlage|antrag|mietbescheinigung|zeugnis|attest)/.test(l) && t.length<110)){ d.docs.push({t:t.replace(/^\s*([-–•·*▪]|\d{1,2}[.)])\s*/,"").replace(/[;,.]\s*$/,"").trim(),ok:false}); if (d.docs.length>=8) break; continue; }
+      if (d.docs.length) inList=false; } }
+  d.docs=d.docs.filter((x,i,a)=>x.t.length>3 && !/^(die|diese|alle|ihre|folgende|fehlende|weitere)?\s*(unterlagen|nachweise|dokumente)$/i.test(x.t.trim()) && a.findIndex(y=>y.t===x.t)===i); if (d.docs.length){ F.docs=1; if (d.kind==="info"||d.kind==="bes") d.kind="mit"; }
+  if (/(rechtsbehelfsbelehrung|widerspruch|einspruch)/.test(all) && d.date && ["bes","abl","rueck","bew","mahn"].includes(d.kind)) d.wid=addMonths(addDays(d.date,4),1);
+  if (/(versagt|entzogen|gekürzt|gekuerzt|minderung|sanktion|säumniszuschlag|mahngebühr|zwangsvollstreckung|vollstreckung|bußgeld|leistungen .{0,20}einstellen)/.test(all)) d.warn=true;
+  return {d, F}; }
+async function brScan(file){ const isPdf=/pdf/i.test(file.type||"")||/\.pdf$/i.test(file.name||""); let lines=[];
+  BR.img=null; BR.st=1; brRender(); const t0=performance.now();
+  try{ if (isPdf){ const r=await stbPdf(file); lines=r.lines; BR.img=r.img; brRender(); } else { BR.img=await tmShrink(file); brRender(); lines=await ocrDataUrl(BR.img); } }
+  catch(e){ lines=[]; if (isPdf) toast(nt("stb_pdf_err")); }
+  const wait=Math.max(0,2000-(performance.now()-t0)); await new Promise(r=>setTimeout(r,RMo()?0:wait));
+  const {d,F}=brParse(lines||[]); BR.d=d; BR.F=F; BR.edit=null; BR.act={due:1,term:1,pay:1,wid:1}; BR.st=2; BR.scanned=true; brRender(); }
+function brReadForm(){ const bg=$("brBg"), d={...(BR.d||{})}; bg.querySelectorAll("[data-brf]").forEach(i=>{ const k=i.dataset.brf, v=(i.value||"").trim();
+  if (k==="docs"){ const old=d.docs||[]; d.docs=v.split(/\n+/).map(s=>s.trim()).filter(Boolean).map(t=>({t, ok:!!(old.find(o=>o.t===t)||{}).ok})); }
+  else if (k==="amt") d[k]=v===""?0:(parseAmt(v)||0); else d[k]=v; });
+  const w=$("brWarn"); if (w) d.warn=w.checked; if (d.date && ["bes","abl","rueck","bew","mahn"].includes(d.kind)) d.wid=d.wid||addMonths(addDays(d.date,4),1); return d; }
+async function brApply(rec, old){ const ym=s=>s.slice(0,7);
+  if (old && old.fixPay && !(BR.act.pay && rec.money==="pay")){ try{ await del("fixed", old.fixPay); }catch(_){} delete rec.fixPay; }
+  if (BR.act.pay && rec.money==="pay" && rec.amt>0){ const dd=rec.due||isoToday(), id=rec.fixPay||newId(); await put("fixed", id, {name:(rec.from||nt("br_k_info"))+(rec.az?" "+rec.az:""), amount:rec.amt, kind:"privat", cat:"Behörden", order:S.fixed.length, from:ym(dd), until:ym(dd), months:[Number(dd.slice(5,7))], days:[{from:ym(dd), day:Number(dd.slice(8,10))}], br:rec.id}); rec.fixPay=id; }
+  rec.remind={due:!!BR.act.due, term:!!BR.act.term, wid:!!BR.act.wid}; }
+function brHints(hints){ for (const x of brList()){ if (x.done) continue; const R=x.remind||{due:1,term:1,wid:1}, s=x.from||nt("br_k_info");
+  if (x.due && R.due){ const n=dLeft(x.due); if (n>=0&&n<=7) hints.push({k:"br", lvl:n<=2?"bad":"warn", t:nt("br_h_due",{s,d:fxDate(x.due,{day:"numeric",month:"long"}),n:String(n)}), s:nt("br_h_due_s"), id:x.id}); }
+  if (x.term && R.term){ const n=dLeft(x.term); if (n>=0&&n<=2) hints.push({k:"br", lvl:"warn", t:nt("br_h_term",{s,d:n===0?nt("tm_today"):n===1?nt("tm_tom"):fxDate(x.term,{day:"numeric",month:"long"}),t:x.time?" · "+x.time:""}), s:nt("br_h_due_s"), id:x.id}); }
+  if (x.wid && R.wid){ const n=dLeft(x.wid); if (n>=0&&n<=5) hints.push({k:"br", lvl:"warn", t:s+": "+nt("br_s_wid",{d:fxDate(x.wid,{day:"numeric",month:"long"})}), s:nt("br_h_due_s"), id:x.id}); } } }
+document.addEventListener("click", async e=>{
+  if (e.target.closest("[data-bropen]")){ e.preventDefault(); brOpen(); return; }
+  const bg=$("brBg"); if (!bg||bg.hidden||!bg.contains(e.target)) return;
+  const pk=e.target.closest("[data-brpick]"); if (pk){ $(pk.dataset.brpick==="cam"?"brCam":"brFile").click(); return; }
+  if (e.target.closest("[data-brmanual]")){ BR.d={money:"none", kind:"info", docs:[], date:isoToday()}; BR.F={}; BR.img=null; BR.edit=null; BR.act={due:1,term:1,pay:1,wid:1}; BR.st=2; brRender(true); return; }
+  const sl=e.target.closest("[data-brsel]"); if (sl){ BR.sel=sl.dataset.brsel; BR.st=3; brRender(true); return; }
+  if (e.target.closest("[data-brhome]")||e.target.closest("[data-brback]")){ BR.st=0; BR.img=null; brRender(true); return; }
+  const mo=e.target.closest("[data-brmoney]"); if (mo){ BR.d=brReadForm(); BR.d.money=mo.dataset.brmoney; brRender(); return; }
+  if (e.target.closest("[data-brzoom]")){ tmShow(BR.img); return; }
+  const vw=e.target.closest("[data-brview]"); if (vw){ const img=await rcptGet("br-"+vw.dataset.brview); if (img) tmShow(img); return; }
+  if (e.target.closest("[data-bredit]")){ const x=brList().find(y=>y.id===BR.sel); if (x){ BR.d=JSON.parse(JSON.stringify(x)); BR.edit=x.id; BR.F={}; BR.img=null; const R=x.remind||{}; BR.act={due:R.due!==false?1:0, term:R.term!==false?1:0, pay:x.fixPay?1:0, wid:R.wid!==false?1:0}; BR.st=2; brRender(true); } return; }
+  const dc=e.target.closest("[data-brdoc]"); if (dc){ const x=brList().find(y=>y.id===BR.sel); if (x){ const it=x.docs[Number(dc.dataset.brdoc)]; it.ok=!it.ok; await saveSettings(); const ck=dc.querySelector(".tmck"); dc.classList.toggle("ok",it.ok); ck.textContent=it.ok?"✓":""; if (!RMo()){ ck.animate([{transform:"scale(.4) rotate(-25deg)"},{transform:"scale(1.25)"},{transform:"none"}],{duration:460,easing:"cubic-bezier(.3,1.6,.5,1)"}); if (it.ok){ const r=ck.getBoundingClientRect(); hbBurst(document.body, r.left+r.width/2, r.top+r.height/2, 12); } }
+      if (x.docs.length && x.docs.every(z=>z.ok) && !x.done){ setTimeout(async()=>{ x.done=true; await saveSettings(); const h=bg.querySelector(".brhero"); if (h) hbConfetti(h, 40); BR.anim=1; brRender(); }, 500); } } return; }
+  if (e.target.closest("[data-brdone]")){ const x=brList().find(y=>y.id===BR.sel); if (x){ x.done=!x.done; await saveSettings(); if (x.done){ const r=e.target.closest("[data-brdone]").getBoundingClientRect(); hbBurst(document.body, r.left+r.width/2, r.top, 26); const h=bg.querySelector(".brhero"); if (h) hbConfetti(h, 40); } BR.anim=1; brRender(); } return; }
+  const dl=e.target.closest("[data-brdel]"); if (dl){ const id=dl.dataset.brdel, x=brList().find(y=>y.id===id); if (x&&x.fixPay){ try{ await del("fixed", x.fixPay); }catch(_){} } S.settings.briefe=brList().filter(y=>y.id!==id); await saveSettings(); BR.st=0; BR.edit=null; brRender(true); return; }
+  if (e.target.closest("[data-brsave]")){ const d=brReadForm(); if (!(d.from||"").trim()){ toast(nt("br_need")); return; }
+    const old=BR.edit?brList().find(y=>y.id===BR.edit):null, id=BR.edit||newId();
+    const rec={...(old||{}), id, from:d.from.trim(), kind:d.kind||"info", date:d.date||"", due:d.due||"", term:d.term||"", time:d.time||"", money:d.money||"none", amt:Number(d.amt)||0, az:d.az||"", docs:d.docs||[], warn:!!d.warn, wid:d.wid||""};
+    if (BR.img){ try{ await rcptPut("br-"+id, BR.img); rec.img=1; }catch(_){} }
+    try{ await brApply(rec, old); }catch(err){ console.warn("br", err); }
+    S.settings.briefe=[...brList().filter(y=>y.id!==id), rec]; await saveSettings();
+    const sb=e.target.closest("[data-brsave]").getBoundingClientRect(); hbBurst(document.body, sb.left+sb.width/2, sb.top, 28); toast(nt("br_saved")); BR.img=null; BR.edit=null; BR.sel=id; BR.st=3; brRender(true); return; }
+});
+document.addEventListener("change", e=>{ const id=e.target.id; if (id==="brCam"||id==="brFile"){ const f=e.target.files&&e.target.files[0]; e.target.value=""; if (f) brScan(f); return; }
+  const a=e.target.dataset&&e.target.dataset.bract; if (a){ BR.act[a]=e.target.checked?1:0; const l=e.target.closest(".stbact"); if (l){ l.classList.toggle("on", e.target.checked); if (!RMo()) l.querySelector(".stbck").animate([{transform:"scale(.4) rotate(-20deg)"},{transform:"scale(1.2)"},{transform:"none"}],{duration:420,easing:"cubic-bezier(.3,1.6,.5,1)"}); } return; }
+  if (e.target.dataset && e.target.dataset.brf && $("brBg") && !$("brBg").hidden && BR.st===2){ BR.d=brReadForm(); const s=$("brBg").querySelector(".brsum"); if (s) s.innerHTML=brSum(BR.d).map(t=>`<p>${esc(t)}</p>`).join(""); } });
+
 /* ===== Mami-Start-Briefing: wichtige Dinge beim Start ===== */
 const MB={i:0, L:[], on:false, shown:false};
-const MB_K={upd:"⬇️",goal:"🎉",info:"💡",minus:"🚨",budget:"🎯",abo:"📺",term:"📅",stb:"🧾",reserve:"🛡️",beihilfe:"🏥",fc:"📉",bs:"📄"};
-function mbItems(){ const H=(UI.hints||[]).filter(h=>h && (h.lvl==="bad"||h.lvl==="warn"||h.k==="stb"||h.k==="term") && ["minus","budget","abo","term","stb","reserve","beihilfe"].includes(h.k));
-  const L=H.map(h=>({k:h.k, lvl:h.lvl==="bad"?"r":h.lvl==="warn"?"w":"i", t:h.t, s:h.s||""}));
+const MB_K={br:"✉️",upd:"⬇️",goal:"🎉",info:"💡",minus:"🚨",budget:"🎯",abo:"📺",term:"📅",stb:"🧾",reserve:"🛡️",beihilfe:"🏥",fc:"📉",bs:"📄"};
+function mbItems(){ const H=(UI.hints||[]).filter(h=>h && (h.lvl==="bad"||h.lvl==="warn"||h.k==="stb"||h.k==="term") && ["minus","budget","abo","term","stb","reserve","beihilfe","br"].includes(h.k));
+  const L=H.map(h=>({k:h.k, lvl:h.lvl==="bad"?"r":h.lvl==="warn"?"w":"i", t:h.t, s:h.s||"", id:h.id, raw:h.k==="br"?1:0}));
   try{ const F=fcCalc(); if (F && F.warn && F.min && !L.some(x=>x.k==="minus")) L.push({k:"fc", lvl:(F.min.v<0?"r":"w"), t:nt("mb_fc",{d:fxDate(F.ym+"-"+pad(F.min.d),{day:"numeric",month:"long"})}), s:nt("mb_fc_s",{n:eur0(F.min.v)}), raw:1}); }catch(_){}
   try{ const j=jlCfg(); for (const b of (j.bescheide||[])){ const n=b.wid?daysTo(b.wid):null; if (n!=null&&n>=0&&n<=7) L.push({k:"bs", lvl:n<=3?"r":"w", t:nt("bs_w",{d:dLong(b.wid,{day:"numeric",month:"long"})}), s:nt("bs_w_s",{n:String(n)}), raw:1}); } }catch(_){}
   const rk={r:0,w:1,i:2}; return L.sort((a,b)=>rk[a.lvl]-rk[b.lvl]).slice(0,6); }
@@ -9605,7 +9817,7 @@ function mbClose(later){ const bg=$("mbBg"); if (!bg) return; MB.on=false; clear
     m.animate(K,{duration:720, delay:120, easing:"cubic-bezier(.5,0,.3,1)", fill:"forwards"}).finished.then(done).catch(done); }
   else { if (m) m.animate([{opacity:1},{opacity:0}],{duration:300,fill:"forwards"}); setTimeout(done, 320); } }
 function mbAct(x){ const k=x.k; if (k==="upd"){ try{ UPD.avail&&UPD.avail.go(); }catch(_){} return; }
-  if (k==="stb") return stbOpen(); if (k==="term") return tmOpen(); if (k==="bs") return bsOpen(); if (k==="fc") return fcOpen();
+  if (k==="br") return brOpen(x.id); if (k==="stb") return stbOpen(); if (k==="term") return tmOpen(); if (k==="bs") return bsOpen(); if (k==="fc") return fcOpen();
   if (k==="abo") return accGo("abos"); if (k==="beihilfe") return accGo("amt");
   if (k==="budget"){ UI.view="year"; render(); return; } if (k==="reserve"){ UI.view="beruf"; render(); return; }
   UI.view="home"; render(); window.scrollTo({top:0,behavior:"smooth"}); }
@@ -9623,7 +9835,7 @@ document.addEventListener("keydown", e=>{ if (!MB.on) return; if (e.key==="Escap
 const MO={on:false, lvl:0, a:0, v:0, drag:null, raf:0, last:0};
 const MO_PG=[["home","🏠"],["beruf","💼"],["zukunft","🐷"],["shop","🛒"],["list","🧾"],["fix","📋"],["year","📊"],["more","⚙️"]];
 function moGeo(){ const pc=document.documentElement.classList.contains("pc"), w=innerWidth, h=innerHeight; return {cx:w/2, cy:h*(pc?.5:.47), r:Math.min(pc?240:150, w*(pc?.3:.37)), tilt:.42}; }
-function moItems(){ if (MO.lvl===0){ const n=(()=>{ try{ return mbUnseen().length; }catch(_){ return 0; } })(); return [{id:"ask",e:"💬",t:nt("mo_ask")},{id:"rem",e:"🔔",t:nt("mo_rem"),n},{id:"tour",e:"🧭",t:nt("mo_tour")}]; }
+function moItems(){ if (MO.lvl===0){ const n=(()=>{ try{ return mbUnseen().length; }catch(_){ return 0; } })(); return [{id:"ask",e:"💬",t:nt("mo_ask")},{id:"rem",e:"🔔",t:nt("mo_rem"),n},{id:"brief",e:"✉️",t:nt("mo_brief")},{id:"tour",e:"🧭",t:nt("mo_tour")}]; }
   return [{id:"all",e:"✨",t:nt("mo_all"),all:1}, ...MO_PG.filter(([k])=>PTOUR[k]).map(([k,e])=>({id:"pg:"+k, e, t:(TABDEF[k]?TABDEF[k][0]:PTOUR[k].t)}))]; }
 function moOpen(){ if (MO.on) return; try{ if ($("mamiPop")&&!$("mamiPop").hidden) mamiClose(); }catch(_){}
   MO.on=true; MO.lvl=0; MO.a=0; MO.v=0;
@@ -9662,6 +9874,7 @@ function moLevel(l){ const N=MO.nodes||[]; if (RMo()){ MO.lvl=l; moBuild(); retu
 function moPick(id, el){ if (MO.lvl===0){
     if (id==="ask"){ moClose(()=>setTimeout(()=>{ try{ mamiOpen(); }catch(_){} }, 60)); return; }
     if (id==="rem"){ const me=$("moMe"), r=me?me.getBoundingClientRect():null; const L=mbAll(); if (!L.length){ moClose(); setTimeout(()=>{ try{ toast(mFill(nt("mb_none"))); }catch(_){} }, 900); return; } MO.keep=true; moClose("keep"); setTimeout(()=>{ MO.keep=false; try{ localStorage.setItem("hb-hints-seen", JSON.stringify(allHints().map(hintKey))); }catch(_){} MB.fromRect=r; mbOpen(L); }, 260); return; }
+    if (id==="brief"){ moClose(()=>setTimeout(()=>{ try{ brOpen(); }catch(_){} }, 60)); return; }
     if (id==="tour"){ if (el && !RMo()) el.animate([{transform:el.style.transform},{transform:el.style.transform.replace(/scale\([^)]*\)/,"scale(1.25)")},{transform:el.style.transform}],{duration:300}); moLevel(1); return; } }
   else { const me=$("moMe"), r=me?me.getBoundingClientRect():null; MO.keep=true; moClose("keep");
     const go=fn=>setTimeout(()=>{ TM.fromRect=r; try{ fn(); }catch(_){} MO.keep=false; if (TOUR.i<0){ TM.fromRect=null; moHide(); } }, 300);
