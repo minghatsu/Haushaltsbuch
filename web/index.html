@@ -9364,7 +9364,7 @@ async function tmSaveAll(){ await saveSettings(); }
 async function tmShrink(file, mx=1600){ const url=await new Promise((ok,no)=>{ const r=new FileReader(); r.onload=()=>ok(r.result); r.onerror=no; r.readAsDataURL(file); }); const im=await loadImg(url), k=Math.min(1,mx/Math.max(im.naturalWidth,im.naturalHeight)), c=document.createElement("canvas"); c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); c.getContext("2d").drawImage(im,0,0,c.width,c.height); return c.toDataURL("image/jpeg",0.85); }
 function ocrRows(L){ const b=(L||[]).filter(l=>l&&typeof l==="object"&&l.t&&l.h>0&&l.w>0); if (b.length<3) return [];
   const it=b.map(l=>({t:String(l.t).trim(), x:l.x, cy:l.y+l.h/2, h:l.h})).sort((a,b)=>a.cy-b.cy), rows=[];
-  for (const l of it){ const r=rows.find(r=>Math.abs(r.cy-l.cy)<Math.min(r.h,l.h)*0.55); if (r){ r.a.push(l); r.cy=(r.cy*(r.a.length-1)+l.cy)/r.a.length; } else rows.push({cy:l.cy, h:l.h, a:[l]}); }
+  for (const l of it){ const r=rows.find(r=>Math.abs(r.cy-l.cy)<Math.min(r.h,l.h)*0.6); if (r){ r.a.push(l); r.cy=(r.cy*(r.a.length-1)+l.cy)/r.a.length; } else rows.push({cy:l.cy, h:l.h, a:[l]}); }
   return rows.sort((a,b)=>a.cy-b.cy).map(r=>({t:r.a.sort((a,b)=>a.x-b.x).map(x=>x.t).join("  "), row:1})).filter(r=>/\s{2}/.test(r.t)); }
 function ocrPlus(L){ L=L||[]; const R=ocrRows(L); window.HB_OCRTXT=(R.length?R:L).map(l=>typeof l==="string"?l:l.t).join("\n"); return R.concat(L); }
 async function ocrImgFile(file){ let L=[]; try{ L=await ocrDataUrl(await tmShrink(file, 2600)); }catch(_){ L=[]; } if (!L.length){ try{ L=await ocrDataUrl(await tmShrink(file, 1600)); }catch(_){ L=[]; } } return ocrPlus(L); }
@@ -9604,12 +9604,14 @@ function stbNum(s){ const a=amountsIn(" "+s+" "); return a.length?a[0]:null; }
 function stbInt(s){ const m=String(s).match(/(\d{1,3}(?:\.\d{3})+|\d{4,6})(?:,\d{2})?(?!\d)/); return m?Number(m[1].replace(/\./g,"")):null; }
 function stbParse(lines){ const T0=lines.map(l=>typeof l==="string"?l:(l.t||l.text||"")).filter(Boolean), low=T0.map(t=>t.toLowerCase()), all=low.join("\n"), d={res:"due"}, F={};
   const next=(i,n)=>T0.slice(i,i+(n||2)).join("  ");
-  let m=all.match(/bescheid\s+(?:für|fuer|über das jahr)\s+(20\d\d)/)||all.match(/(?:für|fuer)\s+(20\d\d)\s+über/)||all.match(/bescheid\D{0,40}(20\d\d)/)||all.match(/(?:veranlagungszeitraum|kalenderjahr|steuerjahr)\s*:?\s*(20\d\d)/)||all.match(/einkommensteuer\D{0,20}(20\d\d)/); if (m){ d.year=Number(m[1]); F.year=1; }
+  let m=all.match(/bescheid\s+(?:für|fuer|über das jahr)\s+(20\d\d)/)||all.match(/\bf\S{0,2}r\s+(20\d\d)\s+\S{0,2}ber\b/)||all.match(/^\s*f\S{0,2}r\s+(20\d\d)\b/m)||all.match(/bescheid\D{0,40}(20\d\d)/)||all.match(/(?:veranlagungszeitraum|kalenderjahr|steuerjahr)\s*:?\s*(20\d\d)/)||all.match(/einkommensteuer\D{0,20}(20\d\d)/); if (m){ d.year=Number(m[1]); F.year=1; }
   for (let i=0;i<T0.length;i++){ if (/zu versteuernde[sn]?\s+einkommen/.test(low[i])){ const v=stbInt(T0[i].replace(/^[^\d]*/,""))||stbInt(T0[i+1]||""); if (v){ d.zve=v; F.zve=1; break; } } }
-  for (let i=0;i<T0.length;i++){ if (/festgesetzt/.test(low[i])){ for (let k=i;k<Math.min(T0.length,i+5);k++){ if (/einkommensteuer|festgesetzt/.test(low[k])){ const a=amountsIn(" "+T0[k]+" "); if (a.length){ d.est=a[0]; F.est=1; break; } } } if (d.est) break; } }
+  for (let i=0;i<T0.length;i++){ if (/festgesetzt/.test(low[i])){ for (let k=i;k<Math.min(T0.length,i+5);k++){ if (/einkommensteuer|festgesetzt/.test(low[k])){ const a=amountsIn(" "+T0[k]+" "); if (a.length){ d.est=Math.max(...a); F.est=1; break; } } } if (d.est) break; } }
   if (!d.est) for (let i=0;i<T0.length;i++) if (/^\s*einkommensteuer\b/.test(low[i])){ const a=amountsIn(" "+T0[i]+" "); if (a.length){ d.est=a[0]; F.est=1; break; } }
-  let due=null, ref=null;
-  for (let i=0;i<T0.length;i++){ const l=low[i];
+  let due=null, ref=null; const tot=/insgesamt/.test(all);
+  for (let i=0;i<T0.length;i++){ const l=low[i], a=amountsIn(" "+T0[i]+" "); if (!a.length) continue; const v=Math.round((tot||a.length===1?Math.max(...a):a.slice(0,4).reduce((p,c)=>p+c,0))*100)/100; if (!(v>0)) continue;
+    if (/zu\s*viel\s*gezahlt|zuviel gezahlt/.test(l)){ ref=v; break; } if (/zu\s*wenig\s*gezahlt|nachzuzahlen|noch zu zahlen/.test(l)){ due=v; break; } }
+  if (due==null && ref==null) for (let i=0;i<T0.length;i++){ const l=low[i];
     if (due==null && /(nachzahlung|noch zu zahlen|zu wenig|bitte zahlen|abschlusszahlung|verbleibende beträge|verbleibender betrag|zu zahlen)/.test(l) && !/vorauszahl/.test(l)){ const a=amountsIn(" "+T0[i]+" ").concat(amountsIn(" "+(T0[i+1]||"")+" ").slice(0,0)); const s=a.slice(0,4).reduce((p,c)=>p+c,0); if (s>0) due=Math.round(s*100)/100; }
     if (ref==null && /(erstattung|wird erstattet|zu viel|guthaben|erstattet)/.test(l)){ const a=amountsIn(" "+T0[i]+" "); const s=a.slice(0,4).reduce((p,c)=>p+c,0); if (s>0) ref=Math.round(s*100)/100; } }
   if (due!=null){ d.res="due"; d.amt=due; F.amt=1; } else if (ref!=null){ d.res="ref"; d.amt=ref; F.amt=1; }
@@ -9617,7 +9619,7 @@ function stbParse(lines){ const T0=lines.map(l=>typeof l==="string"?l:(l.t||l.te
   const vz={}; for (let i=0;i<T0.length;i++){ const r=T0[i].match(/10\.(03|06|09|12)\.(20\d\d|\d\d)/); if (r && (/vorauszahl/.test(all))){ const a=amountsIn(" "+T0[i].replace(r[0]," ")+" "); if (a.length){ const dt=bsDate(r[0]); if (dt) vz[dt]=a[a.length-1]; } } }
   const vd=Object.keys(vz).sort(), fut=vd.filter(x=>x>=isoToday()); if (vd.length){ const cnt={}; for (const k of vd) cnt[vz[k]]=(cnt[vz[k]]||0)+1; const q=Number(Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0]); if (q>0){ d.vz=q; d.vzFrom=fut[0]||vd[vd.length-1]; F.vz=1; } }
   for (let i=0;i<Math.min(T0.length,25);i++){ if (/(datum|^den\b|vom)/.test(low[i]) || i<10){ const x=bsDate(T0[i]); if (x && x<=isoToday() && !/10\.(03|06|09|12)\./.test(T0[i])){ d.date=x; F.date=1; break; } } }
-  if (/vorbehalt der nachprüfung|§\s*164/.test(all)){ d.vorb=true; F.vorb=1; } if (/vorläufig|§\s*165/.test(all)){ d.vorl=true; F.vorl=1; }
+  if (/vorbehalt der nachpr\S{0,3}fung|§\s*164/.test(all) && !/vorbehalt[\s\S]{0,40}aufgehoben/.test(all)){ d.vorb=true; F.vorb=1; } if (/vorläufig|§\s*165/.test(all)){ d.vorl=true; F.vorl=1; }
   const abw=[]; for (const t of T0){ if (/(abweich|nicht anerkannt|nicht berücksichtigt|nicht abziehbar|gekürzt|konnten? nicht|nur in höhe|nicht als)/i.test(t) && t.length>12) abw.push({t:t.trim().slice(0,160), ok:false}); if (abw.length>=6) break; }
   if (abw.length){ d.abw=abw; F.abw=1; }
   if (!d.date){ for (let i=0;i<T0.length;i++){ const x=bsDate(T0[i]); if (x && x<=isoToday() && x>="2015" && !/10\.(03|06|09|12)\./.test(T0[i]) && !/geb|geburt/.test(low[i])){ d.date=x; F.date=1; break; } } }
