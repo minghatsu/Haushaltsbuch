@@ -1993,6 +1993,36 @@ html.pc #hlBg{background:rgba(5,15,11,.82);backdrop-filter:blur(8px)}html.pc .hl
 .bstot{display:flex;gap:8px}.bstot .in{flex:1}.bstot .vadone{flex:none;min-width:0;padding:0 12px;height:auto}
 .bscks{padding:4px 0}.bsck{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;border-top:1px solid var(--line);font-size:13.5px}.bsck:first-child{border-top:0}.bsck>span:first-child{font-size:18px;flex:none}
 .bsck b{display:block;font-size:14px}.bsck small{color:var(--muted);font-size:12px;font-weight:600}.bsck.bad b{color:var(--bad)}.bsck.warn b{color:var(--warn)}.bsck.ok b{color:var(--good)}
+/* Steuerbescheide */
+.stbbars{padding:14px 14px 10px;margin-bottom:10px}
+.stbb{display:flex;align-items:flex-end;gap:12px;height:160px}
+.stbb button{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;border:0;background:none;cursor:pointer;color:var(--muted);font:700 11.5px var(--f-body);padding:0}
+.stbb em{font-style:normal;font-weight:800;color:var(--fg);font-size:12px;white-space:nowrap}
+.stbb i{display:block;width:100%;max-width:64px;height:calc(var(--h) * .72);min-height:8px;border-radius:12px 12px 5px 5px;background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 80%,#fff),var(--accent));transform-origin:bottom;transition:filter .2s}
+.stbb i.neg{background:linear-gradient(180deg,color-mix(in srgb,var(--bad) 75%,#fff),var(--bad))}
+.stbb button:hover i{filter:brightness(1.08)}
+.stbpot{display:flex;align-items:center;gap:14px;padding:14px;margin-bottom:10px}.stbpot b{display:block;font-size:15px}.stbpot small{display:block;color:var(--muted);font-size:12.5px;font-weight:600;margin-top:3px}
+.stbring{--p:0;flex:none;width:74px;height:74px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--sunk) 0);display:grid;place-items:center}
+.stbring b{width:56px;height:56px;border-radius:50%;background:var(--surface);display:grid!important;place-items:center;font:900 15px var(--f-body)!important;margin:0}
+.stbneg{color:var(--bad)}.stbpos{color:var(--good)}
+.b-grn{background:var(--good-soft);color:var(--good)}
+.stbpdf{height:260px;display:grid;place-items:center;font-size:70px;background:#fff}
+.stbhero.neg{background:linear-gradient(135deg,var(--bad),color-mix(in srgb,var(--bad) 65%,#f0a050))}
+.stbtl{padding:12px 14px 4px 34px;position:relative}.stbtl::before{content:"";position:absolute;left:19px;top:20px;bottom:20px;width:2px;background:var(--line)}
+.stbp{position:relative;padding:4px 0 12px}.stbp::before{content:"";position:absolute;left:-20px;top:8px;width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.stbp.w::before{background:var(--warn);box-shadow:0 0 0 4px var(--warn-soft)}.stbp.r::before{background:var(--bad);box-shadow:0 0 0 4px var(--bad-soft);animation:vaPul 1.6s ease-in-out infinite}.stbp.g::before{background:var(--good);box-shadow:0 0 0 4px var(--good-soft)}
+.stbp b{display:block;font-size:14.5px}.stbp small{display:block;color:var(--muted);font-size:12px;font-weight:600}
+.stbab .grow b{font-size:13.5px;font-weight:650}
+.stbab .vab{border:0;cursor:pointer;animation:none}
+.stbma{margin:4px 0 4px}
+.stbacts{padding:4px 0}
+.stbact{display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid var(--line);font:600 14px var(--f-body);cursor:pointer}.stbact:first-child{border-top:0}
+.stbact input{position:absolute;opacity:0;pointer-events:none}
+.stbck{flex:none;width:26px;height:26px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;color:transparent;font-weight:900;transition:all .3s cubic-bezier(.3,1.6,.5,1)}
+.stbact.on .stbck{background:var(--good);border-color:var(--good);color:#fff}
+.stbact:not(.on){color:var(--muted)}
+.stbseg{display:flex;gap:6px;background:var(--sunk);border-radius:14px;padding:4px}.stbseg button{flex:1;border:0;background:none;border-radius:10px;padding:9px 4px;font:700 13px var(--f-body);color:var(--muted);cursor:pointer;transition:all .25s}.stbseg button.on{background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
+.stbgo{position:relative;overflow:hidden}.stbgo::after{content:"";position:absolute;top:0;bottom:0;width:50%;left:-70%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent);animation:vaShn 2.8s ease-in-out infinite}
 
 /* Aufgeräumt + Bewegung */
 .areagear>span{display:none}.areagear{padding:7px!important;border-radius:50%!important;transition:transform .35s cubic-bezier(.3,1.6,.5,1),background .2s}.areagear:active{transform:rotate(90deg) scale(.9)}
@@ -3312,6 +3342,11 @@ const PTOUR_FN=()=>({
     {sel:".anet", ic:"insight", t:"Übrig im Monat", p:["Was am Ende übrig bleibt – mit Verlauf der letzten Monate.", "Antippen öffnet die Details."]},
     {sel:".kpis,.akpi,.anet+*", ic:"wallet", t:"Kennzahlen", p:["Einnahmen, Ausgaben, Fixkosten und Ausgaben pro Tag – jede Kachel antippbar."]},
   ]},
+  beruf:{t:nt("trb_t"), s:[
+    {sel:'[data-view="beruf"] .ahero', raw:1, ic:"receipt", t:nt("trb_hero_t"), p:[nt("trb_hero_p")]},
+    {sel:'[data-view="beruf"] [data-stbopen].atile', raw:1, ic:"doc", t:nt("trb_stb_t"), p:[nt("trb_stb_p")]},
+    {sel:'[data-view="beruf"] .areacard .agrid', raw:1, ic:"case", t:nt("trb_tiles_t"), p:[nt("trb_tiles_p")]},
+  ]},
   more:{t:"Einstellungen", s:[
     {sel:"#setQ", ic:"insight", t:"Suchen", p:["Schneller als blättern: eintippen, was du suchst – z. B. „Backup“ oder „Budget“."]},
     {sel:"#pcsL,#setTabs", ic:"sliders", t:"Bereiche", p:[IS_PC?"Links wählen, rechts erscheint der Inhalt.":"Geld, Anpassen, Sicherheit und Hilfe – darunter klappen die Punkte auf.", "Geld: Konten, Budgets, Abos, Sparen & Anlegen. Anpassen: Farben, Sprache, Kategorien."]},
@@ -3319,15 +3354,15 @@ const PTOUR_FN=()=>({
     {sel:IS_PC?'#ptourQ':'[data-acctab="hilfe"]', ic:"insight", t:"Hilfe", p:[IS_PC?"Das „?“ oben rechts: Tour zu jeder Seite, Fragen und Antworten, Feedback und was neu ist.":"Fragen und Antworten, die große Tour und diese kurzen Seiten-Touren zum erneuten Ansehen."]},
   ]},
 });
-let PTOUR_C=null; const PTOUR=new Proxy({}, {get:(_,k)=>(PTOUR_C||(PTOUR_C=PTOUR_FN()))[k], ownKeys:()=>Reflect.ownKeys(PTOUR_C||(PTOUR_C=PTOUR_FN())), getOwnPropertyDescriptor:(_,k)=>({enumerable:true,configurable:true,value:(PTOUR_C||(PTOUR_C=PTOUR_FN()))[k]})});
+let PTOUR_C=null, PTOUR_L=null; const ptC=()=>{ if (!PTOUR_C||PTOUR_L!==LANG){ PTOUR_C=PTOUR_FN(); PTOUR_L=LANG; } return PTOUR_C; }; const PTOUR=new Proxy({}, {get:(_,k)=>ptC()[k], ownKeys:()=>Reflect.ownKeys(ptC()), getOwnPropertyDescriptor:(_,k)=>({enumerable:true,configurable:true,value:ptC()[k]})});
 
 const ptSeen = () => { try { return JSON.parse(localStorage.getItem("hb-ptour")||"{}"); } catch(_){ return {}; } };
 function ptourOpen(v){ const P=PTOUR[v]; if (!P) return; const steps=P.s.filter(s=>[...document.querySelectorAll(s.sel)].some(n=>tourVis(n) && !n.closest(".cubestage")));
   if (!steps.length) return; try { const o=ptSeen(); o[v]=1; localStorage.setItem("hb-ptour", JSON.stringify(o)); } catch(_){}
   TOUR.page=v; TOUR.steps=steps; tourGo(0); }
-function ptourAuto(){ if (BG_RUN || TOUR.i>=0 || $("dankeBg") || dankeShould() || wizShould() || !PTOUR[UI.view] || ptSeen()[UI.view] || document.querySelector(".backdrop:not([hidden]),#tourBg:not([hidden])")) return;
+function ptourAuto(){ if (BG_RUN || TOUR.i>=0 || $("dankeBg") || dankeShould() || wizShould() || !PTOUR[UI.view] || ptSeen()[UI.view] || document.querySelector(".backdrop:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden])")) return;
   if (UI.view==="home" && !S.tx.length) return;
-  clearTimeout(ptourAuto.t); const v=UI.view; ptourAuto.t=setTimeout(()=>{ if (UI.view===v && TOUR.i<0 && !document.querySelector(".backdrop:not([hidden])")) ptourOpen(v); }, 900); }
+  clearTimeout(ptourAuto.t); const v=UI.view; ptourAuto.t=setTimeout(()=>{ if (UI.view===v && TOUR.i<0 && !document.querySelector(".backdrop:not([hidden]),.hobg:not([hidden])")) ptourOpen(v); }, 900); }
 function ptourBtn(){ const t=$("viewTitle"); if (!t) return; let b=$("ptourQ"); const on=!!PTOUR[UI.view];
   if (!b){ b=document.createElement("button"); b.id="ptourQ"; b.className="ptq"; b.type="button"; b.innerHTML="?<i class=\"badge\" hidden></i>"; b.setAttribute("aria-label","Hilfe"); b.title="Hilfe: Tour, Fragen & Antworten, Feedback"; t.after(b); }
   { const g=document.documentElement.classList.contains("pc") && $("pcActs"), bl=$("bellBtn"); if (g){ if (b.parentElement!==g || b.nextElementSibling!==bl) (bl && bl.parentElement===g ? bl.before(b) : g.appendChild(b)); b.classList.add("roundbtn"); }
@@ -3908,6 +3943,8 @@ function renderBeruf(){ const el=document.querySelector(`[data-view="beruf"]`); 
   const extra=[]; if (staat){ const m=bwMonth(ymOf(new Date())), g2=Number(bwCfg().goal)||0; extra.push(areaTile("📨","Bewerbungen",`${m.length}${g2?" / "+g2:""} im Monat`,"data-bwopen")); }
   if (isJobless()){ const j=jlCfg(), up=(j.terms||[]).filter(t=>!t.done&&t.d>=isoToday()).sort((a,c)=>a.d.localeCompare(c.d))[0], mini=Number(j.mini)||0;
     extra.push(areaTile("⏰","Termine & Fristen",up?esc(dLong(up.d,{day:"numeric",month:"short"})):"keine offen","data-tmopen"), areaTile("💶","Zuverdienst",mini?"+"+esc(eur0(jlKeep(mini))):"Rechner","data-zvopen"), areaTile("📄","Bescheid-Check",(j.bescheide||[]).length?esc(eur0((j.bescheide.slice().sort((a,c)=>(c.from||"").localeCompare(a.from||""))[0]||{}).total||0)):"scannen","data-bsopen")); }
+  if (hasSelf()||hasJob()){ const SL=stbSorted(), l0=SL[0], v0=l0?stbAmt(l0):0; extra.push(areaTile(ic("doc",22), esc(nt("stb_title")), l0?`${v0>0?"+":v0<0?"−":"±"}${esc(eur0(Math.abs(v0)))} · ${esc(String(l0.year))}`:esc(nt("stb_tile_s0")), "data-stbopen"));
+    for (const x of SL){ const w=dLeft(stbWid(x)); if (w!=null&&w>=0&&w<=14){ hints.unshift(`<button type="button" class="ahint" data-stbopen>🧾 <span data-noi18n>${esc(nt("stb_h_ein",{y:String(x.year),n:String(w)}))}</span></button>`); break; } } }
   if (hasSelf()||["angestellt","beamte","beides","azubi"].includes(S.settings.work||"beides")||hasExtra("angestellt")){ const H=hoCalc(y); extra.push(areaTile("🏠","Homeoffice",H.on?esc(eur0(H.amt)):"eintragen","data-hoopen")); }
   el.innerHTML = `${hero}${hints.length?`<div class="ahints">${hints.slice(0,3).join("")}</div>`:""}
     <div class="card areacard">${areaHead(g[0], hasJob()||hasSelf()?"steuer":"amt", "Einstellungen")}<div class="agrid">${tiles.filter(t=>!(tax&&t.k==="tax"&&false)).map(t=>areaTile(ic(t.icon,22), (typeof TL_!=="undefined"&&TL_[t.k]?TL_[t.k][0]:t.title), t.short?esc(String(t.short)):"", `data-anaopen="${esc(t.k)}"`)).join("")}${extra.join("")}</div></div>${IS_PC?`<div class="apcgrid">${["tax","kunden"].map(k=>T.find(t=>t.k===k)).filter(Boolean).map(t=>`<div class="card apcc"><div class="card-head"><h2>${hIc(t.icon)}${(typeof TL_!=="undefined"&&TL_[t.k]?TL_[t.k][0]:t.title)}</h2></div>${t.body||""}</div>`).join("")}</div>`:""}`;
@@ -5074,7 +5111,7 @@ function renderHome(){
       if (md.on && md.h && a.ml!==b.ml){ const plus=(a.ml-b.ml)*md.h*13/3; hints.unshift({k:"mindest", lvl:"good", t:`Neu ab ${ny}: Mindestlohn ${ml2(a.ml)} €`, s:`Du bekommst ca. ${eur0(plus)} mehr brutto im Monat. Prüf, ob es auf deiner Abrechnung steht.`}); }
       if (a.mj!==b.mj && (["minijob","studium","schule","alg","grusi"].includes(S.settings.work)||hasExtra("minijob"))) hints.push({k:"mjgrenze", lvl:"warn", t:`Neu ab ${ny}: Minijob-Grenze ${a.mj} €`, s:`vorher ${b.mj} € im Monat`}); } }
   { const nb=S.tx.filter(t=>t.nobon && !hasReceipt(t.id)).length; if (nb) hints.push({lvl:"warn", t:`${nb} ${nb===1?"Einkauf":"Einkäufe"} ohne Kassenbon`, s:"Öffne die Buchung und fotografier den Bon nach – oder tipp dort „Bon gibt’s nicht“."}); }
-  aboHints(hints); try{ tmHints(hints); }catch(_){}
+  aboHints(hints); try{ tmHints(hints); }catch(_){} try{ stbHints(hints); }catch(_){}
   UI.hints=hints; updateBell();
   if (ym===cur) notifyAlerts(hints);
   const bt = g.filter(x=>x.budget).sort((a,b)=>b.v/b.budget-a.v/a.budget).slice(0,3);
@@ -8341,6 +8378,83 @@ async function deleteTx(){
 }
 
 const NT={
+trb_t:["Beruf", "Work", "İş", "Работа", "Робота", "Praca", "العمل", "Muncă"],
+trb_hero_t:["Deine Steuer auf einen Blick", "Your tax at a glance", "Vergin bir bakışta", "Твой налог одним взглядом", "Твій податок одним поглядом", "Twój podatek w skrócie", "ضريبتك في لمحة", "Impozitul tău dintr-o privire"],
+trb_hero_p:["Hier siehst du, ob du voraussichtlich nachzahlen musst oder Geld zurückbekommst. Antippen zeigt die Rechnung.", "Here you see whether you'll probably pay back or get money back. Tap to see the calculation.", "Burada muhtemelen ek ödeme mi yapacağını yoksa para mı geri alacağını görürsün. Hesap için dokun.", "Здесь видно, придётся ли доплатить или ты получишь деньги назад. Нажми, чтобы увидеть расчёт.", "Тут видно, чи доведеться доплатити, чи ти отримаєш гроші назад. Натисни, щоб побачити розрахунок.", "Tu widzisz, czy prawdopodobnie dopłacisz, czy dostaniesz zwrot. Dotknij, by zobaczyć wyliczenie.", "هنا ترى إن كنت ستدفع إضافيًا أو تسترد مالًا. اضغط لرؤية الحساب.", "Aici vezi dacă probabil plătești în plus sau primești bani înapoi. Atinge pentru calcul."],
+trb_stb_t:["Steuerbescheide", "Tax assessments", "Vergi tahakkukları", "Налоговые уведомления", "Податкові повідомлення", "Decyzje podatkowe", "إشعارات الضريبة", "Decizii de impunere"],
+trb_stb_p:["Fotografier deinen Bescheid oder importier das PDF. Ich lese mit und plane Nachzahlung, Einspruchsfrist und Vorauszahlungen für dich ein.", "Photograph your assessment or import the PDF. I read along and plan back payment, objection deadline and prepayments for you.", "Tahakkukunu fotoğrafla ya da PDF'i içe aktar. Okurum ve ek ödemeyi, itiraz süresini ve peşin ödemeleri senin için planlarım.", "Сфотографируй уведомление или импортируй PDF. Я прочитаю и запланирую доплату, срок возражения и авансы.", "Сфотографуй повідомлення або імпортуй PDF. Я прочитаю й заплануй доплату, термін заперечення та аванси.", "Zrób zdjęcie decyzji albo zaimportuj PDF. Przeczytam i zaplanuję dopłatę, termin sprzeciwu i zaliczki.", "صوّر إشعارك أو استورد ملف PDF. سأقرأه وأخطط الدفع الإضافي ومهلة الاعتراض والدفعات المقدمة لك.", "Fotografiază decizia sau importă PDF-ul. Citesc și îți planific plata, termenul de contestație și plățile anticipate."],
+trb_tiles_t:["Alles rund um die Arbeit", "Everything about work", "İşle ilgili her şey", "Всё о работе", "Усе про роботу", "Wszystko o pracy", "كل ما يخص العمل", "Totul despre muncă"],
+trb_tiles_p:["Gehalt, Kunden, Homeoffice und mehr – jede Kachel öffnet ihren Bereich.", "Salary, clients, home office and more – each tile opens its area.", "Maaş, müşteriler, ev ofisi ve daha fazlası – her kutu kendi alanını açar.", "Зарплата, клиенты, домашний офис и другое – каждая плитка открывает свой раздел.", "Зарплата, клієнти, домашній офіс та інше – кожна плитка відкриває свій розділ.", "Pensja, klienci, home office i więcej – każdy kafelek otwiera swój dział.", "الراتب والعملاء والعمل من المنزل وغير ذلك – كل مربع يفتح قسمه.", "Salariu, clienți, birou acasă și altele – fiecare plăcuță își deschide secțiunea."],
+stb_title:["Steuerbescheide", "Tax assessments", "Vergi tahakkukları", "Налоговые уведомления", "Податкові повідомлення", "Decyzje podatkowe", "إشعارات الضريبة", "Decizii de impunere"],
+stb_tile_s0:["scannen", "scan", "tara", "сканировать", "сканувати", "skanuj", "مسح", "scanează"],
+stb_intro:["Steuerbescheid vom Finanzamt einlesen", "Read in your tax assessment", "Vergi tahakkukunu oku", "Загрузи налоговое уведомление", "Завантаж податкове повідомлення", "Wczytaj decyzję podatkową", "اقرأ إشعار الضريبة", "Încarcă decizia de impunere"],
+stb_intro_s:["Foto oder PDF – Mami liest mit und plant Zahlungen, Fristen und Vorauszahlungen für dich ein.", "Photo or PDF – Mami reads along and plans payments, deadlines and prepayments for you.", "Fotoğraf veya PDF – Mami okur ve ödemeleri, süreleri ve peşin ödemeleri senin için planlar.", "Фото или PDF – Мами прочитает и запланирует платежи, сроки и авансы за тебя.", "Фото або PDF – Мамі прочитає й запланує платежі, терміни та аванси за тебе.", "Zdjęcie lub PDF – Mami przeczyta i zaplanuje płatności, terminy i zaliczki za ciebie.", "صورة أو PDF – ماما تقرأ معك وتخطط المدفوعات والمواعيد والدفعات المقدمة لك.", "Foto sau PDF – Mami citește și îți planifică plățile, termenele și plățile anticipate."],
+stb_import:["Importieren", "Import", "İçe aktar", "Импорт", "Імпорт", "Importuj", "استيراد", "Importă"],
+stb_manual:["Selbst eintragen", "Enter manually", "Elle gir", "Ввести вручную", "Ввести вручну", "Wpisz ręcznie", "إدخال يدوي", "Introdu manual"],
+stb_bars:["Erstattung / Nachzahlung", "Refund / back payment", "İade / ek ödeme", "Возврат / доплата", "Повернення / доплата", "Zwrot / dopłata", "استرداد / دفع إضافي", "Rambursare / plată suplimentară"],
+stb_pot:["Steuer-Topf", "Tax pot", "Vergi kumbarası", "Налоговая копилка", "Податкова скарбничка", "Skarbonka podatkowa", "حصالة الضرائب", "Pușculița pentru taxe"],
+stb_pot_t:["Leg {n} % jeder Rechnung zurück", "Put aside {n} % of every invoice", "Her faturanın %{n}'ini kenara koy", "Откладывай {n} % с каждого счёта", "Відкладай {n} % з кожного рахунку", "Odkładaj {n} % z każdej faktury", "ادّخر {n} % من كل فاتورة", "Pune deoparte {n} % din fiecare factură"],
+stb_pot_s:["Im Topf: {a} von {b}", "In the pot: {a} of {b}", "Kumbarada: {a} / {b}", "В копилке: {a} из {b}", "У скарбничці: {a} з {b}", "W skarbonce: {a} z {b}", "في الحصالة: {a} من {b}", "În pușculiță: {a} din {b}"],
+stb_pot_none:["Noch kein Satz – scanne einen Bescheid, dann rechne ich ihn aus.", "No rate yet – scan an assessment and I'll work it out.", "Henüz oran yok – bir tahakkuk tara, ben hesaplarım.", "Ставки пока нет – отсканируй уведомление, и я посчитаю.", "Ставки ще немає – відскануй повідомлення, і я порахую.", "Brak stawki – zeskanuj decyzję, a ja ją obliczę.", "لا توجد نسبة بعد – امسح إشعارًا وسأحسبها.", "Încă nu există o rată – scanează o decizie și o calculez eu."],
+stb_list:["Bescheide", "Assessments", "Tahakkuklar", "Уведомления", "Повідомлення", "Decyzje", "الإشعارات", "Decizii"],
+stb_due:["Nachzahlung", "Back payment", "Ek ödeme", "Доплата", "Доплата", "Dopłata", "دفع إضافي", "Plată suplimentară"],
+stb_ref:["Erstattung", "Refund", "İade", "Возврат", "Повернення", "Zwrot", "استرداد", "Rambursare"],
+stb_zero:["Kein Unterschied", "No difference", "Fark yok", "Без разницы", "Без різниці", "Bez różnicy", "لا فرق", "Fără diferență"],
+stb_open:["offen", "open", "açık", "открыто", "відкрито", "otwarte", "مفتوح", "deschis"],
+stb_done:["erledigt", "done", "tamam", "готово", "готово", "załatwione", "تم", "gata"],
+stb_year:["Steuerbescheid {y}", "Tax assessment {y}", "{y} vergi tahakkuku", "Налоговое уведомление {y}", "Податкове повідомлення {y}", "Decyzja podatkowa {y}", "إشعار ضريبة {y}", "Decizie de impunere {y}"],
+stb_due_by:["fällig {d}", "due {d}", "vade {d}", "до {d}", "до {d}", "termin {d}", "مستحق {d}", "scadent {d}"],
+stb_from:["Bescheid vom {d}", "Notice dated {d}", "{d} tarihli tahakkuk", "Уведомление от {d}", "Повідомлення від {d}", "Decyzja z {d}", "إشعار بتاريخ {d}", "Decizie din {d}"],
+stb_fr:["Fristen", "Deadlines", "Süreler", "Сроки", "Терміни", "Terminy", "المواعيد", "Termene"],
+stb_ein:["Einspruch bis {d}", "Objection by {d}", "{d} tarihine kadar itiraz", "Возражение до {d}", "Заперечення до {d}", "Sprzeciw do {d}", "اعتراض حتى {d}", "Contestație până la {d}"],
+stb_ein_s:["noch {n} Tage · Mami erinnert dich 7 Tage vorher", "{n} days left · Mami reminds you 7 days before", "{n} gün kaldı · Mami 7 gün önce hatırlatır", "ещё {n} дн. · Мами напомнит за 7 дней", "ще {n} дн. · Мамі нагадає за 7 днів", "jeszcze {n} dni · Mami przypomni 7 dni wcześniej", "باقي {n} يوم · ستذكّرك ماما قبل 7 أيام", "încă {n} zile · Mami îți amintește cu 7 zile înainte"],
+stb_ein_over:["Einspruchsfrist abgelaufen", "Objection period has ended", "İtiraz süresi doldu", "Срок возражения истёк", "Термін заперечення минув", "Termin sprzeciwu minął", "انتهت مهلة الاعتراض", "Termenul de contestație a expirat"],
+stb_pay:["Zahlung bis {d}", "Payment by {d}", "{d} tarihine kadar ödeme", "Оплата до {d}", "Оплата до {d}", "Zapłata do {d}", "الدفع حتى {d}", "Plată până la {d}"],
+stb_pay_s:["als Buchung eingeplant", "planned as a booking", "kayıt olarak planlandı", "запланировано как платёж", "заплановано як платіж", "zaplanowane jako płatność", "مخطط كدفعة", "planificată ca plată"],
+stb_pay_s0:["noch nicht eingeplant", "not planned yet", "henüz planlanmadı", "ещё не запланировано", "ще не заплановано", "jeszcze nie zaplanowane", "لم يُخطط بعد", "încă neplanificată"],
+stb_vz:["Vorauszahlung {d}", "Prepayment {d}", "Peşin ödeme {d}", "Аванс {d}", "Аванс {d}", "Zaliczka {d}", "دفعة مقدمة {d}", "Plată anticipată {d}"],
+stb_vz_s:["{n} · alle 3 Monate als Fixkosten", "{n} · every 3 months as fixed cost", "{n} · 3 ayda bir sabit gider", "{n} · раз в 3 месяца как фикс. расход", "{n} · раз на 3 місяці як фікс. витрата", "{n} · co 3 miesiące jako koszt stały", "{n} · كل 3 أشهر كتكلفة ثابتة", "{n} · la fiecare 3 luni ca cost fix"],
+stb_refin:["Erstattung kommt", "Refund on its way", "İade geliyor", "Возврат в пути", "Повернення в дорозі", "Zwrot w drodze", "الاسترداد في الطريق", "Rambursarea vine"],
+stb_refin_s:["meist in 1–3 Wochen auf dem Konto", "usually in your account within 1–3 weeks", "genelde 1–3 hafta içinde hesapta", "обычно через 1–3 недели на счёте", "зазвичай за 1–3 тижні на рахунку", "zwykle w 1–3 tygodnie na koncie", "عادةً في حسابك خلال 1–3 أسابيع", "de obicei în cont în 1–3 săptămâni"],
+stb_abw:["Abweichungen vom Finanzamt", "Differences from your return", "Beyannameden farklar", "Отличия от декларации", "Відмінності від декларації", "Różnice względem zeznania", "اختلافات عن إقرارك", "Diferențe față de declarație"],
+stb_chk:["prüfen", "check", "kontrol et", "проверить", "перевірити", "sprawdź", "راجِع", "verifică"],
+stb_ok:["ok", "ok", "tamam", "ок", "ок", "ok", "حسنًا", "ok"],
+stb_vorb:["Vorbehalt der Nachprüfung", "Subject to review", "İnceleme şartlı", "Под оговоркой проверки", "Під застереженням перевірки", "Z zastrzeżeniem kontroli", "خاضع للمراجعة", "Sub rezerva verificării"],
+stb_vorb_s:["kann noch geändert werden", "can still be changed", "hâlâ değişebilir", "ещё может измениться", "ще може змінитися", "może się jeszcze zmienić", "قد يتغير لاحقًا", "se mai poate modifica"],
+stb_vorl:["Teilweise vorläufig", "Partly provisional", "Kısmen geçici", "Частично предварительно", "Частково попередньо", "Częściowo tymczasowa", "مؤقت جزئيًا", "Parțial provizorie"],
+stb_hint:["Hinweis", "Note", "Not", "Примечание", "Примітка", "Uwaga", "ملاحظة", "Notă"],
+stb_abw_add:["Abweichung notieren", "Note a difference", "Fark ekle", "Добавить отличие", "Додати відмінність", "Dodaj różnicę", "أضف اختلافًا", "Notează o diferență"],
+stb_abw_ph:["z. B. Arbeitszimmer nicht anerkannt", "e.g. home office not recognised", "örn. çalışma odası kabul edilmedi", "напр. кабинет не признан", "напр. кабінет не визнано", "np. gabinet nieuznany", "مثلًا: غرفة العمل غير معترف بها", "ex. birou nerecunoscut"],
+stb_paid:["Als bezahlt markieren", "Mark as paid", "Ödendi olarak işaretle", "Отметить оплаченным", "Позначити оплаченим", "Oznacz jako zapłacone", "وضع علامة مدفوع", "Marchează ca plătit"],
+stb_paid_ok:["bezahlt", "paid", "ödendi", "оплачено", "оплачено", "zapłacone", "مدفوع", "plătit"],
+stb_edit:["Bearbeiten", "Edit", "Düzenle", "Изменить", "Редагувати", "Edytuj", "تعديل", "Editează"],
+stb_mami:["Ich hab's, {a}! Soll ich das so für dich eintragen? Du kannst alles noch ändern.", "Got it, {a}! Shall I enter it like this for you? You can still change everything.", "Tamam, {a}! Bunu senin için böyle gireyim mi? Her şeyi hâlâ değiştirebilirsin.", "Готово, {a}! Внести так за тебя? Всё ещё можно изменить.", "Готово, {a}! Внести так за тебе? Усе ще можна змінити.", "Mam to, {a}! Mam to tak wpisać? Wszystko możesz jeszcze zmienić.", "فهمت يا {a}! هل أدخل ذلك هكذا لك؟ يمكنك تغيير كل شيء.", "Gata, {a}! Să le trec așa pentru tine? Poți modifica totul."],
+stb_mami0:["Ich konnte leider nichts sicher lesen, {a}. Trag die Werte einfach unten ein – den Rest mache ich.", "Sorry {a}, I couldn't read anything for sure. Just enter the values below – I'll do the rest.", "Üzgünüm {a}, hiçbir şeyi kesin okuyamadım. Değerleri aşağıya gir – gerisini ben yaparım.", "Увы, {a}, ничего не удалось прочитать точно. Впиши значения ниже – остальное сделаю я.", "На жаль, {a}, нічого не вдалося прочитати точно. Впиши значення нижче – решту зроблю я.", "Niestety, {a}, nic nie odczytałam na pewno. Wpisz wartości poniżej – resztę zrobię ja.", "عذرًا يا {a}، لم أستطع قراءة شيء بدقة. أدخل القيم أدناه وسأتولى الباقي.", "Din păcate, {a}, n-am putut citi nimic sigur. Introdu valorile mai jos – restul fac eu."],
+stb_f_year:["Jahr", "Year", "Yıl", "Год", "Рік", "Rok", "السنة", "An"],
+stb_f_date:["Datum des Bescheids", "Notice date", "Tahakkuk tarihi", "Дата уведомления", "Дата повідомлення", "Data decyzji", "تاريخ الإشعار", "Data deciziei"],
+stb_f_est:["Festgesetzte Steuer gesamt", "Total tax assessed", "Toplam belirlenen vergi", "Начисленный налог всего", "Нарахований податок усього", "Ustalony podatek łącznie", "إجمالي الضريبة المحددة", "Impozit stabilit total"],
+stb_f_zve:["Zu versteuerndes Einkommen", "Taxable income", "Vergiye tabi gelir", "Налогооблагаемый доход", "Оподатковуваний дохід", "Dochód do opodatkowania", "الدخل الخاضع للضريبة", "Venit impozabil"],
+stb_f_res:["Ergebnis", "Result", "Sonuç", "Итог", "Підсумок", "Wynik", "النتيجة", "Rezultat"],
+stb_f_amt:["Betrag", "Amount", "Tutar", "Сумма", "Сума", "Kwota", "المبلغ", "Sumă"],
+stb_f_due:["Zahlen bis", "Pay by", "Son ödeme", "Оплатить до", "Сплатити до", "Zapłać do", "ادفع حتى", "Plătește până la"],
+stb_f_vz:["Vorauszahlung pro Quartal", "Prepayment per quarter", "Çeyrek başına peşin ödeme", "Аванс за квартал", "Аванс за квартал", "Zaliczka kwartalna", "دفعة مقدمة لكل ربع", "Plată anticipată pe trimestru"],
+stb_f_vzfrom:["Erste Vorauszahlung", "First prepayment", "İlk peşin ödeme", "Первый аванс", "Перший аванс", "Pierwsza zaliczka", "أول دفعة مقدمة", "Prima plată anticipată"],
+stb_do:["Das mache ich für dich", "I'll do this for you", "Bunu senin için yaparım", "Это я сделаю за тебя", "Це я зроблю за тебе", "To zrobię za ciebie", "سأفعل هذا لك", "Fac asta pentru tine"],
+stb_a_pay:["Nachzahlung als Buchung am {d}", "Back payment as booking on {d}", "{d} tarihinde ek ödeme kaydı", "Доплата как платёж {d}", "Доплата як платіж {d}", "Dopłata jako płatność {d}", "دفع إضافي كدفعة في {d}", "Plată suplimentară ca plată pe {d}"],
+stb_a_ein:["Einspruchsfrist {d} – Mami erinnert dich", "Objection deadline {d} – Mami reminds you", "İtiraz süresi {d} – Mami hatırlatır", "Срок возражения {d} – Мами напомнит", "Термін заперечення {d} – Мамі нагадає", "Termin sprzeciwu {d} – Mami przypomni", "مهلة الاعتراض {d} – ستذكّرك ماما", "Termen contestație {d} – Mami îți amintește"],
+stb_a_vz:["Vorauszahlungen ({n}/Quartal) als Fixkosten", "Prepayments ({n}/quarter) as fixed costs", "Peşin ödemeler ({n}/çeyrek) sabit gider olarak", "Авансы ({n}/квартал) как фикс. расходы", "Аванси ({n}/квартал) як фікс. витрати", "Zaliczki ({n}/kwartał) jako koszty stałe", "الدفعات المقدمة ({n}/ربع) كتكاليف ثابتة", "Plăți anticipate ({n}/trimestru) ca costuri fixe"],
+stb_a_pot:["Steuer-Topf auf {n} % setzen", "Set tax pot to {n} %", "Vergi kumbarasını %{n} yap", "Копилка на {n} %", "Скарбничка на {n} %", "Skarbonka na {n} %", "اضبط الحصالة على {n} %", "Pușculița la {n} %"],
+stb_save:["Alles übernehmen", "Apply all", "Hepsini uygula", "Применить всё", "Застосувати все", "Zastosuj wszystko", "تطبيق الكل", "Aplică tot"],
+stb_saved:["Bescheid gespeichert", "Assessment saved", "Tahakkuk kaydedildi", "Уведомление сохранено", "Повідомлення збережено", "Zapisano decyzję", "تم حفظ الإشعار", "Decizie salvată"],
+stb_need:["Bitte Jahr und Betrag eintragen", "Please enter year and amount", "Lütfen yıl ve tutar gir", "Укажи год и сумму", "Вкажи рік і суму", "Podaj rok i kwotę", "أدخل السنة والمبلغ", "Introdu anul și suma"],
+stb_h_ein:["Einspruchsfrist Steuerbescheid {y}: noch {n} Tage", "Tax objection deadline {y}: {n} days left", "{y} vergi itiraz süresi: {n} gün kaldı", "Срок возражения по налогу {y}: ещё {n} дн.", "Термін заперечення податку {y}: ще {n} дн.", "Termin sprzeciwu podatek {y}: jeszcze {n} dni", "مهلة الاعتراض على ضريبة {y}: باقي {n} يوم", "Termen contestație impozit {y}: încă {n} zile"],
+stb_h_ein_s:["Stimmt alles im Bescheid? Danach ist er nicht mehr änderbar.", "Is everything right in the notice? After that it can't be changed.", "Tahakkukta her şey doğru mu? Sonra değiştirilemez.", "Всё ли верно в уведомлении? Потом его не изменить.", "Чи все правильно в повідомленні? Потім його не змінити.", "Czy wszystko w decyzji się zgadza? Potem nie da się jej zmienić.", "هل كل شيء صحيح في الإشعار؟ بعدها لا يمكن تغييره.", "E totul corect în decizie? După aceea nu mai poate fi schimbată."],
+stb_h_pay:["Steuer-Nachzahlung {n} fällig am {d}", "Tax back payment {n} due on {d}", "{n} vergi ek ödemesi {d} tarihinde", "Доплата налога {n} до {d}", "Доплата податку {n} до {d}", "Dopłata podatku {n} do {d}", "دفع ضريبي إضافي {n} مستحق في {d}", "Plată suplimentară impozit {n} scadentă pe {d}"],
+stb_h_pay_s:["Sorg dafür, dass genug auf dem Konto ist.", "Make sure there's enough in your account.", "Hesabında yeterli para olduğundan emin ol.", "Позаботься, чтобы на счёте хватало денег.", "Подбай, щоб на рахунку вистачало грошей.", "Zadbaj, by na koncie było dość pieniędzy.", "تأكد من وجود رصيد كافٍ في حسابك.", "Asigură-te că ai destui bani în cont."],
+stb_priv:["Bild und Daten bleiben bei dir. Das ist eine Organisationshilfe, keine Steuerberatung.", "Image and data stay with you. This helps you organise – it's not tax advice.", "Görsel ve veriler sende kalır. Bu bir düzen yardımıdır, vergi danışmanlığı değildir.", "Фото и данные остаются у тебя. Это помощь в организации, а не налоговая консультация.", "Фото й дані залишаються в тебе. Це допомога в організації, а не податкова консультація.", "Zdjęcie i dane zostają u ciebie. To pomoc w organizacji, nie doradztwo podatkowe.", "تبقى الصورة والبيانات لديك. هذه مساعدة تنظيمية وليست استشارة ضريبية.", "Imaginea și datele rămân la tine. E un ajutor de organizare, nu consultanță fiscală."],
+stb_pdf_err:["PDF konnte nicht gelesen werden", "Couldn't read the PDF", "PDF okunamadı", "Не удалось прочитать PDF", "Не вдалося прочитати PDF", "Nie udało się odczytać PDF", "تعذّرت قراءة ملف PDF", "PDF-ul nu a putut fi citit"],
+stb_vzq:["/Quartal", "/quarter", "/çeyrek", "/квартал", "/квартал", "/kwartał", "/ربع", "/trimestru"],
+stb_c_year:["Jahr {y}", "Year {y}", "Yıl {y}", "Год {y}", "Рік {y}", "Rok {y}", "السنة {y}", "Anul {y}"],
 fc_mami_w0:["Uff, {a} – das wird eng. Schau, welche Fixkosten du verschieben oder kündigen kannst. Ich helfe dir! 💚","Phew, {a} – that’s tight. Check which fixed costs you can postpone or cancel. I’ll help! 💚","Of {a} – sıkışık olacak. Hangi sabit giderleri erteleyebileceğine ya da iptal edebileceğine bak. Yardım ederim! 💚","Ох, {a} – будет туго. Посмотри, какие постоянные расходы можно перенести или отменить. Я помогу! 💚","Ох, {a} – буде скрутно. Подивись, які постійні витрати можна перенести чи скасувати. Я допоможу! 💚","Uff, {a} – będzie ciasno. Sprawdź, które stałe koszty możesz przesunąć lub wypowiedzieć. Pomogę! 💚","أوف يا {a} – سيكون الأمر ضيقًا. انظر أي التكاليف الثابتة يمكنك تأجيلها أو إلغاؤها. سأساعدك! 💚","Uf, {a} – va fi strâmt. Vezi ce costuri fixe poți amâna sau anula. Te ajut! 💚"],
 va_left:["noch {n} Tage","{n} days left","{n} gün kaldı","ещё {n} дн.","ще {n} дн.","jeszcze {n} dni","باقي {n} يوم","încă {n} zile"],
 va_ind:["in {n} Tagen","in {n} days","{n} gün sonra","через {n} дн.","через {n} дн.","za {n} dni","بعد {n} يوم","în {n} zile"],
@@ -9136,7 +9250,7 @@ async function bsScan(file){ let img; try{ img=await tmShrink(file); }catch(_){ 
   const wait=Math.max(0, 1800-(performance.now()-t0)); await new Promise(r=>setTimeout(r,RMo()?0:wait));
   const {d,F}=bsParse(lines||[]); BS.d={kind:"bew", use:true, terms:true, ...d}; BS.found=F; BS.st=2; BS.scanned=true; bsRender();
   if (!Object.keys(F).length) toast(nt("bs_nothing")); }
-function bsReadForm(){ const bg=$("bsBg"), d={...(BS.d||{})}; bg.querySelectorAll("[data-bsf]").forEach(i=>{ const k=i.dataset.bsf; if (i.type==="date"||i.tagName==="SELECT") d[k]=i.value||""; else { const v=(i.value||"").trim(); d[k]=v===""?"":(parseAmt(v)||0); } }); d.use=$("bsUse").checked; d.terms=$("bsTerms").checked; return d; }
+function bsReadForm(){ const bg=$("bsBg"), d={...(BS.d||{})}; bg.querySelectorAll("[data-bsf]").forEach(i=>{ const k=i.dataset.bsf; if (i.type==="date"||i.dataset.cal||i.tagName==="SELECT") d[k]=i.value||""; else { const v=(i.value||"").trim(); d[k]=v===""?"":(parseAmt(v)||0); } }); d.use=$("bsUse").checked; d.terms=$("bsTerms").checked; return d; }
 document.addEventListener("click", async e=>{
   const op=e.target.closest("[data-bsopen]"); if (op){ e.preventDefault(); bsOpen(); return; }
   const bg=$("bsBg"); if (!bg||bg.hidden||!bg.contains(e.target)) return;
@@ -9161,6 +9275,150 @@ document.addEventListener("click", async e=>{
 document.addEventListener("change", e=>{ const id=e.target.id; if (id==="bsCam"||id==="bsFile"){ const f=e.target.files&&e.target.files[0]; e.target.value=""; if (f) bsScan(f); }
   else if (e.target.dataset&&e.target.dataset.bsf && $("bsBg") && !$("bsBg").hidden){ BS.d=bsReadForm(); const ck=$("bsBg").querySelector(".bscks"); const html=bsChecks(BS.d); const tmp=document.createElement("div"); tmp.innerHTML=html; const prev=ck?ck.previousElementSibling:null; if (ck){ ck.remove(); if (prev&&prev.classList.contains("vak")) prev.remove(); } const form=$("bsBg").querySelector(".bsform"); if (form) form.after(...tmp.childNodes); const sm=$("bsBg").querySelector("[data-bssum]"); if (sm){ const d=BS.d; sm.textContent="= "+eur((Number(d.regel)||0)+(Number(d.kdu)||0)+(Number(d.heiz)||0)+(Number(d.mehr)||0)-(Number(d.ek)||0)); } } });
 
+
+/* ---------- Steuerbescheide: Scan · Akte · Cockpit ---------- */
+const STB={st:0, img:null, d:null, F:{}, sel:null, edit:null, act:{pay:1,ein:1,vz:1,pot:1}};
+function stbList(){ return S.settings.stb=S.settings.stb||[]; }
+function stbSorted(){ return stbList().slice().sort((a,b)=>(Number(b.year)||0)-(Number(a.year)||0) || (b.date||"").localeCompare(a.date||"")); }
+function stbWid(x){ return x&&x.date ? addMonths(addDays(x.date,4),1) : ""; }
+function stbVzDates(x){ if (!(Number(x.vz)>0) || !x.vzFrom) return []; const out=[]; let d=x.vzFrom; for (let i=0;i<4;i++){ out.push(d); d=addMonths(d,3); } return out; }
+function stbRate(x){ const e=Number(x&&x.est)||0, z=Number(x&&x.zve)||0; if (!(e>0&&z>0)) return 0; return Math.max(5, Math.min(45, Math.ceil(e/z*100)+2)); }
+function stbSign(x){ return x.res==="ref" ? 1 : x.res==="due" ? -1 : 0; }
+function stbAmt(x){ return stbSign(x)*(Number(x.amt)||0); }
+function stbPot(){ let bal=0, need=0; try{ const t=taxCalc(new Date().getFullYear()); bal=Math.max(0,t.resBal||0); }catch(_){}
+  const td=isoToday(); for (const x of stbList()){ if (x.res==="due" && !x.paid) need+=Number(x.amt)||0; for (const d of stbVzDates(x)) if (d>=td && d.slice(0,4)===td.slice(0,4)) need+=Number(x.vz)||0; }
+  return {bal, need}; }
+function stbOpen(id){ STB.st=0; STB.img=null; STB.d=null; STB.F={}; STB.edit=null; STB.sel=null; hbSheet("stbBg", nt("stb_title")); if (id && stbList().some(x=>x.id===id)){ STB.sel=id; STB.st=3; } stbRender(true); }
+function stbAnim(b, sel, base){ if (RMo()) return; b.querySelectorAll(sel).forEach((e,i)=>e.animate([{opacity:0,transform:"translateY(16px) scale(.98)"},{opacity:1,transform:"none"}],{duration:520,delay:(base||0)+i*80,easing:"cubic-bezier(.2,1.2,.35,1)",fill:"backwards"})); }
+function stbRender(first){ const bg=$("stbBg"); if (!bg||bg.hidden) return; const b=bg.querySelector(".hobody"), L=stbSorted(), E=v=>esc(eur0(v)), D=(d,o)=>esc(dLong(d,o||{day:"numeric",month:"long"}));
+  /* ---- B: Cockpit ---- */
+  if (STB.st===0){ const yrs=L.slice().filter((x,i,a)=>a.findIndex(y=>y.year===x.year)===i).slice(0,5).reverse(), mx=Math.max(1,...yrs.map(x=>Math.abs(stbAmt(x))));
+    const rate=Number(S.settings.reserveRate)||0, P=stbPot(), pct=P.need>0?Math.min(100,P.bal/P.need*100):(rate?100:0);
+    b.innerHTML=`${L.length?`<div class="vacard stbbars"><div class="vak" style="margin:0 0 6px">${esc(nt("stb_bars"))}</div><div class="stbb">${yrs.map(x=>{ const v=stbAmt(x), h=Math.max(8,Math.abs(v)/mx*100); return `<button type="button" data-stbsel="${esc(x.id)}"><em>${v>0?"+":v<0?"−":""}${E(Math.abs(v))}</em><i class="${v<0?"neg":""}" style="--h:${h}%"></i><small>${esc(String(x.year||""))}</small></button>`; }).join("")}</div></div>`
+      :`<div class="bsintro"><div class="bsdoc">🧾<i></i></div><b>${esc(nt("stb_intro"))}</b><span>${esc(nt("stb_intro_s"))}</span></div>`}
+      ${hasSelf()?`<div class="vacard stbpot"><div class="stbring" style="--p:${pct}"><b data-noi18n>${rate?rate+" %":"–"}</b></div><div class="grow"><div class="vak" style="margin:0 0 3px">${esc(nt("stb_pot"))}</div>${rate?`<b>${esc(nt("stb_pot_t",{n:String(rate)}))}</b>${P.need>0?`<small>${esc(nt("stb_pot_s",{a:eur0(P.bal),b:eur0(P.need)}))}</small>`:""}`:`<small>${esc(nt("stb_pot_none"))}</small>`}</div></div>`:""}
+      <div class="bsbtns"><button type="button" class="vakb" data-stbpick="cam">📸 ${esc(nt("bs_photo"))}</button><button type="button" class="vadone" data-stbpick="file">📄 ${esc(nt("stb_import"))}</button></div>
+      <button type="button" class="btn tmnew" data-stbmanual>✍️ ${esc(nt("stb_manual"))}</button>
+      ${L.length?`<div class="vak">${esc(nt("stb_list"))}</div><div class="vacard">${L.map(x=>{ const v=stbAmt(x), wd=dLeft(stbWid(x)), open=(x.res==="due"&&!x.paid)||(wd!=null&&wd>=0); return `<button type="button" class="fcr tmrow" data-stbsel="${esc(x.id)}"><span class="tmico">📄</span><span class="grow"><b>${esc(String(x.year||"–"))} · <span class="${v<0?"stbneg":"stbpos"}">${v>0?"+":v<0?"−":"±"}${E(Math.abs(v))}</span></b><small>${x.date?esc(nt("stb_from",{d:fxDate(x.date,{day:"2-digit",month:"2-digit",year:"numeric"})})):""}${wd!=null&&wd>=0?` · ${esc(nt("stb_ein",{d:fxDate(stbWid(x),{day:"numeric",month:"short"})}))}`:""}${x.img?" · 📎":""}</small></span><span class="vab ${open?(wd!=null&&wd>=0&&wd<=7?"b-red":"b-amb"):"b-grn"}">${esc(open?nt("stb_open"):nt("stb_done"))}</span></button>`; }).join("")}</div>`:""}
+      <input type="file" id="stbCam" accept="image/*" capture="environment" hidden><input type="file" id="stbFile" accept="image/*,application/pdf,.pdf" hidden>
+      <p class="small muted" style="margin:12px 4px 0">${esc(nt("stb_priv"))}</p>`;
+    if (first||STB.anim){ STB.anim=0; stbAnim(b, ".stbbars,.bsintro,.stbpot,.bsbtns,.tmnew,.vak,.vacard:last-of-type");
+      if (!RMo()){ b.querySelectorAll(".stbb i").forEach((i,k)=>i.animate([{transform:"scaleY(0)"},{transform:"scaleY(1.06)",offset:.75},{transform:"scaleY(1)"}],{duration:800,delay:250+k*110,easing:"cubic-bezier(.3,1.3,.5,1)",fill:"backwards"}));
+        b.querySelectorAll(".stbb em").forEach((e,k)=>{ e.animate([{opacity:0,transform:"translateY(8px)"},{opacity:1,transform:"none"}],{duration:400,delay:650+k*110,fill:"backwards"}); });
+        const r=b.querySelector(".stbring"); if (r){ const p=Number(r.style.getPropertyValue("--p"))||0, t0=performance.now(); const tick=now=>{ const k=Math.min(1,(now-t0-300)/1100); if (k>0) r.style.setProperty("--p", (p*(1-Math.pow(1-k,3))).toFixed(1)); if (k<1) requestAnimationFrame(tick); }; r.style.setProperty("--p",0); requestAnimationFrame(tick); } } }
+    return; }
+  /* ---- Scan läuft ---- */
+  if (STB.st===1){ b.innerHTML=`<div class="bsscan">${STB.img?`<img src="${STB.img}" alt="">`:`<div class="stbpdf">📄</div>`}<i class="bsbeam"></i><span class="bscorner"></span></div><p class="bsstat"><span class="dots3"><i></i><i></i><i></i></span> ${esc(nt("bs_reading"))}</p>`; return; }
+  /* ---- C: Prüfen & übernehmen ---- */
+  if (STB.st===2){ const d=STB.d||{}, F=STB.F||{}, A=STB.act, found=Object.keys(F).length;
+    const chip=(k,txt)=>F[k]?`<span class="bschip">${txt}</span>`:"";
+    const chips=[chip("year",esc(nt("stb_c_year",{y:String(d.year)}))), chip("amt",`${esc(d.res==="ref"?nt("stb_ref"):nt("stb_due"))} <b>${E(d.amt)}</b>`), chip("due",esc(nt("stb_due_by",{d:fxDate(d.due,{day:"numeric",month:"short"})}))), chip("vz",`${esc(nt("stb_f_vz"))} <b>${E(d.vz)}</b>`), chip("est",`${esc(nt("stb_f_est"))} <b>${E(d.est)}</b>`), chip("zve",`${esc(nt("stb_f_zve"))} <b>${E(d.zve)}</b>`), chip("date",esc(nt("stb_from",{d:fxDate(d.date,{day:"numeric",month:"short"})})))].join("");
+    const wid=stbWid(d), rate=stbRate(d);
+    const acts=[d.res==="due"&&Number(d.amt)>0&&d.due?["pay",nt("stb_a_pay",{d:fxDate(d.due,{day:"numeric",month:"long"})})]:null, wid&&dLeft(wid)>=0?["ein",nt("stb_a_ein",{d:fxDate(wid,{day:"numeric",month:"long"})})]:null, Number(d.vz)>0&&d.vzFrom?["vz",nt("stb_a_vz",{n:eur0(d.vz)})]:null, hasSelf()&&rate?["pot",nt("stb_a_pot",{n:String(rate)})]:null].filter(Boolean);
+    const fld=(k,l,type)=>`<div class="field ${F[k]?"bsok":""}"><label>${esc(nt(l))}</label><input class="in" ${type==="date"?'type="date"':type==="year"?'inputmode="numeric" maxlength="4"':'inputmode="decimal" placeholder="0,00"'} data-stbf="${k}" value="${type==="num"?(d[k]!=null&&d[k]!==""?esc(numStr(d[k])):""):esc(String(d[k]||""))}"></div>`;
+    b.innerHTML=`${STB.img||(STB.edit&&d.img)?`<div class="bsthumb">${STB.img?`<img src="${STB.img}" alt="" data-stbzoom>`:`<button type="button" class="vadone" data-stbview="${esc(STB.edit)}">📎 ${esc(nt("bs_showimg"))}</button>`}</div>`:""}
+      ${STB.scanned?`${found?`<div class="bschips">${chips}</div>`:""}<div class="fcmami on stbma">${mAv?mAv(null):"👩"}<div class="bub">${esc(mFill(found?nt("stb_mami"):nt("stb_mami0")))}</div></div>`:""}
+      ${acts.length?`<div class="vak">${esc(nt("stb_do"))}</div><div class="vacard stbacts">${acts.map(([k,t])=>`<label class="stbact ${A[k]?"on":""}"><input type="checkbox" data-stbact="${k}" ${A[k]?"checked":""}><span class="stbck">✓</span><span>${esc(t)}</span></label>`).join("")}</div>`:""}
+      <div class="vak">${esc(nt("bs_check"))}</div>
+      <div class="vacard bsform">
+        <div class="grid2">${fld("year","stb_f_year","year")}${fld("date","stb_f_date","date")}</div>
+        <div class="field"><label>${esc(nt("stb_f_res"))}</label><div class="stbseg">${[["due","stb_due"],["ref","stb_ref"],["zero","stb_zero"]].map(([v,l])=>`<button type="button" class="${(d.res||"due")===v?"on":""}" data-stbres="${v}">${esc(nt(l))}</button>`).join("")}</div></div>
+        <div class="grid2">${fld("amt","stb_f_amt","num")}${fld("due","stb_f_due","date")}</div>
+        <div class="grid2">${fld("vz","stb_f_vz","num")}${fld("vzFrom","stb_f_vzfrom","date")}</div>
+        <div class="grid2">${fld("est","stb_f_est","num")}${fld("zve","stb_f_zve","num")}</div>
+        <label class="kidedu"><input type="checkbox" id="stbVorb" ${d.vorb?"checked":""}> <span>${esc(nt("stb_vorb"))}</span></label>
+        <label class="kidedu"><input type="checkbox" id="stbVorl" ${d.vorl?"checked":""}> <span>${esc(nt("stb_vorl"))}</span></label></div>
+      <div class="vabtns" style="margin-top:12px">${STB.edit?`<button type="button" class="btn danger" data-stbdel="${esc(STB.edit)}">${esc(nt("tm_del"))}</button>`:`<button type="button" class="btn" data-stbback>${esc(nt("tm_cancel"))}</button>`}<button type="button" class="btn primary stbgo" data-stbsave>✓ ${esc(nt("stb_save"))}</button></div>`;
+    if (STB.scanned && !RMo()){ b.querySelectorAll(".bschip").forEach((c,i)=>c.animate([{opacity:0,transform:"scale(.5) translateY(10px)"},{opacity:1,transform:"none"}],{duration:450,delay:150+i*110,easing:"cubic-bezier(.3,1.7,.5,1)",fill:"backwards"}));
+      const ma=b.querySelector(".stbma"); if (ma) ma.animate([{opacity:0,transform:"translateY(14px)"},{opacity:1,transform:"none"}],{duration:520,delay:300+b.querySelectorAll(".bschip").length*110,easing:"cubic-bezier(.2,1.3,.4,1)",fill:"backwards"});
+      b.querySelectorAll(".stbact").forEach((c,i)=>c.animate([{opacity:0,transform:"translateX(-18px)"},{opacity:1,transform:"none"}],{duration:420,delay:700+i*140,easing:"cubic-bezier(.2,1.2,.35,1)",fill:"backwards"})); }
+    else if (first) stbAnim(b, ".vak,.vacard,.vabtns");
+    STB.scanned=false; return; }
+  /* ---- A: Akte ---- */
+  const x=stbList().find(y=>y.id===STB.sel); if (!x){ STB.st=0; return stbRender(true); }
+  const v=stbAmt(x), wid=stbWid(x), wd=dLeft(wid), vzd=stbVzDates(x).filter(d=>d>=isoToday()), td=isoToday();
+  const tl=[]; if (wid) tl.push(wd>=0?`<div class="stbp ${wd<=7?"r":"w"}"><b>${esc(nt("stb_ein",{d:fxDate(wid,{day:"numeric",month:"long"})}))}</b><small>${esc(nt("stb_ein_s",{n:String(wd)}))}</small></div>`:`<div class="stbp g"><b>${esc(nt("stb_ein_over"))}</b></div>`);
+  if (x.res==="due" && x.due) tl.push(`<div class="stbp ${x.paid?"g":dLeft(x.due)<=7?"r":""}"><b>${esc(nt("stb_pay",{d:fxDate(x.due,{day:"numeric",month:"long"})}))}</b><small>${esc(x.paid?nt("stb_paid_ok"):x.fixPay?nt("stb_pay_s"):nt("stb_pay_s0"))}</small></div>`);
+  if (x.res==="ref") tl.push(`<div class="stbp g"><b>${esc(nt("stb_refin"))}</b><small>${esc(nt("stb_refin_s"))}</small></div>`);
+  if (vzd.length) tl.push(`<div class="stbp"><b>${esc(nt("stb_vz",{d:fxDate(vzd[0],{day:"numeric",month:"long",year:"numeric"})}))}</b><small>${esc(nt("stb_vz_s",{n:eur0(x.vz)}))}</small></div>`);
+  const ab=(x.abw||[]);
+  b.innerHTML=`<div class="srhero stbhero ${v<0&&!x.paid?"neg":""}"><small>${esc(nt("stb_year",{y:String(x.year)}))}${x.res==="due"&&x.due?" · "+esc(nt("stb_due_by",{d:fxDate(x.due,{day:"numeric",month:"short"})})):""}</small><div class="srbig"><span id="stbN">${v>0?"+":v<0?"−":"±"}${E(Math.abs(v))}</span></div><span>${esc(x.res==="ref"?nt("stb_ref"):x.res==="due"?nt("stb_due"):nt("stb_zero"))}${x.date?" · "+esc(nt("stb_from",{d:fxDate(x.date,{day:"numeric",month:"short",year:"numeric"})})):""}${x.paid?" · ✓ "+esc(nt("stb_paid_ok")):""}</span><i class="srsh"></i></div>
+    ${tl.length?`<div class="vak">${esc(nt("stb_fr"))}</div><div class="vacard stbtl">${tl.join("")}</div>`:""}
+    <div class="vak">${esc(nt("stb_abw"))}</div><div class="vacard">
+      ${ab.map((a,i)=>`<div class="fcr stbab"><span class="tmico">${a.ok?"✅":"🔎"}</span><span class="grow"><b data-noi18n>${esc(a.t)}</b></span><button type="button" class="vab ${a.ok?"b-grn":"b-red"}" data-stbabw="${i}">${esc(a.ok?nt("stb_ok"):nt("stb_chk"))}</button></div>`).join("")}
+      ${x.vorb?`<div class="fcr"><span class="tmico">📌</span><span class="grow"><b>${esc(nt("stb_vorb"))}</b><small style="display:block;color:var(--muted);font-size:12px">${esc(nt("stb_vorb_s"))}</small></span><span class="vab b-amb">${esc(nt("stb_hint"))}</span></div>`:""}
+      ${x.vorl?`<div class="fcr"><span class="tmico">⏳</span><span class="grow"><b>${esc(nt("stb_vorl"))}</b></span><span class="vab b-amb">${esc(nt("stb_hint"))}</span></div>`:""}
+      <div class="tmadd"><input class="in" id="stbAbwIn" placeholder="${esc(nt("stb_abw_ph"))}"><button type="button" class="btn primary" data-stbabwadd aria-label="${esc(nt("stb_abw_add"))}">+</button></div></div>
+    <div class="vabtns" style="margin-top:12px">${x.res==="due"&&!x.paid?`<button type="button" class="btn primary" data-stbpaid>✓ ${esc(nt("stb_paid"))}</button>`:""}<button type="button" class="btn" data-stbedit>✏️ ${esc(nt("stb_edit"))}</button>${x.img?`<button type="button" class="btn" data-stbview="${esc(x.id)}">📎</button>`:""}</div>
+    <button type="button" class="btn tmnew" data-stbhome>‹ ${esc(nt("stb_title"))}</button>`;
+  if (first||STB.anim){ STB.anim=0; stbAnim(b, ".srhero,.vak,.vacard,.vabtns,.tmnew"); if (!RMo()){ b.querySelectorAll(".stbp").forEach((p,i)=>p.animate([{opacity:0,transform:"translateX(-14px)"},{opacity:1,transform:"none"}],{duration:450,delay:300+i*130,easing:"cubic-bezier(.2,1.2,.35,1)",fill:"backwards"})); const n=$("stbN"); if (n&&typeof hbOdo==="function"){ const t=n.textContent; n.textContent=t.replace(/\d/g,"0"); hbOdo(n,t,1200); } } } }
+function stbNum(s){ const a=amountsIn(" "+s+" "); return a.length?a[0]:null; }
+function stbInt(s){ const m=String(s).match(/(\d{1,3}(?:\.\d{3})+|\d{4,6})(?:,\d{2})?(?!\d)/); return m?Number(m[1].replace(/\./g,"")):null; }
+function stbParse(lines){ const T0=lines.map(l=>typeof l==="string"?l:(l.t||l.text||"")).filter(Boolean), low=T0.map(t=>t.toLowerCase()), all=low.join("\n"), d={res:"due"}, F={};
+  const next=(i,n)=>T0.slice(i,i+(n||2)).join("  ");
+  let m=all.match(/bescheid\s+(?:für|fuer|über das jahr)\s+(20\d\d)/)||all.match(/(?:veranlagungszeitraum|kalenderjahr|steuerjahr)\s*:?\s*(20\d\d)/)||all.match(/einkommensteuer\D{0,20}(20\d\d)/); if (m){ d.year=Number(m[1]); F.year=1; }
+  for (let i=0;i<T0.length;i++){ if (/zu versteuernde[sn]?\s+einkommen/.test(low[i])){ const v=stbInt(T0[i].replace(/^[^\d]*/,""))||stbInt(T0[i+1]||""); if (v){ d.zve=v; F.zve=1; break; } } }
+  for (let i=0;i<T0.length;i++){ if (/festgesetzt/.test(low[i])){ for (let k=i;k<Math.min(T0.length,i+5);k++){ if (/einkommensteuer|festgesetzt/.test(low[k])){ const a=amountsIn(" "+T0[k]+" "); if (a.length){ d.est=a[0]; F.est=1; break; } } } if (d.est) break; } }
+  if (!d.est) for (let i=0;i<T0.length;i++) if (/^\s*einkommensteuer\b/.test(low[i])){ const a=amountsIn(" "+T0[i]+" "); if (a.length){ d.est=a[0]; F.est=1; break; } }
+  let due=null, ref=null;
+  for (let i=0;i<T0.length;i++){ const l=low[i];
+    if (due==null && /(nachzahlung|noch zu zahlen|zu wenig|bitte zahlen|abschlusszahlung|verbleibende beträge|verbleibender betrag|zu zahlen)/.test(l) && !/vorauszahl/.test(l)){ const a=amountsIn(" "+T0[i]+" ").concat(amountsIn(" "+(T0[i+1]||"")+" ").slice(0,0)); const s=a.slice(0,4).reduce((p,c)=>p+c,0); if (s>0) due=Math.round(s*100)/100; }
+    if (ref==null && /(erstattung|wird erstattet|zu viel|guthaben|erstattet)/.test(l)){ const a=amountsIn(" "+T0[i]+" "); const s=a.slice(0,4).reduce((p,c)=>p+c,0); if (s>0) ref=Math.round(s*100)/100; } }
+  if (due!=null){ d.res="due"; d.amt=due; F.amt=1; } else if (ref!=null){ d.res="ref"; d.amt=ref; F.amt=1; }
+  for (let i=0;i<T0.length;i++){ if (/(spätestens|zahlen sie bis|bis zum|fällig am|fällig)/.test(low[i]) && !/vorauszahl/.test(low[i])){ const x=bsDate(next(i,2)); if (x && x>=(d.date||"2015")){ d.due=x; F.due=1; break; } } }
+  const vz={}; for (let i=0;i<T0.length;i++){ const r=T0[i].match(/10\.(03|06|09|12)\.(20\d\d|\d\d)/); if (r && (/vorauszahl/.test(all))){ const a=amountsIn(" "+T0[i].replace(r[0]," ")+" "); if (a.length){ const dt=bsDate(r[0]); if (dt) vz[dt]=a[a.length-1]; } } }
+  const vd=Object.keys(vz).sort(), fut=vd.filter(x=>x>=isoToday()); if (vd.length){ const cnt={}; for (const k of vd) cnt[vz[k]]=(cnt[vz[k]]||0)+1; const q=Number(Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0]); if (q>0){ d.vz=q; d.vzFrom=fut[0]||vd[vd.length-1]; F.vz=1; } }
+  for (let i=0;i<Math.min(T0.length,25);i++){ if (/(datum|^den\b|vom)/.test(low[i]) || i<10){ const x=bsDate(T0[i]); if (x && x<=isoToday() && !/10\.(03|06|09|12)\./.test(T0[i])){ d.date=x; F.date=1; break; } } }
+  if (/vorbehalt der nachprüfung|§\s*164/.test(all)){ d.vorb=true; F.vorb=1; } if (/vorläufig|§\s*165/.test(all)){ d.vorl=true; F.vorl=1; }
+  const abw=[]; for (const t of T0){ if (/(abweich|nicht anerkannt|nicht berücksichtigt|nicht abziehbar|gekürzt|konnten? nicht|nur in höhe|nicht als)/i.test(t) && t.length>12) abw.push({t:t.trim().slice(0,160), ok:false}); if (abw.length>=6) break; }
+  if (abw.length){ d.abw=abw; F.abw=1; }
+  if (!d.year && d.date){ d.year=Number(d.date.slice(0,4))-1; }
+  return {d, F}; }
+async function stbPdf(file){ const buf=await file.arrayBuffer(); const L=await pdfLines(buf); let img=null;
+  try{ const lib=await loadPdfJs(), doc=await lib.getDocument({data:new Uint8Array(buf), isEvalSupported:false}).promise, pg=await doc.getPage(1), vp=pg.getViewport({scale:1.4}), c=document.createElement("canvas"); c.width=vp.width; c.height=vp.height; await pg.render({canvasContext:c.getContext("2d"), viewport:vp}).promise; img=c.toDataURL("image/jpeg",.72); }catch(_){}
+  return {lines:L.map(l=>l.text), img}; }
+async function stbScan(file){ const isPdf=/pdf/i.test(file.type||"")||/\.pdf$/i.test(file.name||""); let lines=[];
+  STB.img=null; STB.st=1; stbRender(); const t0=performance.now();
+  try{ if (isPdf){ const r=await stbPdf(file); lines=r.lines; STB.img=r.img; stbRender(); }
+    else { STB.img=await tmShrink(file); stbRender(); lines=await ocrDataUrl(STB.img); } }
+  catch(e){ lines=[]; if (isPdf) toast(nt("stb_pdf_err")); }
+  const wait=Math.max(0,2000-(performance.now()-t0)); await new Promise(r=>setTimeout(r,RMo()?0:wait));
+  const {d,F}=stbParse(lines||[]); STB.d=d; STB.F=F; STB.edit=null; STB.act={pay:1,ein:1,vz:1,pot:1}; STB.st=2; STB.scanned=true; stbRender(); }
+function stbReadForm(){ const bg=$("stbBg"), d={...(STB.d||{})}; bg.querySelectorAll("[data-stbf]").forEach(i=>{ const k=i.dataset.stbf, v=(i.value||"").trim(); if (i.type==="date"||i.dataset.cal) d[k]=v; else if (k==="year") d[k]=Number(v.replace(/\D/g,""))||""; else d[k]=v===""?"":(parseAmt(v)||0); });
+  const a=$("stbVorb"), b=$("stbVorl"); if (a) d.vorb=a.checked; if (b) d.vorl=b.checked; return d; }
+async function stbApply(rec, old){ const ym=d=>d.slice(0,7);
+  for (const fid of [old&&old.fixPay, old&&old.fixVz].filter(Boolean)){ const f=S.fixed.find(y=>y.id===fid); if (f && !(rec.fixPay===fid||rec.fixVz===fid)){ try{ await del("fixed", fid); }catch(_){} } }
+  if (STB.act.pay && rec.res==="due" && rec.amt>0 && rec.due && !rec.paid){ const id=rec.fixPay||newId(), m=Number(rec.due.slice(5,7)); await put("fixed", id, {name:nt("stb_due")+" "+rec.year, amount:rec.amt, kind:"privat", cat:"Steuern", order:S.fixed.length, from:ym(rec.due), until:ym(rec.due), months:[m], days:[{from:ym(rec.due), day:Number(rec.due.slice(8,10))}], stb:rec.id}); rec.fixPay=id; } else if (rec.fixPay && !STB.act.pay){ try{ await del("fixed", rec.fixPay); }catch(_){} delete rec.fixPay; }
+  if (STB.act.vz && rec.vz>0 && rec.vzFrom){ for (const f of S.fixed) if (f.stbVz && f.id!==rec.fixVz && !f.until){ const {id:_, ...r}=f; r.until=ym(addMonths(rec.vzFrom,-1)); await put("fixed", f.id, r); }
+    const id=rec.fixVz||newId(), st=Number(rec.vzFrom.slice(5,7)); await put("fixed", id, {name:"ESt-"+nt("stb_vz",{d:""}).trim(), amount:rec.vz, kind:"privat", cat:"Steuern", order:S.fixed.length, from:ym(rec.vzFrom), rhythm:"quartal", months:rhythmMonths("quartal", st), days:[{from:ym(rec.vzFrom), day:10}], stb:rec.id, stbVz:true}); rec.fixVz=id; }
+  if (STB.act.pot && hasSelf()){ const r=stbRate(rec); if (r) S.settings.reserveRate=r; } }
+function stbHints(hints){ for (const x of stbList()){ const w=dLeft(stbWid(x)); if (w!=null && w>=0 && w<=7) hints.push({k:"stb", lvl:w<=2?"warn":"info", t:nt("stb_h_ein",{y:String(x.year),n:String(w)}), s:nt("stb_h_ein_s")});
+    if (x.res==="due" && !x.paid && x.due){ const n=dLeft(x.due); if (n>=0 && n<=7) hints.push({k:"stb", lvl:"warn", t:nt("stb_h_pay",{n:eur0(x.amt),d:fxDate(x.due,{day:"numeric",month:"long"})}), s:nt("stb_h_pay_s")}); } } }
+document.addEventListener("click", async e=>{
+  if (e.target.closest("[data-stbopen]")){ e.preventDefault(); stbOpen(); return; }
+  const bg=$("stbBg"); if (!bg||bg.hidden||!bg.contains(e.target)) return;
+  const pk=e.target.closest("[data-stbpick]"); if (pk){ $(pk.dataset.stbpick==="cam"?"stbCam":"stbFile").click(); return; }
+  if (e.target.closest("[data-stbmanual]")){ STB.d={res:"due", year:new Date().getFullYear()-1}; STB.F={}; STB.img=null; STB.edit=null; STB.act={pay:1,ein:1,vz:1,pot:1}; STB.st=2; stbRender(true); return; }
+  const sl=e.target.closest("[data-stbsel]"); if (sl){ STB.sel=sl.dataset.stbsel; STB.st=3; stbRender(true); bg.querySelector(".hosh")&&bg.querySelector(".hosh").scrollTo&&bg.querySelector(".hosh").scrollTo({top:0}); return; }
+  if (e.target.closest("[data-stbhome]")||e.target.closest("[data-stbback]")){ STB.st=0; STB.img=null; stbRender(true); return; }
+  const rs=e.target.closest("[data-stbres]"); if (rs){ STB.d=stbReadForm(); STB.d.res=rs.dataset.stbres; stbRender(); return; }
+  if (e.target.closest("[data-stbzoom]")){ tmShow(STB.img); return; }
+  const vw=e.target.closest("[data-stbview]"); if (vw){ const img=await rcptGet("stb-"+vw.dataset.stbview); if (img) tmShow(img); return; }
+  if (e.target.closest("[data-stbedit]")){ const x=stbList().find(y=>y.id===STB.sel); if (x){ STB.d={...x}; STB.edit=x.id; STB.F={}; STB.img=null; STB.act={pay:x.fixPay?1:0, ein:1, vz:x.fixVz?1:0, pot:0}; STB.st=2; stbRender(true); } return; }
+  const ab=e.target.closest("[data-stbabw]"); if (ab){ const x=stbList().find(y=>y.id===STB.sel); if (x&&x.abw){ const a=x.abw[Number(ab.dataset.stbabw)]; a.ok=!a.ok; await saveSettings(); stbRender(); const nb=bg.querySelectorAll("[data-stbabw]")[Number(ab.dataset.stbabw)]; if (nb&&!RMo()) nb.animate([{transform:"scale(.6)"},{transform:"scale(1.15)"},{transform:"none"}],{duration:380,easing:"cubic-bezier(.3,1.6,.5,1)"}); } return; }
+  if (e.target.closest("[data-stbabwadd]")){ const i=$("stbAbwIn"), t=(i&&i.value||"").trim(), x=stbList().find(y=>y.id===STB.sel); if (t&&x){ (x.abw=x.abw||[]).push({t, ok:false}); await saveSettings(); stbRender(); } return; }
+  if (e.target.closest("[data-stbpaid]")){ const x=stbList().find(y=>y.id===STB.sel); if (x){ x.paid=true; if (x.fixPay && x.due){ const k=UI.ym; UI.ym=x.due.slice(0,7); try{ await setMonthAmount(x.fixPay, Number(x.amt)||0); }catch(_){} UI.ym=k; } await saveSettings(); const r=e.target.closest("[data-stbpaid]").getBoundingClientRect(); hbBurst(document.body, r.left+r.width/2, r.top, 30); const hh=bg.querySelector(".stbhero"); if (hh) hbConfetti(hh, 40); STB.anim=1; stbRender(); } return; }
+  const dl=e.target.closest("[data-stbdel]"); if (dl){ const id=dl.dataset.stbdel, x=stbList().find(y=>y.id===id); if (x){ for (const fid of [x.fixPay,x.fixVz].filter(Boolean)){ try{ await del("fixed", fid); }catch(_){} } } S.settings.stb=stbList().filter(y=>y.id!==id); await saveSettings(); STB.st=0; STB.edit=null; stbRender(true); return; }
+  if (e.target.closest("[data-stbsave]")){ const d=stbReadForm(); if (!(Number(d.year)>2000) || (d.res!=="zero" && !(Number(d.amt)>0) && !(Number(d.est)>0))){ toast(nt("stb_need")); return; }
+    const old=STB.edit?stbList().find(y=>y.id===STB.edit):null, id=STB.edit||newId();
+    const rec={...(old||{}), id, year:Number(d.year), date:d.date||"", res:d.res||"due", amt:Number(d.amt)||0, due:d.due||"", vz:Number(d.vz)||0, vzFrom:d.vzFrom||"", est:Number(d.est)||0, zve:Number(d.zve)||0, vorb:!!d.vorb, vorl:!!d.vorl, abw:d.abw||(old&&old.abw)||[]};
+    if (STB.img){ try{ await rcptPut("stb-"+id, STB.img); rec.img=1; }catch(_){} }
+    try{ await stbApply(rec, old); }catch(err){ console.warn("stb", err); }
+    S.settings.stb=[...stbList().filter(y=>y.id!==id), rec]; await saveSettings();
+    const sb=e.target.closest("[data-stbsave]").getBoundingClientRect(); hbBurst(document.body, sb.left+sb.width/2, sb.top, 28); toast(nt("stb_saved")); STB.img=null; STB.edit=null; STB.sel=id; STB.st=3; stbRender(true); return; }
+});
+document.addEventListener("change", e=>{ const id=e.target.id; if (id==="stbCam"||id==="stbFile"){ const f=e.target.files&&e.target.files[0]; e.target.value=""; if (f) stbScan(f); return; }
+  const a=e.target.dataset&&e.target.dataset.stbact; if (a){ STB.act[a]=e.target.checked?1:0; const l=e.target.closest(".stbact"); if (l){ l.classList.toggle("on", e.target.checked); if (!RMo()) l.querySelector(".stbck").animate([{transform:"scale(.4) rotate(-20deg)"},{transform:"scale(1.2)"},{transform:"none"}],{duration:420,easing:"cubic-bezier(.3,1.6,.5,1)"}); } } });
 
 /* ===== Bewegung: Seiten-Einstieg, Kacheln, Balken, Zahlen ===== */
 const UX={v:null, ym:null};
