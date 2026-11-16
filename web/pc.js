@@ -700,7 +700,7 @@ if (IS_PC){
   }
   function detHtml(t){
     const dt=new Date(t.date+"T12:00"), same=monthCalc(UI.ym).tx.filter(x=>ttl(x)===ttl(t)), rc=hasReceipt(t.id);
-    const kv=[["Kategorie", t.cat||"–"], ["Art", KIND_LABEL[t.kind]||t.kind], ["Bezahlt", t.pay==="bar"?"💶 bar":"Karte / Konto"], ["Wiederkehrend", t.wk?"Ja":"Nein"]];
+    const kv=[["Kategorie", t.cat||"–"], ["Art", KIND_LABEL[t.kind]||t.kind], ["Bezahlt", t.pay==="bar"?"💶 bar":(typeof kaOn==="function" && kaOn() ? (t.acct||"Hauptkonto") : "Karte / Konto")], ["Wiederkehrend", t.wk?"Ja":"Nein"]];
     if (isIn(t) && t.net!=null && Math.abs(t.net-t.amount)>0.004) kv.push(["Netto", eur(t.net)]);
     return `<div class="pcdx">
       <div class="pcdtop">${avatar(t)}<div class="grow"><h2>${esc(ttl(t))}</h2><span class="muted">${esc(dt.toLocaleDateString(LOCD(),{weekday:"long", day:"numeric", month:"long", year:"numeric"}))}</span></div><button class="roundbtn" data-pcdclose="1" aria-label="Schließen" title="Schließen">✕</button></div>
@@ -1305,7 +1305,7 @@ if (IS_PC){
   document.addEventListener("keydown", e=>{ if (e.key==="Escape" && PG.open && !document.querySelector(".backdrop.show:not([hidden])")){ e.preventDefault(); if (PG.pick) pickToggle(false); else if (!PG.embed) pageClose(); } });
   addEventListener("resize", ()=>place());
   new ResizeObserver(()=>place()).observe($("pcpHole"));
-  new MutationObserver(()=>{ const b=NB(); if (!b || !PG.open) return; b.pageShow(!document.querySelector(".backdrop.show:not([hidden]),#pcFbBg:not([hidden])")); }).observe(document.body, {subtree:true, attributes:true, attributeFilter:["class","hidden"]});
+  let pgVis=null; new MutationObserver(()=>{ const b=NB(); if (!b || !PG.open){ pgVis=null; return; } const v=(!document.querySelector(".backdrop.show:not([hidden]),#pcFbBg:not([hidden]),#moBg:not([hidden]),#mbBg:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden]),#hlBg:not([hidden]),#mamiPop:not([hidden]),#fanBg.wheel:not([hidden]),#fanBg.show")); if (v!==pgVis){ pgVis=v; b.pageShow(v); } }).observe(document.body, {subtree:true, attributes:true, attributeFilter:["class","hidden"], childList:true});
   const _r6=render; render=(...a)=>{ const x=_r6(...a); if (PG.open){ if (UI.view!==lastView) pageClose(); else if (!PG.embed) sideRender(); } lastView=UI.view; return x; };
 }
 /* Analyse */
@@ -1366,7 +1366,7 @@ if (IS_PC){
     const line=(()=>{ const W=520,H=140, n=hist.length, mx=Math.max(1,...hist.map(h=>h.v), avg)*1.08, X=i=>10+i*(W-20)/(n-1), Y=v=>H-v/mx*(H-8);
       const pts2=hist.map((h,i)=>h.has?[X(i),Y(h.v)]:null);
       let d="", on=false; pts2.forEach(p=>{ if (!p){ on=false; return; } d+=(on?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)+" "; on=true; });
-      return `<svg class="pcab" viewBox="0 0 ${W} ${H+22}" role="img" aria-label="Ausgaben der letzten 12 Monate">${avg?`<line x1="0" x2="${W}" y1="${Y(avg).toFixed(1)}" y2="${Y(avg).toFixed(1)}" stroke="var(--faint)" stroke-dasharray="4 5"/><text x="${W-2}" y="${(Y(avg)-6).toFixed(1)}" text-anchor="end" font-size="11" fill="var(--muted)">Ø ${esc(eur0(avg))}</text>`:""}
+      return `<svg class="pcab" viewBox="0 0 ${W} ${H+22}" role="img" aria-label="Ausgaben der letzten 12 Monate">${avg?`<line x1="0" x2="${W}" y1="${Y(avg).toFixed(1)}" y2="${Y(avg).toFixed(1)}" stroke="var(--faint)" stroke-dasharray="4 5"/><text x="2" y="${(Y(avg)-6).toFixed(1)}" text-anchor="start" font-size="11" font-weight="700" fill="var(--muted)" paint-order="stroke" stroke="var(--surface)" stroke-width="4" stroke-linejoin="round">Ø ${esc(eur0(avg))}</text>`:""}
         <path d="${d}" fill="none" stroke="var(--bad)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" class="pcaln"/>
         ${hist.map((h,i)=>`<g class="pcabg" data-pcaym="${h.ym}"><rect x="${(X(i)-(W-20)/(n-1)/2).toFixed(1)}" y="0" width="${((W-20)/(n-1)).toFixed(1)}" height="${H+22}" fill="transparent"/>${h.has?`<circle cx="${X(i).toFixed(1)}" cy="${Y(h.v).toFixed(1)}" r="${h.ym===ym?6:3.5}" fill="var(--bad)"/>`:""}<text x="${X(i).toFixed(1)}" y="${H+17}" text-anchor="middle" font-size="11" font-weight="${h.ym===ym?800:500}" fill="${h.ym===ym?"var(--fg)":"var(--muted)"}">${esc(MSHORT[h.i-1].slice(0,1))}</text></g>`.replace('<g class="pcabg"', `<g class="pcabg"${(()=>{ const pp=avg&&h.has?Math.round((h.v-avg)/avg*100):null; return TT({h:MONTHS[h.i-1]+" "+h.ym.slice(0,4), c:"var(--bad)", r:[["Ausgaben",h.has?eur0(h.v):"–","var(--bad)"],...(avg?[["Ø",eur0(avg),"var(--faint)",1]]:[])], f:pp==null?"":pp===0?"genau im Ø":(pp>0?"+":"−")+Math.abs(pp)+" % "+(pp>0?"über":"unter")+" Ø", fc:pp>0?"var(--bad)":"var(--good)"}); })()}`)).join("")}</svg>`; })();
     const isCur=ym===cur, past=withData.filter(h=>h.ym!==ym), avgP=past.length?sum(past,h=>h.v)/past.length:0, frac=isCur?Math.min(1,new Date().getDate()/daysIn(ym)):1;

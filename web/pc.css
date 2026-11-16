@@ -375,7 +375,7 @@ html.pc .pcpr small{display:block;font-size:12px;font-weight:600}
 html.pc .pcpr .warn{color:var(--warn,#c27c0e)}html.pc .pcpr .pos{color:var(--good,#1a7a5c)}
 html.pc .pcbars{display:flex;gap:12px;height:190px;align-items:flex-end;background:color-mix(in srgb,var(--fg) 4%,transparent);border-radius:18px;padding:16px}
 html.pc .pcbars>div{flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;min-width:0}
-html.pc .pcbars i{width:62%;background:var(--c);border-radius:8px 8px 4px 4px;transform-origin:50% 100%}
+html.pc .pcbars i{width:62%;min-height:6px;background:var(--c,var(--accent));border-radius:8px 8px 4px 4px;transform-origin:50% 100%}
 html.pc .pcbars .v{font-size:12px;font-weight:700}
 html.pc .pcbars small{font-size:11px;color:var(--muted);white-space:nowrap}
 html.pc .pcz{padding:22px;position:sticky;top:104px;background-color:color-mix(in srgb,#fff6d6 55%,var(--surface))}
