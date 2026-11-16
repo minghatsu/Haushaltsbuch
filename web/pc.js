@@ -36,7 +36,7 @@ function pcGo(k, nav){
     const news0=pcCalm()?[]:[...pcTiles(document.querySelector(`[data-view="${UI.view}"]`)), ...(window.pcDockEls?pcDockEls():[])];
     news0.forEach(e=>{ e.style.opacity="0"; });
     outs.forEach(a=>{ try { a.cancel(); } catch(_){} });
-    { const dk=$("pcDock"); if (dk && !dk.hidden && !pcCalm()) dk.animate([{opacity:0,transform:"translateX(60px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)",fill:"backwards"}); }
+    { const dk=$("pcDock"); if (dk && !dk.hidden && !pcCalm()) dk.animate([{opacity:0,transform:"translateY(16px)"},{opacity:1,transform:"none"}],{duration:420,easing:"cubic-bezier(.2,.8,.2,1)",fill:"backwards"}); }
     {
       const news=pcCalm()?[]:[...pcTiles(document.querySelector(`[data-view="${UI.view}"]`)), ...(window.pcDockEls?pcDockEls():[])];
       news0.forEach(e=>{ e.style.opacity=""; });
@@ -261,20 +261,24 @@ if (IS_PC){
 /* Start */
 if (IS_PC){
   const PCH=()=>{ const h=S.settings.pcHome||(S.settings.pcHome={}); h.order=Array.isArray(h.order)?h.order:[]; h.min=Array.isArray(h.min)?h.min:[]; return h; };
-  const BIC={cash:"cash",budgets:"target",fix:"list",tax:"shield",goals:"piggy",debts:"bank",recent:"check",gemeinsam:"heart",offers:"cart",...HX_IC};
+  const BIC={cash:"cash",budgets:"target",fix:"list",tax:"shield",goals:"piggy",debts:"bank",recent:"receipt",gemeinsam:"heart",offers:"cart",...HX_IC};
   const name=k=>(HOME_BLOCKS.find(b=>b[0]===k)||[k,k])[1];
   const _k2=accTabKeys; accTabKeys = t => _k2(t).filter(k=>k!=="start");
   homeOrder = () => { const o=[...new Set(PCH().order)].filter(k=>HOME_BLOCKS.some(b=>b[0]===k)); for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k); return o; };
   const _hb=homeBlocks; homeBlocks = html => { const keep=S.settings.homeHidden; S.settings.homeHidden=[...PCH().min]; try { return _hb(html); } finally { S.settings.homeHidden=keep; } };
   const save=()=>{ try { saveSettings(); } catch(e){} };
 
-  document.body.insertAdjacentHTML("beforeend", `<div class="pcdock" id="pcDock" aria-label="Minimierte Kacheln"></div>`);
+  
   function dock(){
-    const d=$("pcDock"); if (!d) return; const on=UI.view==="home", m=PCH().min.filter(k=>HOME_BLOCKS.some(b=>b[0]===k));
-    document.documentElement.classList.toggle("pcdocked", on && m.length>0);
+    let d=$("pcDock"); const on=UI.view==="home", m=PCH().min.filter(k=>HOME_BLOCKS.some(b=>b[0]===k));
+    document.documentElement.classList.remove("pcdocked");
+    const hv=document.querySelector("#v-home"); if (!hv) return;
+    if (!d){ d=document.createElement("div"); d.className="pcdock"; d.id="pcDock"; }
+    const ag=hv.querySelector(".agrid"), anc=ag&&ag.closest(".areacard");
+    if (anc){ if (anc.nextElementSibling!==d) anc.after(d); } else if (d.parentElement!==hv) hv.appendChild(d);
     d.hidden=!on || !m.length;
-    const have=[...d.children].map(x=>x.dataset.pcrest).join(","); if (have===m.join(",")) return;
-    d.innerHTML=m.map(k=>`<button class="pcdi" data-pcrest="${k}" aria-label="${esc(name(k))} wieder anzeigen"><span>${ic(BIC[k]||"tag",22)}</span><em>${esc(name(k))}</em></button>`).join("");
+    const g=d.querySelector(".pcdkg"), have=g?[...g.children].map(x=>x.dataset.pcrest).join(","):null; if (have===m.join(",")) return;
+    d.innerHTML=`<div class="pcdkh"><b>Ausgeblendet</b><small>Antippen zum Einblenden</small></div><div class="pcdkg">`+m.map(k=>`<button class="pcdi" data-pcrest="${k}" aria-label="${esc(name(k))} wieder anzeigen"><span>${ic(BIC[k]||"tag",18)}</span><em>${esc(name(k))}</em></button>`).join("")+`</div>`;
   }
   function decorate(){
     dock();
@@ -285,7 +289,7 @@ if (IS_PC){
   const _ph=pcHome; pcHome = o => { _ph(o); decorate(); };
   setInterval(dock, 1000);
   const _render=render; render = (...a) => { const x=_render(...a); try { dock(); } catch(e){} return x; };
-  window.pcDockEls = () => UI.view==='home' && !$("pcDock").hidden ? [...$("pcDock").children] : [];
+  window.pcDockEls = () => UI.view==='home' && $("pcDock") && !$("pcDock").hidden ? [...$("pcDock").querySelectorAll(".pcdi")] : [];
   const dockSpot=k=>{ const el=document.querySelector(`#pcDock [data-pcrest="${k}"]`); if (el){ const r=el.getBoundingClientRect(); return {x:r.left+r.width/2, y:r.top+r.height/2}; } return {x:innerWidth-50, y:innerHeight/2}; };
 
   const snap=()=>new Map([...document.querySelectorAll("#v-home .hblock")].map(t=>[t.dataset.hb, t.getBoundingClientRect()]));

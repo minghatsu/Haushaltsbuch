@@ -100,14 +100,6 @@ html.pc .pcph{border:2px dashed color-mix(in srgb,var(--accent) 55%,transparent)
 html.pc .pcfly{position:fixed;z-index:60;margin:0;pointer-events:none;transform-origin:50% 50%}
 html.pc .pcfly.pclift{box-shadow:0 30px 60px #13241b38;border-radius:24px}
 html.pc .pcfly .pctl{display:none}
-html.pc .pcdock{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:38;display:flex;flex-direction:column;gap:12px;padding:12px;border-radius:999px;background:var(--surface);box-shadow:0 8px 28px #13241b1f;animation:pcdockin .35s cubic-bezier(.3,.7,.3,1)}
-@keyframes pcdockin{from{opacity:0;transform:translate(30px,-50%)}}
-html.pc .pcdi{position:relative;width:52px;height:52px;border-radius:50%;border:0;padding:0;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;cursor:pointer;transition:transform .18s}
-html.pc .pcdi:hover{transform:scale(1.1)}
-html.pc .pcdi em{position:absolute;right:66px;top:50%;transform:translate(8px,-50%);opacity:0;pointer-events:none;background:var(--fg);color:var(--bg);font:700 13px var(--f-body);font-style:normal;padding:6px 12px;border-radius:10px;white-space:nowrap;transition:opacity .15s,transform .15s}
-html.pc .pcdi:hover em{opacity:1;transform:translate(0,-50%)}
-html.pc.pcdocked main.wrap{padding-right:110px}
-html.pc.pcdocked .tab.plus{right:110px}
 html.pc #v-home button[data-scroll="homeEd"]{display:none}
 html.pc .pcaccs{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;max-height:34vh;overflow:auto;scrollbar-width:thin;scrollbar-color:#ffffff40 transparent;flex:none}
 html.pc .pcaccs button{border:1px solid #ffffff22;background:#ffffff1f;color:#fff;border-radius:18px;padding:12px 14px;text-align:left;cursor:pointer;font:inherit;min-width:0;transition:background .15s,transform .15s}
@@ -731,7 +723,6 @@ html.pc.istab #v-list>#pcDet,html.pc.istab .pcsl,html.pc.istab .pcsd,html.pc.ist
 html.pc.istab .pcdet{max-height:calc(100vh - 230px);min-height:min(560px,calc(100vh - 230px))}
 html.pc.istab .pcsl,html.pc.istab .pcz{max-height:calc(100vh - 230px)}
 html.pc.istab .pcsweb{height:calc(100vh - 230px)}
-html.pc.istab .pcdock{bottom:110px}
 html.pc.istab .pctl{opacity:1!important;transform:none!important;pointer-events:auto!important}
 html.pc.istab .card:not(.hero):active{transition:transform .12s}
 html.pc.istab button:active{transform:scale(.97)}
@@ -863,11 +854,6 @@ html.pc.istab:not(.tabp) #v-fix.pcfcal>.pcfcalc{align-self:start}
 html.pc[data-theme="dark"] .pcz{background-color:color-mix(in srgb,#ffd36b 7%,var(--surface))!important}
 @media (prefers-color-scheme: dark){html.pc:not([data-theme="light"]) .pcz{background-color:color-mix(in srgb,#ffd36b 7%,var(--surface))!important}}
 /* tablet: minimized start tiles as small tabs on the right edge (like the feedback tab on the phone) */
-html.pc.istab .pcdock{right:0!important;background:none!important;box-shadow:none!important;padding:0!important;gap:8px!important;border-radius:0!important}
-html.pc.istab .pcdi{width:40px!important;height:44px!important;border-radius:14px 0 0 14px!important;background:var(--accent)!important;color:#fff!important;box-shadow:-3px 4px 12px rgba(0,0,0,.18)}
-html.pc.istab .pcdi svg{width:19px!important;height:19px!important}
-html.pc.istab .pcdi em{right:52px}
-html.pc.istab.pcdocked main.wrap{padding-right:52px!important}
 
 html.pc .pcfbpg{flex:none;font:700 11.5px var(--f-body);padding:3px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-right:2px}
 
@@ -927,3 +913,12 @@ html.pc .pcdcode{display:flex;align-items:center;gap:9px;background:var(--sunk);
 html.pc .pcdcode .dot,html.pc .pcds .dot{width:9px;height:9px;border-radius:50%;flex:none}
 html.pc .pccp{border:0;background:var(--accent-soft);color:var(--accent);font:700 11.5px var(--f-body);border-radius:8px;padding:5px 9px;cursor:pointer}
 html.pc .pcdel{border:0;background:none;cursor:pointer;font:700 11.5px var(--f-body);color:var(--muted);border-radius:8px;padding:5px 7px;opacity:.7}html.pc .pcdel:hover{opacity:1;background:var(--bad-soft)}html.pc .pcdel.arm{opacity:1;background:var(--bad);color:#fff}
+
+html.pc .pcdock{margin:14px 0 0;padding:12px 14px 14px;border-radius:22px;background:var(--surface);box-shadow:var(--shadow)}
+html.pc .pcdock[hidden]{display:none}
+html.pc .pcdkh{display:flex;align-items:baseline;gap:10px;margin:2px 2px 10px}html.pc .pcdkh b{font:800 12px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}html.pc .pcdkh small{font-size:12px;color:var(--muted)}
+html.pc .pcdkg{display:flex;flex-wrap:wrap;gap:8px}
+html.pc .pcdi{width:96px;min-height:74px;border:0;border-radius:14px;background:var(--sunk);color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:9px 6px;cursor:pointer;transition:transform .18s,box-shadow .18s}
+html.pc .pcdi:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+html.pc .pcdi span{width:30px;height:30px;border-radius:9px;background:var(--surface);display:grid;place-items:center}
+html.pc .pcdi em{font:700 11.5px/1.2 var(--f-body);font-style:normal;color:var(--fg);text-align:center}
