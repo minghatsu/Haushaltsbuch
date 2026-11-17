@@ -595,7 +595,7 @@ html[data-theme=dark] .tmami .mav,html.dark .tmami .mav{border-color:#2a3530}
 .gmcard .gmrow{display:flex;justify-content:space-between;width:100%;border:0;background:none;color:inherit;font:inherit;padding:8px 0;border-top:1px solid var(--line);cursor:pointer}
 textarea.in{font-family:inherit;line-height:1.45}
 .devname{padding:6px 10px;font-weight:700;margin-bottom:2px}
-.ictile.bavatar.lpk svg{width:62%;height:62%}.ictile.bavatar.apob svg{width:58%;height:58%}
+.ictile.bavatar.lpk svg{width:62%;height:62%}[data-openshop].btn{width:128px;flex:none;justify-content:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:10px;padding-right:10px}.ictile.bavatar.apob svg{width:58%;height:58%}
 .ictile.bavatar img{position:absolute;inset:0;margin:auto;width:24px;height:24px;object-fit:contain}
 .card h2:has(.h2ic){display:flex;align-items:center;gap:10px}
 .h2ic{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);flex:none}
@@ -6286,7 +6286,7 @@ const SHOPS = [
   ,{cat:"online", id:"temu", name:"Temu", re:/\btemu\b/, color:"#FB7701", url:"https://www.temu.com/de"}
 ];
 function shopKind(sh){ if (sh.id==="apotheke") return "apo"; const u=sh.url||""; if (sh.cat==="super"||sh.cat==="disc"||/prospekt/i.test(u)) return "leaf"; if (/angebot|sale|deals|aktion|offers|outlet/i.test(u)) return "deal"; return "web"; }
-function shopBtnLbl(sh){ const k=shopKind(sh); return ({apo:ic("pin",16)+" "+esc(nt("apo_find")), leaf:ic("cart",16)+" "+esc(nt("sh_leaf")), deal:ic("tag",16)+" "+esc(nt("sh_deal")), web:ic("right",16)+" "+esc(nt("sh_web"))})[k]; }
+function shopBtnLbl(sh){ const k=shopKind(sh); return ({apo:ic("pin",16)+" "+esc(nt("apo_find_s")), leaf:ic("cart",16)+" "+esc(nt("sh_leaf")), deal:ic("tag",16)+" "+esc(nt("sh_deal")), web:`<svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M7 17 17 7M9 7h8v8"/></svg>`+" "+esc(nt("sh_web"))})[k]; }
 function shopOpenTxt(sh){ return nt(shopKind(sh)==="leaf"?"sh_leaf_open":"sh_page_open"); }
 const SHOP_CATS=[["super","Supermarkt","cart"],["disc","Discounter","tag"],["drog","Drogerie & Apotheke","health"],["kleid","Kleidung & Schuhe","shirt"],["elek","Elektronik","tv"],["bau","Baumarkt","home"],["moebel","Möbel & Haushalt","home"],["tier","Tierbedarf","paw"],["online","Online","cloud"]];
 const SHOP_TAB={super:"Supermarkt",disc:"Discounter",drog:"Drogerie & Apotheke",kleid:"Kleidung",elek:"Elektronik",bau:"Baumarkt",moebel:"Möbel",tier:"Tier",online:"Online"};
@@ -8895,8 +8895,9 @@ ab_err_amt:["Bitte einen Betrag eintragen", "Please enter an amount", "Lütfen b
 ab_done:["{x} hinzugefügt", "{x} added", "{x} eklendi", "{x} добавлен", "{x} додано", "Dodano {x}", "تمت إضافة {x}", "{x} adăugat"],
 apo_find:["Apotheke finden","Find a pharmacy","Eczane bul","Найти аптеку","Знайти аптеку","Znajdź aptekę","ابحث عن صيدلية","Găsește o farmacie"],
 sh_leaf:["Prospekt","Leaflet","Broşür","Проспект","Проспект","Gazetka","النشرة","Catalog"],
+apo_find_s:["Finden","Find","Bul","Найти","Знайти","Znajdź","ابحث","Caută"],
 sh_deal:["Angebote","Deals","Fırsatlar","Акции","Акції","Promocje","العروض","Oferte"],
-sh_web:["Zur Website","Open website","Web sitesine git","Открыть сайт","Відкрити сайт","Otwórz stronę","افتح الموقع","Deschide site-ul"],
+sh_web:["Website","Website","Web sitesi","Сайт","Сайт","Strona","الموقع","Site"],
 sh_leaf_open:["Prospekt ist offen","Leaflet is open","Broşür açık","Проспект открыт","Проспект відкрито","Gazetka jest otwarta","النشرة مفتوحة","Catalogul este deschis"],
 sh_page_open:["Seite ist offen","Page is open","Sayfa açık","Страница открыта","Сторінку відкрито","Strona jest otwarta","الصفحة مفتوحة","Pagina este deschisă"],
 sh_hint_leaf:["Im Prospekt etwas Gutes gesehen? Merk es dir hier – es verschwindet nach Ablauf von selbst.","Spotted something good in the leaflet? Save it here – it disappears by itself once it expires.","Broşürde güzel bir şey mi gördün? Buraya kaydet – süresi dolunca kendiliğinden kaybolur.","Увидел что-то хорошее в проспекте? Запомни здесь – после окончания акции исчезнет само.","Побачив щось хороше в проспекті? Запам’ятай тут – після закінчення акції зникне саме.","Coś fajnego w gazetce? Zapisz tutaj – zniknie samo po terminie.","رأيت شيئًا جيدًا في النشرة؟ احفظه هنا – سيختفي تلقائيًا عند انتهاء مدته.","Ai văzut ceva bun în catalog? Salvează aici – dispare singur după expirare."],
