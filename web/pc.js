@@ -1048,7 +1048,7 @@ if (IS_PC){
 /* Einkauf */
 if (IS_PC){
   const root=$("v-shop"), E="cubic-bezier(.2,.8,.2,1)", BO="cubic-bezier(.3,1.5,.5,1)";
-  const CATN={super:"Supermarkt",disc:"Discounter",drog:"Drogerie",kleid:"Kleidung",elek:"Elektronik",bau:"Baumarkt",moebel:"Möbel",tier:"Tierbedarf",online:"Online"};
+  const CATN={super:"Supermarkt",disc:"Discounter",drog:"Drogerie & Apotheke",kleid:"Kleidung",elek:"Elektronik",bau:"Baumarkt",moebel:"Möbel",tier:"Tierbedarf",online:"Online"};
   const badge=sh=>brandBadge({t:sh.name.replace(/ .*/,"").slice(0,1), bg:sh.color, ink:sh.ink||"#fff", domain:SHOP_DOMAINS[sh.id]||""});
   const shopBy=id=>SHOPS.find(x=>x.id===id);
   const list=()=>S.settings.shoplist||[];
@@ -1086,7 +1086,7 @@ if (IS_PC){
     const canWeb=!!((window.AndroidBridge && window.AndroidBridge.pageOpen) || window.pcPageDemo), web=canWeb || !!(K.pg && K.PG.open && K.PG.embed);
     const det=web ? `<div class="card pcsweb" id="pcsWeb" style="--c:${sh.color}"></div>` : `<div class="card pcsd" style="--c:${sh.color};--k:${sh.ink||"#fff"}">
       <div class="pcsdh"><div class="lg">${badge(sh)}</div><div class="grow"><h2>${esc(sh.name)}</h2><span class="small muted">${esc(CATN[sh.cat]||"")} · ${st.count?`Ø ${esc(eur0(st.sum/6))} im Monat · ${st.count} Einkäufe in 6 Monaten${st.last?` · zuletzt am ${esc(shortDate(st.last))}`:""}`:"zuletzt nicht eingekauft"}</span></div>
-        <button class="btn primary" data-openshop="${esc(sh.url)}">${ic("cart",16)} Prospekt</button></div>
+        <button class="btn primary" data-openshop="${esc(sh.url)}">${sh.id==="apotheke"?ic("pin",16)+" "+esc(nt("apo_find")):ic("cart",16)+" Prospekt"}</button></div>
       <div class="pcsdc"><div>
         <div class="ssh">Gemerkte Angebote</div>
         ${deals.map(d=>`<div class="pccp"><div class="grow"><b>${esc(d.text)}</b><small class="muted">${d.until?`bis ${esc(shortDate(d.until))}`:"ohne Datum"}</small></div>${d.price?`<b class="pp">${esc(eur(d.price))}</b>`:""}<button class="x" data-dealdel="${esc(d.id)}" aria-label="Angebot löschen">×</button></div>`).join("")}
