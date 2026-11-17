@@ -1795,7 +1795,7 @@ html.pc .fanb.fanx,.fan:not(.wheel) .fanb.fanx,.fan:not(.wheel) .fanhint,.fan:no
 .fan.wheel{touch-action:none}
 /* Neue Funktionen */
 .hbodo{display:inline-flex;line-height:1;height:1em;overflow:hidden;vertical-align:bottom;font-variant-numeric:tabular-nums}
-.ahero b.hbodo{display:flex;width:max-content}.hbodo span{font-size:inherit!important;opacity:1!important;letter-spacing:inherit}.hbodo .hc{display:inline-block;height:1em;overflow:hidden}.hbodo .hs{display:flex;flex-direction:column;transition:transform 1.1s cubic-bezier(.2,1,.25,1)}.hbodo .hs span,.hbodo .hc>span{height:1em;line-height:1em;display:block}
+.ahero b.hbodo{display:flex;width:max-content;max-width:100%}html:not(.pc) body{overflow-x:clip}.hbodo span{font-size:inherit!important;opacity:1!important;letter-spacing:inherit}.hbodo .hc{display:inline-block;height:1em;overflow:hidden}.hbodo .hs{display:flex;flex-direction:column;transition:transform 1.1s cubic-bezier(.2,1,.25,1)}.hbodo .hs span,.hbodo .hc>span{height:1em;line-height:1em;display:block}
 .hbconf{position:absolute;width:9px;height:13px;border-radius:2px;z-index:600;pointer-events:none}
 body>.hbconf{position:fixed}
 .hbcoin{position:fixed;z-index:700;left:0;top:0;width:32px;height:32px;margin:-16px 0 0 -16px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3c4,#f1b51c 55%,#c98a00);box-shadow:0 4px 10px rgba(0,0,0,.3),inset 0 -2px 0 rgba(0,0,0,.15);display:grid;place-items:center;font:900 13px var(--f-body);color:#7a4c00;pointer-events:none}
@@ -9418,14 +9418,15 @@ function navPill(anim){ const nav=document.querySelector("nav.tabs"); if (!nav) 
   const tw=t=>{ const n=t.querySelector(".tname"); return 26+24+(n?Math.min(112, n.scrollWidth)+7:0); };
   const cols=g=>{ if (!g.length) return []; if (!act||!g.includes(act)) return g.map(()=>H/g.length); const w=Math.min(H-34*(g.length-1), tw(act)), r=(H-w)/Math.max(1,g.length-1); return g.map(t=>t===act?w:r); };
   const cl=cols(left), cr=cols(right), all=[...cl, ...(pi<0?[]:[PW]), ...cr];
-  nav.style.setProperty("--nc", all.map(v=>v.toFixed(1)+"px").join(" ")); nav.classList.toggle("nosel", !act);
+  if (!(inner>200) || all.some(v=>!(v>0))){ nav.style.removeProperty("--nc"); return; }
+  const fr=v=>`calc((100% - ${PW}px) * ${(v/(inner-PW)).toFixed(4)})`; nav.style.setProperty("--nc", [...cl.map(fr), ...(pi<0?[]:[PW+"px"]), ...cr.map(fr)].join(" ")); nav.classList.toggle("nosel", !act);
   if (!act) return; const idx=kids.indexOf(act); let x=parseFloat(cs.paddingLeft); for (let i=0;i<idx;i++) x+=all[i]; const w=Math.min(all[idx], tw(act)); x+=(all[idx]-w)/2;
   const y=(nav.clientHeight-48)/2, col=getComputedStyle(act).getPropertyValue("--tcol").trim()||getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
   ind.style.setProperty("--ic", col); ind.style.top=y+"px";
   if (anim && NAVX.L!=null && !RMo()){ ind.animate([{transform:`translateX(${NAVX.L}px)`, width:NAVX.W+"px"},{transform:`translateX(${x}px)`, width:w+"px"}],{duration:520,easing:"cubic-bezier(.3,1.2,.4,1)"});
     act.querySelector("svg")?.animate([{transform:"translateY(5px) scale(.85)"},{transform:"none"}],{duration:420,easing:"cubic-bezier(.3,1.6,.5,1)"}); }
   ind.style.transform=`translateX(${x}px)`; ind.style.width=w+"px"; NAVX.L=x; NAVX.W=w; }
-addEventListener("resize", ()=>navPill(false)); try{ document.fonts.ready.then(()=>navPill(false)); }catch(_){} setTimeout(()=>{ try{ navPill(false); }catch(_){} }, 600);
+addEventListener("resize", ()=>navPill(false)); try{ let rw=0; new ResizeObserver(es=>{ const w=Math.round(es[0].contentRect.width); if (w!==rw){ rw=w; navPill(false); } }).observe(document.querySelector("nav.tabs")); }catch(_){} try{ document.fonts.ready.then(()=>navPill(false)); }catch(_){} setTimeout(()=>{ try{ navPill(false); }catch(_){} }, 600);
 async function ocrImgFile(file){ let L=[]; try{ L=await ocrDataUrl(await tmShrink(file, 2600)); }catch(_){ L=[]; } if (!L.length){ try{ L=await ocrDataUrl(await tmShrink(file, 1600)); }catch(_){ L=[]; } } return ocrPlus(L); }
 document.addEventListener("click", async e=>{
   const op=e.target.closest("[data-tmopen]"); if (op){ e.preventDefault(); tmOpen(op.dataset.tmopen||null); return; }
