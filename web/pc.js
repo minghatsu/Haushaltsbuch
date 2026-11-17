@@ -1085,7 +1085,7 @@ if (IS_PC){
     const rmax=Math.max(1,...recent.map(t=>t.amount)), mine=W.filter(x=>x.w && x.w.s===sh.id);
     const canWeb=!!((window.AndroidBridge && window.AndroidBridge.pageOpen) || window.pcPageDemo), web=canWeb || !!(K.pg && K.PG.open && K.PG.embed);
     const det=web ? `<div class="card pcsweb" id="pcsWeb" style="--c:${sh.color}"></div>` : `<div class="card pcsd" style="--c:${sh.color};--k:${sh.ink||"#fff"}">
-      <div class="pcsdh"><div class="lg">${badge(sh)}</div><div class="grow"><h2>${esc(sh.name)}</h2><span class="small muted">${esc(CATN[sh.cat]||"")} · ${st.count?`Ø ${esc(eur0(st.sum/6))} im Monat · ${st.count} Einkäufe in 6 Monaten${st.last?` · zuletzt am ${esc(shortDate(st.last))}`:""}`:"zuletzt nicht eingekauft"}</span></div>
+      <div class="pcsdh"><div class="lg">${badge(sh)}</div><div class="grow"><h2>${esc(sh.name)}</h2><span class="small muted">${esc(CATN[sh.cat]||"")} · ${esc(st.count?nt(st.count===1?"sh_stat1":"sh_stat",{a:eur0(st.sum/6),n:String(st.count)})+(st.last?" · "+nt("sh_last",{d:fxDate(st.last,{day:"numeric",month:"short"})}):""):nt("sh_none"))}</span></div>
         <button class="btn primary" data-openshop="${esc(sh.url)}">${shopBtnLbl(sh)}</button></div>
       <div class="pcsdc"><div>
         <div class="ssh">Gemerkte Angebote</div>
@@ -1129,7 +1129,7 @@ if (IS_PC){
       ${mine.length?`<div class="ssh" style="margin-top:16px">Auf deinem Zettel</div>${mine.map(({it,w})=>`<div class="pczr ${it.done?"done":""}"><span>${esc(it.n)}</span>${w.p!=null?`<b>${esc(eur(w.p))}</b>`:""}</div>`).join("")}`:""}
       ${prices.length?`<div class="ssh" style="margin-top:16px">Deine Preise hier <span class="muted">· aus Quittungen</span></div>
         ${prices.map(x=>`<div class="pcpr"><span class="grow"><b>${esc(name(x.w))}</b>${x.best?`<small class="warn">bei ${esc((shopBy(x.best.s)||{name:x.best.s}).name)} ${esc(eur(x.best.p))}</small>`:x.cheapest?`<small class="pos">hier am günstigsten</small>`:""}</span><b>${esc(eur(x.e.p))}</b></div>`).join("")}`:""}`;
-    const bBody=`<div class="pczst">${badge(sh)}<span><b>${esc(sh.name)}</b><small class="muted">${st.count?`Ø ${esc(eur0(st.sum/6))} im Monat · ${st.count} Einkäufe in 6 Monaten${st.last?` · zuletzt am ${esc(shortDate(st.last))}`:""}`:"zuletzt nicht eingekauft"}</small></span></div>
+    const bBody=`<div class="pczst">${badge(sh)}<span><b>${esc(sh.name)}</b><small class="muted">${esc(st.count?nt(st.count===1?"sh_stat1":"sh_stat",{a:eur0(st.sum/6),n:String(st.count)})+(st.last?" · "+nt("sh_last",{d:fxDate(st.last,{day:"numeric",month:"short"})}):""):nt("sh_none"))}</small></span></div>
       ${recent.length?`<div class="pcbars">${recent.slice().reverse().map(t=>`<div><span class="v">${esc(eur0(t.amount))}</span><i style="height:${Math.max(6,Math.round(t.amount/rmax*100))}%"></i><small>${esc(shortDate(t.date))}</small></div>`).join("")}</div>
         <div class="pczrl">${recent.map(t=>`<div class="pcpr"><span class="grow"><b>${esc(shortDate(t.date))}</b><small class="muted">${esc(t.cat||"")}${hasReceipt(t.id)?" · 📎 Bon":""}</small></span><b>${esc(eur(t.amount))}</b></div>`).join("")}</div>`
         :`<div class="small muted">Hier hast du in letzter Zeit nichts gekauft.</div>`}`;

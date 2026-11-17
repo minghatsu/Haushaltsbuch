@@ -2873,7 +2873,7 @@ function dayLabel(iso){
   if (iso===isoToday()) return "Heute"; if (iso===isoDaysAgo(1)) return "Gestern";
   const d=new Date(iso+"T12:00"); return d.toLocaleDateString(LOCD(),{weekday:"long", day:"numeric", month:"long"});
 }
-function shortDate(iso){ const [,m,d]=iso.split("-"); return Number(d)+". "+MSHORT[Number(m)-1]; }
+function shortDate(iso){ const [y,m,d]=String(iso||"").split("-"); if (!m) return ""; if (typeof LANG!=="undefined" && LANG!=="de"){ try{ return new Date(+y,+m-1,+(d||1)).toLocaleDateString(cLoc(),{day:"numeric",month:"short"}); }catch(_){} } return Number(d)+". "+MSHORT[Number(m)-1]; }
 const $ = id => document.getElementById(id);
 function newId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
 function toast(text, action, label, ms){
@@ -4027,7 +4027,7 @@ function kundenOf(y){ const m=new Map();
     const v=t.net!=null?Number(t.net)||0:t.amount; const o=m.get(k)||{name:n, sum:0, tx:[]}; o.sum+=v; o.tx.push(t); m.set(k,o); }
   const list=[...m.values()].sort((a,b)=>b.sum-a.sum), tot=list.reduce((a,o)=>a+o.sum,0); return {list, tot}; }
 function kundenView(y){ const {list, tot}=kundenOf(y), E=v=>esc(eur0(v));
-  if (!list.length) return `<p class="small muted">Noch keine Einnahmen aus Selbstständigkeit in ${y}. Sobald du welche einträgst, siehst du hier deine Kunden.</p>`;
+  if (!list.length) return `<p class="small muted">${esc(nt("ku_none",{y:String(y)}))}</p>`;
   const top=list[0].sum/tot*100, P=v=>Math.round(v)+" %";
   const warn = list.length>=1 && tot>0 ? (top>=83.3 ? `<div class="notice bad" style="margin-bottom:10px"><span>${P(top)} deiner Einnahmen kommen von einem Kunden. Ab 5/6 (83 %) kann für Selbstständige mit nur einem Auftraggeber Rentenversicherungspflicht entstehen – lass das am besten prüfen.</span></div>`
     : top>50 ? `<div class="notice warn" style="margin-bottom:10px"><span>${P(top)} deiner Einnahmen kommen von einem Kunden. Fällt er weg, fehlt dir über die Hälfte – such dir am besten noch weitere Kunden.</span></div>` : "") : "";
@@ -4089,13 +4089,13 @@ function renderBeruf(){ const el=document.querySelector(`[data-view="beruf"]`); 
 function zukSaved(){ const goals=S.settings.goals||[], g=sum(goals,x=>goalSaved(x).v)||0, td=isoOf(new Date());
   let sp=0, nsp=0; try{ const known=new Set(accountNames()); for (const n of Object.keys(S.settings.accountAnchors||{})){ if (n==="Hauptkonto"||!known.has(n)) continue; const v=accountBalance(n,td)||0; if (v>0){ sp+=v; nsp++; } } }catch(_){}
   let iv=0; try{ for (const x of (inv().goals||[])){ const r=(x.real||[]).slice().sort((a,b)=>a.d.localeCompare(b.d)); if (r.length) iv+=Number(r[r.length-1].v)||0; } }catch(_){}
-  const parts=[]; if (goals.length) parts.push(nt("zk_p_goals",{n:String(goals.length),a:eur0(g)})); if (nsp) parts.push(nt("zk_p_spaces",{a:eur0(sp)})); if (iv>0) parts.push(nt("zk_p_inv",{a:eur0(iv)}));
+  const parts=[]; if (goals.length) parts.push(nt(goals.length===1?"zk_p_goal1":"zk_p_goals",{n:String(goals.length),a:eur0(g)})); if (nsp) parts.push(nt("zk_p_spaces",{a:eur0(sp)})); if (iv>0) parts.push(nt("zk_p_inv",{a:eur0(iv)}));
   return {tot:g+sp+iv, parts}; }
 function renderZukunft(){ const el=document.querySelector(`[data-view="zukunft"]`); if (!el) return;
   const goals=S.settings.goals||[], saved=sum(goals,g=>goalSaved(g).v), debts=sum(S.debts,d=>debtState(d).remaining), E=v=>esc(eur0(v));
   const sv=zukSaved(), dS=S.debts.map(d=>({d, s:debtState(d)})), rate=sum(dS,x=>x.s.rate||0), net=sv.tot-debts, V=S.settings.zukHero||"C";
   const cardS=`<div class="acard zsave" data-ci="0"><div class="l">${esc(nt("zk_saved"))}</div><div class="b">${E(sv.tot)}</div><div class="m"><span>${esc(sv.parts.join(" · ")||nt("zk_saved0"))}</span></div></div>`;
-  const cardD=`<div class="acard zdebt ${debts>0?"minus":"zdone"}" data-ci="1"><div class="l">${esc(nt("zk_debts"))}</div><div class="b">${debts>0?"−"+E(debts):E(0)}</div><div class="m"><span>${debts>0?esc(nt(rate>0?"zk_debts_s":"zk_debts_c",{n:String(S.debts.length),r:eur0(rate)})):esc(nt("zk_debts0"))}</span></div></div>`;
+  const cardD=`<div class="acard zdebt ${debts>0?"minus":"zdone"}" data-ci="1"><div class="l">${esc(nt("zk_debts"))}</div><div class="b">${debts>0?"−"+E(debts):E(0)}</div><div class="m"><span>${debts>0?esc(nt((rate>0?"zk_debts_s":"zk_debts_c")+(S.debts.length===1?"1":""),{n:String(S.debts.length),r:eur0(rate)})):esc(nt("zk_debts0"))}</span></div></div>`;
   const cardN=`<div class="acard alt znet" data-ci="2"><div class="l">${esc(nt("zk_net"))}</div><div class="b">${Math.abs(net)<0.005?"":net>0?"+":"−"}${E(Math.abs(net))}</div><div class="m"><span>${esc(nt(sv.tot<0.005&&debts<0.005?"zk_net_0":net>=0?"zk_net_p":"zk_net_m"))}</span></div></div>`;
   const cards=V==="C"?[cardS,cardD,cardN]:[cardS,cardD];
   const netBar=V==="B"&&debts>0?`<div class="znetbar"><span>${esc(nt("zk_net"))}</span><b class="${net>=0?"pos":"neg"}">${net>=0?"+":"−"}${E(Math.abs(net))}</b><i><em style="width:${Math.max(4,Math.min(100,sv.tot/Math.max(1,sv.tot+debts)*100)).toFixed(1)}%"></em></i></div>`:"";
@@ -4489,7 +4489,6 @@ function fxRates(){ let best=null;
 function fxConv(v, from, to){ const r=fxRates().r, f=from==="EUR"?1:r[from], t=to==="EUR"?1:r[to]; return (f && t) ? v/f*t : null; }
 function fxFmt(v, c, whole){ try { return new Intl.NumberFormat("de-DE",{style:"currency",currency:c,...(whole?{minimumFractionDigits:0,maximumFractionDigits:0}:{})}).format(v); } catch(e){ return numStr(v)+" "+c; } }
 function curName(c){ try { return new Intl.DisplayNames([LOCD()],{type:"currency"}).of(c); } catch(e){ return c; } }
-function fxDate(d){ return d ? new Date(d+"T12:00").toLocaleDateString("de-DE") : ""; }
 async function fxRefresh(){
   for (const u of ["https://api.frankfurter.dev/v1/latest?base=EUR","https://api.frankfurter.app/latest?from=EUR"]){
     try { const r=await fetch(u,{cache:"no-store"}); if (!r.ok) continue; const j=await r.json(); if (!j || !j.rates || !j.date) continue;
@@ -4524,7 +4523,7 @@ function renderSprache(){ const el=$("spracheEd"); if (!el) return;
     <div class="section-title" style="font-size:14px">Kurse · 1 € =</div>
     <div class="fxrl">${list.map(c=>`<div><span class="fl" aria-hidden="true">${flagEl(CUR_CC[c])}</span><span>${esc(curName(c))}<span class="c" data-noi18n>${c}</span></span><b>${esc(String(fx.r[c]??"–").replace(".",","))}</b></div>`).join("")}</div>
     <div class="row-btns" style="justify-content:flex-start;margin-top:10px"><button class="btn" data-fxall>${all?"Weniger anzeigen":`Alle ${FX_CODES.length} Kurse`}</button><button class="btn" data-fxload>Kurse aktualisieren</button></div>
-    <p class="small muted" style="margin:6px 0 0">${fx.approx?"Ungefähre Kurse – noch nicht aktualisiert.":`EZB-Kurse vom ${esc(fxDate(fx.d))}.`} Beim Aktualisieren lädt die App die Tageskurse der Europäischen Zentralbank über frankfurter.app – sonst wird nichts gesendet.</p>`; }
+    <p class="small muted" style="margin:6px 0 0">${fx.approx?"Ungefähre Kurse – noch nicht aktualisiert.":`EZB-Kurse vom ${esc(fxDate(fx.d,{day:"numeric",month:"long",year:"numeric"}))}.`} Beim Aktualisieren lädt die App die Tageskurse der Europäischen Zentralbank über frankfurter.app – sonst wird nichts gesendet.</p>`; }
 function fxMeta(){ const u=UI.fx||{}, x=fxConv(1,u.from,u.to), fx=fxRates(); return x==null ? "" : `${esc(fxFmt(1,u.from,true))} = ${esc(fxFmt(x,u.to))}${fx.approx?` · <span>ungefähr</span>`:` · EZB ${esc(fxDate(fx.d))}`}`; }
 function fxResult(){ const u=UI.fx||{}; const a=parseAmt(u.a||"")||0, x=fxConv(a,u.from,u.to);
   return x==null ? "–" : esc(numStr(Math.round(x*100)/100)); }
@@ -6338,15 +6337,15 @@ function shopPanel(sh, stats){
   const deals=shopDeals(sh.id), prices=shopPrices(sh.id), name=n=>n.charAt(0).toUpperCase()+n.slice(1);
   const shopName=id=>(SHOPS.find(x=>x.id===id)||{name:id}).name;
   return `<div class="spanel">
-    <div class="spt"><div class="grow"><b>${esc(sh.name)}</b><span class="small muted">${o.count?`Ø ${esc(eur0(o.sum/6))} im Monat · ${o.count} Einkäufe in 6 Monaten`:"zuletzt nicht eingekauft"}</span></div>
+    <div class="spt"><div class="grow"><b>${esc(sh.name)}</b><span class="small muted">${esc(o.count?nt(o.count===1?"sh_stat1":"sh_stat",{a:eur0(o.sum/6),n:String(o.count)}):nt("sh_none"))}</span></div>
       <button class="btn primary" data-openshop="${esc(sh.url)}">${shopBtnLbl(sh)}</button></div>
-    <div class="ssec"><span>Gemerkte Angebote</span></div>
-    ${deals.map(d=>`<div class="deal2"><span class="grow"><b>${esc(d.text)}</b><span class="small muted">${d.until?`bis ${esc(shortDate(d.until))}`:"ohne Datum"}</span></span>${d.price?`<b class="pos">${esc(eur(d.price))}</b>`:""}<button class="icon-btn" data-dealdel="${esc(d.id)}" aria-label="Angebot löschen">×</button></div>`).join("") || (UI.dealAdd===sh.id?"":`<div class="small muted" style="padding:4px 0 2px">${esc(nt(shopKind(sh)==="leaf"?"sh_hint_leaf":"sh_hint_page"))}</div>`)}
-    ${UI.dealAdd===sh.id?`<div class="dealform"><input class="in" id="dealText" placeholder="Was? z. B. Kaffee 500 g" aria-label="Was"><div class="grid2"><input class="in" id="dealPrice" inputmode="decimal" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="dealUntil" value="${esc(nextSat())}" aria-label="Gültig bis"></div><div class="row-btns"><button class="btn" data-dealcancel="1">Abbrechen</button><button class="btn primary" data-dealsave="${esc(sh.id)}">Merken</button></div></div>`
-      :`<button class="chip" data-dealadd="${esc(sh.id)}" style="margin-top:6px">+ Angebot merken</button>`}
-    ${prices.length?`<div class="ssec"><span>Deine Preise hier</span><span class="small muted">aus Quittungen</span></div>
-      ${prices.map(x=>`<div class="meta-row" style="padding:5px 0"><span>${esc(name(x.w))}${x.best?`<br><span class="small" style="color:var(--warn)">bei ${esc(shopName(x.best.s))} ${esc(eur(x.best.p))}</span>`:x.cheapest?`<br><span class="small pos">hier am günstigsten</span>`:""}</span><b>${esc(eur(x.e.p))}</b></div>`).join("")}`:""}
-    ${recent.length?`<div class="ssec"><span>Zuletzt bei ${esc(sh.name)}</span></div>${recent.map(t=>`<div class="meta-row" style="padding:5px 0"><span>${esc(shortDate(t.date))}${hasReceipt(t.id)?" · Beleg":""}</span><b>${esc(eur(t.amount))}</b></div>`).join("")}`:""}
+    <div class="ssec"><span>${esc(nt("sh_saved"))}</span></div>
+    ${deals.map(d=>`<div class="deal2"><span class="grow"><b>${esc(d.text)}</b><span class="small muted">${esc(d.until?nt("sh_until",{d:shortDate(d.until)}):nt("sh_nodate"))}</span></span>${d.price?`<b class="pos">${esc(eur(d.price))}</b>`:""}<button class="icon-btn" data-dealdel="${esc(d.id)}" aria-label="${esc(nt("sh_del"))}">×</button></div>`).join("") || (UI.dealAdd===sh.id?"":`<div class="small muted" style="padding:4px 0 2px">${esc(nt(shopKind(sh)==="leaf"?"sh_hint_leaf":"sh_hint_page"))}</div>`)}
+    ${UI.dealAdd===sh.id?`<div class="dealform"><input class="in" id="dealText" placeholder="${esc(nt("sh_what_ph"))}" aria-label="${esc(nt("sh_what"))}"><div class="grid2"><input class="in" id="dealPrice" inputmode="decimal" placeholder="${esc(nt("sh_price"))}" aria-label="${esc(nt("sh_price"))}"><input class="in" type="date" id="dealUntil" value="${esc(nextSat())}" aria-label="${esc(nt("sh_valid"))}"></div><div class="row-btns"><button class="btn" data-dealcancel="1">${esc(nt("sh_cancel"))}</button><button class="btn primary" data-dealsave="${esc(sh.id)}">${esc(nt("sh_keep"))}</button></div></div>`
+      :`<button class="chip" data-dealadd="${esc(sh.id)}" style="margin-top:6px">+ ${esc(nt("sh_add"))}</button>`}
+    ${prices.length?`<div class="ssec"><span>${esc(nt("sh_prices"))}</span><span class="small muted">${esc(nt("sh_from_rc"))}</span></div>
+      ${prices.map(x=>`<div class="meta-row" style="padding:5px 0"><span>${esc(name(x.w))}${x.best?`<br><span class="small" style="color:var(--warn)">${esc(nt("sh_at",{x:shopName(x.best.s),p:eur(x.best.p)}))}</span>`:x.cheapest?`<br><span class="small pos">${esc(nt("sh_cheapest"))}</span>`:""}</span><b>${esc(eur(x.e.p))}</b></div>`).join("")}`:""}
+    ${recent.length?`<div class="ssec"><span>${esc(nt("sh_lastat",{x:sh.name}))}</span></div>${recent.map(t=>`<div class="meta-row" style="padding:5px 0"><span>${esc(shortDate(t.date))}${hasReceipt(t.id)?" · "+esc(nt("sh_rc")):""}</span><b>${esc(eur(t.amount))}</b></div>`).join("")}`:""}
   </div>`;
 }
 function rerenderShopPanel(){ const el=$("shopPanel"); if (!el || !UI.shopSel) return; const stats=Object.fromEntries(shopStats().map(o=>[o.shop.id,o])); el.innerHTML=shopPanel(SHOPS.find(x=>x.id===UI.shopSel), stats); }
@@ -8906,6 +8905,30 @@ sh_none_leaf:["Noch nichts gemerkt – pick ein Angebot im Prospekt oder trag es
 sh_none_page:["Noch nichts gemerkt – pick ein Angebot auf der Seite oder trag es oben ein.","Nothing saved yet – pick an offer on the website or enter it above.","Henüz kayıt yok – siteden bir fırsat seç ya da yukarıya yaz.","Пока ничего не сохранено – выбери предложение на сайте или впиши выше.","Ще нічого не збережено – обери пропозицію на сайті або впиши вище.","Nic jeszcze nie zapisano – wybierz ofertę na stronie lub wpisz ją wyżej.","لم تحفظ شيئًا بعد – اختر عرضًا من الموقع أو اكتبه بالأعلى.","Nimic salvat încă – alege o ofertă de pe site sau scrie-o mai sus."],
 sh_save_leaf:["Angebot aus dem Prospekt merken","Save an offer from the leaflet","Broşürden fırsat kaydet","Запомнить акцию из проспекта","Запам’ятати акцію з проспекту","Zapisz ofertę z gazetki","احفظ عرضًا من النشرة","Salvează o ofertă din catalog"],
 sh_save_page:["Angebot von der Seite merken","Save an offer from the website","Siteden fırsat kaydet","Запомнить предложение с сайта","Запам’ятати пропозицію з сайту","Zapisz ofertę ze strony","احفظ عرضًا من الموقع","Salvează o ofertă de pe site"],
+sh_stat1:["Ø {a} im Monat · 1 Einkauf in 6 Monaten","Ø {a} a month · 1 purchase in 6 months","Ayda Ø {a} · 6 ayda 1 alışveriş","Ø {a} в месяц · 1 покупка за 6 месяцев","Ø {a} на місяць · 1 покупка за 6 місяців","Ø {a} miesięcznie · 1 zakup w 6 miesięcy","Ø {a} شهريًا · عملية شراء واحدة في 6 أشهر","Ø {a} pe lună · 1 cumpărătură în 6 luni"],
+sh_stat:["Ø {a} im Monat · {n} Einkäufe in 6 Monaten","Ø {a} a month · {n} purchases in 6 months","Ayda Ø {a} · 6 ayda {n} alışveriş","Ø {a} в месяц · {n} покупок за 6 месяцев","Ø {a} на місяць · {n} покупок за 6 місяців","Ø {a} miesięcznie · {n} zakupów w 6 miesięcy","Ø {a} شهريًا · {n} مشتريات في 6 أشهر","Ø {a} pe lună · {n} cumpărături în 6 luni"],
+sh_last:["zuletzt am {d}","last on {d}","son: {d}","последний раз {d}","востаннє {d}","ostatnio {d}","آخر مرة {d}","ultima dată {d}"],
+sh_none:["zuletzt nicht eingekauft","not shopped here lately","son zamanlarda alışveriş yok","давно не покупал","давно не купував","ostatnio bez zakupów","لم تتسوق هنا مؤخرًا","fără cumpărături recente"],
+ku_none:["Noch keine Einnahmen aus Selbstständigkeit in {y}. Sobald du welche einträgst, siehst du hier deine Kunden.","No self-employment income in {y} yet. As soon as you add some, you’ll see your clients here.","{y} yılında henüz serbest çalışma geliri yok. Eklediğinde müşterilerini burada görürsün.","В {y} году ещё нет доходов от самозанятости. Как только добавишь, здесь появятся клиенты.","У {y} році ще немає доходів від самозайнятості. Щойно додаси, тут з’являться клієнти.","Brak jeszcze dochodów z działalności w {y}. Gdy je dodasz, zobaczysz tu swoich klientów.","لا يوجد دخل من العمل الحر في {y} بعد. بمجرد إضافته سترى عملاءك هنا.","Încă nu ai venituri din activitate independentă în {y}. Când adaugi, îți vezi clienții aici."],
+sh_saved:["Gemerkte Angebote","Saved offers","Kaydedilen fırsatlar","Сохранённые акции","Збережені акції","Zapisane oferty","العروض المحفوظة","Oferte salvate"],
+sh_until:["bis {d}","until {d}","{d} tarihine kadar","до {d}","до {d}","do {d}","حتى {d}","până la {d}"],
+sh_nodate:["ohne Datum","no date","tarihsiz","без даты","без дати","bez daty","بدون تاريخ","fără dată"],
+sh_del:["Angebot löschen","Delete offer","Fırsatı sil","Удалить акцию","Видалити акцію","Usuń ofertę","حذف العرض","Șterge oferta"],
+sh_what:["Was","What","Ne","Что","Що","Co","ماذا","Ce"],
+sh_what_ph:["Was? z. B. Kaffee 500 g","What? e.g. coffee 500 g","Ne? örn. kahve 500 g","Что? напр. кофе 500 г","Що? напр. кава 500 г","Co? np. kawa 500 g","ماذا؟ مثل: قهوة 500 غ","Ce? ex. cafea 500 g"],
+sh_price:["Preis €","Price €","Fiyat €","Цена €","Ціна €","Cena €","السعر €","Preț €"],
+sh_valid:["Gültig bis","Valid until","Geçerlilik","Действует до","Діє до","Ważne do","صالح حتى","Valabil până la"],
+sh_cancel:["Abbrechen","Cancel","İptal","Отмена","Скасувати","Anuluj","إلغاء","Anulează"],
+sh_keep:["Merken","Save","Kaydet","Запомнить","Запам’ятати","Zapisz","حفظ","Salvează"],
+sh_add:["Angebot merken","Save offer","Fırsat kaydet","Запомнить акцию","Запам’ятати акцію","Zapisz ofertę","احفظ العرض","Salvează oferta"],
+sh_prices:["Deine Preise hier","Your prices here","Buradaki fiyatların","Твои цены здесь","Твої ціни тут","Twoje ceny tutaj","أسعارك هنا","Prețurile tale aici"],
+sh_from_rc:["aus Quittungen","from receipts","fişlerden","из чеков","з чеків","z paragonów","من الإيصالات","din bonuri"],
+sh_at:["bei {x} {p}","at {x} {p}","{x}: {p}","в {x} {p}","у {x} {p}","w {x} {p}","في {x} {p}","la {x} {p}"],
+sh_cheapest:["hier am günstigsten","cheapest here","en ucuz burada","здесь дешевле всего","тут найдешевше","tu najtaniej","الأرخص هنا","cel mai ieftin aici"],
+sh_lastat:["Zuletzt bei {x}","Recently at {x}","Son olarak {x}","Недавно в {x}","Нещодавно в {x}","Ostatnio w {x}","مؤخرًا في {x}","Recent la {x}"],
+sh_rc:["Beleg","Receipt","Fiş","Чек","Чек","Paragon","إيصال","Bon"],
+zk_debts_c1:["1 Kredit offen","1 loan open","1 açık kredi","1 открытый кредит","1 відкритий кредит","1 otwarty kredyt","قرض واحد مفتوح","1 credit deschis"],
+zk_debts_s1:["1 Kredit · {r} Rate im Monat","1 loan · {r} monthly payment","1 kredi · aylık {r} taksit","1 кредит · {r} в месяц","1 кредит · {r} на місяць","1 kredyt · {r} rata miesięcznie","قرض واحد · {r} قسط شهري","1 credit · {r} rată pe lună"],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
@@ -8914,6 +8937,7 @@ zk_net_0:["Noch nichts gespart und keine Schulden","Nothing saved and no debts y
 zk_net_p:["Du hast mehr gespart als Schulden", "You’ve saved more than you owe", "Borcundan fazla biriktirdin", "Накоплено больше, чем долгов", "Заощаджено більше, ніж боргів", "Masz więcej oszczędności niż długów", "مدخراتك أكثر من ديونك", "Ai economisit mai mult decât datorezi"],
 zk_net_m:["So viel fehlt noch bis zur Null", "This much is left to reach zero", "Sıfıra ulaşmak için kalan", "Столько осталось до нуля", "Стільки лишилося до нуля", "Tyle brakuje do zera", "هذا ما تبقى للوصول إلى الصفر", "Atât mai e până la zero"],
 zk_swipe:["Ersparnisse und Schulden – wischen zum Blättern", "Savings and debts – swipe to browse", "Birikim ve borçlar – kaydır", "Накопления и долги – листай", "Заощадження й борги – гортай", "Oszczędności i długi – przesuń", "المدخرات والديون – اسحب للتصفح", "Economii și datorii – glisează"],
+zk_p_goal1:["1 Ziel {a}","1 goal {a}","1 hedef {a}","1 цель {a}","1 ціль {a}","1 cel {a}","هدف واحد {a}","1 obiectiv {a}"],
 zk_p_goals:["{n} Ziele {a}", "{n} goals {a}", "{n} hedef {a}", "{n} цели {a}", "{n} цілі {a}", "{n} cele {a}", "{n} أهداف {a}", "{n} obiective {a}"],
 zk_p_spaces:["Spaces {a}", "Spaces {a}", "Spaces {a}", "Spaces {a}", "Spaces {a}", "Spaces {a}", "Spaces {a}", "Spaces {a}"],
 zk_p_inv:["Anlagen {a}", "Investments {a}", "Yatırımlar {a}", "Вложения {a}", "Вкладення {a}", "Inwestycje {a}", "استثمارات {a}", "Investiții {a}"],
@@ -9067,7 +9091,7 @@ hl_m6:["Ich bin so stolz auf dich, {a}! 💚","I’m so proud of you, {a}! 💚"
 function nt(k, v){ const a=NT[k]; let s=a ? mNm(a[Math.max(0,ML.indexOf(LANG))]||a[0]) : k; if (v) for (const [x,y] of Object.entries(v)) s=s.split("{"+x+"}").join(y); return s; }
 const RMo=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
 const E0=v=>eur0(v), E2=v=>eur(v);
-function fxDate(iso, o){ return new Date(iso+"T12:00").toLocaleDateString(cLoc(), o||{day:"numeric", month:"short"}); }
+function fxDate(iso, o){ if (!iso) return ""; const dt=new Date(String(iso).length===7?iso+"-01T12:00":iso+"T12:00"); if (isNaN(dt)) return ""; return dt.toLocaleDateString(cLoc(), o||{day:"numeric", month:"short"}); }
 function monName(ym, o){ const [y,m]=ymParts(ym); return new Intl.DateTimeFormat(cLoc(), {month:o||"long"}).format(new Date(y,m-1,1)); }
 /* Zählwerk */
 function hbOdo(el, str, dur){ if (!el) return; if (RMo()){ el.textContent=str; el._s=str; return; } const prev=el._s||""; el.classList.add("hbodo");
