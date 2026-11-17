@@ -6285,6 +6285,9 @@ const SHOPS = [
   ,{cat:"online", id:"otto", name:"OTTO", re:/\botto\b/, color:"#D52B1E", url:"https://www.otto.de/sale/"}
   ,{cat:"online", id:"temu", name:"Temu", re:/\btemu\b/, color:"#FB7701", url:"https://www.temu.com/de"}
 ];
+function shopKind(sh){ if (sh.id==="apotheke") return "apo"; const u=sh.url||""; if (sh.cat==="super"||sh.cat==="disc"||/prospekt/i.test(u)) return "leaf"; if (/angebot|sale|deals|aktion|offers|outlet/i.test(u)) return "deal"; return "web"; }
+function shopBtnLbl(sh){ const k=shopKind(sh); return ({apo:ic("pin",16)+" "+esc(nt("apo_find")), leaf:ic("cart",16)+" "+esc(nt("sh_leaf")), deal:ic("tag",16)+" "+esc(nt("sh_deal")), web:ic("right",16)+" "+esc(nt("sh_web"))})[k]; }
+function shopOpenTxt(sh){ return nt(shopKind(sh)==="leaf"?"sh_leaf_open":"sh_page_open"); }
 const SHOP_CATS=[["super","Supermarkt","cart"],["disc","Discounter","tag"],["drog","Drogerie & Apotheke","health"],["kleid","Kleidung & Schuhe","shirt"],["elek","Elektronik","tv"],["bau","Baumarkt","home"],["moebel","Möbel & Haushalt","home"],["tier","Tierbedarf","paw"],["online","Online","cloud"]];
 const SHOP_TAB={super:"Supermarkt",disc:"Discounter",drog:"Drogerie & Apotheke",kleid:"Kleidung",elek:"Elektronik",bau:"Baumarkt",moebel:"Möbel",tier:"Tier",online:"Online"};
 function shopStats(){
@@ -6336,7 +6339,7 @@ function shopPanel(sh, stats){
   const shopName=id=>(SHOPS.find(x=>x.id===id)||{name:id}).name;
   return `<div class="spanel">
     <div class="spt"><div class="grow"><b>${esc(sh.name)}</b><span class="small muted">${o.count?`Ø ${esc(eur0(o.sum/6))} im Monat · ${o.count} Einkäufe in 6 Monaten`:"zuletzt nicht eingekauft"}</span></div>
-      <button class="btn primary" data-openshop="${esc(sh.url)}">${sh.id==="apotheke"?ic("pin",16)+" "+esc(nt("apo_find")):ic("cart",16)+" Prospekt"}</button></div>
+      <button class="btn primary" data-openshop="${esc(sh.url)}">${shopBtnLbl(sh)}</button></div>
     <div class="ssec"><span>Gemerkte Angebote</span></div>
     ${deals.map(d=>`<div class="deal2"><span class="grow"><b>${esc(d.text)}</b><span class="small muted">${d.until?`bis ${esc(shortDate(d.until))}`:"ohne Datum"}</span></span>${d.price?`<b class="pos">${esc(eur(d.price))}</b>`:""}<button class="icon-btn" data-dealdel="${esc(d.id)}" aria-label="Angebot löschen">×</button></div>`).join("") || (UI.dealAdd===sh.id?"":`<div class="small muted" style="padding:4px 0 2px">Im Prospekt etwas Gutes gesehen? Merk es dir hier – es verschwindet nach Ablauf von selbst.</div>`)}
     ${UI.dealAdd===sh.id?`<div class="dealform"><input class="in" id="dealText" placeholder="Was? z. B. Kaffee 500 g" aria-label="Was"><div class="grid2"><input class="in" id="dealPrice" inputmode="decimal" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="dealUntil" value="${esc(nextSat())}" aria-label="Gültig bis"></div><div class="row-btns"><button class="btn" data-dealcancel="1">Abbrechen</button><button class="btn primary" data-dealsave="${esc(sh.id)}">Merken</button></div></div>`
@@ -8891,6 +8894,11 @@ ab_err_name:["Bitte einen Namen eintragen", "Please enter a name", "Lütfen bir 
 ab_err_amt:["Bitte einen Betrag eintragen", "Please enter an amount", "Lütfen bir tutar gir", "Введи сумму", "Введи суму", "Wpisz kwotę", "يرجى إدخال مبلغ", "Te rog introdu o sumă"],
 ab_done:["{x} hinzugefügt", "{x} added", "{x} eklendi", "{x} добавлен", "{x} додано", "Dodano {x}", "تمت إضافة {x}", "{x} adăugat"],
 apo_find:["Apotheke finden","Find a pharmacy","Eczane bul","Найти аптеку","Знайти аптеку","Znajdź aptekę","ابحث عن صيدلية","Găsește o farmacie"],
+sh_leaf:["Prospekt","Leaflet","Broşür","Проспект","Проспект","Gazetka","النشرة","Catalog"],
+sh_deal:["Angebote","Deals","Fırsatlar","Акции","Акції","Promocje","العروض","Oferte"],
+sh_web:["Zur Website","Open website","Web sitesine git","Открыть сайт","Відкрити сайт","Otwórz stronę","افتح الموقع","Deschide site-ul"],
+sh_leaf_open:["Prospekt ist offen","Leaflet is open","Broşür açık","Проспект открыт","Проспект відкрито","Gazetka jest otwarta","النشرة مفتوحة","Catalogul este deschis"],
+sh_page_open:["Seite ist offen","Page is open","Sayfa açık","Страница открыта","Сторінку відкрито","Strona jest otwarta","الصفحة مفتوحة","Pagina este deschisă"],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],

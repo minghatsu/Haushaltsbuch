@@ -1086,7 +1086,7 @@ if (IS_PC){
     const canWeb=!!((window.AndroidBridge && window.AndroidBridge.pageOpen) || window.pcPageDemo), web=canWeb || !!(K.pg && K.PG.open && K.PG.embed);
     const det=web ? `<div class="card pcsweb" id="pcsWeb" style="--c:${sh.color}"></div>` : `<div class="card pcsd" style="--c:${sh.color};--k:${sh.ink||"#fff"}">
       <div class="pcsdh"><div class="lg">${badge(sh)}</div><div class="grow"><h2>${esc(sh.name)}</h2><span class="small muted">${esc(CATN[sh.cat]||"")} · ${st.count?`Ø ${esc(eur0(st.sum/6))} im Monat · ${st.count} Einkäufe in 6 Monaten${st.last?` · zuletzt am ${esc(shortDate(st.last))}`:""}`:"zuletzt nicht eingekauft"}</span></div>
-        <button class="btn primary" data-openshop="${esc(sh.url)}">${sh.id==="apotheke"?ic("pin",16)+" "+esc(nt("apo_find")):ic("cart",16)+" Prospekt"}</button></div>
+        <button class="btn primary" data-openshop="${esc(sh.url)}">${shopBtnLbl(sh)}</button></div>
       <div class="pcsdc"><div>
         <div class="ssh">Gemerkte Angebote</div>
         ${deals.map(d=>`<div class="pccp"><div class="grow"><b>${esc(d.text)}</b><small class="muted">${d.until?`bis ${esc(shortDate(d.until))}`:"ohne Datum"}</small></div>${d.price?`<b class="pp">${esc(eur(d.price))}</b>`:""}<button class="x" data-dealdel="${esc(d.id)}" aria-label="Angebot löschen">×</button></div>`).join("")}
@@ -1217,7 +1217,7 @@ if (IS_PC){
   function sideHtml(){
     const sh=PG.shop; if (!sh) return "";
     const deals=shopDeals(sh.id), mine=list().map(it=>({it, w:where(it)})).filter(x=>x.w && x.w.s===sh.id);
-    return `<div class="sh" style="--c:${sh.color}">${badge(sh)}<div><b>${esc(sh.name)}</b><small class="muted">Prospekt ist offen</small></div></div>
+    return `<div class="sh" style="--c:${sh.color}">${badge(sh)}<div><b>${esc(sh.name)}</b><small class="muted">${esc(shopOpenTxt(sh))}</small></div></div>
       <div class="ssh">Angebot aus dem Prospekt merken</div>
       <div class="pccp form"><input class="in" id="pcpDT" placeholder="Was? z. B. ${sh.cat==="kleid"?"Pullover":sh.cat==="elek"?"Kopfhörer":sh.cat==="moebel"?"Regal":"Kaffee 500 g"}" aria-label="Was"><div class="pr2"><input class="in" id="pcpDP" inputmode="decimal" placeholder="Preis €" aria-label="Preis"><input class="in" type="date" id="pcpDU" value="${esc(nextSat())}" aria-label="Bis wann"></div><div class="pa"><button class="btn primary" data-pcpdeal>Merken</button></div></div>
       <div class="ssh">Einkaufszettel <span class="muted">· für ${esc(sh.name)}</span></div>
