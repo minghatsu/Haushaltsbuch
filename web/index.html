@@ -3413,7 +3413,7 @@ const PTOUR_FN=()=>({
     {sel:"#v-home .hlcard", raw:1, ic:"spark", t:nt("trh_hl_t"), p:[nt("trh_hl_p")]},
     {sel:"#v-home .fcmini", raw:1, ic:"chart", t:nt("trh_fc_t"), p:[nt("trh_fc_p")]},
     {sel:"#v-home .areacard .agrid", raw:1, ic:"home", t:nt("trh_area_t"), p:[nt("trh_area_p")]},
-    {sel:'#v-home .atile[data-accgo="abos"]', raw:1, ic:"repeat", t:nt("trh_abo_t"), p:[nt("trh_abo_p")]},
+    {sel:'#v-home .atile[data-spopen="abos"]', raw:1, ic:"repeat", t:nt("trh_abo_t"), p:[nt("trh_abo_p")]},
     {sel:"#monthpill,.pcmonth", ic:"cal", t:"Monat wechseln", p:["Mit den Pfeilen blätterst du in frühere Monate.", "Alle Seiten zeigen dann diesen Monat – Buchungen, Fixkosten und Analyse."]},
     {sel:'#v-home .hblock[data-hb="budgets"]', ic:"target", t:"Budgets", p:["Zeigt, wie viel von deinem Monatsbudget noch frei ist.", "Budgets legst du unter Einstellungen › Monatsbudgets fest."]},
     {sel:'#v-home .hblock[data-hb="fix"]', ic:"list", t:"Fixkosten", p:["Was diesen Monat fest abgeht – Miete, Abos, Raten.", "Antippen führt zur Fixkosten-Seite zum Abhaken."]},
@@ -4049,8 +4049,8 @@ function homeHub(ym, c){ let t; const fx=fixedForMonth(ym,true).length, done=fx-
   t=[areaTile(ic("list",22),"Fixkosten",fx?`${done} / ${fx} abgehakt`:"anlegen",'data-go="fix"'),
     areaTile(ic("check",22),"Buchungen",n===1?"1 im Monat":`${n} im Monat`,'data-go="list"'),
     areaTile(ic("chart",22),"Auswertung","Wohin dein Geld geht",'data-go="year"'),
-    areaTile(ic("tag",22),"Budgets",Object.values(S.settings.budgets||{}).filter(v=>+v>0).length?`${Object.values(S.settings.budgets||{}).filter(v=>+v>0).length} aktiv`:"festlegen",'data-accgo="budgets"'),
-    areaTile(ic("repeat",22),"Abos & Verträge",ab?`${ab}`:"",'data-accgo="abos"'),
+    areaTile(ic("tag",22),"Budgets",Object.values(S.settings.budgets||{}).filter(v=>+v>0).length?`${Object.values(S.settings.budgets||{}).filter(v=>+v>0).length} aktiv`:"festlegen",'data-spopen="budgets"'),
+    areaTile(ic("repeat",22),"Abos & Verträge",ab?`${ab}`:"",'data-spopen="abos"'),
     areaTile(ic("user",22),"Gemeinsam","Partner, WG",'data-go="gemeinsam"')];
   if (!(hasExtra("partner") || spList().length) && (hasExtra("kinder") || kidsList().length)) t.pop();
   if (hasExtra("kinder") || kidsList().length){ const kg=kidsSum(Number(ym.slice(0,4))); t.splice(5,0,areaTile(ic("kids",22),"Kinder",kidsList().length?`Kindergeld ${esc(eur0(kg))}`:"eintragen","data-kidsopen")); }
@@ -4087,8 +4087,8 @@ function renderZukunft(){ const el=document.querySelector(`[data-view="zukunft"]
   el.innerHTML = `<div class="ahero zuk"><small>${debts>0?"Gespart minus Schulden":"Gespart in deinen Zielen"}</small><b>${debts>0?(saved-debts>=0?"+":"−")+E(Math.abs(saved-debts)):E(saved)}</b><span><span>${goals.length?(goals.length===1?"1 Ziel":`${goals.length} Ziele`):"Noch kein Sparziel"}</span>${goals.length?` · <span>${E(saved)}</span>`:""}${debts>0?` · <span>Schulden ${E(debts)}</span>`:""}</span></div>
     <div class="card areacard">${areaHead("Sparen &amp; Schulden","invest","Einstellungen Sparen")}<div class="agrid">
       ${areaTile(ic("piggy",22),"Ziele",goals.length?`${goals.length}`:"anlegen",'data-go="ziele"')}
-      ${areaTile(ic("chart",22),"Anlegen","Zinseszins & Vergleich",'data-accgo="invest"')}
-      ${areaTile(ic("bank",22),"Schulden",debts>0?E(debts):"keine",'data-accgo="schulden"')}
+      ${areaTile(ic("chart",22),"Anlegen","Zinseszins & Vergleich",'data-spopen="invest"')}
+      ${areaTile(ic("bank",22),"Schulden",debts>0?E(debts):"keine",'data-spopen="schulden"')}
       ${(()=>{ const tt=srTotal(), on=SR_DEF.some(([k])=>(srCfg()[k]||{}).on); return areaTile(ic("coins",22),"Sparregeln",on?E(tt):"einschalten",'data-sropen'); })()}</div></div>
     ${goalsRings()}${UI.goalsOpen||UI.goalEdit?goalsCard():""}${(S.debts||[]).length?debtRings():""}${invTile()}`;
 }
@@ -5035,6 +5035,7 @@ function render(){
   applyTabColors();
   if (UI.tileEdit && UI.tileEdit!==UI.view) UI.tileEdit="";
   if (UI.view==="more" && UI.sp && !spsOpen() && SP_PAGES[UI.sp]){ const k=UI.sp; UI.sp=null; accGo(k); }
+  else if (UI.view!=="more" && spsOpen() && SPS.open!=="profil" && SHEET_SP.includes(SPS.open)){ try{ renderMore(); }catch(_){} spSubRender(SPS.open); }
   else if (UI.view!=="more" && spsOpen()){ $("spBg").hidden=true; $("spBg").classList.remove("show"); spSheetRestore(); SPS.open=null; UI.sp=null; }
   notifyPlanSoon();
   if (dankeShould()) setTimeout(()=>{ if (dankeShould()) dankeOpen(); }, 500);
@@ -5487,7 +5488,7 @@ document.addEventListener("click", async e=>{
   const tb=e.target.closest("[data-invtab]"); if (tb){ UI.invTab=tb.dataset.invtab; renderInvest(); return; }
   const sb=e.target.closest("[data-invsub]"); if (sb){ UI.invSub=sb.dataset.invsub; renderInvest(); return; }
   const tt=e.target.closest("[data-invtile]"); if (tt){ UI.invTileTab=tt.dataset.invtile; const c=tt.closest(".invtile"); if (c) c.outerHTML=invTile(); return; }
-  const op=e.target.closest("[data-invopen]"); if (op){ UI.invTab = op.dataset.invopen==="goals" ? "goals" : (UI.invTileTab==="goals"?"goals":UI.invTileTab==="cmp"?"cmp":"calc"); if (op.dataset.invopen==="goals") UI.invNewGoal={}; accGo("invest"); return; }
+  const op=e.target.closest("[data-invopen]"); if (op){ UI.invTab = op.dataset.invopen==="goals" ? "goals" : (UI.invTileTab==="goals"?"goals":UI.invTileTab==="cmp"?"cmp":"calc"); if (op.dataset.invopen==="goals") UI.invNewGoal={}; spSheetOpen("invest"); return; }
   if (e.target.closest("[data-invgnew]")){ UI.invNewGoal={}; renderInvest(); setTimeout(()=>{ const n=$("invgN"); if (n) n.focus(); },30); return; }
   if (e.target.closest("[data-invgcancel]")){ UI.invNewGoal=null; renderInvest(); return; }
   if (e.target.closest("[data-invgoalfrom]")){ const p=inv().plan; UI.invTab="goals"; UI.invNewGoal={T:p.T, r:p.r, P:p.P, until:numYm(ymNum(ymOf(new Date()))+Math.round(p.y*12))}; renderInvest(); setTimeout(()=>{ const n=$("invgN"); if (n) n.focus(); },30); return; }
@@ -8101,11 +8102,15 @@ document.addEventListener("click", e=>{
 var SPS={open:null, nodes:[]};
 function spsOpen(){ return !!(SPS && SPS.open); }
 function spUseSheet(){ return !matchMedia("(min-width:1000px)").matches; }
+const SHEET_SP=["profil","budgets","abos","invest","schulden"];
+function spSubRender(k){ try{ if (k==="abos") renderAbos(); else if (k==="invest") renderInvest(); }catch(_){} }
+document.addEventListener("click", e=>{ const o=e.target.closest("[data-spopen]"); if (o){ e.preventDefault(); spSheetOpen(o.dataset.spopen); } });
 function spSheetOpen(k){
   if (!SP_PAGES[k]) return;
-  if (k!=="profil"){ UI.sp=null; accGo(k); return; }
+  if (!SHEET_SP.includes(k)){ UI.sp=null; accGo(k); return; }
+  if (k!=="profil" && UI.view!=="more"){ try{ renderMore(); }catch(_){} }
   if (SPS.open) spSheetRestore();
-  SPS.open=k; UI.sp=k; renderSpPages();
+  SPS.open=k; UI.sp=k; renderSpPages(); spSubRender(k);
   const body=$("spBody"); body.innerHTML="";
   const els=[$("spHero"), ...liveSp(k)].filter(el=>el && !el.hidden);
   SPS.nodes=els.map(el=>{ const ph=document.createComment("sp"); el.parentNode.insertBefore(ph, el); body.appendChild(el); return [el,ph]; });
@@ -10275,7 +10280,7 @@ function mbClose(later){ const bg=$("mbBg"); if (!bg) return; MB.on=false; clear
   else { if (m) m.animate([{opacity:1},{opacity:0}],{duration:300,fill:"forwards"}); setTimeout(done, 320); } }
 function mbAct(x){ const k=x.k; if (["price","wb","lohn","rch","kiz"].includes(k)) return hlAct(x); if (k==="upd"){ try{ UPD.avail&&UPD.avail.go(); }catch(_){} return; }
   if (k==="br") return brOpen(x.id); if (k==="stb") return stbOpen(); if (k==="term") return tmOpen(); if (k==="bs") return bsOpen(); if (k==="fc") return fcOpen();
-  if (k==="abo") return accGo("abos"); if (k==="beihilfe") return accGo("amt");
+  if (k==="abo") return spSheetOpen("abos"); if (k==="beihilfe") return accGo("amt");
   if (k==="budget"){ UI.view="year"; render(); return; } if (k==="reserve"){ UI.view="beruf"; render(); return; }
   UI.view="home"; render(); window.scrollTo({top:0,behavior:"smooth"}); }
 function mbSwipe(el){ let x0=null; el.addEventListener("touchstart",e=>{ x0=e.touches[0].clientX; },{passive:true}); el.addEventListener("touchend",e=>{ if (x0==null) return; const dx=e.changedTouches[0].clientX-x0; x0=null; if (Math.abs(dx)<45) return; const rtl=LANG==="ar"; mbStep((dx<0)!==rtl?1:-1); },{passive:true}); }
