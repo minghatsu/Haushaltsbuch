@@ -2707,7 +2707,7 @@ async function fetchLogo(domain){
     clearTimeout(LOGO.tRender); LOGO.tRender=setTimeout(()=>render(), 300);
   } catch(e){} finally { LOGO.busy.delete(domain); }
 }
-function queueLogo(domain){ if (!domain || LOGO.map.has(domain) || LOGO.busy.has(domain) || LOGO.queue.includes(domain)) return; LOGO.queue.push(domain); pumpLogos(); }
+function queueLogo(domain){ if (!domain || !domain.includes(".") || LOGO.map.has(domain) || LOGO.busy.has(domain) || LOGO.queue.includes(domain)) return; LOGO.queue.push(domain); pumpLogos(); }
 function pumpLogos(){ while (LOGO.running<3 && LOGO.queue.length){ const d=LOGO.queue.shift(); LOGO.running++; fetchLogo(d).finally(()=>{ LOGO.running--; pumpLogos(); }); } }
 function prefetchLogos(){
   if (S.settings.logos!==true) return;
@@ -4096,7 +4096,7 @@ function renderZukunft(){ const el=document.querySelector(`[data-view="zukunft"]
   const sv=zukSaved(), dS=S.debts.map(d=>({d, s:debtState(d)})), rate=sum(dS,x=>x.s.rate||0), net=sv.tot-debts, V=S.settings.zukHero||"C";
   const cardS=`<div class="acard zsave" data-ci="0"><div class="l">${esc(nt("zk_saved"))}</div><div class="b">${E(sv.tot)}</div><div class="m"><span>${esc(sv.parts.join(" · ")||nt("zk_saved0"))}</span></div></div>`;
   const cardD=`<div class="acard zdebt ${debts>0?"minus":"zdone"}" data-ci="1"><div class="l">${esc(nt("zk_debts"))}</div><div class="b">${debts>0?"−"+E(debts):E(0)}</div><div class="m"><span>${debts>0?esc(nt(rate>0?"zk_debts_s":"zk_debts_c",{n:String(S.debts.length),r:eur0(rate)})):esc(nt("zk_debts0"))}</span></div></div>`;
-  const cardN=`<div class="acard alt znet" data-ci="2"><div class="l">${esc(nt("zk_net"))}</div><div class="b">${net>=0?"+":"−"}${E(Math.abs(net))}</div><div class="m"><span>${esc(nt(net>=0?"zk_net_p":"zk_net_m"))}</span></div></div>`;
+  const cardN=`<div class="acard alt znet" data-ci="2"><div class="l">${esc(nt("zk_net"))}</div><div class="b">${Math.abs(net)<0.005?"":net>0?"+":"−"}${E(Math.abs(net))}</div><div class="m"><span>${esc(nt(sv.tot<0.005&&debts<0.005?"zk_net_0":net>=0?"zk_net_p":"zk_net_m"))}</span></div></div>`;
   const cards=V==="C"?[cardS,cardD,cardN]:[cardS,cardD];
   const netBar=V==="B"&&debts>0?`<div class="znetbar"><span>${esc(nt("zk_net"))}</span><b class="${net>=0?"pos":"neg"}">${net>=0?"+":"−"}${E(Math.abs(net))}</b><i><em style="width:${Math.max(4,Math.min(100,sv.tot/Math.max(1,sv.tot+debts)*100)).toFixed(1)}%"></em></i></div>`:"";
   el.innerHTML = `<div class="zhero ${IS_PC?"pc":""} v${V}">${IS_PC?`<div class="zgrid">${cards.join("")}</div>`:`<div class="astack" id="zstack" tabindex="0" aria-label="${esc(nt("zk_swipe"))}">${cards.join("")}</div><div class="adots" id="zdots">${cards.map((_,i)=>`<button data-cdot="${i}" aria-label="${i+1}"><i></i></button>`).join("")}</div>`}${netBar}</div>
@@ -8910,6 +8910,7 @@ zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} от
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
 zk_net:["Unterm Strich", "Bottom line", "Net durum", "Итого", "Підсумок", "Na czysto", "الصافي", "În total"],
+zk_net_0:["Noch nichts gespart und keine Schulden","Nothing saved and no debts yet","Henüz birikim de borç da yok","Пока нет ни сбережений, ни долгов","Поки немає ні заощаджень, ні боргів","Brak oszczędności i długów","لا مدخرات ولا ديون بعد","Încă nimic economisit și fără datorii"],
 zk_net_p:["Du hast mehr gespart als Schulden", "You’ve saved more than you owe", "Borcundan fazla biriktirdin", "Накоплено больше, чем долгов", "Заощаджено більше, ніж боргів", "Masz więcej oszczędności niż długów", "مدخراتك أكثر من ديونك", "Ai economisit mai mult decât datorezi"],
 zk_net_m:["So viel fehlt noch bis zur Null", "This much is left to reach zero", "Sıfıra ulaşmak için kalan", "Столько осталось до нуля", "Стільки лишилося до нуля", "Tyle brakuje do zera", "هذا ما تبقى للوصول إلى الصفر", "Atât mai e până la zero"],
 zk_swipe:["Ersparnisse und Schulden – wischen zum Blättern", "Savings and debts – swipe to browse", "Birikim ve borçlar – kaydır", "Накопления и долги – листай", "Заощадження й борги – гортай", "Oszczędności i długi – przesuń", "المدخرات والديون – اسحب للتصفح", "Economii și datorii – glisează"],
@@ -12347,6 +12348,14 @@ window.hbBack = () => {
   if ($("camLive") && !$("camLive").hidden){ camStop(); return true; }
   if ($("camRev") && !$("camRev").hidden){ camRevClose(); return true; }
   if (!$("tourBg").hidden){ if (TOUR.i>0) tourGo(TOUR.i-1); else tourClose(); return true; }
+  { const tv=[...document.querySelectorAll(".tmview")].pop(); if (tv){ tv.click(); if (document.body.contains(tv)) tv.remove(); return true; } }
+  { const hb=[...document.querySelectorAll(".hobg:not([hidden])")].pop(); if (hb && hb.id){ hbSheetClose(hb.id); return true; } }
+  if ($("fxNewBg") && !$("fxNewBg").hidden){ fxNewClose(); return true; }
+  if ($("zDlg") && !$("zDlg").hidden){ zDlgClose(); return true; }
+  if ($("fbFloatBg") && !$("fbFloatBg").hidden){ fbFloatClose(); return true; }
+  if ($("mamiPop") && !$("mamiPop").hidden){ mamiClose(); return true; }
+  if ($("mbBg") && !$("mbBg").hidden){ mbClose(); return true; }
+  if ($("spBg") && !$("spBg").hidden){ spSheetClose(); return true; }
   if (UI.wiz && $("wizBg") && !$("wizBg").hidden){ if (!wizBackOne() && !UI.wiz.forced) wizClose(); return true; }
   if (!$("docRev").hidden){ drFinish(null); return true; }
   if (!$("fanBg").hidden){ fanClose(); return true; }
