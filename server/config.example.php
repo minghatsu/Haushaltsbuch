@@ -10,6 +10,10 @@ return [
     // 'smtp_secure' => 'ssl',        // 'ssl' oder 'tls'
     // 'smtp_user'   => 'kontakt@deine-domain.de',
     // 'smtp_pass'   => '…',          // Passwort des Postfachs – nur hier auf dem Server
+    // KI für „Mami schaut genauer hin“ (Amtsbriefe). Schlüssel aus console.anthropic.com – bleibt nur hier auf dem Server.
+    // 'anthropic_key' => 'sk-ant-…',
+    // 'mami_dev_day'  => 15,     // max. Briefe pro Gerät und Tag
+    // 'mami_all_day'  => 3000,   // max. Briefe für alle zusammen pro Tag (Kostenbremse)
     'signup'       => true,      // false = keine neuen Konten (z. B. während der Testphase nur Einladungen)
     'max_accounts' => 1000,
     // 'data_dir'   => '/pfad/ausserhalb/des/webordners',   // ohne Angabe: Ordner cloud-<zufall> neben cloud.php
