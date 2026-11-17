@@ -9955,8 +9955,9 @@ function moPick(id, el){ if (MO.lvl===0){
     const go=fn=>setTimeout(()=>{ TM.fromRect=r; try{ fn(); }catch(_){} MO.keep=false; if (TOUR.i<0){ TM.fromRect=null; moHide(); } }, 300);
     if (id==="all"){ go(()=>tourOpen()); return; }
     const v=id.slice(3); UI.view=v; UI.sp=null; render(); window.scrollTo({top:0}); go(()=>ptourOpen(v)); } }
-document.addEventListener("pointerdown", e=>{ const bg=$("moBg"); if (!MO.on||!bg||!bg.contains(e.target)) return; MO.drag={x:e.clientX, x0:e.clientX, t:performance.now(), moved:false, v:0}; }, true);
-document.addEventListener("pointermove", e=>{ if (!MO.on||!MO.drag) return; const d=MO.drag, dx=e.clientX-d.x, now=performance.now(), g=moGeo(); if (Math.abs(e.clientX-d.x0)>6) d.moved=true; if (!d.moved) return; const da=dx/g.r; MO.a+=da; d.v=da/Math.max(.008,(now-d.t)/1000); d.x=e.clientX; d.t=now; moPlace(); const h=$("moBg").querySelector(".mohint"); if (h) h.classList.add("off"); }, true);
+document.addEventListener("pointerdown", e=>{ const bg=$("moBg"); if (!MO.on||!bg||!bg.contains(e.target)) return; const g0=moGeo(); MO.drag={x:e.clientX, x0:e.clientX, y0:e.clientY, t:performance.now(), moved:false, v:0, ang:moAng(e.clientX,e.clientY,g0)}; }, true);
+function moAng(x,y,g){ const dx=x-g.cx, dy=(y-g.cy)/((MO.lvl?.6:g.tilt)||1); return Math.hypot(dx,dy)<g.r*.22 ? null : Math.atan2(dy,dx); }
+document.addEventListener("pointermove", e=>{ if (!MO.on||!MO.drag) return; const d=MO.drag, dx=e.clientX-d.x, now=performance.now(), g=moGeo(); if (Math.hypot(e.clientX-d.x0, e.clientY-d.y0)>6) d.moved=true; if (!d.moved) return; e.preventDefault(); const an=moAng(e.clientX,e.clientY,g); let da; if (an!=null && d.ang!=null){ da=an-d.ang; if (da>Math.PI) da-=2*Math.PI; if (da<-Math.PI) da+=2*Math.PI; } else da=dx/(g.r*(MO.lvl?1.2:1))*(e.clientY>g.cy?-1:1); d.ang=an; MO.a+=da; d.v=da/Math.max(.008,(now-d.t)/1000); d.x=e.clientX; d.t=now; moPlace(); const h=$("moBg").querySelector(".mohint"); if (h) h.classList.add("off"); }, true);
 document.addEventListener("pointerup", e=>{ if (!MO.on||!MO.drag) return; const d=MO.drag; MO.drag=null; if (d.moved){ MO.v=Math.max(-6,Math.min(6,d.v)); MO.skipClick=performance.now(); } }, true);
 document.addEventListener("click", e=>{ const bg=$("moBg"); if (!MO.on||!bg||!bg.contains(e.target)) return; if (MO.skipClick && performance.now()-MO.skipClick<350) return;
   const n=e.target.closest("[data-mo]"); if (n){ moPick(n.dataset.mo, n); return; }
@@ -12313,7 +12314,7 @@ $("loginGo").onclick = doLogin;
   const ORDER=["home","beruf","zukunft","shop"], RENDER={beruf:()=>renderBeruf(), zukunft:()=>renderZukunft(), shop:()=>renderShop(), home:()=>renderHome(), list:()=>renderList(), fix:()=>renderFix(), year:()=>renderYear(), ziele:()=>renderZiele(), more:()=>{ renderMore(); renderSpPages(); }};
   const main=document.querySelector("main.wrap");
   const hScroll=t=>{ for (let n=t; n && n!==document.body; n=n.parentElement){ if (n.scrollWidth>n.clientWidth+2){ const ox=getComputedStyle(n).overflowX; if (ox==="auto"||ox==="scroll") return true; } } return false; };
-  const blocked=t=>t.closest(".sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,#astack,.srail,.bt3,.bubbles,.fxchips,input,select,textarea,.wiz,[data-noswipe]") || hScroll(t) || document.querySelector(".backdrop:not([hidden])");
+  const blocked=t=>t.closest("#moBg,#mbBg,#tourBg,.hobg,.sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,#astack,.srail,.bt3,.bubbles,.fxchips,input,select,textarea,.wiz,[data-noswipe]") || hScroll(t) || document.querySelector(".backdrop:not([hidden])");
   const sec=k=>document.querySelector(`[data-view="${k}"]`);
   let x0=0,y0=0,t0=0,on=false,lock=null,dir=0,cur=null,nbKey=null,W=1,p=0,busy=false,lastX=0,lastT=0,vx=0;
   let stage=null,fC=null,fN=null,shC=null,shN=null,sY=0,nY=0; const MEM={};
@@ -12426,7 +12427,7 @@ $("loginGo").onclick = doLogin;
 })();
 (function(){
   const el=$("ptr"), MAX=110, GO=70; let y0=0, x0=0, d=0, on=false, decided=false, busy=false;
-  const blocked = t => t.closest(".sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,.srail,.stack,.bt3,input[type=range],textarea,.wiz") || document.querySelector(".backdrop:not([hidden])");
+  const blocked = t => t.closest("#moBg,#mbBg,#tourBg,.hobg,.sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,.srail,.stack,.bt3,input[type=range],textarea,.wiz") || document.querySelector(".backdrop:not([hidden])");
   const set = (v, rot) => { el.style.transform=`translateY(${v-50}px) rotate(${rot}deg)`; el.style.opacity=String(Math.min(1, v/GO)); };
   document.addEventListener("touchstart", e=>{
     if (busy || e.touches.length!==1 || window.scrollY>0 || blocked(e.target)) { on=false; return; }
