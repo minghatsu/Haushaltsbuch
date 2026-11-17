@@ -239,6 +239,7 @@ try {
         db()->exec('CREATE TABLE IF NOT EXISTS invites (code TEXT PRIMARY KEY, owner TEXT UNIQUE, max INTEGER, lvl INTEGER DEFAULT 1, created INTEGER)');
         db()->exec('CREATE TABLE IF NOT EXISTS acts (code TEXT NOT NULL, dev TEXT NOT NULL, t INTEGER, PRIMARY KEY (code, dev))');
         try { db()->exec('ALTER TABLE invites ADD COLUMN off INTEGER DEFAULT 0'); } catch (Throwable $e) { }
+        db()->exec('CREATE TABLE IF NOT EXISTS ai (code TEXT PRIMARY KEY, on1 INTEGER, t INTEGER)');
         db()->exec('CREATE TABLE IF NOT EXISTS pings (h TEXT PRIMARY KEY, ver TEXT, form TEXT, role TEXT, t INTEGER)');
         $inv = q('SELECT i.code, i.max, i.lvl, i.created, COUNT(a.dev) AS used, MAX(a.t) AS last FROM invites i LEFT JOIN acts a ON a.code = i.code WHERE COALESCE(i.off, 0) = 0 GROUP BY i.code ORDER BY i.lvl, i.created DESC LIMIT 60')->fetchAll(PDO::FETCH_ASSOC);
         $since = time() - 14 * 86400;
@@ -249,9 +250,100 @@ try {
         foreach (q('SELECT a.code, a.dev, a.t, i.lvl FROM acts a JOIN invites i ON i.code = a.code ORDER BY a.t DESC LIMIT 500')->fetchAll(PDO::FETCH_ASSOC) as $x) {
             $p = q('SELECT ver, form, role, t FROM pings WHERE h = ?', [hash('sha256', 'ping|' . $x['dev'])])->fetch(PDO::FETCH_ASSOC);
             if ($p && $p['role'] === 'dev') continue;
-            $testers[] = ['code' => $x['code'], 'since' => (int)$x['t'], 'ver' => $p ? $p['ver'] : '', 'form' => $p ? $p['form'] : '', 'seen' => $p ? (int)$p['t'] : 0];
+            $testers[] = ['ai' => (int)(q('SELECT COALESCE(MAX(on1), 0) FROM ai WHERE code = ?', [$x['code']])->fetchColumn()), 'code' => $x['code'], 'since' => (int)$x['t'], 'ver' => $p ? $p['ver'] : '', 'form' => $p ? $p['form'] : '', 'seen' => $p ? (int)$p['t'] : 0];
         }
         out(['invites' => $inv, 'versions' => $vers, 'active7' => $act7, 'activations' => $acts, 'testers' => $testers]);
+    }
+    // ---- KI-Mami: Amtsbriefe genauer lesen (nur freigeschaltete Tester + Entwickler) ----
+    if (in_array($a, ['mami', 'aiok', 'aistat', 'aiset'], true)) {
+        db()->exec('CREATE TABLE IF NOT EXISTS acts (code TEXT NOT NULL, dev TEXT NOT NULL, t INTEGER, PRIMARY KEY (code, dev))');
+        db()->exec('CREATE TABLE IF NOT EXISTS ai (code TEXT PRIMARY KEY, on1 INTEGER, t INTEGER)');
+        db()->exec('CREATE TABLE IF NOT EXISTS aiuse (t INTEGER, code TEXT, inp INTEGER, cw INTEGER, cr INTEGER, outp INTEGER, usd REAL, ok INTEGER)');
+        db()->exec('CREATE TABLE IF NOT EXISTS aicfg (k TEXT PRIMARY KEY, v TEXT)');
+        $C = array_merge(['anthropic_key' => '', 'mami_model' => 'claude-haiku-5-5', 'mami_dev_day' => 15, 'credit_usd' => 100, 'credit_day' => 27,
+            'price_in' => 0.10, 'price_cw' => 0.125, 'price_cr' => 0.01, 'price_out' => 0.50], cfg());
+        if (is_file(__DIR__ . '/mami-config.php')) { $mc = include __DIR__ . '/mami-config.php'; if (is_array($mc)) $C = array_merge($C, $mc); }
+        $ck = trim((string)$C['anthropic_key']); $hasKey = $ck !== '' && strpos($ck, 'HIER-') !== 0;
+        $gv = fn(string $k, $d) => ($r = q('SELECT v FROM aicfg WHERE k = ?', [$k])->fetchColumn()) === false ? $d : $r;
+        $budget = (float)$gv('budget', (string)$C['credit_usd']);
+        $cday = max(1, min(28, (int)$gv('cday', (string)$C['credit_day'])));
+        $pStart = (function () use ($cday): int { $y = (int)gmdate('Y'); $m = (int)gmdate('n'); if ((int)gmdate('j') < $cday) { $m--; if ($m < 1) { $m = 12; $y--; } } return gmmktime(0, 0, 0, $m, $cday, $y); })();
+        $pEnd = (int)strtotime('+1 month', $pStart);
+        $spent = (float)q('SELECT COALESCE(SUM(usd), 0) FROM aiuse WHERE t >= ?', [$pStart])->fetchColumn();
+        $hdr = trim((string)($_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '')));
+        $isDev = false; if (preg_match('/^Dev\s/', $hdr)) { devCheck(); $isDev = true; }
+
+        if ($a === 'aistat' || $a === 'aiset') {
+            if (!$isDev) fail('Nur für den Entwickler', 403);
+            if ($a === 'aiset') { $b = body();
+                if (isset($b['c'])) { $c = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)$b['c'])); q('INSERT OR REPLACE INTO ai (code, on1, t) VALUES (?, ?, ?)', [$c, empty($b['on']) ? 0 : 1, time()]); }
+                if (isset($b['all'])) { foreach (q('SELECT DISTINCT code FROM acts')->fetchAll(PDO::FETCH_COLUMN) as $c) q('INSERT OR REPLACE INTO ai (code, on1, t) VALUES (?, ?, ?)', [$c, empty($b['all']) ? 0 : 1, time()]); }
+                if (isset($b['budget'])) q('INSERT OR REPLACE INTO aicfg (k, v) VALUES (?, ?)', ['budget', (string)max(0, min(10000, (float)$b['budget']))]);
+                if (isset($b['cday'])) q('INSERT OR REPLACE INTO aicfg (k, v) VALUES (?, ?)', ['cday', (string)max(1, min(28, (int)$b['cday']))]);
+                if (isset($b['pause'])) q('INSERT OR REPLACE INTO aicfg (k, v) VALUES (?, ?)', ['pause', empty($b['pause']) ? '0' : '1']);
+            }
+            $budget = (float)$gv('budget', (string)$C['credit_usd']);
+            $days = q("SELECT strftime('%Y-%m-%d', t, 'unixepoch') AS d, COUNT(*) AS n, SUM(usd) AS usd FROM aiuse WHERE t >= ? GROUP BY d ORDER BY d", [time() - 31 * 86400])->fetchAll(PDO::FETCH_ASSOC);
+            $per = q('SELECT code, COUNT(*) AS n, SUM(usd) AS usd, MAX(t) AS last FROM aiuse WHERE t >= ? GROUP BY code', [$pStart])->fetchAll(PDO::FETCH_ASSOC);
+            $tot = q('SELECT COUNT(*) AS n, COALESCE(SUM(inp),0) AS inp, COALESCE(SUM(cw),0) AS cw, COALESCE(SUM(cr),0) AS cr, COALESCE(SUM(outp),0) AS outp FROM aiuse WHERE t >= ?', [$pStart])->fetch(PDO::FETCH_ASSOC);
+            $codes = q('SELECT DISTINCT a.code, COALESCE(x.on1, 0) AS on1 FROM acts a LEFT JOIN ai x ON x.code = a.code')->fetchAll(PDO::FETCH_ASSOC);
+            out(['key' => $hasKey, 'model' => (string)$C['mami_model'], 'budget' => $budget, 'spent' => round($spent, 6), 'start' => $pStart, 'end' => $pEnd, 'cday' => $cday,
+                'pause' => $gv('pause', '0') === '1', 'tot' => $tot, 'days' => $days, 'per' => $per, 'codes' => $codes,
+                'prices' => ['in' => (float)$C['price_in'], 'cw' => (float)$C['price_cw'], 'cr' => (float)$C['price_cr'], 'out' => (float)$C['price_out']]]);
+        }
+
+        $b = body(); $dev = (string)($b['dev'] ?? ($_GET['dev'] ?? ''));
+        if (!preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev)) fail('dev', 400);
+        $code = (string)(q('SELECT code FROM acts WHERE dev = ? ORDER BY t DESC LIMIT 1', [$dev])->fetchColumn() ?: '');
+        $allowed = $isDev || ($code !== '' && (int)q('SELECT COALESCE(MAX(on1), 0) FROM ai WHERE code = ?', [$code])->fetchColumn() === 1);
+        $why = !$hasKey ? 'nokey' : (!$allowed ? 'notyet' : ($gv('pause', '0') === '1' ? 'pause' : ($spent >= $budget ? 'budget' : '')));
+        if ($a === 'aiok') out(['on' => $why === '', 'why' => $why]);
+        if ($why !== '') fail($why, $why === 'nokey' ? 503 : 403);
+        $n = (int)q('SELECT COUNT(*) FROM aiuse WHERE ok = 1 AND code = ? AND t >= ?', [$isDev ? '#dev' : $code, gmmktime(0, 0, 0)])->fetchColumn();
+        if (!$isDev && $n >= (int)$C['mami_dev_day']) fail('limit', 429);
+        $text = trim(mb_substr((string)($b['text'] ?? ''), 0, 16000)); if (mb_strlen($text) < 40) fail('short', 400);
+        $lang = preg_replace('/[^a-z]/', '', (string)($b['lang'] ?? 'de')) ?: 'de';
+        $L = ['de' => 'Deutsch', 'en' => 'English', 'tr' => 'Türkçe', 'ru' => 'Русский', 'uk' => 'Українська', 'pl' => 'Polski', 'ar' => 'العربية', 'ro' => 'Română']; $ln = $L[$lang] ?? 'Deutsch';
+        $system = "Du liest deutsche Briefe von Ämtern und Behörden (Jobcenter, Finanzamt, Familienkasse, Krankenkasse, Rentenversicherung, Stadt, Gericht usw.) für eine Haushalts-App.\n"
+            . "Der Text stammt aus einer Texterkennung und kann Fehler und Spalten-Durcheinander enthalten. Mit █ geschwärzte Stellen sind persönliche Daten – ignoriere sie und rate sie nicht.\n"
+            . "Antworte AUSSCHLIESSLICH mit einem JSON-Objekt ohne Text davor oder danach, Felder (unbekannt = null):\n"
+            . "{\"from\": Behörde kurz, \"kind\": \"mit\" (Unterlagen/Mitwirkung) | \"bes\" (Bescheid) | \"bew\" (Bewilligung) | \"abl\" (Ablehnung) | \"rueck\" (Rückforderung) | \"mahn\" (Mahnung) | \"ein\" (Einladung/Termin) | \"anh\" (Anhörung) | \"info\",\n"
+            . " \"date\": Briefdatum \"YYYY-MM-DD\", \"due\": wichtigste Frist \"YYYY-MM-DD\", \"term\": Termin \"YYYY-MM-DD\", \"time\": \"HH:MM\",\n"
+            . " \"money\": \"pay\" (muss zahlen) | \"back\" (bekommt einmalig Geld) | \"month\" (laufende Leistung) | \"none\", \"amt\": Betrag als Zahl (bei Spalten der Gesamtbetrag),\n"
+            . " \"docs\": [einzureichende Unterlagen, kurz], \"warn\": true wenn Kürzung/Sanktion/Versagung/Mahngebühr/Vollstreckung droht,\n"
+            . " \"sum\": [2 bis 4 sehr kurze einfache Sätze auf $ln in Du-Form: was drinsteht und was zu tun ist], \"todo\": [bis zu 4 kurze Aufgaben auf $ln]}\n"
+            . "Erfinde nichts. Was nicht im Text steht, ist null.";
+        $payload = json_encode(['model' => (string)$C['mami_model'], 'max_tokens' => 900,
+            'system' => [['type' => 'text', 'text' => $system, 'cache_control' => ['type' => 'ephemeral']]],
+            'messages' => [['role' => 'user', 'content' => "Brief:\n\n" . $text]]], JSON_UNESCAPED_UNICODE);
+        $h = ['Content-Type: application/json', 'x-api-key: ' . $ck, 'anthropic-version: 2023-06-01']; $hc = 0; $resp = '';
+        if (function_exists('curl_init')) { $ch = curl_init('https://api.anthropic.com/v1/messages');
+            curl_setopt_array($ch, [CURLOPT_POST => true, CURLOPT_POSTFIELDS => $payload, CURLOPT_HTTPHEADER => $h, CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 60, CURLOPT_CONNECTTIMEOUT => 10]);
+            $resp = (string)curl_exec($ch); $hc = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE); curl_close($ch);
+        } else { $ctx = stream_context_create(['http' => ['method' => 'POST', 'header' => implode("\r\n", $h), 'content' => $payload, 'timeout' => 60, 'ignore_errors' => true]]);
+            $resp = (string)@file_get_contents('https://api.anthropic.com/v1/messages', false, $ctx);
+            foreach ($http_response_header ?? [] as $l) if (preg_match('#^HTTP/\S+\s+(\d{3})#', $l, $m)) $hc = (int)$m[1]; }
+        $j = json_decode($resp, true) ?: []; $u = $j['usage'] ?? [];
+        $ti = (int)($u['input_tokens'] ?? 0); $tw = (int)($u['cache_creation_input_tokens'] ?? 0); $tr = (int)($u['cache_read_input_tokens'] ?? 0); $to = (int)($u['output_tokens'] ?? 0);
+        $f = ($ti + $tw + $tr) > 100000 ? 5 : 1;
+        $usd = $f * ($ti * $C['price_in'] + $tw * $C['price_cw'] + $tr * $C['price_cr'] + $to * $C['price_out']) / 1e6;
+        q('INSERT INTO aiuse (t, code, inp, cw, cr, outp, usd, ok) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [time(), $isDev ? '#dev' : $code, $ti, $tw, $tr, $to, $usd, ($hc >= 200 && $hc < 300) ? 1 : 0]);
+        if ($hc < 200 || $hc >= 300) { @file_put_contents(DATA_DIR . '/ki-fehler.log', gmdate('c') . " $hc " . substr($resp, 0, 300) . "\n", FILE_APPEND); fail($hc === 429 || $hc === 529 ? 'busy' : 'ai', 502); }
+        $txt = ''; foreach ((array)($j['content'] ?? []) as $c) if (($c['type'] ?? '') === 'text') $txt .= $c['text'];
+        if (!preg_match('/\{[\s\S]*\}/', $txt, $m)) fail('ai', 502);
+        $r = json_decode($m[0], true); if (!is_array($r)) fail('ai', 502);
+        $dd = fn($v) => is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) ? $v : null;
+        $ss = fn($v, $n) => is_string($v) ? mb_substr(trim($v), 0, $n) : null;
+        $ll = function ($v, $n, $len) use ($ss) { $o = []; foreach ((array)$v as $x) { $x = $ss($x, $len); if ($x) $o[] = $x; if (count($o) >= $n) break; } return $o; };
+        $res = ['from' => $ss($r['from'] ?? null, 60),
+            'kind' => in_array($r['kind'] ?? '', ['mit', 'bes', 'bew', 'abl', 'rueck', 'mahn', 'ein', 'anh', 'info'], true) ? $r['kind'] : null,
+            'date' => $dd($r['date'] ?? null), 'due' => $dd($r['due'] ?? null), 'term' => $dd($r['term'] ?? null),
+            'time' => is_string($r['time'] ?? null) && preg_match('/^\d{1,2}:\d{2}$/', $r['time']) ? $r['time'] : null,
+            'money' => in_array($r['money'] ?? '', ['pay', 'back', 'month', 'none'], true) ? $r['money'] : null,
+            'amt' => is_numeric($r['amt'] ?? null) ? round(abs((float)$r['amt']), 2) : null,
+            'docs' => $ll($r['docs'] ?? [], 10, 120), 'warn' => !empty($r['warn']), 'sum' => $ll($r['sum'] ?? [], 4, 240), 'todo' => $ll($r['todo'] ?? [], 4, 120)];
+        if (!$res['sum'] && is_string($r['sum'] ?? null)) $res['sum'] = [$ss($r['sum'], 600)];
+        out(['ok' => 1, 'r' => $res]);
     }
     if ($a === 'feedlist') {
         devCheck(); $list = [];

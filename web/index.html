@@ -9717,7 +9717,7 @@ function brSum(x){ if ((x.aisum||[]).length) return x.aisum.slice(); const s=x.f
   if (x.wid && dLeft(x.wid)>=0) out.push(nt("br_s_wid",{d:D(x.wid)}));
   if (x.warn) out.push(nt("br_s_warn"));
   return out; }
-function brOpen(id){ BR.st=0; BR.img=null; BR.d=null; BR.F={}; BR.edit=null; BR.sel=null; hbSheet("brBg", nt("br_title")); if (id && brList().some(x=>x.id===id)){ BR.sel=id; BR.st=3; } brRender(true); }
+function brOpen(id){ aiCheck(); BR.st=0; BR.img=null; BR.d=null; BR.F={}; BR.edit=null; BR.sel=null; hbSheet("brBg", nt("br_title")); if (id && brList().some(x=>x.id===id)){ BR.sel=id; BR.st=3; } brRender(true); }
 function brRender(first){ const bg=$("brBg"); if (!bg||bg.hidden) return; const b=bg.querySelector(".hobody"), L=brSorted(), D=(d,o)=>esc(fxDate(d,o||{day:"numeric",month:"short"}));
   if (BR.st===0){
     b.innerHTML=`<div class="bsintro"><div class="bsdoc">✉️<i></i></div><b>${esc(nt("br_intro"))}</b><span>${esc(nt("br_intro_s"))}</span></div>
@@ -9795,8 +9795,10 @@ function ocrText(L){ L=(L||[]).filter(l=>l&&(typeof l==="string"||l.t)); const b
   const it=b.map(l=>({t:String(l.t).trim(), x:l.x, cy:l.y+l.h/2, h:l.h})).sort((a,c)=>a.cy-c.cy), rows=[];
   for (const l of it){ const r=rows.find(r=>Math.abs(r.cy-l.cy)<Math.min(r.h,l.h)*0.6); if (r){ r.a.push(l); r.cy=(r.cy*(r.a.length-1)+l.cy)/r.a.length; } else rows.push({cy:l.cy, h:l.h, a:[l]}); }
   return rows.sort((a,c)=>a.cy-c.cy).map(r=>r.a.sort((a,c)=>a.x-c.x).map(x=>x.t).join("  ")).join("\n"); }
-function aiUrl(){ try{ const p=pairUrl(); return p ? p.replace(/pair\.php.*$/,"mami.php") : ""; }catch(_){ return ""; } }
-function aiOn(){ return !!aiUrl() && S.settings.aiOff!==true; }
+function aiUrl(){ try{ return pairUrl()||""; }catch(_){ return ""; } }
+const AIOK={on:(()=>{ try{ return localStorage.getItem("hb-aiok")==="1"; }catch(_){ return false; } })(), t:0};
+async function aiCheck(){ if (!aiUrl() || Date.now()-AIOK.t<60e3) return AIOK.on; AIOK.t=Date.now(); try{ const r=await pairCall("aiok", "", {dev:devId()}, true); const was=AIOK.on; AIOK.on=!!r.on; try{ localStorage.setItem("hb-aiok", AIOK.on?"1":"0"); }catch(_){} if (was!==AIOK.on && $("brBg") && !$("brBg").hidden && BR.st===2) brRender(); }catch(_){} return AIOK.on; }
+function aiOn(){ return !!aiUrl() && AIOK.on; }
 function aiUnsure(d,F){ const core=["from","kind","date","due","amt","term","docs"].filter(k=>F[k]).length; return core<3 || d.kind==="info" || (!F.due && !F.term && !F.amt); }
 function brRedact(text){ const T=String(text||""), mark=new Uint8Array(T.length), M=(a,b)=>{ for (let i=Math.max(0,a);i<Math.min(T.length,b);i++) mark[i]=1; };
   const re=(r,g)=>{ r.lastIndex=0; let m; while ((m=r.exec(T))){ if (g&&m[g]!=null){ const s=m.index+m[0].indexOf(m[g]); M(s,s+m[g].length); } else M(m.index, m.index+m[0].length); if (!m[0].length) r.lastIndex++; } };
@@ -9816,11 +9818,11 @@ function brRedact(text){ const T=String(text||""), mark=new Uint8Array(T.length)
   for (const w of new Set(names)) re(new RegExp("(?<![\\p{L}])"+w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?![\\p{L}])","giu"));
   const out=[]; const rx=/(\s+)|([^\s]+)/g; let m; while ((m=rx.exec(T))){ if (m[1]) out.push({s:m[1], sp:1}); else { let red=0; for (let i=m.index;i<m.index+m[2].length;i++) if (mark[i]){ red=1; break; } out.push({s:m[2], red}); } } return out; }
 function aiTextOf(tok){ return tok.map(t=>t.sp?t.s:(t.red?"█".repeat(Math.min(8,Math.max(3,t.s.length))):t.s)).join(""); }
-async function aiCall(text){ const url=aiUrl(); if (!url) throw new Error("off"); const js=JSON.stringify({dev:devId(), lang:LANG, text}); let r;
-  if (NATIVE && window.AndroidBridge && window.AndroidBridge.http){ r=await new Promise(res=>{ const id=newId(); httpWaiting[id]=res; setTimeout(()=>{ if (httpWaiting[id]){ delete httpWaiting[id]; res({status:0}); } }, 70000); window.AndroidBridge.http(id, "POST", url, "", js); }); }
-  else { try{ const f=await fetch(url,{method:"POST", headers:{"Content-Type":"application/json"}, body:js, cache:"no-store"}); r={status:f.status, text:await f.text()}; }catch(_){ r={status:0}; } }
+async function aiCall(text){ const base=aiUrl(); if (!base) throw new Error("off"); const url=window.__AIURL||apiUrl(base, "mami", ""), auth=updKey()?"Dev "+updKey():"", js=JSON.stringify({dev:devId(), lang:LANG, text}); let r;
+  if (NATIVE && window.AndroidBridge && window.AndroidBridge.http){ r=await new Promise(res=>{ const id=newId(); httpWaiting[id]=res; setTimeout(()=>{ if (httpWaiting[id]){ delete httpWaiting[id]; res({status:0}); } }, 70000); window.AndroidBridge.http(id, "POST", url, auth, js); }); }
+  else { try{ const f=await fetch(url,{method:"POST", headers:Object.assign({"Content-Type":"application/json"}, auth?{Authorization:auth}:{}), body:js, cache:"no-store"}); r={status:f.status, text:await f.text()}; }catch(_){ r={status:0}; } }
   let j={}; try{ j=JSON.parse(r.text||"{}"); }catch(_){}
-  if (!r.status) throw new Error("net"); if (r.status===429||j.error==="limit") throw new Error("limit"); if (j.error==="nokey"||r.status===404) throw new Error("off"); if (!j.ok||!j.r) throw new Error("ai"); return j.r; }
+  if (!r.status) throw new Error("net"); if (r.status===429||j.error==="limit") throw new Error("limit"); if (["nokey","notyet","pause","budget"].includes(j.error)||r.status===404){ AIOK.on=false; AIOK.t=0; try{ localStorage.setItem("hb-aiok","0"); }catch(_){} throw new Error("off"); } if (!j.ok||!j.r) throw new Error("ai"); return j.r; }
 function aiMerge(r){ const d=BR.d||{}, F=BR.F||{};
   for (const k of ["from","kind","date","due","term","time","money"]) if (r[k]){ d[k]=r[k]; F[k]=1; }
   if (r.amt>0){ d.amt=r.amt; F.amt=1; if (!r.money && (!d.money||d.money==="none")) d.money="pay"; }

@@ -922,3 +922,14 @@ html.pc .pcdi{width:96px;min-height:74px;border:0;border-radius:14px;background:
 html.pc .pcdi:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
 html.pc .pcdi span{width:30px;height:30px;border-radius:9px;background:var(--surface);display:grid;place-items:center}
 html.pc .pcdi em{font:700 11.5px/1.2 var(--f-body);font-style:normal;color:var(--fg);text-align:center}
+html.pc .kicard{background:var(--surface);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:0 0 0 1px var(--line)}
+html.pc .kitop{display:flex;justify-content:space-between}html.pc .kibig{margin:4px 0 0}html.pc .kibig b{font-size:30px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}html.pc .kibig span{color:var(--muted);font-weight:600}
+html.pc .kiexact{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin:2px 0 8px}
+html.pc .kibar{height:12px;border-radius:8px;background:var(--sunk);overflow:hidden}html.pc .kibar i{display:block;height:100%;border-radius:8px}
+html.pc .kigrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 4px}html.pc .kigrid span{background:var(--sunk);border-radius:12px;padding:8px 10px}html.pc .kigrid b{display:block;font-variant-numeric:tabular-nums}html.pc .kigrid small{color:var(--muted);font-size:11px}
+html.pc .kidays{display:flex;align-items:flex-end;gap:3px;height:60px;margin-top:10px}html.pc .kidays i{flex:1;min-width:3px;background:var(--accent);border-radius:3px 3px 1px 1px;transform-origin:bottom;opacity:.85}html.pc .kidays i:hover{opacity:1}
+html.pc .kidl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px}
+html.pc .kictl{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}html.pc .kictl .btn{flex:1 1 auto}html.pc .kibud{display:flex;align-items:center;gap:6px;width:100%;font-size:13px;color:var(--muted)}html.pc .kibud .in{width:90px}
+html.pc .kih{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:6px 2px}
+html.pc .kirow{display:flex;align-items:center;gap:10px;cursor:pointer}html.pc .kirow .kiu{flex:1;font-size:12px;color:var(--muted)}html.pc .kirow.on tt{color:var(--accent)}
+html.pc .kisw{position:relative;width:38px;height:22px;flex:none}html.pc .kisw input{position:absolute;opacity:0;inset:0}html.pc .kisw i{position:absolute;inset:0;border-radius:99px;background:var(--line);transition:background .25s}html.pc .kisw i:after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(.3,1.5,.5,1)}html.pc .kisw input:checked+i{background:var(--accent)}html.pc .kisw input:checked+i:after{transform:translateX(16px)}

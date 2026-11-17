@@ -613,9 +613,48 @@ if (IS_PC){
     const head=kop("🎟️",`${open.length} ${open.length===1?"Code":"Codes"} offen`, `${I.length-open.length} schon benutzt · jeder Code gilt für eine Person`);
     const row=i=>{ const u=+i.used; return `<div class="pcdcode ${u?"used":""}"><span class="dot" style="background:${u?"var(--good)":"var(--warn)"}"></span><tt>${esc(i.code)}</tt><span class="pcbadge ${u?"g":"o"}">${u?`benutzt${i.last?" "+new Date(i.last*1000).toLocaleDateString("de-DE",{day:"numeric",month:"numeric"}):""}`:"wartet"}</span>${u?"":`<button class="pccp" data-dscopy="${esc(i.code)}">Kopieren</button>`}<button class="pcdel ${UI.dsDel===i.code?"arm":""}" data-dsdel="${esc(i.code)}" title="Code löschen" aria-label="Code ${esc(i.code)} löschen">${UI.dsDel===i.code?"Löschen?":"🗑"}</button></div>`; };
     return head+`<button class="btn primary pcrgo" data-invopen="1" style="margin:0 0 10px">＋ Code für neuen Tester</button>`+(I.length?I.map(row).join(""):`<p class="small muted">Noch keine Einladung verschickt.</p>`); }
+
+  const KI={d:null, busy:false, err:"", t:0, arm:null, anim:0};
+  async function kiLoad(force, body){ if (KI.busy || (!force && !body && Date.now()-KI.t<30e3)) return; KI.busy=true; KI.err="";
+    try { KI.d=await devReq(body?"aiset":"aistat", "", body); KI.t=Date.now(); KI.anim=1; } catch(e){ KI.err=e.message||"Server nicht erreichbar"; } finally { KI.busy=false; window.pcRelPaint(); } }
+  const usd=(v,d=2)=>Number(v||0).toLocaleString("de-DE",{minimumFractionDigits:d,maximumFractionDigits:d})+" $";
+  const dd=t=>new Date(t*1000).toLocaleDateString("de-DE",{day:"numeric",month:"short"});
+  function kiPanel(){ const d=KI.d; if (!d) return `<p class="small muted" style="padding:14px 0">${KI.err?esc(KI.err):"Wird geladen …"}</p>`;
+    const on=(d.codes||[]).filter(c=>+c.on1).length, all=(d.codes||[]).length, left=Math.max(0,d.budget-d.spent), pct=d.budget>0?Math.min(100,d.spent/d.budget*100):0;
+    const n=+((d.tot||{}).n||0), per=n?d.spent/n:0, now=Date.now()/1000, runDays=Math.max(1,(now-d.start)/86400), perDay=d.spent/runDays, fore=perDay*((d.end-d.start)/86400);
+    const st=!d.key?["🔑","Schlüssel fehlt","Leg mami-config.php mit deinem Schlüssel neben pair.php"]:d.pause?["⏸️","KI pausiert","Niemand kann gerade genauer lesen lassen – außer dir"]:d.spent>=d.budget?["🛑","Guthaben aufgebraucht",`Geht am ${dd(d.end)} wieder los`]:["✨","KI-Mami läuft",`Freigeschaltet für ${on} von ${all} Testern · du hast sie immer`];
+    const head=kop(st[0],st[1],st[2]);
+    const col=pct>=90?"var(--bad)":pct>=70?"var(--warn)":"var(--accent)";
+    const days=d.days||[], mx=Math.max(0.0001,...days.map(x=>+x.usd||0));
+    const card=`<div class="kicard"><div class="kitop"><span class="small muted">Verbraucht seit ${dd(d.start)}</span><span class="small muted">Limit ${usd(d.budget)}</span></div>
+      <div class="kibig"><b data-kiodo="${d.spent}">${usd(d.spent)}</b><span> von ${usd(d.budget)}</span></div>
+      <div class="kiexact">genau: ${usd(d.spent,4)} · übrig ${usd(left)}</div>
+      <div class="kibar"><i style="width:${pct}%;background:${col}"></i></div>
+      <div class="kigrid"><span><b>${n}</b><small>Briefe gelesen</small></span><span><b>${n?usd(per,4):"–"}</b><small>pro Brief</small></span><span><b>${usd(fore)}</b><small>Hochrechnung bis ${dd(d.end)}</small></span></div>
+      ${days.length?`<div class="kidays">${days.map(x=>`<i title="${new Date(x.d).toLocaleDateString("de-DE")}: ${x.n} Briefe · ${usd(x.usd,4)}" style="height:${Math.max(4,(+x.usd||0)/mx*100)}%"></i>`).join("")}</div><div class="kidl"><span>vor 30 Tagen</span><span>heute</span></div>`:""}
+      <span class="small muted" style="display:block;margin-top:6px">Nur was Mami über deinen Server verbraucht. Neues Guthaben am ${dd(d.end)} · ${esc(d.model)}</span></div>`;
+    const ctl=`<div class="kictl"><button class="btn ${d.pause?"primary":""}" data-kipause="${d.pause?0:1}">${d.pause?"▶️ KI wieder an":"⏸️ KI für alle pausieren"}</button>
+      <button class="btn" data-kiall="1">Alle freischalten</button><button class="btn ${KI.arm==="none"?"danger":""}" data-kiall="0">${KI.arm==="none"?"Wirklich alle sperren?":"Alle sperren"}</button>
+      <label class="kibud">Limit <input class="in" id="kiBud" type="number" min="0" step="1" value="${d.budget}"> $ <button class="btn" data-kibud="1">Speichern</button></label></div>`;
+    const per2={}; (d.per||[]).forEach(x=>per2[x.code]=x);
+    const rows=(d.codes||[]).sort((a,b)=>(+b.on1)-(+a.on1)||a.code.localeCompare(b.code)).map(c=>{ const u=per2[c.code]; return `<label class="pcdtr kirow ${+c.on1?"on":""}"><tt>${esc(c.code)}</tt><span class="kiu">${u?`${u.n} ${+u.n===1?"Brief":"Briefe"} · ${usd(u.usd,4)}`:"noch nichts"}</span><span class="kisw"><input type="checkbox" data-kicode="${esc(c.code)}" ${+c.on1?"checked":""}><i></i></span></label>`; }).join("");
+    const me=per2["#dev"]?`<div class="pcdtr kirow on"><tt>Du</tt><span class="kiu">${per2["#dev"].n} Briefe · ${usd(per2["#dev"].usd,4)}</span><span class="pcbadge g">immer an</span></div>`:"";
+    return head+card+ctl+`<div class="kih">Tester freischalten</div>`+me+(rows||`<p class="small muted">Noch keine Tester.</p>`)+`<button class="pccp" style="margin-top:10px" data-kireload="1">${KI.busy?"…":"↻ Neu laden"}</button>`; }
+  function kiOdo(){ const el=document.querySelector("[data-kiodo]"); if (!el || !KI.anim) return; KI.anim=0; if (RMo()) return; const v=+el.dataset.kiodo, t0=performance.now();
+    const step=t=>{ const k=Math.min(1,(t-t0)/900), e=1-Math.pow(1-k,3); el.textContent=usd(v*e); if (k<1) requestAnimationFrame(step); }; requestAnimationFrame(step);
+    const bar=document.querySelector(".kibar i"); if (bar) bar.animate([{width:"0%"},{width:bar.style.width}],{duration:900,easing:"cubic-bezier(.2,.9,.3,1)"});
+    document.querySelectorAll(".kidays i").forEach((b,i)=>b.animate([{transform:"scaleY(0)"},{transform:"none"}],{duration:500,delay:i*18,easing:"cubic-bezier(.3,1.3,.5,1)",fill:"backwards"})); }
+  new MutationObserver(()=>{ if (KI.anim && document.querySelector("[data-kiodo]")) kiOdo(); }).observe(document.documentElement,{childList:true,subtree:true});
+  document.addEventListener("change", e=>{ const c=e.target.closest("[data-kicode]"); if (!c) return; const row=c.closest(".kirow"); if (row) row.classList.toggle("on", c.checked); kiLoad(true, {c:c.dataset.kicode, on:c.checked?1:0}); });
+  document.addEventListener("click", e=>{
+    const p=e.target.closest("[data-kipause]"); if (p){ kiLoad(true,{pause:+p.dataset.kipause}); return; }
+    const a=e.target.closest("[data-kiall]"); if (a){ if (a.dataset.kiall==="0" && KI.arm!=="none"){ KI.arm="none"; window.pcRelPaint(); setTimeout(()=>{ if (KI.arm){ KI.arm=null; window.pcRelPaint(); } },4000); return; } KI.arm=null; kiLoad(true,{all:+a.dataset.kiall}); return; }
+    if (e.target.closest("[data-kibud]")){ const v=parseFloat(($("kiBud")||{}).value); if (!(v>=0)){ toast("Bitte eine Zahl eingeben"); return; } kiLoad(true,{budget:v}); return; }
+    if (e.target.closest("[data-kireload]")){ kiLoad(true); return; } });
   function devPanelHtml(){ const tab=UI.devTab||"rel";
-    const tabs=`<div class="seg pcdevseg">${[["rel","Freigabe"],["stat","Tester"],["codes","Codes"],["test","Testdaten"]].map(([k,l])=>`<button class="${tab===k?"on":""}" data-devtab="${k}">${l}</button>`).join("")}</div>`;
+    const tabs=`<div class="seg pcdevseg">${[["rel","Freigabe"],["stat","Tester"],["codes","Codes"],["ki","✨ KI"],["test","Testdaten"]].map(([k,l])=>`<button class="${tab===k?"on":""}" data-devtab="${k}">${l}</button>`).join("")}</div>`;
     if (tab==="rel") return tabs+relPanel();
+    if (tab==="ki"){ setTimeout(()=>kiLoad(),0); return tabs+`<div class="pcds">${kiPanel()}</div>`; }
     if (tab==="stat"||tab==="codes"){ const d=DS.d; if (!d) return tabs+`<p class="small muted" style="padding:14px 0">${DS.err?esc(DS.err):"Wird geladen …"}</p>`;
       return tabs+`<div class="pcds">${tab==="stat"?testerPanel(d):codesPanel(d)}<button class="pccp" style="margin-top:10px" data-dsreload="1">↻ Neu laden</button></div>`; }
     const coupled=!!SYNC.token;
