@@ -3690,7 +3690,7 @@ function mamiGo(id){ const it=mIntent(id); if (!it) return; const g=it.go; mamiC
   if (g.fn==="tour"){ if (PTOUR[UI.view]) ptourOpen(UI.view); else tourOpen(); return; }
   if (g.fn==="bigtour"){ tourOpen(); return; } if (g.fn==="homeoffice"){ hoOpen(); return; } if (g.fn==="weiter"){ invOpen(); return; } if (g.fn==="danke"){ dankeOpen(true); return; }
   if (g.acc){ accGo(g.acc); return; }
-  if (g.view){ try{ if (spsOpen()) spSheetClose(); }catch(_){} UI.view=g.view; render(); window.scrollTo({top:0}); return; }
+  if (g.view==="gemeinsam"){ gmSheetOpen(); return; } if (g.view){ try{ if (spsOpen()) spSheetClose(); }catch(_){} UI.view=g.view; render(); window.scrollTo({top:0}); return; }
   if (g.spot){ if (UI.view!=="home" && !document.querySelector(g.spot)){ UI.view="home"; render(); }
     setTimeout(()=>{ if (![...document.querySelectorAll(g.spot)].some(tourVis)) return; TOUR.page="mami"; TOUR.steps=[{sel:g.spot, ic:"insight", t:mTxt(it,"t"), p:[mTxt(it,"a")]}]; tourGo(0); }, 250); } }
 function mamiRender(scroll){ const p=$("mamiPop"); if (!p || p.hidden) return; const c=mCfg()||mDef(); p.classList.toggle("studio", !!MAMI.studio); p.dir="ltr";
@@ -5038,7 +5038,7 @@ function render(){
   document.body.classList.toggle("nomonth", UI.view==="more"||UI.view==="import");
   $("settingsBtn").setAttribute("aria-pressed", String(UI.view==="more"));
   document.querySelectorAll(".tab[data-go]").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.go===(AREA_PARENT[UI.view]??UI.view)))); try{ navPill(true); }catch(_){}
-  document.querySelectorAll("[data-view]").forEach(s=>s.hidden = s.dataset.view!==UI.view);
+  document.querySelectorAll("[data-view]").forEach(s=>s.hidden = s.dataset.view!==UI.view && !(s.id==="v-gemeinsam" && SPS.open==="gemeinsam"));
   $("banner").innerHTML = (mem && !LOCAL) ? `<div class="notice warn" style="margin-bottom:14px"><span>Speichern ist hier gerade nicht möglich. Öffne die App bitte neu.</span></div>` : "";
   if (!(render.keep && FRESH[UI.view]===freshKey())) ({beruf:renderBeruf, zukunft:()=>{ renderZukunft(); if (!IS_PC) initStack("zstack","zkIdx","zdots"); }, home:renderHome, list:renderList, fix:renderFix, year:renderYear, ziele:renderZiele, shop:renderShop, more:renderMore, import:renderImport, belege:renderBelege, gemeinsam:renderGemeinsam})[UI.view]();
   render.keep=false; FRESH[UI.view]=freshKey();
@@ -5046,6 +5046,7 @@ function render(){
   applyTabColors();
   if (UI.tileEdit && UI.tileEdit!==UI.view) UI.tileEdit="";
   if (UI.view==="more" && UI.sp && !spsOpen() && SP_PAGES[UI.sp]){ const k=UI.sp; UI.sp=null; accGo(k); }
+  else if (SPS.open==="gemeinsam"){ if (UI.view!=="gemeinsam") try{ renderGemeinsam(); }catch(_){} }
   else if (UI.view!=="more" && spsOpen() && SPS.open!=="profil" && SHEET_SP.includes(SPS.open)){ try{ renderMore(); }catch(_){} spSubRender(SPS.open); }
   else if (UI.view!=="more" && spsOpen()){ $("spBg").hidden=true; $("spBg").classList.remove("show"); spSheetRestore(); SPS.open=null; UI.sp=null; }
   notifyPlanSoon();
@@ -8128,7 +8129,16 @@ function spSheetOpen(k){
   $("spSheetTitle").textContent=SP_PAGES[k][0];
   const bg=$("spBg"); bg.querySelector(".sheet").scrollTop=0; bg.hidden=false; requestAnimationFrame(()=>bg.classList.add("show"));
 }
-function spSheetRestore(){ SPS.nodes.forEach(([el,ph])=>{ if (ph.parentNode) ph.replaceWith(el); }); SPS.nodes=[]; }
+function spSheetRestore(){ SPS.nodes.forEach(([el,ph])=>{ if (ph.parentNode) ph.replaceWith(el); if (el.id==="v-gemeinsam") el.hidden=UI.view!=="gemeinsam"; }); SPS.nodes=[]; }
+function gmSheetOpen(){
+  if (UI.view==="gemeinsam"){ UI.view="home"; render(); }
+  if (SPS.open && SPS.open!=="gemeinsam") spSheetRestore();
+  const gm=$("v-gemeinsam"), body=$("spBody"); if (!gm||!body) return;
+  if (SPS.open!=="gemeinsam"){ body.innerHTML=""; const ph=document.createComment("gm"); gm.parentNode.insertBefore(ph, gm); body.appendChild(gm); SPS.nodes=[[gm,ph]]; }
+  SPS.open="gemeinsam"; gm.hidden=false; gm.classList.add("gmsheet"); renderGemeinsam();
+  $("spSheetTitle").textContent=nt("gm_title");
+  const bg=$("spBg"); bg.querySelector(".sheet").scrollTop=0; bg.hidden=false; requestAnimationFrame(()=>bg.classList.add("show"));
+}
 function spSheetClose(){
   if (!SPS.open) return;
   const bg=$("spBg"); bg.classList.remove("show");
@@ -8852,6 +8862,7 @@ rch_got0:["Hm, da konnte ich nicht viel lesen, {a}. Trag es kurz selbst ein.", "
 zk_saved:["Ersparnisse gesamt", "Total savings", "Toplam birikim", "Всего накоплений", "Усього заощаджень", "Oszczędności razem", "إجمالي المدخرات", "Economii totale"],
 zk_saved0:["Noch nichts gespart – leg ein Ziel an", "Nothing saved yet – create a goal", "Henüz birikim yok – bir hedef oluştur", "Пока ничего не накоплено – создай цель", "Поки нічого не заощаджено – створи ціль", "Jeszcze nic – załóż cel", "لا مدخرات بعد – أنشئ هدفًا", "Nimic economisit încă – creează un obiectiv"],
 zk_debts:["Schulden gesamt", "Total debts", "Toplam borç", "Всего долгов", "Усього боргів", "Długi razem", "إجمالي الديون", "Datorii totale"],
+gm_title:["Gemeinsam","Together","Birlikte","Вместе","Разом","Razem","معًا","Împreună"],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
@@ -10414,7 +10425,7 @@ document.addEventListener("click", async e => {
   const lm=t.closest("[data-lmode]"); if (lm){ UI.listMode=lm.dataset.lmode; UI.calDay=null; renderList(); return; }
   const cd=t.closest("[data-calday]"); if (cd){ UI.calDay = UI.calDay===cd.dataset.calday ? null : cd.dataset.calday; renderList(); return; }
   if (t.closest("[data-scanquick]")){ openSheet("ausgabe"); setTimeout(()=>runScan("camera"), 250); return; }
-  const go = t.closest("[data-go]"); if (go){ UI.view=go.dataset.go; if (UI.view==="more"){ const tg=go.dataset.scroll&&$(go.dataset.scroll); UI.sp = go.dataset.sp || (tg&&tg.closest("[data-sp]")?tg.closest("[data-sp]").dataset.sp:null); } render(); window.scrollTo({top:0}); return; }
+  const go = t.closest("[data-go]"); if (go && go.dataset.go==="gemeinsam"){ const sl=t.closest("[data-gmsel]"); if (sl){ UI.gmSel=sl.dataset.gmsel; UI.gmStep=""; } gmSheetOpen(); return; } if (go){ UI.view=go.dataset.go; if (UI.view==="more"){ const tg=go.dataset.scroll&&$(go.dataset.scroll); UI.sp = go.dataset.sp || (tg&&tg.closest("[data-sp]")?tg.closest("[data-sp]").dataset.sp:null); } render(); window.scrollTo({top:0}); return; }
   const open = t.closest("[data-open]"); if (open){ UI.ym=open.dataset.open; UI.view="home"; render(); window.scrollTo({top:0}); return; }
   const ed = t.closest("[data-edit]"); if (ed){ const tx=S.tx.find(x=>x.id===ed.dataset.edit); if (tx) openSheet(null, tx); return; }
   const kb = t.closest("#kindSeg button"); if (kb){ UI.kind=kb.dataset.kind; UI.cat=null; renderSheet(); try{ motSheet(); }catch(_){} return; }
@@ -13071,7 +13082,7 @@ function ctdTick(){
     el.querySelector("b").textContent=`${m}:${String(sec).padStart(2,"0")}`; el.querySelector(".ctdb i").style.width=`${Math.min(100,(1-left/CTD_LEN)*100).toFixed(2)}%`;
     el.classList.toggle("late", left<60000);
     if (!left && !el.dataset.done){ el.dataset.done="1"; el.querySelector("span").textContent="abgelaufen – neuer Code kommt"; el.querySelector("b").textContent="";
-      if (el.dataset.ctdk==="gm"){ Object.assign(GMS,{code:"",v:"",box:null}); if (UI.view==="gemeinsam") renderGemeinsam(); }
+      if (el.dataset.ctdk==="gm"){ Object.assign(GMS,{code:"",v:"",box:null}); if (UI.view==="gemeinsam"||SPS.open==="gemeinsam") renderGemeinsam(); }
       else if (el.dataset.ctdk==="pair"){ shortDrop(); try { pairUi(); } catch(_){} } } }
 }
 setInterval(()=>{ if (document.querySelector("[data-ctd]")) ctdTick(); }, 1000);
@@ -13115,7 +13126,7 @@ async function reqAsk(kind, sc, card){
     if (a.deny && a.deny.id===W.id){ UI.rwait=null; throw new Error(a.deny.why==="voll" ? (kind==="gm" ? "Dieser Bereich hat schon 10 Mitglieder." : "Dort sind schon 10 Geräte gekoppelt – eins muss erst entfernt werden.") : "Die Anfrage wurde abgelehnt."); } }
   const e=new Error(""); e.cancel=true; throw e; }
 function reqCancel(){ const W=UI.rwait; UI.rwait=null; if (W) boxPut(W.box,"req",{id:W.id, cancel:true}).catch(()=>{}); }
-function reqWaitUi(){ if (UI.rwait && UI.rwait.kind==="gm"){ if (UI.view==="gemeinsam") renderGemeinsam(); } else pairUi(); }
+function reqWaitUi(){ if (UI.rwait && UI.rwait.kind==="gm"){ if (UI.view==="gemeinsam"||SPS.open==="gemeinsam") renderGemeinsam(); } else pairUi(); }
 function reqWaitHtml(W){ const h=W.host.card||{}, gm=W.kind==="gm";
   return `<div class="pwait ${W.ok?"ok":""}">
     <div class="plink">${cardAv(h,"big")}<span class="pline"><i></i><b>✓</b></span>${gm?`<span class="pav big gmav"><b>${esc(String(W.host.a||"G")[0].toUpperCase())}</b></span>`:cardAv({f:devForm(), m:devModel()},"big")}</div>
@@ -13495,7 +13506,7 @@ document.addEventListener("click", async e=>{
   const t=e.target; if (!t.closest) return;
   if (t.closest("#v-gemeinsam button, #v-home .gmcard") && document.activeElement && document.activeElement.blur && document.activeElement!==document.body) document.activeElement.blur();
   const st=t.closest("[data-gmstep]"); if (st){ UI.gmStep=st.dataset.gmstep; renderGemeinsam(); window.scrollTo({top:0}); return; }
-  const se=t.closest("[data-gmsel]"); if (se){ UI.gmSel=se.dataset.gmsel; UI.gmStep=""; if (UI.view==="gemeinsam") renderGemeinsam(); return; }
+  const se=t.closest("[data-gmsel]"); if (se){ UI.gmSel=se.dataset.gmsel; UI.gmStep=""; if (UI.view==="gemeinsam" || SPS.open==="gemeinsam") renderGemeinsam(); return; }
   const tb=t.closest("[data-gmtab]"); if (tb){ UI.gmTab=tb.dataset.gmtab; renderGemeinsam(); return; }
   if (!t.closest("#v-gemeinsam")) return;
   const sp=spList().find(x=>x.v===UI.gmSel), err=m=>{ const x=$("gmErr"); if (x) x.textContent=m; else toast(m); };
