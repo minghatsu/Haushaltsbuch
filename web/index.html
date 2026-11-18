@@ -13078,7 +13078,7 @@ $("loginSeg").addEventListener("click", e=>{
 $("loginGo").onclick = doLogin;
 ["loginPw","loginPw2","loginEmail","loginRCode","loginCode","loginCloud"].forEach(id=>$(id).addEventListener("keydown", e=>{ if (e.key==="Enter") doLogin(); }));
 (function(){
-  const ORDER=["home","beruf","zukunft","shop"], RENDER={beruf:()=>renderBeruf(), zukunft:()=>renderZukunft(), shop:()=>renderShop(), home:()=>renderHome(), list:()=>renderList(), fix:()=>renderFix(), year:()=>renderYear(), ziele:()=>renderZiele(), more:()=>{ renderMore(); renderSpPages(); }};
+  const ORDER=["home","beruf","zukunft","shop"], RENDER={beruf:()=>renderBeruf(), zukunft:()=>{ renderZukunft(); if (!IS_PC) initStack("zstack","zkIdx","zdots"); }, shop:()=>renderShop(), home:()=>renderHome(), list:()=>renderList(), fix:()=>renderFix(), year:()=>renderYear(), ziele:()=>renderZiele(), more:()=>{ renderMore(); renderSpPages(); }};
   const main=document.querySelector("main.wrap");
   const hScroll=t=>{ for (let n=t; n && n!==document.body; n=n.parentElement){ if (n.scrollWidth>n.clientWidth+2){ const ox=getComputedStyle(n).overflowX; if (ox==="auto"||ox==="scroll") return true; } } return false; };
   const blocked=t=>t.closest("#moBg,#mbBg,#tourBg,.hobg,.sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,#astack,#zstack,.srail,.bt3,.bubbles,.fxchips,input,select,textarea,.wiz,[data-noswipe]") || hScroll(t) || document.querySelector(".backdrop:not([hidden])");
