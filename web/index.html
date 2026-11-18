@@ -2202,6 +2202,9 @@ html.pc [data-view="zukunft"] .agrid{grid-template-columns:repeat(4,1fr)!importa
 input,textarea,[contenteditable]{caret-color:var(--accent)}
 input[type=checkbox],input[type=radio],input[type=range],progress{accent-color:var(--accent)}
 html{scrollbar-color:color-mix(in srgb,var(--fg) 22%,transparent) transparent}
+
+.budrow{gap:10px}.budrow .budn{display:flex;align-items:center;gap:10px;flex:1;min-width:0}.budrow .budn b{min-width:0;overflow-wrap:anywhere;hyphens:auto;line-height:1.25}.budrow .in{flex:0 0 auto;width:clamp(96px,32%,130px)}
+@media (max-width:430px){.exr{flex-wrap:wrap}.exr .n{flex:1 1 calc(100% - 60px)}.exr>.btn,.exr>button{margin-left:56px}}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -5396,8 +5399,8 @@ function initStack(id, key, dotsId){ id=id||"astack"; key=key||"cardIdx"; dotsId
       c.style.transition = (!anim || jump) ? "none" : "";
       const x = d*w*0.6 + dx, sc = side===0 ? 1-Math.min(0.14,Math.abs(dx)/w*0.14) : 0.86+Math.min(0.14,(d*dx<0?Math.abs(dx):0)/w*0.14);
       c.style.transform = `translateX(${x}px) scale(${sc})`;
-      c.style.opacity = side<=1 ? "1" : "0";
-      c.style.filter = side===0 ? "" : "brightness(.5) saturate(.75)";
+      c.style.opacity = side===0 ? "1" : side===1 ? ".5" : "0";
+      c.style.filter = side===0 ? "" : "saturate(.7)";
       c.style.boxShadow = side===0 ? "0 18px 34px -14px rgba(0,0,0,.55)" : "";
       c.classList.toggle("side", side!==0);
       c.style.zIndex = String(10-side); c.setAttribute("aria-hidden", String(d!==0)); });
@@ -6713,7 +6716,7 @@ document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("anaBg").hi
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-shopsel]"); if (b) selectShop(b.dataset.shopsel, true); const f=e.target.closest("[data-recentf]"); if (f){ UI.recentF=f.dataset.recentf; renderHome(); } });
 function renderBudgetEd(){
   const el=$("budgetEd"); if (!el || el.contains(document.activeElement)) return; const b=S.settings.budgets||{};
-  el.innerHTML = cats("ausgabe").map(c=>`<div class="edit-row acct-row"><span>${tile("ausgabe",c)} <b style="vertical-align:middle">${esc(c)}</b></span><input class="in" data-budget="${esc(c)}" inputmode="decimal" placeholder="kein Budget" aria-label="Monatsbudget ${esc(c)}" value="${b[c]?esc(numStr(b[c])):""}"></div>`).join("");
+  el.innerHTML = cats("ausgabe").map(c=>`<div class="edit-row acct-row budrow"><span class="budn">${tile("ausgabe",c)}<b>${esc(c)}</b></span><input class="in" data-budget="${esc(c)}" inputmode="decimal" placeholder="kein Budget" aria-label="Monatsbudget ${esc(c)}" value="${b[c]?esc(numStr(b[c])):""}"></div>`).join("");
 }
 document.addEventListener("change", e=>{
   const el=e.target.closest("[data-budget]"); if (!el) return;
@@ -8417,7 +8420,7 @@ function spSheetOpen(k){
   const els=[$("spHero"), ...liveSp(k)].filter(el=>el && !el.hidden);
   SPS.nodes=els.map(el=>{ const ph=document.createComment("sp"); el.parentNode.insertBefore(ph, el); body.appendChild(el); return [el,ph]; });
   $("spSheetTitle").textContent=SP_PAGES[k][0];
-  const bg=$("spBg"); bg.querySelector(".sheet").scrollTop=0; bg.hidden=false; requestAnimationFrame(()=>bg.classList.add("show"));
+  const bg=$("spBg"); bg.dataset.k=SPS.open||""; bg.querySelector(".sheet").scrollTop=0; bg.hidden=false; requestAnimationFrame(()=>bg.classList.add("show"));
 }
 function spSheetRestore(){ SPS.nodes.forEach(([el,ph])=>{ if (ph.parentNode) ph.replaceWith(el); if (el.id==="v-gemeinsam") el.hidden=UI.view!=="gemeinsam"; }); SPS.nodes=[]; }
 function gmSheetOpen(){
@@ -8427,7 +8430,7 @@ function gmSheetOpen(){
   if (SPS.open!=="gemeinsam"){ body.innerHTML=""; const ph=document.createComment("gm"); gm.parentNode.insertBefore(ph, gm); body.appendChild(gm); SPS.nodes=[[gm,ph]]; }
   SPS.open="gemeinsam"; gm.hidden=false; gm.classList.add("gmsheet"); renderGemeinsam();
   $("spSheetTitle").textContent=nt("gm_title");
-  const bg=$("spBg"); bg.querySelector(".sheet").scrollTop=0; bg.hidden=false; requestAnimationFrame(()=>bg.classList.add("show"));
+  const bg=$("spBg"); bg.dataset.k=SPS.open||""; bg.querySelector(".sheet").scrollTop=0; bg.hidden=false; requestAnimationFrame(()=>bg.classList.add("show"));
 }
 function spSheetClose(){
   if (!SPS.open) return;

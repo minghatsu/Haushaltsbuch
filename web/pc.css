@@ -941,3 +941,6 @@ html.pc #phHome>.phg{animation:pcPhIn .45s cubic-bezier(.3,1.3,.5,1) backwards}
 html.pc #phHome>.phg:nth-of-type(2){animation-delay:.05s}html.pc #phHome>.phg:nth-of-type(3){animation-delay:.1s}html.pc #phHome>.phg:nth-of-type(4){animation-delay:.15s}
 @keyframes pcPhIn{from{opacity:0;transform:translateY(16px)}}
 @media (prefers-reduced-motion:reduce){html.pc #phHome>.phg{animation:none}}
+
+/* „Sparen & Anlegen“ hat am PC drei Spalten – dafür braucht das Fenster Platz */
+html.pc #spBg[data-k="invest"] .sheet{width:min(1080px,94vw)!important;max-width:none!important}
