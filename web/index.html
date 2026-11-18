@@ -2205,6 +2205,33 @@ html{scrollbar-color:color-mix(in srgb,var(--fg) 22%,transparent) transparent}
 
 .budrow{gap:10px}.budrow .budn{display:flex;align-items:center;gap:10px;flex:1;min-width:0}.budrow .budn b{min-width:0;overflow-wrap:anywhere;hyphens:auto;line-height:1.25}.budrow .in{flex:0 0 auto;width:clamp(96px,32%,130px)}
 @media (max-width:430px){.exr{flex-wrap:wrap}.exr .n{flex:1 1 calc(100% - 60px)}.exr>.btn,.exr>button{margin-left:56px}}
+
+/* Willkommens-Band über dem Freischalt-Fenster (Vorschlag B) */
+#actBg.gwon{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:0 16px calc(16px + env(safe-area-inset-bottom,0px))}
+#actBg.gwon .legalbox{position:relative;z-index:1;margin:0;flex:none}
+.gwel{--gwa:var(--accent);--gwbg:radial-gradient(120% 90% at 100% 0%,color-mix(in srgb,var(--gwa) 70%,#fff) 0%,var(--gwa) 45%,color-mix(in srgb,var(--gwa) 62%,#000) 100%);
+  position:relative;flex:1 0 auto;align-self:stretch;margin:0 -16px -64px;padding:calc(34px + env(safe-area-inset-top,0px)) 26px 92px;background:var(--gwbg);border-radius:0 0 36px 36px;color:#fff;overflow:hidden;display:flex;flex-direction:column;justify-content:center;pointer-events:none;
+  animation:gwDown .7s cubic-bezier(.2,.9,.25,1) backwards}
+html[data-theme="dark"] .gwel{--gwbg:radial-gradient(120% 90% at 100% 0%,color-mix(in srgb,var(--gwa) 55%,#0b1a14) 0%,color-mix(in srgb,var(--gwa) 38%,#08130e) 50%,#06100b 100%)}
+.gwel:before{content:"";position:absolute;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.08);right:-90px;top:-80px}
+.gwel:after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.22) 50%,transparent 65%);transform:translateX(-110%);animation:gwShine 1.6s ease .9s 1 both}
+.gwin{position:relative;max-width:520px;width:100%;margin:0 auto}
+.gwlg{display:flex;align-items:center;gap:12px;animation:gwPop .55s cubic-bezier(.3,1.6,.5,1) .25s backwards}
+.gwlg img{width:48px;height:48px;border-radius:14px;box-shadow:0 6px 16px rgba(0,0,0,.25);flex:none}
+.gwlg b{font:800 22px var(--f-display);letter-spacing:-.01em}
+.gwh{font:800 clamp(25px,7.6vw,32px)/1.08 var(--f-display);margin:16px 0 14px;letter-spacing:-.02em}
+.gwh span{display:block;animation:gwUp .55s cubic-bezier(.2,.9,.3,1) .38s backwards}.gwh span+span{animation-delay:.5s}
+.gwch{display:flex;flex-wrap:wrap;gap:7px}
+.gwch span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);padding:6px 11px;border-radius:99px;font:700 12.5px var(--f-body);animation:gwPop .45s cubic-bezier(.3,1.6,.5,1) .66s backwards}
+.gwch span:nth-child(2){animation-delay:.76s}.gwch span:nth-child(3){animation-delay:.86s}
+#actBg.gwon .legalbox:not(.seen){animation:gwUp .6s cubic-bezier(.2,.9,.3,1) .15s backwards}
+.gwel.seen,.gwel.seen *,.gwel.seen:after{animation:none!important}.gwel.seen:after{opacity:0}
+@keyframes gwDown{from{transform:translateY(-100%)}}@keyframes gwUp{from{opacity:0;transform:translateY(18px)}}@keyframes gwPop{from{opacity:0;transform:scale(.7)}}@keyframes gwShine{to{transform:translateX(110%)}}
+@media (min-width:700px){#actBg.gwon{justify-content:center;padding:24px}
+  .gwel{flex:none;align-self:center;width:min(580px,100%);margin:0 0 -64px;padding:34px 34px 92px;border-radius:32px;box-shadow:0 24px 60px -28px rgba(0,0,0,.55)}
+  .gwh{font-size:34px}}
+@media (max-height:760px){.gwch{display:none}.gwh{margin-bottom:0;font-size:24px}.gwel{padding-top:calc(22px + env(safe-area-inset-top,0px))}}@media (max-height:600px){.gwel{display:none}#actBg.gwon{justify-content:flex-end}#actBg.gwon .legalbox{margin-top:auto}}
+@media (prefers-reduced-motion:reduce){.gwel,.gwel *,.gwel:after,#actBg.gwon .legalbox{animation:none!important}.gwel:after{opacity:0}}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -4521,11 +4548,16 @@ function langGate(next){
     if (e.target.closest("#lgGo") && sel>=0){ clearInterval(tm); I18N.set(LG[sel][0]); try { render(); } catch(_){}
       el.classList.add("out"); setTimeout(()=>{ el.remove(); document.body.classList.remove("locked"); next(); }, calm?0:280); } });
 }
+const GW_LOGO="data:image/webp;base64,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";
 function actGate(){
   let el=$("actBg"); if (!el){ el=document.createElement("div"); el.id="actBg"; el.className="legalbg"; document.body.appendChild(el); }
   el.hidden=false; document.body.classList.add("locked");
   const A=UI.act||(UI.act={c:"", err:"", busy:false});
-  el.innerHTML=`<div class="legalbox actbox" role="dialog" aria-modal="true" aria-labelledby="actT">
+  el.classList.add("gwon"); el.innerHTML=`<div class="gwel${A.seen?" seen":""}" aria-hidden="true"><div class="gwin">
+      <div class="gwlg"><img src="${GW_LOGO}" alt="" width="52" height="52"><b>Finanz MAMI</b></div>
+      <h3 class="gwh"><span>${esc(nt("gw_h1"))}</span><span>${esc(nt("gw_h2"))}</span></h3>
+      <div class="gwch"><span>${esc(nt("gw_c1"))}</span><span>${esc(nt("gw_c2"))}</span><span>${esc(nt("gw_c3"))}</span></div>
+    </div></div><div class="legalbox actbox${A.seen?" seen":""}" role="dialog" aria-modal="true" aria-labelledby="actT">
     <span class="lgic">${ic("user",26)}</span>
     <h2 id="actT">Willkommen bei Finanz MAMI</h2>
     <p class="small muted" style="margin:0 0 14px">Die App ist gerade nur auf Einladung nutzbar. Gib den Code ein, den du bekommen hast – er steht auch auf der Download-Seite.</p>
@@ -4538,6 +4570,7 @@ function actGate(){
     <button class="btn block" style="justify-content:center;gap:8px" data-actpair>${ic("phone",18)} Ich habe die App schon – Gerät koppeln</button>
     <p class="small muted" style="margin:8px 2px 0;text-align:center">Für dein eigenes zweites Gerät brauchst du keinen Code.</p>
   </div>`;
+  A.seen=true;
   if (!A.waited){ A.waited=true;
     pairCall("actwait","",{dev:devId()}).then(r=>{ if (r && r.c && UI.act && !UI.act.c){ UI.act.c=r.c; UI.act.found=true; if (!$("actBg").hidden) actGate(); } }).catch(()=>{});
     try { if (CAN_NOTIFY && notifyPerm()!=="granted" && !localStorage.getItem("hb-actnask") && AndroidBridge.notifyAsk){ localStorage.setItem("hb-actnask","1"); setTimeout(()=>{ try{ AndroidBridge.notifyAsk(); }catch(_){} }, 1500); } } catch(_){}
@@ -9347,6 +9380,11 @@ act_rem_t:["Fast geschafft!", "Almost there!", "Neredeyse bitti!", "Почти �
 act_rem_p:["Mami wartet auf dich – gib deinen Einladungscode ein und leg los.", "Mami is waiting for you – enter your invitation code and get started.", "Mami seni bekliyor – davet kodunu gir ve başla.", "Mami ждёт тебя – введи код приглашения и начинай.", "Mami чекає на тебе – введи код запрошення й починай.", "Mami czeka na ciebie – wpisz kod zaproszenia i zaczynaj.", "Mami بانتظارك – أدخل رمز دعوتك وابدأ.", "Mami te așteaptă – introdu codul de invitație și începe."],
 trh_inv:["Unter „App weitergeben“ siehst du jetzt alle Einladungen auf einer Pinnwand: wer unterwegs ist, wer die App geladen hat und wer schon freigeschaltet ist. Der nächste Code liegt immer bereit.", "Under “Share the app” you now see all invitations on a board: who's on the way, who downloaded and who's activated. The next code is always ready.", "“Uygulamayı paylaş” altında artık tüm davetleri bir panoda görürsün: kim yolda, kim indirdi, kim etkinleştirdi. Sıradaki kod hep hazır.", "В «Поделиться приложением» теперь все приглашения на доске: кто в пути, кто скачал и кто уже активировал. Следующий код всегда готов.", "У «Поділитися застосунком» тепер усі запрошення на дошці: хто в дорозі, хто завантажив і хто вже активував. Наступний код завжди готовий.", "W „Udostępnij aplikację” widzisz teraz wszystkie zaproszenia na tablicy: kto w drodze, kto pobrał, a kto już aktywował. Następny kod zawsze czeka.", "في «مشاركة التطبيق» ترى الآن كل الدعوات على لوحة: من في الطريق، ومن نزّل، ومن فعّل. الرمز التالي جاهز دائمًا.", "La „Distribuie aplicația” vezi acum toate invitațiile pe un panou: cine e pe drum, cine a descărcat și cine a activat. Codul următor e mereu gata."],
 zk_invest_t:["Anlegen", "Invest", "Yatırım", "Инвестиции", "Інвестиції", "Inwestycje", "استثمار", "Investiții"],
+gw_h1:["Dein Haushaltsbuch.", "Your household budget.", "Ev bütçen.", "Твой домашний бюджет.", "Твій домашній бюджет.", "Twój budżet domowy.", "ميزانية بيتك.", "Bugetul casei tale."],
+gw_h2:["Ohne Zettelchaos.", "Without the paper chaos.", "Kâğıt karmaşası olmadan.", "Без бумажного хаоса.", "Без паперового хаосу.", "Bez papierowego chaosu.", "بلا فوضى الأوراق.", "Fără haosul hârtiilor."],
+gw_c1:["Vorschau bis Monatsende", "Preview to month end", "Ay sonuna kadar önizleme", "Прогноз до конца месяца", "Прогноз до кінця місяця", "Podgląd do końca miesiąca", "توقّع حتى نهاية الشهر", "Previziune până la final de lună"],
+gw_c2:["Fixkosten abhaken", "Tick off fixed costs", "Sabit giderleri işaretle", "Отмечать постоянные расходы", "Відмічати постійні витрати", "Odhaczaj stałe koszty", "علّم التكاليف الثابتة", "Bifezi costurile fixe"],
+gw_c3:["Briefe vom Amt", "Official letters", "Resmî mektuplar", "Письма от ведомств", "Листи від установ", "Pisma z urzędu", "الرسائل الرسمية", "Scrisori de la autorități"],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
