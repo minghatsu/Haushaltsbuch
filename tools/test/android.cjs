@@ -28,16 +28,18 @@ const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out',
   ok('Test-Zugang der Test-App aktiv', await p.evaluate(()=>!!window.__hbt)); await p.evaluate(()=>{ try{ window.__hbt.seed(); }catch(_){} });
   await sleep(800); await hide();
   // Kalibrieren: wo landet ein Android-Tipp in der Seite?
-  await p.evaluate(()=>{ window.__tp=null; addEventListener('touchstart',e=>{ window.__tp=[e.touches[0].clientX,e.touches[0].clientY]; },{capture:true,passive:true}); });
+  // Kalibrier-Fläche über allem, damit der Test-Tipp nichts in der App auslöst
+  await p.evaluate(()=>{ window.__tp=null; const o=document.createElement('div'); o.id='hbCal'; o.style.cssText='position:fixed;inset:0;z-index:2147483647;background:transparent;touch-action:none';
+    const st=e=>{ e.stopPropagation(); e.preventDefault(); }; o.addEventListener('touchstart',e=>{ window.__tp=[e.touches[0].clientX,e.touches[0].clientY]; st(e); },{passive:false}); ['touchend','click','pointerdown','pointerup','mousedown','mouseup'].forEach(t=>o.addEventListener(t,st)); document.body.appendChild(o); });
   shot('start');
   // tatsächliche Bildschirmgröße inkl. Drehung
   let W,H; { const m=sh('dumpsys','display').match(/mCurrentDisplayRect=Rect\(0, 0 - (\d+), (\d+)\)/)||sh('dumpsys','window','displays').match(/cur=(\d+)x(\d+)/); if (m){ W=+m[1]; H=+m[2]; } else [W,H]=sh('wm','size').match(/(\d+)x(\d+)\s*$/m).slice(1).map(Number); }
   const dpr=await p.evaluate(()=>devicePixelRatio); let tp=null, tx=0, ty=0;
   for (const [fx,fy] of [[0.5,0.15],[0.5,0.5],[0.3,0.3],[0.7,0.6]]){ tx=Math.round(W*fx); ty=Math.round(H*fy); await p.evaluate(()=>{ window.__tp=null; }); sh('input','tap',String(tx),String(ty)); await sleep(700); tp=await p.evaluate(()=>window.__tp); if (tp) break; await hide(); }
-  if (!tp){ console.log('Kalibrierung: kein Treffer – App wird neu nach vorne geholt'); sh('am','broadcast','-a','android.intent.action.CLOSE_SYSTEM_DIALOGS'); sh('am','start','-n',(process.env.HB_PKG||'de.sascha.haushaltsbuch.test')+'/de.sascha.haushaltsbuch.MainActivity'); await sleep(8000);
+  if (!tp){ console.log('Kalibrierung: kein Treffer – App wird neu nach vorne geholt'); sh('am','broadcast','-a','android.intent.action.CLOSE_SYSTEM_DIALOGS'); sh('am','start','-n',(process.env.HB_PKG||'de.sascha.haushaltsbuch.test')+'/de.sascha.haushaltsbuch.MainActivity'); await sleep(8000); await p.evaluate(()=>{ if(!document.getElementById('hbCal')){ const o=document.createElement('div'); o.id='hbCal'; o.style.cssText='position:fixed;inset:0;z-index:2147483647'; o.addEventListener('touchstart',e=>{ window.__tp=[e.touches[0].clientX,e.touches[0].clientY]; e.stopPropagation(); e.preventDefault(); },{passive:false}); document.body.appendChild(o);} }).catch(()=>{});
     for (const [fx,fy] of [[0.5,0.15],[0.5,0.5]]){ tx=Math.round(W*fx); ty=Math.round(H*fy); await p.evaluate(()=>{ window.__tp=null; }); sh('input','tap',String(tx),String(ty)); await sleep(900); tp=await p.evaluate(()=>window.__tp); if (tp) break; } }
   if (!tp){ console.log('Kalibrierung fehlgeschlagen', W, H, sh('dumpsys','window').match(/mCurrentFocus=.*/)); shot('kalibrierung'); process.exit(2); }
-  const offX=tx/dpr-tp[0], offY=ty/dpr-tp[1]; await hide();
+  const offX=tx/dpr-tp[0], offY=ty/dpr-tp[1]; await p.evaluate(()=>{ const o=document.getElementById('hbCal'); o&&o.remove(); try{ window.__hbt.seed(); }catch(_){} }); await sleep(1500); await hide();
   const D=(x,y)=>[String(Math.round((x+offX)*dpr)),String(Math.round((y+offY)*dpr))];
   const vw=await p.evaluate(()=>innerWidth), vh=await p.evaluate(()=>innerHeight);
   console.log(`Bildschirm ${W}×${H}, Seite ${vw}×${vh} @${dpr}`);
