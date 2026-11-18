@@ -76,7 +76,10 @@ h1{font:800 24px Georgia,serif;margin:26px 0 4px}.mu{color:var(--mu);font-size:1
   if (!mobile){ $("t").textContent = "Finanz MAMI für den PC"; $("android").hidden = true; $("win").hidden = !isWin; $("other").hidden = isWin; $("mob").hidden = true; }
   else $("win").hidden = true;
   $("cp").onclick = function(){ copy(code, "Code kopiert"); };
-  $("apk").addEventListener("click", function(){ try { navigator.clipboard && navigator.clipboard.writeText(code); } catch(e){} });
+  var ping = function(a, f){ try { var u = PAIR + "?a=" + a + "&c=" + code + (f ? "&f=" + f : ""); if (navigator.sendBeacon && navigator.sendBeacon(u, "{}")) return; fetch(u, { method: "POST", body: "{}", keepalive: true }).catch(function(){}); } catch(e){} };
+  ping("invseen");
+  $("apk").addEventListener("click", function(){ ping("invdl", "apk"); try { navigator.clipboard && navigator.clipboard.writeText(code); } catch(e){} });
+  if ($("zip")) $("zip").addEventListener("click", function(){ ping("invdl", "zip"); });
   $("send").onclick = function(){
     var url = location.origin + location.pathname + "?" + code, text = "Finanz MAMI für den PC – Einladungscode " + code;
     if (navigator.share){ navigator.share({ title: "Finanz MAMI", text: text, url: url }).catch(function(){}); return; }

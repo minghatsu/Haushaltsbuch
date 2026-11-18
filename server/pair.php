@@ -28,6 +28,10 @@ define('DATA_DIR', (function (): string {
 function out($data, int $code = 200): void { http_response_code($code); echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); exit; }
 function fail(string $msg, int $code): void { out(['error' => $msg], $code); }
 function body(): array { static $b = null; if ($b === null) { $j = json_decode(file_get_contents('php://input') ?: '{}', true); $b = is_array($j) ? $j : []; } return $b; }
+function ipH(): string { return hash('sha256', 'invip|' . ip()); }
+function invCols(): void {
+    foreach (['name TEXT', 'given INTEGER', 'seen INTEGER', 'dl INTEGER', 'dlform TEXT', 'app INTEGER', 'iph TEXT', 'remind INTEGER'] as $col) { try { db()->exec('ALTER TABLE invites ADD COLUMN ' . $col); } catch (Throwable $e) { } }
+}
 function ip(): string { return substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 64); }
 
 function db(): PDO {
@@ -56,9 +60,10 @@ function db(): PDO {
     $pdo->exec('CREATE TABLE IF NOT EXISTS ipcreate (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS ipfails (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS ipfeed (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)');
+    foreach (['ipinvseen', 'ipactwait'] as $t) $pdo->exec("CREATE TABLE IF NOT EXISTS $t (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)");
     return $pdo;
 }
-function q(string $sql, array $p = []): PDOStatement { $s = db()->prepare($sql); $s->execute($p); return $s; }
+function q(string $sql, array $p = []): PDOStatement { $s = db()->prepare($sql); $i = 0; foreach ($p as $v) { $i++; $s->bindValue($i, $v, is_int($v) ? PDO::PARAM_INT : (is_null($v) ? PDO::PARAM_NULL : PDO::PARAM_STR)); } $s->execute(); return $s; }
 
 function ipCount(string $table, int $limit): bool {
     $r = q("SELECT n, since FROM $table WHERE ip = ?", [ip()])->fetch();
@@ -156,7 +161,8 @@ try {
             $mine = $lvl === 0 ? 'lvl = 0' : "owner LIKE ? ESCAPE '\\'";
             $mp = $lvl === 0 ? [] : [str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $dev) . '#%'];
             $r = null;
-            if (!$fresh) $r = q("SELECT code, max, lvl FROM invites WHERE $mine AND COALESCE(off, 0) = 0 AND code NOT IN (SELECT code FROM acts) ORDER BY created DESC, rowid DESC LIMIT 1", $mp)->fetch(PDO::FETCH_ASSOC) ?: null;
+            invCols();
+            if (!$fresh) $r = q("SELECT code, max, lvl FROM invites WHERE $mine AND COALESCE(off, 0) = 0 AND given IS NULL AND code NOT IN (SELECT code FROM acts) ORDER BY created DESC, rowid DESC LIMIT 1", $mp)->fetch(PDO::FETCH_ASSOC) ?: null;
             if (!$r) {
                 if ($lvl === 1 && (int)q("SELECT COUNT(*) FROM invites WHERE $mine", $mp)->fetchColumn() >= INV_MAX) fail('Du hast schon ' . INV_MAX . ' Einladungen verschickt', 403);
                 if (!ipCount('ipcreate', MAX_CREATE_PER_HOUR)) fail('Zu viele neue Codes – bitte später noch einmal', 429);
@@ -225,6 +231,50 @@ try {
         db()->exec('CREATE TABLE IF NOT EXISTS pings (h TEXT PRIMARY KEY, ver TEXT, form TEXT, role TEXT, t INTEGER)');
         q('INSERT OR REPLACE INTO pings (h, ver, form, role, t) VALUES (?, ?, ?, ?, ?)', [hash('sha256', 'ping|' . $dev), substr($ver, 0, 12), $form, $role, time()]);
         out(['ok' => true]);
+    }
+    // ---- Einladungen: Verlauf (verschickt → Seite geöffnet → geladen → App offen → freigeschaltet) ----
+    if (in_array($a, ['invgive', 'invname', 'invseen', 'invdl', 'actwait', 'devinv', 'invremind'], true)) {
+        db()->exec('CREATE TABLE IF NOT EXISTS invites (code TEXT PRIMARY KEY, owner TEXT UNIQUE, max INTEGER, lvl INTEGER DEFAULT 1, created INTEGER)');
+        db()->exec('CREATE TABLE IF NOT EXISTS acts (code TEXT NOT NULL, dev TEXT NOT NULL, t INTEGER, PRIMARY KEY (code, dev))');
+        db()->exec('CREATE TABLE IF NOT EXISTS pings (h TEXT PRIMARY KEY, ver TEXT, form TEXT, role TEXT, t INTEGER)');
+        try { db()->exec('ALTER TABLE invites ADD COLUMN off INTEGER DEFAULT 0'); } catch (Throwable $e) { }
+        invCols(); $b = body();
+        $c = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)($b['c'] ?? ($_GET['c'] ?? ''))));
+        if ($a === 'invgive' || $a === 'invname' || $a === 'invremind') {
+            devCheck(); if ($c === '') fail('Code fehlt', 400);
+            $name = mb_substr(trim((string)($b['name'] ?? '')), 0, 40);
+            if ($a === 'invgive') q('UPDATE invites SET given = COALESCE(given, ?), name = CASE WHEN ? <> \'\' THEN ? ELSE name END WHERE code = ?', [time(), $name, $name, $c]);
+            elseif ($a === 'invname') q('UPDATE invites SET name = ? WHERE code = ?', [$name, $c]);
+            else q('UPDATE invites SET remind = ? WHERE code = ?', [time(), $c]);
+            out(['ok' => true]);
+        }
+        if ($a === 'invseen' || $a === 'invdl') {
+            if (!ipCount('ipinvseen', 120)) out(['ok' => false]); ipBump('ipinvseen');
+            if ($c === '') out(['ok' => false]);
+            if ($a === 'invseen') q('UPDATE invites SET seen = COALESCE(seen, ?), iph = ? WHERE code = ? AND COALESCE(off, 0) = 0', [time(), ipH(), $c]);
+            else { $f = in_array($b['f'] ?? ($_GET['f'] ?? ''), ['apk', 'zip', 'ios'], true) ? ($b['f'] ?? $_GET['f']) : 'apk';
+                q('UPDATE invites SET seen = COALESCE(seen, ?), dl = COALESCE(dl, ?), dlform = ?, iph = ? WHERE code = ? AND COALESCE(off, 0) = 0', [time(), time(), $f, ipH(), $c]); }
+            out(['ok' => true]);
+        }
+        if ($a === 'actwait') {
+            // App ist installiert, aber noch nicht freigeschaltet: passende Einladung über dieselbe Internetverbindung finden
+            if (!ipCount('ipactwait', 30)) out(['c' => '']); ipBump('ipactwait');
+            $r = q('SELECT code FROM invites WHERE iph = ? AND COALESCE(off, 0) = 0 AND code NOT IN (SELECT code FROM acts) AND COALESCE(seen, dl, given, created) > ? ORDER BY COALESCE(dl, seen) DESC LIMIT 1', [ipH(), time() - 14 * 86400])->fetch(PDO::FETCH_ASSOC);
+            if ($r) { q('UPDATE invites SET app = COALESCE(app, ?) WHERE code = ?', [time(), $r['code']]); out(['c' => $r['code']]); }
+            out(['c' => '']);
+        }
+        if ($a === 'devinv') {
+            devCheck(); $L = [];
+            foreach (q('SELECT code, name, created, given, seen, dl, dlform, app, remind, lvl FROM invites WHERE COALESCE(off, 0) = 0 AND (given IS NOT NULL OR code IN (SELECT code FROM acts)) ORDER BY COALESCE(given, created) DESC LIMIT 200')->fetchAll(PDO::FETCH_ASSOC) as $x) {
+                $act = q('SELECT dev, t FROM acts WHERE code = ? ORDER BY t LIMIT 1', [$x['code']])->fetch(PDO::FETCH_ASSOC);
+                $p = $act ? q('SELECT ver, form, role, t FROM pings WHERE h = ?', [hash('sha256', 'ping|' . $act['dev'])])->fetch(PDO::FETCH_ASSOC) : null;
+                if ($p && $p['role'] === 'dev') continue;
+                $L[] = ['code' => $x['code'], 'name' => (string)($x['name'] ?? ''), 'given' => (int)($x['given'] ?? 0), 'seen' => (int)($x['seen'] ?? 0), 'dl' => (int)($x['dl'] ?? 0),
+                    'dlform' => (string)($x['dlform'] ?? ''), 'app' => (int)($x['app'] ?? 0), 'remind' => (int)($x['remind'] ?? 0), 'act' => $act ? (int)$act['t'] : 0,
+                    'ver' => $p ? (string)$p['ver'] : '', 'form' => $p ? (string)$p['form'] : '', 'last' => $p ? (int)$p['t'] : 0];
+            }
+            out(['items' => $L]);
+        }
     }
     if ($a === 'invdel') {
         devCheck(); $b = body();

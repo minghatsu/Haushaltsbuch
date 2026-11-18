@@ -2169,6 +2169,28 @@ html.pc [data-view="zukunft"] .agrid{grid-template-columns:repeat(4,1fr)!importa
 .fbrecn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding-left:30px;animation:devIn .35s both}
 .fbshot{align-items:center}.fbshot img{width:44px;height:78px;object-fit:cover;object-position:top;border-radius:8px;margin-left:auto;border:2px solid var(--line);opacity:.55;filter:grayscale(.6);transition:all .3s}
 .fbshot img.on{opacity:1;filter:none;border-color:var(--accent);transform:scale(1.04)}
+
+/* Einladungs-Pinnwand */
+.invboardbox{max-width:760px}.invhd .invrl{margin-left:auto;display:grid;place-items:center}
+.invnext{background:var(--surface);border:2px solid var(--accent);border-radius:22px;padding:14px;margin:14px 0 12px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.invnext.anim{animation:invPop .45s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes invPop{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+.invnl{flex:1 1 200px;min-width:0}.invnl small{color:var(--muted)}.invnc{font:800 24px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;color:var(--accent);margin:2px 0 8px}
+.invname{width:100%}.invnb{display:flex;flex-direction:column;align-items:center;gap:6px}.invnb .btn{display:inline-flex;align-items:center;gap:6px}
+.invqrs{flex-basis:100%;display:flex;justify-content:center;animation:invPop .35s both}.invqrs svg{width:200px}
+.invcols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;flex:1;min-height:0}
+@media (max-width:340px){.invcols{grid-template-columns:repeat(3,minmax(130px,1fr));overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px}.invcol{scroll-snap-align:start}}
+.invcol{background:var(--cb);border-radius:18px;padding:8px 6px;min-height:240px;overflow:auto;animation:devIn .4s both;animation-delay:calc(var(--i)*70ms)}
+.invcol h4{display:flex;justify-content:space-between;align-items:flex-start;gap:4px;margin:2px 4px 8px;font-size:12px}
+.invmini{background:var(--surface);border-radius:13px;padding:9px;margin-bottom:6px;font-size:12px;display:flex;flex-direction:column;gap:2px;animation:devIn .35s both;animation-delay:calc(var(--i)*45ms + 120ms)}
+.invmini b{font-size:13px;overflow-wrap:anywhere}.invmini small{color:var(--muted)}.invmc{font-family:ui-monospace,monospace;letter-spacing:.06em}
+.invmini .link{align-self:flex-start;margin-top:4px;padding:0}.invrem{align-self:flex-start;display:inline-flex;align-items:center;gap:4px;margin-top:4px}
+.invempty{color:var(--faint);font-size:12px;text-align:center;margin:18px 0}
+.invcols .chip{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700}.chip.no{background:var(--surface);color:var(--muted)}.chip.wa{background:var(--surface);color:var(--warn)}.chip.ok{background:var(--surface);color:var(--accent)}
+.invmini .chip.wa{background:var(--warn-soft)}
+.invfoot{margin:12px 4px 0;text-align:center}
+.actfound{color:var(--accent);margin:10px 0 0;display:flex;align-items:center;justify-content:center;gap:6px;animation:invPop .4s both}
+@media (prefers-reduced-motion:reduce){.invnext.anim,.invcol,.invmini,.invqrs,.actfound{animation:none}}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -3522,6 +3544,7 @@ const PTOUR_FN=()=>({
   more:{t:"Einstellungen", s:[
     {sel:"#setQ", ic:"insight", t:"Suchen", p:["Schneller als blättern: eintippen, was du suchst – z. B. „Backup“ oder „Budget“."]},
     {sel:"#pcsL,#setTabs", ic:"sliders", t:"Bereiche", p:[IS_PC?"Links wählen, rechts erscheint der Inhalt.":"Geld, Anpassen, Sicherheit und Hilfe – darunter klappen die Punkte auf.", "Geld: Konten, Budgets, Abos, Sparen & Anlegen. Anpassen: Farben, Sprache, Kategorien."]},
+    ...(canInvite()?[{sel:'[data-invopen="1"],[data-accgo="weiter"]', raw:1, ic:"user", t:nt("inv_t"), p:[nt("trh_inv")]}]:[]),
     {sel:'[data-pcset="geraete"],[data-acctab="sicherheit"]', ic:"phone", t:"Geräte & Sicherheit", p:["Handy und PC koppeln (bis zu 5 Geräte), App-Sperre und Backup findest du hier."]},
     {sel:IS_PC?'#ptourQ':'[data-acctab="hilfe"]', ic:"insight", t:"Hilfe", p:[IS_PC?"Das „?“ oben rechts: Tour zu jeder Seite, Fragen und Antworten, Feedback und was neu ist.":"Fragen und Antworten, die große Tour und diese kurzen Seiten-Touren zum erneuten Ansehen."]},
   ]},
@@ -4494,17 +4517,22 @@ function actGate(){
     <p class="small muted" style="margin:0 0 14px">Die App ist gerade nur auf Einladung nutzbar. Gib den Code ein, den du bekommen hast – er steht auch auf der Download-Seite.</p>
     <input id="actCode" class="actin" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="z. B. K7P2QX" value="${esc(A.c)}" data-noi18n>
     ${canQrLive()?`<button class="btn block" style="justify-content:center;gap:8px;margin-top:10px" data-actscan>${ic("camera",18)} QR-Code der Einladung scannen</button>`:""}
+    ${A.found&&A.c?`<p class="small actfound">${ic("check",14)} ${nt("act_found")}</p>`:""}
     <p class="small" id="actErr" style="color:var(--bad);min-height:1.2em;margin:10px 0 6px">${esc(A.err)}</p>
     <button class="btn primary" id="actOk" ${A.busy?"disabled":""}>${A.busy?"Wird geprüft …":"Freischalten"}</button>
     <div class="actor"><span>oder</span></div>
     <button class="btn block" style="justify-content:center;gap:8px" data-actpair>${ic("phone",18)} Ich habe die App schon – Gerät koppeln</button>
     <p class="small muted" style="margin:8px 2px 0;text-align:center">Für dein eigenes zweites Gerät brauchst du keinen Code.</p>
   </div>`;
+  if (!A.waited){ A.waited=true;
+    pairCall("actwait","",{dev:devId()}).then(r=>{ if (r && r.c && UI.act && !UI.act.c){ UI.act.c=r.c; UI.act.found=true; if (!$("actBg").hidden) actGate(); } }).catch(()=>{});
+    try { if (CAN_NOTIFY && notifyPerm()!=="granted" && !localStorage.getItem("hb-actnask") && AndroidBridge.notifyAsk){ localStorage.setItem("hb-actnask","1"); setTimeout(()=>{ try{ AndroidBridge.notifyAsk(); }catch(_){} }, 1500); } } catch(_){}
+    notifyPlanSoon(); }
 }
 async function actTry(){
   const A=UI.act; const c=invCode(A.c); if (!c){ A.err="Der Code hat 6 Zeichen, z. B. K7P2QX."; actGate(); return; }
   A.busy=true; A.err=""; actGate();
-  try { const r=await pairCall("activate", "", {c, dev:devId()}); actSet({k:r.invite?"tester":"inv", c}); UI.act=null;
+  try { const r=await pairCall("activate", "", {c, dev:devId()}); actSet({k:r.invite?"tester":"inv", c}); UI.act=null; notifyPlanSoon();
     const el=$("actBg"); if (el) el.hidden=true; document.body.classList.remove("locked"); legalGate(); toast("Freigeschaltet – willkommen!"); }
   catch(e){ A.busy=false; A.err=e.message||"Das hat nicht geklappt."; actGate(); } }
 document.addEventListener("input", e=>{ if (e.target.id==="actCode" && UI.act){ UI.act.c=e.target.value; } });
@@ -4517,9 +4545,14 @@ document.addEventListener("click", async e=>{
   if (e.target.closest("[data-invnew]")){ try { const r=await pairCall("invmake", "", {dev:devId(), fresh:1}, true); UI.inv={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; UI.invText=null; invRender(); toast("Neuer Code – gilt für eine Person"); } catch(err){ toast(err.message||"Server nicht erreichbar"); } return; }
   if (e.target.closest("[data-invrenew]")){ if (!UI.invArm){ UI.invArm=true; invRender(); clearTimeout(UI.invArmT); UI.invArmT=setTimeout(()=>{ UI.invArm=false; invRender(); }, 5000); return; }
     UI.invArm=false; try { const r=await pairCall("invrenew", "", {dev:devId()}, true); UI.inv={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; invRender(); toast("Neuer Code – der alte gilt nicht mehr"); } catch(err){ toast(/Unbekannte Aktion/i.test(err.message||"")?"Dafür bitte die neue pair.php auf den Server laden":"Ging nicht: "+(err.message||"")); } return; }
-  if (e.target.closest("[data-invsharego]")){ UI.invShare=true; UI.invText=null; invRender(); return; }
-  if (e.target.closest("[data-invback]")){ UI.invShare=false; invRender(); return; }
+  if (e.target.closest("[data-invsharego]")){ UI.invShare=true; UI.invText=null; if (UI.invTone==="rem") UI.invTone="pers"; invRender(); return; }
+  if (e.target.closest("[data-invqr]")){ UI.invQr=!UI.invQr; invRender(); return; }
+  if (e.target.closest("[data-invreload]")){ const b=e.target.closest("[data-invreload]"); if (!RMo()) b.animate([{transform:"rotate(0)"},{transform:"rotate(360deg)"}],{duration:600,easing:"ease-out"}); invLoad(); return; }
+  { const r=e.target.closest("[data-invremind]"); if (r){ const x=(UI.invL||[]).find(i=>i.code===r.dataset.invremind); if (!x) return;
+      UI.invSaved=UI.inv; UI.inv={code:x.code, name:x.name, reminder:true}; UI.invTone="rem"; UI.invText=null; UI.invShare=true; invRender(); return; } }
+  if (e.target.closest("[data-invback]")){ UI.invShare=false; if (UI.invPending){ UI.inv=UI.invPending; UI.invPending=null; UI.invText=null; } if (UI.inv && UI.inv.reminder){ UI.inv=UI.invSaved||{}; UI.invSaved=null; UI.invTone="pers"; } invRender(); return; }
   { const t=e.target.closest("[data-invtone]"); if (t){ UI.invTone=t.dataset.invtone; UI.invText=null; invRender(); return; } }
+  if (e.target.closest("[data-invcopytxt]") || e.target.closest("[data-invapp]")) invAfterSend();
   if (e.target.closest("[data-invcopytxt]")){ const t=($("invTxt")||{}).value||""; try{ await navigator.clipboard.writeText(t); toast("Text kopiert – einfach einfügen"); }catch(_){ toast("Kopieren ging nicht"); } return; }
   { const a=e.target.closest("[data-invapp]"); if (a){ const t=($("invTxt")||{}).value||"", k=a.dataset.invapp, E=encodeURIComponent(t), I=UI.inv||{};
       const go=u=>{ if (window.AndroidBridge && window.AndroidBridge.desktop){ window.open(u,"_blank"); } else location.href=u; };
@@ -4555,26 +4588,60 @@ function invRender(){
       <div class="invapps">${apps.map(([k,l,c,e])=>`<button data-invapp="${k}">${k==="wa"?`<i style="background:#25D366"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path fill="#fff" d="${INV_WA}"/></svg></i>`:k==="tg"?`<i style="background:#fff"><svg viewBox="0 0 24 24" width="46" height="46" aria-hidden="true"><path fill="#26A5E4" d="${INV_TG}"/></svg></i>`:`<i style="background:${c}">${e}</i>`}<span>${l}</span></button>`).join("")}</div>
       <button class="btn primary block" style="justify-content:center;margin-top:14px" data-invcopytxt>Text kopieren</button></div>
     </div>`; invGrow(); return; }
+  if (canInvite()){ el.innerHTML=invBoard(); return; }
   el.innerHTML=`<div class="invbox" role="dialog" aria-modal="true" aria-labelledby="invT">
     <div class="invhd"><button class="iconbtn" data-invclose aria-label="Zurück">‹</button><b id="invT">App weitergeben</b></div>
     <div class="invmid">${body}</div>
-    ${I.code?`<button class="btn primary block" style="justify-content:center;gap:8px" data-invsharego>${ic("arrowUp",18)} Einladung verschicken</button>
-    <p class="small muted" style="margin:10px 4px 0;text-align:center">Wer scannt, kann die App am Handy laden oder sich den Link für den PC selbst schicken.</p>
-`:""}
+    ${I.code?`<button class="btn primary block" style="justify-content:center;gap:8px" data-invsharego>${ic("arrowUp",18)} Einladung verschicken</button>`:""}
   </div>`; }
+/* Einladungs-Pinnwand für den Entwickler: nächster Code + drei Spalten */
+function invAgo(t){ if (!t) return ""; const s=Date.now()/1000-t; if (s<90) return nt("ago_now"); if (s<3600) return nt("ago_m",{n:Math.round(s/60)}); if (s<86400) return nt("ago_h",{n:Math.round(s/3600)}); return nt("ago_d",{n:Math.round(s/86400)}); }
+function invStage(x){ return x.act?2:(x.dl||x.app)?1:0; }
+function invBoard(){ const I=UI.inv||{}, L=UI.invL||[], calm=RMo();
+  const cols=[[0,nt("inv_c0"),"var(--sunk)","no"],[1,nt("inv_c1"),"var(--warn-soft)","wa"],[2,nt("inv_c2"),"var(--accent-soft)","ok"]];
+  const card=(x,i)=>{ const st=invStage(x), nm=x.name||x.code;
+    const sub= st===2 ? [x.form==="pc"?"PC":x.form==="tab"?"Tablet":x.form?"Android":"", x.ver?"v"+x.ver:"", invAgo(x.act)].filter(Boolean).join(" · ")
+      : st===1 ? (x.app?nt("inv_s_app"):nt("inv_s_dl",{f:x.dlform==="zip"?"PC":"Android"}))+" · "+invAgo(x.app||x.dl)
+      : (x.seen?nt("inv_s_seen"):nt("inv_s_sent"))+" · "+invAgo(x.seen||x.given);
+    return `<div class="invmini" style="--i:${i}" data-invcard="${esc(x.code)}"><b>${esc(nm)}</b><small>${esc(sub)}</small>${x.name?`<small class="invmc" data-noi18n>${esc(x.code)}</small>`:""}
+      ${st===1&&x.app?`<span class="chip wa invrem">${ic("bell",12)}${nt("inv_auto")}</span>`:""}
+      ${st<2?`<button class="link small" data-invremind="${esc(x.code)}">${nt("inv_remind")}${x.remind?` <span class="muted">· ${invAgo(x.remind)}</span>`:""}</button>`:""}</div>`; };
+  const colH=cols.map(([k,t,bg,cl])=>{ const items=L.filter(x=>invStage(x)===k); return `<div class="invcol" style="--cb:${bg};--i:${k}"><h4><span>${t}</span><span class="chip ${cl}">${items.length}</span></h4>${items.length?items.map(card).join(""):`<p class="invempty">${nt("inv_none")}</p>`}</div>`; }).join("");
+  return `<div class="invbox invboardbox" role="dialog" aria-modal="true" aria-labelledby="invT">
+    <div class="invhd"><button class="iconbtn" data-invclose aria-label="Zurück">‹</button><b id="invT">${nt("inv_t")}</b><button class="iconbtn invrl" data-invreload aria-label="${esc(nt("inv_reload"))}">${ic("repeat",18)}</button></div>
+    <div class="invnext ${calm?"":"anim"}">${I.err?`<p class="small" style="color:var(--bad);margin:0">${esc(I.err)}</p><button class="btn" data-invopen>${nt("inv_retry")}</button>`:!I.code?`<p class="muted small" style="margin:0">${nt("inv_load")}</p>`:`
+      <div class="invnl"><small>${nt("inv_next")}</small><div class="invnc" data-noi18n>${esc(I.code)}</div>
+      <input class="in invname" id="invName" maxlength="40" placeholder="${esc(nt("inv_for"))}" value="${esc(UI.invName||"")}" autocomplete="off"></div>
+      <div class="invnb"><button class="btn primary" data-invsharego>${ic("plus",16)}${nt("inv_go")}</button><button class="link small" data-invqr>${UI.invQr?nt("inv_qr_off"):nt("inv_qr")}</button></div>
+      ${UI.invQr?`<div class="invqr invqrs">${qrSvg(invLink(I.code), 200)}</div>`:""}`}</div>
+    <div class="invcols">${UI.invLerr?`<p class="small" style="color:var(--bad)">${esc(UI.invLerr)}</p>`:colH}</div>
+    <p class="small muted invfoot">${nt("inv_hint")}</p>
+  </div>`; }
+async function invLoad(){ try { const j=await pairCall("devinv","",{},true); UI.invL=j.items||[]; UI.invLerr=""; } catch(e){ UI.invLerr=/Unbekannte Aktion/i.test(e.message||"")?nt("inv_oldsrv"):(e.message||"Server nicht erreichbar"); } invRender(); }
+async function invNext(){ try { const r=await pairCall("invmake", "", {dev:devId()}, true); UI.inv={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; } catch(e){ UI.inv={err:e.message||"Server nicht erreichbar"}; } invRender(); }
+function invAfterSend(){ const I=UI.inv||{}; if (!canInvite() || !I.code) return;
+  if (I.reminder){ pairCall("invremind","",{c:I.code},true).then(invLoad).catch(()=>{}); return; } invGiven(); }
+/* Beim Verschicken: Code als „vergeben“ merken, sofort den nächsten holen */
+async function invGiven(){ const I=UI.inv||{}; if (!I.code || I.given || !canInvite()) return; I.given=true; const name=(UI.invName||"").trim();
+  try { await pairCall("invgive","",{c:I.code, name},true); UI.invName="";
+    const r=await pairCall("invmake", "", {dev:devId()}, true); UI.invPending={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; invLoad(); } catch(_){ I.given=false; } }
 function invGrow(){ const ta=$("invTxt"); if (!ta) return; ta.style.height="auto"; ta.style.height=(ta.scrollHeight+4)+"px"; }
 const INV_WA="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z", INV_TG="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z";
-function invMsg(tone, c){ const l=INV_PAGE, dev=!!updKey();
+function invMsg(tone, c){ const I=UI.inv||{}, nm=((I.reminder?I.name:UI.invName)||"").trim(), out=invMsg0(tone,c,nm);
+  return nm && tone!=="rem" ? out.replace(/^Hey\b/, "Hey "+nm) : out; }
+function invMsg0(tone, c, nm){ const l=INV_PAGE, dev=!!updKey();
+  if (tone==="rem") return `Hey${nm?" "+nm:""} 😊 kleine Erinnerung: Finanz MAMI wartet noch auf dich. Beim ersten Start einfach deinen Code ${c} eingeben – oder hier nochmal laden: ${l}?${c}`;
   if (tone==="kurz") return `Finanz MAMI testen? Hier laden: ${l}\nDein persönlicher Code: ${c}`;
   if (tone==="anl") return `Hey! ${dev?"Ich suche Tester für meine App":"Ich teste gerade die App"} Finanz MAMI – ein Haushaltsbuch fürs Handy und den PC 📊\n\nSo geht's:\n1. Link öffnen: ${l}\n2. Deinen Code ${c} eingeben\n3. App für Android oder Windows laden und installieren\n4. Beim ersten Start nochmal den Code eingeben\n\nFehler oder Ideen bitte über den Feedback-Knopf in der App melden. Danke! 🙏`;
   return dev ? `Hey 😊 ich hab eine eigene Haushaltsbuch-App gebaut und suche Tester. Du bekommst sie kostenlos – Fehler und Ideen einfach über den Feedback-Knopf melden.\n\nDownload: ${l}\nDein persönlicher Code: ${c}` : `Hey 😊 ich teste gerade die Haushaltsbuch-App Finanz MAMI – magst du auch? Sie ist kostenlos, Fehler und Ideen meldest du einfach über den Feedback-Knopf.\n\nDownload: ${l}\nDein persönlicher Code: ${c}`; }
 async function invOpen(){
   let el=$("invBg"); if (!el){ el=document.createElement("div"); el.id="invBg"; el.className="invbg"; document.body.appendChild(el); }
   UI.inv={}; UI.invShare=false; UI.invText=null; invRender();
+  if (canInvite()) invLoad();
   try { const r=await pairCall("invmake", "", {dev:devId()}, true); UI.inv={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; }
   catch(e){ UI.inv={err:e.message||"Server nicht erreichbar"}; }
   invRender(); }
-document.addEventListener("input", e=>{ if (e.target.id==="fbTxt") UI.fbDraft=e.target.value; if (e.target.id==="invTxt"){ UI.invText=e.target.value; invGrow(); } });
+document.addEventListener("input", e=>{ if (e.target.id==="invName"){ UI.invName=e.target.value; return; } if (e.target.id==="fbTxt") UI.fbDraft=e.target.value; if (e.target.id==="invTxt"){ UI.invText=e.target.value; invGrow(); } });
 document.addEventListener("change", async e=>{ if (e.target.id==="fbInfo"){ UI.fbInfo=e.target.checked; const kv=document.querySelector(".fbkv"); if (kv) kv.classList.toggle("off", !UI.fbInfo); return; }
   if (e.target.id!=="fbImgFile") return; const files=[...e.target.files].slice(0, FB_MAX_IMG-(UI.fbImgs||[]).length); e.target.value="";
   for (const f of files){ try { (UI.fbImgs||(UI.fbImgs=[])).push(await fbShrink(f)); } catch(_){ toast("Bild konnte nicht gelesen werden"); } }
@@ -7374,6 +7441,9 @@ function notifyPlan(){
     if (c.week){ for (let k=0;k<3;k++){ const d=new Date(now); d.setDate(d.getDate()+((7-d.getDay())%7)+7*k); add("week:"+isoOf(d), at(d,18), "Dein Wochenrückblick", "Schau dir an, wie deine Woche gelaufen ist."); } }
     if (c.month){ const [y,m]=ymParts(nxt); add("month:"+nxt, at(new Date(y,m-1,1),H), `Dein ${MONTHS[(m+10)%12]} ist abgeschlossen`, "Sieh dir an, wie viel übrig geblieben ist."); }
   }
+  // Noch nicht freigeschaltet: sanft erinnern (nach 1, 3 und 7 Tagen um 18 Uhr)
+  if (typeof actNeed==="function" && actNeed() && notifyPerm()==="granted"){ let t0=0; try{ t0=Number(localStorage.getItem("hb-actfirst"))||0; if (!t0){ t0=Date.now(); localStorage.setItem("hb-actfirst", String(t0)); } }catch(_){ t0=Date.now(); }
+    for (const k of [1,3,7]){ const d=new Date(t0); d.setDate(d.getDate()+k); d.setHours(18,0,0,0); if (d.getTime()>Date.now()+30000) list.push({id:nid("act"+k), at:d.getTime(), title:nt("act_rem_t"), text:nt("act_rem_p"), ch:"hinweise"}); } }
   { let t=0; try{ t=Number(localStorage.getItem("hb-nftest"))||0; }catch(_){} if (t>Date.now()) list.push({id:nid("bgtest"), at:t, title:"Test geklappt ✓", text:"Benachrichtigungen kommen auch bei geschlossener App.", ch:"hinweise"}); }
   list.sort((a,b)=>a.at-b.at);
   try{ AndroidBridge.notifySchedule(JSON.stringify(list.slice(0,60))); }catch(e){}
@@ -9233,6 +9303,35 @@ fb_rec_n:["{n} Schritte aufgezeichnet", "{n} steps recorded", "{n} adım kaydedi
 fb_shot:["Bildschirmfoto anhängen", "Attach screenshot", "Ekran görüntüsü ekle", "Приложить снимок экрана", "Додати знімок екрана", "Dołącz zrzut ekranu", "إرفاق لقطة شاشة", "Atașează captura de ecran"],
 fb_shot_s:["(zeigt, was gerade zu sehen war – auch Beträge)", "(shows what was on screen – including amounts)", "(ekranda olanı gösterir – tutarlar dahil)", "(видно всё, что было на экране, включая суммы)", "(видно все, що було на екрані, зокрема суми)", "(widać to, co było na ekranie – także kwoty)", "(يُظهر ما كان على الشاشة – بما في ذلك المبالغ)", "(arată ce era pe ecran – inclusiv sume)"],
 trh_fbrec:["Bei Fehlern schickt die App auf Wunsch mit, was du in den letzten 30 Sekunden angetippt hast – so kann ich den Fehler genau nachstellen.", "For bugs, the app can attach what you tapped in the last 30 seconds – so I can reproduce it exactly.", "Hatalarda uygulama istersen son 30 saniyede dokunduklarını ekler – böylece hatayı birebir tekrarlayabilirim.", "При ошибке приложение может приложить, что ты нажимал за последние 30 секунд, – так я точно её воспроизведу.", "При помилці застосунок може додати, що ти натискав за останні 30 секунд, – так я точно її відтворю.", "Przy błędach aplikacja może dołączyć to, co dotykałeś w ostatnich 30 sekundach – dzięki temu dokładnie odtworzę błąd.", "عند الأخطاء يمكن للتطبيق إرفاق ما نقرت عليه في آخر 30 ثانية – لأعيد إنتاج الخطأ بدقة.", "La erori, aplicația poate atașa ce ai atins în ultimele 30 de secunde – ca să pot reproduce exact problema."],
+inv_t:["Einladungen", "Invitations", "Davetler", "Приглашения", "Запрошення", "Zaproszenia", "الدعوات", "Invitații"],
+inv_next:["Nächster Code – schon bereit", "Next code – ready to go", "Sıradaki kod – hazır", "Следующий код – уже готов", "Наступний код – вже готовий", "Następny kod – już gotowy", "الرمز التالي – جاهز", "Codul următor – gata"],
+inv_for:["Für wen? z. B. Lisa", "Who is it for? e.g. Lisa", "Kimin için? ör. Lisa", "Для кого? напр. Лиза", "Для кого? напр. Ліза", "Dla kogo? np. Lisa", "لمن؟ مثلاً ليزا", "Pentru cine? ex. Lisa"],
+inv_go:["Einladen", "Invite", "Davet et", "Пригласить", "Запросити", "Zaproś", "دعوة", "Invită"],
+inv_qr:["QR-Code zeigen", "Show QR code", "QR kodu göster", "Показать QR-код", "Показати QR-код", "Pokaż kod QR", "إظهار رمز QR", "Arată codul QR"],
+inv_qr_off:["QR-Code ausblenden", "Hide QR code", "QR kodu gizle", "Скрыть QR-код", "Сховати QR-код", "Ukryj kod QR", "إخفاء رمز QR", "Ascunde codul QR"],
+inv_c0:["Unterwegs", "On the way", "Yolda", "В пути", "У дорозі", "W drodze", "في الطريق", "Pe drum"],
+inv_c1:["Geladen, nicht frei", "Downloaded, not active", "İndirildi, etkin değil", "Скачано, не активно", "Завантажено, не активовано", "Pobrane, nieaktywne", "تم التنزيل، غير مفعّل", "Descărcat, neactivat"],
+inv_c2:["Freigeschaltet", "Activated", "Etkin", "Активировано", "Активовано", "Aktywne", "مفعّل", "Activat"],
+inv_none:["Niemand", "Nobody", "Kimse yok", "Никого", "Нікого", "Nikt", "لا أحد", "Nimeni"],
+inv_s_sent:["verschickt", "sent", "gönderildi", "отправлено", "надіслано", "wysłano", "أُرسلت", "trimis"],
+inv_s_seen:["Seite geöffnet", "page opened", "sayfa açıldı", "страница открыта", "сторінку відкрито", "strona otwarta", "فُتحت الصفحة", "pagină deschisă"],
+inv_s_dl:["für {f} geladen", "downloaded for {f}", "{f} için indirildi", "скачано для {f}", "завантажено для {f}", "pobrano na {f}", "نُزّل لـ {f}", "descărcat pentru {f}"],
+inv_s_app:["App geöffnet", "app opened", "uygulama açıldı", "приложение открыто", "застосунок відкрито", "aplikacja otwarta", "فُتح التطبيق", "aplicație deschisă"],
+inv_auto:["App erinnert", "app reminds", "uygulama hatırlatıyor", "приложение напомнит", "застосунок нагадає", "aplikacja przypomina", "التطبيق يذكّر", "aplicația amintește"],
+inv_remind:["Erinnern", "Remind", "Hatırlat", "Напомнить", "Нагадати", "Przypomnij", "تذكير", "Amintește"],
+inv_reload:["Aktualisieren", "Refresh", "Yenile", "Обновить", "Оновити", "Odśwież", "تحديث", "Actualizează"],
+inv_retry:["Nochmal versuchen", "Try again", "Tekrar dene", "Попробовать снова", "Спробувати знову", "Spróbuj ponownie", "حاول مجددًا", "Încearcă din nou"],
+inv_load:["Code wird geladen …", "Loading code …", "Kod yükleniyor …", "Загрузка кода …", "Завантаження коду …", "Ładowanie kodu …", "جارٍ تحميل الرمز …", "Se încarcă codul …"],
+inv_hint:["Nach dem Verschicken liegt sofort ein neuer Code bereit. Wer die App geladen, aber nicht freigeschaltet hat, wird von der App erinnert – der Code ist dort schon eingetragen.", "After sending, a new code is ready right away. Anyone who downloaded but didn't activate gets a reminder from the app – with the code already filled in.", "Gönderdikten sonra hemen yeni bir kod hazır olur. Uygulamayı indirip etkinleştirmeyenlere uygulama hatırlatır – kod zaten girilmiş olur.", "После отправки сразу готов новый код. Кто скачал, но не активировал, получит напоминание от приложения – код уже вписан.", "Після надсилання одразу готовий новий код. Хто завантажив, але не активував, отримає нагадування від застосунку – код уже вписано.", "Po wysłaniu od razu czeka nowy kod. Kto pobrał, ale nie aktywował, dostanie przypomnienie z aplikacji – kod jest już wpisany.", "بعد الإرسال يكون رمز جديد جاهزًا فورًا. من نزّل التطبيق ولم يفعّله يتلقى تذكيرًا من التطبيق – والرمز مُدخل مسبقًا.", "După trimitere, un cod nou e gata imediat. Cine a descărcat dar n-a activat primește un memento din aplicație – cu codul deja completat."],
+inv_oldsrv:["Für die Übersicht bitte die neue pair.php auf den Server laden.", "Please upload the new pair.php to the server for this overview.", "Bu görünüm için lütfen yeni pair.php'yi sunucuya yükle.", "Для обзора загрузи новый pair.php на сервер.", "Для огляду завантаж новий pair.php на сервер.", "Aby zobaczyć przegląd, wgraj nowy pair.php na serwer.", "لعرض هذه النظرة ارفع ملف pair.php الجديد إلى الخادم.", "Pentru prezentare, încarcă noul pair.php pe server."],
+ago_now:["gerade", "just now", "az önce", "только что", "щойно", "przed chwilą", "الآن", "acum"],
+ago_m:["vor {n} Min.", "{n} min ago", "{n} dk önce", "{n} мин назад", "{n} хв тому", "{n} min temu", "قبل {n} د", "acum {n} min"],
+ago_h:["vor {n} Std.", "{n} h ago", "{n} sa önce", "{n} ч назад", "{n} год тому", "{n} godz. temu", "قبل {n} س", "acum {n} h"],
+ago_d:["vor {n} Tagen", "{n} days ago", "{n} gün önce", "{n} дн. назад", "{n} дн. тому", "{n} dni temu", "قبل {n} أيام", "acum {n} zile"],
+act_found:["Dein Einladungscode wurde erkannt – tippe auf Freischalten.", "Your invitation code was recognised – tap Activate.", "Davet kodun tanındı – Etkinleştir'e dokun.", "Твой код приглашения распознан – нажми «Активировать».", "Твій код запрошення розпізнано – натисни «Активувати».", "Rozpoznano twój kod zaproszenia – dotknij „Aktywuj”.", "تم التعرّف على رمز دعوتك – اضغط تفعيل.", "Codul tău de invitație a fost recunoscut – atinge Activează."],
+act_rem_t:["Fast geschafft!", "Almost there!", "Neredeyse bitti!", "Почти готово!", "Майже готово!", "Prawie gotowe!", "اقتربت!", "Aproape gata!"],
+act_rem_p:["Mami wartet auf dich – gib deinen Einladungscode ein und leg los.", "Mami is waiting for you – enter your invitation code and get started.", "Mami seni bekliyor – davet kodunu gir ve başla.", "Mami ждёт тебя – введи код приглашения и начинай.", "Mami чекає на тебе – введи код запрошення й починай.", "Mami czeka na ciebie – wpisz kod zaproszenia i zaczynaj.", "Mami بانتظارك – أدخل رمز دعوتك وابدأ.", "Mami te așteaptă – introdu codul de invitație și începe."],
+trh_inv:["Unter „App weitergeben“ siehst du jetzt alle Einladungen auf einer Pinnwand: wer unterwegs ist, wer die App geladen hat und wer schon freigeschaltet ist. Der nächste Code liegt immer bereit.", "Under “Share the app” you now see all invitations on a board: who's on the way, who downloaded and who's activated. The next code is always ready.", "“Uygulamayı paylaş” altında artık tüm davetleri bir panoda görürsün: kim yolda, kim indirdi, kim etkinleştirdi. Sıradaki kod hep hazır.", "В «Поделиться приложением» теперь все приглашения на доске: кто в пути, кто скачал и кто уже активировал. Следующий код всегда готов.", "У «Поділитися застосунком» тепер усі запрошення на дошці: хто в дорозі, хто завантажив і хто вже активував. Наступний код завжди готовий.", "W „Udostępnij aplikację” widzisz teraz wszystkie zaproszenia na tablicy: kto w drodze, kto pobrał, a kto już aktywował. Następny kod zawsze czeka.", "في «مشاركة التطبيق» ترى الآن كل الدعوات على لوحة: من في الطريق، ومن نزّل، ومن فعّل. الرمز التالي جاهز دائمًا.", "La „Distribuie aplicația” vezi acum toate invitațiile pe un panou: cine e pe drum, cine a descărcat și cine a activat. Codul următor e mereu gata."],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
