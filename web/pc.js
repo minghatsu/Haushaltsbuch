@@ -1465,7 +1465,7 @@ if (IS_PC){
 /* Einstellungen am PC */
 if (IS_PC){
   const PCSET=[["Geld",()=>["konten","budgets",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]),"invest","export"]],
-    ["Anpassen",()=>["farben","sprache","kategorien","laeden"]],
+    ["Anpassen",()=>["toene","farben","sprache","kategorien","laeden"]],
     ["Sicherheit",()=>["sicherheit",...(SYNCABLE||window.AndroidBridge?["geraete"]:[]),"backup",...(CAN_NOTIFY?["notify"]:[]),"speicher"]]];
   const syncOn=()=>!!(SYNCABLE||window.AndroidBridge), parts=k=>k==="geraete"&&syncOn()?["sync","geraete"]:[k], alias={sync:"geraete"};
   const title=k=>k==="geraete"&&syncOn()?"Geräte & Abgleich":accTitle(k), sub=k=>accSub(k);
@@ -1625,9 +1625,9 @@ if (IS_PC){
   const calm=()=>pcCalm();
   /* Einstellungen */
   const GROUPS=()=>[["Geld","#6b8e23",["konten","budgets","schulden",...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]),"invest","export"]],
-    ["Anpassen","#1a7a5c",["farben","sprache","kategorien","start","laeden"]],
+    ["Anpassen","#1a7a5c",["toene","farben","sprache","kategorien","start","laeden"]],
     ["Sicherheit","#3d63a8",["sicherheit",...(SYNCABLE||window.AndroidBridge?["geraete"]:[]),"backup",...(CAN_NOTIFY?["notify"]:[]),"speicher"]],
-    ["Hilfe","#c27c0e",["neu","hilfe",...(canInvite()?["weiter"]:[]),"recht"]]];
+    ["Hilfe","#c27c0e",["neu","hilfe",...(canShare()?["weiter"]:[]),"recht"]]];
   const tTitle=k=>k==="geraete"&&(SYNCABLE||window.AndroidBridge)?"Geräte & Abgleich":accTitle(k);
   function tabSetHTML(){
     const n=String(S.settings.name||"").trim(), p=S.settings.photo, f=devForm(), badge=`<span class="avdev">${devIc(f,11)}</span>`;

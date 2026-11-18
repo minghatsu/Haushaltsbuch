@@ -662,6 +662,11 @@ public class MainActivity extends Activity {
             });
         }
         @JavascriptInterface public boolean isTest() { return testBuild; }
+        /* Klingelmodus fürs Tönen in der App: 0 = lautlos, 1 = vibrieren, 2 = normal */
+        @JavascriptInterface public int ringerMode() {
+            try { android.media.AudioManager am = (android.media.AudioManager) getSystemService(AUDIO_SERVICE); return am != null ? am.getRingerMode() : 2; }
+            catch (Exception e) { return 2; }
+        }
         @JavascriptInterface
         public boolean bgMode() { return false; }
         @JavascriptInterface
