@@ -21,6 +21,8 @@ jobs:
       android: ${{ steps.need.outputs.android }}
       desktop: ${{ steps.need.outputs.desktop }}
       native: ${{ steps.need.outputs.native }}
+      ra: ${{ steps.need.outputs.ra }}
+      re: ${{ steps.need.outputs.re }}
       appv: ${{ steps.build.outputs.appv }}
       pcv: ${{ steps.build.outputs.pcv }}
     steps:
@@ -110,14 +112,134 @@ jobs:
           done
           gh release create build-${{ github.run_number }} app.html --prerelease --title "Zwischenstand build-${{ github.run_number }}" --notes "Wird nach dem Build automatisch gelöscht." --target ${{ github.sha }}
 
+      - name: Fertige App für Tests und Veröffentlichung bereitlegen
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-html
+          path: app.html
+          retention-days: 1
+
+  gesten:
+    name: Gesten-Test (Handy + Tablet)
+    needs: web
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Testbrowser
+        run: |
+          npm i --no-save --prefix /tmp/pw playwright@1.48.2 >/dev/null
+          /tmp/pw/node_modules/.bin/playwright install --with-deps chromium >/dev/null
+      - name: Wischen, Tippen, Zurück auf allen Seiten prüfen
+        run: |
+          python3 tools/test/mk_harness.py . /tmp/hbtest
+          (cd /tmp/hbtest && nohup python3 -m http.server 8078 --bind 127.0.0.1 >/dev/null 2>&1 &)
+          sleep 1
+          NODE_PATH=/tmp/pw/node_modules node tools/test/gesten.cjs http://127.0.0.1:8078/app.html /tmp/hbtest/shots
+      - name: Bildschirmfotos bei Fehler
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gesten-fotos
+          path: /tmp/hbtest/shots
+          retention-days: 3
+
+  android-test:
+    name: Android-Test (${{ matrix.name }})
+    needs: web
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Handy
+            profile: pixel_6
+          - name: Tablet
+            profile: pixel_c
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-html
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Test-App „MAMI Test“ bauen (läuft neben der echten App)
+        run: |
+          mkdir -p android/app/src/main/assets
+          cp app.html android/app/src/main/assets/index.html
+          git rev-list --count HEAD -- android/ > android/app/src/main/assets/native.txt
+          cd android
+          if ! gradle assembleDebug --no-daemon > ../gradle.log 2>&1; then
+            grep -v "^> Task" ../gradle.log | grep -E -A3 "error|What went wrong|FAILURE" | head -60 | while IFS= read -r l; do echo "::error::$l"; done
+            exit 1
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Testwerkzeug
+        run: npm i --no-save --prefix /tmp/pw playwright@1.48.2 >/dev/null
+      - name: Emulator beschleunigen (KVM)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Auf Android-${{ matrix.name }} wischen, tippen, Zurück-Taste
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          NODE_PATH: /tmp/pw/node_modules
+          HB_RUN: ${{ github.run_number }}
+          HB_DEVICE: ${{ matrix.name }}
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: ${{ matrix.profile }}
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          script: bash tools/test/android-run.sh android/app/build/outputs/apk/debug/app-debug.apk /tmp/shots
+      - name: Bildschirmfotos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-${{ matrix.name }}-fotos
+          path: /tmp/shots
+          retention-days: 3
+          if-no-files-found: ignore
+
+  web-release:
+    name: Veröffentlichen (nur App-Inhalt)
+    needs: [web, gesten, android-test]
+    if: ${{ needs.web.outputs.native == 'false' }}
+    runs-on: ubuntu-latest
+    env:
+      APPV: ${{ needs.web.outputs.appv }}
+      PCV: ${{ needs.web.outputs.pcv }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-html
       - name: Veröffentlichen (nur App-Inhalt geändert – Handy- und PC-App bleiben)
-        if: ${{ steps.need.outputs.native == 'false' }}
+        if: ${{ needs.web.outputs.native == 'false' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release download neueste -p Haushaltsbuch.apk -p Haushaltsbuch-Setup.exe -D . --clobber
           TITLE="Finanz MAMI · v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · Handy, Tablet & PC"
-          NOTES="Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=${{ steps.need.outputs.ra }} exe=${{ steps.need.outputs.re }} appv=$APPV pcv=$PCV"
+          NOTES="Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=${{ needs.web.outputs.ra }} exe=${{ needs.web.outputs.re }} appv=$APPV pcv=$PCV"
           if gh release view neueste >/dev/null 2>&1; then
             gh release upload neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --clobber
             gh release edit neueste --title "$TITLE" --notes "$NOTES" --latest
@@ -265,8 +387,8 @@ jobs:
 
   release:
     name: Veröffentlichen
-    needs: [web, android, windows, windows-test]
-    if: ${{ always() && needs.web.result == 'success' && needs.web.outputs.native == 'true' }}
+    needs: [web, android, windows, windows-test, gesten, android-test]
+    if: ${{ always() && needs.web.result == 'success' && needs.web.outputs.native == 'true' && needs.gesten.result == 'success' && needs.android-test.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

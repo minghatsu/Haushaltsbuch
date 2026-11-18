@@ -95,7 +95,10 @@ public class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getSharedPreferences("hb-native", MODE_PRIVATE).getBoolean("secure", true))
+        // Test-Version (nur Debug-Build "MAMI Test"): Fernsteuerung für automatische Tests, keine Bildschirmsperre für Screenshots
+        boolean testBuild = (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        if (testBuild) WebView.setWebContentsDebuggingEnabled(true);
+        if (!testBuild && getSharedPreferences("hb-native", MODE_PRIVATE).getBoolean("secure", true))
             getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
         web = new WebView(this);
         setContentView(web);
@@ -186,7 +189,7 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> { try { startActivity(p); } catch (Exception ignored) {} });
             return "permission";
         }
-        Uri u = FileProvider.getUriForFile(this, "de.sascha.haushaltsbuch.files", f);
+        Uri u = FileProvider.getUriForFile(this, getPackageName() + ".files", f);
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setDataAndType(u, "application/vnd.android.package-archive");
         i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -327,7 +330,7 @@ public class MainActivity extends Activity {
                 return;
             }
             File dir = new File(getCacheDir(), "scan"); dir.mkdirs();
-            scanUri = FileProvider.getUriForFile(this, "de.sascha.haushaltsbuch.files", new File(dir, "foto.jpg"));
+            scanUri = FileProvider.getUriForFile(this, getPackageName() + ".files", new File(dir, "foto.jpg"));
             Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             i.putExtra(MediaStore.EXTRA_OUTPUT, scanUri);
             i.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -349,7 +352,7 @@ public class MainActivity extends Activity {
             try (InputStream is = getContentResolver().openInputStream(src); OutputStream os = new FileOutputStream(f)) {
                 byte[] b = new byte[65536]; int n; while ((n = is.read(b)) > 0) os.write(b, 0, n);
             }
-            return FileProvider.getUriForFile(this, "de.sascha.haushaltsbuch.files", f);
+            return FileProvider.getUriForFile(this, getPackageName() + ".files", f);
         } catch (Exception e) { return src; }
     }
 
@@ -377,7 +380,7 @@ public class MainActivity extends Activity {
                 File dir = new File(getCacheDir(), "scan");
                 dir.mkdirs();
                 File f = new File(dir, "quittung.jpg");
-                scanUri = FileProvider.getUriForFile(this, "de.sascha.haushaltsbuch.files", f);
+                scanUri = FileProvider.getUriForFile(this, getPackageName() + ".files", f);
                 Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 i.putExtra(MediaStore.EXTRA_OUTPUT, scanUri);
                 i.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -1079,7 +1082,7 @@ public class MainActivity extends Activity {
                 if (!safe.endsWith(".jpg")) safe += ".jpg";
                 File f = new File(dir, safe);
                 try (FileOutputStream os = new FileOutputStream(f)) { os.write(bytes); }
-                Uri uri = FileProvider.getUriForFile(MainActivity.this, "de.sascha.haushaltsbuch.files", f);
+                Uri uri = FileProvider.getUriForFile(MainActivity.this, MainActivity.this.getPackageName() + ".files", f);
                 Intent send = new Intent(Intent.ACTION_SEND).setType("image/jpeg").putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 runOnUiThread(() -> { try { startActivity(Intent.createChooser(send, "Beleg teilen")); } catch (Exception ignored) {} });
                 return true;
@@ -1099,7 +1102,7 @@ public class MainActivity extends Activity {
                     byte[] bytes = Base64.decode(arr.getString(i), Base64.DEFAULT);
                     File f = new File(dir, "bild-" + (i + 1) + ".jpg");
                     try (FileOutputStream os = new FileOutputStream(f)) { os.write(bytes); }
-                    uris.add(FileProvider.getUriForFile(MainActivity.this, "de.sascha.haushaltsbuch.files", f));
+                    uris.add(FileProvider.getUriForFile(MainActivity.this, MainActivity.this.getPackageName() + ".files", f));
                 }
                 Intent send;
                 if (uris.isEmpty()) {

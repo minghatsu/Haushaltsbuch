@@ -4318,8 +4318,8 @@ function langGate(next){
   const show=k=>{ const sp=document.createElement("span"); sp.textContent=LG[k][2]; sp.dir="auto"; sp.className=calm?"gi":"gd"; gr.appendChild(sp);
     requestAnimationFrame(()=>requestAnimationFrame(()=>{ sp.className="gi"; if (cur){ const c=cur; c.className="gu"; setTimeout(()=>c.remove(),600); } cur=sp; }));
     el.querySelectorAll(".lgtile").forEach((t,j)=>t.classList.toggle("hi", j===k && sel<0));
-    if (sel<0){ $("lgSub").textContent=LG[k][3]; $("lgGo").textContent=LG[k][4]; } };
-  show(0); const tm=setInterval(()=>{ if (sel>=0) return; i=(i+1)%LG.length; show(i); }, 1500);
+    if (sel<0 && $("lgSub")){ $("lgSub").textContent=LG[k][3]; $("lgGo").textContent=LG[k][4]; } };
+  show(0); const tm=setInterval(()=>{ if (!document.body.contains(el)){ clearInterval(tm); return; } if (sel>=0) return; i=(i+1)%LG.length; show(i); }, 1500);
   el.addEventListener("click", e=>{
     const t=e.target.closest("[data-lg]"); if (t){ sel=+t.dataset.lg; el.querySelectorAll(".lgtile").forEach((x,j)=>{ x.classList.toggle("on", j===sel); x.classList.remove("hi"); }); show(sel);
       $("lgSub").textContent=LG[sel][3]; const g=$("lgGo"); g.textContent=LG[sel][4]; g.disabled=false; const rtl=LG[sel][0]==="ar"?"rtl":"ltr"; $("lgSub").dir=rtl; g.dir=rtl; return; }
@@ -5177,7 +5177,7 @@ function initStack(id, key, dotsId){ id=id||"astack"; key=key||"cardIdx"; dotsId
     if (lock==="x" && (Math.abs(dx)>st.clientWidth*0.18 || (fast && Math.abs(dx)>25))) go(dx<0?1:-1); else if (lock==="x") place();
     x0=null; lock=null; };
   st.addEventListener("pointerup", end); st.addEventListener("pointercancel", end);
-  st.addEventListener("click", e=>{ const c=e.target.closest(".acard"); if (!c || lock) return; const d=rel(cards.indexOf(c)); if (d) go(d>0?1:-1); });
+  st.addEventListener("click", e=>{ const c=e.target.closest(".acard"); if (!c || lock || (st._drag && Date.now()-st._drag<450)) return; const d=rel(cards.indexOf(c)); if (d) go(d>0?1:-1); });
   st.addEventListener("keydown", e=>{ if (e.key==="ArrowRight"){ go(1); e.preventDefault(); } else if (e.key==="ArrowLeft"){ go(-1); e.preventDefault(); } });
   if (dots) dots.addEventListener("click", e=>{ const b=e.target.closest("[data-cdot]"); if (b){ UI[key]=Number(b.dataset.cdot); place(); } });
 }
