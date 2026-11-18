@@ -158,7 +158,7 @@ main{padding-block:6px 120px}
 
 .quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .astack{position:relative;height:186px;touch-action:pan-y;user-select:none;-webkit-user-select:none;outline:none;margin:0 -16px;overflow:hidden}
-.astack.one{margin:0}
+.astack.one{margin:0}.acard .aced{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.18);color:#fff;font-style:normal;z-index:2;transition:transform .2s}.acard.side .aced{opacity:0}.acard:active .aced{transform:scale(.9)}.aback{position:absolute;inset:0;z-index:5;border-radius:inherit;background:var(--surface);color:var(--fg);padding:14px 16px;display:flex;flex-direction:column;gap:6px;justify-content:center;box-shadow:inset 0 0 0 2px var(--accent);cursor:default;text-align:start}.aback b{font-size:15px}.aback small{color:var(--muted);font-size:12px;margin-top:-4px}.acin{display:flex;align-items:center;gap:8px}.acin input{flex:1;min-width:0;font-size:26px;font-weight:800;padding:6px 12px;height:auto}.acin span{font-size:22px;font-weight:800;color:var(--muted)}.acbt{display:flex;gap:8px}.acbt .btn{flex:1;justify-content:center;min-height:40px;padding:6px 10px}.acard.acflip .aced{display:none}.aback{overflow:hidden}@media (max-height:0),(min-width:1000px){.aback{padding:10px 14px;gap:5px}.aback small{display:none}.acin input{font-size:22px;padding:4px 10px}.acbt .btn{min-height:34px}}
 .astack .acard{position:absolute;left:11%;right:11%;top:0;max-width:none;transition:transform .38s cubic-bezier(.2,.8,.2,1),opacity .3s,filter .3s;will-change:transform;cursor:grab;transform-origin:center}
 .astack.one .acard{left:0;right:0}
 .astack.one{height:176px}.astack.one .acard{cursor:default}
@@ -3415,7 +3415,7 @@ function tourPlace(){ if (TOUR.i<0) return; const el=$("tourBg"), s=TOUR.steps[T
 /* kurze Tour für jede Seite */
 const PTOUR_FN=()=>({
   home:{t:"Übersicht", s:[
-    {sel:"#astack,.pcbal,.cashcard,.hkpi", ic:"wallet", t:"Dein Geld auf einen Blick", p:["Hier steht, was heute auf deinen Konten ist – mit Spaces zusammengerechnet.", IS_PC?"Darunter siehst du, wie viel du bis Monatsende noch pro Tag ausgeben kannst.":"Wisch die Karte zur Seite, um einzelne Konten und Spaces zu sehen."]},
+    {sel:"#astack,.pcbal,.cashcard,.hkpi", ic:"wallet", t:"Dein Geld auf einen Blick", p:["Hier steht, was heute auf deinen Konten ist – mit Spaces zusammengerechnet.", IS_PC?"Darunter siehst du, wie viel du bis Monatsende noch pro Tag ausgeben kannst.":"Wisch die Karte zur Seite, um einzelne Konten und Spaces zu sehen.", nt("trh_acedit")]},
     {sel:"#v-home .hlcard", raw:1, ic:"spark", t:nt("trh_hl_t"), p:[nt("trh_hl_p")]},
     {sel:"#v-home .fcmini", raw:1, ic:"chart", t:nt("trh_fc_t"), p:[nt("trh_fc_p")]},
     {sel:"#v-home .areacard .agrid", raw:1, ic:"home", t:nt("trh_area_t"), p:[nt("trh_area_p")]},
@@ -5171,7 +5171,7 @@ function initStack(id, key, dotsId){ id=id||"astack"; key=key||"cardIdx"; dotsId
     if (lock===null && (Math.abs(mx)>6 || Math.abs(my)>6)){ lock = Math.abs(mx)>Math.abs(my) ? "x" : "y"; if (lock==="x"){ try{ st.setPointerCapture(e.pointerId); }catch(_){} } }
     if (lock!=="x") return; dx=mx; place(dx,false);
   });
-  const end = () => { if (x0===null) return; const fast=Math.abs(dx)/Math.max(1,Date.now()-t0)>0.45;
+  const end = () => { if (x0===null) return; if (lock==="x") st._drag=Date.now(); const fast=Math.abs(dx)/Math.max(1,Date.now()-t0)>0.45;
     if (lock==="x" && (Math.abs(dx)>st.clientWidth*0.18 || (fast && Math.abs(dx)>25))) go(dx<0?1:-1); else if (lock==="x") place();
     x0=null; lock=null; };
   st.addEventListener("pointerup", end); st.addEventListener("pointercancel", end);
@@ -5179,6 +5179,33 @@ function initStack(id, key, dotsId){ id=id||"astack"; key=key||"cardIdx"; dotsId
   st.addEventListener("keydown", e=>{ if (e.key==="ArrowRight"){ go(1); e.preventDefault(); } else if (e.key==="ArrowLeft"){ go(-1); e.preventDefault(); } });
   if (dots) dots.addEventListener("click", e=>{ const b=e.target.closest("[data-cdot]"); if (b){ UI[key]=Number(b.dataset.cdot); place(); } });
 }
+/* Kontostand direkt auf der Karte ändern (Karte dreht sich um) */
+function acFlip(card, mid, done){ const base=card.style.transform||"", R=RMo&&RMo();
+  if (R){ mid(); done&&done(); return; }
+  const a=card.animate([{transform:`perspective(1000px) ${base} rotateY(0deg)`},{transform:`perspective(1000px) ${base} rotateY(90deg)`}],{duration:170,easing:"ease-in"});
+  a.onfinish=()=>{ mid(); const b=card.animate([{transform:`perspective(1000px) ${base} rotateY(-90deg)`},{transform:`perspective(1000px) ${base} rotateY(0deg)`}],{duration:220,easing:"cubic-bezier(.2,.9,.3,1.25)"}); b.onfinish=()=>done&&done(); }; }
+function acEditOpen(card){ const i=+card.dataset.ci, m=(UI.acctEd||[])[i]; if (!m || card.querySelector(".aback")) return;
+  document.querySelectorAll(".aback").forEach(x=>acEditClose(x.closest(".acard")));
+  const v=Math.round(m.bal*100)/100;
+  acFlip(card, ()=>{ card.classList.add("acflip"); card.insertAdjacentHTML("beforeend",`<form class="aback" data-acform="${i}" onsubmit="return false"><b>${esc(nt("ac_t",{n:m.label}))}</b><small>${esc(nt(m.cash?"ac_s_cash":"ac_s"))}</small>
+    <div class="acin"><input class="in" inputmode="decimal" enterkeyhint="done" value="${esc(v.toFixed(2).replace(".",","))}" aria-label="${esc(nt("ac_t",{n:m.label}))}"><span>€</span></div>
+    <div class="acbt"><button type="button" class="btn" data-acx>${esc(nt("sh_cancel"))}</button><button type="submit" class="btn primary" data-acok>${esc(nt("ac_ok"))}</button></div></form>`);
+    const f=card.querySelector(".aback"); ["pointerdown","touchstart","mousedown"].forEach(ev=>f.addEventListener(ev,e=>e.stopPropagation())); },
+   ()=>{ const inp=card.querySelector(".aback input"); if (inp){ inp.focus({preventScroll:true}); try{ inp.select(); }catch(_){} } }); }
+function acEditClose(card, after){ if (!card) return; const f=card.querySelector(".aback"); if (!f) return; if (document.activeElement && f.contains(document.activeElement)) document.activeElement.blur();
+  acFlip(card, ()=>{ f.remove(); card.classList.remove("acflip"); }, after); }
+function acEditSave(card){ const i=+card.dataset.ci, m=(UI.acctEd||[])[i], inp=card.querySelector(".aback input"); if (!m||!inp) return;
+  const v=parseAmt(inp.value); if (!isFinite(v)){ toast(nt("ac_err")); inp.focus(); return; } const nv=Math.round(v*100)/100, td=isoToday();
+  if (m.cash){ const cs=S.settings.cash; if (!cs) return; const now=cashBal(td); S.settings.cash={...cs, start:Math.round(((Number(cs.start)||0)+(nv-now))*100)/100, checked:true}; }
+  else S.settings.accountAnchors={...(S.settings.accountAnchors||{}), [m.name]:{date:td, balance:nv, ts:Date.now()}};
+  acEditClose(card, ()=>{ saveSettings(); render(); toast(nt("ac_done",{n:m.label, v:eur(nv)})); }); }
+document.addEventListener("click", e=>{ const t=e.target;
+  if (t.closest("[data-acx]")){ acEditClose(t.closest(".acard")); return; }
+  if (t.closest("[data-acok]")){ acEditSave(t.closest(".acard")); return; }
+  if (t.closest(".aback")) return;
+  const c=t.closest("#astack .acard[data-ci]"); if (!c) return; const st=c.closest("#astack");
+  if (c.classList.contains("side") || (st && st._drag && Date.now()-st._drag<450)) return; acEditOpen(c); });
+document.addEventListener("keydown", e=>{ const f=e.target.closest&&e.target.closest(".aback"); if (!f) return; if (e.key==="Enter"){ e.preventDefault(); acEditSave(f.closest(".acard")); } else if (e.key==="Escape"){ e.preventDefault(); acEditClose(f.closest(".acard")); } });
 function renderHome(){
   if ($("v-home").contains(document.activeElement) && /^(INPUT|SELECT)$/.test(document.activeElement.tagName)) return;
   const ym=UI.ym, c=monthCalc(ym), cum=yearCum(ym), cur=ymOf(new Date());
@@ -5233,9 +5260,9 @@ function renderHome(){
   if (cashOn() && ym<=cur && asOf>=S.settings.cash.since){ if (!mainName) accts[0].bal=Math.round((accts[0].bal-cashFlows(asOf))*100)/100; accts.splice(1,0,{name:"Bargeld", bal:cashBal(asOf), cash:true}); }
   const spark = mainName && ym<=cur ? sparkPath(mainName, asOf) : "";
   const when = ym===cur?"heute":ym<cur?"Ende "+MONTHS[ymParts(ym)[1]-1]:"voraussichtlich Ende "+MONTHS[ymParts(ym)[1]-1];
-  UI.acctNames=accts.map(a=>a.name);
+  UI.acctNames=accts.map(a=>a.name); UI.acctEd=accts.map(a=>ym!==cur||a.total||(a.guess&&a.name==="Spaces")?null:{name:a.cash?"Bargeld":(a.main&&!mainName?"Hauptkonto":a.name), label:a.name, cash:!!a.cash, bal:Number(a.bal)||0});
   const acol=(a,i)=>{ const c=acctColor(a.name,i); return c?` style="background:linear-gradient(150deg, ${c}, color-mix(in srgb, ${c} 62%, #000))"`:""; };
-  const acardHtml = accts.map((a,i)=>`<div class="acard ${i?"alt":""} ${a.cash?"cashc":""} ${a.total?"tot":""} ${a.bal<0&&!acctColor(a.name,i)?"minus":""}" data-ci="${i}"${acol(a,i)}><div class="l">${esc(a.name)} · ${esc(when)}</div><div class="b">${esc(eur(a.bal))}</div>${fxLine(a.bal)}
+  const acardHtml = accts.map((a,i)=>`<div class="acard ${i?"alt":""} ${a.cash?"cashc":""} ${a.total?"tot":""} ${a.bal<0&&!acctColor(a.name,i)?"minus":""}" data-ci="${i}"${acol(a,i)}>${ym===cur&&!a.total&&!(a.guess&&a.name==="Spaces")?`<i class="aced" aria-hidden="true">${ic("pen",14)}</i>`:""}<div class="l">${esc(a.name)} · ${esc(when)}</div><div class="b">${esc(eur(a.bal))}</div>${fxLine(a.bal)}
       ${a.main&&spark?`<svg class="spark" viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true"><path d="${spark}" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2.2" stroke-linejoin="round"/></svg>`:""}
       <div class="m">${a.main?`<span>${c.net>=0?"↑":"↓"} ${esc(eur0(Math.abs(c.net)))} ${c.net>=0?"übrig":"mehr ausgegeben"} im ${esc(MONTHS[ymParts(ym)[1]-1])}</span>${mainName?`<span>Mit Spaces ${esc(eur((accts.find(x=>x.total)||{bal:cum.balance}).bal))}</span>`:""}`
         : a.cash ? `<span>💶 im Portemonnaie</span>` : a.total ? `<span>Hauptkonto und alle Spaces</span>` : a.guess ? `<span>Space · ${esc(a.how||"")}</span>` : `<span>Space</span>`}</div></div>`).join("");
@@ -8954,6 +8981,13 @@ pot_p2:["Sobald die Umbuchung im nächsten Kontoauszug steht, erkenne ich sie un
 pot_ok:["Verstanden","Got it","Anladım","Понятно","Зрозуміло","Rozumiem","فهمت","Am înțeles"],
 trh_pot_t:["Aus dem Space bezahlt","Paid from a Space","Space'ten ödendi","Оплачено из Space","Оплачено зі Space","Zapłacone ze Space","مدفوع من Space","Plătit din Space"],
 trh_pot_p:["Ordnest du eine Buchung einem Space zu (z. B. Einkauf), ziehe ich das Geld dort ab – auch wenn die Bank vom Hauptkonto abbucht. Dann erinnere ich dich, das Geld in der Bank umzubuchen.","If you assign a booking to a Space (e.g. groceries), I deduct the money there – even if the bank charges the main account. Then I remind you to move the money in your bank.","Bir kaydı bir Space'e (örn. alışveriş) atarsan, parayı orada düşerim – banka ana hesaptan çekse bile. Sonra bankada parayı aktarmanı hatırlatırım.","Если отнесёшь запись к Space (напр. покупки), я спишу деньги там – даже если банк списал с основного счёта. Потом напомню перевести деньги в банке.","Якщо віднесеш запис до Space (напр. покупки), я спишу гроші там – навіть якщо банк списав з основного рахунку. Потім нагадаю переказати гроші в банку.","Gdy przypiszesz pozycję do Space (np. zakupy), odejmę tam pieniądze – nawet jeśli bank pobrał je z konta głównego. Potem przypomnę, żeby przelać je w banku.","إذا نسبتَ عملية إلى Space (مثل المشتريات) أخصم المال منه – حتى لو سحبه البنك من الحساب الرئيسي. ثم أذكّرك بتحويل المال في البنك.","Dacă atribui o tranzacție unui Space (ex. cumpărături), scad banii de acolo – chiar dacă banca debitează contul principal. Apoi îți amintesc să muți banii în bancă."],
+ac_t:["{n} · Stand heute","{n} · balance today","{n} · bugünkü bakiye","{n} · баланс сегодня","{n} · баланс сьогодні","{n} · stan dziś","{n} · الرصيد اليوم","{n} · sold azi"],
+ac_s:["So viel zeigt deine Bank-App gerade an","What your banking app shows right now","Banka uygulamanın şu an gösterdiği tutar","Сколько сейчас показывает банковское приложение","Скільки зараз показує банківський застосунок","Tyle pokazuje teraz aplikacja banku","المبلغ الذي يعرضه تطبيق البنك الآن","Cât arată acum aplicația băncii"],
+ac_s_cash:["So viel hast du gerade im Portemonnaie","What you have in your wallet right now","Şu an cüzdanında olan","Сколько сейчас в кошельке","Скільки зараз у гаманці","Tyle masz teraz w portfelu","ما في محفظتك الآن","Cât ai acum în portofel"],
+ac_ok:["Speichern","Save","Kaydet","Сохранить","Зберегти","Zapisz","حفظ","Salvează"],
+ac_err:["Bitte eine Zahl eingeben","Please enter a number","Lütfen bir sayı gir","Введи число","Введи число","Wpisz liczbę","يرجى إدخال رقم","Introdu un număr"],
+ac_done:["{n}: Stand {v} gespeichert","{n}: balance {v} saved","{n}: bakiye {v} kaydedildi","{n}: баланс {v} сохранён","{n}: баланс {v} збережено","{n}: zapisano stan {v}","{n}: تم حفظ الرصيد {v}","{n}: sold {v} salvat"],
+trh_acedit:["Tipp auf eine Karte, um den Stand zu ändern – die Karte dreht sich um.","Tap a card to change the balance – the card flips over.","Bakiyeyi değiştirmek için bir karta dokun – kart döner.","Нажми на карточку, чтобы изменить баланс – она перевернётся.","Натисни на картку, щоб змінити баланс – вона перевернеться.","Dotknij karty, aby zmienić stan – karta się obróci.","اضغط على بطاقة لتغيير الرصيد – ستنقلب البطاقة.","Atinge un card ca să schimbi soldul – cardul se întoarce."],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
