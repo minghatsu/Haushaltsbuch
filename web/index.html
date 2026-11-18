@@ -3143,6 +3143,9 @@ function renderAmtEd(){
 }
 /* Rechtliches */
 const LEGAL_VER = "2026-11-10";
+/* Test-App „MAMI Test“: Ersteinrichtung überspringen, damit automatische Tests direkt starten können */
+try { if (window.AndroidBridge && AndroidBridge.isTest && AndroidBridge.isTest() && !localStorage.getItem("hb-testinit")){ const L=localStorage; L.setItem("hb-testinit","1"); L.setItem("hb-lang","de"); L.setItem("hb-legal",LEGAL_VER); L.setItem("hb-wiz-skip","1"); L.setItem("hb-danke","1");
+  const t={}; ["home","beruf","zukunft","shop","list","fix","year","ziele","more","import","belege","gemeinsam"].forEach(k=>t[k]=1); L.setItem("hb-ptour",JSON.stringify(t)); L.setItem("hb-testseed","1"); } } catch(_){}
 const LEGAL_PAID = false;
 const IMPRESSUM = { name:"Sascha Georg Küpper", street:"Brühler Straße 144", city:"42657 Solingen", mail:"kontakt@miracleframe.de" };
 const FEEDBACK_MAIL = "kontakt@miracleframe.de";
@@ -5144,7 +5147,8 @@ function moneyFlowCard(ym){
 }
 /* Nur in der Test-App „MAMI Test“ (Debug-Build): Lese-Zugriff für automatische Tests */
 try { if (window.AndroidBridge && AndroidBridge.isTest && AndroidBridge.isTest()) window.__hbt={ view:()=>UI.view, idx:k=>UI[k], go:v=>{ UI.view=v; render(); }, legal:()=>LEGAL_VER, log:()=>CHANGELOG[0][0],
-  seed:()=>{ const d=isoToday(); S.settings.accountAnchors={Hauptkonto:{date:d,balance:1200,ts:Date.now()},Tagesgeld:{date:d,balance:400,ts:Date.now()}}; S.settings.name="Test"; render(); } }; } catch(_){}
+  seed:()=>{ const d=isoToday(); S.settings.accountAnchors={Hauptkonto:{date:d,balance:1200,ts:Date.now()},Tagesgeld:{date:d,balance:400,ts:Date.now()}}; S.settings.name="Test"; UI.ym=ymOf(new Date()); render(); } };
+  if (window.__hbt && localStorage.getItem("hb-testseed")==="1"){ localStorage.setItem("hb-testseed","2"); setTimeout(()=>{ try{ window.__hbt.seed(); if (typeof saveSettings==="function") saveSettings(); }catch(_){} }, 2500); } } catch(_){}
 function initStack(id, key, dotsId){ id=id||"astack"; key=key||"cardIdx"; dotsId=dotsId||"adots";
   const st=$(id); if (!st) return;
   const cards=[...st.querySelectorAll(".acard")], n=cards.length, dots=$(dotsId);

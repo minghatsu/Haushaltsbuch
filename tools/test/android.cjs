@@ -69,10 +69,13 @@ const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out',
       ok(`Leiste → ${g}: Inhalt sichtbar`, st.h>200 && st.op==='1', `Höhe ${Math.round(st.h)}, Deckkraft ${st.op}`);
       shot(g); await checkSwipers(g); } }
   else {
+  const freeY=()=>p.evaluate(()=>{ const B="#moBg,#mbBg,#tourBg,.hobg,.sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,#astack,#zstack,.srail,.bt3,.bubbles,.fxchips,input,select,textarea,.wiz,[data-noswipe],button,a,.tabs,nav";
+    const hs=n=>{ for(;n&&n!==document.body;n=n.parentElement){ if(n.scrollWidth>n.clientWidth+2){ const o=getComputedStyle(n).overflowX; if(o==='auto'||o==='scroll') return true; } } return false; };
+    for (const f of [0.6,0.55,0.65,0.5,0.7,0.45,0.75,0.4,0.35,0.8]){ const y=innerHeight*f; let good=true; for (const fx of [0.2,0.5,0.8]){ const e=document.elementFromPoint(innerWidth*fx,y); if(!e||e.closest(B)||hs(e)){ good=false; break; } } if (good) return y; } return innerHeight*0.6; });
   // 1) Seiten per echtem Seitwärts-Wischen
-  for (let k=0;k<4;k++){ const from=await view(); await sleep(2500); await swipe(vw-70,vh*0.72,70,vh*0.72,300); await until(async()=>(await view())!==from,6000); await settle(); await hide(); const to=await view();
+  for (let k=0;k<4;k++){ const from=await view(); await sleep(2500); { const y=await freeY(); await swipe(vw-70,y,70,y,300); } await until(async()=>(await view())!==from,6000); await settle(); await hide(); const to=await view();
     ok(`Seitwärts-Wischen ${from} → ${to}`, to!==from); shot('wisch-'+to); await checkSwipers('auf '+to); }
-  for (let k=0;k<2;k++){ const from=await view(); await sleep(2500); await swipe(70,vh*0.72,vw-70,vh*0.72,300); await until(async()=>(await view())!==from,6000); await settle(); await hide(); const to=await view(); ok(`Zurück-Wischen ${from} → ${to}`, to!==from); await checkSwipers('zurück auf '+to); }
+  for (let k=0;k<2;k++){ const from=await view(); await sleep(2500); { const y=await freeY(); await swipe(70,y,vw-70,y,300); } await until(async()=>(await view())!==from,6000); await settle(); await hide(); const to=await view(); ok(`Zurück-Wischen ${from} → ${to}`, to!==from); await checkSwipers('zurück auf '+to); }
   }
   // 2) Startseite: Konto-Karte antippen dreht um, Abbrechen dreht zurück
   await p.evaluate(()=>{ try{ window.__hbt.go('home'); }catch(_){} }); await sleep(2500); await hide();
