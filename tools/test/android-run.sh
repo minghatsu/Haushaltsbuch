@@ -13,8 +13,13 @@ adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 
 adb uninstall $PKG >/dev/null 2>&1 || true
 adb install -r -g "$APK" || exit 3
 adb logcat -c
-adb shell am start -W -n $PKG/de.sascha.haushaltsbuch.MainActivity
-sleep 15
+PID=""
+for t in 1 2 3; do
+  adb shell am start -W -n $PKG/de.sascha.haushaltsbuch.MainActivity
+  sleep 15
+  PID=$(adb shell pidof $PKG | tr -d '\r'); [ -n "$PID" ] && break
+  echo "App noch nicht da – Versuch $t"; adb shell input keyevent 3; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1; sleep 10
+done
 adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1 || true
 PID=$(adb shell pidof $PKG | tr -d '\r')
 [ -n "$PID" ] || { echo "App startet nicht"; adb logcat -d -s AndroidRuntime:E | head -40; exit 4; }
