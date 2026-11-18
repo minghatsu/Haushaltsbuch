@@ -1662,6 +1662,7 @@ if (IS_PC){
 }
 /* Navigation nicht unter den Monatswähler schieben */
 function pcNavFit(){ if (!IS_PC || document.documentElement.classList.contains("istab")) return; const t=document.querySelector(".tabs"), mp=document.getElementById("monthpill"); if (!t||!mp) return;
-  t.style.translate=""; const tr=t.getBoundingClientRect(), mr=mp.getBoundingClientRect(); if (!mr.width || mr.top>tr.bottom || mr.bottom<tr.top) return;
-  const ov=tr.right-(mr.left-10); if (ov>0) t.style.translate=`${-Math.ceil(ov)}px 0`; }
+  // "right" statt translate: translate würde den festen Plus-Knopf in der Leiste mitverschieben (er landete oben im Kopf)
+  t.style.right=""; const tr=t.getBoundingClientRect(), mr=mp.getBoundingClientRect(); if (!mr.width || mr.top>tr.bottom || mr.bottom<tr.top) return;
+  const ov=tr.right-(mr.left-10); if (ov>0) t.style.right=`${2*Math.ceil(ov)}px`; }
 addEventListener("resize", ()=>requestAnimationFrame(pcNavFit)); setTimeout(pcNavFit, 300); setTimeout(pcNavFit, 1500);

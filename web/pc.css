@@ -832,7 +832,7 @@ html.pc.istab:not(.tabp) .pchero{position:fixed!important;left:24px;top:104px!im
   html.pc.istab:not(.tabp) .pcaccs{margin-top:8px;gap:5px}
   html.pc.istab:not(.tabp) .pcaccs button{padding:4px 9px;border-radius:11px;line-height:1.15}
   html.pc.istab:not(.tabp) .pcaccs button.main{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px}
-  html.pc.istab:not(.tabp) .pcaccs span{font-size:10px}
+  html.pc.istab:not(.tabp) .pcaccs span{font-size:11px}
   html.pc.istab:not(.tabp) .pcaccs b{font-size:13px}
   html.pc.istab:not(.tabp) .pcaccs button.main b{font-size:15px}
   html.pc.istab:not(.tabp) .pcring{width:min(108px,17vh)!important;margin-top:10px!important}
