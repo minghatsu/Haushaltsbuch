@@ -4,15 +4,16 @@
 const {_android}=require('playwright'); const {execFileSync}=require('child_process'); const fs=require('fs');
 const SHOT=process.argv[2]||'shots', DEV=process.env.HB_DEVICE||'Android', ADB=process.env.ADB||'adb', SER=process.env.ANDROID_SERIAL;
 fs.mkdirSync(SHOT,{recursive:true});
-const adb=(...a)=>execFileSync(ADB,[...(SER?['-s',SER]:[]),...a],{maxBuffer:64<<20});
+const adb=(...a)=>execFileSync(ADB,[...(SER?['-s',SER]:[]),...a],{maxBuffer:64<<20,timeout:30000});
 const sh=(...a)=>adb('shell',...a).toString();
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const fails=[]; let checks=0;
 const ok=(what,cond,info='')=>{ checks++; if(!cond){ fails.push(`${DEV}: ${what}${info?' – '+info:''}`); console.log('  ✗',what,info); } else console.log('  ✓',what); };
 const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out','screencap','-p')); }catch(e){} };
 (async()=>{
+  setTimeout(()=>{ console.log('Zeitlimit erreicht (10 Min) – Test hängt'); try{ fs.writeFileSync(`${SHOT}/${DEV}-zeitlimit.png`, adb('exec-out','screencap','-p')); }catch(_){} process.exit(3); }, 600000).unref();
   const devs=await _android.devices(); const dv=SER?devs.find(d=>d.serial()===SER):devs[0]; if(!dv){ console.log('Kein Android-Gerät gefunden'); process.exit(2); }
-  const wv=await dv.webView({pkg:process.env.HB_PKG||'de.sascha.haushaltsbuch.test'},{timeout:60000}); const p=await wv.page(); const b={close:()=>dv.close()};
+  const wv=await dv.webView({pkg:process.env.HB_PKG||'de.sascha.haushaltsbuch.test'},{timeout:60000}); const p=await wv.page(); p.setDefaultTimeout(20000); const b={close:()=>dv.close()}; console.log('verbunden');
   const errs=[]; p.on('pageerror',e=>errs.push(e.message));
   console.log(`== ${DEV} ==  ${p.url()}`);
   if (process.env.HB_RUN){ const v=await p.evaluate(()=>{ const m=document.querySelector('meta[name=hb-version]'); return m&&m.content; }); ok('Test-App enthält die neue Version', v===process.env.HB_RUN, 'gefunden '+v); }
@@ -27,19 +28,21 @@ const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out',
   await sleep(800); await hide();
   // Kalibrieren: wo landet ein Android-Tipp in der Seite?
   await p.evaluate(()=>{ window.__tp=null; addEventListener('touchstart',e=>{ window.__tp=[e.touches[0].clientX,e.touches[0].clientY]; },{capture:true,passive:true}); });
-  const [W,H]=sh('wm','size').match(/(\d+)x(\d+)\s*$/m).slice(1).map(Number);
-  sh('input','tap',String(Math.round(W/2)),String(Math.round(H*0.15))); await sleep(500);
-  const tp=await p.evaluate(()=>window.__tp), dpr=await p.evaluate(()=>devicePixelRatio);
-  if (!tp){ console.log('Kalibrierung fehlgeschlagen'); process.exit(2); }
-  const offX=W/2/dpr-tp[0], offY=H*0.15/dpr-tp[1]; await hide();
+  shot('start');
+  // tatsächliche Bildschirmgröße inkl. Drehung
+  let W,H; { const m=sh('dumpsys','display').match(/mCurrentDisplayRect=Rect\(0, 0 - (\d+), (\d+)\)/)||sh('dumpsys','window','displays').match(/cur=(\d+)x(\d+)/); if (m){ W=+m[1]; H=+m[2]; } else [W,H]=sh('wm','size').match(/(\d+)x(\d+)\s*$/m).slice(1).map(Number); }
+  const dpr=await p.evaluate(()=>devicePixelRatio); let tp=null, tx=0, ty=0;
+  for (const [fx,fy] of [[0.5,0.15],[0.5,0.5],[0.3,0.3],[0.7,0.6]]){ tx=Math.round(W*fx); ty=Math.round(H*fy); await p.evaluate(()=>{ window.__tp=null; }); sh('input','tap',String(tx),String(ty)); await sleep(700); tp=await p.evaluate(()=>window.__tp); if (tp) break; await hide(); }
+  if (!tp){ console.log('Kalibrierung fehlgeschlagen', W, H, sh('dumpsys','window').match(/mCurrentFocus=.*/)); shot('kalibrierung'); process.exit(2); }
+  const offX=tx/dpr-tp[0], offY=ty/dpr-tp[1]; await hide();
   const D=(x,y)=>[String(Math.round((x+offX)*dpr)),String(Math.round((y+offY)*dpr))];
   const vw=await p.evaluate(()=>innerWidth), vh=await p.evaluate(()=>innerHeight);
   console.log(`Bildschirm ${W}×${H}, Seite ${vw}×${vh} @${dpr}`);
   const swipe=async(x1,y1,x2,y2,ms=260)=>{ sh('input','swipe',...D(x1,y1),...D(x2,y2),String(ms)); await sleep(900); };
   const tap=async(x,y)=>{ sh('input','tap',...D(x,y)); await sleep(700); };
-  const view=()=>p.evaluate(()=>{ const v=[...document.querySelectorAll('[data-view]')].find(e=>!e.hidden && e.offsetParent!==null && !e.closest('.cubestage')); return v?v.dataset.view:'?'; });
+  const view=()=>p.evaluate(()=>{ try{ if (typeof UI!=='undefined' && UI.view) return UI.view; }catch(_){} const v=[...document.querySelectorAll('[data-view]')].find(e=>!e.hidden && e.offsetParent!==null && !e.closest('.cubestage')); return v?v.dataset.view:'?'; });
   async function checkSwipers(label){
-    const list=await p.evaluate(()=>{ document.querySelectorAll('[data-tq]').forEach(x=>x.removeAttribute('data-tq')); const v=[...document.querySelectorAll('[data-view]')].find(e=>!e.hidden && e.offsetParent!==null && !e.closest('.cubestage'))||document; const out=[];
+    const list=await p.evaluate(()=>{ document.querySelectorAll('[data-tq]').forEach(x=>x.removeAttribute('data-tq')); const v=(()=>{ try{ return document.querySelector(`main [data-view="${UI.view}"]`); }catch(_){ return null; } })()||[...document.querySelectorAll('main [data-view]')].find(e=>!e.hidden && e.offsetParent!==null)||document; const out=[];
       v.querySelectorAll('.astack:not(.one),.srail').forEach((e,i)=>{ const r=e.getBoundingClientRect(); if(r.width<50||r.height<30) return; e.dataset.tq=i; out.push({i,n:e.id||e.className.split(' ')[0]}); }); return out; });
     for (const s of list){
       await p.evaluate(i=>document.querySelector(`[data-tq="${i}"]`).scrollIntoView({block:'center'}),s.i); await sleep(500);
