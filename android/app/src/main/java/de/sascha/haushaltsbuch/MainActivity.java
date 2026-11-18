@@ -57,6 +57,7 @@ public class MainActivity extends Activity {
     private static final int SCAN_DOC = 41;
     private static final int FILE_CAM = 42;
     private boolean docForFile = false;
+    private int docPages = 1;
     private String scanId;
     private Uri scanUri;
     private static final String APP_URL = "file:///android_asset/index.html";
@@ -147,7 +148,8 @@ public class MainActivity extends Activity {
                 fileCallback = callback;
                 String[] acc0 = params.getAcceptTypes();
                 boolean img0 = acc0 != null && acc0.length > 0 && acc0[0] != null && acc0[0].startsWith("image/");
-                if (params.isCaptureEnabled() && img0) { docForFile = true; startDocScan(true); return true; }
+                boolean multi = params.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE;
+                if (params.isCaptureEnabled() && img0) { docForFile = true; docPages = multi ? 10 : 1; startDocScan(true); return true; }
                 Intent i = new Intent(Intent.ACTION_GET_CONTENT);
                 i.addCategory(Intent.CATEGORY_OPENABLE);
                 String[] acc = params.getAcceptTypes();
@@ -158,6 +160,7 @@ public class MainActivity extends Activity {
                     for (String a : acc) if (a != null && a.contains("/")) mt.add(a);
                     if (mt.size() > 1) { i.setType("*/*"); i.putExtra(Intent.EXTRA_MIME_TYPES, mt.toArray(new String[0])); }
                 }
+                if (multi) i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 try {
                     startActivityForResult(Intent.createChooser(i, img ? "Foto auswählen" : "Datei auswählen"), FILE_REQUEST);
                 } catch (Exception e) {
@@ -169,6 +172,7 @@ public class MainActivity extends Activity {
         });
 
         updTap = isUpdIntent(getIntent());
+        takeShare(getIntent());
         UpdateJob.plan(this);
         BgJob.plan(this);
         live = this;
@@ -242,14 +246,19 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SCAN_DOC) {
             boolean forFile = docForFile; docForFile = false;
-            Uri page = null;
+            Uri page = null; java.util.ArrayList<Uri> pages = new java.util.ArrayList<>();
             if (resultCode == RESULT_OK) {
                 try {
                     GmsDocumentScanningResult r = GmsDocumentScanningResult.fromActivityResultIntent(data);
-                    if (r != null && r.getPages() != null && !r.getPages().isEmpty()) page = copyToScan(r.getPages().get(0).getImageUri());
+                    if (r != null && r.getPages() != null && !r.getPages().isEmpty()) {
+                        clearScanDir();
+                        for (GmsDocumentScanningResult.Page pg : r.getPages()) { Uri u = copyToScan(pg.getImageUri(), false); if (u != null) pages.add(u); }
+                        if (!pages.isEmpty()) page = pages.get(0);
+                    }
                 } catch (Exception ignored) {}
             }
-            if (forFile) { if (fileCallback != null) { fileCallback.onReceiveValue(page == null ? null : new Uri[]{page}); fileCallback = null; } return; }
+            docPages = 1;
+            if (forFile) { if (fileCallback != null) { fileCallback.onReceiveValue(pages.isEmpty() ? null : pages.toArray(new Uri[0])); fileCallback = null; } return; }
             if (resultCode != RESULT_OK) { scanDone(null, "cancel"); return; }
             if (page == null) { scanDone(null, "Kein Bild erhalten"); return; }
             recognize(page);
@@ -268,7 +277,12 @@ public class MainActivity extends Activity {
         }
         if (requestCode == FILE_REQUEST && fileCallback != null) {
             Uri[] result = null;
-            if (resultCode == RESULT_OK && data != null && data.getData() != null) result = new Uri[]{data.getData()};
+            if (resultCode == RESULT_OK && data != null) {
+                if (data.getClipData() != null && data.getClipData().getItemCount() > 0) {
+                    android.content.ClipData cd = data.getClipData(); int n = Math.min(cd.getItemCount(), 20);
+                    result = new Uri[n]; for (int k = 0; k < n; k++) result[k] = cd.getItemAt(k).getUri();
+                } else if (data.getData() != null) result = new Uri[]{data.getData()};
+            }
             fileCallback.onReceiveValue(result);
             fileCallback = null;
             return;
@@ -289,7 +303,7 @@ public class MainActivity extends Activity {
         try {
             GmsDocumentScannerOptions o = new GmsDocumentScannerOptions.Builder()
                 .setGalleryImportAllowed(true)
-                .setPageLimit(1)
+                .setPageLimit(forFile ? Math.max(1, docPages) : 1)
                 .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_JPEG)
                 .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
                 .build();
@@ -321,12 +335,17 @@ public class MainActivity extends Activity {
         } catch (Exception e) { if (fileCallback != null) { fileCallback.onReceiveValue(null); fileCallback = null; } }
     }
 
-    private Uri copyToScan(Uri src) {
+    private void clearScanDir() {
+        File dir = new File(getCacheDir(), "scan"); dir.mkdirs();
+        File[] old = dir.listFiles((d, n) -> n.startsWith("dokument_"));
+        if (old != null) for (File x : old) x.delete();
+    }
+    private Uri copyToScan(Uri src) { clearScanDir(); return copyToScan(src, false); }
+    private Uri copyToScan(Uri src, boolean clear) {
         try {
+            if (clear) clearScanDir();
             File dir = new File(getCacheDir(), "scan"); dir.mkdirs();
-            File f = new File(dir, "dokument_" + System.currentTimeMillis() + ".jpg");
-            File[] old = dir.listFiles((d, n) -> n.startsWith("dokument_"));
-            if (old != null) for (File x : old) x.delete();
+            File f = new File(dir, "dokument_" + System.currentTimeMillis() + "_" + (int)(Math.random()*100000) + ".jpg");
             try (InputStream is = getContentResolver().openInputStream(src); OutputStream os = new FileOutputStream(f)) {
                 byte[] b = new byte[65536]; int n; while ((n = is.read(b)) > 0) os.write(b, 0, n);
             }
@@ -499,10 +518,45 @@ public class MainActivity extends Activity {
         return d != null && "finanzmami".equals(d.getScheme());
     }
 
+    /* Geteilte Dateien (WhatsApp, Mail, Galerie …) */
+    private final java.util.ArrayList<String[]> shared = new java.util.ArrayList<>();
+    private boolean takeShare(Intent i) {
+        if (i == null) return false; String a = i.getAction();
+        if (!Intent.ACTION_SEND.equals(a) && !Intent.ACTION_SEND_MULTIPLE.equals(a)) return false;
+        java.util.ArrayList<Uri> list = new java.util.ArrayList<>();
+        try {
+            if (Intent.ACTION_SEND.equals(a)) { Uri u = i.getParcelableExtra(Intent.EXTRA_STREAM); if (u != null) list.add(u); }
+            else { java.util.ArrayList<Uri> l = i.getParcelableArrayListExtra(Intent.EXTRA_STREAM); if (l != null) list.addAll(l); }
+        } catch (Exception ignored) {}
+        if (list.isEmpty()) return false;
+        File dir = new File(getCacheDir(), "share"); dir.mkdirs();
+        synchronized (shared) {
+            File[] old = dir.listFiles(); if (old != null && shared.isEmpty()) for (File x : old) x.delete();
+            int k = 0;
+            for (Uri u : list) {
+                if (k++ >= 20) break;
+                try {
+                    String type = getContentResolver().getType(u); if (type == null) type = i.getType() != null ? i.getType() : "application/octet-stream";
+                    String name = "datei" + k;
+                    try (android.database.Cursor c = getContentResolver().query(u, new String[]{android.provider.OpenableColumns.DISPLAY_NAME}, null, null, null)) { if (c != null && c.moveToFirst()) name = c.getString(0); } catch (Exception ignored) {}
+                    File f = new File(dir, System.currentTimeMillis() + "_" + k);
+                    long tot = 0;
+                    try (InputStream is = getContentResolver().openInputStream(u); OutputStream os = new FileOutputStream(f)) {
+                        byte[] b = new byte[65536]; int n; while ((n = is.read(b)) > 0) { os.write(b, 0, n); tot += n; if (tot > 25L * 1024 * 1024) break; }
+                    }
+                    shared.add(new String[]{ f.getAbsolutePath(), name, type });
+                } catch (Exception ignored) {}
+            }
+        }
+        if (web != null) web.evaluateJavascript("window.hbShared && window.hbShared()", null);
+        return true;
+    }
+
     @Override
     protected void onNewIntent(Intent i) {
         super.onNewIntent(i);
         setIntent(i);
+        takeShare(i);
         if (isUpdIntent(i) && web != null) web.evaluateJavascript("window.hbUpdTap && window.hbUpdTap()", null);
     }
 
@@ -569,6 +623,25 @@ public class MainActivity extends Activity {
     private class Bridge {
         @JavascriptInterface
         public boolean bgMode() { return false; }
+        @JavascriptInterface
+        public String sharedList() {
+            try {
+                org.json.JSONArray a = new org.json.JSONArray();
+                synchronized (shared) { for (String[] x : shared) { org.json.JSONObject o = new org.json.JSONObject(); o.put("name", x[1]); o.put("type", x[2]); a.put(o); } }
+                return a.toString();
+            } catch (Exception e) { return "[]"; }
+        }
+        @JavascriptInterface
+        public String sharedData(int k) {
+            try {
+                String[] x; synchronized (shared) { if (k < 0 || k >= shared.size()) return ""; x = shared.get(k); }
+                File f = new File(x[0]); byte[] b = new byte[(int) f.length()];
+                try (java.io.FileInputStream is = new java.io.FileInputStream(f)) { int off = 0, n; while (off < b.length && (n = is.read(b, off, b.length - off)) > 0) off += n; }
+                return Base64.encodeToString(b, Base64.NO_WRAP);
+            } catch (Throwable e) { return ""; }
+        }
+        @JavascriptInterface
+        public void sharedClear() { synchronized (shared) { for (String[] x : shared) new File(x[0]).delete(); shared.clear(); } }
         @JavascriptInterface
         public String batteryState() {
             try {
