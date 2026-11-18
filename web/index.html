@@ -2136,6 +2136,39 @@ html.pc .mbbub{border-radius:24px 24px 6px 24px;transform-origin:92% 100%}
 }
 html.pc [data-view="zukunft"] .agrid{grid-template-columns:repeat(4,1fr)!important}
 
+
+/* Entwickler-Werkzeuge */
+#devTouch{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:2147483000}
+#devFps{position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:2147483001;pointer-events:none;display:flex;align-items:baseline;gap:5px;padding:5px 10px;border-radius:999px;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(8px);box-shadow:var(--shadow);font:600 12px system-ui,sans-serif;color:var(--good);transition:color .3s,background .3s}
+#devFps b{font-size:15px}#devFps small{color:var(--muted);font-weight:500}#devFps.mid{color:var(--warn)}#devFps.bad{color:var(--bad);background:color-mix(in srgb,var(--bad-soft) 90%,transparent)}
+.devwrap{display:flex;flex-direction:column;gap:10px;padding-bottom:6px}
+.devwrap>*{animation:devIn .42s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*35ms)}
+@keyframes devIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.devwrap>*{animation:none}}
+.devh{display:flex;align-items:center;justify-content:space-between;margin-top:6px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.devhb{display:flex;gap:12px;text-transform:none;letter-spacing:0}
+.devkv{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.devkv div{background:var(--sunk);border-radius:14px;padding:9px 12px;min-width:0}.devkv small{display:block;color:var(--muted);font-size:11px}.devkv b{display:block;font-size:13px;overflow-wrap:anywhere}
+.devsw{display:flex;align-items:center;gap:12px;background:var(--sunk);border-radius:16px;padding:12px 14px;cursor:pointer}
+.devswt{flex:1;min-width:0}.devswt b{display:block;font-size:14px}.devswt small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.devsw input{position:absolute;opacity:0;pointer-events:none}
+.devtg{flex:none;width:44px;height:26px;border-radius:99px;background:var(--line);position:relative;transition:background .25s}
+.devtg::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .3s cubic-bezier(.3,1.5,.5,1)}
+.devsw input:checked+.devtg{background:var(--accent)}.devsw input:checked+.devtg::after{transform:translateX(18px)}
+.devsw input:focus-visible+.devtg{outline:2px solid var(--accent);outline-offset:2px}
+.devbtns{display:flex;flex-wrap:wrap;gap:8px}.devbtns .btn{display:inline-flex;align-items:center;gap:7px;flex:1 1 140px;justify-content:center}
+.devlog{display:flex;flex-direction:column;gap:2px;max-height:240px;overflow:auto;background:var(--sunk);border-radius:14px;padding:8px;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+.devli{display:flex;gap:8px;align-items:baseline;padding:3px 4px;border-radius:8px;animation:devIn .3s both}
+.devlt{flex:none;width:58px;color:var(--faint);text-align:right}
+.devlk{flex:none;font:600 10px system-ui,sans-serif;padding:2px 7px;border-radius:99px;background:var(--accent-soft);color:var(--accent-2)}
+.devls{min-width:0;overflow-wrap:anywhere;color:var(--fg)}
+.devli.k-fehler .devlk,.devli.k-tot .devlk{background:var(--bad-soft);color:var(--bad)}.devli.k-tot{background:color-mix(in srgb,var(--bad-soft) 50%,transparent)}
+.devli.k-seite .devlk{background:var(--warn-soft);color:var(--warn)}
+.devoff{margin-top:6px;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.fbrec{display:flex;flex-direction:column;gap:6px;margin:4px 0}
+.fbrecn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding-left:30px;animation:devIn .35s both}
+.fbshot{align-items:center}.fbshot img{width:44px;height:78px;object-fit:cover;object-position:top;border-radius:8px;margin-left:auto;border:2px solid var(--line);opacity:.55;filter:grayscale(.6);transition:all .3s}
+.fbshot img.on{opacity:1;filter:none;border-color:var(--accent);transform:scale(1.04)}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -3299,7 +3332,7 @@ function tourSteps(){ const w=S.settings.work, g=workGroup(w);
     {sel:".tabs .tab.plus,.pcfab,[data-addmenu]", raw:1, ic:"docout", t:nt("trh_in_t"), p:[nt(IS_PC?"trh_in_p_pc":"trh_in_p")]},
     {sel:"#ptourQ", raw:1, ic:"bell", t:nt("trh_bell_t"), p:[nt("trh_bell_p")]},
     {sel:"#ptourQ", raw:1, ic:"insight", t:nt("trh_help_t"), p:[nt("trh_help_p")]},
-    {sel:"#fbQuick", ic:"insight", t:"Fehler gefunden? Hier tippen!", p:["Mit diesem Knopf schickst du mir jederzeit Fehler, Ideen oder Fragen – von jeder Seite aus."]},
+    {sel:"#fbQuick", ic:"insight", t:"Fehler gefunden? Hier tippen!", p:["Mit diesem Knopf schickst du mir jederzeit Fehler, Ideen oder Fragen – von jeder Seite aus.", nt("trh_fbrec")]},
     {sel:"#topAv", ic:"sliders", t:"Ich & Einstellungen", p:["Tippe auf dein Profilbild – dort findest du alle Einstellungen. In jedem Bereich gibt es außerdem eigene Einstellungen.", "Diese Tour findest du hier jederzeit wieder unter Hilfe."]} ];
   return st.filter(x=>[...document.querySelectorAll(x.sel)].some(tourVis)); }
 const TOUR={i:-1, steps:[]};
@@ -3699,7 +3732,7 @@ function mMsg(m){ if (m.raw!=null) return esc(m.raw); if (m.k) return esc(mFill(
 function mamiChip(id){ const it=mIntent(id); if (!it) return; MAMI.log.push({me:true, itq:it.id}); MAMI.log.push({me:false, it:it.id, go:it.id}); mamiRender(true); }
 function mamiGo(id){ const it=mIntent(id); if (!it) return; const g=it.go; mamiClose();
   if (g.fn==="studio"){ MAMI.studio=true; MAMI.draft={...(mCfg()||mDef())}; MAMI.bub=mFill(mL("st_ask"), MAMI.draft); mamiOpen(); return; }
-  if (g.fn==="feedback"){ fbFloatOpen(); return; }
+  if (g.fn==="feedback"){ fbQuickGo(); return; }
   if (g.fn==="tour"){ if (PTOUR[UI.view]) ptourOpen(UI.view); else tourOpen(); return; }
   if (g.fn==="bigtour"){ tourOpen(); return; } if (g.fn==="homeoffice"){ hoOpen(); return; } if (g.fn==="weiter"){ invOpen(); return; } if (g.fn==="danke"){ dankeOpen(true); return; }
   if (g.acc){ accGo(g.acc); return; }
@@ -4185,7 +4218,7 @@ function fbQuickBtn(){ let b=$("fbQuick"); const q=$("ptourQ");
   if (!fbQuickOn() || !q){ if (b) b.remove(); return; }
   if (!b){ b=document.createElement("button"); b.id="fbQuick"; b.type="button"; b.className="ptq fbq roundbtn"; b.setAttribute("aria-label","Feedback geben"); b.title="Feedback geben – Fehler, Ideen, Fragen";
     b.innerHTML=`<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M12 8v4M12 15.5v.01"/></svg>`;
-    b.onclick=()=>{ if (FB_PAGES.some(p=>p[0]===UI.view) && !(UI.fbDraft||"").trim()) UI.fbPages=[UI.view]; fbFloatOpen(); }; }
+    b.onclick=()=>fbQuickGo(); }
   if (!document.documentElement.classList.contains("pc")){ b.className="fbtab"; b.innerHTML=`<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M12 8v4M12 15.5v.01"/></svg><span>Feedback</span>`; if (b.parentElement!==document.body) document.body.appendChild(b); return; }
   if (q.classList.contains("ptqph")) b.classList.add("ptqph"); else b.classList.remove("ptqph");
   if (b.nextElementSibling!==q) q.before(b); }
@@ -4205,7 +4238,7 @@ function dankeOpen(preview){ if ($("dankeBg")) return; DANKE.preview=!!preview;
   document.body.appendChild(el); document.body.classList.add("locked");
   el.querySelector("[data-dkok]").onclick=()=>{ el.classList.add("out"); setTimeout(()=>{ el.remove(); document.body.classList.remove("locked"); dankeSpot(); }, 280); }; }
 function dankeSpot(){ fbQuickBtn(); if (!DANKE.preview && (UI.wiz || wizShould())){ const wb=$("wizBg"); if (!UI.wiz || !wb || wb.hidden) wizOpen(); return; } if (!$("fbQuick")){ DANKE.preview=false; return; }
-  TOUR.page="danke"; TOUR.steps=[{sel:"#fbQuick", ic:"insight", t:"Fehler gefunden? Hier tippen!", p:["Mit diesem Knopf schickst du mir jederzeit Fehler, Ideen oder Fragen – von jeder Seite aus."]}];
+  TOUR.page="danke"; TOUR.steps=[{sel:"#fbQuick", ic:"insight", t:"Fehler gefunden? Hier tippen!", p:["Mit diesem Knopf schickst du mir jederzeit Fehler, Ideen oder Fragen – von jeder Seite aus.", nt("trh_fbrec")]}];
   tourGo(0); }
 function helpMenu(){ let m=$("helpMenu"); if (m && !m.hidden){ m.hidden=true; return; }
   if (!m){ m=document.createElement("div"); m.id="helpMenu"; m.className="helpmenu"; m.setAttribute("role","menu"); document.body.appendChild(m); }
@@ -4226,6 +4259,9 @@ document.addEventListener("click", e=>{ const b=e.target.closest("[data-tour]");
 
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-faq]"); if (!b) return; const i=+b.dataset.faq; UI.faqOpen = UI.faqOpen===i ? null : i; renderHilfe(); });
 
+async function fbQuickGo(){ if (FB_PAGES.some(p=>p[0]===UI.view) && !(UI.fbDraft||"").trim()) UI.fbPages=[UI.view];
+  UI.fbRecLog=(typeof dbgSince==="function")?dbgSince(30000):""; UI.fbShot=null; UI.fbShotOn=false;
+  const shot=hbShot(); UI.fbShot=await Promise.race([shot, new Promise(r=>setTimeout(()=>r(null),700))]); fbFloatOpen(); if (!UI.fbShot) shot.then(u=>{ if (u){ UI.fbShot=u; renderFeedback(); } }); }
 function fbFloatEl(){ let bg=$("fbFloatBg"); if (bg) return bg;
   bg=document.createElement("div"); bg.id="fbFloatBg"; bg.className="backdrop fbfloat"; bg.hidden=true;
   bg.innerHTML=`<div class="sheet fbsheet" role="dialog" aria-modal="true" aria-label="Feedback"><div class="sheet-head"><h2>Feedback</h2><button class="icon-btn" data-fbx="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>`;
@@ -4259,6 +4295,10 @@ function renderFeedback(){ const el=$("fbEd"); if (!el) return; if (document.act
     <textarea class="in fbta" id="fbTxt" rows="6" aria-label="Deine Nachricht" placeholder="${esc(T(kind==="fehler"?"Was ist passiert? Was hast du davor gemacht?":kind==="lob"?"Was gefällt dir?":"Was wünschst du dir?"))}">${esc(UI.fbDraft||"")}</textarea>
     <div class="fbimgs">${imgs.map((u,i)=>`<div class="t"><img src="${u}" alt="Bild ${i+1}"><button data-fbimgdel="${i}" aria-label="Bild ${i+1} entfernen">×</button></div>`).join("")}${imgs.length<FB_MAX_IMG?`<button class="add" id="fbImgAdd"><b>＋</b>Bild</button>`:""}</div>
     <input type="file" id="fbImgFile" accept="image/*" multiple hidden>
+    ${kind==="fehler"?`<div class="fbrec">
+      <label class="lgchk fbinfo"><input type="checkbox" id="fbRec" ${UI.fbRec!==false?"checked":""}><span>${nt("fb_rec")} <small>${nt("fb_rec_s")}</small></span></label>
+      ${UI.fbRecLog?`<div class="fbrecn">${ic("clock",13)}${nt("fb_rec_n",{n:UI.fbRecLog.split("\n").length})}</div>`:""}
+      ${UI.fbShot?`<label class="lgchk fbinfo fbshot"><input type="checkbox" id="fbShotOn" ${UI.fbShotOn?"checked":""}><span>${nt("fb_shot")} <small>${nt("fb_shot_s")}</small></span><img src="${UI.fbShot}" alt="" class="${UI.fbShotOn?"on":""}"></label>`:""}</div>`:""}
     <label class="lgchk fbinfo"><input type="checkbox" id="fbInfo" ${info?"checked":""}><span>Diese Infos mitschicken <small>(keine Finanzdaten)</small></span></label>
     <div class="fbkv ${info?"":"off"}"><div><small>Version</small><b>${esc(curVerShort())}</b></div><div><small>Rolle</small><b>${esc(verRole())}</b></div><div><small>Gerät</small><b>${esc(dev)}</b></div><div><small>Gruppe</small><b>${esc(grp)}</b></div></div>
     <div class="row-btns fbbtns"><button class="btn primary" id="fbSend" ${UI.fbBusy?"disabled":""}>${UI.fbBusy?"Wird gesendet …":"Senden"}</button><button class="btn" id="fbCopy">Text kopieren</button></div>
@@ -4272,20 +4312,135 @@ async function fbPost(body){
   let j={}; try{ j=JSON.parse(r.text); }catch(e){}
   if (r.status<200 || r.status>=300){ throw new Error(j.error || "Server antwortet mit "+r.status); }
   return j; }
+/* Entwickler-Werkzeuge: Spur der letzten Schritte, Wischgesten ohne Wirkung, Fingerspur, FPS, Entwickler-Menü */
+const DBG={log:[], errs:[], g:null, trails:[], raf:0, fpsRaf:0, lastView:null, taps:[]};
+const dbgLS=(k,v)=>{ try{ if (v===undefined) return localStorage.getItem(k); if (v===null) localStorage.removeItem(k); else localStorage.setItem(k,v); }catch(_){ return null; } };
+DBG.on=dbgLS("hb-dev")==="1"; DBG.touch=DBG.on && dbgLS("hb-dev-touch")==="1"; DBG.fps=DBG.on && dbgLS("hb-dev-fps")==="1";
+try { DBG.errs=JSON.parse(dbgLS("hb-dev-errs")||"[]").slice(-20); } catch(_){ DBG.errs=[]; }
+function dbgEl(n){ if (!n || n.nodeType!==1) return "?"; const out=[];
+  for (let e=n, i=0; e && e!==document.body && e!==document.documentElement && i<3; e=e.parentElement, i++){
+    let s=e.tagName.toLowerCase(); if (e.id && !/^[0-9a-f-]{20,}$/.test(e.id)){ out.unshift(s+"#"+e.id); break; }
+    const d=["go","spgo","view","hb","fbk","ci","fbpg","acx","openshop","hbclose"].find(k=>e.dataset && e.dataset[k]!=null);
+    if (d) s+=`[data-${d}=${String(e.dataset[d]).slice(0,24)}]`; else if (e.classList.length) s+="."+[...e.classList].slice(0,2).join(".");
+    out.unshift(s); }
+  return out.join(" › "); }
+function dbgAdd(k, s){ const now=Date.now(); DBG.log.push({t:now, k, s:String(s||"").slice(0,180)});
+  while (DBG.log.length>300 || (DBG.log.length && now-DBG.log[0].t>180000)) DBG.log.shift();
+  if (DBG.on && $("devBg") && !$("devBg").hidden) devLogRender(); }
+function dbgSince(ms){ const now=Date.now(); return DBG.log.filter(x=>now-x.t<=ms).map(x=>`${((x.t-now)/1000).toFixed(1).padStart(6)} s  ${x.k.padEnd(6)} ${x.s}`).join("\n"); }
+function dbgSig(el){ const st=el && el.closest && el.closest(".astack,.srail");
+  let sc=0; for (let e=el; e && e!==document.body; e=e.parentElement){ if (e.scrollWidth>e.clientWidth+2) sc+=e.scrollLeft; }
+  return [window.UI&&UI.view, window.UI&&UI.cardIdx, window.UI&&UI.zkIdx, window.UI&&UI.ym, document.querySelectorAll(".backdrop:not([hidden]),.hobg:not([hidden])").length,
+    st?[...st.children].slice(0,8).map(c=>c.style.transform).join(","):"", Math.round(sc), scrollY>>3].join("|"); }
+const DBG_NOSWIPE="input,textarea,select,.sheet,.backdrop,.hobg,[data-noswipe],.bt3,.bubbles,.fxchips,#monthpill,.tabs,nav,.tmview,#tourBg,.pcfbsheet";
+function dbgDead(g, dx, dy, dt){
+  const want=g.el.closest(".astack:not(.one),.srail") ? "Karten/Leiste" : (!IS_PC && !g.el.closest(DBG_NOSWIPE) && !document.body.classList.contains("locked") ? "Seitenwechsel" : null);
+  if (!want) return;
+  const info=`Erwartet: ${want}\nElement: ${dbgEl(g.el)}\nAnsicht: ${(window.UI&&UI.view)||"?"}\nStrecke: dx ${Math.round(dx)} / dy ${Math.round(dy)} px in ${Math.round(dt)} ms`;
+  dbgAdd("tot", `${want} – ${dbgEl(g.el)}`); g.dead=true;
+  if (typeof window.hbAutoReport==="function") window.hbAutoReport(`Verdacht: Wischgeste ohne Wirkung (${want})`, info); }
+document.addEventListener("pointerdown", e=>{ if (!e.isPrimary) return;
+  DBG.g={x:e.clientX, y:e.clientY, t:performance.now(), el:e.target, touch:e.pointerType==="touch", max:0, lx:e.clientX, ly:e.clientY, sig:dbgSig(e.target), pts:[[e.clientX,e.clientY]]};
+  if (DBG.touch) dbgTrail(DBG.g); }, {capture:true, passive:true});
+document.addEventListener("pointermove", e=>{ const g=DBG.g; if (!g || !e.isPrimary) return; g.lx=e.clientX; g.ly=e.clientY;
+  g.max=Math.max(g.max, Math.hypot(e.clientX-g.x, e.clientY-g.y)); if (DBG.touch && g.pts.length<400) { g.pts.push([e.clientX,e.clientY]); dbgDraw(); } }, {capture:true, passive:true});
+const dbgUp=e=>{ const g=DBG.g; if (!g || !e.isPrimary) return; DBG.g=null;
+  const dx=g.lx-g.x, dy=g.ly-g.y, dt=performance.now()-g.t;
+  if (g.max<12){ dbgAdd("tipp", dbgEl(g.el)); g.kind="tap"; }
+  else { const dir=Math.abs(dx)>Math.abs(dy)?(dx<0?"←":"→"):(dy<0?"↑":"↓"); dbgAdd("wisch", `${dir} ${Math.round(Math.hypot(dx,dy))} px · ${dbgEl(g.el)}`); g.kind="swipe";
+    if (g.touch && Math.abs(dx)>90 && Math.abs(dy)<Math.abs(dx)*0.5 && dt<900) setTimeout(()=>{ if (dbgSig(g.el)===g.sig) dbgDead(g, dx, dy, dt); }, 900); }
+  g.end=performance.now(); if (DBG.touch) dbgDraw(); };
+document.addEventListener("pointerup", dbgUp, {capture:true, passive:true});
+document.addEventListener("pointercancel", e=>{ const g=DBG.g; if (g){ g.cancel=true; dbgUp(e); } }, {capture:true, passive:true});
+setInterval(()=>{ const v=window.UI&&UI.view; if (v && v!==DBG.lastView){ if (DBG.lastView) dbgAdd("seite", v); DBG.lastView=v; } }, 600);
+function dbgErr(msg){ dbgAdd("fehler", msg); DBG.errs.push({t:Date.now(), m:String(msg).slice(0,300), v:window.UI&&UI.view}); DBG.errs=DBG.errs.slice(-20); dbgLS("hb-dev-errs", JSON.stringify(DBG.errs)); }
+addEventListener("error", e=>dbgErr(e.message||"Fehler"));
+addEventListener("unhandledrejection", e=>{ const r=e.reason; dbgErr(r&&r.message||String(r)); });
+/* Fingerspur */
+function dbgCanvas(){ let c=$("devTouch"); if (!c){ c=document.createElement("canvas"); c.id="devTouch"; c.setAttribute("aria-hidden","true"); document.body.appendChild(c); } return c; }
+function dbgTrail(g){ DBG.trails.push(g); if (DBG.trails.length>6) DBG.trails.shift(); dbgDraw(); }
+function dbgDraw(){ if (DBG.raf) return; DBG.raf=requestAnimationFrame(dbgFrame); }
+function dbgFrame(){ DBG.raf=0; const c=dbgCanvas(), dpr=devicePixelRatio||1, W=innerWidth, H=innerHeight;
+  if (c.width!==Math.round(W*dpr) || c.height!==Math.round(H*dpr)){ c.width=Math.round(W*dpr); c.height=Math.round(H*dpr); }
+  const x=c.getContext("2d"); x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,W,H);
+  const cs=getComputedStyle(document.documentElement), acc=(cs.getPropertyValue("--accent")||"#1a7a5c").trim(), bad="#e5484d", now=performance.now(); let alive=false;
+  DBG.trails=DBG.trails.filter(g=>!g.end || now-g.end<1600);
+  for (const g of DBG.trails){ const age=g.end?(now-g.end)/1600:0, a=1-age; alive=true; const col=g.dead?bad:acc;
+    x.globalAlpha=Math.max(0,a); x.strokeStyle=col; x.fillStyle=col; x.lineWidth=5; x.lineCap="round"; x.lineJoin="round";
+    x.beginPath(); g.pts.forEach(([px,py],i)=>i?x.lineTo(px,py):x.moveTo(px,py)); x.stroke();
+    const [sx,sy]=g.pts[0]; x.globalAlpha=Math.max(0,a*.35); x.beginPath(); x.arc(sx,sy,18+(g.end?age*26:Math.sin(now/160)*4),0,7); x.fill();
+    if (g.end){ const [ex,ey]=g.pts[g.pts.length-1]; const lab=g.dead?nt("dev_k_tot"):g.kind==="tap"?nt("dev_k_tipp"):nt("dev_k_wisch");
+      x.globalAlpha=Math.max(0,a); x.font="600 12px system-ui,sans-serif"; const w=x.measureText(lab).width+14; const lx=Math.min(W-w-6,Math.max(6,ex-w/2)), ly=Math.max(8,ey-40);
+      x.fillStyle=col; x.beginPath(); x.roundRect?x.roundRect(lx,ly,w,22,11):x.rect(lx,ly,w,22); x.fill(); x.fillStyle="#fff"; x.fillText(lab,lx+7,ly+15); } }
+  x.globalAlpha=1; if (alive) DBG.raf=requestAnimationFrame(dbgFrame); }
+/* Ruckel-Anzeige */
+function dbgFpsOn(on){ let el=$("devFps"); cancelAnimationFrame(DBG.fpsRaf); DBG.fpsRaf=0;
+  if (!on){ if (el) el.remove(); return; }
+  if (!el){ el=document.createElement("div"); el.id="devFps"; el.setAttribute("aria-hidden","true"); document.body.appendChild(el); }
+  let n=0, t0=performance.now(), last=t0, worst=0;
+  const loop=t=>{ n++; worst=Math.max(worst,t-last); last=t; if (t-t0>=1000){ const f=Math.round(n*1000/(t-t0)); el.innerHTML=`<b>${f}</b> FPS<small>${Math.round(worst)} ms</small>`; el.className=f<40||worst>80?"bad":f<55?"mid":""; n=0; t0=t; worst=0; } DBG.fpsRaf=requestAnimationFrame(loop); };
+  DBG.fpsRaf=requestAnimationFrame(loop); }
+/* Entwickler-Menü – 7× auf die Versionsnummer tippen */
+document.addEventListener("click", e=>{ const v=e.target.closest(".appfoot small,#pcVer"); if (!v) return;
+  if (DBG.on){ devOpen(); return; }
+  const now=Date.now(); DBG.taps=DBG.taps.filter(t=>now-t<3000); DBG.taps.push(now); const left=7-DBG.taps.length;
+  v.animate([{transform:"scale(1)"},{transform:"scale(1.12)"},{transform:"scale(1)"}],{duration:220});
+  if (left<=0){ DBG.taps=[]; DBG.on=true; dbgLS("hb-dev","1"); toast(nt("dev_on")); devOpen(); }
+  else if (left<=3) toast(nt("dev_more",{n:left}), null, null, 1200); });
+function devStore(){ let b=0; try { for (let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); b+=(k.length+(localStorage.getItem(k)||"").length)*2; } } catch(_){} return b>1048576?(b/1048576).toFixed(1)+" MB":Math.round(b/1024)+" KB"; }
+function devOpen(){ const body=hbSheet("devBg", nt("dev_t"));
+  const dev=window.AndroidBridge?(IS_DESK?"PC":IS_TAB?"Tablet":"Android"):"Browser";
+  const kv=[[nt("dev_ver"),"v"+curVerShort()],[nt("dev_dev"),`${dev} · ${devModel()}`],[nt("dev_scr"),`${innerWidth}×${innerHeight} @${(devicePixelRatio||1).toFixed(2)}`],[nt("dev_view"),(UI.view||"?")+" · "+LANG],[nt("dev_mem"),devStore()]];
+  const sw=(k,on,t,s,i)=>`<label class="devsw" style="--i:${i}"><span class="devswt"><b>${t}</b><small>${s}</small></span><input type="checkbox" data-devsw="${k}" ${on?"checked":""}><span class="devtg" aria-hidden="true"></span></label>`;
+  body.innerHTML=`<div class="devwrap">
+    <div class="devh" style="--i:0">${nt("dev_info")}</div><div class="devkv" style="--i:1">${kv.map(([k,v])=>`<div><small>${esc(k)}</small><b>${esc(v)}</b></div>`).join("")}</div>
+    <div class="devh" style="--i:2">${nt("dev_show")}</div>
+    ${sw("touch",DBG.touch,nt("dev_touch"),nt("dev_touch_s"),3)}${sw("fps",DBG.fps,nt("dev_fps"),nt("dev_fps_s"),4)}
+    <div class="devh" style="--i:5">${nt("dev_act")}</div>
+    <div class="devbtns" style="--i:6"><button class="btn" data-devact="tours">${ic("spark",16)}${nt("dev_tours")}</button><button class="btn" data-devact="sync">${ic("repeat",16)}${nt("dev_sync")}</button><button class="btn" data-devact="test">${ic("send",16)}${nt("dev_test")}</button></div>
+    <div class="devh" style="--i:7">${nt("dev_log")}<span class="devhb"><button class="link small" data-devact="copy">${nt("dev_copy")}</button><button class="link small" data-devact="clear">${nt("dev_clear")}</button></span></div>
+    <div class="devlog" id="devLog" style="--i:8"></div>
+    <div class="devh" style="--i:9">${nt("dev_errs")}</div>
+    <div class="devlog" id="devErrs" style="--i:10"></div>
+    <button class="btn devoff" data-devact="off" style="--i:11">${ic("x",16)}${nt("dev_off")}</button></div>`;
+  devLogRender(); }
+function devLogRender(){ const el=$("devLog"); if (!el) return; const now=Date.now(), L=DBG.log.slice(-40).reverse();
+  el.innerHTML=L.length?L.map(x=>`<div class="devli k-${x.k}"><span class="devlt">${((x.t-now)/1000).toFixed(1)} s</span><span class="devlk">${nt("dev_k_"+x.k)}</span><span class="devls">${esc(x.s)}</span></div>`).join(""):`<p class="muted small">${nt("dev_log0")}</p>`;
+  const er=$("devErrs"); if (er) er.innerHTML=DBG.errs.length?DBG.errs.slice().reverse().map(x=>`<div class="devli k-fehler"><span class="devlt">${new Date(x.t).toLocaleString(cLoc(),{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</span><span class="devls">${esc(x.m)}${x.v?` <small>(${esc(x.v)})</small>`:""}</span></div>`).join(""):`<p class="muted small">${nt("dev_errs0")}</p>`; }
+document.addEventListener("change", e=>{ if (e.target.id==="fbRec"){ UI.fbRec=e.target.checked; return; } if (e.target.id==="fbShotOn"){ UI.fbShotOn=e.target.checked; renderFeedback(); return; } const s=e.target.closest("[data-devsw]"); if (!s) return; const k=s.dataset.devsw, on=s.checked;
+  if (k==="touch"){ DBG.touch=on; dbgLS("hb-dev-touch", on?"1":null); if (!on){ DBG.trails=[]; const c=$("devTouch"); if (c) c.remove(); } }
+  if (k==="fps"){ DBG.fps=on; dbgLS("hb-dev-fps", on?"1":null); dbgFpsOn(on); } });
+document.addEventListener("click", async e=>{ const b=e.target.closest("[data-devact]"); if (!b) return; const a=b.dataset.devact;
+  if (a==="tours"){ ["hb-ptour","hb-tour","hb-tourdone","hb-seen-tour"].forEach(k=>dbgLS(k,null)); try{ for (let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if (/^hb-(p?tour)/.test(k)) localStorage.removeItem(k); } }catch(_){} toast(nt("dev_tours_ok")); }
+  if (a==="sync"){ try { await syncNow(); } catch(_){} }
+  if (a==="test"){ if (typeof window.hbAutoReport==="function") window.hbAutoReport("Testbericht aus dem Entwickler-Menü", "Absichtlich ausgelöst – alles gut.", true); toast(nt("dev_test_ok")); }
+  if (a==="copy"){ const t=`Finanz MAMI ${verFull()} · ${devModel()} · ${innerWidth}×${innerHeight}\n\nLetzte Schritte:\n${dbgSince(180000)}\n\nFehler:\n${DBG.errs.map(x=>new Date(x.t).toISOString()+"  "+x.m).join("\n")||"–"}`;
+    try{ await navigator.clipboard.writeText(t); toast(nt("dev_copied")); }catch(_){ if (window.AndroidBridge && AndroidBridge.copySecret) AndroidBridge.copySecret(t, 300); toast(nt("dev_copied")); } }
+  if (a==="clear"){ DBG.log=[]; DBG.errs=[]; dbgLS("hb-dev-errs",null); devLogRender(); }
+  if (a==="off"){ DBG.on=false; DBG.touch=false; DBG.fps=false; ["hb-dev","hb-dev-touch","hb-dev-fps"].forEach(k=>dbgLS(k,null)); dbgFpsOn(false); const c=$("devTouch"); if (c) c.remove(); hbSheetClose("devBg"); } });
+if (DBG.fps) setTimeout(()=>dbgFpsOn(true), 1500);
+/* Bildschirmfoto für Fehlermeldungen (Android / PC-App) */
+async function hbShot(){ try { const B=window.AndroidBridge; if (!B || !B.screenshot) return null;
+  const r = B.desktop ? await B.screenshot() : await new Promise(res=>{ const t=setTimeout(()=>res(null),2500); window.hbShotCb=d=>{ clearTimeout(t); window.hbShotCb=null; res(d); }; B.screenshot(); });
+  return (typeof r==="string" && r.startsWith("data:image/"))?r:null; } catch(_){ return null; } }
+/* Absturz der Android-App beim letzten Mal? */
+setTimeout(()=>{ try { const B=window.AndroidBridge; if (B && B.lastCrash){ const c=B.lastCrash(); if (c && typeof window.hbAutoReport==="function") window.hbAutoReport("Android-App ist abgestürzt (beim letzten Start)", c); } } catch(_){} }, 6000);
 /* Abstürze melden sich selbst */
 (function(){
-  const send=(msg, where)=>{ try {
+  const send=(msg, where, force)=>{ try {
     msg=String(msg||"").slice(0,600); if (!msg || /^Script error\.?$/i.test(msg) || /ResizeObserver loop|Extension context|chrome-extension:/.test(msg+where)) return;
     if (window.claude || !window.AndroidBridge || !pairUrl()) return;
     const day=new Date().toISOString().slice(0,10), key=(msg+"|"+String(where||"").split("\n")[0]).slice(0,200); let st={};
     try { st=JSON.parse(localStorage.getItem("hb-crash")||"{}"); } catch(_){}
-    if (st.d!==day) st={d:day, n:0, k:{}}; if (st.k[key] || st.n>=10) return; st.k[key]=1; st.n++;
+    if (st.d!==day) st={d:day, n:0, k:{}}; if (!force && (st.k[key] || st.n>=10)) return; st.k[key]=1; st.n++;
     try { localStorage.setItem("hb-crash", JSON.stringify(st)); } catch(_){}
     const info=`Finanz MAMI ${verFull()} · ${IS_DESK?"PC":IS_TAB?"Tablet":"Android"} · ${devModel()} · Ansicht: ${(window.UI&&UI.view)||"?"}`;
-    setTimeout(()=>fbPost({kind:"absturz", text:`${msg}\n\n${String(where||"").slice(0,1500)}\n\n---\n${info}`}).catch(()=>{}), 2500);
+    const steps=(typeof dbgSince==="function")?dbgSince(30000):"";
+    setTimeout(()=>fbPost({kind:"absturz", text:`${msg}\n\n${String(where||"").slice(0,3000)}${steps?`\n\nLetzte Schritte (30 s):\n${steps.slice(-2500)}`:""}\n\n---\n${info}`}).catch(()=>{}), 2500);
   } catch(_){} };
   addEventListener("error", e=>send(e.message, (e.error&&e.error.stack) || (e.filename? e.filename+":"+e.lineno+":"+e.colno : "")));
   addEventListener("unhandledrejection", e=>{ const r=e.reason; send(r&&r.message||String(r), r&&r.stack||""); });
+  window.hbAutoReport=send;
 })();
 /* Versions-Ping */
 function verPing(){ try { if (window.claude || !window.AndroidBridge || !pairUrl()) return; const day=new Date().toISOString().slice(0,10);
@@ -4432,7 +4587,9 @@ document.addEventListener("click", async e=>{
   if (e.target.closest("#fbCopy")){ const t=fbText(); if (!t.trim()){ toast("Bitte erst etwas schreiben"); return; } try{ await navigator.clipboard.writeText(t); toast("Kopiert"); }catch(_){ toast("Kopieren ging nicht – Text bitte markieren"); } return; }
   if (e.target.closest("#fbSend")){ const t=fbText(); if (!(UI.fbDraft||"").trim()){ toast("Bitte erst etwas schreiben"); return; } if (UI.fbBusy) return;
     UI.fbBusy=true; renderFeedback();
-    try { await fbPost({kind:UI.fbKind||"idee", text:t, images:UI.fbImgs||[]}); UI.fbDraft=""; UI.fbImgs=[]; UI.fbPages=[]; fbFloatClose(); toast("Danke! Dein Feedback ist angekommen", null, null, 5000); }
+    const fk=UI.fbKind||"idee", rec=fk==="fehler" && UI.fbRec!==false && UI.fbRecLog ? `\n\nAufzeichnung (letzte 30 s vor dem Feedback-Knopf):\n${UI.fbRecLog.slice(-3500)}` : "";
+    const imgs=(UI.fbImgs||[]).concat(fk==="fehler" && UI.fbShotOn && UI.fbShot ? [UI.fbShot] : []).slice(0,5);
+    try { await fbPost({kind:fk, text:t+rec, images:imgs}); UI.fbDraft=""; UI.fbImgs=[]; UI.fbPages=[]; UI.fbShot=null; UI.fbRecLog=""; fbFloatClose(); toast("Danke! Dein Feedback ist angekommen", null, null, 5000); }
     catch(err){ toast("Senden hat nicht geklappt"+(err&&err.message?" – "+err.message:""), ()=>{ const b=$("fbMail"); if (b) b.click(); }, "Per E-Mail", 9000); }
     finally { UI.fbBusy=false; renderFeedback(); }
     return; }
@@ -8117,7 +8274,7 @@ function renderSetHome(){
   else document.querySelectorAll("#setList [data-accsub]").forEach(s=>{ const t=accSub(s.dataset.accsub); if (s.textContent!==t) s.textContent=t; });
 }
 function accGo(k){
-  if (k==="feedback"){ fbFloatOpen(); return; }
+  if (k==="feedback"){ fbQuickGo(); return; }
   if (k==="profil"){ spSheetOpen("profil"); return; }
   if (k==="weiter"){ invOpen(); return; }
   if (!SP_PAGES[k] && !["dark","wiz"].includes(k)) return;
@@ -9037,6 +9194,45 @@ in_drop:["Hier loslassen – ich lese es","Drop here – I’ll read it","Buraya
 trh_in_t:["Mehrere Seiten & Teilen","Multiple pages & sharing","Çok sayfa ve paylaşma","Несколько страниц и «Поделиться»","Кілька сторінок і «Поділитися»","Wiele stron i udostępnianie","صفحات متعددة ومشاركة","Mai multe pagini și partajare"],
 trh_in_p:["Fotografier einen Brief mit mehreren Seiten am Stück oder wähl mehrere Bilder aus der Galerie. Fotos und PDFs aus WhatsApp oder Mail schickst du mit „Teilen → Finanz MAMI“ direkt zu mir.","Photograph a multi-page letter in one go or pick several pictures from your gallery. Send photos and PDFs from WhatsApp or mail straight to me with “Share → Finanz MAMI”.","Çok sayfalı bir mektubu tek seferde çek ya da galeriden birden fazla resim seç. WhatsApp veya e-postadaki fotoğraf ve PDF'leri „Paylaş → Finanz MAMI“ ile doğrudan bana gönder.","Сфотографируй многостраничное письмо за раз или выбери несколько фото из галереи. Фото и PDF из WhatsApp или почты отправляй мне через «Поделиться → Finanz MAMI».","Сфотографуй багатосторінковий лист за раз або обери кілька фото з галереї. Фото й PDF з WhatsApp чи пошти надсилай мені через «Поділитися → Finanz MAMI».","Sfotografuj wielostronicowe pismo za jednym razem albo wybierz kilka zdjęć z galerii. Zdjęcia i PDF-y z WhatsAppa lub maila wyślesz mi przez „Udostępnij → Finanz MAMI”.","صوّر رسالة من عدة صفحات دفعة واحدة أو اختر عدة صور من المعرض. أرسل الصور وملفات PDF من واتساب أو البريد إليّ مباشرة عبر „مشاركة ← Finanz MAMI“.","Fotografiază o scrisoare cu mai multe pagini dintr-o dată sau alege mai multe poze din galerie. Trimite-mi poze și PDF-uri din WhatsApp sau e-mail cu „Partajează → Finanz MAMI”."],
 trh_in_p_pc:["Zieh Fotos oder PDFs einfach ins Fenster oder füg sie mit Strg+V ein – auch mehrere auf einmal. Ich frage dann, was es ist.","Just drag photos or PDFs into the window or paste them with Ctrl+V – several at once, too. Then I ask what it is.","Fotoğrafları veya PDF'leri pencereye sürükle ya da Ctrl+V ile yapıştır – birden fazla da olur. Sonra ne olduğunu sorarım.","Просто перетащи фото или PDF в окно или вставь через Ctrl+V – можно несколько сразу. Потом я спрошу, что это.","Просто перетягни фото чи PDF у вікно або встав через Ctrl+V – можна кілька одразу. Потім я спитаю, що це.","Przeciągnij zdjęcia lub PDF-y do okna albo wklej je Ctrl+V – także kilka naraz. Potem zapytam, co to jest.","اسحب الصور أو ملفات PDF إلى النافذة أو الصقها بـ Ctrl+V – حتى عدة ملفات معًا. ثم أسألك ما هي.","Trage poze sau PDF-uri în fereastră sau lipește-le cu Ctrl+V – și mai multe deodată. Apoi te întreb ce sunt."],
+dev_t:["Entwickler-Menü", "Developer menu", "Geliştirici menüsü", "Меню разработчика", "Меню розробника", "Menu dewelopera", "قائمة المطوّر", "Meniu dezvoltator"],
+dev_on:["Entwickler-Menü freigeschaltet", "Developer menu unlocked", "Geliştirici menüsü açıldı", "Меню разработчика открыто", "Меню розробника відкрито", "Menu dewelopera odblokowane", "تم فتح قائمة المطوّر", "Meniul dezvoltator a fost deblocat"],
+dev_more:["Noch {n}× tippen", "{n} more taps", "{n} kez daha dokun", "Ещё {n} нажатия", "Ще {n} дотики", "Jeszcze {n} dotknięcia", "{n} نقرات أخرى", "Încă {n} atingeri"],
+dev_info:["Gerät & App", "Device & app", "Cihaz ve uygulama", "Устройство и приложение", "Пристрій і застосунок", "Urządzenie i aplikacja", "الجهاز والتطبيق", "Dispozitiv și aplicație"],
+dev_ver:["Version", "Version", "Sürüm", "Версия", "Версія", "Wersja", "الإصدار", "Versiune"],
+dev_dev:["Gerät", "Device", "Cihaz", "Устройство", "Пристрій", "Urządzenie", "الجهاز", "Dispozitiv"],
+dev_scr:["Bildschirm", "Screen", "Ekran", "Экран", "Екран", "Ekran", "الشاشة", "Ecran"],
+dev_view:["Seite", "Page", "Sayfa", "Страница", "Сторінка", "Strona", "الصفحة", "Pagină"],
+dev_mem:["Speicher", "Storage", "Depolama", "Память", "Пам'ять", "Pamięć", "التخزين", "Stocare"],
+dev_show:["Anzeigen", "Overlays", "Göstergeler", "Наложения", "Накладки", "Nakładki", "مؤشرات", "Suprapuneri"],
+dev_touch:["Fingerspur", "Touch trail", "Dokunma izi", "След касаний", "Слід дотиків", "Ślad dotyku", "أثر اللمس", "Urma atingerii"],
+dev_touch_s:["Zeigt, wo und wie Wischgesten erkannt werden", "Shows where and how swipes are detected", "Kaydırmaların nerede ve nasıl algılandığını gösterir", "Показывает, где и как распознаются жесты", "Показує, де і як розпізнаються жести", "Pokazuje, gdzie i jak rozpoznawane są gesty", "يعرض أين وكيف تُكتشف حركات السحب", "Arată unde și cum sunt recunoscute gesturile"],
+dev_fps:["Ruckel-Anzeige (FPS)", "Smoothness meter (FPS)", "Akıcılık göstergesi (FPS)", "Плавность (FPS)", "Плавність (FPS)", "Płynność (FPS)", "مؤشر السلاسة (FPS)", "Indicator de fluiditate (FPS)"],
+dev_fps_s:["Bilder pro Sekunde – rot heißt, es ruckelt", "Frames per second – red means it stutters", "Saniyedeki kare – kırmızı takılma demek", "Кадры в секунду – красный значит рывки", "Кадри за секунду – червоний означає ривки", "Klatki na sekundę – czerwony to przycięcia", "إطارات في الثانية – الأحمر يعني تقطّعًا", "Cadre pe secundă – roșu înseamnă sacadări"],
+dev_act:["Aktionen", "Actions", "İşlemler", "Действия", "Дії", "Akcje", "إجراءات", "Acțiuni"],
+dev_tours:["Touren zurücksetzen", "Reset tours", "Turları sıfırla", "Сбросить туры", "Скинути тури", "Resetuj przewodniki", "إعادة ضبط الجولات", "Resetează turele"],
+dev_tours_ok:["Touren starten beim nächsten Öffnen wieder", "Tours will show again next time", "Turlar bir dahaki açılışta yeniden başlar", "Туры снова покажутся при следующем открытии", "Тури знову з'являться під час наступного відкриття", "Przewodniki pojawią się ponownie przy następnym otwarciu", "ستظهر الجولات مجددًا في المرة القادمة", "Turele vor apărea din nou data viitoare"],
+dev_sync:["Jetzt abgleichen", "Sync now", "Şimdi eşitle", "Синхронизировать сейчас", "Синхронізувати зараз", "Synchronizuj teraz", "مزامنة الآن", "Sincronizează acum"],
+dev_test:["Testbericht senden", "Send test report", "Test raporu gönder", "Отправить тестовый отчёт", "Надіслати тестовий звіт", "Wyślij raport testowy", "إرسال تقرير تجريبي", "Trimite raport de test"],
+dev_test_ok:["Testbericht ist unterwegs", "Test report sent", "Test raporu gönderildi", "Тестовый отчёт отправлен", "Тестовий звіт надіслано", "Raport testowy wysłany", "تم إرسال التقرير التجريبي", "Raportul de test a fost trimis"],
+dev_log:["Letzte Schritte", "Recent steps", "Son adımlar", "Последние шаги", "Останні кроки", "Ostatnie kroki", "الخطوات الأخيرة", "Pașii recenți"],
+dev_log0:["Noch nichts aufgezeichnet", "Nothing recorded yet", "Henüz kayıt yok", "Пока ничего не записано", "Поки нічого не записано", "Jeszcze nic nie zapisano", "لم يُسجَّل شيء بعد", "Nimic înregistrat încă"],
+dev_copy:["Protokoll kopieren", "Copy log", "Kaydı kopyala", "Копировать журнал", "Копіювати журнал", "Kopiuj dziennik", "نسخ السجل", "Copiază jurnalul"],
+dev_clear:["Leeren", "Clear", "Temizle", "Очистить", "Очистити", "Wyczyść", "مسح", "Golește"],
+dev_errs:["Fehler auf diesem Gerät", "Errors on this device", "Bu cihazdaki hatalar", "Ошибки на этом устройстве", "Помилки на цьому пристрої", "Błędy na tym urządzeniu", "أخطاء على هذا الجهاز", "Erori pe acest dispozitiv"],
+dev_errs0:["Keine Fehler – sehr gut", "No errors – great", "Hata yok – harika", "Ошибок нет – отлично", "Помилок немає – чудово", "Brak błędów – świetnie", "لا أخطاء – رائع", "Nicio eroare – excelent"],
+dev_off:["Entwickler-Menü ausblenden", "Hide developer menu", "Geliştirici menüsünü gizle", "Скрыть меню разработчика", "Сховати меню розробника", "Ukryj menu dewelopera", "إخفاء قائمة المطوّر", "Ascunde meniul dezvoltator"],
+dev_copied:["Kopiert", "Copied", "Kopyalandı", "Скопировано", "Скопійовано", "Skopiowano", "تم النسخ", "Copiat"],
+dev_k_tipp:["Tipp", "Tap", "Dokunma", "Касание", "Дотик", "Dotknięcie", "نقرة", "Atingere"],
+dev_k_wisch:["Wisch", "Swipe", "Kaydırma", "Свайп", "Свайп", "Przesunięcie", "سحب", "Glisare"],
+dev_k_seite:["Seite", "Page", "Sayfa", "Страница", "Сторінка", "Strona", "صفحة", "Pagină"],
+dev_k_fehler:["Fehler", "Error", "Hata", "Ошибка", "Помилка", "Błąd", "خطأ", "Eroare"],
+dev_k_tot:["ohne Wirkung", "no effect", "etkisiz", "без эффекта", "без ефекту", "bez efektu", "بلا تأثير", "fără efect"],
+fb_rec:["Aufzeichnung der letzten 30 Sekunden anhängen", "Attach a recording of the last 30 seconds", "Son 30 saniyenin kaydını ekle", "Приложить запись последних 30 секунд", "Додати запис останніх 30 секунд", "Dołącz zapis ostatnich 30 sekund", "إرفاق تسجيل آخر 30 ثانية", "Atașează înregistrarea ultimelor 30 de secunde"],
+fb_rec_s:["(nur was du angetippt und gewischt hast – keine Zahlen)", "(only what you tapped and swiped – no numbers)", "(sadece dokunduğun ve kaydırdığın yerler – rakam yok)", "(только касания и свайпы – без чисел)", "(лише дотики та свайпи – без чисел)", "(tylko dotknięcia i przesunięcia – bez liczb)", "(فقط ما نقرت عليه وسحبته – بدون أرقام)", "(doar ce ai atins și glisat – fără cifre)"],
+fb_rec_n:["{n} Schritte aufgezeichnet", "{n} steps recorded", "{n} adım kaydedildi", "Записано шагов: {n}", "Записано кроків: {n}", "Zapisano kroków: {n}", "تم تسجيل {n} خطوة", "{n} pași înregistrați"],
+fb_shot:["Bildschirmfoto anhängen", "Attach screenshot", "Ekran görüntüsü ekle", "Приложить снимок экрана", "Додати знімок екрана", "Dołącz zrzut ekranu", "إرفاق لقطة شاشة", "Atașează captura de ecran"],
+fb_shot_s:["(zeigt, was gerade zu sehen war – auch Beträge)", "(shows what was on screen – including amounts)", "(ekranda olanı gösterir – tutarlar dahil)", "(видно всё, что было на экране, включая суммы)", "(видно все, що було на екрані, зокрема суми)", "(widać to, co było na ekranie – także kwoty)", "(يُظهر ما كان على الشاشة – بما في ذلك المبالغ)", "(arată ce era pe ecran – inclusiv sume)"],
+trh_fbrec:["Bei Fehlern schickt die App auf Wunsch mit, was du in den letzten 30 Sekunden angetippt hast – so kann ich den Fehler genau nachstellen.", "For bugs, the app can attach what you tapped in the last 30 seconds – so I can reproduce it exactly.", "Hatalarda uygulama istersen son 30 saniyede dokunduklarını ekler – böylece hatayı birebir tekrarlayabilirim.", "При ошибке приложение может приложить, что ты нажимал за последние 30 секунд, – так я точно её воспроизведу.", "При помилці застосунок може додати, що ти натискав за останні 30 секунд, – так я точно її відтворю.", "Przy błędach aplikacja może dołączyć to, co dotykałeś w ostatnich 30 sekundach – dzięki temu dokładnie odtworzę błąd.", "عند الأخطاء يمكن للتطبيق إرفاق ما نقرت عليه في آخر 30 ثانية – لأعيد إنتاج الخطأ بدقة.", "La erori, aplicația poate atașa ce ai atins în ultimele 30 de secunde – ca să pot reproduce exact problema."],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],

@@ -165,6 +165,10 @@ function goBack() {
 }
 
 /* Bridge (wie Android) */
+ipcMain.handle("shot", async () => {
+  try { if (!win) return ""; let img = await win.webContents.capturePage(); const sz = img.getSize(); if (sz.width > 1600) img = img.resize({ width: 1600 });
+    return "data:image/jpeg;base64," + img.toJPEG(72).toString("base64"); } catch (err) { return ""; }
+});
 ipcMain.on("saveFile", (e, name, text) => {
   try {
     const safe = String(name).replace(/[\\/:*?"<>|]/g, "_") || "haushaltsbuch.json";

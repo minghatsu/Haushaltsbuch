@@ -508,10 +508,15 @@ if (IS_PC){
     const n=unread(), bd=b.querySelector(".badge"), was=Number(bd.textContent)||0; bd.textContent=n; bd.hidden=!n;
     if (n>was && was>=0 && FB.last) { b.animate([{transform:"rotate(0)"},{transform:"rotate(-14deg) scale(1.12)",offset:.25},{transform:"rotate(10deg)",offset:.5},{transform:"rotate(-6deg)",offset:.75},{transform:"none"}],{duration:700}); }
   }
+  /* Immer aktuelle Kopie in „Downloads\MAMI-Feedback.txt“ – damit Claude Fehlerberichte direkt lesen kann */
+  function fbMirror(){ try { const B=window.AndroidBridge; if (!B || !B.desktop || !B.saveFile) return;
+    const L=FB.items.slice(0,80), sig=L.map(x=>x.id+(x.read?"r":"")).join(","); if (sig===FB.mirror) return; FB.mirror=sig;
+    const t=`Finanz MAMI – Feedback-Eingang (Stand ${new Date().toLocaleString("de-DE")})\n${L.length} Meldungen, neueste zuerst. Bilder liegen im Feedback-Eingang der App.\n\n`+L.map(x=>{ const d=new Date(x.ts*1000); return `### ${(KIND[x.kind]||KIND.idee)[0]}${x.read?"":" (ungelesen)"} · ${d.toLocaleDateString("de-DE")} ${d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})} · id ${x.id}${x.images?` · ${x.images} Bild(er)`:""}\n${String(x.text||"").trim()}`; }).join("\n\n");
+    B.saveFile("MAMI-Feedback.txt", t); } catch(_){} }
   async function fbLoad(force){
     if (!updKey() || FB.busy || (!force && Date.now()-FB.last<50*1000)) return fbBtn();
     FB.busy=true; const before=unread();
-    try { const j=await devReq("feedlist"); FB.items=j.items||[]; const n=unread(); if (FB.last && n>before) toast(n-before===1?"Neues Feedback ist da":`${n-before} neue Feedbacks sind da`, ()=>fbOpen(), "Ansehen", 8000); FB.last=Date.now(); }
+    try { const j=await devReq("feedlist"); FB.items=j.items||[]; fbMirror(); const n=unread(); if (FB.last && n>before) toast(n-before===1?"Neues Feedback ist da":`${n-before} neue Feedbacks sind da`, ()=>fbOpen(), "Ansehen", 8000); FB.last=Date.now(); }
     catch(e){ FB.err = /Unbekannte Aktion/i.test(e.message) ? "Auf dem Server läuft noch die alte pair.php – bitte die neue in den Ordner „haushaltsbuch“ kopieren." : e.message; }
     finally { FB.busy=false; fbBtn(); if (!$("pcFbBg").hidden) fbRender(); }
   }
@@ -1494,7 +1499,7 @@ if (IS_PC){
   };
   accGo=function(k){
     if (k==="profil"){ spSheetOpen("profil"); return; }
-    if (k==="feedback"){ fbFloatOpen(); return; }
+    if (k==="feedback"){ fbQuickGo(); return; }
     if (k==="weiter"){ invOpen(); return; }
     if (!SP_PAGES[k]) return;
     ACC.q=""; const q=$("setQ"); if (q) q.value="";

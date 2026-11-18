@@ -32,5 +32,6 @@ contextBridge.exposeInMainWorld("AndroidBridge", {
   nativeRev: () => ipcRenderer.sendSync("nativeRev"),
   ghFetch: (id, url, token, kind) => ipcRenderer.send("ghFetch", { id: String(id), url: String(url), token: String(token), kind: String(kind) }),
   scan: (id) => ipcRenderer.send("scan", String(id)),
+  screenshot: () => ipcRenderer.invoke("shot"),
   desktop: true,
 });

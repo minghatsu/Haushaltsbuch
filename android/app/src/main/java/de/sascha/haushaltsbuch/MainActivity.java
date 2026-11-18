@@ -96,6 +96,17 @@ public class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Absturz merken, damit die App ihn beim nächsten Start melden kann
+        final Thread.UncaughtExceptionHandler prevCrash = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler((th, ex) -> {
+            try {
+                java.io.StringWriter sw = new java.io.StringWriter(); ex.printStackTrace(new java.io.PrintWriter(sw));
+                String txt = "Thread: " + th.getName() + "\nAndroid " + android.os.Build.VERSION.RELEASE + " · " + android.os.Build.MANUFACTURER + " " + android.os.Build.MODEL + "\n\n" + sw;
+                if (txt.length() > 6000) txt = txt.substring(0, 6000);
+                try (FileOutputStream o = new FileOutputStream(new File(getFilesDir(), "lastcrash.txt"))) { o.write(txt.getBytes(StandardCharsets.UTF_8)); }
+            } catch (Throwable ignore) {}
+            if (prevCrash != null) prevCrash.uncaughtException(th, ex);
+        });
         // Test-Version (nur Debug-Build "MAMI Test"): Fernsteuerung für automatische Tests, keine Bildschirmsperre für Screenshots
         testBuild = (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         if (testBuild) WebView.setWebContentsDebuggingEnabled(true);
@@ -625,6 +636,31 @@ public class MainActivity extends Activity {
     }
 
     private class Bridge {
+        @JavascriptInterface public String lastCrash() {
+            try {
+                File f = new File(getFilesDir(), "lastcrash.txt"); if (!f.exists()) return "";
+                ByteArrayOutputStream bo = new ByteArrayOutputStream();
+                try (InputStream in = new java.io.FileInputStream(f)) { byte[] buf = new byte[4096]; int n; while ((n = in.read(buf)) > 0) bo.write(buf, 0, n); }
+                f.delete(); return new String(bo.toByteArray(), StandardCharsets.UTF_8);
+            } catch (Exception e) { return ""; }
+        }
+        @JavascriptInterface public void screenshot() {
+            // asynchron: Ergebnis kommt über window.hbShotCb zurück (der JS-Faden darf nicht warten)
+            web.post(() -> {
+                String data = "";
+                try {
+                    int w = web.getWidth(), h = web.getHeight();
+                    if (w > 0 && h > 0) {
+                        float k = Math.min(1f, 900f / w);
+                        Bitmap bm = Bitmap.createBitmap(Math.round(w * k), Math.round(h * k), Bitmap.Config.RGB_565);
+                        android.graphics.Canvas cv = new android.graphics.Canvas(bm); cv.scale(k, k); web.draw(cv);
+                        ByteArrayOutputStream o = new ByteArrayOutputStream(); bm.compress(Bitmap.CompressFormat.JPEG, 70, o); bm.recycle();
+                        data = "data:image/jpeg;base64," + Base64.encodeToString(o.toByteArray(), Base64.NO_WRAP);
+                    }
+                } catch (Throwable ignore) {}
+                web.evaluateJavascript("window.hbShotCb&&window.hbShotCb('" + data + "')", null);
+            });
+        }
         @JavascriptInterface public boolean isTest() { return testBuild; }
         @JavascriptInterface
         public boolean bgMode() { return false; }
