@@ -742,7 +742,7 @@ if (IS_PC){
     const kv=[["Kategorie", t.cat||"–"], ["Art", KIND_LABEL[t.kind]||t.kind], ["Bezahlt", t.pay==="bar"?"💶 bar":(typeof kaOn==="function" && kaOn() ? (t.acct||"Hauptkonto") : "Karte / Konto")], ["Wiederkehrend", t.wk?"Ja":"Nein"]];
     if (isIn(t) && t.net!=null && Math.abs(t.net-t.amount)>0.004) kv.push(["Netto", eur(t.net)]);
     return `<div class="pcdx">
-      <div class="pcdtop">${avatar(t)}<div class="grow"><h2>${esc(ttl(t))}</h2><span class="muted">${esc(dt.toLocaleDateString(LOCD(),{weekday:"long", day:"numeric", month:"long", year:"numeric"}))}</span></div><button class="roundbtn" data-pcdclose="1" aria-label="Schließen" title="Schließen">✕</button></div>
+      <div class="pcdtop">${avatar(t)}<div class="grow"><h2>${esc(ttl(t))}</h2><span class="muted">${esc(dt.toLocaleDateString(LOCD(),{weekday:"long", day:"numeric", month:"long", year:"numeric"}))}</span></div><button class="roundbtn" data-pcdclose="1" aria-label="Schließen" title="Schließen"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
       <div class="pcdbig ${isIn(t)?"pos":""}">${esc(amtTxt(t))}</div>
       <div class="pcdbody"><div class="pcdkv">${kv.map(([a,b])=>`<div><span class="muted">${esc(a)}</span><b>${esc(b)}</b></div>`).join("")}
         ${same.length>1?`<div class="pcdsame"><small class="muted"><b>${esc(ttl(t))}</b> <span>diesen Monat</span></small><div><span>${same.length} Buchungen</span><b>${esc(amtTxt(t, sum(same,x=>x.amount)))}</b></div></div>`:""}</div>
@@ -1197,7 +1197,7 @@ if (IS_PC){
   const PG={open:false, url:"", shop:null, st:{}, ro:null, embed:false}; let lastView=UI.view;
   const pg=document.createElement("div"); pg.id="pcPage"; pg.className="pcpage"; pg.hidden=true;
   pg.innerHTML=`<div class="pcpbar"><button data-pcpnav="back" title="Zurück" aria-label="Zurück">‹</button><button data-pcpnav="fwd" title="Vor" aria-label="Vor">›</button><button data-pcpnav="reload" class="rl" title="Neu laden" aria-label="Neu laden">⟳</button><button data-pcpnav="pick" class="wide pick" title="Angebot anklicken – es kommt auf den Einkaufszettel">🛒 Angebote picken</button>
-    <div class="url" title="Gesperrt: hier geht nur diese eine Webseite"><span class="lk">🔒</span><span class="u"></span><small class="t"></small><em class="only"></em></div><button data-pcpnav="close" class="x" title="Schließen (Esc)" aria-label="Schließen">✕</button></div>
+    <div class="url" title="Gesperrt: hier geht nur diese eine Webseite"><span class="lk">🔒</span><span class="u"></span><small class="t"></small><em class="only"></em></div><button data-pcpnav="close" class="x" title="Schließen (Esc)" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="pcphole" id="pcpHole"><div class="pcpload"><i></i><span>Seite wird geladen …</span></div></div>`;
   const side=document.createElement("aside"); side.id="pcpSide"; side.className="pcpside"; side.hidden=true;
   document.body.append(pg, side);
