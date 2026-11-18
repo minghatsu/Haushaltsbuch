@@ -6377,7 +6377,7 @@ function initShopRail(){
   const items=[...st.querySelectorAll("[data-shopsel]")], n=items.length; if (!n) return;
   items.forEach(b=>{ b.querySelectorAll("img").forEach(im=>{ im.draggable=false; }); });
   let pos=Math.max(0, items.findIndex(b=>b.dataset.shopsel===UI.shopSel));
-  const step=()=>Math.min(78, st.clientWidth/4.6);
+  const step=()=>Math.min(78, (st.clientWidth||(window.innerWidth-32))/4.6);
   const rel = (i,p) => { let d=((i-p)%n+n)%n; if (d>n/2) d-=n; return d; };
   const lerp=(a,b,t)=>a+(b-a)*t;
   let last=items.map((_,i)=>rel(i,pos));
@@ -6393,6 +6393,7 @@ function initShopRail(){
       const on=i===cur; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
     last=items.map((_,i)=>rel(i,pos));
   };
+  try{ if (st._ro) st._ro.disconnect(); let w0=st.clientWidth; st._ro=new ResizeObserver(()=>{ const w=st.clientWidth; if (w && w!==w0){ w0=w; place(false); } }); st._ro.observe(st); }catch(_){}
   const settle = () => { pos=Math.round(pos); place(true); const id=items[((pos%n)+n)%n].dataset.shopsel; if (id!==UI.shopSel) selectShop(id, false); };
   place(false);
   if (n<2) return;
@@ -10356,7 +10357,7 @@ document.addEventListener("change", e=>{ const id=e.target.id; if (id==="brCam"|
 function kaNames(){ const s=new Set(accountNames()); for (const k of Object.keys(S.settings.accountAnchors||{})) s.add(k); if (!s.size) return []; s.add("Hauptkonto"); return [...s].sort((a,b)=>(b==="Hauptkonto")-(a==="Hauptkonto") || a.localeCompare(b,"de")); }
 function kaOn(){ return kaNames().length>1; }
 function kaFor(cat){ const m=S.settings.acctByCat||{}, n=kaNames(); const v=cat&&m[cat]; return v && n.includes(v) ? v : "Hauptkonto"; }
-function kaOf(t){ return t && t.acct ? t.acct : "Hauptkonto"; }
+function kaOf(t){ if (t && t.acct) return t.acct; let b=null; try{ b=bankAcctOf(t); }catch(_){} return b || "Hauptkonto"; }
 function kaIcon(n){ const s=nrm(n); return n==="Hauptkonto"?"🏦":/auto|tank|kfz/.test(s)?"🚗":/einkauf|lebensmittel|essen/.test(s)?"🛒":/steuer|finanz/.test(s)?"🧾":/urlaub|reise/.test(s)?"🏖️":/spar|ruecklage|rücklage|notgroschen/.test(s)?"🐷":/monat|fix|kosten|miete/.test(s)?"📅":/kind|baby/.test(s)?"🧸":/geschenk|weihnacht/.test(s)?"🎁":"💳"; }
 function kaCol(n){ try{ const i=kaNames().indexOf(n); return acctColor(n,i)||(n==="Hauptkonto"?"var(--accent)":["#3d63a8","#c47a12","#8a4fb5","#b42318","#0f8a8a","#a0522d"][Math.max(0,i-1)%6]); }catch(_){ return "var(--accent)"; } }
 function kaRender(){ const el=$("acctRow"); if (!el) return; const show=kaOn() && ["ausgabe","einnahme","betrieb"].includes(UI.kind) && UI.pay!=="bar" && !(UI.kind==="ausgabe" && isWithdrawCat(UI.cat));
@@ -12054,11 +12055,14 @@ function manualDelta(a, lastImp, asOf, name){ const at=a.ts||0; let d=0; let cut
   return d; }
 /* Buchung einem Space zugeordnet, die Bank hat aber vom Hauptkonto abgebucht:
    Space sinkt, Hauptkonto bekommt es zurück – bis du in der Bank umbuchst (wird am Kontoauszug erkannt). */
-const POT={tok:null, c:{}};
+const POT={tok:null, c:{}, rk:null, rkn:-1};
+function rowAcctMap(){ let n=0; for (const d of Object.values(memStore.acct||{})) n+=Object.keys(d.rows||{}).length; if (POT.rk && POT.rkn===n) return POT.rk;
+  const m=new Map(); for (const d of Object.values(memStore.acct||{})) for (const [k,r] of Object.entries(d.rows||{})) m.set(k, r[0]); POT.rk=m; POT.rkn=n; return m; }
+function bankAcctOf(t){ if (!t || !t.importKey) return null; const m=rowAcctMap(); return m.get(t.importKey) || (t.keys2||[]).map(k=>m.get(k)).find(Boolean) || t.bacct || null; }
 function potCache(){ let n=0; for (const d of Object.values(memStore.acct||{})) n+=Object.keys(d.rows||{}).length;
   if (POT.tok && POT.tok[0]===S.tx && POT.tok[1]===n) return POT.c;
   const out={}, known=new Set(kaNames()), dd=(a,b)=>Math.abs((new Date(a+"T12:00:00")-new Date(b+"T12:00:00"))/864e5);
-  for (const t of (S.tx||[])){ if (!t.importKey || !t.acct || !t.date) continue; const P=t.acct, B=t.bacct||"Hauptkonto"; if (P===B || !known.has(P)) continue;
+  for (const t of (S.tx||[])){ if (!t.importKey || !t.acct || !t.date) continue; const P=t.acct, B=bankAcctOf(t); if (!B || P===B || P==="Hauptkonto" || !known.has(P) || !known.has(B)) continue;
     const k=t.kind, sg=(k==="ausgabe"||k==="betrieb"||k==="vorauszahlung")?1:k==="einnahme"?-1:0; if (!sg) continue;
     (out[P]=out[P]||{bank:B, ev:[]}).ev.push({d:t.date, v:sg*(Number(t.amount)||0)}); }
   for (const [P,o] of Object.entries(out)){ const first=o.ev.reduce((m,e)=>!m||e.d<m?e.d:m,""), pr=ledgerRows(P).filter(r=>r.v<0 && r.date>=first), br=ledgerRows(o.bank).filter(r=>r.v>0), used=new Set();
