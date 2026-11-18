@@ -25,15 +25,32 @@ function A { param([Parameter(ValueFromRemainingArguments)]$a) & $adb @a }
 
 # 2) Handy verbunden?
 A start-server | Out-Null
-$dev = (A devices) | Select-String "`tdevice$"
+# bis zu 90 Sekunden warten – in der Zeit kann am Handy "Zulassen" bestätigt werden
+$dev = $null; $hint = ''
+for ($i = 0; $i -lt 45; $i++) {
+  $lst = (A devices) | Select-String "`t"
+  $dev = $lst | Select-String "`tdevice$"
+  if ($dev) { break }
+  $st = if ($lst | Select-String 'unauthorized') { 'unauthorized' } elseif ($lst) { 'other' } else { 'none' }
+  if ($st -ne $hint) {
+    $hint = $st
+    if ($st -eq 'unauthorized') { Say 'Handy erkannt – bitte am Handy "USB-Debugging zulassen" bestätigen (Häkchen bei "Immer zulassen") ...' }
+    elseif ($st -eq 'none') { Say 'Warte auf Handy ... (USB-Kabel stecken, Handy entsperren)' }
+  }
+  if ($st -eq 'unauthorized' -and $i -eq 20) { A kill-server | Out-Null; A start-server | Out-Null }
+  Start-Sleep 2
+}
 if (-not $dev) {
   Say ''
-  Say 'Kein Handy gefunden. Bitte:'
-  Say '  1. Handy per USB-Kabel anschließen und entsperren'
-  Say '  2. Einstellungen > Telefoninfo > Softwareinformationen > 7x auf "Buildnummer" tippen'
-  Say '  3. Einstellungen > Entwickleroptionen > "USB-Debugging" einschalten'
-  Say '  4. Auf dem Handy "USB-Debugging zulassen" mit OK bestätigen'
-  Say 'Dann dieses Programm nochmal starten.'
+  Say "Kein Handy gefunden (Status: $hint)."
+  if ($hint -eq 'none') {
+    Say 'Bei Samsung braucht Windows meist den Samsung-USB-Treiber:'
+    Say '  https://developer.samsung.com/android-usb-driver  -> herunterladen, installieren, PC neu starten.'
+    Say 'Außerdem: anderes USB-Kabel/Anschluss probieren (manche Kabel können nur laden).'
+  } else {
+    Say 'Am Handy: Entwickleroptionen > "USB-Debugging-Berechtigungen widerrufen", Kabel neu stecken, neu zulassen.'
+  }
+  Say ''; Say 'adb-Ausgabe:'; Say ((A devices -l) -join "`n")
   Read-Host 'Enter zum Schließen'; exit 1
 }
 Say "Handy: $((A shell getprop ro.product.model).Trim())  Android $((A shell getprop ro.build.version.release).Trim())"
