@@ -8095,9 +8095,10 @@ function phSetRender(el){
   $("phHome").innerHTML=phHomeHtml(); }
 function phPageClose(){ accRestoreAll(); ACC.page=null; const el=$("setHome"); if (el) el.dataset.page=""; renderSetHome(); window.scrollTo({top:0}); }
 document.addEventListener("click", e=>{ if (e.target.closest("[data-phback]")) phPageClose(); });
+var PH_SET=true; /* Einstellungen am PC wie am Handy */
 function renderSetHome(){
   const el=$("setHome"); if (!el) return;
-  if (!IS_PC) return phSetRender(el);
+  if (!IS_PC || PH_SET) return phSetRender(el);
   if (!$("setList")){
     el.innerHTML=`<div class="settop"><label class="setsrch"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="setQ" type="search" placeholder="Einstellung suchen …" autocomplete="off" aria-label="Einstellung suchen"></label><button class="setav" data-spgo="profil" aria-label="Profil" id="setAv"></button></div>
       <div class="settabs" role="tablist" id="setTabs"></div><div id="setList"></div>`; ACC.built=""; }
@@ -8113,7 +8114,7 @@ function accGo(k){
   if (k==="profil"){ spSheetOpen("profil"); return; }
   if (k==="weiter"){ invOpen(); return; }
   if (!SP_PAGES[k] && !["dark","wiz"].includes(k)) return;
-  if (!IS_PC){ if (k==="dark"||k==="wiz") return; ACC.q=""; ACC.page = k==="sync" ? "geraete" : k; if (UI.view!=="more"){ UI.view="more"; render(); } else renderSetHome(); return; }
+  if (!IS_PC || PH_SET){ if (k==="dark"||k==="wiz") return; ACC.q=""; ACC.page = k==="sync" ? "geraete" : k; if (UI.view!=="more"){ UI.view="more"; render(); } else renderSetHome(); return; }
   ACC.q=""; const q=$("setQ"); if (q) q.value="";
   ACC.tab=accTabOf(k); if (accHasBody(k)) ACC.open.add(k);
   if (UI.view!=="more"){ UI.view="more"; render(); }
@@ -8129,7 +8130,7 @@ document.addEventListener("click", e=>{
     return; } });
 document.addEventListener("input", e=>{ if (e.target.id!=="setQ") return; ACC.q=e.target.value; renderSetHome(); });
 function renderSpPages(){
-  if (UI.sp && !spsOpen()){ const k=UI.sp; UI.sp=null; if (k==="profil"){ spSheetOpen("profil"); return; } if (SP_PAGES[k]){ if (!IS_PC) ACC.page = k==="sync" ? "geraete" : k; else { ACC.tab=accTabOf(k); if (accHasBody(k)) ACC.open.add(k); ACC.built=""; } } }
+  if (UI.sp && !spsOpen()){ const k=UI.sp; UI.sp=null; if (k==="profil"){ spSheetOpen("profil"); return; } if (SP_PAGES[k]){ if (!IS_PC || PH_SET) ACC.page = k==="sync" ? "geraete" : k; else { ACC.tab=accTabOf(k); if (accHasBody(k)) ACC.open.add(k); ACC.built=""; } } }
   $("spHead").hidden=true; $("setHome").hidden=false; const hero=$("spHero"); if (hero) hero.hidden=true;
   const sk = spsOpen() ? UI.sp : null;
   liveSp().forEach(el=>{ if (!el.closest(".sabody")) el.hidden = !(sk && el.dataset.sp===sk); });
@@ -8141,7 +8142,7 @@ document.addEventListener("click", e=>{
   if (!e.target.closest("[data-qdark]")) return;
   const t=document.documentElement.dataset.theme==="dark"?"light":"dark"; document.documentElement.dataset.theme=t;
   try{ localStorage.setItem("hb-theme",t); }catch(_){}
-  if (!IS_PC && UI.view==="more" && !ACC.page) try { renderSetHome(); } catch(_){}
+  if ((!IS_PC || PH_SET) && UI.view==="more" && !ACC.page) try { renderSetHome(); } catch(_){}
   const tg=document.querySelector('[data-acc="dark"] .tg'); if (tg){ tg.classList.toggle("on", t==="dark"); tg.setAttribute("aria-checked", String(t==="dark")); }
   renderSetHome(); try{ render(); }catch(_){}
 });
@@ -12628,7 +12629,7 @@ window.hbBack = () => {
   if (!$("fanBg").hidden){ fanClose(); return true; }
   if (!$("sheetBg").hidden){ closeSheet(); return true; }
   if (UI.view==="import" && UI.importing) return true;
-  if (!IS_PC && UI.view==="more" && ACC.page){ phPageClose(); return true; }
+  if ((!IS_PC || PH_SET) && UI.view==="more" && ACC.page){ phPageClose(); return true; }
   if (UI.view!=="home"){ UI.imp=null; UI.view="home"; render(); window.scrollTo({top:0}); return true; }
   return false;
 };
