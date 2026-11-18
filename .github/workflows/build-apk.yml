@@ -208,14 +208,15 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           script: bash tools/test/android-run.sh android/app/build/outputs/apk/debug/app-debug.apk /tmp/shots
-      - name: Bildschirmfotos
+      - name: Bildschirmfotos ablegen (Release „testfotos“, wird jedes Mal ersetzt)
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-${{ matrix.name }}-fotos
-          path: /tmp/shots
-          retention-days: 3
-          if-no-files-found: ignore
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls /tmp/shots/*.png >/dev/null 2>&1 || exit 0
+          gh release view testfotos >/dev/null 2>&1 || gh release create testfotos --prerelease --title "Testfotos (automatisch)" --notes "Bildschirmfotos der automatischen Android-Tests. Wird bei jedem Build ersetzt." || true
+          for f in $(gh release view testfotos --json assets -q '.assets[].name' | grep "^${{ matrix.name }}-" || true); do gh release delete-asset testfotos "$f" -y || true; done
+          gh release upload testfotos /tmp/shots/*.png --clobber
 
   web-release:
     name: Veröffentlichen (nur App-Inhalt)

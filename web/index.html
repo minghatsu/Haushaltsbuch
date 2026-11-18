@@ -5142,6 +5142,9 @@ function moneyFlowCard(ym){
         : emptyState("basket","Noch nichts ausgegeben","Tipp auf das Plus, um deine erste Ausgabe einzutragen.")}
     </div>`;
 }
+/* Nur in der Test-App „MAMI Test“ (Debug-Build): Lese-Zugriff für automatische Tests */
+try { if (window.AndroidBridge && AndroidBridge.isTest && AndroidBridge.isTest()) window.__hbt={ view:()=>UI.view, idx:k=>UI[k], go:v=>{ UI.view=v; render(); }, legal:()=>LEGAL_VER, log:()=>CHANGELOG[0][0],
+  seed:()=>{ const d=isoToday(); S.settings.accountAnchors={Hauptkonto:{date:d,balance:1200,ts:Date.now()},Tagesgeld:{date:d,balance:400,ts:Date.now()}}; S.settings.name="Test"; render(); } }; } catch(_){}
 function initStack(id, key, dotsId){ id=id||"astack"; key=key||"cardIdx"; dotsId=dotsId||"adots";
   const st=$(id); if (!st) return;
   const cards=[...st.querySelectorAll(".acard")], n=cards.length, dots=$(dotsId);

@@ -51,6 +51,7 @@ import java.util.regex.Pattern;
 import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends Activity {
+    private boolean testBuild = false;
     private static final int FILE_REQUEST = 1;
     private static final int SCAN_CAMERA = 2;
     private static final int SCAN_GALLERY = 3;
@@ -96,7 +97,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Test-Version (nur Debug-Build "MAMI Test"): Fernsteuerung für automatische Tests, keine Bildschirmsperre für Screenshots
-        boolean testBuild = (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        testBuild = (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         if (testBuild) WebView.setWebContentsDebuggingEnabled(true);
         if (!testBuild && getSharedPreferences("hb-native", MODE_PRIVATE).getBoolean("secure", true))
             getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
@@ -624,6 +625,7 @@ public class MainActivity extends Activity {
     }
 
     private class Bridge {
+        @JavascriptInterface public boolean isTest() { return testBuild; }
         @JavascriptInterface
         public boolean bgMode() { return false; }
         @JavascriptInterface

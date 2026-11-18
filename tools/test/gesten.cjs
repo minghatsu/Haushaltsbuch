@@ -70,7 +70,7 @@ async function runDevice(b,D){
   }
   // 4) Konto-Karte antippen -> dreht sich um, Esc schließt
   await p.evaluate(()=>{ const T=window.__T(); T.UI.view='home'; T.render(); }); await p.waitForTimeout(800); await hide();
-  const card=await p.evaluate(()=>{ const c=document.querySelector('#astack .acard:not(.side)[data-ci]'); if(!c) return null; const r=c.getBoundingClientRect(); return {x:r.x+r.width/2,y:r.y+r.height*0.6}; });
+  const card=await p.evaluate(()=>{ const c=[...document.querySelectorAll('#astack .acard:not(.side)[data-ci]')].find(x=>x.getBoundingClientRect().width>40); if(!c) return null; const r=c.getBoundingClientRect(); return {x:r.x+r.width/2,y:r.y+r.height*0.6}; });
   if (card){ await tap(card.x,card.y); await p.waitForTimeout(500); ok(D.name,'Konto-Karte antippen dreht um', await p.evaluate(()=>!!document.querySelector('#astack .aback')));
     await p.keyboard.press('Escape'); await p.waitForTimeout(600); ok(D.name,'Esc dreht Karte zurück', await p.evaluate(()=>!document.querySelector('#astack .aback'))); }
   // 5) Profilbild -> Einstellungen, Zurück-Taste schließt
