@@ -7,6 +7,7 @@ fs.mkdirSync(SHOT,{recursive:true});
 const adb=(...a)=>execFileSync(ADB,[...(SER?['-s',SER]:[]),...a],{maxBuffer:64<<20,timeout:30000});
 const sh=(...a)=>adb('shell',...a).toString();
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const until=async(fn,ms=6000)=>{ const t=Date.now(); let v; while(Date.now()-t<ms){ v=await fn(); if (v) return v; await sleep(250); } return v; };
 const fails=[]; let checks=0;
 const T0=Date.now(); const ok=(what,cond,info='')=>{ checks++; info=info+(info?' ':'')+`[${Math.round((Date.now()-T0)/1000)}s]`; if(!cond){ fails.push(`${DEV}: ${what}${info?' – '+info:''}`); console.log('  ✗',what,info); } else console.log('  ✓',what); };
 const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out','screencap','-p')); }catch(e){} };
@@ -40,7 +41,8 @@ const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out',
   const D=(x,y)=>[String(Math.round((x+offX)*dpr)),String(Math.round((y+offY)*dpr))];
   const vw=await p.evaluate(()=>innerWidth), vh=await p.evaluate(()=>innerHeight);
   console.log(`Bildschirm ${W}×${H}, Seite ${vw}×${vh} @${dpr}`);
-  const swipe=async(x1,y1,x2,y2,ms=260)=>{ sh('input','swipe',...D(x1,y1),...D(x2,y2),String(ms)); await sleep(900); };
+  const swipe=async(x1,y1,x2,y2,ms=260)=>{ sh('input','swipe',...D(x1,y1),...D(x2,y2),String(ms)); await sleep(400); };
+  const settle=async()=>{ let a=await view(); for(let i=0;i<8;i++){ await sleep(500); const b2=await view(); if (b2===a) break; a=b2; } await sleep(600); };
   const tap=async(x,y)=>{ sh('input','tap',...D(x,y)); await sleep(700); };
   const view=()=>p.evaluate(()=>{ try{ return window.__hbt.view(); }catch(_){} const v=[...document.querySelectorAll('[data-view]')].find(e=>!e.hidden && e.offsetParent!==null && !e.closest('.cubestage')); return v?v.dataset.view:'?'; });
   async function checkSwipers(label){
@@ -50,7 +52,7 @@ const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out',
       await p.evaluate(i=>document.querySelector(`[data-tq="${i}"]`).scrollIntoView({block:'center'}),s.i); await sleep(500);
       const r=await p.evaluate(i=>{const b=document.querySelector(`[data-tq="${i}"]`).getBoundingClientRect(); return [b.x+b.width/2,b.y+b.height/2];},s.i);
       const snap=()=>p.evaluate(i=>{const e=document.querySelector(`[data-tq="${i}"]`); return e?[...e.children].map(c=>c.style.transform+'|'+c.getAttribute('aria-hidden')).join(';'):'WEG';},s.i);
-      const v0=await view(), a=await snap(); await swipe(r[0]+vw*0.28,r[1],r[0]-vw*0.28,r[1],220); const b2=await snap(), v1=await view();
+      const v0=await view(), a=await snap(); await swipe(r[0]+vw*0.28,r[1],r[0]-vw*0.28,r[1],220); const b2=await until(async()=>{ const x=await snap(); return x!==a?x:null; },5000)||a; await settle(); const v1=await view();
       ok(`${label}: ${s.n} wischbar`, a!==b2 && v0===v1, v0!==v1?'Seite hat stattdessen gewechselt':a===b2?'nichts bewegt':'');
       await p.evaluate(()=>scrollTo(0,0)); await sleep(300);
     }
@@ -68,15 +70,15 @@ const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out',
       shot(g); await checkSwipers(g); } }
   else {
   // 1) Seiten per echtem Seitwärts-Wischen
-  for (let k=0;k<4;k++){ const from=await view(); await sleep(2500); await swipe(vw-70,vh*0.72,70,vh*0.72,300); await hide(); const to=await view();
+  for (let k=0;k<4;k++){ const from=await view(); await sleep(2500); await swipe(vw-70,vh*0.72,70,vh*0.72,300); await until(async()=>(await view())!==from,6000); await settle(); await hide(); const to=await view();
     ok(`Seitwärts-Wischen ${from} → ${to}`, to!==from); shot('wisch-'+to); await checkSwipers('auf '+to); }
-  for (let k=0;k<2;k++){ const from=await view(); await sleep(2500); await swipe(70,vh*0.72,vw-70,vh*0.72,300); await hide(); const to=await view(); ok(`Zurück-Wischen ${from} → ${to}`, to!==from); await checkSwipers('zurück auf '+to); }
+  for (let k=0;k<2;k++){ const from=await view(); await sleep(2500); await swipe(70,vh*0.72,vw-70,vh*0.72,300); await until(async()=>(await view())!==from,6000); await settle(); await hide(); const to=await view(); ok(`Zurück-Wischen ${from} → ${to}`, to!==from); await checkSwipers('zurück auf '+to); }
   }
   // 2) Startseite: Konto-Karte antippen dreht um, Abbrechen dreht zurück
-  await p.evaluate(()=>{ try{ window.__hbt.go('home'); }catch(_){} }); await sleep(900); await hide();
+  await p.evaluate(()=>{ try{ window.__hbt.go('home'); }catch(_){} }); await sleep(2500); await hide();
   const card=await p.evaluate(()=>{ const c=[...document.querySelectorAll('#astack .acard:not(.side)[data-ci]')].find(x=>x.getBoundingClientRect().width>40); if(!c) return null; const r=c.getBoundingClientRect(); return [r.x+r.width/2,r.y+r.height*0.6]; });
-  if (card){ await tap(...card); await sleep(400); ok('Konto-Karte antippen dreht um', await p.evaluate(()=>!!document.querySelector('#astack .aback'))); shot('karte');
-    const x=await p.evaluate(()=>{ const b=document.querySelector('[data-acx]'); if(!b) return null; const r=b.getBoundingClientRect(); return [r.x+r.width/2,r.y+r.height/2]; }); if (x){ await tap(...x); await sleep(500); ok('Abbrechen dreht Karte zurück', await p.evaluate(()=>!document.querySelector('#astack .aback'))); } }
+  if (card){ await tap(...card); ok('Konto-Karte antippen dreht um', await until(()=>p.evaluate(()=>!!document.querySelector('#astack .aback')),5000)); shot('karte');
+    const x=await p.evaluate(()=>{ const b=document.querySelector('[data-acx]'); if(!b) return null; const r=b.getBoundingClientRect(); return [r.x+r.width/2,r.y+r.height/2]; }); if (x){ await tap(...x); ok('Abbrechen dreht Karte zurück', await until(()=>p.evaluate(()=>!document.querySelector('#astack .aback')),5000)); } }
   // 3) Profilbild -> Einstellungen, echte Android-Zurück-Taste
   const av=await p.evaluate(()=>{ const a=document.getElementById('topAv'); if(!a) return null; const r=a.getBoundingClientRect(); return [r.x+r.width/2,r.y+r.height/2]; });
   if (av){ const v0=await view(); await tap(...av); await sleep(500); const v1=await view(); shot('einstellungen'); ok('Profilbild öffnet Einstellungen', v1!==v0);
