@@ -178,7 +178,7 @@ try {
             $mp = $lvl === 0 ? [] : [str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $dev) . '#%'];
             $r = null;
             invCols();
-            if (!$fresh) $r = q("SELECT code, max, lvl FROM invites WHERE $mine AND COALESCE(off, 0) = 0 AND given IS NULL AND code NOT IN (SELECT code FROM acts) ORDER BY created DESC, rowid DESC LIMIT 1", $mp)->fetch(PDO::FETCH_ASSOC) ?: null;
+            if (!$fresh) $r = q("SELECT code, max, lvl FROM invites WHERE $mine AND COALESCE(off, 0) = 0 AND given IS NULL AND seen IS NULL AND code NOT IN (SELECT code FROM acts) ORDER BY created DESC, rowid DESC LIMIT 1", $mp)->fetch(PDO::FETCH_ASSOC) ?: null;
             if (!$r) {
                 if ($lvl === 1 && (int)q("SELECT COUNT(*) FROM invites WHERE $mine", $mp)->fetchColumn() >= INV_MAX) fail('Du hast schon ' . INV_MAX . ' Einladungen verschickt', 403);
                 if (!ipCount('ipcreate', MAX_CREATE_PER_HOUR)) fail('Zu viele neue Codes – bitte später noch einmal', 429);

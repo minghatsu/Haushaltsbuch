@@ -2248,6 +2248,7 @@ html[data-theme="dark"] .gwel{--gwbg:radial-gradient(120% 90% at 100% 0%,color-m
 @keyframes invSl{from{opacity:0;transform:translateY(8px)}}@keyframes invBar{from{width:0}}
 @media (prefers-reduced-motion:reduce){.invslots,.invslots i em,.invcapx{animation:none}}
 ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+.invfresh b{display:inline-block;animation:invFr .6s cubic-bezier(.3,1.6,.5,1)}.invqr svg{transition:opacity .3s}@keyframes invFr{0%{transform:scale(.6);opacity:0}}@media (prefers-reduced-motion:reduce){.invfresh b{animation:none}}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -4646,9 +4647,8 @@ function invRender(){
     : `<p class="muted" style="margin:0 0 12px">Lass das scannen</p>
        <div class="invqr">${qrSvg(invLink(I.code), 236)}</div>
        <div class="invurl" data-noi18n>${esc(INV_PAGE.replace(/^https?:\/\//,"").replace(/\/$/,""))}</div>
-       <div class="invcode">Code <b data-noi18n>${esc(I.code)}</b></div>
-       <p class="small muted" style="margin:8px 0 0">${I.used?`Dieser Code wurde schon benutzt`:`Gilt für <b>eine Person</b> · danach nicht mehr verwendbar`}</p>
-       <button class="link small" style="margin-top:6px" data-invnew>＋ Neuer Code für die nächste Person</button>${invSlotsBox(I)}`;
+       <div class="invcode${I.fresh?" invfresh":""}">Code <b data-noi18n>${esc(I.code)}</b></div>
+       <p class="small muted" style="margin:8px 0 0">${I.used?`Dieser Code wurde schon benutzt`:`Gilt für <b>eine Person</b> · nach dem Scannen kommt sofort ein neuer Code`}</p>${invSlotsBox(I)}`;
   if (I.code && UI.invShare){ const tone=UI.invTone||"pers", txt=UI.invText!=null?UI.invText:invMsg(tone, I.code);
     const apps=[["wa","WhatsApp","#25D366","💬"],["tg","Telegram","#229ED9","✈️"],...(IS_DESK?[]:[["sms","SMS","#0b8a5f","✉️"]]),["mail","E-Mail","#c27c0e","📧"],["more","Mehr","#8a958f","⋯"]];
     el.innerHTML=`<div class="invbox" role="dialog" aria-modal="true" aria-labelledby="invT">
@@ -4714,7 +4714,12 @@ async function invOpen(){
   if (canInvite()) invLoad();
   try { const r=await pairCall("invmake", "", {dev:devId()}, true); UI.inv=invFrom(r); }
   catch(e){ UI.inv={err:e.message||"Server nicht erreichbar"}; }
-  invRender(); }
+  invRender(); invPoll(); }
+/* Sobald jemand den QR-Code scannt, liegt sofort der nächste Code bereit */
+function invPoll(){ clearInterval(UI.invPollT); UI.invPollT=setInterval(async ()=>{
+  if (!$("invBg")){ clearInterval(UI.invPollT); return; } const I=UI.inv||{}; if (!I.code || UI.invShare || I.given || document.hidden) return;
+  try { const r=await pairCall("invmake", "", {dev:devId()}, true); if (!$("invBg")) return; const n=invFrom(r);
+    if (n.code!==I.code || !!n.full!==!!I.full || n.slots!==I.slots){ const scanned=n.code!==I.code; UI.inv=Object.assign(n, scanned?{fresh:true}:{}); invRender(); if (scanned){ toast(nt("inv_scanned")); if (canInvite()) invLoad(); setTimeout(()=>{ if (UI.inv) UI.inv.fresh=false; }, 1500); } } } catch(_){} }, 4000); }
 document.addEventListener("input", e=>{ if (e.target.id==="invName"){ UI.invName=e.target.value; return; } if (e.target.id==="fbTxt") UI.fbDraft=e.target.value; if (e.target.id==="invTxt"){ UI.invText=e.target.value; invGrow(); } });
 document.addEventListener("change", async e=>{ if (e.target.id==="fbInfo"){ UI.fbInfo=e.target.checked; const kv=document.querySelector(".fbkv"); if (kv) kv.classList.toggle("off", !UI.fbInfo); return; }
   if (e.target.id!=="fbImgFile") return; const files=[...e.target.files].slice(0, FB_MAX_IMG-(UI.fbImgs||[]).length); e.target.value="";
@@ -9432,6 +9437,7 @@ inv_cap_ok:["Jetzt {n} Testplätze", "Now {n} tester spots", "Artık {n} test ye
 inv_share_t:["App weitergeben", "Share the app", "Uygulamayı paylaş", "Поделиться приложением", "Поділитися застосунком", "Udostępnij aplikację", "مشاركة التطبيق", "Distribuie aplicația"],
 trh_inv_t:["Lade Freunde zum Testen ein: Zeig deinen QR-Code oder schick die Einladung. Jeder Code gilt für eine Person, und die Testplätze teilen sich alle Tester – du siehst immer, wie viele noch frei sind.", "Invite friends to test: show your QR code or send the invite. Each code is for one person, and all testers share the spots – you always see how many are left.", "Arkadaşlarını teste davet et: QR kodunu göster ya da daveti gönder. Her kod bir kişi içindir; yerler tüm test kullanıcıları arasında ortaktır – kaç yer kaldığını hep görürsün.", "Пригласи друзей тестировать: покажи QR-код или отправь приглашение. Каждый код – для одного человека, а места общие для всех тестеров – ты всегда видишь, сколько осталось.", "Запроси друзів тестувати: покажи QR-код або надішли запрошення. Кожен код – для однієї людини, а місця спільні для всіх тестувальників – ти завжди бачиш, скільки лишилось.", "Zaproś znajomych do testów: pokaż kod QR albo wyślij zaproszenie. Każdy kod jest dla jednej osoby, a miejsca są wspólne dla wszystkich testerów – zawsze widzisz, ile zostało.", "ادعُ أصدقاءك للتجربة: اعرض رمز QR أو أرسل الدعوة. كل رمز لشخص واحد، والأماكن مشتركة بين كل المختبرين – وترى دائمًا كم تبقّى.", "Invită prieteni la testare: arată codul QR sau trimite invitația. Fiecare cod e pentru o persoană, iar locurile sunt comune pentru toți testerii – vezi mereu câte au rămas."],
 trh_fanqr:["Mit dem QR-Knopf lädst du Freunde zum Testen ein – Mami zeigt dir dabei, wie viele Testplätze noch frei sind.", "With the QR button you invite friends to test – Mami shows you how many tester spots are left.", "QR düğmesiyle arkadaşlarını teste davet edersin – Mami kaç test yeri kaldığını gösterir.", "Кнопкой QR приглашаешь друзей тестировать – Mami покажет, сколько мест осталось.", "Кнопкою QR запрошуєш друзів тестувати – Mami покаже, скільки місць лишилось.", "Przyciskiem QR zapraszasz znajomych do testów – Mami pokaże, ile miejsc zostało.", "بزر QR تدعو أصدقاءك للتجربة – وتُريك Mami كم تبقّى من الأماكن.", "Cu butonul QR inviți prieteni la testare – Mami îți arată câte locuri au mai rămas."],
+inv_scanned:["Gescannt – der nächste Code ist schon bereit", "Scanned – the next code is ready", "Tarandı – sıradaki kod hazır", "Отсканировано – следующий код уже готов", "Відскановано – наступний код уже готовий", "Zeskanowano – następny kod już gotowy", "تم المسح – الرمز التالي جاهز", "Scanat – următorul cod e gata"],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
