@@ -2232,6 +2232,22 @@ html[data-theme="dark"] .gwel{--gwbg:radial-gradient(120% 90% at 100% 0%,color-m
   .gwh{font-size:34px}}
 @media (max-height:760px){.gwch{display:none}.gwh{margin-bottom:0;font-size:24px}.gwel{padding-top:calc(22px + env(safe-area-inset-top,0px))}}@media (max-height:600px){.gwel{display:none}#actBg.gwon{justify-content:flex-end}#actBg.gwon .legalbox{margin-top:auto}}
 @media (prefers-reduced-motion:reduce){.gwel,.gwel *,.gwel:after,#actBg.gwon .legalbox{animation:none!important}.gwel:after{opacity:0}}
+
+/* Testplätze */
+.invslots{margin:14px 0 4px;padding:12px 14px;border-radius:16px;background:var(--sunk);text-align:start;width:100%;animation:invSl .45s cubic-bezier(.2,.9,.3,1) .1s backwards}
+.invslots .invslh{display:flex;justify-content:space-between;align-items:baseline;font-weight:800}.invslots .invslh b{font-size:20px;font-variant-numeric:tabular-nums}.invslots .invslh b small{font-size:13px;color:var(--muted);font-weight:700}
+.invslots i{display:block;height:8px;border-radius:6px;background:color-mix(in srgb,var(--accent) 16%,var(--surface));margin:8px 0 6px;overflow:hidden}
+.invslots i em{display:block;height:100%;width:var(--w);border-radius:6px;background:var(--accent);animation:invBar .9s cubic-bezier(.3,1,.4,1) .2s backwards}
+.invslots p{margin:0;font-size:12.5px;color:var(--muted)}.invslots.full i em{background:var(--bad)}.invslots.full .invslh b{color:var(--bad)}
+.invqroff{opacity:.2;filter:grayscale(1)}
+.invcapb{margin-inline-start:auto;margin-inline-end:6px;border:0;padding:6px 11px;min-height:32px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font:800 13px var(--f-body);font-variant-numeric:tabular-nums;cursor:pointer;transition:transform .15s}
+.invcapb:active{transform:scale(.94)}.invcapb.full{background:var(--bad-soft,#f6dedb);color:var(--bad)}
+.invcapx{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;margin:0 0 10px;border-radius:16px;background:var(--sunk);animation:invSl .3s ease}
+.invcapx>span{flex:1;min-width:120px;font-weight:700;font-size:13.5px}.invcapst{display:flex;align-items:center;gap:6px}.invcapst b{min-width:44px;text-align:center;font-size:18px;font-variant-numeric:tabular-nums}
+.invvia{display:block;font-size:11.5px;font-weight:700;color:var(--accent);margin-top:2px}
+@keyframes invSl{from{opacity:0;transform:translateY(8px)}}@keyframes invBar{from{width:0}}
+@media (prefers-reduced-motion:reduce){.invslots,.invslots i em,.invcapx{animation:none}}
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -3386,7 +3402,7 @@ function tourSteps(){ const w=S.settings.work, g=workGroup(w);
     {sel:"#monthpill", ic:"cal", t:"Monat wechseln", p:["Mit den Pfeilen blätterst du durch die Monate – alle Seiten zeigen dann diesen Monat."]},
     {sel:'[data-hb="debts"]', ic:"bank", t:"Kredite & Schulden", p:["Was noch offen ist und wann du schuldenfrei bist. Raten aus den Fixkosten werden automatisch abgezogen."]},
     {sel:".tabs .tab.plus", ic:"receipt", t:"Eintragen", p:["Tippe auf Plus für eine Ausgabe oder Einnahme."]},
-    {sel:".tabs .tab.plus", ic:"camera", t:"Kassenbon & Kontoauszug", p:["Im Plus-Menü kannst du einen Kassenbon fotografieren oder deinen Kontoauszug (CSV) importieren – die App sortiert alles ein."]},
+    {sel:".tabs .tab.plus", ic:"camera", t:"Kassenbon & Kontoauszug", p:["Im Plus-Menü kannst du einen Kassenbon fotografieren oder deinen Kontoauszug (CSV) importieren – die App sortiert alles ein.", ...(canShare()?[nt("trh_fanqr")]:[])]},
     {sel:".areacard", ic:"list", t:"Alles im Haushalt", p:["Fixkosten, Buchungen, Auswertung, Budgets und Abos findest du hier als Kacheln.", fix]},
     {sel:'.tabs .tab[data-go="beruf"]', ic:"insight", t:"Beruf & Steuer", p:["Gehalt, Selbstständigkeit, Steuer und alles rund um deine Arbeit – passend zu deinem Profil."]},
     {sel:'.tabs .tab[data-go="zukunft"]', ic:"insight", t:"Sparen & Schulden", p:["Deine Sparziele, Anlegen und was du noch abzahlen musst."]},
@@ -3585,7 +3601,7 @@ const PTOUR_FN=()=>({
   more:{t:"Einstellungen", s:[
     {sel:"#setQ", ic:"insight", t:"Suchen", p:["Schneller als blättern: eintippen, was du suchst – z. B. „Backup“ oder „Budget“."]},
     {sel:"#pcsL,#setTabs", ic:"sliders", t:"Bereiche", p:[IS_PC?"Links wählen, rechts erscheint der Inhalt.":"Geld, Anpassen, Sicherheit und Hilfe – darunter klappen die Punkte auf.", "Geld: Konten, Budgets, Abos, Sparen & Anlegen. Anpassen: Farben, Sprache, Kategorien."]},
-    ...(canInvite()?[{sel:'[data-invopen="1"],[data-accgo="weiter"]', raw:1, ic:"user", t:nt("inv_t"), p:[nt("trh_inv")]}]:[]),
+    ...(canShare()?[{sel:'[data-invopen="1"],[data-accgo="weiter"]', raw:1, ic:"user", t:canInvite()?nt("inv_t"):nt("inv_share_t"), p:[canInvite()?nt("trh_inv"):nt("trh_inv_t")]}]:[]),
     {sel:'[data-pcset="geraete"],[data-acctab="sicherheit"]', ic:"phone", t:"Geräte & Sicherheit", p:["Handy und PC koppeln (bis zu 5 Geräte), App-Sperre und Backup findest du hier."]},
     {sel:IS_PC?'#ptourQ':'[data-acctab="hilfe"]', ic:"insight", t:"Hilfe", p:[IS_PC?"Das „?“ oben rechts: Tour zu jeder Seite, Fragen und Antworten, Feedback und was neu ist.":"Fragen und Antworten, die große Tour und diese kurzen Seiten-Touren zum erneuten Ansehen."]},
   ]},
@@ -3780,7 +3796,7 @@ function mamiGreet(){ const keys=Math.random()<0.5?["g1","g2","g3"]:["f1","f2","
 function mIntent(id){ return MI.find(x=>x.id===id); }
 function mTxt(it, k){ const i=ML.indexOf(LANG); return (it[k][i<0?0:i]||it[k][0]); }
 function mNorm(s){ return String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^\p{L}\p{N}' ]+/gu," ").replace(/\s+/g," ").trim(); }
-function mOk(it){ return !it.dev || (it.dev==="inv"?canInvite():!!updKey()); }
+function mOk(it){ return !it.dev || (it.dev==="inv"?canShare():!!updKey()); }
 function mFind(q){ const n=" "+mNorm(q)+" "; if (n.trim().length<2) return [];
   const res=MI.filter(mOk).map(it=>{ let sc=0; const kws=it.kw.split("|").join(" ").split(" ").filter(Boolean).map(mNorm);
     for (const k of new Set(kws)){ if (k.length<2) continue; if (n.includes(" "+k+" ")) sc+=3; else if (k.length>=4 && n.includes(k.slice(0, Math.max(4, k.length-2)))) sc+=2; else if (k.length>=3 && n.includes(" "+k)) sc+=1; }
@@ -4307,7 +4323,7 @@ function dankeSpot(){ fbQuickBtn(); if (!DANKE.preview && (UI.wiz || wizShould()
 function helpMenu(){ let m=$("helpMenu"); if (m && !m.hidden){ m.hidden=true; return; }
   if (!m){ m=document.createElement("div"); m.id="helpMenu"; m.className="helpmenu"; m.setAttribute("role","menu"); document.body.appendChild(m); }
   const inbox=$("pcInbox"), nIn=inbox?Number((inbox.querySelector(".badge")||{}).textContent)||0:0;
-  m.innerHTML=[PTOUR[UI.view]?["tour","🧭","Tour zu dieser Seite"]:null,["faq","❓","Fragen & Antworten"],["neu","✨","Neu in dieser Version"],["big","🎓","Große Tour durch die App"],canInvite()?["weiter","📲","App weitergeben (QR-Code)"]:null,updKey()?["danke","💌","Dankeskarte (Tester) ansehen"]:null].filter(Boolean)
+  m.innerHTML=[PTOUR[UI.view]?["tour","🧭","Tour zu dieser Seite"]:null,["faq","❓","Fragen & Antworten"],["neu","✨","Neu in dieser Version"],["big","🎓","Große Tour durch die App"],canShare()?["weiter","📲","App weitergeben (QR-Code)"]:null,updKey()?["danke","💌","Dankeskarte (Tester) ansehen"]:null].filter(Boolean)
     .map(([k,i,l])=>`<button role="menuitem" data-help="${k}"><span>${i}</span>${l}</button>`).join("");
   const b=$("ptourQ").getBoundingClientRect(); m.hidden=false; m.style.top=(b.bottom+8)+"px"; m.style.left=Math.max(8,Math.min(innerWidth-m.offsetWidth-8, b.left-8))+"px"; }
 document.addEventListener("click", e=>{ const h=e.target.closest("[data-help]"), m=$("helpMenu");
@@ -4518,6 +4534,8 @@ function actSet(o){ try{ localStorage.setItem("hb-act", JSON.stringify(o)); }cat
 (function(){ try{ if (!localStorage.getItem("hb-act") && localStorage.getItem("hb-legal")) actSet({k:"root"}); }catch(e){} })();
 const actNeed = () => !actGet() && !window.claude && !!pairUrl();
 const canInvite = () => !!pairUrl() && !!updKey();
+/* Weitergeben dürfen alle freigeschalteten Tester – gemeinsame Testplätze, siehe Server */
+const canShare = () => !!pairUrl() && (canInvite() || !!actGet());
 const invCode = s => { const m=String(s||"").toUpperCase().match(/[?&](?:I=)?([A-Z0-9]{6})\b/) || String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"").match(/^([A-Z0-9]{6})$/); return m?m[1]:""; };
 const invLink = c => INV_PAGE+"?"+c;
 async function pairCall(action, qs, body, devAuth){
@@ -4589,9 +4607,12 @@ document.addEventListener("click", async e=>{
   if (e.target.closest("[data-actpair]")){ const g=$("actBg"); if (g) g.hidden=true; document.body.classList.remove("locked"); pairShow("join"); return; }
   if (e.target.closest("[data-actscan]")){ try { const t=await qrLive(/[?&](?:i=)?[A-Za-z0-9]{6}\b|^\s*[A-Za-z0-9]{6}\s*$/); if (!t) return; UI.act.c=invCode(t); actTry(); } catch(x){ toast(x.message); } return; }
   if (e.target.closest("[data-invopen]")){ invOpen(); return; }
-  if (e.target.closest("[data-invnew]")){ try { const r=await pairCall("invmake", "", {dev:devId(), fresh:1}, true); UI.inv={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; UI.invText=null; invRender(); toast("Neuer Code – gilt für eine Person"); } catch(err){ toast(err.message||"Server nicht erreichbar"); } return; }
+  if (e.target.closest("[data-invcap]")){ UI.invCapEd=UI.invCapEd?0:(UI.invSlots||{}).cap||50; invRender(); return; }
+  const icd=e.target.closest("[data-invcapd]"); if (icd){ UI.invCapEd=Math.max(Math.max(1,(UI.invSlots||{}).slots||0), (UI.invCapEd||50)+Number(icd.dataset.invcapd)); invRender(); return; }
+  if (e.target.closest("[data-invcapsave]")){ try { const r=await pairCall("invcap","",{cap:UI.invCapEd},true); UI.invSlots={slots:r.slots, cap:r.cap}; UI.invCapEd=0; toast(nt("inv_cap_ok",{n:r.cap})); } catch(x){ toast(x.message); } invRender(); return; }
+  if (e.target.closest("[data-invnew]")){ try { const r=await pairCall("invmake", "", {dev:devId(), fresh:1}, true); UI.inv=invFrom(r); UI.invText=null; invRender(); toast("Neuer Code – gilt für eine Person"); } catch(err){ toast(err.message||"Server nicht erreichbar"); } return; }
   if (e.target.closest("[data-invrenew]")){ if (!UI.invArm){ UI.invArm=true; invRender(); clearTimeout(UI.invArmT); UI.invArmT=setTimeout(()=>{ UI.invArm=false; invRender(); }, 5000); return; }
-    UI.invArm=false; try { const r=await pairCall("invrenew", "", {dev:devId()}, true); UI.inv={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; invRender(); toast("Neuer Code – der alte gilt nicht mehr"); } catch(err){ toast(/Unbekannte Aktion/i.test(err.message||"")?"Dafür bitte die neue pair.php auf den Server laden":"Ging nicht: "+(err.message||"")); } return; }
+    UI.invArm=false; try { const r=await pairCall("invrenew", "", {dev:devId()}, true); UI.inv=invFrom(r); invRender(); toast("Neuer Code – der alte gilt nicht mehr"); } catch(err){ toast(/Unbekannte Aktion/i.test(err.message||"")?"Dafür bitte die neue pair.php auf den Server laden":"Ging nicht: "+(err.message||"")); } return; }
   if (e.target.closest("[data-invsharego]")){ UI.invShare=true; UI.invText=null; if (UI.invTone==="rem") UI.invTone="pers"; invRender(); return; }
   if (e.target.closest("[data-invqr]")){ UI.invQr=!UI.invQr; invRender(); return; }
   if (e.target.closest("[data-invreload]")){ const b=e.target.closest("[data-invreload]"); if (!RMo()) b.animate([{transform:"rotate(0)"},{transform:"rotate(360deg)"}],{duration:600,easing:"ease-out"}); invLoad(); return; }
@@ -4614,16 +4635,20 @@ document.addEventListener("click", async e=>{
     try { if (navigator.share && !NATIVE && !IS_DESK){ await navigator.share({title:"Finanz MAMI", text:"Hol dir Finanz MAMI – Einladungscode "+I.code, url:l}); return; } } catch(err){ if (err && err.name==="AbortError") return; }
     try { await navigator.clipboard.writeText(l); toast("Link kopiert – füg ihn z. B. in WhatsApp ein"); } catch(_){ toast(l); } return; }
 });
+/* Testplätze: wie viele der gemeinsamen Plätze schon belegt sind */
+function invSlotsBox(I){ if (!I || !I.cap) return ""; const n=Math.min(I.slots||0, I.cap), full=I.full||n>=I.cap, pc=Math.round(n/I.cap*100);
+  return `<div class="invslots${full?" full":""}"><div class="invslh"><span>${esc(nt("inv_slots"))}</span><b data-noi18n>${n} <small>/ ${I.cap}</small></b></div><i><em style="--w:${pc}%"></em></i><p>${esc(full?nt("inv_full"):nt("inv_free",{n:I.cap-n}))}</p></div>`; }
 function invRender(){
   const el=$("invBg"); if (!el) return; const I=UI.inv||{};
   const body = I.err ? `<p class="small" style="color:var(--bad);margin:30px 0">${esc(I.err)}</p><button class="btn" data-invopen>Nochmal versuchen</button>`
+    : I.full ? `<div class="invqr invqroff" aria-hidden="true">${qrSvg(INV_PAGE, 236)}</div>${invSlotsBox(I)}`
     : !I.code ? `<p class="muted" style="margin:60px 0">Einladung wird geladen …</p>`
     : `<p class="muted" style="margin:0 0 12px">Lass das scannen</p>
        <div class="invqr">${qrSvg(invLink(I.code), 236)}</div>
        <div class="invurl" data-noi18n>${esc(INV_PAGE.replace(/^https?:\/\//,"").replace(/\/$/,""))}</div>
        <div class="invcode">Code <b data-noi18n>${esc(I.code)}</b></div>
        <p class="small muted" style="margin:8px 0 0">${I.used?`Dieser Code wurde schon benutzt`:`Gilt für <b>eine Person</b> · danach nicht mehr verwendbar`}</p>
-       <button class="link small" style="margin-top:6px" data-invnew>＋ Neuer Code für die nächste Person</button>`;
+       <button class="link small" style="margin-top:6px" data-invnew>＋ Neuer Code für die nächste Person</button>${invSlotsBox(I)}`;
   if (I.code && UI.invShare){ const tone=UI.invTone||"pers", txt=UI.invText!=null?UI.invText:invMsg(tone, I.code);
     const apps=[["wa","WhatsApp","#25D366","💬"],["tg","Telegram","#229ED9","✈️"],...(IS_DESK?[]:[["sms","SMS","#0b8a5f","✉️"]]),["mail","E-Mail","#c27c0e","📧"],["more","Mehr","#8a958f","⋯"]];
     el.innerHTML=`<div class="invbox" role="dialog" aria-modal="true" aria-labelledby="invT">
@@ -4639,7 +4664,7 @@ function invRender(){
   el.innerHTML=`<div class="invbox" role="dialog" aria-modal="true" aria-labelledby="invT">
     <div class="invhd"><button class="iconbtn" data-invclose aria-label="Zurück">‹</button><b id="invT">App weitergeben</b></div>
     <div class="invmid">${body}</div>
-    ${I.code?`<button class="btn primary block" style="justify-content:center;gap:8px" data-invsharego>${ic("arrowUp",18)} Einladung verschicken</button>`:""}
+    ${I.code||I.full?`<button class="btn primary block" style="justify-content:center;gap:8px" data-invsharego ${I.full?"disabled":""}>${ic("arrowUp",18)} Einladung verschicken</button>`:""}
   </div>`; }
 /* Einladungs-Pinnwand für den Entwickler: nächster Code + drei Spalten */
 function invAgo(t){ if (!t) return ""; const s=Date.now()/1000-t; if (s<90) return nt("ago_now"); if (s<3600) return nt("ago_m",{n:Math.round(s/60)}); if (s<86400) return nt("ago_h",{n:Math.round(s/3600)}); return nt("ago_d",{n:Math.round(s/86400)}); }
@@ -4650,12 +4675,13 @@ function invBoard(){ const I=UI.inv||{}, L=UI.invL||[], calm=RMo();
     const sub= st===2 ? [x.form==="pc"?"PC":x.form==="tab"?"Tablet":x.form?"Android":"", x.ver?"v"+x.ver:"", invAgo(x.act)].filter(Boolean).join(" · ")
       : st===1 ? (x.app?nt("inv_s_app"):nt("inv_s_dl",{f:x.dlform==="zip"?"PC":"Android"}))+" · "+invAgo(x.app||x.dl)
       : (x.seen?nt("inv_s_seen"):nt("inv_s_sent"))+" · "+invAgo(x.seen||x.given);
-    return `<div class="invmini" style="--i:${i}" data-invcard="${esc(x.code)}"><b>${esc(nm)}</b><small>${esc(sub)}</small>${x.name?`<small class="invmc" data-noi18n>${esc(x.code)}</small>`:""}
+    return `<div class="invmini" style="--i:${i}" data-invcard="${esc(x.code)}"><b>${esc(nm)}</b>${x.via?`<span class="invvia">${esc(nt("inv_via",{n:x.via}))}</span>`:""}<small>${esc(sub)}</small>${x.name?`<small class="invmc" data-noi18n>${esc(x.code)}</small>`:""}
       ${st===1&&x.app?`<span class="chip wa invrem">${ic("bell",12)}${nt("inv_auto")}</span>`:""}
       ${st<2?`<button class="link small" data-invremind="${esc(x.code)}">${nt("inv_remind")}${x.remind?` <span class="muted">· ${invAgo(x.remind)}</span>`:""}</button>`:""}</div>`; };
   const colH=cols.map(([k,t,bg,cl])=>{ const items=L.filter(x=>invStage(x)===k); return `<div class="invcol" style="--cb:${bg};--i:${k}"><h4><span>${t}</span><span class="chip ${cl}">${items.length}</span></h4>${items.length?items.map(card).join(""):`<p class="invempty">${nt("inv_none")}</p>`}</div>`; }).join("");
   return `<div class="invbox invboardbox" role="dialog" aria-modal="true" aria-labelledby="invT">
-    <div class="invhd"><button class="iconbtn" data-invclose aria-label="Zurück">‹</button><b id="invT">${nt("inv_t")}</b><button class="iconbtn invrl" data-invreload aria-label="${esc(nt("inv_reload"))}">${ic("repeat",18)}</button></div>
+    <div class="invhd"><button class="iconbtn" data-invclose aria-label="Zurück">‹</button><b id="invT">${nt("inv_t")}</b>${UI.invSlots?`<button class="invcapb${UI.invSlots.slots>=UI.invSlots.cap?" full":""}" data-invcap aria-expanded="${!!UI.invCapEd}" aria-label="${esc(nt("inv_slots"))}" data-noi18n>${UI.invSlots.slots} / ${UI.invSlots.cap}</button>`:""}<button class="iconbtn invrl" data-invreload aria-label="${esc(nt("inv_reload"))}">${ic("repeat",18)}</button></div>
+    ${UI.invCapEd&&UI.invSlots?`<div class="invcapx"><span>${esc(nt("inv_cap_t"))}</span><div class="invcapst"><button class="iconbtn" data-invcapd="-5" aria-label="−5">−</button><b data-noi18n>${UI.invCapEd}</b><button class="iconbtn" data-invcapd="5" aria-label="+5">+</button></div><button class="btn primary" data-invcapsave>${esc(nt("inv_cap_save"))}</button></div>`:""}
     <div class="invnext ${calm?"":"anim"}">${I.err?`<p class="small" style="color:var(--bad);margin:0">${esc(I.err)}</p><button class="btn" data-invopen>${nt("inv_retry")}</button>`:!I.code?`<p class="muted small" style="margin:0">${nt("inv_load")}</p>`:`
       <div class="invnl"><small>${nt("inv_next")}</small><div class="invnc" data-noi18n>${esc(I.code)}</div>
       <input class="in invname" id="invName" maxlength="40" placeholder="${esc(nt("inv_for"))}" value="${esc(UI.invName||"")}" autocomplete="off"></div>
@@ -4664,14 +4690,15 @@ function invBoard(){ const I=UI.inv||{}, L=UI.invL||[], calm=RMo();
     <div class="invcols">${UI.invLerr?`<p class="small" style="color:var(--bad)">${esc(UI.invLerr)}</p>`:colH}</div>
     <p class="small muted invfoot">${nt("inv_hint")}</p>
   </div>`; }
-async function invLoad(){ try { const j=await pairCall("devinv","",{},true); UI.invL=j.items||[]; UI.invLerr=""; } catch(e){ UI.invLerr=/Unbekannte Aktion/i.test(e.message||"")?nt("inv_oldsrv"):(e.message||"Server nicht erreichbar"); } invRender(); }
-async function invNext(){ try { const r=await pairCall("invmake", "", {dev:devId()}, true); UI.inv={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; } catch(e){ UI.inv={err:e.message||"Server nicht erreichbar"}; } invRender(); }
-function invAfterSend(){ const I=UI.inv||{}; if (!canInvite() || !I.code) return;
-  if (I.reminder){ pairCall("invremind","",{c:I.code},true).then(invLoad).catch(()=>{}); return; } invGiven(); }
+const invFrom = r => r.full ? {full:true, slots:r.slots, cap:r.cap} : {code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used), slots:r.slots, cap:r.cap};
+async function invLoad(){ try { const j=await pairCall("devinv","",{},true); UI.invL=j.items||[]; UI.invLerr=""; if (j.cap) UI.invSlots={slots:j.slots, cap:j.cap}; } catch(e){ UI.invLerr=/Unbekannte Aktion/i.test(e.message||"")?nt("inv_oldsrv"):(e.message||"Server nicht erreichbar"); } invRender(); }
+async function invNext(){ try { const r=await pairCall("invmake", "", {dev:devId()}, true); UI.inv=invFrom(r); } catch(e){ UI.inv={err:e.message||"Server nicht erreichbar"}; } invRender(); }
+function invAfterSend(){ const I=UI.inv||{}; if (!canShare() || !I.code) return;
+  if (I.reminder){ pairCall("invremind","",{c:I.code, dev:devId()},true).then(()=>{ if (canInvite()) invLoad(); }).catch(()=>{}); return; } invGiven(); }
 /* Beim Verschicken: Code als „vergeben“ merken, sofort den nächsten holen */
-async function invGiven(){ const I=UI.inv||{}; if (!I.code || I.given || !canInvite()) return; I.given=true; const name=(UI.invName||"").trim();
-  try { await pairCall("invgive","",{c:I.code, name},true); UI.invName="";
-    const r=await pairCall("invmake", "", {dev:devId()}, true); UI.invPending={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; invLoad(); } catch(_){ I.given=false; } }
+async function invGiven(){ const I=UI.inv||{}; if (!I.code || I.given || !canShare()) return; I.given=true; const name=(UI.invName||"").trim();
+  try { await pairCall("invgive","",{c:I.code, name, dev:devId()},true); UI.invName="";
+    const r=await pairCall("invmake", "", {dev:devId()}, true); UI.invPending=invFrom(r); if (canInvite()) invLoad(); } catch(_){ I.given=false; } }
 function invGrow(){ const ta=$("invTxt"); if (!ta) return; ta.style.height="auto"; ta.style.height=(ta.scrollHeight+4)+"px"; }
 const INV_WA="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z", INV_TG="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z";
 function invMsg(tone, c){ const I=UI.inv||{}, nm=((I.reminder?I.name:UI.invName)||"").trim(), out=invMsg0(tone,c,nm);
@@ -4685,7 +4712,7 @@ async function invOpen(){
   let el=$("invBg"); if (!el){ el=document.createElement("div"); el.id="invBg"; el.className="invbg"; document.body.appendChild(el); }
   UI.inv={}; UI.invShare=false; UI.invText=null; invRender();
   if (canInvite()) invLoad();
-  try { const r=await pairCall("invmake", "", {dev:devId()}, true); UI.inv={code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used)}; }
+  try { const r=await pairCall("invmake", "", {dev:devId()}, true); UI.inv=invFrom(r); }
   catch(e){ UI.inv={err:e.message||"Server nicht erreichbar"}; }
   invRender(); }
 document.addEventListener("input", e=>{ if (e.target.id==="invName"){ UI.invName=e.target.value; return; } if (e.target.id==="fbTxt") UI.fbDraft=e.target.value; if (e.target.id==="invTxt"){ UI.invText=e.target.value; invGrow(); } });
@@ -5671,7 +5698,7 @@ function fanOpen(){
     fan.style.setProperty("--cx", (r.left+r.width/2)+"px"); fan.style.setProperty("--cy", (r.top+r.height/2)+"px");
     [150,90,30].forEach((a,i)=>{ const b=fan.children[i], t=a*Math.PI/180; b.style.setProperty("--dx", Math.round(Math.cos(t)*R)+"px"); b.style.setProperty("--dy", Math.round(-Math.sin(t)*R - 26)+"px"); });
     fan.classList.remove("closing"); fan.hidden=false; pl.classList.add("open"); requestAnimationFrame(()=>requestAnimationFrame(()=>fan.classList.add("show"))); return; }
-  fan.classList.add("wheel"); { const q=fan.querySelector('[data-addpick="qr"]'); if (q) q.hidden=!canInvite(); } const dw=$("fanDw"); if (dw.children.length!==fanItems().length) dw.innerHTML=fanItems().map(()=>"<i></i>").join("");
+  fan.classList.add("wheel"); { const q=fan.querySelector('[data-addpick="qr"]'); if (q) q.hidden=!canShare(); } const dw=$("fanDw"); if (dw.children.length!==fanItems().length) dw.innerHTML=fanItems().map(()=>"<i></i>").join("");
   FW.open=true; FW.rot=FW.target=0; fan.hidden=false; pl.classList.add("open"); requestAnimationFrame(()=>fan.classList.add("show")); fanKick();
   let n=0; try{ n=Number(localStorage.getItem("hb-fanhint"))||0; localStorage.setItem("hb-fanhint", String(n+1)); }catch(_){}
   $("fanHint").classList.toggle("on", n<3);
@@ -8256,7 +8283,7 @@ function accTabKeys(t){
   if (t==="geld") return ["konten","budgets","schulden", ...(isJobless()?["amt"]:hasProfile()?["amt","steuer"]:["steuer"]), "invest","export"];
   if (t==="anpassen") return ["dark","farben","sprache","kategorien","start","laeden"];
   if (t==="sicherheit") return ["sicherheit", ...(SYNCABLE||window.AndroidBridge?["sync","geraete"]:[]), "backup", ...(CAN_NOTIFY?["notify"]:[]), "speicher"];
-  return ["neu","hilfe","wiz", ...(canInvite()?["weiter"]:[]), "recht"];
+  return ["neu","hilfe","wiz", ...(canShare()?["weiter"]:[]), "recht"];
 }
 const accTabOf = k => (ACC_TABS.find(([t])=>accTabKeys(t).includes(k))||["geld"])[0];
 const ACC_COL={invest:"#c98a12",konten:"#3d63a8",budgets:"#c27c0e",schulden:"#7a5bc2",steuer:"#d4813a",amt:"#3d63a8",abos:"#0f766e",export:"#047857",dark:"#34413b",farben:"#d14d72",sprache:"#65a30d",kategorien:"#c0497a",start:"#1a7a5c",laeden:"#0f8a8a",sicherheit:"#b23a3a",sync:"#2f7fb8",geraete:"#0e7490",backup:"#2e9c74",notify:"#e0902b",speicher:"#4b5563",neu:"#15803d",hilfe:"#0e7490",wiz:"#1a7a5c",feedback:"#4d7c0f",recht:"#4b5563"};
@@ -8343,11 +8370,21 @@ function qsIcon(k){ const u="qs"+(++QS_N);
 const qsText = (k,on) => k==="dark" ? [on?"Dunkel":"Hell", on?"Tippen für Hell":"Tippen für Dunkel"] : null;
 function qsTile([k,l,on,sub]){ const t=qsText(k,on)||[l,sub];
   return `<button class="qs ${on?"on":""}" data-phsw="${k}" role="switch" aria-checked="${on}" aria-label="${esc(l)}"><span class="qtop"><span class="qic qi-${k}">${qsIcon(k)}</span><span class="qtg"><i>${k==="dark"?qsIcon("dark"):`<b class="v">✓</b><b class="x">✕</b>`}</i></span></span><span class="qtx"><b>${esc(t[0])}</b><small>${esc(t[1])}</small></span></button>`; }
+/* Hell/Dunkel wie am PC: sofort umschalten, die neue Farbe wächst als Kreis vom Knopf aus */
+function themeFlip(t, x, y, el){
+  const apply=()=>{ document.documentElement.dataset.theme=t; try{ localStorage.setItem("hb-theme",t); }catch(_){} try{ renderDarkBtn(); }catch(_){} try{ render(); }catch(_){} };
+  if (el && el.animate && !RMo()) el.animate([{transform:"rotate(0) scale(1)"},{transform:"rotate(-25deg) scale(.86)",offset:.4},{transform:"rotate(0) scale(1)"}],{duration:520,easing:"cubic-bezier(.3,.7,.3,1)"});
+  if (document.startViewTransition && !RMo()){
+    const vt=document.startViewTransition(apply);
+    vt.ready.then(()=>{ const R=Math.hypot(Math.max(x,innerWidth-x), Math.max(y,innerHeight-y));
+      document.documentElement.animate({clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${R}px at ${x}px ${y}px)`]},{duration:650,easing:"cubic-bezier(.4,0,.2,1)",pseudoElement:"::view-transition-new(root)"}); }).catch(()=>{});
+  } else apply(); }
 function quickToggle(k, btn){
   if (btn){ const on=!btn.classList.contains("on"); btn.classList.toggle("on", on); btn.setAttribute("aria-checked", String(on));
     const t=qsText(k,on)||[null, k==="secure"?(on?"keine Screenshots":"aus"):(on?"an":"aus")]; if (t[0]) btn.querySelector(".qtx b").textContent=t[0]; btn.querySelector(".qtx small").textContent=t[1];
     if (k==="notify" && on){ btn.classList.add("qring"); setTimeout(()=>btn.classList.remove("qring"), 2400); }
-    setTimeout(()=>quickToggle(k), k==="dark"?600:250); return; }
+    if (k==="dark"){ const kn=btn.querySelector(".qtg i")||btn, r=kn.getBoundingClientRect(); themeFlip(on?"dark":"light", r.left+r.width/2, r.top+r.height/2, kn); return; }
+    setTimeout(()=>quickToggle(k), 250); return; }
   if (k==="dark"){ const t=document.documentElement.dataset.theme==="dark"?"light":"dark"; document.documentElement.dataset.theme=t; try{ localStorage.setItem("hb-theme",t); }catch(_){} try{ render(); }catch(_){} return; }
   if (k==="notify"){ const c=notifyCfg(); if (c.on){ c.on=false; notifySave(c); toast("Erinnerungen aus"); } else { c.on=true; notifySave(c); try { AndroidBridge.notifyAsk(); if (AndroidBridge.desktop) window.hbNotifyPerm(true); } catch(_){} toast("Erinnerungen an"); } }
   else if (k==="secure"){ const on=lsGet("hb-scrsec")==="0"; try{ localStorage.setItem("hb-scrsec", on?"1":"0"); }catch(_){} try{ window.AndroidBridge.setSecure(on); }catch(_){} toast(on?"Bildschirmschutz an":"Bildschirmschutz aus – Screenshots sind jetzt möglich"); }
@@ -9385,6 +9422,16 @@ gw_h2:["Ohne Zettelchaos.", "Without the paper chaos.", "Kâğıt karmaşası ol
 gw_c1:["Vorschau bis Monatsende", "Preview to month end", "Ay sonuna kadar önizleme", "Прогноз до конца месяца", "Прогноз до кінця місяця", "Podgląd do końca miesiąca", "توقّع حتى نهاية الشهر", "Previziune până la final de lună"],
 gw_c2:["Fixkosten abhaken", "Tick off fixed costs", "Sabit giderleri işaretle", "Отмечать постоянные расходы", "Відмічати постійні витрати", "Odhaczaj stałe koszty", "علّم التكاليف الثابتة", "Bifezi costurile fixe"],
 gw_c3:["Briefe vom Amt", "Official letters", "Resmî mektuplar", "Письма от ведомств", "Листи від установ", "Pisma z urzędu", "الرسائل الرسمية", "Scrisori de la autorități"],
+inv_slots:["Testplätze", "Tester spots", "Test yerleri", "Места для тестеров", "Місця для тестувальників", "Miejsca dla testerów", "أماكن المختبرين", "Locuri de testare"],
+inv_free:["Noch {n} Plätze frei – für alle Tester zusammen.", "{n} spots left – shared by all testers.", "{n} yer kaldı – tüm test kullanıcıları için ortak.", "Осталось мест: {n} – общих для всех тестеров.", "Залишилось місць: {n} – спільних для всіх тестувальників.", "Zostało miejsc: {n} – wspólnych dla wszystkich testerów.", "تبقّى {n} أماكن – مشتركة بين كل المختبرين.", "Mai sunt {n} locuri – comune pentru toți testerii."],
+inv_full:["Alle Plätze sind vergeben. Sobald mehr freigegeben werden, kannst du wieder jemanden einladen.", "All spots are taken. As soon as more are opened up, you can invite someone again.", "Tüm yerler doldu. Yeni yer açılınca tekrar birini davet edebilirsin.", "Все места заняты. Когда появятся новые, снова сможешь пригласить.", "Усі місця зайняті. Коли з'являться нові, знову зможеш запросити.", "Wszystkie miejsca zajęte. Gdy pojawią się nowe, znów kogoś zaprosisz.", "كل الأماكن محجوزة. عندما تُفتح أماكن جديدة يمكنك دعوة أحد من جديد.", "Toate locurile sunt ocupate. Când se eliberează altele, poți invita din nou pe cineva."],
+inv_via:["eingeladen von {n}", "invited by {n}", "{n} davet etti", "пригласил(а) {n}", "запросив(ла) {n}", "zaprosił(a) {n}", "دعاه {n}", "invitat de {n}"],
+inv_cap_t:["Testplätze insgesamt", "Total tester spots", "Toplam test yeri", "Всего мест для тестеров", "Усього місць для тестувальників", "Łącznie miejsc dla testerów", "إجمالي أماكن المختبرين", "Total locuri de testare"],
+inv_cap_save:["Speichern", "Save", "Kaydet", "Сохранить", "Зберегти", "Zapisz", "حفظ", "Salvează"],
+inv_cap_ok:["Jetzt {n} Testplätze", "Now {n} tester spots", "Artık {n} test yeri", "Теперь мест: {n}", "Тепер місць: {n}", "Teraz miejsc: {n}", "الآن {n} أماكن", "Acum {n} locuri"],
+inv_share_t:["App weitergeben", "Share the app", "Uygulamayı paylaş", "Поделиться приложением", "Поділитися застосунком", "Udostępnij aplikację", "مشاركة التطبيق", "Distribuie aplicația"],
+trh_inv_t:["Lade Freunde zum Testen ein: Zeig deinen QR-Code oder schick die Einladung. Jeder Code gilt für eine Person, und die Testplätze teilen sich alle Tester – du siehst immer, wie viele noch frei sind.", "Invite friends to test: show your QR code or send the invite. Each code is for one person, and all testers share the spots – you always see how many are left.", "Arkadaşlarını teste davet et: QR kodunu göster ya da daveti gönder. Her kod bir kişi içindir; yerler tüm test kullanıcıları arasında ortaktır – kaç yer kaldığını hep görürsün.", "Пригласи друзей тестировать: покажи QR-код или отправь приглашение. Каждый код – для одного человека, а места общие для всех тестеров – ты всегда видишь, сколько осталось.", "Запроси друзів тестувати: покажи QR-код або надішли запрошення. Кожен код – для однієї людини, а місця спільні для всіх тестувальників – ти завжди бачиш, скільки лишилось.", "Zaproś znajomych do testów: pokaż kod QR albo wyślij zaproszenie. Każdy kod jest dla jednej osoby, a miejsca są wspólne dla wszystkich testerów – zawsze widzisz, ile zostało.", "ادعُ أصدقاءك للتجربة: اعرض رمز QR أو أرسل الدعوة. كل رمز لشخص واحد، والأماكن مشتركة بين كل المختبرين – وترى دائمًا كم تبقّى.", "Invită prieteni la testare: arată codul QR sau trimite invitația. Fiecare cod e pentru o persoană, iar locurile sunt comune pentru toți testerii – vezi mereu câte au rămas."],
+trh_fanqr:["Mit dem QR-Knopf lädst du Freunde zum Testen ein – Mami zeigt dir dabei, wie viele Testplätze noch frei sind.", "With the QR button you invite friends to test – Mami shows you how many tester spots are left.", "QR düğmesiyle arkadaşlarını teste davet edersin – Mami kaç test yeri kaldığını gösterir.", "Кнопкой QR приглашаешь друзей тестировать – Mami покажет, сколько мест осталось.", "Кнопкою QR запрошуєш друзів тестувати – Mami покаже, скільки місць лишилось.", "Przyciskiem QR zapraszasz znajomych do testów – Mami pokaże, ile miejsc zostało.", "بزر QR تدعو أصدقاءك للتجربة – وتُريك Mami كم تبقّى من الأماكن.", "Cu butonul QR inviți prieteni la testare – Mami îți arată câte locuri au mai rămas."],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],

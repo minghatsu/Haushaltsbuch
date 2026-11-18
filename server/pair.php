@@ -32,6 +32,19 @@ function ipH(): string { return hash('sha256', 'invip|' . ip()); }
 function invCols(): void {
     foreach (['name TEXT', 'given INTEGER', 'seen INTEGER', 'dl INTEGER', 'dlform TEXT', 'app INTEGER', 'iph TEXT', 'remind INTEGER'] as $col) { try { db()->exec('ALTER TABLE invites ADD COLUMN ' . $col); } catch (Throwable $e) { } }
 }
+// Testplätze: gemeinsame Grenze für alle Tester zusammen (der Entwickler kann sie ändern)
+function invCap(): int {
+    db()->exec('CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT)');
+    $v = q('SELECT v FROM kv WHERE k = ?', ['invcap'])->fetchColumn();
+    return $v === false ? DEV_MAX : max(1, min(100000, (int)$v));
+}
+function invUsed(): int {
+    db()->exec('CREATE TABLE IF NOT EXISTS acts (code TEXT NOT NULL, dev TEXT NOT NULL, t INTEGER, PRIMARY KEY (code, dev))');
+    return (int)q('SELECT COUNT(DISTINCT a.dev) FROM acts a JOIN invites i ON i.code = a.code WHERE COALESCE(i.off, 0) = 0')->fetchColumn();
+}
+function invTester(string $dev): bool {
+    return $dev !== '' && (bool)q('SELECT 1 FROM acts a JOIN invites i ON i.code = a.code WHERE a.dev = ? AND COALESCE(i.off, 0) = 0 LIMIT 1', [$dev])->fetch();
+}
 function ip(): string { return substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 64); }
 
 function db(): PDO {
@@ -156,7 +169,10 @@ try {
             $h = trim((string)($_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '')));
             $lvl = null;
             if (preg_match('/^Dev\s/', $h)) { devCheck(); $lvl = 0; }
-            if ($lvl === null) fail('Nur der Entwickler kann Einladungen verschicken', 403);
+            elseif (invTester($dev)) $lvl = 1;
+            if ($lvl === null) fail('Einladen geht nur auf dem Gerät, mit dem du die App freigeschaltet hast', 403);
+            $cap = invCap(); $tot = invUsed();
+            if ($lvl === 1 && $tot >= $cap) out(['full' => true, 'slots' => $tot, 'cap' => $cap]);
             $fresh = $a === 'invrenew' || !empty($b['fresh']);
             $mine = $lvl === 0 ? 'lvl = 0' : "owner LIKE ? ESCAPE '\\'";
             $mp = $lvl === 0 ? [] : [str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $dev) . '#%'];
@@ -173,7 +189,7 @@ try {
                 $r = ['code' => $c, 'max' => 1, 'lvl' => $lvl];
             }
             $r['max'] = 1;
-            out(['code' => $r['code'], 'max' => (int)$r['max'], 'used' => $used($r['code'])]);
+            out(['code' => $r['code'], 'max' => (int)$r['max'], 'used' => $used($r['code']), 'slots' => $tot, 'cap' => $cap]);
         }
         $c = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)($b['c'] ?? ($_GET['c'] ?? ''))));
         if (!ipCount('ipfails', 60)) fail('Zu viele falsche Versuche – bitte später noch einmal', 429);
@@ -186,6 +202,7 @@ try {
         if (!preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev)) fail('Gerät fehlt', 400);
         if (q('SELECT 1 FROM acts WHERE code = ? AND dev = ?', [$c, $dev])->fetch()) out(['ok' => true, 'left' => $left, 'invite' => $inv]);
         if ($n >= $max) fail('Dieser Code wurde schon benutzt – jeder bekommt seinen eigenen. Frag nach einem neuen.', 403);
+        if (invUsed() >= invCap()) fail('Alle Testplätze sind gerade vergeben – frag die Person, die dich eingeladen hat.', 403);
         q('INSERT INTO acts (code, dev, t) VALUES (?, ?, ?)', [$c, $dev, time()]);
         out(['ok' => true, 'left' => 0, 'invite' => $inv]);
     }
@@ -241,7 +258,10 @@ try {
         invCols(); $b = body();
         $c = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)($b['c'] ?? ($_GET['c'] ?? ''))));
         if ($a === 'invgive' || $a === 'invname' || $a === 'invremind') {
-            devCheck(); if ($c === '') fail('Code fehlt', 400);
+            if ($c === '') fail('Code fehlt', 400);
+            $h = trim((string)($_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '')));
+            if (preg_match('/^Dev\s/', $h)) devCheck();
+            else { $dv = (string)($b['dev'] ?? ''); if (!preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dv) || !q('SELECT 1 FROM invites WHERE code = ? AND owner = ?', [$c, $dv . '#' . $c])->fetch()) fail('Nicht erlaubt', 403); }
             $name = mb_substr(trim((string)($b['name'] ?? '')), 0, 40);
             if ($a === 'invgive') q('UPDATE invites SET given = COALESCE(given, ?), name = CASE WHEN ? <> \'\' THEN ? ELSE name END WHERE code = ?', [time(), $name, $name, $c]);
             elseif ($a === 'invname') q('UPDATE invites SET name = ? WHERE code = ?', [$name, $c]);
@@ -265,16 +285,27 @@ try {
         }
         if ($a === 'devinv') {
             devCheck(); $L = [];
-            foreach (q('SELECT code, name, created, given, seen, dl, dlform, app, remind, lvl FROM invites WHERE COALESCE(off, 0) = 0 AND (given IS NOT NULL OR code IN (SELECT code FROM acts)) ORDER BY COALESCE(given, created) DESC LIMIT 200')->fetchAll(PDO::FETCH_ASSOC) as $x) {
+            foreach (q('SELECT code, name, owner, created, given, seen, dl, dlform, app, remind, lvl FROM invites WHERE COALESCE(off, 0) = 0 AND (given IS NOT NULL OR code IN (SELECT code FROM acts)) ORDER BY COALESCE(given, created) DESC LIMIT 200')->fetchAll(PDO::FETCH_ASSOC) as $x) {
                 $act = q('SELECT dev, t FROM acts WHERE code = ? ORDER BY t LIMIT 1', [$x['code']])->fetch(PDO::FETCH_ASSOC);
                 $p = $act ? q('SELECT ver, form, role, t FROM pings WHERE h = ?', [hash('sha256', 'ping|' . $act['dev'])])->fetch(PDO::FETCH_ASSOC) : null;
                 if ($p && $p['role'] === 'dev') continue;
-                $L[] = ['code' => $x['code'], 'name' => (string)($x['name'] ?? ''), 'given' => (int)($x['given'] ?? 0), 'seen' => (int)($x['seen'] ?? 0), 'dl' => (int)($x['dl'] ?? 0),
+                $via = '';
+                if ((int)$x['lvl'] === 1) { $od = explode('#', (string)$x['owner'])[0];
+                    $vr = q('SELECT i.code, i.name FROM acts a JOIN invites i ON i.code = a.code WHERE a.dev = ? ORDER BY a.t LIMIT 1', [$od])->fetch(PDO::FETCH_ASSOC);
+                    if ($vr) $via = (string)($vr['name'] ?: $vr['code']); }
+                $L[] = ['via' => $via, 'code' => $x['code'], 'name' => (string)($x['name'] ?? ''), 'given' => (int)($x['given'] ?? 0), 'seen' => (int)($x['seen'] ?? 0), 'dl' => (int)($x['dl'] ?? 0),
                     'dlform' => (string)($x['dlform'] ?? ''), 'app' => (int)($x['app'] ?? 0), 'remind' => (int)($x['remind'] ?? 0), 'act' => $act ? (int)$act['t'] : 0,
                     'ver' => $p ? (string)$p['ver'] : '', 'form' => $p ? (string)$p['form'] : '', 'last' => $p ? (int)$p['t'] : 0];
             }
-            out(['items' => $L]);
+            out(['items' => $L, 'slots' => invUsed(), 'cap' => invCap()]);
         }
+    }
+    if ($a === 'invcap') {
+        devCheck(); $n = (int)(body()['cap'] ?? 0);
+        if ($n < 1 || $n > 100000) fail('Ungültige Zahl', 400);
+        db()->exec('CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT)');
+        q('INSERT OR REPLACE INTO kv (k, v) VALUES (?, ?)', ['invcap', (string)$n]);
+        out(['ok' => true, 'slots' => invUsed(), 'cap' => invCap()]);
     }
     if ($a === 'invdel') {
         devCheck(); $b = body();
