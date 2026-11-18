@@ -11495,7 +11495,7 @@ function parseBankAmt(s){
 }
 function hashKey(s){ let h=5381; for (let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))|0; return "k"+(h>>>0).toString(36)+s.length.toString(36); }
 function knownKeys(){
-  const k=new Set(); for (const t of S.tx) if (t.importKey) k.add(t.importKey);
+  const k=new Set(); for (const t of S.tx){ if (t.importKey) k.add(t.importKey); if (t.keys2) for (const x of t.keys2) k.add(x); }
   for (const m of Object.values(S.months)){ if (m.paidKeys) for (const v of Object.values(m.paidKeys)) k.add(v); if (m.importKeys) for (const v of m.importKeys) k.add(v); }
   return k;
 }
@@ -12072,19 +12072,25 @@ function txSameName(a,b){ const x=txNameKey(a), y=txNameKey(b); if (typeof x==="
   return x.length>0 && y.length>0 && x.some(w=>y.some(v=>v.startsWith(w)||w.startsWith(v))); }
 function dupPairs(){
   const day=d=>new Date(d+"T12:00:00").getTime()/864e5, ok=new Set(S.settings.dupOk||[]), lim=day(isoToday())-60;
-  const man=S.tx.filter(t=>!t.importKey && t.date && t.kind!=="umbuchung" && t.kind!=="abhebung" && !t.split);
-  const imp=S.tx.filter(t=>t.importKey && t.date && t.kind!=="umbuchung" && t.kind!=="abhebung").sort((a,b)=>a.date.localeCompare(b.date));
-  const used=new Set(), out=[], byAmt=new Map(); for (const m of man){ const k=Math.round(Number(m.amount)*100); if (!byAmt.has(k)) byAmt.set(k,[]); byAmt.get(k).push(m); }
+  const rc=id=>{ try{ return hasReceipt(id); }catch(_){ return false; } };
+  const out=[], used=new Set();
+  /* gleicher Bank-Schlüssel zweimal (z. B. nach Sync) – immer doppelt */
+  const byKey=new Map(); for (const t of S.tx) if (t.importKey){ if (!byKey.has(t.importKey)) byKey.set(t.importKey,[]); byKey.get(t.importKey).push(t); }
+  for (const L of byKey.values()) if (L.length>1){ const keep=L.slice().sort((a,b)=>(rc(b.id)-rc(a.id)) || ((a._b?1:0)-(b._b?1:0)) || String(a.date).localeCompare(String(b.date)))[0];
+    for (const t of L) if (t!==keep){ used.add(t.id); used.add(keep.id); out.push({m:keep, i:t, sure:true, same:true}); } }
+  const man=S.tx.filter(t=>t.date && !used.has(t.id) && t.kind!=="umbuchung" && t.kind!=="abhebung" && (!t.importKey || rc(t.id)));
+  const imp=S.tx.filter(t=>t.importKey && t.date && !used.has(t.id) && t.kind!=="umbuchung" && t.kind!=="abhebung").sort((a,b)=>a.date.localeCompare(b.date));
+  const byAmt=new Map(); for (const m of man){ const k=Math.round(Number(m.amount)*100); if (!byAmt.has(k)) byAmt.set(k,[]); byAmt.get(k).push(m); }
   for (const i of imp){ const di=day(i.date); let best=null, bs=99, bsame=false;
-    for (const m of (byAmt.get(Math.round(Number(i.amount)*100))||[])){ if (used.has(m.id)) continue;
+    for (const m of (byAmt.get(Math.round(Number(i.amount)*100))||[])){ if (used.has(m.id) || m.id===i.id || (m.importKey && (rc(i.id) || !txSameName(m.note||"", (i.note||"")+" "+(i.bank||"")+" "+(i.ref||""))))) continue;
       if ((m.kind==="einnahme")!==(i.kind==="einnahme")) continue; if (ok.has(m.id+"|"+i.id)) continue;
       const g=di-day(m.date); if (g<-2 || g>5) continue; const same=txSameName(m.note||"", (i.note||"")+" "+(i.bank||"")+" "+(i.ref||""));
       if (!same && (Math.min(di,day(m.date))<lim || g<-1 || g>4)) continue;
       const sc=Math.abs(g)+(same?-3:0); if (sc<bs){ bs=sc; best=m; bsame=same; } }
-    if (best){ used.add(best.id); out.push({m:best, i, sure:bsame}); } }
+    if (best){ used.add(best.id); out.push({m:best, i, sure:bsame && !best.importKey}); } }
   return out;
 }
-async function dupMerge(pr){ const {m,i}=pr; const d=plainTx(m); d.importKey=i.importKey; if (i.bank||i.note) d.bank=String(i.bank||i.note).slice(0,80); if (!d.ref && i.ref) d.ref=i.ref; if (i.source) d.source=i.source;
+async function dupMerge(pr){ const {m,i}=pr; const d=plainTx(m); if (d.importKey && d.importKey!==i.importKey) d.keys2=[...new Set([...(d.keys2||[]), i.importKey, ...(i.keys2||[])])]; else d.importKey=i.importKey; if (i.bank||i.note) d.bank=String(i.bank||i.note).slice(0,80); if (!d.ref && i.ref) d.ref=i.ref; if (i.source) d.source=i.source;
   await saveTxDoc(m.id, d, m); await delTxDoc(i); }
 const DUP={t:0, busy:false};
 async function dupAuto(){ if (DUP.busy || UI.imp || UI.importing) return; let L; try{ L=dupPairs().filter(p=>p.sure); }catch(_){ return; } if (!L.length) return;
