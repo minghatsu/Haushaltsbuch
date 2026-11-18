@@ -206,7 +206,7 @@ jobs:
           arch: x86_64
           profile: ${{ matrix.profile }}
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          emulator-options: -no-window -memory 4096 -cores 4 -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           script: bash tools/test/android-run.sh android/app/build/outputs/apk/debug/app-debug.apk /tmp/shots
       - name: Bildschirmfotos ablegen (Release „testfotos“, wird jedes Mal ersetzt)
         if: always()

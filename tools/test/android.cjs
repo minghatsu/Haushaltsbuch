@@ -33,6 +33,8 @@ const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out',
   let W,H; { const m=sh('dumpsys','display').match(/mCurrentDisplayRect=Rect\(0, 0 - (\d+), (\d+)\)/)||sh('dumpsys','window','displays').match(/cur=(\d+)x(\d+)/); if (m){ W=+m[1]; H=+m[2]; } else [W,H]=sh('wm','size').match(/(\d+)x(\d+)\s*$/m).slice(1).map(Number); }
   const dpr=await p.evaluate(()=>devicePixelRatio); let tp=null, tx=0, ty=0;
   for (const [fx,fy] of [[0.5,0.15],[0.5,0.5],[0.3,0.3],[0.7,0.6]]){ tx=Math.round(W*fx); ty=Math.round(H*fy); await p.evaluate(()=>{ window.__tp=null; }); sh('input','tap',String(tx),String(ty)); await sleep(700); tp=await p.evaluate(()=>window.__tp); if (tp) break; await hide(); }
+  if (!tp){ console.log('Kalibrierung: kein Treffer – App wird neu nach vorne geholt'); sh('am','broadcast','-a','android.intent.action.CLOSE_SYSTEM_DIALOGS'); sh('am','start','-n',(process.env.HB_PKG||'de.sascha.haushaltsbuch.test')+'/de.sascha.haushaltsbuch.MainActivity'); await sleep(8000);
+    for (const [fx,fy] of [[0.5,0.15],[0.5,0.5]]){ tx=Math.round(W*fx); ty=Math.round(H*fy); await p.evaluate(()=>{ window.__tp=null; }); sh('input','tap',String(tx),String(ty)); await sleep(900); tp=await p.evaluate(()=>window.__tp); if (tp) break; } }
   if (!tp){ console.log('Kalibrierung fehlgeschlagen', W, H, sh('dumpsys','window').match(/mCurrentFocus=.*/)); shot('kalibrierung'); process.exit(2); }
   const offX=tx/dpr-tp[0], offY=ty/dpr-tp[1]; await hide();
   const D=(x,y)=>[String(Math.round((x+offX)*dpr)),String(Math.round((y+offY)*dpr))];
@@ -55,7 +57,15 @@ const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out',
   }
   const isPC=await p.evaluate(()=>document.documentElement.classList.contains('pc'));
   console.log(isPC?'Tablet-/PC-Ansicht':'Handy-Ansicht');
-  if (isPC){ await checkSwipers('Start'); for (const g of ['beruf','zukunft','shop','home']){ await p.evaluate(g=>{ try{ window.__hbt.go(g); }catch(_){} },g); await sleep(900); await hide(); shot(g); await checkSwipers(g); } }
+  if (isPC){ await checkSwipers('Start'); for (const g of ['beruf','zukunft','shop','home']){
+      const t=await p.evaluate(g=>{ const b=document.querySelector(`.tabs .tab[data-go="${g}"]`); if(!b) return null; const r=b.getBoundingClientRect(); return [r.x+r.width/2,r.y+r.height/2]; },g);
+      if (t) await tap(...t); else await p.evaluate(g=>{ try{ window.__hbt.go(g); }catch(_){} },g);
+      await sleep(1800); await hide();
+      const st=await p.evaluate(g=>{ const b=document.querySelector('.tabs .tab[aria-selected="true"]'); const v=document.querySelector(`[data-view="${g}"]`); return {tab:b&&b.dataset.go, h:v?v.getBoundingClientRect().height:0, op:v?getComputedStyle(v).opacity:'-'}; },g);
+      ok(`Leiste → ${g}: richtige Seite`, (await view())===g, 'ist '+(await view()));
+      ok(`Leiste → ${g}: Knopf markiert`, st.tab===g, 'markiert '+st.tab);
+      ok(`Leiste → ${g}: Inhalt sichtbar`, st.h>200 && st.op==='1', `Höhe ${Math.round(st.h)}, Deckkraft ${st.op}`);
+      shot(g); await checkSwipers(g); } }
   else {
   // 1) Seiten per echtem Seitwärts-Wischen
   for (let k=0;k<4;k++){ const from=await view(); await sleep(2500); await swipe(vw-70,vh*0.72,70,vh*0.72,300); await hide(); const to=await view();

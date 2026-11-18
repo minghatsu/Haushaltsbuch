@@ -11,7 +11,8 @@ adb uninstall $PKG >/dev/null 2>&1 || true
 adb install -r -g "$APK" || exit 3
 adb logcat -c
 adb shell am start -W -n $PKG/de.sascha.haushaltsbuch.MainActivity
-sleep 8
+sleep 15
+adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1 || true
 PID=$(adb shell pidof $PKG | tr -d '\r')
 [ -n "$PID" ] || { echo "App startet nicht"; adb logcat -d -s AndroidRuntime:E | head -40; exit 4; }
 HB_PKG=$PKG node "$(dirname "$0")/android.cjs" "$OUT"
