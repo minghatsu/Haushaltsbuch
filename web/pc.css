@@ -944,3 +944,18 @@ html.pc #phHome>.phg:nth-of-type(2){animation-delay:.05s}html.pc #phHome>.phg:nt
 
 /* „Sparen & Anlegen“ hat am PC drei Spalten – dafür braucht das Fenster Platz */
 html.pc #spBg[data-k="invest"] .sheet{width:min(1080px,94vw)!important;max-width:none!important}
+
+/* Menüleiste am PC wie am Handy: heller Streifen, aktive Seite als farbige Kapsel mit Namen, die mitgleitet */
+html.pc:not(.istab) nav.tabs.navx{--pbar:color-mix(in srgb,var(--accent) 11%,var(--surface));background:var(--pbar)!important;box-shadow:0 8px 22px -12px rgba(19,36,27,.35),inset 0 0 0 1px color-mix(in srgb,var(--accent) 12%,transparent)!important;padding:4px!important;gap:2px!important;border-radius:999px!important;display:flex}
+html.pc[data-theme="dark"]:not(.istab) nav.tabs.navx{--pbar:color-mix(in srgb,var(--accent) 16%,var(--surface))}
+html.pc:not(.istab) nav.tabs.navx .pcarr{display:none!important}
+html.pc:not(.istab) nav.tabs.navx .tab:not(.plus){flex-direction:row!important;min-width:0!important;height:46px;padding:0 15px!important;border-radius:999px!important;background:none!important;color:var(--muted)!important;position:relative;z-index:1;transition:color .3s,background .2s}
+html.pc:not(.istab) nav.tabs.navx .tab:not(.plus) svg.i{width:22px;height:22px;flex:none;transform:none!important;padding:0!important;background:none!important}
+html.pc:not(.istab) nav.tabs.navx .tab:not(.plus) .tname{display:block;max-height:none!important;max-width:0;opacity:0;margin:0!important;font:800 14px var(--f-body)!important;line-height:1;color:#fff!important;overflow:hidden;white-space:nowrap;transition:max-width .5s cubic-bezier(.3,1.15,.4,1),opacity .25s,margin .5s cubic-bezier(.3,1.15,.4,1)}
+html.pc:not(.istab) nav.tabs.navx .tab[aria-selected="true"]:not(.plus){color:#fff!important;padding:0 18px 0 15px!important}
+html.pc:not(.istab) nav.tabs.navx .tab[aria-selected="true"]:not(.plus) .tname{max-width:140px;opacity:1;margin-left:8px!important;transition-delay:0s,.12s,0s}
+html.pc:not(.istab) nav.tabs.navx .tab:not(.plus):not([aria-selected="true"]):hover{color:var(--tcol,var(--fg))!important;background:color-mix(in srgb,var(--tcol,#888) 11%,transparent)!important}
+html.pc:not(.istab) nav.tabs.navx .tab:not(.plus):active{transform:scale(.95)}
+html.pc:not(.istab) nav.tabs.navx .tabind{display:block!important;position:absolute;top:4px;left:0;width:0;height:46px;border-radius:999px;z-index:0;pointer-events:none;background:var(--ic,var(--accent));box-shadow:0 6px 14px -4px color-mix(in srgb,var(--ic,var(--accent)) 60%,transparent);transition:left .5s cubic-bezier(.3,1.2,.4,1),width .5s cubic-bezier(.3,1.2,.4,1),background-color .35s,opacity .25s}
+html.pc:not(.istab) nav.tabs.navx.nosel .tabind{opacity:0}
+@media (prefers-reduced-motion:reduce){html.pc:not(.istab) nav.tabs.navx .tabind,html.pc:not(.istab) nav.tabs.navx .tab .tname{transition:none!important}}
