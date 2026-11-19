@@ -959,3 +959,31 @@ html.pc:not(.istab) nav.tabs.navx .tab:not(.plus):active{transform:scale(.95)}
 html.pc:not(.istab) nav.tabs.navx .tabind{display:block!important;position:absolute;top:4px;left:0;width:0;height:46px;border-radius:999px;z-index:0;pointer-events:none;background:var(--ic,var(--accent));box-shadow:0 6px 14px -4px color-mix(in srgb,var(--ic,var(--accent)) 60%,transparent);transition:left .5s cubic-bezier(.3,1.2,.4,1),width .5s cubic-bezier(.3,1.2,.4,1),background-color .35s,opacity .25s}
 html.pc:not(.istab) nav.tabs.navx.nosel .tabind{opacity:0}
 @media (prefers-reduced-motion:reduce){html.pc:not(.istab) nav.tabs.navx .tabind,html.pc:not(.istab) nav.tabs.navx .tab .tname{transition:none!important}}
+/* Umbuchen am PC: Konto auf Konto ziehen */
+html.pc .pcaccs button.mvd{cursor:grab;position:relative}
+html.pc .pcaccs button.mvd:active{cursor:grabbing}
+html.pc .pcaccs button.mvd:after{content:"";position:absolute;right:10px;top:50%;width:6px;height:14px;margin-top:-7px;opacity:0;transition:opacity .15s;
+  background:radial-gradient(circle,#fff 1.2px,transparent 1.6px) 0 0/3px 4.7px;}
+html.pc .pcaccs button.mvd:hover:after{opacity:.55}
+html.pc .pcaccs button.src{opacity:.35;transform:scale(.96)}
+html.pc .pcaccs button.dragok{border-style:dashed;border-color:#ffffff66}
+html.pc .pcaccs button.tgt{background:#ffffff40;border:1px solid #fff;transform:scale(1.04);box-shadow:0 0 0 4px #ffffff26}
+html.pc .pcaccs button.got{animation:pcMvGot .7s cubic-bezier(.3,1.6,.5,1)}
+html.pc .pcaccs button.gave{animation:pcMvGave .5s ease}
+@keyframes pcMvGot{0%{transform:scale(1)}35%{transform:scale(1.07);background:#ffffff4d}100%{transform:none}}
+@keyframes pcMvGave{30%{transform:translateX(-4px)}60%{transform:translateX(3px)}100%{transform:none}}
+html.pc .pcaccs.mvpulse button.mvd{animation:pcMvHint 1.1s ease 2}
+@keyframes pcMvHint{40%{transform:translateY(-3px);box-shadow:0 0 0 3px #ffffff40}}
+.mvpcghost{position:fixed;z-index:90;margin:0;pointer-events:none;border:1px solid #ffffff55;color:#fff;border-radius:18px;padding:12px 14px;text-align:left;font:inherit;
+  transform:rotate(-3deg) scale(.92);opacity:.95;box-shadow:0 26px 50px -12px rgba(0,0,0,.55);transition:transform .12s,opacity .15s;animation:pcMvLift .18s ease-out}
+@keyframes pcMvLift{from{transform:scale(1);opacity:.6}}
+.mvpcghost span{display:block;color:#bfe6d4;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mvpcghost b{font:800 20px var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mvpcghost.drop{transform:scale(.8);opacity:0}
+body.mvdragging,body.mvdragging *{cursor:grabbing!important;user-select:none}
+/* Betrag-Fenster am PC: mittig statt von unten */
+.mvsheet.mvpcs{top:0;display:grid;place-items:center;padding:24px;background:color-mix(in srgb,#000 38%,transparent);opacity:0;transform:none;transition:opacity .22s}
+.mvsheet.mvpcs.show{opacity:1}.mvsheet.mvpcs[hidden]{display:none}
+.mvsheet.mvpcs .mvsh{width:min(460px,100%);border-radius:28px;padding:22px 24px;transform:translateY(14px) scale(.96);transition:transform .32s cubic-bezier(.2,1.2,.3,1);box-shadow:0 30px 70px -20px rgba(0,0,0,.5)}
+.mvsheet.mvpcs.show .mvsh{transform:none}
+@media (prefers-reduced-motion:reduce){html.pc .pcaccs button.got,html.pc .pcaccs button.gave,html.pc .pcaccs.mvpulse button.mvd{animation:none}.mvsheet.mvpcs .mvsh{transition:none}}

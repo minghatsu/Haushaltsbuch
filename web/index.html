@@ -351,7 +351,8 @@ html.pc .invbg{background:color-mix(in srgb,var(--bg) 70%,#000a);align-items:cen
 .tg{width:46px;height:28px;border-radius:99px;border:0;background:var(--sunk);position:relative;cursor:pointer;flex:none;transition:background .2s}.tg:after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s}
 .tg.on{background:var(--accent)}.tg.on:after{left:21px}
 .hasnew{position:relative}.hasnew:after{content:"neu";position:absolute;top:6px;right:6px;background:#e0902b;color:#fff;font-size:9.5px;font-weight:800;border-radius:6px;padding:1px 5px}
-.clog{padding:12px 0;border-bottom:1px solid var(--line)}.clog.top .clh b{color:var(--accent)}.clh{display:flex;justify-content:space-between;align-items:baseline}.clog ul{margin:6px 0 0;padding-left:18px;line-height:1.55;font-size:14px}
+.clog{padding:12px 0;border-bottom:1px solid var(--line)}.clog.top .clh b{color:var(--accent)}.clh{display:flex;justify-content:space-between;align-items:baseline}.clh{gap:8px;flex-wrap:wrap}.clh:has(.ntgo){justify-content:flex-start}.clh .ntgo{margin-inline-start:auto}.ntgo{display:inline-flex;align-items:center;gap:5px;border:0;border-radius:99px;padding:5px 11px;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);font:700 12.5px var(--f-body);cursor:pointer;min-height:30px;transition:transform .15s,background .15s}.ntgo:hover{background:color-mix(in srgb,var(--accent) 22%,transparent)}.ntgo:active{transform:scale(.94)}.ntgo svg{animation:ntSpark 2.4s ease-in-out infinite}@keyframes ntSpark{50%{transform:rotate(14deg) scale(1.12)}}@media (prefers-reduced-motion:reduce){.ntgo svg{animation:none}}
+.clog ul{margin:6px 0 0;padding-left:18px;line-height:1.55;font-size:14px}
 .rfseg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:4px 0 12px}.rfseg button{border:0;border-radius:13px;padding:11px 6px;background:var(--sunk);color:var(--fg);font:700 14px var(--f-body);cursor:pointer}
 .rfseg button.on{background:var(--accent);color:#fff}.rfseg button.on.rate{background:#7a5bc2}
 .rfchips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}.rfchips button{border:0;border-radius:999px;padding:7px 12px;background:var(--sunk);color:var(--fg);font:700 12.5px var(--f-body);cursor:pointer}.rfchips button.on{background:#7a5bc2;color:#fff}
@@ -2322,7 +2323,7 @@ body.mvdragging{cursor:grabbing}
 .mvamt{display:flex;align-items:center;gap:6px;justify-content:center;margin:4px 0 10px}.mvamt input{font:800 34px var(--f-body);text-align:center;max-width:220px;border-radius:16px}.mvamt span{font:800 28px var(--f-body);color:var(--muted)}
 .mvq{display:flex;gap:8px;margin-bottom:12px}.mvq button{flex:1;border:0;border-radius:12px;padding:10px 0;background:var(--sunk);color:var(--fg);font:700 13.5px var(--f-body);cursor:pointer;min-height:40px}.mvq button:active{transform:scale(.95)}
 .mvbt{display:flex;gap:10px}.mvbt .btn{flex:1;justify-content:center}.mvbt .primary{flex:2}.mvnote{margin:10px 2px 0;text-align:center}
-html.pc .mvopen{display:none}
+html.pc:not(.istab) .mvopen{display:none}
 @media (prefers-reduced-motion:reduce){.mvc.in,.mvc.got,.mvc.gave,.mvarr,.mvopen svg{animation:none}}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
@@ -3107,7 +3108,8 @@ async function mvDo(){ const i=$("mvAmt"); const v=Math.round(parseAmt(i.value||
   toast(nt("mv_done",{v:eur(v), a:a.label, b:b.label}), async ()=>{ S.settings.moves=(S.settings.moves||[]).filter(m=>m.id!==mv.id); if (a.cash||b.cash){ const cs=S.settings.cash; if (cs) S.settings.cash={...cs, start:Math.round(((Number(cs.start)||0)-(b.cash?v:-v))*100)/100}; } await saveSettings(); render(); if ($("mvBg")&&!$("mvBg").hidden) mvRender(false); }); }
 document.addEventListener("click", e=>{
   if (e.target.closest("[data-mvopen]")){ mvOpen(); return; }
-  if (!e.target.closest("#mvBg")) return;
+  if (!e.target.closest("#mvBg, #mvSheet")) return;
+  if (e.target.id==="mvSheet" && !$("mvBg")){ mvSheetClose(); return; }
   if (e.target.closest("[data-mvclose]")){ mvClose(); return; }
   if (e.target.closest("[data-mvcancel]")){ mvSheetClose(); return; }
   const q=e.target.closest("[data-mvq]"); if (q){ const i=$("mvAmt"); i.value=String(q.dataset.mvq).replace(".",","); mvBtn(); SND.play("tick"); return; }
@@ -3116,6 +3118,8 @@ document.addEventListener("click", e=>{
   const c=e.target.closest("[data-mvc].nostand"); if (c && !MV.moved){ toast(nt("mv_nostand_t")); }
 });
 document.addEventListener("input", e=>{ if (e.target.id==="mvAmt") mvBtn(); });
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-newtour]"); if (!b) return; const x=NEWTOUR.find(n=>n.v===b.dataset.newtour); if (!x) return;
+  try{ spSheetClose(); }catch(_){} try{ mamiClose(); }catch(_){} UI.view="home"; render(); setTimeout(()=>ntOpen([x], true), 380); });
 document.addEventListener("keydown", e=>{ if (e.target.id==="mvAmt" && e.key==="Enter"){ e.preventDefault(); mvDo(); } });
 /* Ziehen: kurz gedrückt halten, dann auf eine andere Karte ziehen */
 (function(){ let st=null;
@@ -3569,6 +3573,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.39.7", "19. November 2026", ["Neu am PC: Geld umbuchen per Ziehen – ein Konto in der grünen Karte mit der Maus auf ein anderes ziehen, Betrag wählen, senden", "Nach großen Updates zeigt dir Mami einmal kurz von selbst, was neu ist – mit „Überspringen“. Kleine Verbesserungen stehen nur hier", "Hier unter „Neu in dieser Version“: „Mami zeigt's dir“ startet den kurzen Rundgang jederzeit wieder"]],
   ["0.39.6", "19. November 2026", ["Neu: Geld umbuchen wie bei N26 – unter dem Kontostand „Alle Konten“ antippen oder die Karte nach unten ziehen, eine Karte auf eine andere ziehen, Betrag wählen, senden", "Kontostand: ein eingetragener Stand wird jetzt genau so angezeigt (Spaces und Hauptkonto)", "Neu: leise Töne – beim Speichern, Abhaken, Ziele, Löschen und Rückgängig, Seitenwechsel, Plus-Menü, Karten wischen, Kopieren, Kassenbon, Import, Koppeln, Monats-Rückblick, neuen Hinweisen, Budget überschritten, Fehlern und bei Mami. Drei Klänge zur Wahl (Sanft, Glas, Holz), zwei Lautstärken, mit Schalter in den Einstellungen. Ist das Handy lautlos, bleibt die App still", "Tester können die App selbst weitergeben: QR-Code im Plus-Menü, gemeinsame Testplätze mit Zähler, nach dem Scannen kommt sofort der nächste Code", "Hell/Dunkel am Handy wie am PC: sofort, mit Kreis-Übergang vom Schalter aus", "Neues Logo überall – App-Symbol, Statusleiste, Windows und Einladungsseite", "Willkommens-Band beim ersten Start", "Viele kleine Verbesserungen für Tablet, Dunkelmodus und lange Wörter in anderen Sprachen"]],
   ["0.26.5", "14. November 2026", ["Feedback-Knopf: am Handy als Lasche am rechten Rand, an Tablet und PC oben – von jeder Seite aus Fehler, Ideen und Fragen schicken", "Einstellungen am Handy neu: Profil oben, Schnellschalter mit lebenden Symbolen (Sonne/Mond, Glocke, Schild, Laden), Bereiche als Kästen mit eigenen Seiten", "Koppeln mit Anfrage: der andere sieht dein Profilbild und muss bestätigen, das Hauptgerät hat eine Krone 👑, bis zu 10 Geräte", "Beim Koppeln zeigt ein Pfeil, in welche Richtung die Daten gehen – antippen dreht ihn um", "Gekoppelte Geräte zeigen ihr Profilbild", "Tablet neu aufgeteilt: grüner Kasten als schmale Spalte, Fixkosten-Kalender und Seitenspalte scrollen getrennt, „Ohne festen Tag“ ganz oben", "Tablet: kein Entwickler-Kram mehr in der Kopfzeile, neu laden durch Herunterziehen", "Einkaufszettel im Dunkelmodus angenehm dunkel", "Handy: Kopfzeile aufgeräumt, „?“ neben der Glocke, kleinere Knöpfe", "Hilfe-Menü ohne doppelte Einträge", "Behoben: Filter bei den Buchungen abgeschnitten, Seitenwechsel am Tablet hochkant, Glocken-Schalter am Tablet"]],
   ["0.24.1", "13. November 2026", ["Eine Versionsnummer für Handy, Tablet und PC – mit „Tester“ oder „Entwickler“ dahinter", "App weitergeben: eigener QR-Code zum Einladen, Freischalten beim ersten Start", "Farbpakete färben jetzt alles ein – Handy, Tablet und PC", "Tablet-Version: Dock unten, Wischen zum Blättern, Drehen mit Animation", "Neues App-Symbol: Mama mit Sparschwein", "Kurze Tour für jede Seite – beim ersten Besuch von selbst, später über das „?“", "Animationen: Karten kommen nacheinander, Häkchen ploppen, Balken füllen sich", "Zusammengelegt: Sparziele und Anlage-Ziele, Belege als Filter in den Buchungen, ein Hilfe-Menü", "Handy: Erinnerungen auch bei geschlossener App"]],
@@ -3582,7 +3587,7 @@ const verRole = () => (typeof updKey==="function" && updKey()) ? "Entwickler" : 
 const verFull = () => "v"+curVerShort()+" · "+verRole();
 function neuUnseen(){ try{ return localStorage.getItem("hb-seenlog")!==CHANGELOG[0][0]; }catch(e){ return false; } }
 function renderNeu(){ const el=$("neuEd"); if (!el) return; try{ localStorage.setItem("hb-seenlog", CHANGELOG[0][0]); }catch(e){}
-  el.innerHTML = CHANGELOG.map(([v,d,items],i)=>`<div class="clog ${i?"":"top"}"><div class="clh"><b>${v?"v"+esc(v):esc(d)}</b><span class="small muted">${v?esc(d):""}</span></div><ul>${items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join(""); }
+  el.innerHTML = CHANGELOG.map(([v,d,items],i)=>`<div class="clog ${i?"":"top"}"><div class="clh"><b>${v?"v"+esc(v):esc(d)}</b><span class="small muted">${v?esc(d):""}</span>${v&&NEWTOUR.some(x=>x.v===v&&x.s().length)?`<button type="button" class="ntgo" data-newtour="${esc(v)}" data-noi18n>${ic("insight",15)}<span>${esc(nt("nw_show"))}</span></button>`:""}</div><ul>${items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join(""); }
 
 const FAQ=[
   ["Wie trage ich etwas ein?","Tippe unten auf das große Plus. Du kannst selbst eintippen, einen Beleg fotografieren oder Kontoauszüge importieren."],
@@ -3619,6 +3624,7 @@ function tourSteps(){ const w=S.settings.work, g=workGroup(w);
   const st=[
     {sel:"#astack,.pchero", ic:"cash", t:"Dein Kontostand", p:[IS_PC?"Was heute auf deinen Konten ist – darunter Hauptkonto und Spaces einzeln.":"Was heute auf dem Konto ist. Wischen zeigt deine Spaces, Antippen trägt den echten Stand ein.", inc]},
     {sel:"[data-mvopen]", raw:1, ic:"repeat", t:nt("mv_sheet"), p:[nt("trh_mv")]},
+    {sel:"#pcHero .pcaccs:has(.mvd)", raw:1, ic:"repeat", t:nt("mv_sheet"), p:[nt("trh_mvpc")]},
     {sel:".hkpi,.pcring", ic:"cal", t:"Noch pro Tag", p:["So viel kannst du bis Monatsende jeden Tag ausgeben – dein Hauptkonto geteilt durch die restlichen Tage."]},
     {sel:"#monthpill", ic:"cal", t:"Monat wechseln", p:["Mit den Pfeilen blätterst du durch die Monate – alle Seiten zeigen dann diesen Monat."]},
     {sel:'[data-hb="debts"]', ic:"bank", t:"Kredite & Schulden", p:["Was noch offen ist und wann du schuldenfrei bist. Raten aus den Fixkosten werden automatisch abgezogen."]},
@@ -3651,7 +3657,7 @@ function tourOpen(){ TOUR.page=null; if (UI.view!=="home"){ UI.view="home"; rend
   TOUR.steps.unshift({sel:"#ptourQ", raw:1, t:mFill(nm?mL("tr_hi").replace("{n}",nm):mL("tr_hi0")), p:[mL("tr_hi2").replace("{n}", TOUR.steps.length+1)]});
   TOUR.steps.push({sel:"#ptourQ", raw:1, t:mL("tr_end_t"), p:[mFill(mL("tr_end_p"))]});
   TOUR.i=-1; tourGo(0); }
-function tourCloseNow(){ try{ mHeadIn(); }catch(_){} const el=$("tourBg"); el.hidden=true; el.innerHTML=""; TOUR.i=-1; TM.x=null; TM.anim=null; if (TOUR.page==="mami"){ TOUR.page=null; document.body.classList.remove("locked"); return; } if (TOUR.page==="danke"){ TOUR.page=null; document.body.classList.remove("locked"); if (DANKE.preview){ DANKE.preview=false; fbQuickBtn(); } if (wizShould()) setTimeout(()=>{ if (wizShould()) wizOpen(); }, 400); return; } if (TOUR.page){ TOUR.page=null; toast(mL("again"), null, null, 3500); } document.body.classList.remove("locked"); }
+function tourCloseNow(){ try{ mHeadIn(); }catch(_){} const el=$("tourBg"); el.hidden=true; el.innerHTML=""; TOUR.i=-1; TM.x=null; TM.anim=null; if (TOUR.page==="mami"||TOUR.page==="neu"){ TOUR.page=null; document.body.classList.remove("locked"); return; } if (TOUR.page==="danke"){ TOUR.page=null; document.body.classList.remove("locked"); if (DANKE.preview){ DANKE.preview=false; fbQuickBtn(); } if (wizShould()) setTimeout(()=>{ if (wizShould()) wizOpen(); }, 400); return; } if (TOUR.page){ TOUR.page=null; toast(mL("again"), null, null, 3500); } document.body.classList.remove("locked"); }
 function tourClose(){ if (TM.closing) return; const el=$("tourBg"); if (!el || el.hidden || !el.querySelector(".tmami")){ tourCloseNow(); return; } TM.closing=1; TM.tok++;
   tmHome().then(()=>{ TM.closing=0; tourCloseNow(); }); }
 function tourVis(n){ return n.offsetParent!==null || (n.getClientRects().length>0 && getComputedStyle(n).visibility!=="hidden"); }
@@ -3664,12 +3670,12 @@ function tmTarget(s){ return s ? [...document.querySelectorAll(s.sel)].find(n=>t
 function tmFixed(t){ for (let n=t; n && n!==document.body; n=n.parentElement){ const p=getComputedStyle(n).position; if (p==="fixed"||p==="sticky") return true; } return false; }
 function tourGo(i){ const el=$("tourBg");
   if (i>=TOUR.steps.length){ tourClose(); return; }
-  const tv=(TOUR.page==="danke"||TOUR.page==="mami")?UI.view:(TOUR.page||"home"); if (UI.view!==tv){ UI.view=tv; render(); }
+  const tv=TOUR.steps[i].view || ((TOUR.page==="danke"||TOUR.page==="mami"||TOUR.page==="neu")?UI.view:(TOUR.page||"home")); if (UI.view!==tv){ UI.view=tv; render(); }
   const first=TOUR.i<0 || !el.querySelector(".tmami"); TOUR.i=i; const s=TOUR.steps[i], n=TOUR.steps.length;
   el.className="tourbg spot mt"; el.hidden=false; document.body.classList.add("locked");
   const {ring, bub, mami}=tmEls(); const tok=++TM.tok;
   const T=x=>s.raw?`<span data-noi18n>${esc(x)}</span>`:esc(x);
-  const lab=TOUR.page==="danke"?"Feedback":TOUR.page==="mami"?"":`${TOUR.page&&PTOUR[TOUR.page]?"<span>"+esc(PTOUR[TOUR.page].t)+"</span> · ":""}<span data-noi18n>${i+1} / ${n}</span>`;
+  const lab=TOUR.page==="danke"?"Feedback":TOUR.page==="mami"?"":TOUR.page==="neu"?`<span data-noi18n>${esc(nt("nw_lab"))}</span> · <span data-noi18n dir="ltr">${i+1} / ${n}</span>`:`${TOUR.page&&PTOUR[TOUR.page]?"<span>"+esc(PTOUR[TOUR.page].t)+"</span> · ":""}<span data-noi18n dir="ltr">${i+1} / ${n}</span>`;
   bub.classList.remove("on","typing");
   const fill=()=>{ bub.innerHTML=`<div class="tmhd"><span data-noi18n>${esc(mL("name"))}</span>${lab?`<small>${lab}</small>`:""}</div><b class="tmt">${T(s.t)}</b>
     <div class="tin">${s.p.map(x=>`<p>${T(x)}</p>`).join("")}${s.demo||""}<div class="trow"><button class="tskip" data-tour="close">${TOUR.page?"Überspringen":"Beenden"}</button>
@@ -3839,7 +3845,32 @@ const ptSeen = () => { try { return JSON.parse(localStorage.getItem("hb-ptour")|
 function ptourOpen(v){ const P=PTOUR[v]; if (!P) return; const steps=P.s.filter(s=>[...document.querySelectorAll(s.sel)].some(n=>tourVis(n) && !n.closest(".cubestage")));
   if (!steps.length) return; try { const o=ptSeen(); o[v]=1; localStorage.setItem("hb-ptour", JSON.stringify(o)); } catch(_){}
   TOUR.page=v; TOUR.steps=steps; tourGo(0); }
-function ptourAuto(){ if (BG_RUN || TOUR.i>=0 || $("dankeBg") || dankeShould() || wizShould() || !PTOUR[UI.view] || ptSeen()[UI.view] || document.querySelector(".backdrop:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden])")) return;
+/* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
+const NEWTOUR=[
+  {v:"0.39.7", s:()=>IS_DESK ? [{sel:"#pcHero .pcaccs:has(.mvd)", ic:"repeat", t:nt("mv_sheet"), p:[nt("trh_mvpc")]}] : []},
+  {v:"0.39.6", s:()=>IS_DESK ? [] : [{sel:"[data-mvopen]", ic:"repeat", t:nt("mv_sheet"), p:[nt("trh_mv")]}]},
+  {v:"0.39.4", s:()=>IS_DESK && !IS_TAB ? [{sel:"nav.tabs.navx", ic:"list", t:nt("nw_nav_t"), p:[nt("nw_nav_p")]}] : []},
+  {v:"0.39.3", s:()=>[{sel:"#topAv", center:1, ic:"bell", t:nt("nw_snd_t"), p:[nt("nw_snd_p")]}]},
+  {v:"0.39.1", s:()=>canShare() ? [{sel:".tabs .tab.plus,.pcfab,[data-addmenu]", center:1, ic:"insight", t:nt("nw_inv_t"), p:[nt("nw_inv_p")]}] : []},
+];
+const vCmp=(a,b)=>{ const A=String(a).split(".").map(Number), B=String(b).split(".").map(Number); for (let k=0;k<3;k++){ const d=(A[k]||0)-(B[k]||0); if (d) return d; } return 0; };
+function ntBase(){ const cur=CHANGELOG[0][0]; try{ let b=localStorage.getItem("hb-newtour"); if (b) return b;
+    const seen=localStorage.getItem("hb-seenlog"); b = seen && /^\d/.test(seen) ? seen : (S.tx.length ? "0.39.5" : cur); localStorage.setItem("hb-newtour", b); return b; }catch(_){ return cur; } }
+function ntPending(base){ const cur=CHANGELOG[0][0]; return NEWTOUR.filter(x=>vCmp(x.v, base)>0 && vCmp(x.v, cur)<=0).slice(0,4); }
+function ntOpen(list, manual){ list=list.filter(x=>x.s().length); const vis=s=>[...document.querySelectorAll(s.sel)].some(n=>tourVis(n) && !n.closest(".cubestage"));
+  list=list.map(x=>({v:x.v, b:x.s().filter(s=>s.center||vis(s))})).filter(x=>x.b.length);
+  const body=list.flatMap(x=>x.b).map(s=>({raw:1, ...s, sel:vis(s)?s.sel:"#ntNone"}));
+  try{ localStorage.setItem("hb-newtour", CHANGELOG[0][0]); }catch(_){} ntAuto.off=1;
+  if (!body.length){ if (manual) toast(nt("nw_end_p")); return; }
+  const v=list.length===1 ? "v"+list[0].v : "v"+list[list.length-1].v+" – v"+list[0].v;
+  TOUR.page="neu"; TOUR.steps=[{sel:"#ptourQ", raw:1, t:nt("nw_hi"), p:[nt("nw_hi_p",{v})]}, ...body, {sel:"#ptourQ", raw:1, t:nt("nw_end_t"), p:[nt("nw_end_p")]}];
+  try{ SND.play("bell"); }catch(_){} TOUR.i=-1; tourGo(0); }
+const ntBlocked=()=>BG_RUN || TOUR.i>=0 || UI.view!=="home" || !!$("dankeBg") || dankeShould() || wizShould() || UI.wiz || !!document.querySelector(".backdrop:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden]),#actBg:not([hidden]),#mvBg:not([hidden]),#loginBg:not([hidden]),#langBg,#mvSheet:not([hidden])");
+function ntAuto(){ if (ntAuto.off) return false; if (BG_RUN || wizShould() || UI.wiz || $("dankeBg") || dankeShould()) return false;
+  const L=ntPending(ntBase()); if (!L.length){ ntAuto.off=1; return false; }
+  if (ntBlocked()){ clearTimeout(ntAuto.r); ntAuto.r=setTimeout(()=>{ try{ ntAuto(); }catch(_){} }, 2500); return TOUR.i<0 && UI.view==="home"; }
+  clearTimeout(ntAuto.t); ntAuto.t=setTimeout(()=>{ if (ntBlocked()){ ntAuto(); return; } const P=ntPending(ntBase()); if (P.length) ntOpen(P); }, 1400); return true; }
+function ptourAuto(){ if (ntAuto()) return; if (BG_RUN || TOUR.i>=0 || $("dankeBg") || dankeShould() || wizShould() || !PTOUR[UI.view] || ptSeen()[UI.view] || document.querySelector(".backdrop:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden])")) return;
   if (UI.view==="home" && !S.tx.length) return;
   clearTimeout(ptourAuto.t); const v=UI.view; ptourAuto.t=setTimeout(()=>{ if (UI.view===v && TOUR.i<0 && !document.querySelector(".backdrop:not([hidden]),.hobg:not([hidden])")) ptourOpen(v); }, 900); }
 function ptourBtn(){ const t=$("viewTitle"); if (!t) return; let b=$("ptourQ"); const on=!!PTOUR[UI.view];
@@ -9707,6 +9738,20 @@ mv_send:["{v} an {n} senden","Send {v} to {n}","{n} hesabına {v} gönder","От
 mv_note:["Nur in der App – in deiner Bank buchst du genauso um. Taucht die Umbuchung im Kontoauszug auf, zählt sie nicht doppelt.","Only in the app – make the same transfer in your bank. Once it shows up in your statement, it won't count twice.","Sadece uygulamada – bankanda da aynı aktarımı yap. Hesap dökümünde görünce iki kez sayılmaz.","Только в приложении – сделай такой же перевод в банке. Когда он появится в выписке, он не посчитается дважды.","Лише в застосунку – зроби такий самий переказ у банку. Коли він з'явиться у виписці, не порахується двічі.","Tylko w aplikacji – zrób ten sam przelew w banku. Gdy pojawi się w wyciągu, nie policzy się podwójnie.","داخل التطبيق فقط – قم بنفس التحويل في بنكك. عندما يظهر في كشف الحساب لن يُحسب مرتين.","Doar în aplicație – fă același transfer și în bancă. Când apare în extras, nu se numără de două ori."],
 mv_done:["{v} von {a} an {b} umgebucht","Moved {v} from {a} to {b}","{v} {a} hesabından {b} hesabına aktarıldı","{v} переведено с {a} на {b}","{v} переказано з {a} на {b}","Przelano {v} z {a} na {b}","تم تحويل {v} من {a} إلى {b}","{v} mutați din {a} în {b}"],
 trh_mv:["Neu: Tipp auf „Alle Konten“ oder zieh die Karte nach unten – dann liegen alle Konten offen. Halte eine Karte gedrückt und zieh sie auf eine andere, um Geld umzubuchen.","New: tap “All accounts” or pull the card down – all accounts open up. Press and hold one and drag it onto another to move money.","Yeni: “Tüm hesaplar”a dokun ya da kartı aşağı çek – tüm hesaplar açılır. Para aktarmak için birini basılı tutup diğerine sürükle.","Новое: нажми «Все счета» или потяни карту вниз – откроются все счета. Удерживай одну и перетащи на другую, чтобы перевести деньги.","Нове: натисни «Усі рахунки» або потягни картку вниз – відкриються всі рахунки. Утримуй одну й перетягни на іншу, щоб переказати гроші.","Nowość: stuknij „Wszystkie konta” albo pociągnij kartę w dół – otworzą się wszystkie konta. Przytrzymaj jedną i przeciągnij na inną, aby przelać pieniądze.","جديد: اضغط «كل الحسابات» أو اسحب البطاقة للأسفل – تنفتح كل الحسابات. اضغط مطولًا على واحدة واسحبها إلى أخرى لتحويل المال.","Nou: apasă „Toate conturile” sau trage cardul în jos – se deschid toate conturile. Ține apăsat unul și trage-l peste altul ca să muți bani."],
+mv_pc:["Zieh ein Konto auf ein anderes, um Geld umzubuchen", "Drag one account onto another to move money", "Para aktarmak için bir hesabı diğerinin üzerine sürükle", "Перетащи один счёт на другой, чтобы перевести деньги", "Перетягни один рахунок на інший, щоб переказати гроші", "Przeciągnij jedno konto na drugie, aby przelać pieniądze", "اسحب حسابًا إلى حساب آخر لتحويل المال", "Trage un cont peste altul ca să muți bani"],
+trh_mvpc:["Neu: Pack ein Konto mit der Maus und zieh es auf ein anderes – dann Betrag wählen und senden. So schiebst du Geld zwischen Hauptkonto, Spaces und Bargeld.", "New: grab an account with the mouse and drag it onto another – then pick the amount and send. That's how you move money between main account, Spaces and cash.", "Yeni: Bir hesabı fareyle tut ve diğerinin üzerine sürükle – sonra tutarı seç ve gönder. Böylece ana hesap, Space'ler ve nakit arasında para aktarırsın.", "Новое: возьми счёт мышью и перетащи на другой – выбери сумму и отправь. Так деньги переходят между основным счётом, Spaces и наличными.", "Нове: візьми рахунок мишею і перетягни на інший – обери суму й надішли. Так гроші переходять між основним рахунком, Spaces і готівкою.", "Nowość: chwyć konto myszą i przeciągnij na inne – wybierz kwotę i wyślij. Tak przesuwasz pieniądze między kontem głównym, Spaces i gotówką.", "جديد: أمسك حسابًا بالفأرة واسحبه إلى حساب آخر – ثم اختر المبلغ وأرسل. هكذا تنقل المال بين الحساب الرئيسي والـSpaces والنقد.", "Nou: apucă un cont cu mouse-ul și trage-l peste altul – apoi alege suma și trimite. Așa muți bani între contul principal, Spaces și numerar."],
+nw_hi:["Neu in dieser Version!", "New in this version!", "Bu sürümde yeni!", "Новое в этой версии!", "Нове в цій версії!", "Nowość w tej wersji!", "جديد في هذا الإصدار!", "Nou în această versiune!"],
+nw_hi_p:["Mami zeigt dir kurz, was in {v} dazugekommen ist. Dauert nur ein paar Sekunden.", "Mami quickly shows you what's new in {v}. Takes just a few seconds.", "Mami sana {v} sürümünde nelerin eklendiğini kısaca gösteriyor. Sadece birkaç saniye sürer.", "Мами коротко покажет, что нового в {v}. Это займёт пару секунд.", "Мамі коротко покаже, що нового в {v}. Це займе кілька секунд.", "Mami krótko pokaże ci, co nowego w {v}. To tylko kilka sekund.", "ماما تريك بسرعة ما الجديد في {v}. يستغرق ذلك بضع ثوانٍ فقط.", "Mami îți arată pe scurt ce e nou în {v}. Durează doar câteva secunde."],
+nw_lab:["Neu", "New", "Yeni", "Новое", "Нове", "Nowość", "جديد", "Nou"],
+nw_end_t:["Das war's schon!", "That's it!", "Hepsi bu kadar!", "Вот и всё!", "Ось і все!", "To wszystko!", "هذا كل شيء!", "Asta a fost tot!"],
+nw_end_p:["Alles Neue findest du jederzeit unter „Neu in dieser Version“ in den Einstellungen.", "You can find everything new anytime under “New in this version” in the settings.", "Tüm yenilikleri her zaman ayarlardaki “Bu sürümde yeni” bölümünde bulursun.", "Всё новое всегда найдёшь в настройках в разделе «Новое в этой версии».", "Усе нове завжди знайдеш у налаштуваннях у розділі «Нове в цій версії».", "Wszystkie nowości znajdziesz zawsze w ustawieniach w „Nowość w tej wersji”.", "تجد كل جديد في أي وقت ضمن «جديد في هذا الإصدار» في الإعدادات.", "Găsești oricând noutățile în setări, la „Nou în această versiune”."],
+nw_nav_t:["Neue Menüleiste", "New menu bar", "Yeni menü çubuğu", "Новая панель меню", "Нова панель меню", "Nowy pasek menu", "شريط قوائم جديد", "Bară de meniu nouă"],
+nw_nav_p:["Haushalt, Beruf, Sparen und Einkaufen – jetzt wie am Handy. Die helle Pille zeigt dir, wo du gerade bist.", "Household, work, saving and shopping – now just like on the phone. The bright pill shows where you are.", "Ev, iş, birikim ve alışveriş – artık telefondaki gibi. Açık renkli hap nerede olduğunu gösterir.", "Хозяйство, работа, накопления и покупки – теперь как на телефоне. Светлая капсула показывает, где ты.", "Господарство, робота, заощадження й покупки – тепер як на телефоні. Світла капсула показує, де ти.", "Dom, praca, oszczędzanie i zakupy – teraz jak na telefonie. Jasna pigułka pokazuje, gdzie jesteś.", "المنزل والعمل والادخار والتسوق – الآن كما في الهاتف. الحبة الفاتحة تريك أين أنت.", "Gospodărie, muncă, economii și cumpărături – acum ca pe telefon. Pastila deschisă arată unde ești."],
+nw_snd_t:["Neu: Töne", "New: sounds", "Yeni: Sesler", "Новое: звуки", "Нове: звуки", "Nowość: dźwięki", "جديد: الأصوات", "Nou: sunete"],
+nw_snd_p:["Leise Töne beim Speichern, Abhaken und Umbuchen. In den Einstellungen unter „Töne“ schaltest du sie an oder aus und wählst Klang und Lautstärke.", "Soft sounds when saving, ticking off and moving money. Under “Sounds” in the settings you switch them on or off and pick style and volume.", "Kaydederken, işaretlerken ve aktarırken hafif sesler. Ayarlarda “Sesler” altında açıp kapatır, tını ve ses seviyesini seçersin.", "Тихие звуки при сохранении, отметке и переводе. В настройках в разделе «Звуки» их можно включить или выключить и выбрать стиль и громкость.", "Тихі звуки під час збереження, позначення й переказу. У налаштуваннях у розділі «Звуки» їх можна ввімкнути чи вимкнути та обрати стиль і гучність.", "Ciche dźwięki przy zapisywaniu, odhaczaniu i przelewach. W ustawieniach w „Dźwięki” włączysz je lub wyłączysz i wybierzesz brzmienie oraz głośność.", "أصوات هادئة عند الحفظ والتأشير والتحويل. من «الأصوات» في الإعدادات تشغّلها أو توقفها وتختار النغمة ومستوى الصوت.", "Sunete discrete la salvare, bifare și mutarea banilor. În setări, la „Sunete”, le pornești sau oprești și alegi stilul și volumul."],
+nw_inv_t:["Neu: Freunde einladen", "New: invite friends", "Yeni: Arkadaşlarını davet et", "Новое: пригласи друзей", "Нове: запроси друзів", "Nowość: zaproś znajomych", "جديد: ادعُ أصدقاءك", "Nou: invită prieteni"],
+nw_inv_p:["Im Plus-Menü findest du deinen eigenen QR-Code. Wer ihn scannt, kann die App testen – danach erscheint sofort ein neuer Code für die nächste Person.", "In the plus menu you'll find your own QR code. Whoever scans it can test the app – then a new code appears right away for the next person.", "Artı menüsünde kendi QR kodunu bulursun. Onu tarayan uygulamayı deneyebilir – ardından bir sonraki kişi için hemen yeni bir kod çıkar.", "В меню «плюс» есть твой QR-код. Кто его отсканирует, сможет тестировать приложение – сразу появится новый код для следующего.", "У меню «плюс» є твій QR-код. Хто його відсканує, зможе тестувати застосунок – одразу з'явиться новий код для наступного.", "W menu plus znajdziesz własny kod QR. Kto go zeskanuje, może testować aplikację – od razu pojawi się nowy kod dla kolejnej osoby.", "في قائمة الزائد تجد رمز QR الخاص بك. من يمسحه يمكنه تجربة التطبيق – ثم يظهر فورًا رمز جديد للشخص التالي.", "În meniul plus găsești propriul cod QR. Cine îl scanează poate testa aplicația – apoi apare imediat un cod nou pentru următoarea persoană."],
+nw_show:["Mami zeigt's dir", "Mami shows you", "Mami göstersin", "Мами покажет", "Мамі покаже", "Mami ci pokaże", "ماما تريك", "Mami îți arată"],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
@@ -13300,6 +13345,7 @@ $("backupFile").addEventListener("change", async e => {
 });
 
 window.hbBack = () => {
+  if (!$("mvBg") && $("mvSheet") && !$("mvSheet").hidden){ mvSheetClose(); return true; }
   if ($("mvBg") && !$("mvBg").hidden){ if ($("mvSheet") && !$("mvSheet").hidden) mvSheetClose(); else mvClose(); return true; }
   if ($("codeBg") && !$("codeBg").hidden){ codeClose(); return true; }
   if ($("camLive") && !$("camLive").hidden){ camStop(); return true; }
