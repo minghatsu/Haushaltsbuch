@@ -2190,6 +2190,32 @@ html.pc [data-view="zukunft"] .agrid{grid-template-columns:repeat(4,1fr)!importa
 .invcols .chip{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700}.chip.no{background:var(--surface);color:var(--muted)}.chip.wa{background:var(--surface);color:var(--warn)}.chip.ok{background:var(--surface);color:var(--accent)}
 .invmini .chip.wa{background:var(--warn-soft)}
 .invfoot{margin:12px 4px 0;text-align:center}
+.invside{display:contents}.invside>*{flex-shrink:0}
+.invpub{position:relative;background:var(--surface);border:2px dashed color-mix(in srgb,var(--accent) 55%,transparent);border-radius:20px;padding:14px 16px;margin:0 0 12px;animation:invPop .45s .04s cubic-bezier(.2,1.3,.4,1) both;transition:opacity .2s}
+.invpub>b{display:flex;align-items:center;gap:7px;font-size:14px}.invpub>b svg.i{stroke:var(--accent)}
+.invpst{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;padding:3px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.invpub.off .invpst{background:var(--sunk);color:var(--muted)}
+.invpdot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:invPulse 1.6s ease-in-out infinite}
+@keyframes invPulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent)}60%{box-shadow:0 0 0 6px transparent}}
+.invpub p{margin:4px 0 10px;font-size:12.5px;color:var(--muted)}
+.invpurl{display:flex;align-items:center;gap:8px;background:var(--sunk);border-radius:14px;padding:6px 6px 6px 12px;font:600 12px ui-monospace,SFMono-Regular,Menlo,monospace;min-width:0;transition:opacity .2s}
+.invpurl em{font:inherit;font-style:normal;color:var(--accent)}.invpurl span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr}
+.invpcp{display:inline-flex;align-items:center;gap:5px;flex:none;border:0;border-radius:10px;padding:8px 11px;background:var(--accent);color:var(--accent-ink);font:800 12px var(--f-body);cursor:pointer;transition:transform .15s}
+.invpcp svg.i{stroke:currentColor}.invpcp:hover svg.i{animation:invRing .5s ease}.invpcp:active{transform:scale(.93)}
+.invpub.off .invpurl{opacity:.5}
+.invpbar{height:6px;border-radius:99px;background:var(--sunk);margin:12px 0 5px;overflow:hidden}.invpbar i{display:block;height:100%;width:var(--w);min-width:2px;border-radius:inherit;background:var(--accent);transform-origin:left;animation:invGrow .8s .2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes invGrow{from{transform:scaleX(0)}}
+.invpstat{display:block;color:var(--muted);font-size:11.5px}
+.invpbtn{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin-top:8px}.invpbtn .link{display:inline-flex;align-items:center;gap:5px;padding:0}.invpbtn .link svg.i{stroke:currentColor}
+.invpask{font-size:12px;font-weight:700;color:var(--warn);flex-basis:100%;animation:invPop .3s both}
+.invpub.busy{opacity:.6;pointer-events:none}
+.invpub.new .btn{display:inline-flex;align-items:center;gap:6px}.invpub.new .btn svg.i{stroke:currentColor}
+.invlnk{align-self:flex-start;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:1px 7px;border-radius:99px;margin:2px 0}.invlnk svg.i{stroke:currentColor}
+.invpg{position:relative;border:1.5px dashed color-mix(in srgb,var(--accent) 45%,transparent)}
+.invpgi{position:absolute;right:8px;top:8px;opacity:.7}.invpgi svg.i{stroke:var(--accent)}
+.invpg b{padding-right:22px}
+.invpgc{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}.invpgc i{font:600 10px ui-monospace,monospace;letter-spacing:.04em;background:var(--sunk);border-radius:6px;padding:1px 5px;font-style:normal;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.invpub,.invpbar i,.invpdot,.invpask{animation:none}}
 .invupd{position:relative;overflow:hidden;background:linear-gradient(135deg,color-mix(in srgb,var(--warn-soft) 70%,var(--surface)),var(--warn-soft));border-radius:20px;padding:14px 16px;margin:0 0 12px;animation:invPop .45s .08s cubic-bezier(.2,1.3,.4,1) both}
 .invupd b{display:flex;align-items:center;gap:7px;font-size:14px}.invupd b svg.i{stroke:var(--warn)}
 .invupd p{margin:4px 0 10px;font-size:12.5px;color:var(--muted)}
@@ -2219,9 +2245,10 @@ html.pc [data-view="zukunft"] .agrid{grid-template-columns:repeat(4,1fr)!importa
 /* Pinnwand am PC: breit, links Code und Update, rechts drei Spalten */
 html.pc:not(.istab) .invboardbox{max-width:1260px;width:calc(100vw - 120px);display:grid;grid-template-columns:330px 1fr;grid-template-rows:auto auto 1fr auto;gap:0 22px;max-height:calc(100vh - 80px)}
 html.pc:not(.istab) .invboardbox>.invhd,html.pc:not(.istab) .invboardbox>.invcapx,html.pc:not(.istab) .invboardbox>.invfoot{grid-column:1/3}
-html.pc:not(.istab) .invboardbox>.invnext{grid-column:1;grid-row:3;align-self:start;flex-direction:column;align-items:stretch;margin:14px 0 12px}
-html.pc:not(.istab) .invboardbox>.invnext .invnb{flex-direction:row;justify-content:flex-start}html.pc:not(.istab) .invboardbox>.invnext .invnl{flex:0 0 auto}
-html.pc:not(.istab) .invboardbox>.invupd{grid-column:1;grid-row:3;align-self:end;margin:0 0 4px}
+html.pc:not(.istab) .invboardbox>.invside{display:flex;flex-direction:column;gap:12px;grid-column:1;grid-row:2/4;min-height:0;overflow:auto;padding:14px 3px 4px;margin:0 -3px;scrollbar-width:thin}
+html.pc:not(.istab) .invside>*{margin:0;flex:none}
+html.pc:not(.istab) .invside>.invnext{flex-direction:column;align-items:stretch}
+html.pc:not(.istab) .invside>.invnext .invnb{flex-direction:row;justify-content:flex-start}html.pc:not(.istab) .invside>.invnext .invnl{flex:0 0 auto}
 html.pc:not(.istab) .invboardbox>.invcols{grid-column:2;grid-row:2/4;margin-top:14px;gap:14px;min-height:0}
 html.pc:not(.istab) .invboardbox .invcol{border-radius:22px;padding:12px 10px;min-height:0;max-height:calc(100vh - 260px)}
 html.pc:not(.istab) .invboardbox .invcol h4{font-size:14px;margin:2px 6px 12px}
@@ -2864,6 +2891,7 @@ const P = {sound:"<path d=\"M4 9.5h3.2L12 5.5v13l-4.8-4H4z\"/><path d=\"M15.5 9.
   palette:'<path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.8 1.8-1.7 0-1.3-1-1.5-1-2.6 0-.9.7-1.6 1.7-1.6h2.2a3.8 3.8 0 0 0 3.8-3.8C20.5 6.9 16.7 3.5 12 3.5Z"/><circle cx="7.6" cy="11" r="1.1"/><circle cx="10" cy="7.3" r="1.1"/><circle cx="14.4" cy="7.3" r="1.1"/>',
   piggy:'<path d="M5 11.5a6.5 5.5 0 0 1 11.6-3.3L19 7.5v3.2l1.5.8v3l-2 .5a6.5 5.5 0 0 1-2.5 2.2V20h-3v-2.2h-3V20H7v-3.2A5.5 5.5 0 0 1 5 11.5z"/><circle cx="14.5" cy="11" r=".7"/>'
 };
+Object.assign(P,{link:"<path d=\"M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2\"/><path d=\"M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2\"/>",copy:"<rect x=\"8.5\" y=\"8.5\" width=\"11\" height=\"11\" rx=\"2.5\"/><path d=\"M15.5 8.5V6A1.5 1.5 0 0 0 14 4.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5\"/>",pause:"<path d=\"M9 6v12M15 6v12\"/>",play:"<path d=\"M8 5.5v13l10.5-6.5z\"/>"});
 function ic(name, size){ return `<svg class="i" viewBox="0 0 24 24"${size?` style="width:${size}px;height:${size}px"`:""}>${P[name]||P.tag}</svg>`; }
 function iconFor(kind, name){
   const n = (name||"").toLowerCase();
@@ -3616,6 +3644,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.40.2", "19. November 2026", ["Neu in den Einladungen: „Link für Posts“ – ein Link für Facebook & Co., jeder Besucher bekommt automatisch seinen eigenen Code", "Wer den Link nochmal öffnet, sieht wieder seinen Code von vorhin – höchstens 20 neue Codes am Tag", "Link pausieren oder erneuern; die Pinnwand zeigt, wie viele über den Link kamen"]],
   ["0.40.1", "19. November 2026", ["Einladungen am PC: breite Pinnwand mit Code links und den drei Spalten rechts", "Tester ans Update erinnern: jeder Tester zeigt seine Version – „aktuell“ oder „alt“ – mit Knopf „Erinnern“ oder „Alle ans Update erinnern“", "Wer erinnert wird, bekommt einmal am Tag ein Mami-Fenster mit „Jetzt updaten“ und eine Meldung, auch wenn die App zu ist", "Einladungen: Tablet-Tester stehen nicht mehr fälschlich als „Android“ da"]],
   ["0.40.0", "19. November 2026", ["PC: Plus-Rad dreht beim Ziehen jetzt in die richtige Richtung – der Knopf bleibt unter der Maus und rastet sanft ein"]],
   ["0.39.9", "19. November 2026", ["Neu am PC: das Plus-Menü wie am Handy – alle Knöpfe auf einem Viertelkreis um das +, drehen mit Mausrad, Ziehen oder Pfeiltasten, vorne groß mit kurzer Erklärung", "Neu am PC: ein Entwickler-Knopf in der Kopfzeile mit Freigabe & Tester, Feedback-Eingang und Werkzeugen", "Tablet: im Plus-Rad fehlten Einstellungen, Profil und Hilfe – jetzt sind alle da", "Backup laden behält jetzt den Entwickler-Schlüssel", "Werkzeuge: Speicher-Anzeige zeigt wieder einen Wert"]],
@@ -3894,6 +3923,7 @@ function ptourOpen(v){ const P=PTOUR[v]; if (!P) return; const steps=P.s.filter(
   TOUR.page=v; TOUR.steps=steps; tourGo(0); }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR=[
+  {v:"0.40.2", s:()=>updKey() ? [{sel:"#ntNone", center:1, ic:"link", t:nt("nw_pl_t"), p:[nt("nw_pl_p")]}] : []},
   {v:"0.40.1", s:()=>updKey() ? [{sel:"#ntNone", center:1, ic:"bell", t:nt("nw_nu_t"), p:[nt("nw_nu_p")]}] : []},
   {v:"0.39.9", s:()=>IS_DESK ? [{sel:".tab.plus", ic:"plus", t:nt("nw_fan_t"), p:[nt("nw_fan_p")]}] : []},
   {v:"0.39.7", s:()=>IS_DESK ? [{sel:"#pcHero .pcaccs:has(.mvd)", ic:"repeat", t:nt("mv_sheet"), p:[nt("trh_mvpc")]}] : []},
@@ -5036,30 +5066,54 @@ document.addEventListener("click", e=>{ if (e.target.closest("[data-nudgego]")){
   if (e.target.closest("[data-nudgelater]") || e.target.id==="nudgeBg"){ nudgeClose(); } });
 document.addEventListener("keydown", e=>{ if (e.key==="Escape" && $("nudgeBg")) nudgeClose(); });
 if (!BG_RUN){ setTimeout(()=>nudgeCheck(), 25000); setInterval(()=>nudgeCheck(), 15*60e3); document.addEventListener("visibilitychange", ()=>{ if (document.hidden) setTimeout(()=>nudgeCheck(true), 60e3); }); }
+/* Link für Posts: ein Link, jeder Besucher bekommt automatisch seinen eigenen Code */
+const pubUrl = t => INV_PAGE+"?l="+t;
+function invPubGroup(g){ const last=Math.max(...g.map(x=>x.seen||x.given||0));
+  return `<div class="invmini invpg" style="--i:0"><span class="invpgi" aria-hidden="true">${ic("link",16)}</span><b data-noi18n>${esc(nt(g.length===1?"pl_grp1":"pl_grp",{n:g.length}))}</b><small data-noi18n>${esc(nt("pl_grp_s"))} · ${invAgo(last)}</small>
+    <span class="invpgc" data-noi18n>${g.slice(0,8).map(x=>`<i>${esc(x.code)}</i>`).join("")}${g.length>8?`<i>+${g.length-8}</i>`:""}</span></div>`; }
+function invPubBox(){ const P=UI.invPub; if (!P || UI.invLerr) return ""; const busy=UI.invPubBusy?" busy":"";
+  if (!P.tok) return `<div class="invpub new${busy}"><b>${ic("link",15)}<span data-noi18n>${esc(nt("pl_t"))}</span></b><p data-noi18n>${esc(nt("pl_none_p"))}</p><button class="btn primary" data-invpub="on" data-noi18n>${ic("link",15)}${esc(nt("pl_make"))}</button></div>`;
+  const on=!!P.on, pct=Math.min(100, Math.round(100*(P.today||0)/(P.day||20)));
+  return `<div class="invpub ${on?"on":"off"}${busy}"><b>${ic("link",15)}<span data-noi18n>${esc(nt("pl_t"))}</span><span class="invpst" data-noi18n>${on?`<i class="invpdot"></i>`:""}${esc(nt(on?"pl_on":"pl_off"))}</span></b>
+    <p data-noi18n>${esc(nt(on?"pl_p":"pl_paused_p"))}</p>
+    <div class="invpurl" data-noi18n><span title="${esc(pubUrl(P.tok))}">…/i.html?l=<em>${esc(P.tok)}</em></span><button class="invpcp" data-invpub="copy" aria-label="${esc(nt("pl_copy"))}">${ic("copy",15)}<span>${esc(nt("pl_copy"))}</span></button></div>
+    <div class="invpbar" role="img" aria-label="${esc(nt("pl_stats",{t:P.today||0,d:P.day||20,n:P.total||0,a:P.act||0}))}"><i style="--w:${pct}%"></i></div>
+    <small class="invpstat" data-noi18n>${esc(nt("pl_stats",{t:P.today||0,d:P.day||20,n:P.total||0,a:P.act||0}))}</small>
+    <div class="invpbtn">${UI.invPubAsk?`<span class="invpask" data-noi18n>${esc(nt("pl_new_q"))}</span><button class="link small" data-invpub="newok" data-noi18n>${esc(nt("pl_new_yes"))}</button><button class="link small muted" data-invpub="newno" data-noi18n>${esc(nt("pl_new_no"))}</button>`
+      :`<button class="link small" data-invpub="${on?"off":"on"}" data-noi18n>${ic(on?"pause":"play",13)}${esc(nt(on?"pl_pause":"pl_resume"))}</button><button class="link small" data-invpub="new" data-noi18n>${ic("repeat",13)}${esc(nt("pl_new"))}</button>`}</div></div>`; }
+async function invPubDo(op){ const P=UI.invPub||{};
+  if (op==="copy"){ const u=pubUrl(P.tok); try { await navigator.clipboard.writeText(u); toast(nt("pl_copied")); } catch(_){ prompt(nt("pl_copy"), u); } SND.play("copy"); return; }
+  if (op==="new"){ UI.invPubAsk=1; invRender(); return; } if (op==="newno"){ UI.invPubAsk=0; invRender(); return; }
+  UI.invPubAsk=0; UI.invPubBusy=1; invRender();
+  try { UI.invPub=await pairCall("publink","",{op:op==="newok"?"new":op},true); toast(nt(op==="newok"?"pl_new_ok":op==="off"?"pl_paused":"pl_started")); SND.play(op==="off"?"tick":"done"); }
+  catch(e){ toast(/Unbekannte Aktion/i.test(e.message||"")?nt("inv_oldsrv"):(e.message||"Server nicht erreichbar")); }
+  UI.invPubBusy=0; invRender(); }
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-invpub]"); if (!b || b.closest(".busy")) return; e.preventDefault(); invPubDo(b.dataset.invpub); });
 function invBoard(){ const I=UI.inv||{}, L=UI.invL||[], calm=RMo();
   const cols=[[0,nt("inv_c0"),"var(--sunk)","no"],[1,nt("inv_c1"),"var(--warn-soft)","wa"],[2,nt("inv_c2"),"var(--accent-soft)","ok"]];
   const card=(x,i)=>{ const st=invStage(x), nm=x.name||x.code;
     const sub= st===2 ? [x.form==="pc"||x.form==="laptop"?"PC":x.form==="tab"||x.form==="tablet"?"Tablet":x.form?"Android":"", x.ver?"v"+x.ver:"", invAgo(x.act)].filter(Boolean).join(" · ")
       : st===1 ? (x.app?nt("inv_s_app"):nt("inv_s_dl",{f:x.dlform==="zip"?"PC":"Android"}))+" · "+invAgo(x.app||x.dl)
       : (x.seen?nt("inv_s_seen"):nt("inv_s_sent"))+" · "+invAgo(x.seen||x.given);
-    return `<div class="invmini" style="--i:${i}" data-invcard="${esc(x.code)}"><b>${esc(nm)}</b>${x.via?`<span class="invvia">${esc(nt("inv_via",{n:x.via}))}</span>`:""}${x.ios&&!x.act?`<span class="invios"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>${esc(nt("inv_ios"))}</span>`:""}<small>${esc(sub)}</small>${x.name?`<small class="invmc" data-noi18n>${esc(x.code)}</small>`:""}
+    return `<div class="invmini" style="--i:${i}" data-invcard="${esc(x.code)}"><b>${esc(nm)}</b>${x.via?`<span class="invvia">${esc(nt("inv_via",{n:x.via}))}</span>`:""}${x.src==="link"?`<span class="invlnk">${ic("link",11)}${esc(nt("pl_via"))}</span>`:""}${x.ios&&!x.act?`<span class="invios"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>${esc(nt("inv_ios"))}</span>`:""}<small>${esc(sub)}</small>${x.name?`<small class="invmc" data-noi18n>${esc(x.code)}</small>`:""}
       ${st===1&&x.app?`<span class="chip wa invrem">${ic("bell",12)}${nt("inv_auto")}</span>`:""}
       ${st<2?`<button class="link small" data-invremind="${esc(x.code)}">${nt("inv_remind")}${x.remind?` <span class="muted">· ${invAgo(x.remind)}</span>`:""}</button>`:""}${st===2?invVerRow(x):""}</div>`; };
-  const colH=cols.map(([k,t,bg,cl])=>{ const items=L.filter(x=>invStage(x)===k); return `<div class="invcol" style="--cb:${bg};--i:${k}"><h4><span>${t}</span><span class="chip ${cl}">${items.length}</span></h4>${items.length?items.map(card).join(""):`<p class="invempty">${nt("inv_none")}</p>`}</div>`; }).join("");
+  const colH=cols.map(([k,t,bg,cl])=>{ const all=L.filter(x=>invStage(x)===k), grp=k===0?all.filter(x=>x.src==="link"&&!x.name):[], items=all.filter(x=>!grp.includes(x));
+    return `<div class="invcol" style="--cb:${bg};--i:${k}"><h4><span>${t}</span><span class="chip ${cl}">${all.length}</span></h4>${grp.length?invPubGroup(grp):""}${items.length?items.map(card).join(""):grp.length?"":`<p class="invempty">${nt("inv_none")}</p>`}</div>`; }).join("");
   return `<div class="invbox invboardbox" role="dialog" aria-modal="true" aria-labelledby="invT">
     <div class="invhd"><button class="iconbtn" data-invclose aria-label="Zurück">‹</button><b id="invT">${nt("inv_t")}</b>${UI.invIos?`<span class="invioschip" title="${esc(nt("inv_ios_n",{n:UI.invIos}))}" aria-label="${esc(nt("inv_ios_n",{n:UI.invIos}))}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg><span data-noi18n>${UI.invIos}</span></span>`:""}${UI.invSlots?`<button class="invcapb${UI.invSlots.slots>=UI.invSlots.cap?" full":""}" data-invcap aria-expanded="${!!UI.invCapEd}" aria-label="${esc(nt("inv_slots"))}" data-noi18n>${UI.invSlots.slots} / ${UI.invSlots.cap}</button>`:""}<button class="iconbtn invrl" data-invreload aria-label="${esc(nt("inv_reload"))}">${ic("repeat",18)}</button></div>
     ${UI.invCapEd&&UI.invSlots?`<div class="invcapx"><span>${esc(nt("inv_cap_t"))}</span><div class="invcapst"><button class="iconbtn" data-invcapd="-5" aria-label="−5">−</button><b data-noi18n>${UI.invCapEd}</b><button class="iconbtn" data-invcapd="5" aria-label="+5">+</button></div><button class="btn primary" data-invcapsave>${esc(nt("inv_cap_save"))}</button></div>`:""}
-    <div class="invnext ${calm?"":"anim"}">${I.err?`<p class="small" style="color:var(--bad);margin:0">${esc(I.err)}</p><button class="btn" data-invopen>${nt("inv_retry")}</button>`:!I.code?`<p class="muted small" style="margin:0">${nt("inv_load")}</p>`:`
+    <div class="invside"><div class="invnext ${calm?"":"anim"}">${I.err?`<p class="small" style="color:var(--bad);margin:0">${esc(I.err)}</p><button class="btn" data-invopen>${nt("inv_retry")}</button>`:!I.code?`<p class="muted small" style="margin:0">${nt("inv_load")}</p>`:`
       <div class="invnl"><small>${nt("inv_next")}</small><div class="invnc" data-noi18n>${esc(I.code)}</div>
       <input class="in invname" id="invName" maxlength="40" placeholder="${esc(nt("inv_for"))}" value="${esc(UI.invName||"")}" autocomplete="off"></div>
       <div class="invnb"><button class="btn primary" data-invsharego>${ic("plus",16)}${nt("inv_go")}</button><button class="link small" data-invqr>${UI.invQr?nt("inv_qr_off"):nt("inv_qr")}</button></div>
       ${UI.invQr?`<div class="invqr invqrs">${qrSvg(invLink(I.code), 200)}</div>`:""}`}</div>
-    ${invUpdBox(L)}
+    ${invPubBox()}${invUpdBox(L)}</div>
     <div class="invcols">${UI.invLerr?`<p class="small" style="color:var(--bad)">${esc(UI.invLerr)}</p>`:colH}</div>
     <p class="small muted invfoot">${nt("inv_hint")}</p>
   </div>`; }
 const invFrom = r => r.full ? {full:true, slots:r.slots, cap:r.cap} : {code:r.code, max:r.max, used:r.used, left:Math.max(0,r.max-r.used), slots:r.slots, cap:r.cap};
-async function invLoad(){ try { const j=await pairCall("devinv","",{},true); UI.invL=j.items||[]; UI.invLerr=""; if (j.cap) UI.invSlots={slots:j.slots, cap:j.cap}; UI.invIos=Number(j.ios)||0; } catch(e){ UI.invLerr=/Unbekannte Aktion/i.test(e.message||"")?nt("inv_oldsrv"):(e.message||"Server nicht erreichbar"); } invRender(); }
+async function invLoad(){ try { const j=await pairCall("devinv","",{},true); UI.invL=j.items||[]; UI.invPub=j.pub||null; UI.invLerr=""; if (j.cap) UI.invSlots={slots:j.slots, cap:j.cap}; UI.invIos=Number(j.ios)||0; } catch(e){ UI.invLerr=/Unbekannte Aktion/i.test(e.message||"")?nt("inv_oldsrv"):(e.message||"Server nicht erreichbar"); } invRender(); }
 async function invNext(){ try { const r=await pairCall("invmake", "", {dev:devId()}, true); UI.inv=invFrom(r); } catch(e){ UI.inv={err:e.message||"Server nicht erreichbar"}; } invRender(); }
 function invAfterSend(){ const I=UI.inv||{}; if (!canShare() || !I.code) return;
   if (I.reminder){ pairCall("invremind","",{c:I.code, dev:devId()},true).then(()=>{ if (canInvite()) invLoad(); }).catch(()=>{}); return; } invGiven(); }
@@ -9908,6 +9962,31 @@ nu_later:["Später", "Later", "Sonra", "Позже", "Пізніше", "Późnie
 nu_loading:["Update wird geholt …", "Getting the update …", "Güncelleme alınıyor …", "Загружаю обновление …", "Завантажую оновлення …", "Pobieram aktualizację …", "جارٍ جلب التحديث …", "Se descarcă actualizarea …"],
 nw_nu_t:["Tester ans Update erinnern", "Remind testers to update", "Test edenlere güncellemeyi hatırlat", "Напомнить тестерам об обновлении", "Нагадати тестувальникам про оновлення", "Przypomnij testerom o aktualizacji", "ذكّر المختبِرين بالتحديث", "Amintește-le testerilor să actualizeze"],
 nw_nu_p:["In den Einladungen siehst du jetzt bei jedem Tester seine Version. Wer noch eine alte hat, erinnerst du mit einem Klick – Mami meldet sich dann bei ihm, auch wenn die App zu ist.", "In Invitations you now see each tester's version. Remind anyone on an old one with one click – Mami then reaches out to them, even when the app is closed.", "Davetlerde artık her test edenin sürümünü görürsün. Eski sürümde olanı tek tıkla hatırlatırsın – Mami, uygulama kapalıyken bile ona ulaşır.", "В приглашениях теперь видна версия каждого тестера. Тому, у кого старая, напомнишь одним кликом – Мами напишет ему, даже если приложение закрыто.", "У запрошеннях тепер видно версію кожного тестувальника. Тому, хто на старій, нагадаєш одним кліком – Мамі напише йому, навіть коли застосунок закритий.", "W zaproszeniach widzisz teraz wersję każdego testera. Temu, kto ma starą, przypomnisz jednym kliknięciem – Mami odezwie się do niego, nawet gdy aplikacja jest zamknięta.", "في الدعوات ترى الآن إصدار كل مختبِر. من لديه إصدار قديم تذكّره بنقرة واحدة – وتتواصل معه ماما حتى لو كان التطبيق مغلقًا.", "La invitații vezi acum versiunea fiecărui tester. Pe cine are una veche îl amintești cu un clic – Mami îi scrie, chiar dacă aplicația e închisă."],
+pl_t:["Link für Posts", "Link for posts", "Paylaşımlar için bağlantı", "Ссылка для постов", "Посилання для дописів", "Link do postów", "رابط للمنشورات", "Link pentru postări"],
+pl_on:["an", "on", "açık", "вкл.", "увімк.", "wł.", "مفعّل", "pornit"],
+pl_off:["pausiert", "paused", "duraklatıldı", "на паузе", "на паузі", "wstrzymany", "متوقف", "în pauză"],
+pl_p:["Jeder, der den Link öffnet, bekommt automatisch seinen eigenen Code.", "Everyone who opens the link automatically gets their own code.", "Bağlantıyı açan herkes otomatik olarak kendi kodunu alır.", "Каждый, кто откроет ссылку, автоматически получит свой код.", "Кожен, хто відкриє посилання, автоматично отримає свій код.", "Każdy, kto otworzy link, automatycznie dostaje własny kod.", "كل من يفتح الرابط يحصل تلقائيًا على رمزه الخاص.", "Oricine deschide linkul primește automat propriul cod."],
+pl_paused_p:["Gerade gibt es über den Link keine neuen Codes. Wer schon einen hat, kann ihn weiter benutzen.", "The link isn't handing out new codes right now. Anyone who already has one can keep using it.", "Bağlantı şu anda yeni kod vermiyor. Kodu olan kullanmaya devam edebilir.", "Сейчас ссылка не выдаёт новых кодов. У кого код уже есть, может им пользоваться.", "Зараз посилання не видає нових кодів. Хто вже має код, може ним користуватися.", "Link nie wydaje teraz nowych kodów. Kto już ma kod, może go dalej używać.", "الرابط لا يمنح رموزًا جديدة الآن. من لديه رمز يمكنه الاستمرار في استخدامه.", "Linkul nu oferă acum coduri noi. Cine are deja un cod îl poate folosi în continuare."],
+pl_none_p:["Ein Link für Facebook, Instagram & Co. – jeder, der ihn öffnet, bekommt automatisch seinen eigenen Code.", "One link for Facebook, Instagram & co. – everyone who opens it automatically gets their own code.", "Facebook, Instagram vb. için tek bağlantı – açan herkes otomatik olarak kendi kodunu alır.", "Одна ссылка для Facebook, Instagram и т. д. — каждый, кто её откроет, получит свой код.", "Одне посилання для Facebook, Instagram тощо — кожен, хто його відкриє, отримає свій код.", "Jeden link na Facebooka, Instagram itp. – każdy, kto go otworzy, dostaje własny kod.", "رابط واحد لفيسبوك وإنستغرام وغيرها – كل من يفتحه يحصل تلقائيًا على رمزه الخاص.", "Un singur link pentru Facebook, Instagram etc. – oricine îl deschide primește automat propriul cod."],
+pl_make:["Link erstellen", "Create link", "Bağlantı oluştur", "Создать ссылку", "Створити посилання", "Utwórz link", "إنشاء رابط", "Creează link"],
+pl_copy:["Kopieren", "Copy", "Kopyala", "Копировать", "Копіювати", "Kopiuj", "نسخ", "Copiază"],
+pl_copied:["Link kopiert – jetzt einfach im Post einfügen", "Link copied – just paste it into your post", "Bağlantı kopyalandı – paylaşıma yapıştır", "Ссылка скопирована — вставь её в пост", "Посилання скопійовано — встав його в допис", "Link skopiowany – wklej go do posta", "تم نسخ الرابط – الصقه في منشورك", "Link copiat – lipește-l în postare"],
+pl_pause:["Pausieren", "Pause", "Duraklat", "Пауза", "Пауза", "Wstrzymaj", "إيقاف مؤقت", "Pauză"],
+pl_resume:["Wieder einschalten", "Turn back on", "Yeniden aç", "Включить снова", "Увімкнути знову", "Włącz ponownie", "تشغيل مجددًا", "Pornește din nou"],
+pl_new:["Neuer Link", "New link", "Yeni bağlantı", "Новая ссылка", "Нове посилання", "Nowy link", "رابط جديد", "Link nou"],
+pl_new_q:["Der alte Link gibt dann keine Codes mehr aus. Schon vergebene Codes bleiben gültig.", "The old link will stop handing out codes. Codes already given stay valid.", "Eski bağlantı artık kod vermez. Verilmiş kodlar geçerli kalır.", "Старая ссылка перестанет выдавать коды. Уже выданные коды останутся в силе.", "Старе посилання перестане видавати коди. Уже видані коди залишаться чинними.", "Stary link przestanie wydawać kody. Wydane kody pozostaną ważne.", "لن يمنح الرابط القديم رموزًا بعد الآن. تبقى الرموز الممنوحة صالحة.", "Linkul vechi nu va mai oferi coduri. Codurile date rămân valabile."],
+pl_new_yes:["Ja, neuer Link", "Yes, new link", "Evet, yeni bağlantı", "Да, новая ссылка", "Так, нове посилання", "Tak, nowy link", "نعم، رابط جديد", "Da, link nou"],
+pl_new_no:["Abbrechen", "Cancel", "Vazgeç", "Отмена", "Скасувати", "Anuluj", "إلغاء", "Anulează"],
+pl_new_ok:["Neuer Link ist da – den alten gibt es nicht mehr", "New link is ready – the old one no longer works", "Yeni bağlantı hazır – eskisi artık çalışmıyor", "Новая ссылка готова — старая больше не работает", "Нове посилання готове — старе більше не працює", "Nowy link gotowy – stary już nie działa", "الرابط الجديد جاهز – القديم لم يعد يعمل", "Linkul nou e gata – cel vechi nu mai funcționează"],
+pl_paused:["Link pausiert", "Link paused", "Bağlantı duraklatıldı", "Ссылка на паузе", "Посилання на паузі", "Link wstrzymany", "تم إيقاف الرابط مؤقتًا", "Link în pauză"],
+pl_started:["Link ist an", "Link is on", "Bağlantı açık", "Ссылка включена", "Посилання увімкнено", "Link włączony", "الرابط مفعّل", "Linkul e pornit"],
+pl_stats:["Heute {t} von {d} · insgesamt {n} · {a} freigeschaltet", "Today {t} of {d} · {n} in total · {a} activated", "Bugün {t}/{d} · toplam {n} · {a} etkin", "Сегодня {t} из {d} · всего {n} · активировано {a}", "Сьогодні {t} з {d} · усього {n} · активовано {a}", "Dziś {t} z {d} · łącznie {n} · aktywowane {a}", "اليوم {t} من {d} · المجموع {n} · مُفعّل {a}", "Azi {t} din {d} · total {n} · activate {a}"],
+pl_via:["über Link", "via link", "bağlantıyla", "по ссылке", "за посиланням", "przez link", "عبر الرابط", "prin link"],
+pl_grp1:["1 Code über den Link", "1 code via the link", "Bağlantıyla 1 kod", "1 код по ссылке", "1 код за посиланням", "1 kod przez link", "رمز واحد عبر الرابط", "1 cod prin link"],
+pl_grp:["{n} Codes über den Link", "{n} codes via the link", "Bağlantıyla {n} kod", "{n} кодов по ссылке", "{n} кодів за посиланням", "{n} kodów przez link", "{n} رموز عبر الرابط", "{n} coduri prin link"],
+pl_grp_s:["Seite geöffnet, noch nicht geladen", "Page opened, not downloaded yet", "Sayfa açıldı, henüz indirilmedi", "Страница открыта, ещё не скачано", "Сторінку відкрито, ще не завантажено", "Strona otwarta, jeszcze nie pobrano", "فُتحت الصفحة، لم يتم التنزيل بعد", "Pagina deschisă, încă nedescărcată"],
+nw_pl_t:["Ein Link für alle", "One link for everyone", "Herkes için tek bağlantı", "Одна ссылка для всех", "Одне посилання для всіх", "Jeden link dla wszystkich", "رابط واحد للجميع", "Un link pentru toți"],
+nw_pl_p:["Neu in den Einladungen: „Link für Posts“. Ein Link für Facebook & Co. – jeder, der ihn öffnet, bekommt seinen eigenen Code. Höchstens 20 neue am Tag, pausierbar und erneuerbar.", "New in invitations: “Link for posts”. One link for Facebook & co. – everyone who opens it gets their own code. Up to 20 new ones a day, can be paused and renewed.", "Davetlerde yeni: “Paylaşımlar için bağlantı”. Facebook vb. için tek bağlantı – açan herkes kendi kodunu alır. Günde en fazla 20 yeni, duraklatılabilir ve yenilenebilir.", "Новое в приглашениях: «Ссылка для постов». Одна ссылка для Facebook и т. д. — каждый, кто её откроет, получит свой код. Не больше 20 новых в день, можно поставить на паузу и обновить.", "Нове в запрошеннях: «Посилання для дописів». Одне посилання для Facebook тощо — кожен, хто його відкриє, отримає свій код. Не більше 20 нових на день, можна призупинити й оновити.", "Nowość w zaproszeniach: „Link do postów”. Jeden link na Facebooka itp. – każdy, kto go otworzy, dostaje własny kod. Do 20 nowych dziennie, można wstrzymać i odnowić.", "جديد في الدعوات: «رابط للمنشورات». رابط واحد لفيسبوك وغيره – كل من يفتحه يحصل على رمزه الخاص. حتى 20 رمزًا جديدًا يوميًا، ويمكن إيقافه وتجديده.", "Nou la invitații: „Link pentru postări”. Un singur link pentru Facebook etc. – oricine îl deschide primește propriul cod. Cel mult 20 noi pe zi, se poate opri și reînnoi."],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],

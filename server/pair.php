@@ -30,7 +30,7 @@ function fail(string $msg, int $code): void { out(['error' => $msg], $code); }
 function body(): array { static $b = null; if ($b === null) { $j = json_decode(file_get_contents('php://input') ?: '{}', true); $b = is_array($j) ? $j : []; } return $b; }
 function ipH(): string { return hash('sha256', 'invip|' . ip()); }
 function invCols(): void {
-    foreach (['name TEXT', 'given INTEGER', 'seen INTEGER', 'dl INTEGER', 'dlform TEXT', 'app INTEGER', 'iph TEXT', 'remind INTEGER', 'ios INTEGER'] as $col) { try { db()->exec('ALTER TABLE invites ADD COLUMN ' . $col); } catch (Throwable $e) { } }
+    foreach (['name TEXT', 'given INTEGER', 'seen INTEGER', 'dl INTEGER', 'dlform TEXT', 'app INTEGER', 'iph TEXT', 'remind INTEGER', 'ios INTEGER', 'src TEXT'] as $col) { try { db()->exec('ALTER TABLE invites ADD COLUMN ' . $col); } catch (Throwable $e) { } }
 }
 // Testplätze: gemeinsame Grenze für alle Tester zusammen (der Entwickler kann sie ändern)
 function invCap(): int {
@@ -119,6 +119,25 @@ function smtpSend(string $to, string $subject, string $mime, string $ctype): boo
     @fwrite($fp, "QUIT\r\n"); fclose($fp); return $ok;
 }
 const DEV_REPO = 'minghatsu/Haushaltsbuch';
+// Link für Posts: ein öffentlicher Link, jeder Besucher bekommt seinen eigenen Code
+const PUB_DAY = 20;
+function kvGet(string $k): ?string { db()->exec('CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT)'); $v = q('SELECT v FROM kv WHERE k = ?', [$k])->fetchColumn(); return $v === false ? null : (string)$v; }
+function kvSet(string $k, string $v): void { db()->exec('CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT)'); q('INSERT OR REPLACE INTO kv (k, v) VALUES (?, ?)', [$k, $v]); }
+function pubTables(): void {
+    db()->exec('CREATE TABLE IF NOT EXISTS invites (code TEXT PRIMARY KEY, owner TEXT UNIQUE, max INTEGER, lvl INTEGER DEFAULT 1, created INTEGER)');
+    db()->exec('CREATE TABLE IF NOT EXISTS acts (code TEXT NOT NULL, dev TEXT NOT NULL, t INTEGER, PRIMARY KEY (code, dev))');
+    try { db()->exec('ALTER TABLE invites ADD COLUMN off INTEGER DEFAULT 0'); } catch (Throwable $e) { }
+    invCols();
+}
+function pubToday(): int { return (int)q("SELECT COUNT(*) FROM invites WHERE src = 'link' AND created >= ?", [time() - 86400])->fetchColumn(); }
+function pubInfo(): array {
+    $tok = kvGet('pubtok') ?? '';
+    return ['tok' => $tok, 'on' => $tok !== '' && kvGet('pubon') !== '0', 'today' => pubToday(), 'day' => PUB_DAY,
+        'total' => (int)q("SELECT COUNT(*) FROM invites WHERE src = 'link'")->fetchColumn(),
+        'act' => (int)q("SELECT COUNT(DISTINCT a.code) FROM acts a JOIN invites i ON i.code = a.code WHERE i.src = 'link'")->fetchColumn(),
+        'slots' => invUsed(), 'cap' => invCap()];
+}
+function pubNewTok(): string { $abc = '23456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ'; $t = ''; for ($i = 0; $i < 8; $i++) $t .= $abc[random_int(0, strlen($abc) - 1)]; return $t; }
 function nudgeTable(): void { db()->exec('CREATE TABLE IF NOT EXISTS nudges (code TEXT PRIMARY KEY, t INTEGER, ver TEXT, frm TEXT, items TEXT)'); }
 function devCheck(): void {
     $h = (string)($_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? ''));
@@ -286,14 +305,15 @@ try {
         }
         if ($a === 'actwait') {
             // App ist installiert, aber noch nicht freigeschaltet: passende Einladung über dieselbe Internetverbindung finden
+            // (Codes vom Link für Posts nur kurz nach dem Download: im Mobilfunk teilen sich viele Fremde eine Adresse)
             if (!ipCount('ipactwait', 30)) out(['c' => '']); ipBump('ipactwait');
-            $r = q('SELECT code FROM invites WHERE iph = ? AND COALESCE(off, 0) = 0 AND code NOT IN (SELECT code FROM acts) AND COALESCE(seen, dl, given, created) > ? ORDER BY COALESCE(dl, seen) DESC LIMIT 1', [ipH(), time() - 14 * 86400])->fetch(PDO::FETCH_ASSOC);
+            $r = q('SELECT code FROM invites WHERE iph = ? AND COALESCE(off, 0) = 0 AND code NOT IN (SELECT code FROM acts) AND COALESCE(seen, dl, given, created) > ? AND (COALESCE(src, ?) <> ? OR dl > ?) ORDER BY COALESCE(dl, seen) DESC LIMIT 1', [ipH(), time() - 14 * 86400, '', 'link', time() - 3 * 3600])->fetch(PDO::FETCH_ASSOC);
             if ($r) { q('UPDATE invites SET app = COALESCE(app, ?) WHERE code = ?', [time(), $r['code']]); out(['c' => $r['code']]); }
             out(['c' => '']);
         }
         if ($a === 'devinv') {
             devCheck(); $L = []; nudgeTable();
-            foreach (q('SELECT code, name, owner, created, given, seen, dl, dlform, app, remind, lvl, ios FROM invites WHERE COALESCE(off, 0) = 0 AND (given IS NOT NULL OR code IN (SELECT code FROM acts)) ORDER BY COALESCE(given, created) DESC LIMIT 200')->fetchAll(PDO::FETCH_ASSOC) as $x) {
+            foreach (q('SELECT code, name, owner, created, given, seen, dl, dlform, app, remind, lvl, ios, src FROM invites WHERE COALESCE(off, 0) = 0 AND (given IS NOT NULL OR code IN (SELECT code FROM acts)) ORDER BY COALESCE(given, created) DESC LIMIT 200')->fetchAll(PDO::FETCH_ASSOC) as $x) {
                 $act = q('SELECT dev, t FROM acts WHERE code = ? ORDER BY t LIMIT 1', [$x['code']])->fetch(PDO::FETCH_ASSOC);
                 $p = $act ? q('SELECT ver, form, role, t FROM pings WHERE h = ?', [hash('sha256', 'ping|' . $act['dev'])])->fetch(PDO::FETCH_ASSOC) : null;
                 if ($p && $p['role'] === 'dev') continue;
@@ -301,13 +321,41 @@ try {
                 if ((int)$x['lvl'] === 1) { $od = explode('#', (string)$x['owner'])[0];
                     $vr = q('SELECT i.code, i.name FROM acts a JOIN invites i ON i.code = a.code WHERE a.dev = ? ORDER BY a.t LIMIT 1', [$od])->fetch(PDO::FETCH_ASSOC);
                     if ($vr) $via = (string)($vr['name'] ?: $vr['code']); }
-                $L[] = ['via' => $via, 'ios' => (int)($x['ios'] ?? 0), 'code' => $x['code'], 'name' => (string)($x['name'] ?? ''), 'given' => (int)($x['given'] ?? 0), 'seen' => (int)($x['seen'] ?? 0), 'dl' => (int)($x['dl'] ?? 0),
+                $L[] = ['via' => $via, 'src' => (string)($x['src'] ?? ''), 'ios' => (int)($x['ios'] ?? 0), 'code' => $x['code'], 'name' => (string)($x['name'] ?? ''), 'given' => (int)($x['given'] ?? 0), 'seen' => (int)($x['seen'] ?? 0), 'dl' => (int)($x['dl'] ?? 0),
                     'dlform' => (string)($x['dlform'] ?? ''), 'app' => (int)($x['app'] ?? 0), 'remind' => (int)($x['remind'] ?? 0), 'act' => $act ? (int)$act['t'] : 0,
                     'ver' => $p ? (string)$p['ver'] : '', 'form' => $p ? (string)$p['form'] : '', 'last' => $p ? (int)$p['t'] : 0,
                     'nudge' => (int)(q('SELECT COALESCE(MAX(t), 0) FROM nudges WHERE code = ?', [$x['code']])->fetchColumn())];
             }
-            out(['items' => $L, 'slots' => invUsed(), 'cap' => invCap(), 'ios' => (int)q('SELECT COUNT(*) FROM invites WHERE ios IS NOT NULL AND COALESCE(off, 0) = 0')->fetchColumn()]);
+            out(['items' => $L, 'pub' => pubInfo(), 'slots' => invUsed(), 'cap' => invCap(), 'ios' => (int)q('SELECT COUNT(*) FROM invites WHERE ios IS NOT NULL AND COALESCE(off, 0) = 0')->fetchColumn()]);
         }
+    }
+    // ---- Link für Posts ----
+    if ($a === 'publink') {
+        devCheck(); pubTables(); $op = (string)(body()['op'] ?? 'get');
+        if ($op === 'new' || ($op === 'on' && (kvGet('pubtok') ?? '') === '')) kvSet('pubtok', pubNewTok());
+        if ($op === 'on' || $op === 'new') kvSet('pubon', '1');
+        if ($op === 'off') kvSet('pubon', '0');
+        out(pubInfo());
+    }
+    if ($a === 'pubcode') {
+        pubTables(); $b = body();
+        if (!ipCount('ipinvseen', 120)) fail('Zu viele Aufrufe – bitte später noch einmal', 429);
+        ipBump('ipinvseen');
+        $l = preg_replace('/[^A-Za-z0-9]/', '', (string)($b['l'] ?? ($_GET['l'] ?? '')));
+        $tok = kvGet('pubtok') ?? '';
+        if ($l === '' || $tok === '' || !hash_equals($tok, $l)) out(['gone' => true]);
+        if (kvGet('pubon') === '0') out(['paused' => true]);
+        // Derselbe Browser bekommt seinen Code von vorhin (nicht über die IP: im Mobilfunk teilen sich viele Fremde eine Adresse)
+        $mine = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)($b['b'] ?? ($_GET['b'] ?? ''))));
+        if ($mine !== '' && q("SELECT 1 FROM invites WHERE code = ? AND src = 'link' AND COALESCE(off, 0) = 0", [$mine])->fetch()) out(['code' => $mine, 'fresh' => false]);
+        if (invUsed() >= invCap()) out(['full' => true]);
+        if (pubToday() >= PUB_DAY) out(['limit' => true]);
+        if (!ipCount('ipcreate', MAX_CREATE_PER_HOUR)) fail('Zu viele neue Codes – bitte später noch einmal', 429);
+        ipBump('ipcreate');
+        $abc = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+        do { $c = ''; for ($i = 0; $i < 6; $i++) $c .= $abc[random_int(0, strlen($abc) - 1)]; } while (q('SELECT 1 FROM invites WHERE code = ?', [$c])->fetch());
+        q('INSERT INTO invites (code, owner, max, lvl, created, given, seen, iph, src) VALUES (?, ?, 1, 0, ?, ?, ?, ?, ?)', [$c, 'pub#' . $c, time(), time(), time(), ipH(), 'link']);
+        out(['code' => $c, 'fresh' => true]);
     }
     // ---- Update-Erinnerung: Entwickler bittet Tester, die neue Version zu holen ----
     if ($a === 'nudge') {
