@@ -2290,6 +2290,40 @@ html[data-theme="dark"] .qi-sound,html[data-theme="dark"] .sndic{background:#2a2
 @media (prefers-reduced-motion:reduce){.sndst button,.sndw i,.sndic *{animation:none!important;transition:none!important}}
 .invios{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;color:var(--muted);margin-top:2px}.invios svg,.invioschip svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .invioschip{display:inline-flex;align-items:center;gap:4px;margin-inline-start:auto;padding:5px 9px;border-radius:99px;background:var(--sunk);color:var(--muted);font:800 13px var(--f-body);font-variant-numeric:tabular-nums}.invioschip+.invcapb{margin-inline-start:6px}
+
+/* Konten aufklappen + umbuchen */
+.mvopen{display:flex;align-items:center;gap:6px;margin:4px auto 10px;border:0;background:var(--sunk);color:var(--muted);font:700 13px var(--f-body);padding:8px 14px;border-radius:99px;cursor:pointer;min-height:36px;transition:transform .15s,color .2s}
+.mvopen:active{transform:scale(.95)}.mvopen:hover{color:var(--fg)}.mvopen svg{animation:mvNudge 2.6s ease-in-out 1.2s 2}
+@keyframes mvNudge{0%,70%,100%{transform:none}80%{transform:translateY(3px)}90%{transform:translateY(-1px)}}
+.mvbg{position:fixed;inset:0;z-index:70;text-align:start;background:color-mix(in srgb,var(--bg) 94%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);overflow-y:auto;overscroll-behavior:contain;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px));opacity:0;transition:opacity .3s}
+.mvbg.show{opacity:1}.mvbg[hidden]{display:none}
+.mvtop{display:flex;align-items:center;justify-content:space-between;max-width:560px;margin:6px auto 4px}.mvtop b{font:800 26px var(--f-display);letter-spacing:-.02em}
+.mvhint{max-width:560px;margin:0 auto 14px;color:var(--muted);font-size:13.5px;line-height:1.4}.mvbg:not(.hint) .mvhint{display:none}
+.mvlist{display:grid;gap:12px;max-width:560px;margin:0 auto}
+.mvc{position:relative;height:104px;border-radius:26px;padding:16px 20px;color:#fff;background:linear-gradient(150deg,var(--c),color-mix(in srgb,var(--c) 62%,#000));overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab;box-shadow:0 10px 24px -14px rgba(0,0,0,.5);transition:transform .25s cubic-bezier(.3,1.4,.5,1),opacity .25s,outline-color .2s;outline:3px dashed transparent;outline-offset:4px}
+.mvc:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.08);right:-60px;top:-70px;pointer-events:none}
+.mvc.in{animation:mvDrop .55s cubic-bezier(.2,1.1,.3,1) calc(var(--i)*70ms) backwards}
+@keyframes mvDrop{from{opacity:0;transform:translateY(calc(-60px - var(--i)*104px)) scale(.92)}}
+.mvl{display:block;font-weight:700;font-size:14px;opacity:.92}.mvv{display:block;font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums}
+.mvc small{display:block;font-size:11.5px;font-weight:700;opacity:.9;margin-top:2px}.mvc.nostand .mvv{font-size:24px}
+.mvgrip{position:absolute;right:18px;top:50%;width:14px;height:22px;margin-top:-11px;opacity:.55;background:radial-gradient(circle,#fff 1.6px,transparent 2px) 0 0/7px 7px}
+.mvc.nostand{filter:saturate(.4);opacity:.7;cursor:default}.mvc.nostand .mvgrip{display:none}
+.mvc.src{opacity:.3;transform:scale(.97)}.mvc.tgt{outline-color:#fff;transform:scale(1.035)}
+.mvc.got{animation:mvGot .7s cubic-bezier(.3,1.6,.5,1)}.mvc.gave{animation:mvGave .5s ease}
+@keyframes mvGot{40%{transform:scale(1.05)}}@keyframes mvGave{40%{transform:scale(.96)}}
+.mvghost{position:fixed;z-index:90;margin:0;pointer-events:none;transform:rotate(-3deg) scale(.97);box-shadow:0 30px 60px -12px rgba(0,0,0,.6);cursor:grabbing}
+body.mvdragging{cursor:grabbing}
+.mvsheet{position:fixed;left:0;right:0;bottom:0;z-index:80;transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}.mvsheet.show{transform:none}
+.mvsh{max-width:560px;margin:0 auto;background:var(--surface);border-radius:28px 28px 0 0;padding:18px 20px calc(20px + env(safe-area-inset-bottom,0px));box-shadow:0 -20px 40px -10px rgba(0,0,0,.35)}
+.mvsh h3{margin:2px 0 12px;font-size:19px}.mvflow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.mvchip{flex:1;min-width:0;border-radius:16px;padding:10px 12px;color:#fff;font-weight:800;font-size:14px;background:linear-gradient(150deg,var(--c),color-mix(in srgb,var(--c) 62%,#000));overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mvchip small{display:block;font-weight:600;opacity:.88;font-size:12px}.mvarr{flex:none;width:34px;height:34px;border-radius:50%;background:var(--sunk);display:grid;place-items:center;animation:mvArr 1.4s ease-in-out infinite}
+@keyframes mvArr{50%{transform:translateX(3px)}}
+.mvamt{display:flex;align-items:center;gap:6px;justify-content:center;margin:4px 0 10px}.mvamt input{font:800 34px var(--f-body);text-align:center;max-width:220px;border-radius:16px}.mvamt span{font:800 28px var(--f-body);color:var(--muted)}
+.mvq{display:flex;gap:8px;margin-bottom:12px}.mvq button{flex:1;border:0;border-radius:12px;padding:10px 0;background:var(--sunk);color:var(--fg);font:700 13.5px var(--f-body);cursor:pointer;min-height:40px}.mvq button:active{transform:scale(.95)}
+.mvbt{display:flex;gap:10px}.mvbt .btn{flex:1;justify-content:center}.mvbt .primary{flex:2}.mvnote{margin:10px 2px 0;text-align:center}
+html.pc .mvopen{display:none}
+@media (prefers-reduced-motion:reduce){.mvc.in,.mvc.got,.mvc.gave,.mvarr,.mvopen svg{animation:none}}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -3032,6 +3066,81 @@ function dayLabel(iso){
 function shortDate(iso){ const [y,m,d]=String(iso||"").split("-"); if (!m) return ""; if (typeof LANG!=="undefined" && LANG!=="de"){ try{ return new Date(+y,+m-1,+(d||1)).toLocaleDateString(cLoc(),{day:"numeric",month:"short"}); }catch(_){} } return Number(d)+". "+MSHORT[Number(m)-1]; }
 const $ = id => document.getElementById(id);
 function newId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+
+/* ===== Konten aufklappen und Geld per Ziehen umbuchen (wie bei N26) ===== */
+const MV={drag:null, from:null, to:null};
+function mvList(){ return (UI.acctEd||[]).map((m,i)=>m?{...m, i}:null).filter(Boolean); }
+function mvCol(m){ const c=acctColor(m.label, m.i); return c || (m.cash?"#8a5a12":m.i===0?"var(--accent)":themeCol("#3d63a8", m.i)); }
+function mvHas(m){ return m.cash || !!(S.settings.accountAnchors||{})[m.name]; }
+function mvOpen(){ let el=$("mvBg"); if (!el){ el=document.createElement("div"); el.id="mvBg"; el.className="mvbg"; el.setAttribute("role","dialog"); el.setAttribute("aria-modal","true"); el.setAttribute("aria-labelledby","mvT"); document.body.appendChild(el); }
+  el.hidden=false; document.body.classList.add("locked"); mvRender(true); SND.play("whoosh"); try{ navigator.vibrate&&navigator.vibrate(8); }catch(_){}
+  requestAnimationFrame(()=>el.classList.add("show"));
+  let n=0; try{ n=Number(localStorage.getItem("hb-mvhint"))||0; localStorage.setItem("hb-mvhint", String(n+1)); }catch(_){} el.classList.toggle("hint", n<3); }
+function mvClose(){ const el=$("mvBg"); if (!el || el.hidden) return; el.classList.remove("show"); SND.play("whooshin"); document.body.classList.remove("locked"); setTimeout(()=>{ el.hidden=true; }, 320); render(); }
+function mvRender(anim){ const el=$("mvBg"); if (!el) return; const L=mvList();
+  el.innerHTML=`<div class="mvtop"><b id="mvT">${esc(nt("mv_t"))}</b><button class="iconbtn" data-mvclose aria-label="Schließen">${ic("x",20)}</button></div>
+  <p class="mvhint">${esc(nt("mv_hint"))}</p>
+  <div class="mvlist">${L.map((m,k)=>`<div class="mvc ${mvHas(m)?"":"nostand"} ${anim?"in":""}" data-mvc="${m.i}" style="--i:${k};--c:${mvCol(m)}" role="button" tabindex="0" aria-label="${esc(m.label)}: ${esc(eur(m.bal))}">
+    <span class="mvl">${esc(m.label)}${m.cash?"":m.name==="Hauptkonto"||m.i===0?"":` · ${esc(nt("mv_space"))}`}</span>
+    <b class="mvv" data-noi18n>${esc(eur(m.bal))}</b>${mvHas(m)?"":`<small>${esc(nt("mv_nostand"))}</small>`}<i class="mvgrip" aria-hidden="true"></i></div>`).join("")}</div>
+  <div class="mvsheet" id="mvSheet" hidden></div>`; }
+function mvSheet(from, to){ const sh=$("mvSheet"), L=mvList(), a=L.find(x=>x.i===from), b=L.find(x=>x.i===to); if (!sh||!a||!b) return; MV.from=a; MV.to=b;
+  const q=[10,25,50].filter(v=>v<=Math.max(0,a.bal)||a.bal<=0), all=Math.max(0, Math.round(a.bal*100)/100);
+  sh.innerHTML=`<div class="mvsh"><h3>${esc(nt("mv_sheet"))}</h3>
+    <div class="mvflow"><span class="mvchip" style="--c:${mvCol(a)}">${esc(a.label)}<small data-noi18n>${esc(eur(a.bal))}</small></span><span class="mvarr" aria-hidden="true">${ic("right",18)}</span><span class="mvchip" style="--c:${mvCol(b)}">${esc(b.label)}<small data-noi18n>${esc(eur(b.bal))}</small></span></div>
+    <label class="mvamt"><input id="mvAmt" class="in" inputmode="decimal" enterkeyhint="send" placeholder="0,00" aria-label="${esc(nt("mv_amt"))}"><span>€</span></label>
+    <div class="mvq">${q.map(v=>`<button type="button" data-mvq="${v}">${v} €</button>`).join("")}${all>0?`<button type="button" data-mvq="${all}">${esc(nt("mv_all"))}</button>`:""}</div>
+    <div class="mvbt"><button type="button" class="btn" data-mvcancel>${esc(nt("sh_cancel"))}</button><button type="button" class="btn primary" data-mvsend disabled>${esc(nt("mv_send0"))}</button></div>
+    <p class="small muted mvnote">${esc(nt("mv_note"))}</p></div>`;
+  sh.hidden=false; requestAnimationFrame(()=>sh.classList.add("show")); setTimeout(()=>{ const i=$("mvAmt"); i&&i.focus({preventScroll:true}); }, 260); }
+function mvSheetClose(){ const sh=$("mvSheet"); if (!sh||sh.hidden) return; sh.classList.remove("show"); setTimeout(()=>{ sh.hidden=true; }, 260);
+  document.querySelectorAll("#mvBg .mvc").forEach(c=>c.classList.remove("src","tgt")); }
+function mvBtn(){ const i=$("mvAmt"), bt=document.querySelector("[data-mvsend]"); if (!i||!bt) return; const v=parseAmt(i.value||""); const ok=isFinite(v)&&v>0;
+  bt.disabled=!ok; bt.textContent=ok?nt("mv_send",{v:eur(v), n:MV.to.label}):nt("mv_send0"); }
+async function mvDo(){ const i=$("mvAmt"); const v=Math.round(parseAmt(i.value||"")*100)/100; if (!(v>0)) return; const a=MV.from, b=MV.to, td=isoToday(), ts=Date.now();
+  if (a.cash||b.cash){ const cs=S.settings.cash; if (cs) S.settings.cash={...cs, start:Math.round(((Number(cs.start)||0)+(b.cash?v:-v))*100)/100}; }
+  const mv={id:newId(), from:a.name, to:b.name, amt:v, date:td, ts}; S.settings.moves=[...(S.settings.moves||[]).filter(m=>m.date>=isoOf(new Date(Date.now()-120*864e5))), mv];
+  await saveSettings(); SND.play("pair"); try{ navigator.vibrate&&navigator.vibrate([10,40,18]); }catch(_){}
+  const before={[a.i]:a.bal, [b.i]:b.bal}; mvSheetClose(); render(); mvRender(false);
+  for (const k of [a.i,b.i]){ const c=document.querySelector(`#mvBg [data-mvc="${k}"]`), m=mvList().find(x=>x.i===k); if (!c||!m) continue; c.classList.add(k===b.i?"got":"gave"); const out=c.querySelector(".mvv"), s0=before[k], s1=m.bal, t0=performance.now();
+    const step=t=>{ const p=Math.min(1,(t-t0)/700), e=1-Math.pow(1-p,3); out.textContent=eur(s0+(s1-s0)*e); if (p<1) requestAnimationFrame(step); }; if (RMo()) out.textContent=eur(s1); else requestAnimationFrame(step); setTimeout(()=>c.classList.remove("got","gave"), 1200); }
+  toast(nt("mv_done",{v:eur(v), a:a.label, b:b.label}), async ()=>{ S.settings.moves=(S.settings.moves||[]).filter(m=>m.id!==mv.id); if (a.cash||b.cash){ const cs=S.settings.cash; if (cs) S.settings.cash={...cs, start:Math.round(((Number(cs.start)||0)-(b.cash?v:-v))*100)/100}; } await saveSettings(); render(); if ($("mvBg")&&!$("mvBg").hidden) mvRender(false); }); }
+document.addEventListener("click", e=>{
+  if (e.target.closest("[data-mvopen]")){ mvOpen(); return; }
+  if (!e.target.closest("#mvBg")) return;
+  if (e.target.closest("[data-mvclose]")){ mvClose(); return; }
+  if (e.target.closest("[data-mvcancel]")){ mvSheetClose(); return; }
+  const q=e.target.closest("[data-mvq]"); if (q){ const i=$("mvAmt"); i.value=String(q.dataset.mvq).replace(".",","); mvBtn(); SND.play("tick"); return; }
+  if (e.target.closest("[data-mvsend]")){ mvDo(); return; }
+  if (e.target.id==="mvBg" && $("mvSheet") && !$("mvSheet").hidden){ mvSheetClose(); return; }
+  const c=e.target.closest("[data-mvc].nostand"); if (c && !MV.moved){ toast(nt("mv_nostand_t")); }
+});
+document.addEventListener("input", e=>{ if (e.target.id==="mvAmt") mvBtn(); });
+document.addEventListener("keydown", e=>{ if (e.target.id==="mvAmt" && e.key==="Enter"){ e.preventDefault(); mvDo(); } });
+/* Ziehen: kurz gedrückt halten, dann auf eine andere Karte ziehen */
+(function(){ let st=null;
+  const end=()=>{ if (!st) return; clearTimeout(st.t); const d=st; st=null; if (!d.on) return; d.ghost.remove(); d.src.classList.remove("src"); document.body.classList.remove("mvdragging");
+    const tg=document.querySelector("#mvBg .mvc.tgt"); if (tg){ const to=+tg.dataset.mvc; if (!mvHas(mvList().find(x=>x.i===to))){ tg.classList.remove("tgt"); toast(nt("mv_nostand_t")); return; } d.src.classList.add("src"); SND.play("pop"); mvSheet(d.from, to); }
+    else SND.play("whooshin"); setTimeout(()=>{ MV.moved=false; }, 50); };
+  document.addEventListener("pointerdown", e=>{ const c=e.target.closest("#mvBg .mvc"); if (!c || (e.pointerType==="mouse"&&e.button!==0) || !$("mvSheet").hidden) return; if (!mvHas(mvList().find(x=>x.i===+c.dataset.mvc))) return;
+    st={src:c, from:+c.dataset.mvc, x0:e.clientX, y0:e.clientY, on:false, id:e.pointerId};
+    st.t=setTimeout(()=>{ if (!st) return; const r=c.getBoundingClientRect(); const g=c.cloneNode(true); g.classList.add("mvghost"); g.classList.remove("in"); g.style.width=r.width+"px"; g.style.height=r.height+"px"; g.style.left=r.left+"px"; g.style.top=r.top+"px"; document.body.appendChild(g);
+      st.ghost=g; st.dx=st.x0-r.left; st.dy=st.y0-r.top; st.on=true; MV.moved=true; c.classList.add("src"); document.body.classList.add("mvdragging"); try{ navigator.vibrate&&navigator.vibrate(12); }catch(_){} SND.play("detent"); }, e.pointerType==="mouse"?120:260); }, true);
+  document.addEventListener("pointermove", e=>{ if (!st) return; if (!st.on){ if (Math.hypot(e.clientX-st.x0, e.clientY-st.y0)>10){ clearTimeout(st.t); st=null; } return; }
+    e.preventDefault(); const g=st.ghost; g.style.left=(e.clientX-st.dx)+"px"; g.style.top=(e.clientY-st.dy)+"px";
+    g.style.visibility="hidden"; const under=document.elementFromPoint(e.clientX, e.clientY); g.style.visibility="";
+    const t=under && under.closest("#mvBg .mvc"); document.querySelectorAll("#mvBg .mvc.tgt").forEach(x=>{ if (x!==t) x.classList.remove("tgt"); });
+    if (t && t!==st.src && !t.classList.contains("tgt")){ t.classList.add("tgt"); SND.play("detent"); try{ navigator.vibrate&&navigator.vibrate(6); }catch(_){} }
+    const lst=document.querySelector("#mvBg"); if (lst){ if (e.clientY<90) lst.scrollTop-=8; else if (e.clientY>innerHeight-90) lst.scrollTop+=8; } }, {passive:false});
+  document.addEventListener("pointerup", end); document.addEventListener("pointercancel", end);
+  document.addEventListener("touchmove", e=>{ if (st&&st.on) e.preventDefault(); }, {passive:false});
+})();
+/* Kartenstapel nach unten ziehen öffnet alle Konten */
+(function(){ let y0=null, x0=0;
+  document.addEventListener("touchstart", e=>{ const s=e.target.closest("#astack"); if (!s || window.scrollY>4 || !document.querySelector("[data-mvopen]")) { y0=null; return; } y0=e.touches[0].clientY; x0=e.touches[0].clientX; }, {passive:true});
+  document.addEventListener("touchmove", e=>{ if (y0==null) return; const dy=e.touches[0].clientY-y0, dx=Math.abs(e.touches[0].clientX-x0); if (dx>dy) { y0=null; return; } if (dy>70){ y0=null; mvOpen(); } }, {passive:true});
+})();
+
 /* ===== Töne: leise, kurze Klänge nur an wenigen Stellen (WebAudio, ohne Dateien) ===== */
 /* Pegel je Klang, gemessen und angeglichen (ziel: −27 bis −38 LUFS, je nach Wichtigkeit) */
 const SND_G={"sanft": {"save": 5.97, "income": 2.15, "tick": 5.5, "untick": 6.6, "done": 1.95, "del": 3.15, "undo": 3.32, "ping": 2.8, "pop": 9.95, "nav": 8.36, "detent": 8.54, "copy": 3.47, "whoosh": 13.33, "whooshin": 9.57, "page": 14.95, "glide": 3.85, "shutter": 19.17, "pair": 2.32, "bell": 2.97, "fanfare": 2.51, "warn": 2.64, "err": 6.32}, "glas": {"save": 3.29, "income": 2.01, "tick": 3.27, "untick": 4.2, "done": 1.49, "del": 2.08, "undo": 2.05, "ping": 2.17, "pop": 9.95, "nav": 5.7, "detent": 6.06, "copy": 2.57, "whoosh": 11.9, "whooshin": 9.98, "page": 16.4, "glide": 3.69, "shutter": 19.17, "pair": 2.17, "bell": 1.95, "fanfare": 1.9, "warn": 2.05, "err": 5.65}, "holz": {"save": 9.89, "income": 8.0, "tick": 13.72, "untick": 16.03, "done": 5.28, "del": 11.95, "undo": 5.92, "ping": 8.76, "pop": 9.95, "nav": 19.17, "detent": 19.56, "copy": 7.95, "whoosh": 13.76, "whooshin": 9.0, "page": 15.58, "glide": 3.5, "shutter": 19.98, "pair": 5.47, "bell": 1.82, "fanfare": 5.69, "warn": 4.87, "err": 5.47}};
@@ -3460,7 +3569,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
-  ["0.39.3", "19. November 2026", ["Neu: leise Töne – beim Speichern, Abhaken, Ziele, Löschen und Rückgängig, Seitenwechsel, Plus-Menü, Karten wischen, Kopieren, Kassenbon, Import, Koppeln, Monats-Rückblick, neuen Hinweisen, Budget überschritten, Fehlern und bei Mami. Drei Klänge zur Wahl (Sanft, Glas, Holz), zwei Lautstärken, mit Schalter in den Einstellungen. Ist das Handy lautlos, bleibt die App still", "Tester können die App selbst weitergeben: QR-Code im Plus-Menü, gemeinsame Testplätze mit Zähler, nach dem Scannen kommt sofort der nächste Code", "Hell/Dunkel am Handy wie am PC: sofort, mit Kreis-Übergang vom Schalter aus", "Neues Logo überall – App-Symbol, Statusleiste, Windows und Einladungsseite", "Willkommens-Band beim ersten Start", "Viele kleine Verbesserungen für Tablet, Dunkelmodus und lange Wörter in anderen Sprachen"]],
+  ["0.39.6", "19. November 2026", ["Neu: Geld umbuchen wie bei N26 – unter dem Kontostand „Alle Konten“ antippen oder die Karte nach unten ziehen, eine Karte auf eine andere ziehen, Betrag wählen, senden", "Kontostand: ein eingetragener Stand wird jetzt genau so angezeigt (Spaces und Hauptkonto)", "Neu: leise Töne – beim Speichern, Abhaken, Ziele, Löschen und Rückgängig, Seitenwechsel, Plus-Menü, Karten wischen, Kopieren, Kassenbon, Import, Koppeln, Monats-Rückblick, neuen Hinweisen, Budget überschritten, Fehlern und bei Mami. Drei Klänge zur Wahl (Sanft, Glas, Holz), zwei Lautstärken, mit Schalter in den Einstellungen. Ist das Handy lautlos, bleibt die App still", "Tester können die App selbst weitergeben: QR-Code im Plus-Menü, gemeinsame Testplätze mit Zähler, nach dem Scannen kommt sofort der nächste Code", "Hell/Dunkel am Handy wie am PC: sofort, mit Kreis-Übergang vom Schalter aus", "Neues Logo überall – App-Symbol, Statusleiste, Windows und Einladungsseite", "Willkommens-Band beim ersten Start", "Viele kleine Verbesserungen für Tablet, Dunkelmodus und lange Wörter in anderen Sprachen"]],
   ["0.26.5", "14. November 2026", ["Feedback-Knopf: am Handy als Lasche am rechten Rand, an Tablet und PC oben – von jeder Seite aus Fehler, Ideen und Fragen schicken", "Einstellungen am Handy neu: Profil oben, Schnellschalter mit lebenden Symbolen (Sonne/Mond, Glocke, Schild, Laden), Bereiche als Kästen mit eigenen Seiten", "Koppeln mit Anfrage: der andere sieht dein Profilbild und muss bestätigen, das Hauptgerät hat eine Krone 👑, bis zu 10 Geräte", "Beim Koppeln zeigt ein Pfeil, in welche Richtung die Daten gehen – antippen dreht ihn um", "Gekoppelte Geräte zeigen ihr Profilbild", "Tablet neu aufgeteilt: grüner Kasten als schmale Spalte, Fixkosten-Kalender und Seitenspalte scrollen getrennt, „Ohne festen Tag“ ganz oben", "Tablet: kein Entwickler-Kram mehr in der Kopfzeile, neu laden durch Herunterziehen", "Einkaufszettel im Dunkelmodus angenehm dunkel", "Handy: Kopfzeile aufgeräumt, „?“ neben der Glocke, kleinere Knöpfe", "Hilfe-Menü ohne doppelte Einträge", "Behoben: Filter bei den Buchungen abgeschnitten, Seitenwechsel am Tablet hochkant, Glocken-Schalter am Tablet"]],
   ["0.24.1", "13. November 2026", ["Eine Versionsnummer für Handy, Tablet und PC – mit „Tester“ oder „Entwickler“ dahinter", "App weitergeben: eigener QR-Code zum Einladen, Freischalten beim ersten Start", "Farbpakete färben jetzt alles ein – Handy, Tablet und PC", "Tablet-Version: Dock unten, Wischen zum Blättern, Drehen mit Animation", "Neues App-Symbol: Mama mit Sparschwein", "Kurze Tour für jede Seite – beim ersten Besuch von selbst, später über das „?“", "Animationen: Karten kommen nacheinander, Häkchen ploppen, Balken füllen sich", "Zusammengelegt: Sparziele und Anlage-Ziele, Belege als Filter in den Buchungen, ein Hilfe-Menü", "Handy: Erinnerungen auch bei geschlossener App"]],
   ["", "11. November 2026", ["QR-Codes scannen: auf dem Handy öffnet sich direkt die Kamera und liest den Code sofort – am PC wählst du ein Bild", "Koppeln in beide Richtungen: auch der PC zeigt einen kurzen Code, den du am Handy unter „Gerät koppeln“ eintippst", "Abgleich-Seite neu: große Statusanzeige, die mit Animation zeigt, was gerade passiert – Abgleich, Update oder Koppeln", "Update da, aber nicht automatisch geladen? Dann steht es in der Glocke – mit Knopf zum Installieren", "Die Glocke wackelt, wenn es etwas Neues gibt", "Koppeln mit dem PC: der PC zeigt den QR-Code, das Handy scannt ihn – kein Abtippen mehr", "Kurzer Kopplungs-Code mit 10 Zeichen statt des langen Codes – gilt 10 Minuten", "Kopplungs-Fenster lässt sich nach unten wischen und mit × schließen", "Tutorial-Tour ausführlicher: bis zu 12 kurze Schritte – Noch pro Tag, Monat wechseln, Schulden, Kassenbon & Kontoauszug, Buchungen, Einkaufen, Hinweise", "Alle Sprachen überarbeitet: neue Texte übersetzt, auch Diagramm-Beschriftungen", "Gehalt: zeigt die Monate mit Gehalt (Abrechnung, Mindestlohn-Schätzung oder Gehaltseingang) statt „0 von 12“", "Analyse neu: drei Reiter Auswertung, Planung und Steuer – Übrig mit Verlauf, Kennzahlen und Top-Kategorien direkt sichtbar", "Feedback: bis zu 4 Bilder (z. B. Screenshots) mitschicken", "Sprache & Währung neu gestaltet: Sprachen mit Flaggen, zweite Währung per Antippen, grüner Umrechner, Kursliste mit Flaggen", "Wischen in seitlich scrollbaren Leisten wechselt nicht mehr versehentlich die Seite", "Wischen zwischen den Hauptseiten läuft flüssiger"]],
@@ -3509,6 +3618,7 @@ function tourSteps(){ const w=S.settings.work, g=workGroup(w);
     : "Hier stellst du alles ein, was zu dir passt.";
   const st=[
     {sel:"#astack,.pchero", ic:"cash", t:"Dein Kontostand", p:[IS_PC?"Was heute auf deinen Konten ist – darunter Hauptkonto und Spaces einzeln.":"Was heute auf dem Konto ist. Wischen zeigt deine Spaces, Antippen trägt den echten Stand ein.", inc]},
+    {sel:"[data-mvopen]", raw:1, ic:"repeat", t:nt("mv_sheet"), p:[nt("trh_mv")]},
     {sel:".hkpi,.pcring", ic:"cal", t:"Noch pro Tag", p:["So viel kannst du bis Monatsende jeden Tag ausgeben – dein Hauptkonto geteilt durch die restlichen Tage."]},
     {sel:"#monthpill", ic:"cal", t:"Monat wechseln", p:["Mit den Pfeilen blätterst du durch die Monate – alle Seiten zeigen dann diesen Monat."]},
     {sel:'[data-hb="debts"]', ic:"bank", t:"Kredite & Schulden", p:["Was noch offen ist und wann du schuldenfrei bist. Raten aus den Fixkosten werden automatisch abgezogen."]},
@@ -3867,6 +3977,9 @@ const MI=[
  {id:"faq",go:{acc:"hilfe"},kw:"hilfe frage fragen faq antworten|help question faq answers|yardım soru cevap|помощь вопрос ответы|допомога питання відповіді|pomoc pytanie odpowiedzi|مساعدة سؤال أجوبة|ajutor întrebare răspunsuri",
   t:["Fragen & Antworten","Questions & answers","Sorular ve cevaplar","Вопросы и ответы","Питання й відповіді","Pytania i odpowiedzi","أسئلة وأجوبة","Întrebări și răspunsuri"],
   a:["Hier findest du Antworten auf häufige Fragen.","Here you'll find answers to common questions.","Burada sık sorulan soruların cevaplarını bulursun.","Здесь ответы на частые вопросы.","Тут відповіді на часті питання.","Tu znajdziesz odpowiedzi na częste pytania.","هنا تجد إجابات الأسئلة الشائعة.","Aici găsești răspunsuri la întrebări frecvente."]},
+ {id:"umbuchen",go:{fn:"mvopen"},kw:"umbuchen umbuchung space spaces verschieben überweisen geld schieben konten ziehen|move money transfer space spaces drag|aktar para space|перевести перевод счета|переказ переказати рахунки|przelej przelew konta|تحويل حسابات|mută transfer conturi",
+  t:["Geld zwischen Konten umbuchen","Move money between accounts","Hesaplar arasında para aktar","Перевести деньги между счетами","Переказати гроші між рахунками","Przelej pieniądze między kontami","تحويل المال بين الحسابات","Mută bani între conturi"],
+  a:["Auf der Startseite unter dem Kontostand auf „Alle Konten“ tippen oder die Karte nach unten ziehen. Dann eine Karte gedrückt halten und auf eine andere ziehen – Betrag wählen, senden. In der Bank buchst du genauso um.","On the home page tap “All accounts” under your balance or pull the card down. Then press and hold a card and drag it onto another – pick the amount, send. Make the same transfer in your bank.","Ana sayfada bakiyenin altındaki “Tüm hesaplar”a dokun ya da kartı aşağı çek. Sonra bir kartı basılı tutup diğerine sürükle – tutarı seç, gönder. Bankanda da aynısını yap.","На главной нажми «Все счета» под остатком или потяни карту вниз. Затем удерживай карту и перетащи на другую – выбери сумму, отправь. В банке сделай такой же перевод.","На головній натисни «Усі рахунки» під залишком або потягни картку вниз. Потім утримуй картку й перетягни на іншу – обери суму, надішли. У банку зроби такий самий переказ.","Na stronie głównej stuknij „Wszystkie konta” pod saldem albo pociągnij kartę w dół. Potem przytrzymaj kartę i przeciągnij na inną – wybierz kwotę, wyślij. W banku zrób ten sam przelew.","في الصفحة الرئيسية اضغط «كل الحسابات» تحت الرصيد أو اسحب البطاقة للأسفل. ثم اضغط مطولًا على بطاقة واسحبها إلى أخرى – اختر المبلغ وأرسل. قم بنفس التحويل في بنكك.","Pe pagina principală apasă „Toate conturile” sub sold sau trage cardul în jos. Apoi ține apăsat un card și trage-l peste altul – alege suma, trimite. Fă același transfer și în bancă."]},
  {id:"toene",go:{acc:"toene"},kw:"ton töne sound klang laut leise stumm lautlos geräusch|sound sounds mute volume quiet|ses sessiz sesi kapat|звук звуки тихо выключить|звук звуки тихо вимкнути|dźwięk dźwięki cicho wycisz|صوت أصوات كتم|sunet sunete silențios",
   t:["Töne an- oder ausschalten","Turn sounds on or off","Sesleri aç veya kapat","Включить или выключить звуки","Увімкнути чи вимкнути звуки","Włącz lub wyłącz dźwięki","تشغيل الأصوات أو إيقافها","Pornește sau oprește sunetele"],
   a:["Unter Einstellungen › Töne schaltest du die leisen Klänge an oder aus und wählst den Klang: Sanft, Glas oder Holz. Ist dein Handy lautlos, bleibt die App sowieso still.","Under Settings › Sounds you switch the soft sounds on or off and pick a style: Soft, Glass or Wood. If your phone is on silent, the app stays silent anyway.","Ayarlar › Sesler bölümünde yumuşak sesleri açıp kapatır ve tonu seçersin: Yumuşak, Cam veya Ahşap. Telefon sessizdeyse uygulama zaten sessiz kalır.","В Настройках › Звуки ты включаешь или выключаешь тихие звуки и выбираешь звучание: Мягкий, Стекло или Дерево. Если телефон беззвучный, приложение и так молчит.","У Налаштуваннях › Звуки ти вмикаєш чи вимикаєш тихі звуки й обираєш звучання: М'який, Скло або Дерево. Якщо телефон беззвучний, застосунок і так мовчить.","W Ustawieniach › Dźwięki włączasz lub wyłączasz ciche dźwięki i wybierasz brzmienie: Miękki, Szkło albo Drewno. Gdy telefon jest wyciszony, aplikacja i tak milczy.","في الإعدادات › الأصوات تشغّل الأصوات الهادئة أو توقفها وتختار النغمة: ناعم أو زجاج أو خشب. إذا كان هاتفك صامتًا يبقى التطبيق صامتًا على أي حال.","În Setări › Sunete pornești sau oprești sunetele discrete și alegi timbrul: Moale, Sticlă sau Lemn. Dacă telefonul e pe silențios, aplicația rămâne oricum silențioasă."]},
@@ -3929,6 +4042,7 @@ function mamiGo(id){ const it=mIntent(id); if (!it) return; const g=it.go; mamiC
   if (g.fn==="studio"){ MAMI.studio=true; MAMI.draft={...(mCfg()||mDef())}; MAMI.bub=mFill(mL("st_ask"), MAMI.draft); mamiOpen(); return; }
   if (g.fn==="feedback"){ fbQuickGo(); return; }
   if (g.fn==="tour"){ if (PTOUR[UI.view]) ptourOpen(UI.view); else tourOpen(); return; }
+  if (g.fn==="mvopen"){ UI.view="home"; render(); setTimeout(()=>{ if (document.querySelector("[data-mvopen]")) mvOpen(); else toast(nt("mv_nostand_t")); }, 350); return; }
   if (g.fn==="bigtour"){ tourOpen(); return; } if (g.fn==="homeoffice"){ hoOpen(); return; } if (g.fn==="weiter"){ invOpen(); return; } if (g.fn==="danke"){ dankeOpen(true); return; }
   if (g.acc){ accGo(g.acc); return; }
   if (g.view==="gemeinsam"){ gmSheetOpen(); return; } if (g.view){ try{ if (spsOpen()) spSheetClose(); }catch(_){} UI.view=g.view; render(); window.scrollTo({top:0}); return; }
@@ -5736,6 +5850,7 @@ function renderHome(){
     <div class="homeTop" style="display:flex;flex-direction:column;gap:10px" ${isJobless()?"hidden":""}>
       <div class="astack ${accts.length>1?"":"one"}" id="astack" ${accts.length>1?`tabindex="0" aria-label="Konten – wischen zum Blättern"`:""}>${acardHtml}</div>
       ${accts.length>1?`<div class="adots" id="adots">${accts.map((_,i)=>`<button data-cdot="${i}" aria-label="Karte ${i+1}"><i></i></button>`).join("")}</div>`:""}
+      ${ym===cur && (UI.acctEd||[]).filter(Boolean).length>1 ? `<button class="mvopen" data-mvopen aria-label="${esc(nt("mv_open"))}">${ic("down",18)}<span>${esc(nt("mv_open"))}</span></button>` : ""}
       <div class="hkpi one">
         ${ym===cur ? (()=>{ const left=Math.max(1, daysIn(ym)-new Date().getDate()), v=Math.max(0, mainBal/left);
           return `<button data-go="year" aria-label="Noch ${eur0(v)} pro Tag für ${left} Tage"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small><span>Noch pro Tag</span> · <span>${left} ${left===1?"Tag":"Tage"}</span></small><b>${esc(eur0(v))}</b></span>${(()=>{ const d=new Date().getDate(), sp=sum(c.tx.filter(hxOut),t=>t.amount); return `<span class="hkavg"><small>bisher Ø</small><b>${esc(eur0(sp/Math.max(1,d)))}</b><small>pro Tag</small></span>`; })()}</button>`; })()
@@ -9578,6 +9693,20 @@ snd_t:["Töne", "Sounds", "Sesler", "Звуки", "Звуки", "Dźwięki", "ا
 trh_snd:["Hier schaltest du die leisen Töne an oder aus. In den Einstellungen unter Anpassen › Töne wählst du den Klang – Sanft, Glas oder Holz – und wie laut.", "Here you switch the soft sounds on or off. Under Customize › Sounds you pick the style – Soft, Glass or Wood – and the volume.", "Burada yumuşak sesleri açıp kapatırsın. Özelleştir › Sesler'de tonu – Yumuşak, Cam veya Ahşap – ve ses seviyesini seçersin.", "Здесь ты включаешь или выключаешь тихие звуки. В разделе Настроить › Звуки выбираешь звучание – Мягкий, Стекло или Дерево – и громкость.", "Тут ти вмикаєш чи вимикаєш тихі звуки. У розділі Налаштувати › Звуки обираєш звучання – М'який, Скло або Дерево – і гучність.", "Tu włączasz lub wyłączasz ciche dźwięki. W Dostosuj › Dźwięki wybierasz brzmienie – Miękki, Szkło albo Drewno – i głośność.", "هنا تشغّل الأصوات الهادئة أو توقفها. في تخصيص › الأصوات تختار النغمة – ناعم أو زجاج أو خشب – ومستوى الصوت.", "Aici pornești sau oprești sunetele discrete. La Personalizare › Sunete alegi timbrul – Moale, Sticlă sau Lemn – și volumul."],
 inv_ios:["wartet aufs iPhone", "waiting for iPhone", "iPhone bekliyor", "ждёт iPhone", "чекає на iPhone", "czeka na iPhone'a", "ينتظر iPhone", "așteaptă iPhone"],
 inv_ios_n:["{n} warten auf die iPhone-App", "{n} waiting for the iPhone app", "{n} kişi iPhone uygulamasını bekliyor", "Ждут приложение для iPhone: {n}", "Чекають на застосунок для iPhone: {n}", "Czeka na aplikację na iPhone'a: {n}", "{n} بانتظار تطبيق iPhone", "{n} așteaptă aplicația pentru iPhone"],
+mv_open:["Alle Konten · umbuchen","All accounts · move money","Tüm hesaplar · aktar","Все счета · перевести","Усі рахунки · переказати","Wszystkie konta · przelej","كل الحسابات · تحويل","Toate conturile · mută bani"],
+mv_t:["Meine Konten","My accounts","Hesaplarım","Мои счета","Мої рахунки","Moje konta","حساباتي","Conturile mele"],
+mv_hint:["Halte eine Karte gedrückt und zieh sie auf eine andere, um Geld umzubuchen.","Press and hold a card and drag it onto another to move money.","Para aktarmak için bir karta basılı tut ve başka bir karta sürükle.","Удерживай карту и перетащи её на другую, чтобы перевести деньги.","Утримуй картку й перетягни на іншу, щоб переказати гроші.","Przytrzymaj kartę i przeciągnij ją na inną, aby przelać pieniądze.","اضغط مطولًا على بطاقة واسحبها إلى أخرى لتحويل المال.","Ține apăsat pe un card și trage-l peste altul ca să muți bani."],
+mv_space:["Space","Space","Space","Space","Space","Space","Space","Space"],
+mv_nostand:["Stand fehlt – erst eintragen","Balance missing – enter it first","Bakiye yok – önce gir","Нет остатка – сначала введи","Немає залишку – спершу введи","Brak salda – najpierw wpisz","الرصيد غير موجود – أدخله أولًا","Lipsește soldul – introdu-l întâi"],
+mv_nostand_t:["Trag für dieses Konto erst den Stand ein (Stift auf der Karte).","Enter this account's balance first (pencil on the card).","Önce bu hesabın bakiyesini gir (karttaki kalem).","Сначала введи остаток этого счёта (карандаш на карте).","Спершу введи залишок цього рахунку (олівець на картці).","Najpierw wpisz saldo tego konta (ołówek na karcie).","أدخل رصيد هذا الحساب أولًا (القلم على البطاقة).","Introdu întâi soldul acestui cont (creionul de pe card)."],
+mv_sheet:["Geld umbuchen","Move money","Para aktar","Перевести деньги","Переказати гроші","Przelej pieniądze","تحويل المال","Mută bani"],
+mv_amt:["Betrag","Amount","Tutar","Сумма","Сума","Kwota","المبلغ","Sumă"],
+mv_all:["Alles","All","Tümü","Всё","Усе","Wszystko","الكل","Tot"],
+mv_send0:["Betrag eingeben","Enter amount","Tutar gir","Введи сумму","Введи суму","Wpisz kwotę","أدخل المبلغ","Introdu suma"],
+mv_send:["{v} an {n} senden","Send {v} to {n}","{n} hesabına {v} gönder","Отправить {v} на {n}","Надіслати {v} на {n}","Wyślij {v} na {n}","أرسل {v} إلى {n}","Trimite {v} la {n}"],
+mv_note:["Nur in der App – in deiner Bank buchst du genauso um. Taucht die Umbuchung im Kontoauszug auf, zählt sie nicht doppelt.","Only in the app – make the same transfer in your bank. Once it shows up in your statement, it won't count twice.","Sadece uygulamada – bankanda da aynı aktarımı yap. Hesap dökümünde görünce iki kez sayılmaz.","Только в приложении – сделай такой же перевод в банке. Когда он появится в выписке, он не посчитается дважды.","Лише в застосунку – зроби такий самий переказ у банку. Коли він з'явиться у виписці, не порахується двічі.","Tylko w aplikacji – zrób ten sam przelew w banku. Gdy pojawi się w wyciągu, nie policzy się podwójnie.","داخل التطبيق فقط – قم بنفس التحويل في بنكك. عندما يظهر في كشف الحساب لن يُحسب مرتين.","Doar în aplicație – fă același transfer și în bancă. Când apare în extras, nu se numără de două ori."],
+mv_done:["{v} von {a} an {b} umgebucht","Moved {v} from {a} to {b}","{v} {a} hesabından {b} hesabına aktarıldı","{v} переведено с {a} на {b}","{v} переказано з {a} на {b}","Przelano {v} z {a} na {b}","تم تحويل {v} من {a} إلى {b}","{v} mutați din {a} în {b}"],
+trh_mv:["Neu: Tipp auf „Alle Konten“ oder zieh die Karte nach unten – dann liegen alle Konten offen. Halte eine Karte gedrückt und zieh sie auf eine andere, um Geld umzubuchen.","New: tap “All accounts” or pull the card down – all accounts open up. Press and hold one and drag it onto another to move money.","Yeni: “Tüm hesaplar”a dokun ya da kartı aşağı çek – tüm hesaplar açılır. Para aktarmak için birini basılı tutup diğerine sürükle.","Новое: нажми «Все счета» или потяни карту вниз – откроются все счета. Удерживай одну и перетащи на другую, чтобы перевести деньги.","Нове: натисни «Усі рахунки» або потягни картку вниз – відкриються всі рахунки. Утримуй одну й перетягни на іншу, щоб переказати гроші.","Nowość: stuknij „Wszystkie konta” albo pociągnij kartę w dół – otworzą się wszystkie konta. Przytrzymaj jedną i przeciągnij na inną, aby przelać pieniądze.","جديد: اضغط «كل الحسابات» أو اسحب البطاقة للأسفل – تنفتح كل الحسابات. اضغط مطولًا على واحدة واسحبها إلى أخرى لتحويل المال.","Nou: apasă „Toate conturile” sau trage cardul în jos – se deschid toate conturile. Ține apăsat unul și trage-l peste altul ca să muți bani."],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
@@ -12778,10 +12907,18 @@ function accountBalance(name, asOf){
     if (date>a.date && date<=asOf) b+=v; else if (date<=a.date && date>asOf) b-=v;
   }
   b+=manualDelta(a, last, asOf, name);
+  /* In der App umgebuchtes Geld (ziehen & senden) – bis die Bank-Umbuchung im Kontoauszug auftaucht */
+  for (const m of (S.settings.moves||[])){ if (m.from!==name && m.to!==name) continue; if (!m.date || m.date>asOf) continue;
+    if (!(m.date>a.date || (m.date===a.date && (m.ts||0)>(a.ts||0)))) continue; if (moveInBank(m)) continue;
+    b += (m.to===name?1:-1)*(Number(m.amt)||0); }
   /* Offene Space-Umbuchungen nur ab dem eingetragenen Stand rechnen – der eingetippte Stand enthält alles davor schon */
   try{ const po=potCache(), dv=P=>potOpen(P, asOf)-potOpen(P, a.date); if (po[name]) b-=dv(name); for (const [P,o] of Object.entries(po)) if (o.bank===name) b+=dv(P); }catch(_){}
   return Math.round(b*100)/100;
 }
+/* Steht die Umbuchung schon im Kontoauszug? (Abgang und Eingang, gleicher Betrag, bis 5 Tage danach) */
+function moveInBank(m){ const lim=new Date(m.date+"T12:00:00"); lim.setDate(lim.getDate()+5); const end=isoOf(lim), amt=Number(m.amt)||0;
+  const hit=(n,sg)=>n==="Bargeld" || ledgerRows(n).some(r=>r.date>=m.date && r.date<=end && Math.abs(r.v-sg*amt)<0.005);
+  return hit(m.from,-1) && hit(m.to,1); }
 function lastDayOf(ym){ return ym+"-"+pad(daysIn(ym)); }
 function renderAccounts(){
   const el=$("acctEd"); if (!el || el.contains(document.activeElement)) return;
@@ -13163,6 +13300,7 @@ $("backupFile").addEventListener("change", async e => {
 });
 
 window.hbBack = () => {
+  if ($("mvBg") && !$("mvBg").hidden){ if ($("mvSheet") && !$("mvSheet").hidden) mvSheetClose(); else mvClose(); return true; }
   if ($("codeBg") && !$("codeBg").hidden){ codeClose(); return true; }
   if ($("camLive") && !$("camLive").hidden){ camStop(); return true; }
   if ($("camRev") && !$("camRev").hidden){ camRevClose(); return true; }
