@@ -369,6 +369,7 @@ if (IS_PC){
   document.addEventListener("click", e=>{
     const b=e.target.closest("#pcTheme"); if (!b) return;
     const t=isDark()?"light":"dark", r=b.getBoundingClientRect(), x=r.left+r.width/2, y=r.top+r.height/2;
+    try{ SND.play("glide"); }catch(_){}
     const apply=()=>{ document.documentElement.dataset.theme=t; try{ localStorage.setItem("hb-theme",t); }catch(_){} sync(); try{ render(); }catch(_){} };
     b.animate([{transform:"rotate(0) scale(1)"},{transform:"rotate(-25deg) scale(.86)",offset:.4},{transform:"rotate(0) scale(1)"}],{duration:520,easing:"cubic-bezier(.3,.7,.3,1)"});
     if (document.startViewTransition && !pcCalm()){
