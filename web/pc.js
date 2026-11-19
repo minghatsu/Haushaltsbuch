@@ -1766,11 +1766,11 @@ if (IS_DESK){
   const snap=(t,silent)=>{ const {ST}=steps(); const n=Math.round(t/ST)*ST; if (n!==FW.target && !silent){ SND.play("detent"); } FW.target=n; fanKick(); };
   document.addEventListener("pointerdown", e=>{ if (!isOpen() || e.button!==0 || !e.target.closest("#fanBg")) return; e.stopPropagation();
     PF.dragA=angle(e); PF.r0=FW.rot; PF.la=PF.dragA; PF.lt=performance.now(); PF.v=0; PF.x0=e.clientX; PF.y0=e.clientY; FW.moved=false; }, true);
-  document.addEventListener("pointermove", e=>{ if (PF.dragA==null || !isOpen()) return; const a=angle(e); let da=a-PF.dragA; if (da>180) da-=360; if (da<-180) da+=360;
+  document.addEventListener("pointermove", e=>{ if (PF.dragA==null || !isOpen()) return; e.stopPropagation(); const a=angle(e); let da=a-PF.dragA; if (da>180) da-=360; if (da<-180) da+=360;
     if (!FW.moved && Math.hypot(e.clientX-PF.x0, e.clientY-PF.y0)>6){ FW.moved=true; FW.drag=true; $("fanHint").classList.remove("on"); fan.classList.add("dragging"); }
     if (!FW.moved) return; const {ST}=steps(), now=performance.now(); PF.v=(a-PF.la)/Math.max(1,now-PF.lt); PF.la=a; PF.lt=now;
     FW.rot=PF.r0 - da/SP*ST; FW.target=FW.rot; fanKick(); }, true);
-  const up=()=>{ if (PF.dragA==null) return; PF.dragA=null; fan.classList.remove("dragging"); if (!FW.moved) return; FW.drag=false; const {ST}=steps(); snap(FW.rot - PF.v*160/SP*ST); setTimeout(()=>{ FW.moved=false; }, 60); };
+  const up=e=>{ if (PF.dragA==null) return; if (e) e.stopPropagation(); PF.dragA=null; fan.classList.remove("dragging"); if (!FW.moved) return; FW.drag=false; const {ST}=steps(); const fl=cl(-PF.v*120/SP, -1, 1); snap(FW.rot + fl*ST); setTimeout(()=>{ FW.moved=false; }, 60); };
   document.addEventListener("pointerup", up, true); document.addEventListener("pointercancel", up, true);
   window.addEventListener("click", e=>{ if (!fan.classList.contains("pcw") || !e.target.closest("#fanBg")) return;
     if (FW.moved){ e.stopImmediatePropagation(); e.preventDefault(); return; }
