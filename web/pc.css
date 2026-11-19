@@ -987,3 +987,6 @@ body.mvdragging,body.mvdragging *{cursor:grabbing!important;user-select:none}
 .mvsheet.mvpcs .mvsh{width:min(460px,100%);border-radius:28px;padding:22px 24px;transform:translateY(14px) scale(.96);transition:transform .32s cubic-bezier(.2,1.2,.3,1);box-shadow:0 30px 70px -20px rgba(0,0,0,.5)}
 .mvsheet.mvpcs.show .mvsh{transform:none}
 @media (prefers-reduced-motion:reduce){html.pc .pcaccs button.got,html.pc .pcaccs button.gave,html.pc .pcaccs.mvpulse button.mvd{animation:none}.mvsheet.mvpcs .mvsh{transition:none}}
+/* Tablet: Umbuchen-Knopf in der grünen Karte */
+html.pc .pchero .pcmvo{background:#ffffff24;color:#fff;margin:10px 0 0;align-self:flex-start;flex:none}
+html.pc .pchero .pcmvo:hover{background:#ffffff38;color:#fff}
