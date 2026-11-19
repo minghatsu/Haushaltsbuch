@@ -12778,7 +12778,8 @@ function accountBalance(name, asOf){
     if (date>a.date && date<=asOf) b+=v; else if (date<=a.date && date>asOf) b-=v;
   }
   b+=manualDelta(a, last, asOf, name);
-  try{ const po=potCache(); if (po[name]) b-=potOpen(name, asOf); for (const [P,o] of Object.entries(po)) if (o.bank===name) b+=potOpen(P, asOf); }catch(_){}
+  /* Offene Space-Umbuchungen nur ab dem eingetragenen Stand rechnen – der eingetippte Stand enthält alles davor schon */
+  try{ const po=potCache(), dv=P=>potOpen(P, asOf)-potOpen(P, a.date); if (po[name]) b-=dv(name); for (const [P,o] of Object.entries(po)) if (o.bank===name) b+=dv(P); }catch(_){}
   return Math.round(b*100)/100;
 }
 function lastDayOf(ym){ return ym+"-"+pad(daysIn(ym)); }
