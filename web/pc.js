@@ -383,7 +383,7 @@ if (IS_PC){
 if (IS_PC){
   const fan=$("fanBg"), rc=fan && fan.querySelector('[data-addpick="receipt"]');
   if (rc && IS_DESK){    rc.dataset.addpick="pcscan"; rc.innerHTML=`<svg class="i" viewBox="0 0 24 24"><path d="M4 14h16v4.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5z"/><path d="M6 14 8.5 5.5h7L18 14"/><path d="M7.5 17h3"/></svg><span>Scannen</span>`; }
-  openAddMenu = () => { if (!fan.hidden){ fanClose(); return; } fanOpen();
+  openAddMenu = () => { if (!fan.hidden){ fanClose(); return; } if (IS_DESK && window.pcFanOpen){ window.pcFanOpen(); return; } fanOpen();
     if (IS_TAB) return;
     const R=140; [180,135,90].forEach((a,i)=>{ const t=a*Math.PI/180, b=fan.children[i]; b.style.setProperty("--dx", Math.round(Math.cos(t)*R)+"px"); b.style.setProperty("--dy", Math.round(-Math.sin(t)*R-14)+"px"); }); };
   const SCANW={}; window.hbScanDone=(id,data,err)=>{ const f=SCANW[id]; if (f){ delete SCANW[id]; f(data,err); } };
@@ -1720,4 +1720,99 @@ if (IS_DESK){
   document.addEventListener("keydown", e=>{ if (e.key==="Escape" && st && st.on){ st.ghost.remove(); st.src.classList.remove("src"); document.body.classList.remove("mvdragging"); document.querySelectorAll("#pcHero [data-mvi]").forEach(c=>c.classList.remove("tgt","dragok")); st=null; } else if (e.key==="Escape" && !sheetEl().hidden) mvSheetClose(); });
   document.addEventListener("click", e=>{ if (eat && e.target.closest("#pcHero")){ e.preventDefault(); e.stopPropagation(); } }, true);
   document.addEventListener("dragstart", e=>{ if (e.target.closest && e.target.closest("#pcHero [data-mvi]")) e.preventDefault(); }, true);
+}
+
+/* Plus-Menü am PC: Viertelkreis um das +, alle Knöpfe, drehen mit Mausrad, Ziehen und Pfeiltasten */
+if (IS_DESK){
+  const fan=$("fanBg"); const SUBK={hand:"fs_hand", pcscan:"fs_scan", receipt:"fs_scan", import:"fs_import", settings:"fs_settings", profil:"fs_profil", hilfe:"fs_hilfe", qr:"fs_qr"};
+  const PF={t0:0, dragA:null, r0:0, la:0, lt:0, v:0, acc:0, wt:0, closing:false};
+  const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)), eo=t=>1-Math.pow(1-t,3), back=t=>{ const c1=1.5,c3=c1+1; return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2); };
+  const SP=30, FRONT=135;
+  const geo=()=>{ const r=document.querySelector(".tab.plus").getBoundingClientRect(); return {cx:r.left+r.width/2, cy:r.top+r.height/2, R:Math.round(cl(innerHeight*0.32, 190, 268))}; };
+  const arc=(cx,cy,r,a0,a1)=>{ const P=a=>[cx+r*Math.cos(a*Math.PI/180), cy-r*Math.sin(a*Math.PI/180)]; const [x0,y0]=P(a0),[x1,y1]=P(a1); return `M ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r} ${r} 0 0 0 ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
+  function prep(){ if (!fan.querySelector(".fpcband")) fan.insertAdjacentHTML("afterbegin", `<svg class="fpcband" aria-hidden="true"><defs><linearGradient id="fpcGl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" class="fg0"/><stop offset="1" class="fg1"/></linearGradient></defs><path class="fpb"/><path class="fpe"/><g class="fpd"></g></svg><div class="fpcripple" aria-hidden="true"></div><button class="fpcx" type="button" data-addclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>`);
+    fan.querySelectorAll(".fanb").forEach(b=>{ if (!b.querySelector(".fsub")){ const k=SUBK[b.dataset.addpick]; if (k) b.insertAdjacentHTML("beforeend", `<small class="fsub" data-noi18n></small>`); } const sm=b.querySelector(".fsub"), k=SUBK[b.dataset.addpick]; if (sm&&k) sm.textContent=nt(k); });
+    const h=$("fanHint"); if (h) h.innerHTML=`↻ <span data-noi18n>${esc(nt("fan_pc_hint"))}</span> <kbd>←</kbd><kbd>→</kbd><kbd>Enter</kbd>`; }
+  window.pcFanOpen=function(){ prep(); const q=fan.querySelector('[data-addpick="qr"]'); if (q) q.hidden=!canShare();
+    fan.classList.add("wheel","pcw"); fan.classList.remove("closing"); SND.play("whoosh"); FW.open=true; FW.rot=FW.target=0; FW.t=0; PF.t0=performance.now(); fan.hidden=false;
+    const pl=document.querySelector(".tab.plus"); pl.classList.add("open"); const rp=fan.querySelector(".fpcripple"); if (rp){ const g=geo(); rp.style.left=g.cx+"px"; rp.style.top=g.cy+"px"; rp.classList.remove("go"); void rp.offsetWidth; rp.classList.add("go"); }
+    { const x=fan.querySelector(".fpcx"), r=pl.getBoundingClientRect(); if (x){ x.style.left=r.left+"px"; x.style.top=r.top+"px"; x.style.width=r.width+"px"; x.style.height=r.height+"px"; } }
+    requestAnimationFrame(()=>fan.classList.add("show")); fanKick();
+    let n=0; try{ n=Number(localStorage.getItem("hb-fanhint"))||0; localStorage.setItem("hb-fanhint", String(n+1)); }catch(_){} $("fanHint").classList.toggle("on", n<6);
+    setTimeout(()=>{ try{ fan.focus({preventScroll:true}); }catch(_){} }, 50); };
+  const steps=()=>{ const N=fanItems().length, ST=360/N; return {N, ST, f:FW.rot/ST}; };
+  const wrap=(d,N)=>((d%N)+N*1.5)%N-N/2;
+  const _fd=fanDraw; fanDraw=function(){ if (!fan.classList.contains("pcw")) return _fd();
+    const items=fanItems(), {N,f}=steps(), {cx,cy,R}=geo(), el=performance.now()-PF.t0, rm=matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const closeK=FW.open?1:eo(cl(FW.t)); let anim=false;
+    const bk=(FW.open ? (rm?1:back(cl((el-40)/520))) : closeK); if (FW.open && el<620) anim=true;
+    const band=fan.querySelector(".fpcband"); if (band){ const br=Math.max(1,R*bk); band.querySelector(".fpb").setAttribute("d", arc(cx,cy,br,62,208)); band.querySelector(".fpb").style.strokeWidth=(112*cl(bk,0,1.15)).toFixed(1); band.style.opacity=cl(bk*1.4).toFixed(3);
+      band.querySelector(".fpe").setAttribute("d", arc(cx,cy,br+56*cl(bk),64,206));
+      const fi=((Math.round(f)%N)+N)%N; let h=""; for (let i=0;i<N;i++){ const a=112+i*(46/Math.max(1,N-1)), r=(R+44)*cl(bk), x=cx+Math.cos(a*Math.PI/180)*r, y=cy-Math.sin(a*Math.PI/180)*r, on=i===fi;
+        h+=`<rect x="${(x-(on?8:3)).toFixed(1)}" y="${(y-3).toFixed(1)}" width="${on?16:6}" height="6" rx="3" class="${on?"on":""}" transform="rotate(${(-(a-90)).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})"/>`; } band.querySelector(".fpd").innerHTML=h; }
+    items.forEach((b,i)=>{ const d=wrap(i-f,N), ad=Math.abs(d*SP), a=FRONT+d*SP;
+      const ik = FW.open ? (rm?1:back(cl((el-120-i*45)/420))) : closeK; if (FW.open && el<120+i*45+420) anim=true;
+      const sc=ad<=30?1.18-(0.32*ad/30):ad<=60?0.86-0.26*(ad-30)/30:0.6-0.25*cl((ad-60)/30);
+      const op=ad<=30?1:ad<=60?1-0.5*(ad-30)/30:0.5*(1-cl((ad-60)/30));
+      const r=R*ik, x=cx+Math.cos(a*Math.PI/180)*r, y=cy-Math.sin(a*Math.PI/180)*r;
+      b.style.left=x.toFixed(1)+"px"; b.style.top=y.toFixed(1)+"px"; b.style.transform=`scale(${(sc*(0.3+0.7*cl(ik))).toFixed(3)})`; b.style.opacity=(op*cl(ik*1.3)).toFixed(3);
+      b.style.zIndex=String(Math.round(200-ad)); b.style.pointerEvents=FW.open&&op>0.25?"auto":"none";
+      const front=ad<15; b.classList.toggle("front", front); b.classList.toggle("lab", ad<45); b.classList.remove("peek"); b.dataset.d=(-d).toFixed(2); b.tabIndex=front?0:-1; });
+    const hn=$("fanHint"); if (hn){ hn.style.right=Math.max(16, innerWidth-(cx-R-70))+"px"; hn.style.bottom=Math.max(16, innerHeight-cy-14)+"px"; }
+    if (anim) requestAnimationFrame(()=>{ if (!FW.raf) fanKick(); });
+    if (!FW.open && FW.t<=0){ fan.classList.remove("pcw"); } };
+  const isOpen=()=>fan.classList.contains("pcw") && FW.open && !fan.hidden;
+  const angle=e=>{ const {cx,cy}=geo(); return Math.atan2(cy-e.clientY, e.clientX-cx)*180/Math.PI; };
+  const snap=(t,silent)=>{ const {ST}=steps(); const n=Math.round(t/ST)*ST; if (n!==FW.target && !silent){ SND.play("detent"); } FW.target=n; fanKick(); };
+  document.addEventListener("pointerdown", e=>{ if (!isOpen() || e.button!==0 || !e.target.closest("#fanBg")) return; e.stopPropagation();
+    PF.dragA=angle(e); PF.r0=FW.rot; PF.la=PF.dragA; PF.lt=performance.now(); PF.v=0; PF.x0=e.clientX; PF.y0=e.clientY; FW.moved=false; }, true);
+  document.addEventListener("pointermove", e=>{ if (PF.dragA==null || !isOpen()) return; const a=angle(e); let da=a-PF.dragA; if (da>180) da-=360; if (da<-180) da+=360;
+    if (!FW.moved && Math.hypot(e.clientX-PF.x0, e.clientY-PF.y0)>6){ FW.moved=true; FW.drag=true; $("fanHint").classList.remove("on"); fan.classList.add("dragging"); }
+    if (!FW.moved) return; const {ST}=steps(), now=performance.now(); PF.v=(a-PF.la)/Math.max(1,now-PF.lt); PF.la=a; PF.lt=now;
+    FW.rot=PF.r0 - da/SP*ST; FW.target=FW.rot; fanKick(); }, true);
+  const up=()=>{ if (PF.dragA==null) return; PF.dragA=null; fan.classList.remove("dragging"); if (!FW.moved) return; FW.drag=false; const {ST}=steps(); snap(FW.rot - PF.v*160/SP*ST); setTimeout(()=>{ FW.moved=false; }, 60); };
+  document.addEventListener("pointerup", up, true); document.addEventListener("pointercancel", up, true);
+  window.addEventListener("click", e=>{ if (!fan.classList.contains("pcw") || !e.target.closest("#fanBg")) return;
+    if (FW.moved){ e.stopImmediatePropagation(); e.preventDefault(); return; }
+    const b=e.target.closest(".fanb"); if (b && !b.classList.contains("front")){ e.stopImmediatePropagation(); e.preventDefault(); const {ST}=steps(); snap(FW.target - Number(b.dataset.d)*ST); return; } }, true);
+  fan.addEventListener("wheel", e=>{ if (!isOpen()) return; e.preventDefault(); const now=performance.now(); PF.acc+=(Math.abs(e.deltaY)>=Math.abs(e.deltaX)?e.deltaY:e.deltaX);
+    if (Math.abs(PF.acc)>=40 && now-PF.wt>90){ const {ST}=steps(); PF.wt=now; snap(FW.target+Math.sign(PF.acc)*ST); PF.acc=0; $("fanHint").classList.remove("on"); } }, {passive:false});
+  document.addEventListener("keydown", e=>{ if (!isOpen()) return; const {ST}=steps();
+    if (["ArrowRight","ArrowDown"].includes(e.key)){ e.preventDefault(); snap(FW.target+ST); }
+    else if (["ArrowLeft","ArrowUp"].includes(e.key)){ e.preventDefault(); snap(FW.target-ST); }
+    else if (e.key==="Enter"||e.key===" "){ e.preventDefault(); const b=fan.querySelector(".fanb.front"); if (b) b.click(); }
+    else if (e.key==="Escape"){ e.preventDefault(); fanClose(); } }, true);
+}
+/* Entwickler-Knopf in der Kopfzeile: Freigabe & Tester, Feedback-Eingang, Werkzeuge */
+if (IS_DESK){
+  const WR=`<svg class="i" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L4 16.7 7.3 20l5.3-5.3a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.4-.6-.6-2.4z"/></svg>`;
+  function devW(){ let w=$("pcDevW"); if (!updKey()){ if (w){ ["pcRel","pcInbox"].forEach(i=>{ const b=$(i); if (b) b.remove(); }); w.remove(); } return; }
+    const ref=$("pcRefresh")||$("pcTheme"); if (!ref) return;
+    if (!w){ ref.insertAdjacentHTML("beforebegin", `<span class="pcdevw" id="pcDevW"><button class="roundbtn pcdev" id="pcDev" aria-haspopup="menu" aria-expanded="false" aria-label="${esc(nt("dv_t"))}" title="${esc(nt("dv_t"))}">${WR}<i class="badge" hidden></i><i class="dot" hidden></i></button></span>`); w=$("pcDevW"); }
+    ["pcRel","pcInbox"].forEach(i=>{ const b=$(i); if (b && b.parentElement!==w){ w.appendChild(b); b.tabIndex=-1; b.setAttribute("aria-hidden","true"); } });
+    const ib=$("pcInbox"), bd=ib&&ib.querySelector(".badge"), mb=w.querySelector(".pcdev .badge"), n=bd&&!bd.hidden?bd.textContent:"";
+    if (mb){ if (mb.textContent!==n){ const was=Number(mb.textContent)||0; mb.textContent=n; if ((Number(n)||0)>was) w.querySelector(".pcdev").animate([{transform:"rotate(0)"},{transform:"rotate(-16deg) scale(1.12)",offset:.3},{transform:"rotate(10deg)",offset:.6},{transform:"none"}],{duration:650}); } mb.hidden=!n; }
+    const rd=$("pcRel")&&$("pcRel").querySelector(".dot"), md=w.querySelector(".pcdev .dot"); if (md) md.hidden=!(rd&&!rd.hidden) || !!n;
+    const p=$("pcDevPop"); if (p) paint(p); }
+  const row=(k,svg,t,sub,badge)=>`<button class="pcdvr" data-pcdv="${k}" role="menuitem"><span class="pcdvi">${svg}</span><span class="pcdvt"><b>${esc(t)}</b><small>${esc(sub)}</small></span>${badge?`<i class="badge">${esc(badge)}</i>`:`<span class="pcdva" aria-hidden="true">›</span>`}</button>`;
+  function paint(p){ const ib=$("pcInbox"), bd=ib&&ib.querySelector(".badge"), n=bd&&!bd.hidden?bd.textContent:"";
+    p.innerHTML=`<div class="pcdvh" data-noi18n>${esc(nt("dv_t"))}</div>`
+      +row("rel",`<svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>`, nt("dv_rel"), nt("dv_rel_s"), "")
+      +row("fb",`<svg class="i" viewBox="0 0 24 24"><path d="M4 13.5 6.5 5h11l2.5 8.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 13.5h4.5l1 2h5l1-2H20"/></svg>`, nt("dv_fb"), nt("dv_fb_s"), n)
+      +row("tools",WR, nt("dv_tools"), nt("dv_tools_s"), ""); p.setAttribute("data-noi18n",""); }
+  function popClose(){ const p=$("pcDevPop"); if (!p) return; p.classList.add("out"); const b=$("pcDev"); if (b) b.setAttribute("aria-expanded","false"); setTimeout(()=>p.remove(), 160); }
+  function popOpen(){ const b=$("pcDev"); if (!b) return; const r=b.getBoundingClientRect(); const p=document.createElement("div"); p.id="pcDevPop"; p.className="pcdevpop"; p.setAttribute("role","menu");
+    p.style.top=(r.bottom+10)+"px"; p.style.left=Math.max(12, Math.min(innerWidth-352, r.left+r.width/2-170))+"px"; p.style.setProperty("--ax", Math.round(r.left+r.width/2-Math.max(12, Math.min(innerWidth-352, r.left+r.width/2-170)))+"px");
+    paint(p); document.body.appendChild(p); b.setAttribute("aria-expanded","true"); SND.play("pop"); const f=p.querySelector(".pcdvr"); if (f) f.focus({preventScroll:true}); }
+  document.addEventListener("click", e=>{
+    if (e.target.closest("#pcDev")){ e.stopPropagation(); if ($("pcDevPop")) popClose(); else { const rp=$("pcRelPop"); if (rp) rp.remove(); popOpen(); } return; }
+    const r=e.target.closest("[data-pcdv]"); if (r){ const k=r.dataset.pcdv; popClose();
+      if (k==="rel"){ const b=$("pcRel"); if (b) setTimeout(()=>b.click(), 20); }
+      else if (k==="fb"){ const b=$("pcInbox"); if (b) setTimeout(()=>b.click(), 20); }
+      else if (k==="tools"){ setTimeout(()=>{ try{ devOpen(); }catch(_){} }, 60); } return; }
+    if ($("pcDevPop") && !e.target.closest("#pcDevPop")) popClose(); }, true);
+  document.addEventListener("keydown", e=>{ const p=$("pcDevPop"); if (!p) return; if (e.key==="Escape"){ popClose(); const b=$("pcDev"); if (b) b.focus(); return; }
+    if (e.key==="ArrowDown"||e.key==="ArrowUp"){ e.preventDefault(); const L=[...p.querySelectorAll(".pcdvr")], i=L.indexOf(document.activeElement); L[(i+(e.key==="ArrowDown"?1:-1)+L.length)%L.length].focus(); } });
+  const _rd=render; render=(...a)=>{ const x=_rd(...a); try{ devW(); }catch(_){} return x; };
+  setInterval(()=>{ try{ devW(); }catch(_){} }, 3000); setTimeout(()=>{ try{ devW(); }catch(_){} }, 600);
 }
