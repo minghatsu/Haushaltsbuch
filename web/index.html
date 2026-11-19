@@ -2190,6 +2190,43 @@ html.pc [data-view="zukunft"] .agrid{grid-template-columns:repeat(4,1fr)!importa
 .invcols .chip{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700}.chip.no{background:var(--surface);color:var(--muted)}.chip.wa{background:var(--surface);color:var(--warn)}.chip.ok{background:var(--surface);color:var(--accent)}
 .invmini .chip.wa{background:var(--warn-soft)}
 .invfoot{margin:12px 4px 0;text-align:center}
+.invupd{position:relative;overflow:hidden;background:linear-gradient(135deg,color-mix(in srgb,var(--warn-soft) 70%,var(--surface)),var(--warn-soft));border-radius:20px;padding:14px 16px;margin:0 0 12px;animation:invPop .45s .08s cubic-bezier(.2,1.3,.4,1) both}
+.invupd b{display:flex;align-items:center;gap:7px;font-size:14px}.invupd b svg.i{stroke:var(--warn)}
+.invupd p{margin:4px 0 10px;font-size:12.5px;color:var(--muted)}
+.invupd.ok{background:var(--accent-soft)}.invupd.ok b svg.i{stroke:var(--accent)}
+.invupr{position:absolute;right:-24px;top:-24px;width:96px;height:96px;border-radius:50%;border:14px solid color-mix(in srgb,var(--warn) 22%,transparent);pointer-events:none}
+.invbell{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;border:0;border-radius:99px;padding:6px 10px;font:800 11.5px var(--f-body);background:var(--fg);color:var(--bg);cursor:pointer;transition:transform .15s}
+.invbell svg.i{stroke:currentColor}.invbell:hover svg.i{animation:invRing .6s ease}.invbell:active{transform:scale(.94)}.invbell.busy{opacity:.6;pointer-events:none}
+.invbell.big{padding:10px 16px;font-size:13px}
+@keyframes invRing{20%{transform:rotate(-18deg)}45%{transform:rotate(14deg)}70%{transform:rotate(-8deg)}100%{transform:none}}
+.invvc{align-self:flex-start;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;margin-top:4px}
+.invvc.ok{background:var(--accent-soft);color:var(--accent)}.invvc.ok svg.i{stroke:currentColor}.invvc.old{background:var(--warn-soft);color:color-mix(in srgb,var(--warn) 70%,var(--fg))}
+.invvr{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;margin-top:2px}
+.invok{color:var(--accent);font-weight:900}.invvdone{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--muted);white-space:nowrap}.invvdone svg.i{stroke:var(--accent)}
+.nudgebg{position:fixed;inset:0;z-index:95;display:flex;align-items:flex-end;justify-content:center;padding:12px;background:color-mix(in srgb,#0c1611 46%,transparent);opacity:0;transition:opacity .25s}
+.nudgebg.show{opacity:1}
+.nudgesh{position:relative;width:min(440px,100%);background:var(--surface);border-radius:30px;padding:54px 22px 18px;text-align:center;box-shadow:0 30px 60px -12px rgba(0,0,0,.5);transform:translateY(40px) scale(.97);transition:transform .45s cubic-bezier(.2,1.25,.35,1)}
+.nudgebg.show .nudgesh{transform:none}
+.nudgemami{position:absolute;left:50%;top:-38px;width:80px;height:80px;margin-left:-40px;border-radius:50%;border:5px solid var(--surface);background:var(--sunk);box-shadow:0 10px 24px rgba(0,0,0,.22);animation:nudgeHop 1.1s .35s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes nudgeHop{0%{transform:translateY(16px) scale(.6);opacity:0}55%{transform:translateY(-6px) scale(1.06);opacity:1}100%{transform:none}}
+.nudgesh h3{margin:0 0 6px;font-size:20px}.nudgesh p{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.45}
+.nudgev{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}.nudgev span{padding:4px 10px;border-radius:99px;font-weight:800;font-size:12.5px}
+.nudgev .old{background:var(--warn-soft);color:color-mix(in srgb,var(--warn) 70%,var(--fg))}.nudgev .new{background:var(--accent-soft);color:var(--accent)}.nudgev .arr{padding:0;color:var(--muted)}
+.nudgesh ul{text-align:start;margin:0 0 16px;padding:12px 14px 12px 30px;background:var(--sunk);border-radius:16px;font-size:13px;line-height:1.6}
+.nudgelater{display:block;margin:8px auto 0;color:var(--muted)}
+@media (min-width:700px){.nudgebg{align-items:center}}
+@media (prefers-reduced-motion:reduce){.nudgesh,.nudgemami,.invupd{transition:none;animation:none}}
+/* Pinnwand am PC: breit, links Code und Update, rechts drei Spalten */
+html.pc:not(.istab) .invboardbox{max-width:1260px;width:calc(100vw - 120px);display:grid;grid-template-columns:330px 1fr;grid-template-rows:auto auto 1fr auto;gap:0 22px;max-height:calc(100vh - 80px)}
+html.pc:not(.istab) .invboardbox>.invhd,html.pc:not(.istab) .invboardbox>.invcapx,html.pc:not(.istab) .invboardbox>.invfoot{grid-column:1/3}
+html.pc:not(.istab) .invboardbox>.invnext{grid-column:1;grid-row:3;align-self:start;flex-direction:column;align-items:stretch;margin:14px 0 12px}
+html.pc:not(.istab) .invboardbox>.invnext .invnb{flex-direction:row;justify-content:flex-start}html.pc:not(.istab) .invboardbox>.invnext .invnl{flex:0 0 auto}
+html.pc:not(.istab) .invboardbox>.invupd{grid-column:1;grid-row:3;align-self:end;margin:0 0 4px}
+html.pc:not(.istab) .invboardbox>.invcols{grid-column:2;grid-row:2/4;margin-top:14px;gap:14px;min-height:0}
+html.pc:not(.istab) .invboardbox .invcol{border-radius:22px;padding:12px 10px;min-height:0;max-height:calc(100vh - 260px)}
+html.pc:not(.istab) .invboardbox .invcol h4{font-size:14px;margin:2px 6px 12px}
+html.pc:not(.istab) .invboardbox .invmini{border-radius:16px;padding:11px 12px;margin-bottom:9px;font-size:12.5px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+html.pc:not(.istab) .invboardbox .invmini b{font-size:14px}
 .actfound{color:var(--accent);margin:10px 0 0;display:flex;align-items:center;justify-content:center;gap:6px;animation:invPop .4s both}
 @media (prefers-reduced-motion:reduce){.invnext.anim,.invcol,.invmini,.invqrs,.actfound{animation:none}}
 
@@ -3579,6 +3616,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.40.1", "19. November 2026", ["Einladungen am PC: breite Pinnwand mit Code links und den drei Spalten rechts", "Tester ans Update erinnern: jeder Tester zeigt seine Version – „aktuell“ oder „alt“ – mit Knopf „Erinnern“ oder „Alle ans Update erinnern“", "Wer erinnert wird, bekommt einmal am Tag ein Mami-Fenster mit „Jetzt updaten“ und eine Meldung, auch wenn die App zu ist", "Einladungen: Tablet-Tester stehen nicht mehr fälschlich als „Android“ da"]],
   ["0.40.0", "19. November 2026", ["PC: Plus-Rad dreht beim Ziehen jetzt in die richtige Richtung – der Knopf bleibt unter der Maus und rastet sanft ein"]],
   ["0.39.9", "19. November 2026", ["Neu am PC: das Plus-Menü wie am Handy – alle Knöpfe auf einem Viertelkreis um das +, drehen mit Mausrad, Ziehen oder Pfeiltasten, vorne groß mit kurzer Erklärung", "Neu am PC: ein Entwickler-Knopf in der Kopfzeile mit Freigabe & Tester, Feedback-Eingang und Werkzeugen", "Tablet: im Plus-Rad fehlten Einstellungen, Profil und Hilfe – jetzt sind alle da", "Backup laden behält jetzt den Entwickler-Schlüssel", "Werkzeuge: Speicher-Anzeige zeigt wieder einen Wert"]],
   ["0.39.8", "19. November 2026", ["Tablet: „Alle Konten · umbuchen“ jetzt auch in der grünen Karte – vorher ging Umbuchen am Tablet gar nicht", "Umbuchungen bleiben auch nach Monaten richtig im Kontostand", "Übersetzungen ergänzt: Einstellungen-Übersicht, Import-Anleitung, Geräte, Speicher, Benachrichtigungen, Analyse", "Export: ohne Belegfotos kein leerer ZIP-Knopf mehr"]],
@@ -3856,6 +3894,7 @@ function ptourOpen(v){ const P=PTOUR[v]; if (!P) return; const steps=P.s.filter(
   TOUR.page=v; TOUR.steps=steps; tourGo(0); }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR=[
+  {v:"0.40.1", s:()=>updKey() ? [{sel:"#ntNone", center:1, ic:"bell", t:nt("nw_nu_t"), p:[nt("nw_nu_p")]}] : []},
   {v:"0.39.9", s:()=>IS_DESK ? [{sel:".tab.plus", ic:"plus", t:nt("nw_fan_t"), p:[nt("nw_fan_p")]}] : []},
   {v:"0.39.7", s:()=>IS_DESK ? [{sel:"#pcHero .pcaccs:has(.mvd)", ic:"repeat", t:nt("mv_sheet"), p:[nt("trh_mvpc")]}] : []},
   {v:"0.39.6", s:()=>IS_DESK ? [] : [{sel:"[data-mvopen]", ic:"repeat", t:nt("mv_sheet"), p:[nt("trh_mv")]}]},
@@ -4938,15 +4977,74 @@ function invRender(){
 /* Einladungs-Pinnwand für den Entwickler: nächster Code + drei Spalten */
 function invAgo(t){ if (!t) return ""; const s=Date.now()/1000-t; if (s<90) return nt("ago_now"); if (s<3600) return nt("ago_m",{n:Math.round(s/60)}); if (s<86400) return nt("ago_h",{n:Math.round(s/3600)}); return nt("ago_d",{n:Math.round(s/86400)}); }
 function invStage(x){ return x.act?2:(x.dl||x.app)?1:0; }
+/* Update-Erinnerung: welche Version ist für Handy, Tablet und PC freigegeben? */
+const vNum=v=>{ const m=String(v||"").match(/(\d+)\.(\d+)\.(\d+)/); return m?(+m[1])*1e6+(+m[2])*1e3+(+m[3]):0; };
+function invFormKey(f){ return f==="pc"||f==="laptop" ? "pc" : f==="tablet" ? "tablet" : "phone"; }
+function invNewest(L){ try{ relLoad(); }catch(_){}
+  const ow=relNum(REL.allBody,"web"), R={phone:ow, tablet:relNum(REL.allBody,"webt")||ow, pc:relNum(REL.allBody,"webp")||ow}, out={};
+  const any=(L||[]).map(x=>x.ver).filter(Boolean).sort((a,b)=>vNum(b)-vNum(a))[0]||"";
+  for (const k of ["phone","tablet","pc"]){ const own=R[k]?verName(R[k]).replace(/^v/,""):"", seen=R[k] ? ((L||[]).filter(x=>invFormKey(x.form)===k).map(x=>x.ver).sort((a,b)=>vNum(b)-vNum(a))[0]||"") : any;
+    out[k]=vNum(own)>=vNum(seen)?own:seen; }
+  return out; }
+function invOld(x, N){ if (invStage(x)!==2 || !x.ver) return false; const n=N[invFormKey(x.form)]; return !!n && vNum(x.ver)<vNum(n); }
+const invToday=t=>t && new Date(t*1000).toDateString()===new Date().toDateString();
+function invVerRow(x){ const N=UI.invNew||{}, n=N[invFormKey(x.form)]; if (!x.ver) return "";
+  if (!invOld(x,N)) return `<span class="invvc ok" data-noi18n>✓ v${esc(x.ver)} · ${esc(nt("nu_cur"))}</span>`;
+  const done=invToday(x.nudge);
+  return `<div class="invvr"><span class="invvc old" data-noi18n>v${esc(x.ver)} · ${esc(nt("nu_old"))}</span>${done?`<span class="invvdone" data-noi18n>✓ ${esc(nt("nu_done"))}</span>`:`<button class="invbell" data-invnudge="${esc(x.code)}" data-noi18n>${ic("bell",12)}${esc(nt("nu_btn"))}</button>`}</div>`; }
+function invUpdBox(L){ if (!L.length || UI.invLerr) return ""; const N=UI.invNew=invNewest(L), act=L.filter(x=>invStage(x)===2), old=act.filter(x=>invOld(x,N));
+  if (!act.length) return "";
+  const nv=[...new Set(old.map(x=>N[invFormKey(x.form)]))].filter(Boolean).map(v=>"v"+v).join(" / ");
+  if (!old.length) return `<div class="invupd ok"><b><span class="invok" aria-hidden="true">✓</span><span data-noi18n>${esc(nt("nu_all_ok"))}</span></b></div>`;
+  const todo=old.filter(x=>!invToday(x.nudge));
+  return `<div class="invupd"><span class="invupr" aria-hidden="true"></span><b>${ic("bell",15)}<span data-noi18n>${esc(nt(old.length===1?"nu_n1":"nu_n",{n:old.length}))}</span></b>
+    <p data-noi18n>${esc(nt("nu_box",{v:nv}))}</p>${todo.length?`<button class="invbell big" data-invnudge="*" data-noi18n>${ic("bell",14)}${esc(nt("nu_all"))}</button>`:`<span class="invvdone" data-noi18n>✓ ${esc(nt("nu_all_done"))}</span>`}</div>`; }
+async function invNudge(codes, btn){ const N=UI.invNew||{}, L=UI.invL||[], vers={};
+  codes.forEach(c=>{ const x=L.find(i=>i.code===c); if (x) vers[c]=N[invFormKey(x.form)]||""; });
+  const NOT={pc:/^(Neu (am|auf dem) )?(Tablet|Handy)\b/i, phone:/^(Neu (am|auf dem) )?(PC|Tablet)\b/i, tablet:/^(Neu (am|auf dem) )?(PC|Handy)\b/i}, itemsBy={};
+  codes.forEach(c=>{ const x=L.find(i=>i.code===c); if (!x) return; const k=invFormKey(x.form), out=[];
+    for (const [v, , it] of CHANGELOG){ if (!v || vNum(v)<=vNum(x.ver)) continue; for (const t of it||[]){ const tt=String(t).split(" – ")[0].trim(); if (out.length<3 && !NOT[k].test(tt)) out.push(tt.slice(0,80)); } }
+    itemsBy[c]=out; });
+  if (btn){ btn.disabled=true; btn.classList.add("busy"); }
+  try { const r=await pairCall("nudge","",{codes, vers, itemsBy, from:(S.settings.name||"").trim()},true); const now=Math.floor(Date.now()/1000);
+    L.forEach(x=>{ if (codes.includes(x.code)) x.nudge=now; }); SND.play("bell"); toast(nt(codes.length===1?"nu_sent1":"nu_sent",{n:codes.length})); invRender(); }
+  catch(e){ if (btn){ btn.disabled=false; btn.classList.remove("busy"); } toast(/Unbekannte Aktion/i.test(e.message||"")?nt("inv_oldsrv"):(e.message||"Server nicht erreichbar")); } }
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-invnudge]"); if (!b) return; e.preventDefault();
+  const N=UI.invNew||{}, L=UI.invL||[], codes=b.dataset.invnudge==="*" ? L.filter(x=>invOld(x,N) && !invToday(x.nudge)).map(x=>x.code) : [b.dataset.invnudge];
+  if (codes.length) invNudge(codes, b); });
+/* Tester-Seite: Erinnerung abholen – in der App als Mami-Fenster, sonst als Benachrichtigung */
+async function nudgeCheck(bg){ try {
+    if (window.claude || !window.AndroidBridge || !pairUrl() || updKey() || !actGet()) return;
+    const r=await pairCall("nudgeget","",{dev:devId()}); if (!r || !r.t || !r.ver || vNum(r.ver)<=vNum(curVerShort())) return;
+    const day=new Date().toDateString(), nm=(S.settings.name||"").trim(), who=(r.from||"").trim();
+    const title=nt(nm?"nu_t_n":"nu_t",{n:nm}), body=nt(who?"nu_b_w":"nu_b",{w:who, v:"v"+r.ver, o:"v"+curVerShort()});
+    const hidden=bg || BG_RUN || document.hidden;
+    if (hidden){ if (localStorage.getItem("hb-nudge-n")===day) return; localStorage.setItem("hb-nudge-n", day); try{ AndroidBridge.notifyNow(900002, title, body, "hinweise"); }catch(_){} return; }
+    if (localStorage.getItem("hb-nudge-s")===day) return;
+    if (document.querySelector("#nudgeBg,.backdrop:not([hidden]),#tourBg:not([hidden]),#actBg:not([hidden]),#mvBg:not([hidden])") || TOUR.i>=0 || wizShould() || UI.wiz){ clearTimeout(nudgeCheck.t); nudgeCheck.t=setTimeout(()=>nudgeCheck(), 20000); return; }
+    localStorage.setItem("hb-nudge-s", day); nudgeShow(r, title, who);
+  } catch(_){} }
+function nudgeShow(r, title, who){ const el=document.createElement("div"); el.id="nudgeBg"; el.className="nudgebg"; el.setAttribute("role","dialog"); el.setAttribute("aria-modal","true"); el.setAttribute("aria-labelledby","nudgeT");
+  const items=(typeof LANG==="string" && LANG!=="de") ? [] : (r.items||[]).slice(0,3);
+  el.innerHTML=`<div class="nudgesh" data-noi18n><img class="nudgemami" src="${mImg()}" alt=""><h3 id="nudgeT">${esc(title)}</h3><p>${esc(nt(who?"nu_p_w":"nu_p",{w:who}))}</p>
+    <div class="nudgev"><span class="old">${esc(nt("nu_yours",{v:"v"+curVerShort()}))}</span><span class="arr" aria-hidden="true">→</span><span class="new">${esc(nt("nu_new",{v:"v"+r.ver}))}</span></div>
+    ${items.length?`<ul>${items.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}
+    <button class="btn primary block" data-nudgego>${esc(nt("nu_go"))}</button><button class="link nudgelater" data-nudgelater>${esc(nt("nu_later"))}</button></div>`;
+  document.body.appendChild(el); requestAnimationFrame(()=>el.classList.add("show")); SND.play("bell"); try{ el.querySelector("[data-nudgego]").focus({preventScroll:true}); }catch(_){} }
+function nudgeClose(){ const el=$("nudgeBg"); if (!el) return false; el.classList.remove("show"); setTimeout(()=>el.remove(), 260); return true; }
+document.addEventListener("click", e=>{ if (e.target.closest("[data-nudgego]")){ nudgeClose(); try{ ghCheck(true, true); }catch(_){} toast(nt("nu_loading")); return; }
+  if (e.target.closest("[data-nudgelater]") || e.target.id==="nudgeBg"){ nudgeClose(); } });
+document.addEventListener("keydown", e=>{ if (e.key==="Escape" && $("nudgeBg")) nudgeClose(); });
+if (!BG_RUN){ setTimeout(()=>nudgeCheck(), 25000); setInterval(()=>nudgeCheck(), 15*60e3); document.addEventListener("visibilitychange", ()=>{ if (document.hidden) setTimeout(()=>nudgeCheck(true), 60e3); }); }
 function invBoard(){ const I=UI.inv||{}, L=UI.invL||[], calm=RMo();
   const cols=[[0,nt("inv_c0"),"var(--sunk)","no"],[1,nt("inv_c1"),"var(--warn-soft)","wa"],[2,nt("inv_c2"),"var(--accent-soft)","ok"]];
   const card=(x,i)=>{ const st=invStage(x), nm=x.name||x.code;
-    const sub= st===2 ? [x.form==="pc"?"PC":x.form==="tab"?"Tablet":x.form?"Android":"", x.ver?"v"+x.ver:"", invAgo(x.act)].filter(Boolean).join(" · ")
+    const sub= st===2 ? [x.form==="pc"||x.form==="laptop"?"PC":x.form==="tab"||x.form==="tablet"?"Tablet":x.form?"Android":"", x.ver?"v"+x.ver:"", invAgo(x.act)].filter(Boolean).join(" · ")
       : st===1 ? (x.app?nt("inv_s_app"):nt("inv_s_dl",{f:x.dlform==="zip"?"PC":"Android"}))+" · "+invAgo(x.app||x.dl)
       : (x.seen?nt("inv_s_seen"):nt("inv_s_sent"))+" · "+invAgo(x.seen||x.given);
     return `<div class="invmini" style="--i:${i}" data-invcard="${esc(x.code)}"><b>${esc(nm)}</b>${x.via?`<span class="invvia">${esc(nt("inv_via",{n:x.via}))}</span>`:""}${x.ios&&!x.act?`<span class="invios"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>${esc(nt("inv_ios"))}</span>`:""}<small>${esc(sub)}</small>${x.name?`<small class="invmc" data-noi18n>${esc(x.code)}</small>`:""}
       ${st===1&&x.app?`<span class="chip wa invrem">${ic("bell",12)}${nt("inv_auto")}</span>`:""}
-      ${st<2?`<button class="link small" data-invremind="${esc(x.code)}">${nt("inv_remind")}${x.remind?` <span class="muted">· ${invAgo(x.remind)}</span>`:""}</button>`:""}</div>`; };
+      ${st<2?`<button class="link small" data-invremind="${esc(x.code)}">${nt("inv_remind")}${x.remind?` <span class="muted">· ${invAgo(x.remind)}</span>`:""}</button>`:""}${st===2?invVerRow(x):""}</div>`; };
   const colH=cols.map(([k,t,bg,cl])=>{ const items=L.filter(x=>invStage(x)===k); return `<div class="invcol" style="--cb:${bg};--i:${k}"><h4><span>${t}</span><span class="chip ${cl}">${items.length}</span></h4>${items.length?items.map(card).join(""):`<p class="invempty">${nt("inv_none")}</p>`}</div>`; }).join("");
   return `<div class="invbox invboardbox" role="dialog" aria-modal="true" aria-labelledby="invT">
     <div class="invhd"><button class="iconbtn" data-invclose aria-label="Zurück">‹</button><b id="invT">${nt("inv_t")}</b>${UI.invIos?`<span class="invioschip" title="${esc(nt("inv_ios_n",{n:UI.invIos}))}" aria-label="${esc(nt("inv_ios_n",{n:UI.invIos}))}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg><span data-noi18n>${UI.invIos}</span></span>`:""}${UI.invSlots?`<button class="invcapb${UI.invSlots.slots>=UI.invSlots.cap?" full":""}" data-invcap aria-expanded="${!!UI.invCapEd}" aria-label="${esc(nt("inv_slots"))}" data-noi18n>${UI.invSlots.slots} / ${UI.invSlots.cap}</button>`:""}<button class="iconbtn invrl" data-invreload aria-label="${esc(nt("inv_reload"))}">${ic("repeat",18)}</button></div>
@@ -4956,6 +5054,7 @@ function invBoard(){ const I=UI.inv||{}, L=UI.invL||[], calm=RMo();
       <input class="in invname" id="invName" maxlength="40" placeholder="${esc(nt("inv_for"))}" value="${esc(UI.invName||"")}" autocomplete="off"></div>
       <div class="invnb"><button class="btn primary" data-invsharego>${ic("plus",16)}${nt("inv_go")}</button><button class="link small" data-invqr>${UI.invQr?nt("inv_qr_off"):nt("inv_qr")}</button></div>
       ${UI.invQr?`<div class="invqr invqrs">${qrSvg(invLink(I.code), 200)}</div>`:""}`}</div>
+    ${invUpdBox(L)}
     <div class="invcols">${UI.invLerr?`<p class="small" style="color:var(--bad)">${esc(UI.invLerr)}</p>`:colH}</div>
     <p class="small muted invfoot">${nt("inv_hint")}</p>
   </div>`; }
@@ -7806,6 +7905,7 @@ window.hbBg = async () => {
     try { zTripCheck(); zDevOutCheck(); } catch(_){}
     try { const v=UI.ym; UI.ym=ymOf(new Date()); renderHome(); UI.ym=v; } catch(_){}
     try { notifyPlan(); } catch(_){}
+    try { await nudgeCheck(true); } catch(_){}
   } finally { setTimeout(done, 400); }
 };
 let notifyT=null; function notifyPlanSoon(){ clearTimeout(notifyT); notifyT=setTimeout(notifyPlan, 1500); }
@@ -9783,6 +9883,31 @@ dv_tools:["Werkzeuge", "Tools", "Araçlar", "Инструменты", "Інст�
 dv_tools_s:["Fingerspur, Ruckel-Anzeige, Protokoll, Fehler", "Touch trail, frame rate, log, errors", "Dokunma izi, kare hızı, kayıt, hatalar", "След касаний, FPS, журнал, ошибки", "Слід дотиків, FPS, журнал, помилки", "Ślad dotyku, FPS, dziennik, błędy", "أثر اللمس، معدل الإطارات، السجل، الأخطاء", "Urmă atingeri, FPS, jurnal, erori"],
 nw_fan_t:["Neues Plus-Menü", "New plus menu", "Yeni artı menüsü", "Новое меню «плюс»", "Нове меню «плюс»", "Nowe menu plus", "قائمة الزائد الجديدة", "Meniu plus nou"],
 nw_fan_p:["Alles wie am Handy: Klick auf das + und dreh das Rad mit dem Mausrad, durch Ziehen oder mit den Pfeiltasten. Vorne steht, was ein Klick oder Enter öffnet.", "Just like on the phone: click the + and turn the wheel with the mouse wheel, by dragging or with the arrow keys. The one in front opens with a click or Enter.", "Telefondaki gibi: +'ya tıkla, çarkı fare tekerleğiyle, sürükleyerek ya da ok tuşlarıyla çevir. Öndeki, tıklayınca veya Enter'la açılır.", "Как на телефоне: нажми на + и крути колесо мышью, перетаскиванием или стрелками. Передний пункт открывается кликом или Enter.", "Як на телефоні: натисни + і крути колесо мишею, перетягуванням або стрілками. Передній пункт відкривається кліком або Enter.", "Jak na telefonie: kliknij + i obracaj koło kółkiem myszy, przeciąganiem lub strzałkami. Ten z przodu otworzysz kliknięciem lub Enter.", "تمامًا كما في الهاتف: انقر على + وأدر العجلة بعجلة الفأرة أو بالسحب أو بالأسهم. ما في المقدمة يُفتح بنقرة أو بـ Enter.", "Exact ca pe telefon: apasă pe + și rotește roata cu rotița, trăgând sau cu săgețile. Cel din față se deschide cu un clic sau Enter."],
+nu_cur:["aktuell", "up to date", "güncel", "актуально", "актуально", "aktualna", "محدّث", "la zi"],
+nu_old:["alt", "old", "eski", "старая", "стара", "stara", "قديم", "veche"],
+nu_btn:["Erinnern", "Remind", "Hatırlat", "Напомнить", "Нагадати", "Przypomnij", "ذكّر", "Amintește"],
+nu_done:["heute erinnert", "reminded today", "bugün hatırlatıldı", "напомнено сегодня", "нагадано сьогодні", "przypomniano dziś", "تم التذكير اليوم", "amintit azi"],
+nu_n1:["1 Tester nicht aktuell", "1 tester not up to date", "1 test eden güncel değil", "1 тестер не обновился", "1 тестувальник не оновився", "1 tester bez aktualizacji", "مختبِر واحد غير محدّث", "1 tester nu e la zi"],
+nu_n:["{n} Tester nicht aktuell", "{n} testers not up to date", "{n} test eden güncel değil", "{n} тестеров не обновились", "{n} тестувальників не оновилися", "{n} testerów bez aktualizacji", "{n} مختبِرين غير محدّثين", "{n} testeri nu sunt la zi"],
+nu_box:["Neu ist {v}. Mami erinnert sie in der App – und mit einer Meldung, auch wenn die App zu ist.", "{v} is out. Mami reminds them in the app – and with a notification, even when the app is closed.", "Yeni sürüm {v}. Mami onlara uygulamada ve uygulama kapalıyken bile bir bildirimle hatırlatır.", "Вышла {v}. Мами напомнит в приложении – и уведомлением, даже если оно закрыто.", "Вийшла {v}. Мамі нагадає в застосунку – і сповіщенням, навіть коли він закритий.", "Nowa wersja to {v}. Mami przypomni w aplikacji – i powiadomieniem, nawet gdy jest zamknięta.", "الإصدار الجديد {v}. ماما تذكّرهم في التطبيق – وبإشعار حتى لو كان التطبيق مغلقًا.", "Nou este {v}. Mami le amintește în aplicație – și printr-o notificare, chiar dacă e închisă."],
+nu_all:["Alle ans Update erinnern", "Remind everyone to update", "Herkese güncellemeyi hatırlat", "Напомнить всем обновиться", "Нагадати всім оновитися", "Przypomnij wszystkim o aktualizacji", "ذكّر الجميع بالتحديث", "Amintește-le tuturor să actualizeze"],
+nu_all_done:["Alle heute erinnert", "Everyone reminded today", "Herkese bugün hatırlatıldı", "Всем напомнено сегодня", "Усім нагадано сьогодні", "Wszystkim przypomniano dziś", "تم تذكير الجميع اليوم", "Toți au fost amintiți azi"],
+nu_all_ok:["Alle Tester sind aktuell", "All testers are up to date", "Tüm test edenler güncel", "Все тестеры обновлены", "Усі тестувальники оновлені", "Wszyscy testerzy mają aktualną wersję", "كل المختبِرين محدّثون", "Toți testerii sunt la zi"],
+nu_sent1:["Erinnerung ist unterwegs", "Reminder sent", "Hatırlatma gönderildi", "Напоминание отправлено", "Нагадування надіслано", "Przypomnienie wysłane", "تم إرسال التذكير", "Memento trimis"],
+nu_sent:["{n} Erinnerungen sind unterwegs", "{n} reminders sent", "{n} hatırlatma gönderildi", "Отправлено напоминаний: {n}", "Надіслано нагадувань: {n}", "Wysłano przypomnień: {n}", "تم إرسال {n} تذكيرات", "{n} mementouri trimise"],
+nu_t:["Es gibt ein Update!", "There's an update!", "Bir güncelleme var!", "Есть обновление!", "Є оновлення!", "Jest aktualizacja!", "يوجد تحديث!", "Există o actualizare!"],
+nu_t_n:["{n}, es gibt ein Update!", "{n}, there's an update!", "{n}, bir güncelleme var!", "{n}, есть обновление!", "{n}, є оновлення!", "{n}, jest aktualizacja!", "{n}، يوجد تحديث!", "{n}, există o actualizare!"],
+nu_b:["Hol dir {v} – du hast noch {o}.", "Get {v} – you still have {o}.", "{v} sürümünü al – sende hâlâ {o} var.", "Установи {v} – у тебя ещё {o}.", "Встанови {v} – у тебе ще {o}.", "Pobierz {v} – masz jeszcze {o}.", "احصل على {v} – لديك ما زال {o}.", "Ia {v} – încă ai {o}."],
+nu_b_w:["{w} bittet dich, {v} zu holen. Du hast noch {o}.", "{w} asks you to get {v}. You still have {o}.", "{w} senden {v} sürümünü almanı istiyor. Sende hâlâ {o} var.", "{w} просит установить {v}. У тебя ещё {o}.", "{w} просить встановити {v}. У тебе ще {o}.", "{w} prosi cię o pobranie {v}. Masz jeszcze {o}.", "{w} يطلب منك الحصول على {v}. لديك ما زال {o}.", "{w} te roagă să iei {v}. Încă ai {o}."],
+nu_p:["Hol dir die neue Version – damit du die neuesten Sachen testest.", "Get the new version – so you're testing the latest things.", "Yeni sürümü al – en yeni şeyleri test etmek için.", "Установи новую версию – чтобы тестировать самое новое.", "Встанови нову версію – щоб тестувати найновіше.", "Pobierz nową wersję – żeby testować najnowsze rzeczy.", "احصل على الإصدار الجديد – لتختبر أحدث الأشياء.", "Ia versiunea nouă – ca să testezi cele mai noi lucruri."],
+nu_p_w:["{w} bittet dich, die neue Version zu holen – damit du die neuesten Sachen testest.", "{w} asks you to get the new version – so you're testing the latest things.", "{w} yeni sürümü almanı istiyor – en yeni şeyleri test etmek için.", "{w} просит установить новую версию – чтобы ты тестировал самое новое.", "{w} просить встановити нову версію – щоб ти тестував найновіше.", "{w} prosi cię o pobranie nowej wersji – żebyś testował najnowsze rzeczy.", "{w} يطلب منك الحصول على الإصدار الجديد – لتختبر أحدث الأشياء.", "{w} te roagă să iei versiunea nouă – ca să testezi cele mai noi lucruri."],
+nu_yours:["deine {v}", "your {v}", "seninki {v}", "у тебя {v}", "у тебе {v}", "twoja {v}", "لديك {v}", "a ta {v}"],
+nu_new:["neu {v}", "new {v}", "yeni {v}", "новая {v}", "нова {v}", "nowa {v}", "الجديد {v}", "nouă {v}"],
+nu_go:["Jetzt updaten", "Update now", "Şimdi güncelle", "Обновить сейчас", "Оновити зараз", "Aktualizuj teraz", "حدّث الآن", "Actualizează acum"],
+nu_later:["Später", "Later", "Sonra", "Позже", "Пізніше", "Później", "لاحقًا", "Mai târziu"],
+nu_loading:["Update wird geholt …", "Getting the update …", "Güncelleme alınıyor …", "Загружаю обновление …", "Завантажую оновлення …", "Pobieram aktualizację …", "جارٍ جلب التحديث …", "Se descarcă actualizarea …"],
+nw_nu_t:["Tester ans Update erinnern", "Remind testers to update", "Test edenlere güncellemeyi hatırlat", "Напомнить тестерам об обновлении", "Нагадати тестувальникам про оновлення", "Przypomnij testerom o aktualizacji", "ذكّر المختبِرين بالتحديث", "Amintește-le testerilor să actualizeze"],
+nw_nu_p:["In den Einladungen siehst du jetzt bei jedem Tester seine Version. Wer noch eine alte hat, erinnerst du mit einem Klick – Mami meldet sich dann bei ihm, auch wenn die App zu ist.", "In Invitations you now see each tester's version. Remind anyone on an old one with one click – Mami then reaches out to them, even when the app is closed.", "Davetlerde artık her test edenin sürümünü görürsün. Eski sürümde olanı tek tıkla hatırlatırsın – Mami, uygulama kapalıyken bile ona ulaşır.", "В приглашениях теперь видна версия каждого тестера. Тому, у кого старая, напомнишь одним кликом – Мами напишет ему, даже если приложение закрыто.", "У запрошеннях тепер видно версію кожного тестувальника. Тому, хто на старій, нагадаєш одним кліком – Мамі напише йому, навіть коли застосунок закритий.", "W zaproszeniach widzisz teraz wersję każdego testera. Temu, kto ma starą, przypomnisz jednym kliknięciem – Mami odezwie się do niego, nawet gdy aplikacja jest zamknięta.", "في الدعوات ترى الآن إصدار كل مختبِر. من لديه إصدار قديم تذكّره بنقرة واحدة – وتتواصل معه ماما حتى لو كان التطبيق مغلقًا.", "La invitații vezi acum versiunea fiecărui tester. Pe cine are una veche îl amintești cu un clic – Mami îi scrie, chiar dacă aplicația e închisă."],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
@@ -13376,6 +13501,7 @@ $("backupFile").addEventListener("change", async e => {
 });
 
 window.hbBack = () => {
+  if (nudgeClose()) return true;
   if (!$("mvBg") && $("mvSheet") && !$("mvSheet").hidden){ mvSheetClose(); return true; }
   if ($("mvBg") && !$("mvBg").hidden){ if ($("mvSheet") && !$("mvSheet").hidden) mvSheetClose(); else mvClose(); return true; }
   if ($("codeBg") && !$("codeBg").hidden){ codeClose(); return true; }

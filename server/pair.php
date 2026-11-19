@@ -119,6 +119,7 @@ function smtpSend(string $to, string $subject, string $mime, string $ctype): boo
     @fwrite($fp, "QUIT\r\n"); fclose($fp); return $ok;
 }
 const DEV_REPO = 'minghatsu/Haushaltsbuch';
+function nudgeTable(): void { db()->exec('CREATE TABLE IF NOT EXISTS nudges (code TEXT PRIMARY KEY, t INTEGER, ver TEXT, frm TEXT, items TEXT)'); }
 function devCheck(): void {
     $h = (string)($_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? ''));
     if (!preg_match('/^Dev\s+([A-Za-z0-9_]{20,255})$/', trim($h), $m)) fail('Kein Entwickler-Schlüssel', 401);
@@ -291,7 +292,7 @@ try {
             out(['c' => '']);
         }
         if ($a === 'devinv') {
-            devCheck(); $L = [];
+            devCheck(); $L = []; nudgeTable();
             foreach (q('SELECT code, name, owner, created, given, seen, dl, dlform, app, remind, lvl, ios FROM invites WHERE COALESCE(off, 0) = 0 AND (given IS NOT NULL OR code IN (SELECT code FROM acts)) ORDER BY COALESCE(given, created) DESC LIMIT 200')->fetchAll(PDO::FETCH_ASSOC) as $x) {
                 $act = q('SELECT dev, t FROM acts WHERE code = ? ORDER BY t LIMIT 1', [$x['code']])->fetch(PDO::FETCH_ASSOC);
                 $p = $act ? q('SELECT ver, form, role, t FROM pings WHERE h = ?', [hash('sha256', 'ping|' . $act['dev'])])->fetch(PDO::FETCH_ASSOC) : null;
@@ -302,10 +303,33 @@ try {
                     if ($vr) $via = (string)($vr['name'] ?: $vr['code']); }
                 $L[] = ['via' => $via, 'ios' => (int)($x['ios'] ?? 0), 'code' => $x['code'], 'name' => (string)($x['name'] ?? ''), 'given' => (int)($x['given'] ?? 0), 'seen' => (int)($x['seen'] ?? 0), 'dl' => (int)($x['dl'] ?? 0),
                     'dlform' => (string)($x['dlform'] ?? ''), 'app' => (int)($x['app'] ?? 0), 'remind' => (int)($x['remind'] ?? 0), 'act' => $act ? (int)$act['t'] : 0,
-                    'ver' => $p ? (string)$p['ver'] : '', 'form' => $p ? (string)$p['form'] : '', 'last' => $p ? (int)$p['t'] : 0];
+                    'ver' => $p ? (string)$p['ver'] : '', 'form' => $p ? (string)$p['form'] : '', 'last' => $p ? (int)$p['t'] : 0,
+                    'nudge' => (int)(q('SELECT COALESCE(MAX(t), 0) FROM nudges WHERE code = ?', [$x['code']])->fetchColumn())];
             }
             out(['items' => $L, 'slots' => invUsed(), 'cap' => invCap(), 'ios' => (int)q('SELECT COUNT(*) FROM invites WHERE ios IS NOT NULL AND COALESCE(off, 0) = 0')->fetchColumn()]);
         }
+    }
+    // ---- Update-Erinnerung: Entwickler bittet Tester, die neue Version zu holen ----
+    if ($a === 'nudge') {
+        devCheck(); nudgeTable(); $b = body();
+        $from = mb_substr(trim((string)($b['from'] ?? '')), 0, 30);
+        $clean = function ($L): array { $o = []; foreach (array_slice(is_array($L) ? $L : [], 0, 3) as $it) { $it = mb_substr(trim((string)$it), 0, 90); if ($it !== '') $o[] = $it; } return $o; };
+        $items = $clean($b['items'] ?? []); $by = is_array($b['itemsBy'] ?? null) ? $b['itemsBy'] : [];
+        $vers = (array)($b['vers'] ?? []); $n = 0;
+        foreach (array_slice((array)($b['codes'] ?? []), 0, 200) as $c) {
+            $c = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string)$c)); if ($c === '') continue;
+            $v = substr(preg_replace('/[^0-9.]/', '', (string)($vers[$c] ?? '')), 0, 12);
+            q('INSERT OR REPLACE INTO nudges (code, t, ver, frm, items) VALUES (?, ?, ?, ?, ?)', [$c, time(), $v, $from, json_encode(isset($by[$c]) ? $clean($by[$c]) : $items, JSON_UNESCAPED_UNICODE)]); $n++;
+        }
+        out(['ok' => true, 'n' => $n]);
+    }
+    if ($a === 'nudgeget') {
+        nudgeTable(); $b = body(); $dev = (string)($b['dev'] ?? '');
+        if (!preg_match('/^[A-Za-z0-9_-]{6,64}$/', $dev)) out(['t' => 0]);
+        db()->exec('CREATE TABLE IF NOT EXISTS acts (code TEXT NOT NULL, dev TEXT NOT NULL, t INTEGER, PRIMARY KEY (code, dev))');
+        $r = q('SELECT n.t, n.ver, n.frm, n.items FROM nudges n JOIN acts a ON a.code = n.code WHERE a.dev = ? ORDER BY n.t DESC LIMIT 1', [$dev])->fetch(PDO::FETCH_ASSOC);
+        if (!$r) out(['t' => 0]);
+        out(['t' => (int)$r['t'], 'ver' => (string)$r['ver'], 'from' => (string)$r['frm'], 'items' => json_decode((string)$r['items'], true) ?: []]);
     }
     if ($a === 'invcap') {
         devCheck(); $n = (int)(body()['cap'] ?? 0);
