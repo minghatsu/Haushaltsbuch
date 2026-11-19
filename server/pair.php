@@ -30,7 +30,7 @@ function fail(string $msg, int $code): void { out(['error' => $msg], $code); }
 function body(): array { static $b = null; if ($b === null) { $j = json_decode(file_get_contents('php://input') ?: '{}', true); $b = is_array($j) ? $j : []; } return $b; }
 function ipH(): string { return hash('sha256', 'invip|' . ip()); }
 function invCols(): void {
-    foreach (['name TEXT', 'given INTEGER', 'seen INTEGER', 'dl INTEGER', 'dlform TEXT', 'app INTEGER', 'iph TEXT', 'remind INTEGER'] as $col) { try { db()->exec('ALTER TABLE invites ADD COLUMN ' . $col); } catch (Throwable $e) { } }
+    foreach (['name TEXT', 'given INTEGER', 'seen INTEGER', 'dl INTEGER', 'dlform TEXT', 'app INTEGER', 'iph TEXT', 'remind INTEGER', 'ios INTEGER'] as $col) { try { db()->exec('ALTER TABLE invites ADD COLUMN ' . $col); } catch (Throwable $e) { } }
 }
 // Testplätze: gemeinsame Grenze für alle Tester zusammen (der Entwickler kann sie ändern)
 function invCap(): int {
@@ -250,7 +250,7 @@ try {
         out(['ok' => true]);
     }
     // ---- Einladungen: Verlauf (verschickt → Seite geöffnet → geladen → App offen → freigeschaltet) ----
-    if (in_array($a, ['invgive', 'invname', 'invseen', 'invdl', 'actwait', 'devinv', 'invremind'], true)) {
+    if (in_array($a, ['invgive', 'invname', 'invseen', 'invdl', 'iosint', 'actwait', 'devinv', 'invremind'], true)) {
         db()->exec('CREATE TABLE IF NOT EXISTS invites (code TEXT PRIMARY KEY, owner TEXT UNIQUE, max INTEGER, lvl INTEGER DEFAULT 1, created INTEGER)');
         db()->exec('CREATE TABLE IF NOT EXISTS acts (code TEXT NOT NULL, dev TEXT NOT NULL, t INTEGER, PRIMARY KEY (code, dev))');
         db()->exec('CREATE TABLE IF NOT EXISTS pings (h TEXT PRIMARY KEY, ver TEXT, form TEXT, role TEXT, t INTEGER)');
@@ -266,6 +266,13 @@ try {
             if ($a === 'invgive') q('UPDATE invites SET given = COALESCE(given, ?), name = CASE WHEN ? <> \'\' THEN ? ELSE name END WHERE code = ?', [time(), $name, $name, $c]);
             elseif ($a === 'invname') q('UPDATE invites SET name = ? WHERE code = ?', [$name, $c]);
             else q('UPDATE invites SET remind = ? WHERE code = ?', [time(), $c]);
+            out(['ok' => true]);
+        }
+        if ($a === 'iosint') {
+            // iPhone-Nutzer merkt sich für die iPhone-App vor (Code ist persönlich)
+            if (!ipCount('ipinvseen', 120)) out(['ok' => false]); ipBump('ipinvseen');
+            if ($c === '') out(['ok' => false]);
+            q('UPDATE invites SET seen = COALESCE(seen, ?), ios = COALESCE(ios, ?), iph = ? WHERE code = ? AND COALESCE(off, 0) = 0', [time(), time(), ipH(), $c]);
             out(['ok' => true]);
         }
         if ($a === 'invseen' || $a === 'invdl') {
@@ -285,7 +292,7 @@ try {
         }
         if ($a === 'devinv') {
             devCheck(); $L = [];
-            foreach (q('SELECT code, name, owner, created, given, seen, dl, dlform, app, remind, lvl FROM invites WHERE COALESCE(off, 0) = 0 AND (given IS NOT NULL OR code IN (SELECT code FROM acts)) ORDER BY COALESCE(given, created) DESC LIMIT 200')->fetchAll(PDO::FETCH_ASSOC) as $x) {
+            foreach (q('SELECT code, name, owner, created, given, seen, dl, dlform, app, remind, lvl, ios FROM invites WHERE COALESCE(off, 0) = 0 AND (given IS NOT NULL OR code IN (SELECT code FROM acts)) ORDER BY COALESCE(given, created) DESC LIMIT 200')->fetchAll(PDO::FETCH_ASSOC) as $x) {
                 $act = q('SELECT dev, t FROM acts WHERE code = ? ORDER BY t LIMIT 1', [$x['code']])->fetch(PDO::FETCH_ASSOC);
                 $p = $act ? q('SELECT ver, form, role, t FROM pings WHERE h = ?', [hash('sha256', 'ping|' . $act['dev'])])->fetch(PDO::FETCH_ASSOC) : null;
                 if ($p && $p['role'] === 'dev') continue;
@@ -293,11 +300,11 @@ try {
                 if ((int)$x['lvl'] === 1) { $od = explode('#', (string)$x['owner'])[0];
                     $vr = q('SELECT i.code, i.name FROM acts a JOIN invites i ON i.code = a.code WHERE a.dev = ? ORDER BY a.t LIMIT 1', [$od])->fetch(PDO::FETCH_ASSOC);
                     if ($vr) $via = (string)($vr['name'] ?: $vr['code']); }
-                $L[] = ['via' => $via, 'code' => $x['code'], 'name' => (string)($x['name'] ?? ''), 'given' => (int)($x['given'] ?? 0), 'seen' => (int)($x['seen'] ?? 0), 'dl' => (int)($x['dl'] ?? 0),
+                $L[] = ['via' => $via, 'ios' => (int)($x['ios'] ?? 0), 'code' => $x['code'], 'name' => (string)($x['name'] ?? ''), 'given' => (int)($x['given'] ?? 0), 'seen' => (int)($x['seen'] ?? 0), 'dl' => (int)($x['dl'] ?? 0),
                     'dlform' => (string)($x['dlform'] ?? ''), 'app' => (int)($x['app'] ?? 0), 'remind' => (int)($x['remind'] ?? 0), 'act' => $act ? (int)$act['t'] : 0,
                     'ver' => $p ? (string)$p['ver'] : '', 'form' => $p ? (string)$p['form'] : '', 'last' => $p ? (int)$p['t'] : 0];
             }
-            out(['items' => $L, 'slots' => invUsed(), 'cap' => invCap()]);
+            out(['items' => $L, 'slots' => invUsed(), 'cap' => invCap(), 'ios' => (int)q('SELECT COUNT(*) FROM invites WHERE ios IS NOT NULL AND COALESCE(off, 0) = 0')->fetchColumn()]);
         }
     }
     if ($a === 'invcap') {

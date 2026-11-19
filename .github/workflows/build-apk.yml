@@ -230,6 +230,69 @@ jobs:
           for f in $(gh release view testfotos --json assets -q '.assets[].name' | grep "^${{ matrix.name }}-" || true); do gh release delete-asset testfotos "$f" -y || true; done
           gh release upload testfotos /tmp/shots/*.png --clobber
 
+  ios:
+    name: iPhone-App (ohne Signatur)
+    needs: web
+    runs-on: macos-15
+    continue-on-error: true
+    timeout-minutes: 40
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-html
+          path: dl
+      - name: Web-App einpacken
+        run: |
+          mkdir -p ios/www && cp dl/app.html ios/www/index.html
+          ls -la ios/www
+      - name: Xcode-Projekt erzeugen
+        run: |
+          brew install xcodegen >/dev/null
+          cd ios && xcodegen generate
+      - name: Für den Simulator bauen
+        run: |
+          cd ios
+          N=${{ github.run_number }}
+          xcodebuild -project FinanzMAMI.xcodeproj -scheme FinanzMAMI -configuration Release -sdk iphonesimulator \
+            -derivedDataPath build/sim MARKETING_VERSION=0.$((N/10)).$((N%10)) CURRENT_PROJECT_VERSION=$N CODE_SIGNING_ALLOWED=NO build | tail -25
+      - name: Im iPhone-Simulator starten (Start-Test mit Bildschirmfoto)
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import sys,json;d=json.load(sys.stdin)['devices'];l=[x for k in sorted(d,reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone') and 'Pro Max' not in x['name']];print(l[0]['udid'])")
+          echo "Simulator: $UDID"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          APP=$(find ios/build/sim -name "FinanzMAMI.app" -type d | head -1)
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl launch "$UDID" de.sascha.haushaltsbuch
+          sleep 25
+          mkdir -p shots && xcrun simctl io "$UDID" screenshot shots/iphone-start.png
+          xcrun simctl spawn "$UDID" launchctl list | grep -q haushaltsbuch && echo "App läuft" || { echo "::error::Die iPhone-App läuft nach dem Start nicht"; exit 1; }
+      - name: Fürs iPhone bauen (unsigniert – zum Hochladen braucht es später das Apple-Konto)
+        run: |
+          cd ios
+          N=${{ github.run_number }}
+          xcodebuild -project FinanzMAMI.xcodeproj -scheme FinanzMAMI -configuration Release -sdk iphoneos -derivedDataPath build/dev \
+            MARKETING_VERSION=0.$((N/10)).$((N%10)) CURRENT_PROJECT_VERSION=$N CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build | tail -15
+          APP=$(find build/dev -name "FinanzMAMI.app" -type d -path "*iphoneos*" | head -1)
+          mkdir -p Payload && cp -R "$APP" Payload/ && zip -qry ../FinanzMAMI-unsigniert.ipa Payload
+          ls -la ../FinanzMAMI-unsigniert.ipa
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iphone-app
+          path: |
+            FinanzMAMI-unsigniert.ipa
+            shots/iphone-start.png
+          retention-days: 14
+      - name: Bildschirmfoto ablegen (Release „testfotos“)
+        if: always()
+        run: |
+          [ -f shots/iphone-start.png ] || exit 0
+          gh release view testfotos >/dev/null 2>&1 || gh release create testfotos --prerelease --title "Testfotos (automatisch)" --notes "Bildschirmfotos der automatischen Tests."
+          gh release upload testfotos shots/iphone-start.png --clobber
+
   web-release:
     name: Veröffentlichen (nur App-Inhalt)
     needs: [web, gesten, android-test]

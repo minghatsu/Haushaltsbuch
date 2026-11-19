@@ -1,0 +1,36 @@
+# iPhone-App: dieselbe Web-App wie auf Android, in einer WKWebView-Hülle.
+# Erzeugt mit XcodeGen (auf GitHub, macOS). Signieren/TestFlight erst mit Apple-Entwicklerkonto.
+name: FinanzMAMI
+options:
+  bundleIdPrefix: de.sascha
+  deploymentTarget:
+    iOS: "15.0"
+  createIntermediateGroups: true
+targets:
+  FinanzMAMI:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+      - path: www
+        type: folder
+        buildPhase: resources
+    scheme: {}
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.sascha.haushaltsbuch
+        PRODUCT_NAME: FinanzMAMI
+        MARKETING_VERSION: "0.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Finanz MAMI
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.finance
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_NSCameraUsageDescription: "Damit du Kassenbons, Briefe und QR-Codes fotografieren kannst."
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Damit du Fotos von Kassenbons und Briefen auswählen kannst."
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.0"
