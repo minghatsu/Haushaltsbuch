@@ -855,7 +855,7 @@ if (IS_PC){
   const _rf=renderFix;
   renderFix = function(){
     if (UI.fixEdit) { $("v-fix").classList.remove("pcfcal"); return _rf(); }
-    if ($("v-fix").contains(document.activeElement) && document.activeElement.id==="fxAmtIn") return;
+    if (($("v-fix").contains(document.activeElement) && document.activeElement.id==="fxAmtIn") || pdHold($("v-fix"))) return;
     const ym=UI.ym, c=monthCalc(ym), paid=c.paid||{}, cur=ymOf(new Date()), today=ym===cur?new Date().getDate():ym<cur?99:0;
     const mName=MONTHS[ymParts(ym)[1]-1], D=daysIn(ym), [y,m]=ymParts(ym), first=(new Date(y,m-1,1).getDay()+6)%7;
     const all=fixedSorted().filter(f=>dueIn(f,ym) || f.id in paid);
@@ -1560,7 +1560,7 @@ if (IS_PC){
         :`<button class="pctk pctnew" data-pctnew="abos" style="--i:${L.length}">+ Abo anlegen</button>`}</div>`; };
 
   window.pcTilePane=k=>PT[k]?`<div class="pctpane" data-pctk="${k}">${PT[k]()}</div>`:null;
-  const repaint=()=>{ const el=document.querySelector("#pcsR .pctpane"); if (!el) return; if (el.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) return; const k=el.dataset.pctk; el.innerHTML=PT[k](); el.classList.add("still"); };
+  const repaint=()=>{ const el=document.querySelector("#pcsR .pctpane"); if (!el) return; if ((el.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) || pdHold(el)) return; const k=el.dataset.pctk; el.innerHTML=PT[k](); el.classList.add("still"); };
   window.pcTileRepaint=repaint;
   const after=(msg)=>{ UI.pctAdd=""; try { document.activeElement && document.activeElement.blur(); } catch(_){} if (msg) toast(msg); repaint(); };
 

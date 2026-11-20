@@ -3556,7 +3556,7 @@ document.addEventListener("click", e=>{ if (e.target.closest("[data-tipoff]")){ 
 document.addEventListener("click", e=>{ if (e.target.closest("#stmtMore")){ const im=UI.imp&&UI.imp.photo?UI.imp:null; CAM.pages=im?im.pages:null; CAM.raw=im?im.raw:null; smartScan({type:"stmt"}); } });
 document.addEventListener("click", e=>{ if (e.target.closest("[data-potall]")){ UI.potAll=!UI.potAll; render(); } });
 function renderAmtEd(){
-  const el=$("amtEd"); if (!el) return; if (el.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) return;
+  const el=$("amtEd"); if (!el) return; if ((el.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) || pdHold(el)) return;
   const j=jlCfg(), w=S.settings.work, P=prof()||GPROF.alg, mini=Number(j.mini)||0, today=isoToday();
   const ecats=cats("ausgabe"), end=profEnd();
   el.innerHTML=`
@@ -3686,6 +3686,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.40.4", "20. November 2026", ["PC: Bei den Fixkosten verschwand die Auswahl „Monatlich / Vierteljährlich / Jährlich …“, wenn man vorher einen Namen oder Betrag eingetippt hatte – behoben, auch in anderen Listen mit Auswahlfeldern"]],
   ["0.40.3", "19. November 2026", ["„Alle Konten“ klappt jetzt wie ein Kartenstapel auf: die Spaces ziehen sich hinter der Hauptkarte zusammen und werden dann nacheinander darunter ausgeteilt – beim Schließen läuft es rückwärts"]],
   ["0.40.2", "19. November 2026", ["Neu in den Einladungen: „Link für Posts“ – ein Link für Facebook & Co., jeder Besucher bekommt automatisch seinen eigenen Code", "Wer den Link nochmal öffnet, sieht wieder seinen Code von vorhin – höchstens 20 neue Codes am Tag", "Link pausieren oder erneuern; die Pinnwand zeigt, wie viele über den Link kamen"]],
   ["0.40.1", "19. November 2026", ["Einladungen am PC: breite Pinnwand mit Code links und den drei Spalten rechts", "Tester ans Update erinnern: jeder Tester zeigt seine Version – „aktuell“ oder „alt“ – mit Knopf „Erinnern“ oder „Alle ans Update erinnern“", "Wer erinnert wird, bekommt einmal am Tag ein Mami-Fenster mit „Jetzt updaten“ und eine Meldung, auch wenn die App zu ist", "Einladungen: Tablet-Tester stehen nicht mehr fälschlich als „Android“ da"]],
@@ -5985,7 +5986,7 @@ document.addEventListener("click", e=>{ const t=e.target;
   if (c.classList.contains("side") || (st && st._drag && Date.now()-st._drag<450)) return; acEditOpen(c); });
 document.addEventListener("keydown", e=>{ const f=e.target.closest&&e.target.closest(".aback"); if (!f) return; if (e.key==="Enter"){ e.preventDefault(); acEditSave(f.closest(".acard")); } else if (e.key==="Escape"){ e.preventDefault(); acEditClose(f.closest(".acard")); } });
 function renderHome(){
-  if ($("v-home").contains(document.activeElement) && /^(INPUT|SELECT)$/.test(document.activeElement.tagName)) return;
+  if (($("v-home").contains(document.activeElement) && /^(INPUT|SELECT)$/.test(document.activeElement.tagName)) || pdHold($("v-home"))) return;
   const ym=UI.ym, c=monthCalc(ym), cum=yearCum(ym), cur=ymOf(new Date());
   const free = cum.balance - cum.reserveBal - c.fixOpen;
   let days=0, dayNote="";
@@ -6274,7 +6275,7 @@ function invGoalsHtml(v){ const G=v.goals;
     ${UI.invNewGoal?`<div class="invgoal invform"><b>Neues Anlage-Ziel</b><label>Name<input class="in" id="invgN" placeholder="z. B. Eigenkapital Wohnung" value="${esc(UI.invNewGoal.name||"")}"></label><div class="grid2"><label>Ziel<input class="in" id="invgT" inputmode="decimal" value="${esc(numStr(UI.invNewGoal.T||10000))}"></label><label>Bis<input class="in" id="invgU" type="month" value="${esc(UI.invNewGoal.until||numYm(ymNum(ymOf(new Date()))+60))}"></label><label>Zins % pro Jahr<input class="in" id="invgR" inputmode="decimal" value="${esc(invPct(UI.invNewGoal.r??4))}"></label><label>Schon angelegt<input class="in" id="invgP" inputmode="decimal" value="${esc(numStr(UI.invNewGoal.P||0))}"></label></div><div class="row-btns"><button class="btn" data-invgcancel="1">Abbrechen</button><button class="btn primary" data-invgsave="1">Anlegen</button></div></div>`
       :`<button class="invnew" data-invgnew="1">+ Anlage-Ziel anlegen</button>`}`; }
 function renderInvest(){
-  const el=$("investEd"); if (!el) return; if (el.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) return;
+  const el=$("investEd"); if (!el) return; if ((el.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName)) || pdHold(el)) return;
   const v=inv(), t=UI.invTab||"calc", sub=UI.invSub||"calc";
   el.innerHTML=`<div class="invtabs" role="tablist" ${IS_PC?"hidden":""}>${[["calc","Zinseszins"],["cmp","Vergleich"],["goals","Anlage-Ziele"]].map(([k,l])=>`<button role="tab" data-invtab="${k}" aria-selected="${t===k}" class="${t===k?"on":""}">${l}</button>`).join("")}</div>
     <div class="invbody">${(()=>{ const secCalc=`<div class="invsub">${[["calc","Was wird daraus?"],["plan","Ziel planen"]].map(([k,l])=>`<button data-invsub="${k}" class="${sub===k?"on":""}">${l}</button>`).join("")}</div>
@@ -7231,7 +7232,7 @@ document.addEventListener("click", e=>{ const c=e.target.closest("[data-anachart
 let TL_={};
 function anaFill(t, force){
   const body=$("anaBody");
-  if (!force && body.contains(document.activeElement) && /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  if (!force && ((body.contains(document.activeElement) && /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) || pdHold(body))) return;
   const col=userCol("ana",t.k)||themeCol((TL_[t.k]||[])[1], ["kpi","cat","trend","io","calc","plan","lohn","wk","tax","euer"].indexOf(t.k))||"var(--accent)";
   $("anaBg").querySelector(".sheet").style.setProperty("--tc", col);
   $("anaHead").innerHTML=`<span class="ic">${ic(t.icon,18)}</span><span class="n"><b>${t.title}</b><span class="small muted">${t.sub}</span></span>`;
@@ -7327,7 +7328,7 @@ function renderList(){
 }
 
 function renderFix(){
-  if ($("v-fix").contains(document.activeElement) && /^(INPUT|SELECT)$/.test(document.activeElement.tagName)) return;
+  if (($("v-fix").contains(document.activeElement) && /^(INPUT|SELECT)$/.test(document.activeElement.tagName)) || pdHold($("v-fix"))) return;
   const c=monthCalc(UI.ym), paid=c.paid, past=UI.ym<ymOf(new Date());
   const shown=new Set(fixedForMonth(UI.ym, UI.fixShowAll).map(f=>f.id));
   const fx=UI.fixEdit ? fixedSorted() : fixedSorted().filter(f=>shown.has(f.id));
@@ -7940,6 +7941,12 @@ function planEditor(d, plan){
 /* Benachrichtigungen */
 const NOTIFY_DEF = { on:false, budget:true, minus:true, reserve:true, debt:true, goal:true, fix:"3,25", daily:"", imp:"14", tax:true, week:false, month:true, hour:"9" };
 const CAN_NOTIFY = !!(window.AndroidBridge && window.AndroidBridge.notifySchedule);
+/* Beim Klick in ein Auswahlfeld nicht neu zeichnen: sonst verschwindet z. B. die Liste „Monatlich/Vierteljährlich…“,
+   weil das Speichern des vorigen Feldes genau in diesem Moment die Seite neu aufbaut (am PC besonders schnell). */
+var PD={t:null, skip:0};
+function pdHold(el){ const t=PD&&PD.t; if (t && el && el.contains(t) && t.closest && t.closest("select,input,textarea")){ PD.skip=1; return true; } return false; }
+(function(){ const end=()=>{ const t=PD.t; setTimeout(()=>{ if (PD.t!==t) return; PD.t=null; if (PD.skip){ PD.skip=0; try{ render(); }catch(_){} } }, 350); };
+  document.addEventListener("pointerdown", e=>{ PD.t=e.target; }, true); document.addEventListener("pointerup", end, true); document.addEventListener("pointercancel", end, true); })();
 const IS_DESK = !!(window.AndroidBridge && window.AndroidBridge.desktop);
 const IS_TAB = !IS_DESK && (()=>{ try { if (localStorage.getItem("hb-forcetab")==="1") return true; } catch(_){}
   return !!window.AndroidBridge && Math.min(screen.width||0, screen.height||0) >= 600; })();
@@ -13407,7 +13414,7 @@ function renderImport(){
     v.innerHTML = `<div class="card" style="text-align:center;padding:32px 20px"><span class="ictile" style="margin:0 auto 12px;width:56px;height:56px;border-radius:18px;background:var(--accent-soft);color:var(--accent)">${ic("arrowDown",26)}</span><h2>Buchungen werden übernommen …</h2><div class="progress-big" style="margin:18px 0 8px"><div class="fill" style="width:${pct}%"></div></div><div class="small muted">${pct} % · bitte die App kurz offen lassen</div></div>`;
     return;
   }
-  if (v.contains(document.activeElement) && document.activeElement.tagName==="SELECT") return;
+  if ((v.contains(document.activeElement) && document.activeElement.tagName==="SELECT") || pdHold(v)) return;
   const colSel = (k,label,req) => `<div class="field"><label for="map-${k}">${label}${req?"":" (optional)"}</label><select class="in" id="map-${k}" data-map="${k}"><option value="-1">–</option>${imp.headers.map((h,i)=>`<option value="${i}" ${imp.map[k]===i?"selected":""}>${esc(h||("Spalte "+(i+1)))}</option>`).join("")}</select></div>`;
   const mapping = `<div class="card"><div class="card-head"><h2>Spalten zuordnen</h2></div>
     <p class="small muted" style="margin:-4px 0 12px">${imp.items?"Erkannt. Nur ändern, wenn etwas falsch aussieht.":"Die Spalten konnten nicht automatisch erkannt werden. Wähle bitte aus, welche Spalte was enthält."}</p>
