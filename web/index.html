@@ -3824,6 +3824,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.41.5", "20. November 2026", ["Rechnung als PDF speichern: Du wählst jetzt selbst, wo und unter welchem Namen die PDF (und das Archiv) gespeichert wird – am PC und am Handy (neue App-Version nötig)."]],
   ["0.41.4", "20. November 2026", ["GoBD: Gespeicherte Rechnungen sind festgeschrieben und mit Prüfsiegel gesichert – Änderungen nur per Storno (eigene Stornorechnung).", "Änderungsprotokoll und Archiv für die Betriebsprüfung (alle PDFs, Rechnungsausgangsbuch, Protokoll als ZIP).", "Rechnungen: Umsatzsteuer pro Leistung (19 %, 7 %, 0 %), Rabatt, Teilzahlungen und Rechnungen auf Englisch.", "Erinnerungen für Fristen und Termine aus Briefen vom Amt und für überfällige Rechnungen."]],
   ["0.41.3", "20. November 2026", ["Rechnungen: eigenes Logo hochladen – PNGs ohne Hintergrund stehen frei im Kopf, andere Bilder in einem weißen Feld.", "Rechnungsfarbe frei wählbar (Farbwähler) oder ganz ohne Farbe in Schwarz-Weiß; bei hellen Farben wird die Schrift automatisch dunkel.", "Rechnungen-Fenster neu gestaltet: großer Knopf „Rechnung schreiben“, darunter Fotografieren, Importieren und Selbst eintragen als Kacheln.", "Beruf: die Knöpfe „Alle“ und „+ Rechnung“ in den Leisten sind weg – neue Rechnungen über die Kachel „Rechnungen“."]],
   ["0.41.2", "20. November 2026", ["Rechnung „Per E-Mail“: Am PC öffnet Thunderbird mit der Rechnung schon im Anhang, am Handy die Mail-App mit PDF (neue App-Version nötig)."]],
@@ -10448,6 +10449,8 @@ rlog_paid:["bezahlt", "paid", "ödendi", "оплачен", "сплачено", "
 rlog_part:["Teilzahlung", "part payment", "kısmi ödeme", "частичная оплата", "часткова оплата", "wpłata częściowa", "دفعة جزئية", "plată parțială"],
 rlog_del:["gelöscht (Scan)", "deleted (scan)", "silindi (tarama)", "удалён (скан)", "видалено (скан)", "usunięto (skan)", "حُذف (مسح)", "ștearsă (scanare)"],
 rlog_export:["Archiv exportiert", "archive exported", "arşiv dışa aktarıldı", "архив выгружен", "архів вивантажено", "archiwum wyeksportowane", "صُدّر الأرشيف", "arhivă exportată"],
+rv_save_as:["Rechnung speichern unter", "Save invoice as", "Faturayı farklı kaydet", "Сохранить счёт как", "Зберегти рахунок як", "Zapisz fakturę jako", "حفظ الفاتورة باسم", "Salvează factura ca"],
+rv_saved_at:["Gespeichert: {p}", "Saved: {p}", "Kaydedildi: {p}", "Сохранено: {p}", "Збережено: {p}", "Zapisano: {p}", "حُفظت: {p}", "Salvat: {p}"],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
@@ -11996,8 +11999,15 @@ async function rvArchive(){ const L=rchList().slice().sort((a,b)=>String(a.date)
   const lg=[["Zeit","Aktion","Rechnung","Info"].map(q).join(";")].concat((S.settings.rvLog||[]).map(x=>[x.t, x.a, x.nr, x.x].map(q).join(";")));
   files.push({name:"Aenderungsprotokoll.csv", data:enc.encode("\ufeff"+lg.join("\r\n"))});
   const b=rvBiz(); files.push({name:"LIESMICH.txt", data:enc.encode(`Rechnungsarchiv ${b.name||""}\r\nErstellt am ${new Date().toLocaleString("de-DE")} mit Finanz MAMI\r\n\r\nRechnungen/ – alle geschriebenen Rechnungen als PDF\r\nRechnungen-Scans/ – fotografierte oder importierte Rechnungen\r\nRechnungsausgangsbuch.csv – alle Rechnungen mit Beträgen, Status und Prüfsiegel (für Excel oder Prüfsoftware)\r\nAenderungsprotokoll.csv – wann was erstellt, storniert oder bezahlt wurde\r\n\r\nFestgeschriebene Rechnungen sind mit einem Prüfsiegel (SHA-256-Kette) gesichert.\r\nPrüfung beim Export: ${ver.bad.length?"ABWEICHUNG bei "+ver.bad.join(", "):"alle "+ver.n+" Rechnungen unverändert"}.\r\nRechnungen bitte 8 Jahre aufbewahren (seit 2025; vorher 10 Jahre).\r\n`)});
-  rvLog("export", "", files.length+" Dateien"); await saveSettings(); await saveBinary("Rechnungsarchiv-"+isoToday()+".zip", makeZip(files), nt("rch_arch_ok")); }
+  rvLog("export", "", files.length+" Dateien"); await saveSettings(); { const zb=makeZip(files), zn="Rechnungsarchiv-"+isoToday()+".zip", r=await rvSaveAs(zb instanceof Blob?zb:new Blob([zb],{type:"application/zip"}), zn, "application/zip"); if (r==="ok"||r==="cancel") return; await saveBinary(zn, zb, nt("rch_arch_ok")); } }
+async function rvSaveAs(blob, name, mime){ const br=window.AndroidBridge;
+  if (br && br.saveFileAs){ const b64=await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(String(fr.result).split(",")[1]||""); fr.readAsDataURL(blob); });
+    if (IS_DESK){ try{ const r=br.saveFileAs(name, b64, nt("rv_save_as")); if (r==="cancel") return "cancel"; if (r && String(r).startsWith("ok:")){ toast(nt("rv_saved_at",{p:String(r).slice(3)})); return "ok"; } }catch(_){} }
+    else { const r=await new Promise(res=>{ window.hbSaveAsDone=ok=>{ window.hbSaveAsDone=null; res(ok===true?"ok":ok===null?"cancel":""); }; try{ if (!br.saveFileAs(name, mime, b64)){ window.hbSaveAsDone=null; res(""); } }catch(_){ window.hbSaveAsDone=null; res(""); } }); if (r==="ok") toast(nt("rv_pdf_ok")); if (r) return r; } }
+  if (!NATIVE && window.showSaveFilePicker){ try{ const ext=name.split(".").pop(), h=await window.showSaveFilePicker({suggestedName:name, types:[{description:ext.toUpperCase(), accept:{[mime]:["."+ext]}}]}); const w=await h.createWritable(); await w.write(blob); await w.close(); toast(nt("rv_pdf_ok")); return "ok"; }catch(e){ if (e && e.name==="AbortError") return "cancel"; } }
+  return ""; }
 async function rvSavePdf(d){ d=d||(rvSync(),RV.d); const blob=rvPdf(d), name=("Rechnung "+(d.nr||"")+" "+(d.k&&d.k.name||"")).trim().replace(/[\\/:*?"<>|]+/g,"-")+".pdf";
+  { const r=await rvSaveAs(blob, name, "application/pdf"); if (r==="cancel") return; if (r==="ok"){ try{ if (d.nr && rchList().some(i=>i.nr===d.nr)) rvLog("pdf", d.nr, ""); await saveSettings(); }catch(_){} return; } }
   if (!NATIVE && navigator.canShare && /Android|iPhone|iPad/i.test(navigator.userAgent)){ try{ const f=new File([blob],name,{type:"application/pdf"}); if (navigator.canShare({files:[f]})){ await navigator.share({files:[f], title:name}); return; } }catch(e){ if (e && e.name==="AbortError") return; } }
   try{ if (d.nr && rchList().some(i=>i.nr===d.nr)) rvLog("pdf", d.nr, ""); }catch(_){}
   await saveBinary(name, blob, nt("rv_pdf_ok")); }

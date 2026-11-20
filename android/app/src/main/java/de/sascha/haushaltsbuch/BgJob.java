@@ -193,6 +193,7 @@ public class BgJob extends JobService {
         @JavascriptInterface public boolean saveFileB64(String name, String mime, String b64) { return false; }
         @JavascriptInterface public boolean shareImage(String b64, String name) { return false; }
         @JavascriptInterface public boolean sendMail(String to, String subject, String body, String imagesJson) { return false; }
+        @JavascriptInterface public boolean saveFileAs(String name, String mime, String b64) { return false; }
         @JavascriptInterface public boolean sendFile(String to, String subject, String body, String name, String mime, String b64) { return false; }
         @JavascriptInterface public boolean autoBackup(String name, String content, int keep) { return false; }
     }

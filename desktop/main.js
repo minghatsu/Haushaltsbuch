@@ -189,6 +189,20 @@ ipcMain.on("saveFileB64", (e, name, b64) => {
   }
 });
 
+ipcMain.on("saveFileAs", (e, name, b64, title) => {
+  try {
+    const safe = String(name).replace(/[\\/:*?"<>|]/g, "_") || "datei.pdf";
+    const ext = (safe.split(".").pop() || "pdf").toLowerCase();
+    const w = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
+    const p = dialog.showSaveDialogSync(w, { title: String(title || "Speichern unter"), defaultPath: path.join(app.getPath("documents"), safe), filters: [{ name: ext.toUpperCase(), extensions: [ext] }] });
+    if (!p) { e.returnValue = "cancel"; return; }
+    fs.writeFileSync(p, Buffer.from(String(b64), "base64"));
+    e.returnValue = "ok:" + p;
+  } catch (err) {
+    e.returnValue = "";
+  }
+});
+
 ipcMain.on("mailFile", (e, to, subject, body, name, b64) => {
   try {
     const safe = String(name).replace(/[\\/:*?"<>|]/g, "_") || "rechnung.pdf";

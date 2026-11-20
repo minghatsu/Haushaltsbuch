@@ -257,8 +257,23 @@ public class MainActivity extends Activity {
         }
     }
 
+    private static final int SAVE_AS = 7731;
+    private byte[] saveAsBytes = null;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SAVE_AS) {
+            boolean ok = false;
+            if (resultCode == RESULT_OK && data != null && data.getData() != null && saveAsBytes != null) {
+                try (OutputStream os = getContentResolver().openOutputStream(data.getData())) {
+                    if (os != null) { os.write(saveAsBytes); ok = true; }
+                } catch (Exception ignored) {}
+            }
+            saveAsBytes = null;
+            final String res = ok ? "true" : (resultCode == RESULT_OK ? "false" : "null");
+            runOnUiThread(() -> web.evaluateJavascript("window.hbSaveAsDone && window.hbSaveAsDone(" + res + ")", null));
+            return;
+        }
         if (requestCode == SCAN_DOC) {
             boolean forFile = docForFile; docForFile = false;
             Uri page = null; java.util.ArrayList<Uri> pages = new java.util.ArrayList<>();
@@ -1089,6 +1104,20 @@ public class MainActivity extends Activity {
                     if (os == null) return false;
                     os.write(content.getBytes(StandardCharsets.UTF_8));
                 }
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        @JavascriptInterface
+        public boolean saveFileAs(String name, String mime, String b64) {
+            try {
+                saveAsBytes = Base64.decode(b64, Base64.DEFAULT);
+                Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                i.setType(mime == null || mime.isEmpty() ? "application/octet-stream" : mime);
+                i.putExtra(Intent.EXTRA_TITLE, name);
+                runOnUiThread(() -> { try { startActivityForResult(i, SAVE_AS); } catch (Exception ex) { saveAsBytes = null; web.evaluateJavascript("window.hbSaveAsDone && window.hbSaveAsDone(false)", null); } });
                 return true;
             } catch (Exception e) {
                 return false;
