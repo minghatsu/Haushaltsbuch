@@ -3883,6 +3883,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.42.1", "21. November 2026", ["Beruf am PC: Die Steuer-Kästen unten sind weg – alles dazu findest du in der Kachel „Steuer“."]],
   ["0.42.0", "20. November 2026", ["Beruf am PC: Einkommensteuer und Umsatzsteuer stehen jetzt nebeneinander statt in Reitern; der Kasten mit den Kunden-Einnahmen ist weg.", "Die Kachel „Kunden“ öffnet jetzt deine Kundendaten: Suche, Kundennummer, Logo, Adresse, Ansprechpartner – bearbeiten, neu anlegen, entfernen oder direkt eine Rechnung schreiben."]],
   ["0.41.9", "20. November 2026", ["Kontoauszug als PDF: Die Buchungen zählen jetzt zum Kontostand, und der Endstand aus dem Auszug („Neuer Kontostand“) wird übernommen – bisher blieb der Kontostand nach einem PDF-Import gleich.", "PDF-Auszüge: Eingänge ohne Plus-Zeichen werden nicht mehr als Ausgabe gelesen."]],
   ["0.41.8", "20. November 2026", ["Rechnung: Kunden kannst du jetzt entfernen (Kunde antippen → „Entfernen“, mit Rückgängig). Fertige Rechnungen bleiben dabei unverändert.", "Aus hochgeladenen Rechnungen (Fotos und PDFs) übernimmt die App jetzt auch Adresse, Ansprechpartner/Inhaber und E-Mail deiner Kunden – auch nachträglich für schon gelesene Rechnungen."]],
@@ -4807,7 +4808,7 @@ function berufDuo(el, tiles, T, exJ, exB, hints){
     <div class="bfleg" data-noi18n><span><i class="j"></i>${esc(nt("bf_inc_job"))} <b>${E(M.job)}</b></span><span><i class="b"></i>${esc(nt("bf_inc_biz"))} <b>${E(M.biz)}</b></span></div>${hints.length?`<div class="bfhl" role="list" aria-label="${esc(nt("bf_todo"))}">${hints.slice(0,3).join("")}</div>`:""}</div></div>
   <div class="bfsw ${side==="b"?"sb":"sj"}" id="bfsw"><div class="bfbands">${bJ}${bB}</div><div class="bfhint" aria-hidden="true">${ic("chev",14)}<span data-noi18n>${esc(nt("bf_swipe"))}</span></div>
    <div class="bfgrids"><div class="agrid bfg bfgj">${J.join("")}</div><div class="agrid bfg bfgb">${B.join("")}</div></div></div>
-${IS_PC?taxSplit(T.find(t=>t.k==="tax"), "bfpc"):""}`;
+`;
   try{ if (localStorage.getItem("hb-bfside")) $("bfsw").classList.add("known"); }catch(_){}
   bfWire(); }
 function bfSwap(to, anim){ const w=$("bfsw"); if (!w) return; const cur=w.classList.contains("sb")?"b":"j"; to=to||(cur==="j"?"b":"j"); if (to===cur) return;
@@ -4860,7 +4861,7 @@ function renderBeruf(){ const el=document.querySelector(`[data-view="beruf"]`); 
   if (hasSelf()||["angestellt","beamte","beides","azubi"].includes(S.settings.work||"beides")||hasExtra("angestellt")){ const H=hoCalc(y); (duo?exJ:extra).push(areaTile(ic("home",22),"Homeoffice",H.on?esc(eur0(H.amt)):"eintragen","data-hoopen")); }
   if (duo) return berufDuo(el, tiles, T, exJ, exB, hints);
   el.innerHTML = `${hero}${hints.length?`<div class="ahints">${hints.slice(0,3).join("")}</div>`:""}
-    <div class="card areacard">${areaHead(g[0], hasJob()||hasSelf()?"steuer":"amt", "Einstellungen")}<div class="agrid">${tiles.filter(t=>!(tax&&t.k==="tax"&&false)).map(t=>t.k==="kunden"?kdTile():areaTile(ic(t.icon,22), (typeof TL_!=="undefined"&&TL_[t.k]?TL_[t.k][0]:t.title), t.short?esc(String(t.short)):"", `data-anaopen="${esc(t.k)}"`)).join("")}${extra.join("")}</div></div>${IS_PC?taxSplit(T.find(t=>t.k==="tax"), ""):""}`;
+    <div class="card areacard">${areaHead(g[0], hasJob()||hasSelf()?"steuer":"amt", "Einstellungen")}<div class="agrid">${tiles.filter(t=>!(tax&&t.k==="tax"&&false)).map(t=>t.k==="kunden"?kdTile():areaTile(ic(t.icon,22), (typeof TL_!=="undefined"&&TL_[t.k]?TL_[t.k][0]:t.title), t.short?esc(String(t.short)):"", `data-anaopen="${esc(t.k)}"`)).join("")}${extra.join("")}</div></div>`;
 }
 function zukSaved(){ const goals=S.settings.goals||[], g=sum(goals,x=>goalSaved(x).v)||0, td=isoOf(new Date());
   let sp=0, nsp=0; try{ const known=new Set(accountNames()); for (const n of Object.keys(S.settings.accountAnchors||{})){ if (n==="Hauptkonto"||!known.has(n)) continue; const v=accountBalance(n,td)||0; if (v>0){ sp+=v; nsp++; } } }catch(_){}
