@@ -1074,7 +1074,7 @@ if (IS_PC){
   function saveList(l){ zSave(l); }
   function renderShopPC(){
     const ch=chosen();
-    if (!ch.length){ root.classList.remove("pcshop"); root.innerHTML=`<div class="pcsnone">${zettelCard()}${offersCard()}</div>`; return; }
+    if (!ch.length){ root.classList.remove("pcshop"); root.innerHTML=`<div class="pcsnone">${zettelCard()}${typeof shopAvgCard==="function"?shopAvgCard():""}${offersCard()}</div>`; return; }
     const cats=[...new Set(ch.map(x=>x.cat))]; if (UI.shopCat && !cats.includes(UI.shopCat)) UI.shopCat="";
     const shown=UI.shopCat?ch.filter(x=>x.cat===UI.shopCat):ch;
     if (!ch.some(x=>x.id===UI.shopSel)) UI.shopSel=ch[0].id;
@@ -1144,7 +1144,7 @@ if (IS_PC){
     const keep=document.activeElement && document.activeElement.id==="pczIn", val=keep?document.activeElement.value:"";
     const kept={}; ["pcpDT","pcpDP","pcpDU"].forEach(k=>{ const el=$(k); if (el) kept[k]=el.value; }); const fid=document.activeElement&&root.contains(document.activeElement)?document.activeElement.id:"";
     if (K.pg && root.contains(K.pg)) document.body.append(K.pg);
-    root.innerHTML=left+det+zet;
+    root.innerHTML=`<div class="pcscol">${typeof shopAvgCard==="function"?shopAvgCard():""}${left}</div>`+det+zet;
     for (const k in kept){ const el=$(k); if (el && kept[k]) el.value=kept[k]; } if (fid && /^pcpD/.test(fid) && $(fid)) $(fid).focus();
     if (web){ $("pcsWeb").appendChild(K.pg); requestAnimationFrame(()=>K.place()); }
     if (canWeb && UI.view==="shop" && !root.hidden && document.visibilityState!=="hidden" && !(K.PG.open && K.PG.embed && K.PG.shop && K.PG.shop.id===sh.id))

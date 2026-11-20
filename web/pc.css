@@ -1055,3 +1055,5 @@ html.pc[data-theme="dark"] .fan.pcw .fpe{stroke:var(--fg);stroke-opacity:.22}
 html.pc[data-theme="dark"] .fan.pcw .fanb.front{box-shadow:0 0 0 6px color-mix(in srgb,var(--fg) 80%,transparent),0 18px 34px -10px rgba(0,0,0,.7)}
 html.pc[data-theme="dark"] .fan.pcw .fanb span,html.pc[data-theme="dark"] .fan.pcw .fanhint{background:color-mix(in srgb,var(--fg) 92%,transparent);color:var(--bg)}
 html.pc[data-theme="dark"] .fan.pcw .fanhint kbd{background:color-mix(in srgb,var(--bg) 18%,transparent);color:var(--bg)}
+
+html.pc .pcscol{display:flex;flex-direction:column;gap:16px;min-width:0}html.pc .pcscol .sagrid{grid-template-columns:1fr;gap:6px}html.pc .pcscol .sagrid>div{display:flex;align-items:baseline;justify-content:space-between;gap:8px}html.pc .pcscol .sagrid b{font-size:18px}

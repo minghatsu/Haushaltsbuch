@@ -1407,7 +1407,11 @@ html:not(.pc) .tabs.navx.nosel .tabind{opacity:0;transform:scale(.6)}
 .hkpi .hki{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:#fff;background:var(--tc);flex:none}
 .hkpi small{display:block;color:var(--muted);font-size:12px}.hkpi b{display:block;font:800 17px var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .anarow .kpis{margin:0}
-.zstack{display:flex;flex-direction:column;gap:14px}.zstack>.card{order:0!important;margin:0}
+.zstack{display:flex;flex-direction:column;gap:14px}
+.sacard{padding:14px 16px}.sahd{display:flex;align-items:center;gap:8px;color:var(--accent);margin-bottom:10px}.sahd b{color:var(--fg);font-size:15px}
+.sagrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.sagrid>div{background:var(--sunk);border-radius:14px;padding:10px 12px;min-width:0}.sagrid small{display:block;color:var(--muted);font-size:12px;font-weight:700}.sagrid b{display:block;font-size:19px;font-weight:900;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sas{margin:10px 2px 0}
+@media (max-width:380px){.sagrid b{font-size:16px}}
+@media (prefers-reduced-motion:no-preference){.sagrid>div{animation:saIn .5s cubic-bezier(.2,1.2,.35,1) both}.sagrid>div:nth-child(2){animation-delay:.07s}.sagrid>div:nth-child(3){animation-delay:.14s}@keyframes saIn{from{opacity:0;transform:translateY(10px) scale(.97)}}}.zstack>.card{order:0!important;margin:0}
 .zcard{background:color-mix(in srgb,#FFF4D6 55%,var(--surface))}[data-theme=dark] .zcard,[data-theme=dark] .zmini{background:color-mix(in srgb,#5a4a1e 30%,var(--surface))}.zcard .card-head{margin-bottom:10px}
 .zsort{display:flex;background:var(--sunk);border-radius:12px;padding:3px;margin-bottom:10px}.zsort button{flex:1;border:0;background:none;padding:8px 2px;border-radius:9px;font:inherit;font-weight:700;font-size:13px;color:var(--muted)}.zsort button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .zadd{display:flex;gap:8px;margin-bottom:6px}.zadd .in{flex:1}.zadd .btn{width:48px;padding:0;font-size:22px}
@@ -3883,7 +3887,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
-  ["0.42.1", "21. November 2026", ["Beruf am PC: Die Steuer-Kästen unten sind weg – alles dazu findest du in der Kachel „Steuer“."]],
+  ["0.42.1", "21. November 2026", ["Beruf am PC: Die Steuer-Kästen unten sind weg – alles dazu findest du in der Kachel „Steuer“.", "Space-Hinweis („… schuldet dem Hauptkonto …“): Mit „Erledigt – weg damit“ ist er verschwunden und verschiebt nichts mehr zwischen den Konten.", "Einkauf: neue Karte „Was du beim Einkaufen ausgibst“ – Durchschnitt pro Tag, Woche und Monat. In der Analyse zählt „Ø pro Tag“ jetzt ohne Einkäufe."]],
   ["0.42.0", "20. November 2026", ["Beruf am PC: Einkommensteuer und Umsatzsteuer stehen jetzt nebeneinander statt in Reitern; der Kasten mit den Kunden-Einnahmen ist weg.", "Die Kachel „Kunden“ öffnet jetzt deine Kundendaten: Suche, Kundennummer, Logo, Adresse, Ansprechpartner – bearbeiten, neu anlegen, entfernen oder direkt eine Rechnung schreiben."]],
   ["0.41.9", "20. November 2026", ["Kontoauszug als PDF: Die Buchungen zählen jetzt zum Kontostand, und der Endstand aus dem Auszug („Neuer Kontostand“) wird übernommen – bisher blieb der Kontostand nach einem PDF-Import gleich.", "PDF-Auszüge: Eingänge ohne Plus-Zeichen werden nicht mehr als Ausgabe gelesen."]],
   ["0.41.8", "20. November 2026", ["Rechnung: Kunden kannst du jetzt entfernen (Kunde antippen → „Entfernen“, mit Rückgängig). Fertige Rechnungen bleiben dabei unverändert.", "Aus hochgeladenen Rechnungen (Fotos und PDFs) übernimmt die App jetzt auch Adresse, Ansprechpartner/Inhaber und E-Mail deiner Kunden – auch nachträglich für schon gelesene Rechnungen."]],
@@ -6367,7 +6371,7 @@ function renderHome(){
       <div class="hkpi one">
         ${ym===cur ? (()=>{ const left=Math.max(1, daysIn(ym)-new Date().getDate()), v=Math.max(0, mainBal/left);
           return `<button data-go="year" aria-label="Noch ${eur0(v)} pro Tag für ${left} Tage"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small><span>Noch pro Tag</span> · <span>${left} ${left===1?"Tag":"Tage"}</span></small><b>${esc(eur0(v))}</b></span>${(()=>{ const d=new Date().getDate(), sp=sum(c.tx.filter(hxOut),t=>t.amount); return `<span class="hkavg"><small>bisher Ø</small><b>${esc(eur0(sp/Math.max(1,d)))}</b><small>pro Tag</small></span>`; })()}</button>`; })()
-        : `<button data-go="year"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small>Ø pro Tag ausgegeben</small><b>${esc(eur0(c.expenses/Math.max(1, daysIn(ym))))}</b></span></button>`}
+        : `<button data-go="year"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small>Ø pro Tag ohne Einkäufe</small><b>${esc(eur0(Math.max(0,c.expenses-shopSum(ym+"-01",lastDayOf(ym)).v)/Math.max(1, daysIn(ym))))}</b></span></button>`}
       </div>
       ${ym===cur?fcMini():""}
     </div>
@@ -6842,11 +6846,11 @@ function homeExtra({ym, cur, c, g, mainName, mainBal, asOf}){
   const out={}, mon=MONTHS[ymParts(ym)[1]-1], today=new Date().getDate();
   const spentList=c.tx.filter(hxOut), spent=sum(spentList,t=>t.amount);
   { const D=daysIn(ym), left=ym===cur?Math.max(1, D-today+1):ym>cur?D:0, past=ym===cur?today:ym<cur?D:0;
-    const per=left?Math.max(0, mainBal/left):0, avg=past?spent/past:0, pct=Math.round(past/D*100);
+    const per=left?Math.max(0, mainBal/left):0, avg=past?Math.max(0, spent-sum(spentList.filter(isShopTx),t=>t.amount))/past:0, pct=Math.round(past/D*100);
     out.perday = `<div class="card">${hxHead("perday","Noch pro Tag")}
       ${left?`<div class="hxbig">${esc(eur0(per))}</div><div class="small muted"><span>noch ${left} ${left===1?"Tag":"Tage"} bis Monatsende</span></div>`:`<div class="hxbig">${esc(eur0(avg))}</div><div class="small muted"><span>Ø pro Tag ausgegeben</span></div>`}
       <div class="hxbar" style="margin-top:12px"><i style="width:${pct}%"></i></div>
-      <div class="meta-row small" style="margin-top:6px"><span class="muted">${pct} % des Monats vorbei</span>${left&&past?`<span><span class="muted">Ø bisher pro Tag ausgegeben</span> <b>${esc(eur0(avg))}</b></span>`:""}</div></div>`; }
+      <div class="meta-row small" style="margin-top:6px"><span class="muted">${pct} % des Monats vorbei</span>${left&&past?`<span><span class="muted">Ø bisher pro Tag (ohne Einkäufe)</span> <b>${esc(eur0(avg))}</b></span>`:""}</div></div>`; }
   { const paid=c.paid||{}, open=fixedForMonth(ym,true).filter(f=>!(f.id in paid)).map(f=>({f, d:fixDay(f,ym), v:planAmt(f,ym)}));
     const soon = ym===cur ? open.filter(x=>x.d!=null && x.d>=today && x.d<=today+6).sort((a,b)=>a.d-b.d) : open.sort((a,b)=>(a.d||99)-(b.d||99)).slice(0,5);
     const rest=open.length-soon.length, when=d=>d===today?"heute":d===today+1?"morgen":`in ${d-today} Tagen`;
@@ -6923,7 +6927,7 @@ function goalsRings(){
 }
 /* Sparen */
 /* Einkauf */
-function renderShop(){ const a=document.activeElement; if (BG_RENDER && a && a.tagName==="INPUT" && a.closest && a.closest(".zcard,.zmini")) return; const keep=a&&a.id==="zIn"?a.value:null; $("v-shop").innerHTML = `<div class="zstack">${zettelCard()}${offersCard()}</div>`; initShopRail();
+function renderShop(){ const a=document.activeElement; if (BG_RENDER && a && a.tagName==="INPUT" && a.closest && a.closest(".zcard,.zmini")) return; const keep=a&&a.id==="zIn"?a.value:null; $("v-shop").innerHTML = `<div class="zstack">${zettelCard()}${shopAvgCard()}${offersCard()}</div>`; initShopRail();
   if (keep!==null){ const i=$("zIn"); if (i){ i.value=keep; i.focus(); } } }
 /* Einkaufszettel */
 const ZDEPTS=[
@@ -7131,6 +7135,16 @@ function zMiniCard(T){
   return `<div class="card zmini"><button class="zmh" data-zopen><span class="zmt">${ic(zi,18)}<span>${esc(txt).replace(/&amp;/g,"&")}</span></span><small>${sub}</small></button>
     <div class="zadd"><input class="in" id="zIn" placeholder="Was brauchst du?" autocomplete="off" aria-label="Was brauchst du?"><button class="btn primary" data-zadd aria-label="Hinzufügen">+</button></div></div>`;
 }
+/* Einkäufe (Läden, Einkaufszettel) getrennt vom übrigen Alltag rechnen */
+function isShopTx(t){ if (!t || t.kind!=="ausgabe") return false; if (t.src==="zettel") return true; const n=nrm((t.note||"")+" "+(t.bank||"")); return !!n && SHOPS.some(x=>x.re.test(n)); }
+function shopSum(from, to){ let v=0, n=0; for (const t of S.tx){ if (!t.date || t.date<from || t.date>to || !isShopTx(t)) continue; v+=Math.abs(Number(t.amount)||0); n++; } return {v, n}; }
+function shopAvg(){ const td=isoToday(), d0=new Date(td+"T12:00"); d0.setDate(d0.getDate()-89); let first=td; for (const t of S.tx) if (t.date && t.date<first) first=t.date;
+  const from=first>isoOf(d0)?first:isoOf(d0), span=Math.max(14, Math.round((new Date(td+"T12:00")-new Date(from+"T12:00"))/864e5)+1), A=shopSum(from, td), M=shopSum(td.slice(0,7)+"-01", td), day=A.v/span;
+  return {day, week:day*7, month:day*30.44, n:A.n, span, mon:M.v, monN:M.n}; }
+function shopAvgCard(){ const a=shopAvg(); if (!a.n) return ""; const E=v=>esc(eur(v));
+  return `<div class="card sacard"><div class="sahd">${ic("cart",18)}<b>${esc(nt("sa_h"))}</b></div><div class="sagrid" data-noi18n>
+    <div><small>${esc(nt("sa_day"))}</small><b>${E(a.day)}</b></div><div><small>${esc(nt("sa_week"))}</small><b>${E(a.week)}</b></div><div><small>${esc(nt("sa_month"))}</small><b>${E(a.month)}</b></div></div>
+    <p class="small muted sas">${esc(nt("sa_sub",{d:String(a.span),n:String(a.n),m:eur0(a.mon)}))}</p></div>`; }
 function zettelCard(){
   const T=zTrip(), M=zMyTrip(), me=devId();
   if (!M && !zList().length) return zMiniCard(T);
@@ -7680,7 +7694,7 @@ function analyseTop(ym){
       <div class="card-head"><h2>${hIc("insight")}Auf einen Blick</h2><span class="small muted">${esc(MONTHS[ymParts(ym)[1]-1])}</span></div>
       <div class="insights">
         <div class="ins"><span class="eyebrow">Saldo</span><b class="${c.net<0?"neg":"pos"}">${c.net>=0?"+":"−"} ${esc(eur0(Math.abs(c.net)))}</b><span class="small muted">${c.income?`${Math.round(Math.max(0,c.net)/c.income*100)} % gespart`:"Einnahmen − Ausgaben"}</span></div>
-        <div class="ins"><span class="eyebrow">Ø pro Tag</span><b>${esc(eur0(c.expenses/Math.max(1, ym===cur?new Date().getDate():daysIn(ym))))}</b><span class="small muted">ausgegeben</span></div>
+        <div class="ins"><span class="eyebrow">Ø pro Tag</span><b>${esc(eur0(Math.max(0,c.expenses-shopSum(ym+"-01",ym===cur?isoToday():lastDayOf(ym)).v)/Math.max(1, ym===cur?new Date().getDate():daysIn(ym))))}</b><span class="small muted">ohne Einkäufe</span></div>
         <div class="ins"><span class="eyebrow">Vormonat</span>${prevExp>0?`<b class="${expDelta>0?"neg":"pos"}">${expDelta>0?"+":"−"} ${Math.abs(Math.round(expDelta))} %</b><span class="small muted">${ym===cur?"bis heute ":""}${expDelta>0?"mehr":"weniger"} als ${esc(MSHORT[ymParts(prevYm)[1]-1])}</span>`:`<b>–</b><span class="small muted">keine Daten</span>`}</div>
         <div class="ins"><span class="eyebrow">Größte Ausgabe</span>${topTx?`<b>${esc(eur0(topTx.amount))}</b><span class="small muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(topTx.note||topTx.cat||"")}</span>`:`<b>–</b><span class="small muted">noch keine</span>`}</div>
       </div>
@@ -7837,7 +7851,7 @@ function renderYear(){
   const ym=UI.ym, mc=monthCalc(ym), prevYm=shiftYm(ym,-1), dayNow=new Date().getDate();
   const prevExp = sum(monthCalc(prevYm).tx.filter(t=>(t.kind==="ausgabe"||t.kind==="betrieb") && (ym!==cur || Number(t.date.slice(8,10))<=dayNow)),t=>t.amount) + (ym!==cur ? monthCalc(prevYm).fixPaid : 0);
   const curExp = ym===cur ? sum(mc.tx.filter(t=>t.kind==="ausgabe"||t.kind==="betrieb"),t=>t.amount) : mc.expenses;
-  const delta = prevExp>0 ? (curExp/prevExp-1)*100 : null, perDay = mc.expenses/Math.max(1, ym===cur?dayNow:daysIn(ym));
+  const delta = prevExp>0 ? (curExp/prevExp-1)*100 : null, shopM = shopSum(ym+"-01", ym===cur?isoToday():lastDayOf(ym)).v, perDay = Math.max(0, mc.expenses-shopM)/Math.max(1, ym===cur?dayNow:daysIn(ym)), shopDay = shopM/Math.max(1, ym===cur?dayNow:daysIn(ym));
   const mode = UI.anaChart||"cat", tiles=[];
   const nice2=niceMax(Math.max(1,...rows.map(r=>r.c.expenses))), sy2=v=>pt+(H-pt-pb)*(1-v/nice2), avgExp=exp/Math.max(1,rows.filter(r=>r.c.expenses>0).length);
   let svg2=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ausgaben pro Monat ${y}">`;
@@ -7854,7 +7868,7 @@ function renderYear(){
   const accRow=(k,icon,title,sub,body,short)=>{ tiles.push({k,icon,title,sub,body,short}); return ""; };
   const kpisHtml=`    <div class="kpis">
       <div class="kpi"><small>${mc.net>=0?"Übrig":"Mehr ausgegeben"}</small><b class="${mc.net<0?"neg":"pos"}">${mc.net>=0?"+":"−"} ${esc(eur0(Math.abs(mc.net)))}</b><span>${mc.income?`${Math.round(Math.max(0,mc.net)/mc.income*100)} % gespart`:esc(MONTHS[ymParts(ym)[1]-1])}</span></div>
-      <div class="kpi"><small>Ø pro Tag</small><b>${esc(eur0(perDay))}</b><span>ausgegeben</span></div>
+      <div class="kpi"><small>Ø pro Tag</small><b>${esc(eur0(perDay))}</b><span>${shopM>0?`ohne Einkäufe · Einkauf Ø ${esc(eur0(shopDay))}`:"ausgegeben"}</span></div>
       <div class="kpi"><small>vs. ${esc(MONTHS[ymParts(prevYm)[1]-1])}</small>${delta===null?`<b>–</b><span>keine Daten</span>`:`<b class="${delta>0?"neg":"pos"}">${delta>0?"+":"−"} ${Math.abs(Math.round(delta))} %</b><span>${ym===cur?"bis heute ":""}${delta>0?"mehr":"weniger"} ausgegeben</span>`}</div>
       ${!hasSelf() && !TS.show ? `<div class="kpi"><small>Einnahmen</small><b class="pos">+ ${esc(eur0(mc.income))}</b><span>im ${esc(MONTHS[ymParts(ym)[1]-1])}</span></div>` : `<div class="kpi"><small>Steuer ${y}</small>${!hasSelf()?(Math.abs(tax.due)<1?`<b>–</b><span>ausgeglichen</span>`:tax.due<0?`<b class="pos">+ ${esc(eur0(-tax.due))}</b><span>Erstattung (Schätzung)</span>`:`<b class="neg">− ${esc(eur0(tax.due))}</b><span>Nachzahlung (Schätzung)</span>`):need<=0&&!tax.resBal?`<b>–</b><span>keine Nachzahlung</span>`:resCover>=0?`<b class="pos">✓ reicht</b><span>Rücklage ${esc(eur0(tax.resBal))}</span>`:`<b class="neg">− ${esc(eur0(-resCover))}</b><span>fehlen noch</span>`}</div>`}
     </div>`;
@@ -7931,7 +7945,7 @@ function anaTabsHtml({tiles, GRP, TL, ord, rows, ym, mc, y, inc, exp}){
     const zins = mode==="m" && ym===cur ? sum(S.debts,d=>debtState(d).zinsNow||0) : 0;
     body = `<div class="card anet" data-anaopen="io"><small>${net>=0?"Übrig":"Mehr ausgegeben"} ${mode==="m"?"im "+esc(mn):esc(String(y))}</small><div class="big ${net>=0?"pos":"neg"}">${esc(sg(net))}</div>${chart}<div class="ml">${pts.map(p=>`<span>${esc(p.l)}</span>`).join("")}</div></div>
       <div class="akg"><div><small>Einnahmen</small><b class="pos">${esc(eur0(mode==="m"?mc.income:inc))}</b></div><div><small>Ausgaben</small><b>${esc(eur0(mode==="m"?mc.expenses:exp))}</b></div>
-        <div><small>Fixkosten</small><b>${esc(eur0(fixP))}</b></div>${zins>0?`<div><small>Zinsen</small><b class="neg">${esc(eur0(zins))}</b></div>`:`<div><small>Ø pro Tag</small><b>${esc(eur0((mode==="m"?mc.expenses:exp)/Math.max(1, mode==="m" ? (ym===cur?new Date().getDate():daysIn(ym)) : 365)))}</b></div>`}</div>
+        <div><small>Fixkosten</small><b>${esc(eur0(fixP))}</b></div>${zins>0?`<div><small>Zinsen</small><b class="neg">${esc(eur0(zins))}</b></div>`:`<div><small>Ø pro Tag <span class="muted">ohne Einkäufe</span></small><b>${esc(eur0(Math.max(0,(mode==="m"?mc.expenses-shopSum(ym+"-01",ym===cur?isoToday():lastDayOf(ym)).v:exp-shopSum(ymParts(ym)[0]+"-01-01",ymParts(ym)[0]+"-12-31").v))/Math.max(1, mode==="m" ? (ym===cur?new Date().getDate():daysIn(ym)) : 365)))}</b></div>`}</div>
       ${ct.length?`<div class="sgl">Top-Kategorien</div><div class="arl">${ct.slice(0,5).map(([c,v])=>`<button class="arw" data-anaopen="cat" style="--tc:${catColor("ausgabe",c)}"><span class="ai">${esc(String(c).trim().slice(0,1).toUpperCase())}</span><span class="an"><b>${esc(c)}</b><small>${tot>0?Math.round(v/tot*100):0} %</small></span><span class="av">${esc(eur0(v))}</span></button>`).join("")}<button class="arw" data-anaopen="cat"><span class="an"><b style="color:var(--accent);font-size:14px">Alle Kategorien</b></span><span class="av"><span class="ch">›</span></span></button></div>`:""}
       <div class="sgl">Mehr</div>${rowsFor(["kpi","trend","io","calc","plan"])}`;
   } else if (tab==="plan") body = rowsFor(GRP[1][1]);
@@ -10591,6 +10605,13 @@ kd_empty:["Noch keine Kunden. Leg einen an oder schreib eine Rechnung – Kunden
 kd_inv:["Rechnung schreiben", "Write invoice", "Fatura yaz", "Выписать счёт", "Виписати рахунок", "Wystaw fakturę", "اكتب فاتورة", "Scrie factură"],
 kd_saved:["Kunde gespeichert", "Customer saved", "Müşteri kaydedildi", "Клиент сохранён", "Клієнта збережено", "Klient zapisany", "تم حفظ العميل", "Client salvat"],
 kd_need_name:["Bitte einen Namen eintragen", "Please enter a name", "Lütfen bir ad gir", "Введи имя", "Введи ім’я", "Wpisz nazwę", "يرجى إدخال اسم", "Introdu un nume"],
+pot_done:["Erledigt – weg damit", "Done – remove it", "Tamam – kaldır", "Готово – убрать", "Готово – прибрати", "Załatwione – usuń", "تم – أزله", "Gata – elimină"],
+pot_done_t:["Erledigt – der Hinweis ist weg", "Done – the note is gone", "Tamam – not kaldırıldı", "Готово – подсказка убрана", "Готово – підказку прибрано", "Załatwione – podpowiedź zniknęła", "تم – أزيل التنبيه", "Gata – nota a dispărut"],
+sa_h:["Was du beim Einkaufen ausgibst", "What you spend shopping", "Alışverişte ne harcıyorsun", "Сколько ты тратишь на покупки", "Скільки ти витрачаєш на покупки", "Ile wydajesz na zakupy", "كم تنفق على التسوق", "Cât cheltui la cumpărături"],
+sa_day:["Ø pro Tag", "Ø per day", "Ø günlük", "Ø в день", "Ø на день", "Ø dziennie", "المتوسط يومياً", "Ø pe zi"],
+sa_week:["Ø pro Woche", "Ø per week", "Ø haftalık", "Ø в неделю", "Ø на тиждень", "Ø tygodniowo", "المتوسط أسبوعياً", "Ø pe săptămână"],
+sa_month:["Ø pro Monat", "Ø per month", "Ø aylık", "Ø в месяц", "Ø на місяць", "Ø miesięcznie", "المتوسط شهرياً", "Ø pe lună"],
+sa_sub:["Aus {n} Einkäufen der letzten {d} Tage · diesen Monat bisher {m}", "From {n} purchases in the last {d} days · this month so far {m}", "Son {d} gündeki {n} alışverişten · bu ay şimdiye kadar {m}", "По {n} покупкам за {d} дней · в этом месяце уже {m}", "За {n} покупками за {d} днів · цього місяця вже {m}", "Z {n} zakupów z ostatnich {d} dni · w tym miesiącu {m}", "من {n} عملية شراء خلال آخر {d} يوماً · هذا الشهر حتى الآن {m}", "Din {n} cumpărături în ultimele {d} zile · luna aceasta {m}"],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
@@ -12556,8 +12577,9 @@ document.addEventListener("click", async e=>{ const sv=e.target.closest("[data-r
 function potInfo(P){ const x=potList().find(o=>o.p===P); if (!x) return; const b=hbSheet("potBg", nt("pot_h"));
   b.innerHTML=`<div class="potv"><div class="potf"><i style="background:${kaCol(x.p)}">${kaIcon(x.p)}</i><b data-noi18n>${esc(x.p)}</b></div><div class="potar"><span>${esc(eur(x.v))}</span><svg class="i" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div><div class="potf"><i style="background:${kaCol(x.bank)}">${kaIcon(x.bank)}</i><b data-noi18n>${esc(x.bank)}</b></div></div>
     <p style="margin:14px 2px 6px">${esc(nt("pot_p1",{a:eur(x.v),p:x.p,b:x.bank}))}</p><p class="small muted" style="margin:0 2px 14px">${esc(nt("pot_p2"))}</p>
-    <button type="button" class="btn primary block" style="justify-content:center" data-potok>${esc(nt("pot_ok"))}</button>`; }
-document.addEventListener("click", e=>{ if (e.target.closest("[data-potok]")) hbSheetClose("potBg"); });
+    <div class="vabtns"><button type="button" class="btn" data-potdone="${esc(x.p)}">${ic("check",16)} ${esc(nt("pot_done"))}</button><button type="button" class="btn primary" style="justify-content:center" data-potok>${esc(nt("pot_ok"))}</button></div>`; }
+document.addEventListener("click", async e=>{ if (e.target.closest("[data-potok]")) hbSheetClose("potBg");
+  const d=e.target.closest("[data-potdone]"); if (d){ potSettle(d.dataset.potdone); await saveSettings(); hbSheetClose("potBg"); try{ MB.L=(MB.L||[]).filter(x=>!(x.k==="pot"&&x.id===d.dataset.potdone)); }catch(_){} toast(nt("pot_done_t")); try{ render(); }catch(_){} } });
 function mbItems(){ const H=(UI.hints||[]).filter(h=>h && (h.lvl==="bad"||h.lvl==="warn"||h.k==="stb"||h.k==="term") && ["minus","budget","abo","term","stb","reserve","beihilfe","br"].includes(h.k));
   const L=H.map(h=>({k:h.k, lvl:h.lvl==="bad"?"r":h.lvl==="warn"?"w":"i", t:h.t, s:h.s||"", id:h.id, raw:h.k==="br"?1:0}));
   try{ const F=fcCalc(); if (F && F.warn && F.min && !L.some(x=>x.k==="minus")) L.push({k:"fc", lvl:(F.min.v<0?"r":"w"), t:nt("mb_fc",{d:fxDate(F.ym+"-"+pad(F.min.d),{day:"numeric",month:"long"})}), s:nt("mb_fc_s",{n:eur0(F.min.v)}), raw:1}); }catch(_){}
@@ -14272,7 +14294,10 @@ function potCache(){ let n=0; for (const d of Object.values(memStore.acct||{})) 
     for (const r of pr){ const j=br.findIndex((x,ix)=>!used.has(ix) && Math.abs(x.v+r.v)<0.005 && dd(x.date,r.date)<=1); if (j>=0){ used.add(j); o.ev.push({d:r.date, v:r.v, st:1}); } }
     o.ev.sort((a,b)=>a.d.localeCompare(b.d) || (a.st?1:0)-(b.st?1:0)); }
   POT.tok=[S.tx,n]; POT.c=out; return out; }
-function potOpen(P, asOf){ const o=potCache()[P]; if (!o) return 0; let open=0; for (const e of o.ev){ if (e.d>asOf) break; open=e.st?Math.max(0,open+e.v):open+e.v; } return Math.max(0, Math.round(open*100)/100); }
+function potOpen(P, asOf){ const o=potCache()[P]; if (!o) return 0; const dn=(S.settings.potDone||{})[P]; let open=0; for (const e of o.ev){ if (e.d>asOf) break; open=e.st?Math.max(0,open+e.v):open+e.v; }
+  /* „Erledigt“: bis dahin offener Betrag zählt nicht mehr (in der Bank umgebucht oder bewusst so gelassen) */
+  if (dn && asOf>=dn.d) open-=Number(dn.v)||0; return Math.max(0, Math.round(open*100)/100); }
+function potSettle(P){ const td=isoToday(), o=potCache()[P]; if (!o) return; let raw=0; for (const e of o.ev){ if (e.d>td) break; raw=e.st?Math.max(0,raw+e.v):raw+e.v; } S.settings.potDone={...(S.settings.potDone||{}), [P]:{d:td, v:Math.round(Math.max(0,raw)*100)/100}}; }
 function potList(){ const out=[], td=isoToday(); for (const [P,o] of Object.entries(potCache())){ const v=potOpen(P,td); if (v>=0.01) out.push({p:P, bank:o.bank, v}); } return out; }
 function accountBalance(name, asOf){
   const a=(S.settings.accountAnchors||{})[name]; if (!a) return null;
