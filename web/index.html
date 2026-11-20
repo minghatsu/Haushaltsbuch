@@ -1761,7 +1761,17 @@ div.homt{cursor:default}
 /* Lebensbereiche */
 /* Beruf: Job + Geschäft */
 :root{--bf-job:#3d63a8;--bf-biz:var(--accent)}html[data-theme="dark"]{--bf-job:#7fa2ee}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bf-job:#7fa2ee}}
-.bftop{display:grid;gap:10px;margin-bottom:12px}.bftop>.card{margin:0}
+.bftop{display:grid;gap:10px;margin-bottom:12px}
+.bfhl{display:flex;flex-direction:column;margin-top:10px;border-top:1px solid var(--line)}
+.bfhl .ahint{display:flex;align-items:flex-start;gap:9px;width:100%;background:none!important;border-radius:0;padding:9px 2px 2px;font-weight:600;font-size:0;color:var(--fg);line-height:1.35}
+.bfhl .ahint{max-width:none!important;flex:none}.bfhl .ahint+.ahint{border-top:1px dashed var(--line);padding-top:8px;margin-top:6px}
+.bfhl .ahint:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--bf-dot,var(--warn));flex:none;margin-top:6px}
+.bfhl .ahint.g:before{background:var(--accent)}
+.bfhl .ahint>svg,.bfhl .ahint>.i{display:none}
+.bfhl .ahint span{font-size:13px;white-space:normal!important;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;flex:1}
+.bfhl .ahint:after{content:"›";color:var(--muted);font-size:18px;line-height:1;margin-left:auto}
+.bfhl .ahint:hover span{text-decoration:underline;text-underline-offset:3px}
+@media (prefers-reduced-motion:no-preference){.bfhl .ahint{animation:bfhlIn .4s cubic-bezier(.2,.9,.2,1) both}.bfhl .ahint:nth-child(2){animation-delay:.06s}.bfhl .ahint:nth-child(3){animation-delay:.12s}@keyframes bfhlIn{from{opacity:0;transform:translateY(-4px)}}}.bftop>.card{margin:0}
 .bfih{display:flex;align-items:center;gap:8px;font:800 14px var(--f-body);color:var(--fg)}.bfih>span{margin-left:auto;font:800 13px var(--f-body);color:var(--accent)}.bfih svg{color:var(--muted)}
 .bfih .bfn{color:#fff;background:var(--bad);border-radius:99px;padding:1px 8px;font-size:11.5px}
 .bfbar{display:flex;height:12px;border-radius:99px;overflow:hidden;margin:10px 0 7px;background:var(--sunk)}.bfbar i{display:block;width:var(--w);transform-origin:left;animation:bfGrow .9s cubic-bezier(.2,.8,.2,1) both}.bfbar i.j{background:var(--bf-job)}.bfbar i.b{background:var(--bf-biz);animation-delay:.12s}
@@ -1790,15 +1800,18 @@ div.homt{cursor:default}
 .bftodo2{margin-top:12px}html.pc:not(.tabp) .bftodo2{display:none}
 html:not(.pc) .bftop .bftodo,html.tabp .bftop .bftodo{display:none}
 html.tabp .bfg{grid-template-columns:repeat(3,minmax(0,1fr))!important}
-html.pc:not(.tabp) .bftop{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}
-html.pc:not(.tabp) .bfsw{--bfduo:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:12px 16px;align-items:start}
+html.pc:not(.tabp) .bftop{grid-template-columns:minmax(0,1fr)}
+html.pc:not(.tabp) .bfsw{--bfduo:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 16px;align-items:start}
 html.pc:not(.tabp) .bfbands,html.pc:not(.tabp) .bfgrids{display:contents}
 html.pc:not(.tabp) .bfhint{display:none}
 html.pc:not(.tabp) .bfband{transform:none!important;opacity:1!important;filter:none!important;cursor:default}
 html.pc:not(.tabp) .bfband .bfbtn{visibility:visible!important}
 html.pc:not(.tabp) .bfj{grid-column:1;grid-row:1}html.pc:not(.tabp) .bfb{grid-column:2;grid-row:1}
-html.pc:not(.tabp) .bfgj{grid-column:1;grid-row:2;visibility:visible!important;pointer-events:auto!important}html.pc:not(.tabp) .bfgb{grid-column:2;grid-row:2;visibility:visible!important;pointer-events:auto!important;grid-template-columns:repeat(4,minmax(0,1fr))!important}
-html.istab:not(.tabp) .bfgb{grid-template-columns:repeat(2,minmax(0,1fr))!important}html.istab:not(.tabp) .bfsw{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr)}
+html.pc:not(.tabp) .bfgj{grid-column:1;grid-row:2;visibility:visible!important;pointer-events:auto!important}html.pc:not(.tabp) .bfgb{grid-column:2;grid-row:2;visibility:visible!important;pointer-events:auto!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html.pc:not(.tabp) .bfgj{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html.pc:not(.tabp) #v-beruf{max-width:min(2240px,100%)}
+html.pc:not(.tabp) .apcgrid.bfpc{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+html.istab:not(.tabp) .bfgb,html.istab:not(.tabp) .bfgj{grid-template-columns:repeat(2,minmax(0,1fr))!important}html.istab:not(.tabp) .bfsw{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 @media (prefers-reduced-motion:reduce){.bfband{transition:none}.bfbar i,.bfhint svg{animation:none}}
 .areacard{padding:14px}
 .areahd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 10px;font:800 12px var(--f-body);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
@@ -1883,7 +1896,11 @@ html.pc:not(.tabp) .rvhd{grid-column:1}
  html.pc:not(.tabp):not(.istab) .rvbody{grid-column:2;grid-row:2;padding:6px 8px 0}html.pc:not(.tabp):not(.istab) .rvprev{grid-column:3;grid-row:1/3;border-radius:0 26px 26px 0}
 }
 @media (max-width:420px){.rvp{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n d" "q t"}.rvpn{grid-area:n}.rvpd{grid-area:d}.rvq{grid-area:q;justify-self:start}.rvpt{grid-area:t}}
-#rvBg .vacard{padding:14px 16px;overflow:visible}#rvBg .seg{background:var(--sunk);border-radius:14px;padding:4px;gap:4px}#rvBg .seg button{transition:background .2s,color .2s,box-shadow .2s,transform .12s;cursor:pointer}#rvBg .seg button:active{transform:scale(.96)}#rvBg .seg button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.14)}.rvrecs{margin-top:14px;display:flex;flex-direction:column;gap:8px}.rvrecs .rvsub{display:flex;gap:6px;align-items:center}.rvrecr{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:14px;padding:10px 12px}.rvrecr small{display:block;font-size:12px;color:var(--muted);font-weight:600}.rvrecr b{display:block}#rvBg select.in{width:100%}#rvBg .vacard.rvtot{padding:18px}#rvBg .rvwrite,.rvwrite{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px}
+#rvBg .vacard{padding:14px 16px;overflow:visible}.rvzc{touch-action:pan-y;position:relative}.rvzc .rvzi{transform-origin:0 0}.rvzc.zoomed{overflow:hidden!important;touch-action:none;cursor:grab}.rvzc.zoomed:active{cursor:grabbing}.rvzc:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.rvzb{position:absolute;top:8px;right:10px;z-index:3;display:flex;align-items:center;gap:2px;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-radius:99px;padding:3px;box-shadow:0 6px 18px -8px rgba(0,0,0,.35);opacity:.0;transform:translateY(-6px);transition:opacity .2s,transform .2s;pointer-events:none}
+.rvzc:hover .rvzb,.rvzc.zoomed .rvzb,.rvzc:focus-within .rvzb{opacity:1;transform:none;pointer-events:auto}@media (pointer:coarse){.rvzb{opacity:1;transform:none;pointer-events:auto}}
+.rvzb button{border:0;background:none;color:var(--fg);height:28px;min-width:28px;border-radius:99px;display:grid;place-items:center;font-weight:800;font-size:12px;cursor:pointer;padding:0 6px}.rvzb button:hover{background:var(--sunk)}
+.rvzm{border-radius:6px;overflow:hidden;padding-top:30px}.rvplm{position:absolute;top:10px;left:4px}.rvzh{font-weight:600}#rvBg .seg{background:var(--sunk);border-radius:14px;padding:4px;gap:4px}#rvBg .seg button{transition:background .2s,color .2s,box-shadow .2s,transform .12s;cursor:pointer}#rvBg .seg button:active{transform:scale(.96)}#rvBg .seg button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.14)}.rvrecs{margin-top:14px;display:flex;flex-direction:column;gap:8px}.rvrecs .rvsub{display:flex;gap:6px;align-items:center}.rvrecr{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:14px;padding:10px 12px}.rvrecr small{display:block;font-size:12px;color:var(--muted);font-weight:600}.rvrecr b{display:block}#rvBg select.in{width:100%}#rvBg .vacard.rvtot{padding:18px}#rvBg .rvwrite,.rvwrite{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px}
 
 .apcgrid.bfpc{margin-top:16px}.bfpc .card-head h2{gap:8px}.apcc.bfpcj{box-shadow:inset 0 3px 0 var(--bf-job)}.apcc.bfpcb{box-shadow:inset 0 3px 0 var(--bf-biz)}
 @media (prefers-reduced-motion:no-preference){.apcgrid.bfpc>.card{animation:bfpcIn .5s cubic-bezier(.2,.8,.2,1) both}.apcgrid.bfpc>.card+.card{animation-delay:.08s}@keyframes bfpcIn{from{opacity:0;transform:translateY(14px)}}}
@@ -3793,6 +3810,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.41.1", "20. November 2026", ["Rechnungs-Vorschau zoomen: am PC mit dem Mausrad, an Tablet und Handy mit zwei Fingern – Doppelklick/-tipp zoomt hinein, Ziehen verschiebt.", "Beruf: „Mein Job“ und „Mein Geschäft“ teilen sich den Bildschirm genau zur Hälfte und nutzen die ganze Breite – darunter Steuer und Kunden.", "„Jetzt zu tun“ steht jetzt dezent oben in der Einkommenskarte, lange Hinweise brechen in eine zweite Zeile um."]],
   ["0.40.9", "20. November 2026", ["Rechnungen: Abschlagsrechnungen (und in der Schlussrechnung abziehen), Gutschriften und wiederkehrende Rechnungen – Mami erinnert dich und legt die nächste fertig an.", "Eigene Rechnungsnummern: Vorsilbe (z. B. RE-) und Startnummer, falls du schon Rechnungen woanders geschrieben hast."]],
   ["0.40.8", "20. November 2026", ["Neu: Rechnungen schreiben – in 4 kleinen Schritten mit Mami-Tipps: Kunde, Leistungen, Details, Prüfen.", "Fertige PDF mit farbigem Kopf, „Bitte überweisen bis …“ und QR-Code (GiroCode) zum Bezahlen per Banking-App.", "Pflichtangaben-Check, Kleinunternehmer-Hinweis nach § 19, Kunden und Leistungen merkt sich die App.", "Jede Rechnung landet in „Rechnungen im Blick“ – mit PDF, Bearbeiten und „Als Vorlage“ für die nächste."]],
   ["0.40.7", "20. November 2026", ["Beruf am PC und Tablet: Unter „Mein Job“ und „Mein Geschäft“ stehen wieder die großen Karten für Steuer und Kunden.", "Mein Geschäft zeigt jetzt auch die Steuer-Rücklage."]],
@@ -4696,11 +4714,10 @@ function berufDuo(el, tiles, T, exJ, exB, hints){
   const bB=band("b","store",nt("bf_biz"),nt("bf_biz_s",{n:eur0(M.rev),m:mn}),`<button type="button" class="bfbtn" data-rvnew data-noi18n>+ ${esc(nt("bf_inv"))}</button>`);
   el.innerHTML=`<div class="bftop"><div class="card bfinc"><div class="bfih">${ic("chart",17)}<b data-noi18n>${esc(nt("bf_inc",{m:mn}))}</b><span data-noi18n>${E(tot)}</span></div>
     <div class="bfbar" role="img" aria-label="${esc(nt("bf_inc_job"))} ${E(M.job)}, ${esc(nt("bf_inc_biz"))} ${E(M.biz)}"><i class="j" style="--w:${tot?M.job/tot*100:50}%"></i><i class="b" style="--w:${tot?M.biz/tot*100:50}%"></i></div>
-    <div class="bfleg" data-noi18n><span><i class="j"></i>${esc(nt("bf_inc_job"))} <b>${E(M.job)}</b></span><span><i class="b"></i>${esc(nt("bf_inc_biz"))} <b>${E(M.biz)}</b></span></div></div>
-   <div class="card bftodo"><div class="bfih">${ic("bell",17)}<b data-noi18n>${esc(nt("bf_todo"))}</b>${hints.length?`<span class="bfn">${hints.length}</span>`:""}</div>${hints.length?`<div class="ahints bfh">${hints.slice(0,3).join("")}</div>`:`<div class="bfok">${ic("check",18)}<span data-noi18n>${esc(nt("bf_none"))}</span></div>`}</div></div>
+    <div class="bfleg" data-noi18n><span><i class="j"></i>${esc(nt("bf_inc_job"))} <b>${E(M.job)}</b></span><span><i class="b"></i>${esc(nt("bf_inc_biz"))} <b>${E(M.biz)}</b></span></div>${hints.length?`<div class="bfhl" role="list" aria-label="${esc(nt("bf_todo"))}">${hints.slice(0,3).join("")}</div>`:""}</div></div>
   <div class="bfsw ${side==="b"?"sb":"sj"}" id="bfsw"><div class="bfbands">${bJ}${bB}</div><div class="bfhint" aria-hidden="true">${ic("chev",14)}<span data-noi18n>${esc(nt("bf_swipe"))}</span></div>
    <div class="bfgrids"><div class="agrid bfg bfgj">${J.join("")}</div><div class="agrid bfg bfgb">${B.join("")}</div></div></div>
-  ${hints.length?`<div class="card bftodo bftodo2"><div class="bfih">${ic("bell",17)}<b data-noi18n>${esc(nt("bf_todo"))}</b><span class="bfn">${hints.length}</span></div><div class="ahints bfh">${hints.slice(0,3).join("")}</div></div>`:""}${IS_PC?`<div class="apcgrid bfpc">${["tax","kunden"].map(k=>T.find(t=>t.k===k)).filter(Boolean).map(t=>`<div class="card apcc bfpc${t.k==="tax"?"j":"b"}"><div class="card-head"><h2>${hIc(t.icon)}${(typeof TL_!=="undefined"&&TL_[t.k]?TL_[t.k][0]:t.title)}</h2></div>${t.body||""}</div>`).join("")}</div>`:""}`;
+${IS_PC?`<div class="apcgrid bfpc">${["tax","kunden"].map(k=>T.find(t=>t.k===k)).filter(Boolean).map(t=>`<div class="card apcc bfpc${t.k==="tax"?"j":"b"}"><div class="card-head"><h2>${hIc(t.icon)}${(typeof TL_!=="undefined"&&TL_[t.k]?TL_[t.k][0]:t.title)}</h2></div>${t.body||""}</div>`).join("")}</div>`:""}`;
   try{ if (localStorage.getItem("hb-bfside")) $("bfsw").classList.add("known"); }catch(_){}
   bfWire(); }
 function bfSwap(to, anim){ const w=$("bfsw"); if (!w) return; const cur=w.classList.contains("sb")?"b":"j"; to=to||(cur==="j"?"b":"j"); if (to===cur) return;
@@ -10342,6 +10359,11 @@ rv_nr_pre:["Vorsilbe (optional)", "Prefix (optional)", "Ön ek (isteğe bağlı)
 rv_nr_start:["Weiter ab Nummer", "Continue from number", "Bu numaradan devam", "Продолжить с номера", "Продовжити з номера", "Kontynuuj od numeru", "تابع من الرقم", "Continuă de la numărul"],
 rv_nr_next:["Nächste Nummer: {n}", "Next number: {n}", "Sonraki numara: {n}", "Следующий номер: {n}", "Наступний номер: {n}", "Następny numer: {n}", "الرقم التالي: {n}", "Următorul număr: {n}"],
 rv_c_pay:["Abschläge sind höher als die Rechnung", "Deposits exceed the invoice", "Avanslar faturadan yüksek", "Авансы больше суммы счёта", "Аванси більші за суму рахунку", "Zaliczki przekraczają fakturę", "الدفعات المقدمة أعلى من الفاتورة", "Avansurile depășesc factura"],
+rv_zoom_pc:["Mausrad zum Zoomen", "Scroll wheel to zoom", "Yakınlaştırmak için fare tekerleği", "Колесо мыши – масштаб", "Коліщатко миші – масштаб", "Kółko myszy – powiększ", "عجلة الفأرة للتكبير", "Rotița mouse-ului pentru zoom"],
+rv_zoom_touch:["Mit zwei Fingern zoomen", "Pinch with two fingers to zoom", "İki parmakla yakınlaştır", "Масштаб двумя пальцами", "Масштаб двома пальцями", "Powiększ dwoma palcami", "كبّر بإصبعين", "Zoom cu două degete"],
+rv_zoom_in:["Vergrößern", "Zoom in", "Yakınlaştır", "Увеличить", "Збільшити", "Powiększ", "تكبير", "Mărește"],
+rv_zoom_out:["Verkleinern", "Zoom out", "Uzaklaştır", "Уменьшить", "Зменшити", "Pomniejsz", "تصغير", "Micșorează"],
+rv_zoom_reset:["Zurück auf 100 %", "Reset to 100 %", "%100'e dön", "Вернуть 100 %", "Повернути 100 %", "Wróć do 100 %", "العودة إلى 100 ٪", "Înapoi la 100 %"],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
@@ -11727,7 +11749,7 @@ function rvPdf(d){ const {pages}=rvLayout(d), H=842, col=h=>{ const n=parseInt(S
 function rvSteps(){ const s=[]; if (!RV.meDone) s.push("me"); s.push("kunde","pos","det","chk"); return s; }
 function rvOpen(d){ RV.d=d||rvNew(); RV.nrTouched=0; RV.meDone=rvBizOk(); RV.st=0; RV.dir=1; RV.pv=0; let bg=$("rvBg"); if (!bg){ bg=document.createElement("div"); bg.id="rvBg"; bg.className="rvbg"; document.body.appendChild(bg); }
   bg.innerHTML=`<div class="rvwin" role="dialog" aria-modal="true" aria-labelledby="rvTt"><header class="rvhd"><button type="button" class="rvx" data-rvclose aria-label="${esc(nt("rv_close"))}">${ic("x",20)}</button><div class="grow"><small id="rvSub"></small><b id="rvTt">${esc(nt("rv_title"))}</b></div><button type="button" class="rvpvb" data-rvpv>${ic("eye",17)}<span>${esc(nt("rv_preview"))}</span></button></header>
-    <nav class="rvnav" id="rvNav" aria-label="${esc(nt("rv_steps"))}"></nav><main class="rvbody" id="rvBody"></main><aside class="rvprev" id="rvPrev" aria-label="${esc(nt("rv_preview"))}"><span class="rvpl">${ic("eye",14)} ${esc(nt("rv_live"))}</span><div class="rvpp" id="rvPP" data-noi18n translate="no"></div></aside></div>`;
+    <nav class="rvnav" id="rvNav" aria-label="${esc(nt("rv_steps"))}"></nav><main class="rvbody" id="rvBody"></main><aside class="rvprev rvzc" id="rvPrev" tabindex="0" aria-label="${esc(nt("rv_preview"))}"><span class="rvpl">${ic("eye",14)} ${esc(nt("rv_live"))} · <span class="rvzh">${esc(nt(matchMedia("(pointer:coarse)").matches?"rv_zoom_touch":"rv_zoom_pc"))}</span></span>${rvzBar()}<div class="rvpp rvzi" id="rvPP" data-noi18n translate="no"></div></aside></div>`;
   bg.hidden=false; document.body.classList.add("locked"); requestAnimationFrame(()=>bg.classList.add("on")); rvRender(); SND.play("whoosh");
   if (!RMo()) bg.querySelector(".rvwin").animate([{transform:"translateY(28px) scale(.98)",opacity:0},{transform:"none",opacity:1}],{duration:380,easing:"cubic-bezier(.2,.9,.2,1)"}); }
 function rvClose(){ const bg=$("rvBg"); if (!bg||bg.hidden) return; if (rvSteps()[RV.st]!=="me") rvSync(); try{ localStorage.setItem("hb-rvdraft", JSON.stringify(RV.d)); }catch(_){} bg.classList.remove("on"); SND.play("whooshin"); setTimeout(()=>{ bg.hidden=true; bg.innerHTML=""; document.body.classList.remove("locked"); }, RMo()?0:220); }
@@ -11762,7 +11784,7 @@ function rvStepHtml(k){ const d=RV.d, b=rvBiz(), sum=rvSum(d);
   const C=rvCheck(); return `${rvTip(C.every(c=>c.ok)?"rv_tip_ok":"rv_tip_miss")}<div class="vacard rvtot"><small>${esc(nt("rv_total"))}</small><b data-noi18n id="rvTot">${esc(rvE(sum.gross))}</b><span data-noi18n>${esc(d.k.name||"–")} · ${esc(d.nr)} · ${esc(nt("rv_d_due",{d:fxDate(addDays(d.date,Number(d.z)||14),{day:"numeric",month:"long"})}))}</span></div>
     <div class="vacard rvchk"><b class="rvsub">${esc(nt("rv_chk_h"))}</b>${C.map(c=>`<button type="button" class="rvc ${c.ok?"ok":"no"}" ${c.ok?"":`data-rvgo="${c.go}"`}><i>${ic(c.ok?"check":"alert",14)}</i><span>${esc(nt(c.k))}</span>${c.ok?"":ic("right",15)}</button>`).join("")}</div>
     ${(d.typ||"r")==="r"&&!d.recId?`<div class="vacard rvgrid"><div class="hlf w2"><span>${esc(nt("rv_rep"))}</span><div class="seg rvseg">${[0,1,3,12].map(n=>`<button type="button" class="${Number(d.rep||0)===n?"on":""}" data-rvrep="${n}">${esc(nt("rv_rep_"+n))}</button>`).join("")}</div><small class="rvhint">${esc(Number(d.rep)>0?nt("rv_rep_s",{d:fxDate(rvAddM(d.date,Number(d.rep)),{day:"numeric",month:"long"})}):nt("rv_rep_s0"))}</small></div></div>`:""}
-    <div class="rvpaperm" id="rvPM" data-noi18n translate="no">${rvSvg(d)}</div>
+    <div class="rvzc rvzm" tabindex="0"><span class="rvpl rvplm">${esc(nt("rv_zoom_touch"))}</span>${rvzBar()}<div class="rvpaperm rvzi" id="rvPM" data-noi18n translate="no">${rvSvg(d)}</div></div>
     <div class="rvacts"><button type="button" class="btn" data-rvpdf>${ic("dl",17)} ${esc(nt("rv_pdf"))}</button><button type="button" class="btn" data-rvmail>${ic("mail",17)} ${esc(nt("rv_mail"))}</button></div>`; }
 function rvCheck(){ const d=RV.d, b=rvBiz(), st=rvSteps(); const go=k=>Math.max(0,st.indexOf(k)); return [
   {k:"rv_c_me", ok:!!(b.name&&b.street&&b.city), go:"me"}, {k:"rv_c_tax", ok:!!(b.taxNo||b.vatId), go:"me"}, {k:"rv_c_k", ok:!!(d.k.name&&(d.k.street||d.k.city)), go:"kunde"},
@@ -11775,6 +11797,40 @@ function rvRender(){ const d=RV.d, st=rvSteps(), k=st[RV.st]||"chk", nav=$("rvNa
   body.innerHTML=`<div class="rvstep" data-k="${k}"><small class="rvcount">${esc(nt("rv_step_n",{i:String(RV.st+1),m:String(st.length)}))}</small><h2 class="rvh">${esc(nt(lab[k][0]+"_q"))}</h2>${rvStepHtml(k)}</div>
     <div class="rvfoot">${RV.st>0?`<button type="button" class="btn" data-rvback>${esc(nt("rv_back"))}</button>`:""}${last?`<button type="button" class="btn primary" data-rvfin>${ic("check",17)} ${esc(nt(d.id?"rv_fin_upd":"rv_fin"))}</button>`:`<button type="button" class="btn primary" data-rvnext>${esc(nt("rv_next",{s:nt(lab[st[RV.st+1]][0])}))} ${ic("right",16)}</button>`}</div>`;
   rvPrev(); if (!RMo()){ const s=body.querySelector(".rvstep"); s.animate([{transform:`translateX(${RV.dir*34}px)`,opacity:0},{transform:"none",opacity:1}],{duration:340,easing:"cubic-bezier(.2,.9,.2,1)"}); [...s.querySelectorAll(".vacard,.rvtip,.rvks,.rvpaperm,.rvacts")].forEach((e,i)=>e.animate([{transform:"translateY(10px)",opacity:0},{transform:"none",opacity:1}],{duration:320,delay:60+i*45,easing:"ease-out",fill:"backwards"})); } }
+/* Vorschau zoomen: Mausrad (PC), zwei Finger (Tablet/Handy), Doppelklick/-tipp, Ziehen zum Verschieben */
+const RVZ={p:new Map()};
+function rvzSt(c){ return c._z||(c._z={s:1,tx:0,ty:0}); }
+function rvzApply(c, anim){ const z=rvzSt(c), i=c.querySelector(".rvzi"); if (!i) return;
+  if (z.s<=1.001){ z.s=1; z.tx=0; z.ty=0; }
+  else { const W=i.offsetWidth*z.s, H=i.offsetHeight*z.s, cw=c.clientWidth, ch=c.clientHeight, ox=i.offsetLeft, oy=i.offsetTop;
+    z.tx=W+ox*2<=cw ? 0 : Math.min(-ox+8, Math.max(cw-W-ox-8, z.tx)); z.ty=H+oy<=ch ? 0 : Math.min(-oy+8, Math.max(ch-H-oy-8, z.ty)); }
+  const zoomed=z.s>1; if (zoomed && !c.classList.contains("zoomed")){ z.ty-=c.scrollTop; c.scrollTop=0; } const back=!zoomed && c.classList.contains("zoomed") ? (c._sy||0) : null;
+  c.classList.toggle("zoomed", zoomed); i.style.transition=anim&&!RMo()?"transform .28s cubic-bezier(.2,.9,.2,1)":"none";
+  i.style.transform=zoomed?`translate(${z.tx}px,${z.ty}px) scale(${z.s})`:""; if (back!==null) c.scrollTop=back;
+  const b=c.querySelector(".rvzp"); if (b) b.textContent=Math.round(z.s*100)+" %"; }
+function rvzAt(c, s, cx, cy, anim){ const z=rvzSt(c), i=c.querySelector(".rvzi"); if (!i) return; const r=c.getBoundingClientRect(), ns=Math.max(1, Math.min(5, s));
+  if (z.s<=1) { c._sy=c.scrollTop; z.ty=-c.scrollTop; c.scrollTop=0; c.classList.add("zoomed"); }
+  const px=cx-r.left-i.offsetLeft, py=cy-r.top-i.offsetTop, ux=(px-z.tx)/z.s, uy=(py-z.ty)/z.s; z.tx=px-ux*ns; z.ty=py-uy*ns; z.s=ns; rvzApply(c, anim); }
+document.addEventListener("wheel", e=>{ const c=e.target.closest&&e.target.closest("#rvBg .rvzc"); if (!c) return; e.preventDefault(); const z=rvzSt(c);
+  rvzAt(c, z.s*Math.exp(-Math.max(-60,Math.min(60,e.deltaY*(e.deltaMode===1?16:1)))*0.004), e.clientX, e.clientY, false); }, {passive:false});
+document.addEventListener("dblclick", e=>{ const c=e.target.closest&&e.target.closest("#rvBg .rvzc"); if (!c||e.target.closest(".rvzb")) return; const z=rvzSt(c); rvzAt(c, z.s>1.2?1:2.2, e.clientX, e.clientY, true); });
+document.addEventListener("pointerdown", e=>{ const c=e.target.closest&&e.target.closest("#rvBg .rvzc"); if (!c||e.target.closest(".rvzb")) return; const z=rvzSt(c);
+  RVZ.p.set(e.pointerId,{x:e.clientX,y:e.clientY}); RVZ.c=c;
+  if (RVZ.p.size===2){ const [a,b]=[...RVZ.p.values()]; RVZ.d0=Math.hypot(a.x-b.x,a.y-b.y)||1; RVZ.s0=z.s; RVZ.m0={x:(a.x+b.x)/2,y:(a.y+b.y)/2}; RVZ.pan=null; }
+  else if (z.s>1){ RVZ.pan={x:e.clientX,y:e.clientY,tx:z.tx,ty:z.ty}; try{ c.setPointerCapture(e.pointerId); }catch(_){} }
+  if (e.pointerType!=="mouse"){ const t=Date.now(); if (RVZ.p.size===1 && t-(RVZ.tap||0)<300 && Math.hypot(e.clientX-(RVZ.tx0||0),e.clientY-(RVZ.ty0||0))<30){ rvzAt(c, z.s>1.2?1:2.2, e.clientX, e.clientY, true); RVZ.tap=0; } else { RVZ.tap=t; RVZ.tx0=e.clientX; RVZ.ty0=e.clientY; } } });
+document.addEventListener("pointermove", e=>{ if (!RVZ.p.has(e.pointerId)) return; const c=RVZ.c, z=rvzSt(c); RVZ.p.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if (RVZ.p.size===2){ e.preventDefault(); const [a,b]=[...RVZ.p.values()], d=Math.hypot(a.x-b.x,a.y-b.y), m={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+    rvzAt(c, RVZ.s0*d/RVZ.d0, m.x, m.y, false); z.tx+=m.x-RVZ.m0.x; z.ty+=m.y-RVZ.m0.y; RVZ.m0=m; RVZ.s0=z.s; RVZ.d0=d; rvzApply(c,false); return; }
+  if (RVZ.pan && z.s>1){ z.tx=RVZ.pan.tx+(e.clientX-RVZ.pan.x); z.ty=RVZ.pan.ty+(e.clientY-RVZ.pan.y); rvzApply(c,false); } }, {passive:false});
+const rvzUp=e=>{ RVZ.p.delete(e.pointerId); if (RVZ.p.size<2){ RVZ.d0=null; } if (!RVZ.p.size) RVZ.pan=null; };
+document.addEventListener("pointerup", rvzUp); document.addEventListener("pointercancel", rvzUp);
+document.addEventListener("click", e=>{ const r=e.target.closest&&e.target.closest("#rvBg [data-rvzr]"); if (r){ const c=r.closest(".rvzc"); rvzSt(c).s=1; rvzApply(c,true); }
+  const p=e.target.closest&&e.target.closest("#rvBg [data-rvzp]"); if (p){ const c=p.closest(".rvzc"), q=c.getBoundingClientRect(); rvzAt(c, rvzSt(c).s*(p.dataset.rvzp==="1"?1.4:1/1.4), q.left+q.width/2, q.top+q.height/2, true); } });
+document.addEventListener("keydown", e=>{ const c=document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#rvBg .rvzc"); if (!c) return; const q=c.getBoundingClientRect(), z=rvzSt(c);
+  if (e.key==="+"||e.key==="="){ e.preventDefault(); rvzAt(c,z.s*1.4,q.left+q.width/2,q.top+q.height/2,true); } else if (e.key==="-"){ e.preventDefault(); rvzAt(c,z.s/1.4,q.left+q.width/2,q.top+q.height/2,true); } else if (e.key==="0"){ z.s=1; rvzApply(c,true); } });
+function rvzBar(){ return `<div class="rvzb" data-noi18n><button type="button" data-rvzp="0" aria-label="${esc(nt("rv_zoom_out"))}">${ic("minus",14)}</button><button type="button" class="rvzp" data-rvzr title="${esc(nt("rv_zoom_reset"))}">100 %</button><button type="button" data-rvzp="1" aria-label="${esc(nt("rv_zoom_in"))}">${ic("plus",14)}</button></div>`; }
+
 function rvPrev(){ const p=$("rvPP"); if (p) p.innerHTML=rvSvg(RV.d); const m=$("rvPM"); if (m) m.innerHTML=rvSvg(RV.d); }
 function rvSync(){ const d=RV.d; if (!d) return; const v=id=>{ const e=$(id); return e?e.value:null; }, b=rvBiz(), st=rvSteps(), k=st[RV.st];
   if (k==="me" && $("rvBn")){ Object.assign(b,{name:v("rvBn").trim(), owner:v("rvBo").trim(), email:v("rvBe").trim(), street:v("rvBs").trim(), city:v("rvBc").trim(), tel:v("rvBt").trim(), web:v("rvBw").trim(), taxNo:v("rvBx").trim(), vatId:v("rvBv").trim().toUpperCase(), iban:v("rvBi").replace(/\s+/g," ").trim().toUpperCase(), bic:v("rvBb").trim().toUpperCase(), bank:v("rvBn2").trim(), klein:$("rvBk").checked, nrPre:v("rvBp").trim(), nrStart:Math.max(0,Math.floor(Number(v("rvBst"))||0))||""}); const nn=$("rvNrN"); if (nn) nn.textContent=nt("rv_nr_next",{n:rchNextNr(b)}); if (!RV.d.id && !RV.d.recId && !RV.nrTouched) RV.d.nr=rchNextNr(b); }
