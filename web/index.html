@@ -3887,6 +3887,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.42.4", "21. November 2026", ["Kontoauszug als PDF mit Spaces (z. B. N26): Jede Buchung landet jetzt im richtigen Space, und für Hauptkonto und jeden Space wird der Endstand aus dem Auszug übernommen. Vorher wurde der Stand des letzten Spaces fälschlich beim Hauptkonto eingetragen."]],
   ["0.42.3", "21. November 2026", ["Fehlermeldungen: Ein Seitenwechsel per Wischen wurde fälschlich als „Wischgeste ohne Wirkung“ gemeldet – behoben."]],
   ["0.42.2", "21. November 2026", ["Space-Hinweis („… schuldet dem Hauptkonto …“): Mit „Erledigt – weg damit“ ist er verschwunden und verschiebt nichts mehr zwischen den Konten.", "Einkauf: neue Karte „Was du beim Einkaufen ausgibst“ – Durchschnitt pro Tag, Woche und Monat. In der Analyse zählt „Ø pro Tag“ jetzt ohne Einkäufe."]],
   ["0.42.1", "21. November 2026", ["Beruf am PC: Die Steuer-Kästen unten sind weg – alles dazu findest du in der Kachel „Steuer“."]],
@@ -10614,6 +10615,7 @@ sa_day:["Ø pro Tag", "Ø per day", "Ø günlük", "Ø в день", "Ø на д
 sa_week:["Ø pro Woche", "Ø per week", "Ø haftalık", "Ø в неделю", "Ø на тиждень", "Ø tygodniowo", "المتوسط أسبوعياً", "Ø pe săptămână"],
 sa_month:["Ø pro Monat", "Ø per month", "Ø aylık", "Ø в месяц", "Ø на місяць", "Ø miesięcznie", "المتوسط شهرياً", "Ø pe lună"],
 sa_sub:["Aus {n} Einkäufen der letzten {d} Tage · diesen Monat bisher {m}", "From {n} purchases in the last {d} days · this month so far {m}", "Son {d} gündeki {n} alışverişten · bu ay şimdiye kadar {m}", "По {n} покупкам за {d} дней · в этом месяце уже {m}", "За {n} покупками за {d} днів · цього місяця вже {m}", "Z {n} zakupów z ostatnich {d} dni · w tym miesiącu {m}", "من {n} عملية شراء خلال آخر {d} يوماً · هذا الشهر حتى الآن {m}", "Din {n} cumpărături în ultimele {d} zile · luna aceasta {m}"],
+pdf_bals_set:["Kontostände aus dem Auszug ({d}): {l}", "Balances from the statement ({d}): {l}", "Ekstreden bakiyeler ({d}): {l}", "Остатки из выписки ({d}): {l}", "Залишки з виписки ({d}): {l}", "Salda z wyciągu ({d}): {l}", "الأرصدة من الكشف ({d}): {l}", "Solduri din extras ({d}): {l}"],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
@@ -13878,7 +13880,7 @@ function pdfStatementRows(lines){
     if (!sign && expNeg) sign=1;
     if (!sign) sign = /gutschrift|eingang|gehalt|lohn|rente|einzahlung|erstattung|zinsen haben/i.test(type+" "+t.first) ? 1 : -1;
     const amount=(sign<0?"-":"")+t.v.toFixed(2);
-    return [t.date, payee.replace(/\s+/g," ").slice(0,90), rest.join(" ").slice(0,160), amount, type];
+    return [t.date, payee.replace(/\s+/g," ").slice(0,90), rest.join(" ").slice(0,160), amount, type, t.page];
   });
 }
 /* Papierauszüge */
@@ -14207,14 +14209,30 @@ async function loadPdf(file){
   try { const L=await pdfLines(await file.arrayBuffer()); L0=L; pp=/paypal/i.test(file.name||"") || /transaktionscode|transaktions-id|paypal[- ]?(kontoauszug|konto\b)|paypal \(europe\)[^\n]{0,40}(kontoauszug|aktivit)/i.test(L.filter(l=>l.page===1).slice(0,14).map(l=>l.text).join("\n")); rows = pdfStatementRows(L); }
   catch(e){ toast(e && /PDF-Leser/.test(e.message) ? e.message : (e && e.name==="PasswordException" ? "Die PDF ist mit Passwort geschützt" : "Die PDF konnte nicht gelesen werden")); return; }
   if (!rows.length){ toast("In der PDF wurden keine Buchungen gefunden. Am sichersten ist der CSV-Export deiner Bank."); return; }
-  const headers=["Datum","Empfänger","Verwendungszweck","Betrag","Buchungsart"];
-  UI.imp = { fileName:file.name, headers, raw:rows.slice(0,2000), map:{date:0, payee:1, payer:-1, ref:2, amount:3, type:4, account:-1, status:-1, sh:-1, soll:-1, haben:-1, paypal:pp}, items:null, pdf:true };
+  /* Auszüge mit Unterkonten (z. B. N26-Spaces): jede Seite gehört zu „Space: …“ oder zum Hauptkonto */
+  const PA=pdfPageAccts(L0), multi=!pp && Object.values(PA).some(a=>a!=="Hauptkonto"), acc0=pp?"":pdfAcct(L0);
+  for (const r of rows){ const pg=r[5]; r[5]=pp?"":(multi?(PA[pg]||"Hauptkonto"):acc0); }
+  const headers=["Datum","Empfänger","Verwendungszweck","Betrag","Buchungsart","Konto"];
+  UI.imp = { fileName:file.name, headers, raw:rows.slice(0,2000), map:{date:0, payee:1, payer:-1, ref:2, amount:3, type:4, account:pp?-1:5, status:-1, sh:-1, soll:-1, haben:-1, paypal:pp}, items:null, pdf:true };
   buildItems();
-  /* Kontostände: PDF-Buchungen dem Konto zuordnen und den Endstand aus dem Auszug übernehmen */
-  if (!pp){ try{ const acc=pdfAcct(L0); for (const it of (UI.imp.items||[])) if (!it.acct) it.acct=acc; recordAccounts(UI.imp.items); UI.imp.balMsg=pdfBalApply(acc, pdfBalance(L0), UI.imp.items); }catch(_){} }
+  /* Kontostände: Buchungen zählen zum Konto, Endstände aus dem Auszug werden übernommen */
+  if (!pp){ try{ for (const it of (UI.imp.items||[])) if (!it.acct) it.acct=acc0||"Hauptkonto"; recordAccounts(UI.imp.items); UI.imp.balMsg=pdfBalsApply(pdfBalances(L0, PA, multi?null:acc0), pdfEndDate(L0), UI.imp.items); }catch(e){ console.warn("pdf-bal", e); } }
   UI.view="import"; render(); window.scrollTo({top:0});
   if (UI.imp && UI.imp.balMsg) setTimeout(()=>toast(UI.imp.balMsg, null, null, 5200), 900);
 }
+function pdfPageAccts(L){ const out={}; for (const l of (L||[])){ const m=String(l.text||"").replace(/\s+/g," ").trim().match(/^Space:\s*(.{1,40})$/i); if (m && !out[l.page]) out[l.page]=m[1].trim(); } const pages=[...new Set((L||[]).map(l=>l.page))]; for (const p of pages) if (!out[p]) out[p]="Hauptkonto"; return out; }
+function pdfEndDate(L){ const T=(L||[]).slice(0,80).map(l=>String(l.text||"")).join(" "), m=T.match(/(?:bis|–|-)\s*(\d{1,2}\.\d{1,2}\.\d{4})/); return m?bsDate(m[1]):null; }
+/* Endstände je Konto: bei Unterkonten der Stand auf der Seite des jeweiligen Kontos */
+function pdfBalances(L, PA, single){ if (single) { const b=pdfBalance(L); return b?[{acc:single, ...b}]:[]; }
+  const by={}; for (const l of (L||[])) (by[l.page]=by[l.page]||[]).push(l); const res={};
+  for (const [pg,ls] of Object.entries(by)){ const b=pdfBalance(ls); if (b) res[PA[pg]||"Hauptkonto"]=b; }
+  return Object.entries(res).map(([acc,b])=>({acc, ...b})); }
+function pdfBalsApply(list, end, items){ if (!list.length){ const ds=(items||[]).map(i=>i.date).filter(Boolean).sort(); return ds.length?nt("pdf_bal_rows",{a:[...new Set((items||[]).map(i=>i.acct).filter(Boolean))].join(", ")}):""; }
+  const ds=(items||[]).map(i=>i.date).filter(Boolean).sort(), last=ds[ds.length-1]||null, set=[], old=[];
+  for (const b of list){ const date=end || (b.date && (!last || b.date>=last) ? b.date : (last||isoToday())); const AN={...(S.settings.accountAnchors||{})}, a=AN[b.acc];
+    if (a && a.date>date){ old.push(b.acc); continue; } AN[b.acc]={date, balance:Math.round(b.v*100)/100, ts:Date.now(), src:"pdf"}; S.settings.accountAnchors=AN; set.push(`${b.acc} ${eur(b.v)}`); }
+  if (set.length) saveSettings();
+  return set.length ? nt("pdf_bals_set",{l:set.join(" · "), d:shortDate(end||last||isoToday())}) : old.length ? nt("pdf_bal_old",{a:old.join(", "), d:shortDate(end||last||isoToday()), e:shortDate((S.settings.accountAnchors||{})[old[0]].date)}) : ""; }
 /* Endstand („Neuer Kontostand“, „Saldo am …“) aus dem PDF-Text lesen */
 function pdfBalance(L){ const T=(L||[]).map(l=>String(l.text||"").replace(/\s+/g," ").trim()).filter(Boolean); let best=null;
   const KEY=/(neuer|aktueller|end|schluss)[-\s]*(kontostand|saldo)|(kontostand|saldo)\s*(am|per|zum|vom)\b|endsaldo|schlusssaldo|^\s*kontostand\b|^\s*saldo\b/i, OLD=/(alter|vorheriger|anfangs|letzter|bisheriger|start)[-\s]*(kontostand|saldo)|(kontostand|saldo)\s*alt\b|übertrag|vortrag/i, AM=/(-|−|minus)?\s*(\d{1,3}(?:\.\d{3})+|\d{1,9}),(\d{2})(?!\d)\s*(-(?!\d)|S\b|Soll\b|H\b|Haben\b)?/gi;
