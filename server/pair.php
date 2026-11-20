@@ -73,19 +73,23 @@ function db(): PDO {
     $pdo->exec('CREATE TABLE IF NOT EXISTS ipcreate (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS ipfails (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS ipfeed (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)');
-    foreach (['ipinvseen', 'ipactwait'] as $t) $pdo->exec("CREATE TABLE IF NOT EXISTS $t (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)");
+    foreach (['ipinvseen', 'ipactwait', 'ipcrash'] as $t) $pdo->exec("CREATE TABLE IF NOT EXISTS $t (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)");
+    foreach (['ipcreate', 'ipfails', 'ipfeed', 'ipcrash', 'ipinvseen', 'ipactwait'] as $t) { try { $pdo->exec("DELETE FROM $t WHERE length(ip) <> 64"); } catch (Throwable $e) { } }
     return $pdo;
 }
 function q(string $sql, array $p = []): PDOStatement { $s = db()->prepare($sql); $i = 0; foreach ($p as $v) { $i++; $s->bindValue($i, $v, is_int($v) ? PDO::PARAM_INT : (is_null($v) ? PDO::PARAM_NULL : PDO::PARAM_STR)); } $s->execute(); return $s; }
 
+/* Missbrauchsschutz: nur eine Prüfsumme der IP-Adresse, Einträge älter als ein Tag werden gelöscht */
+function ipK(): string { return hash('sha256', 'rl|' . ip()); }
 function ipCount(string $table, int $limit): bool {
-    $r = q("SELECT n, since FROM $table WHERE ip = ?", [ip()])->fetch();
+    if (random_int(1, 50) === 1) q("DELETE FROM $table WHERE since < ?", [time() - 86400]);
+    $r = q("SELECT n, since FROM $table WHERE ip = ?", [ipK()])->fetch();
     return !($r && (int)$r['since'] > time() - 3600 && (int)$r['n'] >= $limit);
 }
 function ipBump(string $table): void {
-    $r = q("SELECT n, since FROM $table WHERE ip = ?", [ip()])->fetch();
-    if (!$r || (int)$r['since'] < time() - 3600) q("INSERT OR REPLACE INTO $table (ip, n, since) VALUES (?, 1, ?)", [ip(), time()]);
-    else q("UPDATE $table SET n = n + 1 WHERE ip = ?", [ip()]);
+    $r = q("SELECT n, since FROM $table WHERE ip = ?", [ipK()])->fetch();
+    if (!$r || (int)$r['since'] < time() - 3600) q("INSERT OR REPLACE INTO $table (ip, n, since) VALUES (?, 1, ?)", [ipK(), time()]);
+    else q("UPDATE $table SET n = n + 1 WHERE ip = ?", [ipK()]);
 }
 
 function authVault(): array {
