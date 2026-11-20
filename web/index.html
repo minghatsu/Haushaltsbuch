@@ -3887,6 +3887,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.42.5", "21. November 2026", ["Fehlermeldungen: Kurze, langsame Wischer, die absichtlich keine Seite wechseln, werden nicht mehr als Absturz gemeldet."]],
   ["0.42.4", "21. November 2026", ["Kontoauszug als PDF mit Spaces (z. B. N26): Jede Buchung landet jetzt im richtigen Space, und für Hauptkonto und jeden Space wird der Endstand aus dem Auszug übernommen. Vorher wurde der Stand des letzten Spaces fälschlich beim Hauptkonto eingetragen."]],
   ["0.42.3", "21. November 2026", ["Fehlermeldungen: Ein Seitenwechsel per Wischen wurde fälschlich als „Wischgeste ohne Wirkung“ gemeldet – behoben."]],
   ["0.42.2", "21. November 2026", ["Space-Hinweis („… schuldet dem Hauptkonto …“): Mit „Erledigt – weg damit“ ist er verschwunden und verschiebt nichts mehr zwischen den Konten.", "Einkauf: neue Karte „Was du beim Einkaufen ausgibst“ – Durchschnitt pro Tag, Woche und Monat. In der Analyse zählt „Ø pro Tag“ jetzt ohne Einkäufe."]],
@@ -5090,7 +5091,9 @@ const dbgUp=e=>{ const g=DBG.g; if (!g || !e.isPrimary) return; DBG.g=null;
   const dx=g.lx-g.x, dy=g.ly-g.y, dt=performance.now()-g.t;
   if (g.max<12){ dbgAdd("tipp", dbgEl(g.el)); g.kind="tap"; }
   else { const dir=Math.abs(dx)>Math.abs(dy)?(dx<0?"←":"→"):(dy<0?"↑":"↓"); dbgAdd("wisch", `${dir} ${Math.round(Math.hypot(dx,dy))} px · ${dbgEl(g.el)}`); g.kind="swipe";
-    if (g.touch && Math.abs(dx)>90 && Math.abs(dy)<Math.abs(dx)*0.5 && dt<900) setTimeout(()=>{ if (dbgSig(g.el)===g.sig) dbgDead(g, dx, dy, dt); }, 900); }
+    const ax=Math.abs(dx), cardish=g.el && g.el.closest && g.el.closest(".astack:not(.one),.srail"), far=cardish ? ax>90 : (ax>innerWidth*0.4 || (ax/Math.max(1,dt)>0.75 && ax>innerWidth*0.2));
+    /* nur melden, wenn die Geste auch wirklich hätte wechseln müssen (kurze, langsame Wischer wechseln absichtlich nicht) */
+    if (g.touch && far && Math.abs(dy)<ax*0.5 && dt<900) setTimeout(()=>{ if (dbgSig(g.el)===g.sig) dbgDead(g, dx, dy, dt); }, 900); }
   g.end=performance.now(); if (DBG.touch) dbgDraw(); };
 document.addEventListener("pointerup", dbgUp, {capture:true, passive:true});
 document.addEventListener("pointercancel", e=>{ const g=DBG.g; if (g){ g.cancel=true; dbgUp(e); } }, {capture:true, passive:true});
