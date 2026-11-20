@@ -1822,6 +1822,9 @@ html.pc .agrid{grid-template-columns:repeat(6,1fr)}
 html.pc #v-beruf,html.pc #v-zukunft{max-width:1200px;margin:0 auto;width:100%}
 html.pc #v-zukunft{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}html.pc #v-zukunft>.ahero,html.pc #v-zukunft>.zhero,html.pc #v-zukunft>.areacard{grid-column:1/-1}html.pc #v-zukunft>.card{order:0!important}
 .apcgrid{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;align-items:start}
+.apcgrid.bfpc{margin-top:16px}.bfpc .card-head h2{gap:8px}.apcc.bfpcj{box-shadow:inset 0 3px 0 var(--bf-job)}.apcc.bfpcb{box-shadow:inset 0 3px 0 var(--bf-biz)}
+@media (prefers-reduced-motion:no-preference){.apcgrid.bfpc>.card{animation:bfpcIn .5s cubic-bezier(.2,.8,.2,1) both}.apcgrid.bfpc>.card+.card{animation-delay:.08s}@keyframes bfpcIn{from{opacity:0;transform:translateY(14px)}}}
+html.tabp .apcgrid.bfpc{grid-template-columns:1fr}
 
 /* Plus-Rad */
 .fan.wheel .fanb{transition:none!important;margin:-32px 0 0 -32px;width:64px;height:64px;transform-origin:center;will-change:transform,opacity,left,top}
@@ -3727,6 +3730,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.40.6", "20. November 2026", ["Beruf am PC und Tablet: Unter „Mein Job“ und „Mein Geschäft“ stehen wieder die großen Karten für Steuer und Kunden.", "Mein Geschäft zeigt jetzt auch die Steuer-Rücklage."]],
   ["0.40.5", "20. November 2026", ["Beruf: Wer angestellt und selbstständig ist, sieht „Mein Job“ und „Mein Geschäft“ jetzt getrennt – oben dein Einkommen aus beidem und was zu tun ist", "Handy und Tablet hochkant: das Geschäft liegt hinter dem Job – nach unten wischen oder antippen, die Kacheln fliegen nach links raus und die anderen kommen von rechts"]],
   ["0.40.4", "20. November 2026", ["PC: Bei den Fixkosten verschwand die Auswahl „Monatlich / Vierteljährlich / Jährlich …“, wenn man vorher einen Namen oder Betrag eingetippt hatte – behoben, auch in anderen Listen mit Auswahlfeldern"]],
   ["0.40.3", "19. November 2026", ["„Alle Konten“ klappt jetzt wie ein Kartenstapel auf: die Spaces ziehen sich hinter der Hauptkarte zusammen und werden dann nacheinander darunter ausgeteilt – beim Schließen läuft es rückwärts"]],
@@ -4629,7 +4633,7 @@ function berufDuo(el, tiles, T, exJ, exB, hints){
    <div class="card bftodo"><div class="bfih">${ic("bell",17)}<b data-noi18n>${esc(nt("bf_todo"))}</b>${hints.length?`<span class="bfn">${hints.length}</span>`:""}</div>${hints.length?`<div class="ahints bfh">${hints.slice(0,3).join("")}</div>`:`<div class="bfok">${ic("check",18)}<span data-noi18n>${esc(nt("bf_none"))}</span></div>`}</div></div>
   <div class="bfsw ${side==="b"?"sb":"sj"}" id="bfsw"><div class="bfbands">${bJ}${bB}</div><div class="bfhint" aria-hidden="true">${ic("chev",14)}<span data-noi18n>${esc(nt("bf_swipe"))}</span></div>
    <div class="bfgrids"><div class="agrid bfg bfgj">${J.join("")}</div><div class="agrid bfg bfgb">${B.join("")}</div></div></div>
-  ${hints.length?`<div class="card bftodo bftodo2"><div class="bfih">${ic("bell",17)}<b data-noi18n>${esc(nt("bf_todo"))}</b><span class="bfn">${hints.length}</span></div><div class="ahints bfh">${hints.slice(0,3).join("")}</div></div>`:""}`;
+  ${hints.length?`<div class="card bftodo bftodo2"><div class="bfih">${ic("bell",17)}<b data-noi18n>${esc(nt("bf_todo"))}</b><span class="bfn">${hints.length}</span></div><div class="ahints bfh">${hints.slice(0,3).join("")}</div></div>`:""}${IS_PC?`<div class="apcgrid bfpc">${["tax","kunden"].map(k=>T.find(t=>t.k===k)).filter(Boolean).map(t=>`<div class="card apcc bfpc${t.k==="tax"?"j":"b"}"><div class="card-head"><h2>${hIc(t.icon)}${(typeof TL_!=="undefined"&&TL_[t.k]?TL_[t.k][0]:t.title)}</h2></div>${t.body||""}</div>`).join("")}</div>`:""}`;
   try{ if (localStorage.getItem("hb-bfside")) $("bfsw").classList.add("known"); }catch(_){}
   bfWire(); }
 function bfSwap(to, anim){ const w=$("bfsw"); if (!w) return; const cur=w.classList.contains("sb")?"b":"j"; to=to||(cur==="j"?"b":"j"); if (to===cur) return;
@@ -7571,7 +7575,7 @@ function anaGroupTiles(y, ym, mc, tax, TS){
       + fx.map(f=>({f, v:f.id in (mc.paid||{}) ? Number(mc.paid[f.id])||0 : planAmt(f,ym)})).sort((a,b)=>b.v-a.v).slice(0,6).map(({f,v})=>aBar(esc(f.name), v, tot)).join("")
       + `<button class="link small" data-go="fix" style="margin-top:10px">Alle Fixkosten ${ic("right",14)}</button>`), pct!=null?`${pct} %`:eur0(tot)); }
   const [, keys] = anaGrp();
-  const need = k => keys.includes(k);
+  const need = k => keys.includes(k) || (k==="ruecklage" && hasSelf() && hasJob());
   if (need("hourly")){ const h=Number(st.wochenstd)||Number((st.mindest||{}).h)||0, mon=L.monat||mindestMonat(y)||0, hr=h&&mon?mon/(h*13/3):0;
     add("hourly", hr?`${esc(eur(hr))} brutto pro Stunde`:"Stunden eintragen", aCard("Stundenlohn",
       `<div class="field" style="margin:0 0 10px"><label for="aStd">Stunden pro Woche</label><input class="in" id="aStd" inputmode="decimal" value="${h?esc(numStr(h)):""}" placeholder="z. B. 40"></div>`
