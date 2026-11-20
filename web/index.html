@@ -1759,6 +1759,47 @@ div.homt{cursor:default}
 .kdx{padding:0 0 8px 42px;display:flex;flex-direction:column}.kdt{display:flex;justify-content:space-between;border:0;background:none;padding:6px 0;font:600 13px var(--f-body);color:var(--fg);cursor:pointer;border-top:1px dashed var(--line)}
 
 /* Lebensbereiche */
+/* Beruf: Job + Geschäft */
+:root{--bf-job:#3d63a8;--bf-biz:var(--accent)}html[data-theme="dark"]{--bf-job:#7fa2ee}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bf-job:#7fa2ee}}
+.bftop{display:grid;gap:10px;margin-bottom:12px}.bftop>.card{margin:0}
+.bfih{display:flex;align-items:center;gap:8px;font:800 14px var(--f-body);color:var(--fg)}.bfih>span{margin-left:auto;font:800 13px var(--f-body);color:var(--accent)}.bfih svg{color:var(--muted)}
+.bfih .bfn{color:#fff;background:var(--bad);border-radius:99px;padding:1px 8px;font-size:11.5px}
+.bfbar{display:flex;height:12px;border-radius:99px;overflow:hidden;margin:10px 0 7px;background:var(--sunk)}.bfbar i{display:block;width:var(--w);transform-origin:left;animation:bfGrow .9s cubic-bezier(.2,.8,.2,1) both}.bfbar i.j{background:var(--bf-job)}.bfbar i.b{background:var(--bf-biz);animation-delay:.12s}
+@keyframes bfGrow{from{transform:scaleX(0)}}
+.bfleg{display:flex;flex-wrap:wrap;gap:4px 14px;font:700 11.5px var(--f-body);color:var(--muted)}.bfleg b{color:var(--fg)}.bfleg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:0}.bfleg i.j{background:var(--bf-job)}.bfleg i.b{background:var(--bf-biz)}
+.bftodo .ahints{flex-direction:column!important;overflow:visible!important;margin:8px 0 0!important;padding:0!important}.bftodo .ahint{width:100%}
+.bfok{display:flex;align-items:center;gap:8px;margin-top:10px;font:700 13px var(--f-body);color:var(--good)}
+.bfsw{--bfoff:40px;--bfduo:0;position:relative}
+.bfbands{display:grid;touch-action:none;padding-bottom:var(--bfoff);user-select:none;-webkit-user-select:none}
+.bfband{grid-area:1/1;display:flex;align-items:center;gap:12px;padding:11px 12px 11px 14px;border-radius:20px;background:color-mix(in srgb,var(--bfc) 12%,var(--surface));border-left:6px solid var(--bfc);box-shadow:0 10px 24px -16px rgba(0,0,0,.45);transform-origin:50% 0;transform:translateY(var(--bfdy,0px));transition:transform .45s cubic-bezier(.3,1.4,.5,1),opacity .3s,filter .3s;cursor:pointer;outline-offset:3px;min-width:0}
+.bfband.drag{transition:none}.bfj{--bfc:var(--bf-job)}.bfb{--bfc:var(--bf-biz)}
+.bfbi{width:40px;height:40px;border-radius:13px;background:var(--bfc);color:#fff;display:grid;place-items:center;flex:none;box-shadow:0 6px 14px -6px var(--bfc)}
+.bfbt{flex:1;min-width:0}.bfbt b{display:block;font:800 17px var(--f-body);color:var(--bfc)}.bfbt small{display:block;font:600 12px var(--f-body);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bfbtn{flex:none;border:0;border-radius:99px;padding:8px 12px;background:var(--surface);color:var(--bfc);font:800 12px var(--f-body);cursor:pointer;box-shadow:0 2px 8px -4px rgba(0,0,0,.25);transition:transform .15s}.bfbtn:active{transform:scale(.94)}
+.bfsw.sj .bfj,.bfsw.sb .bfb{z-index:2}
+.bfsw.sj .bfb,.bfsw.sb .bfj{z-index:1;transform:translateY(var(--bfoff)) scale(.92);opacity:.42;filter:saturate(.55)}
+.bfsw.sj .bfb .bfbtn,.bfsw.sb .bfj .bfbtn{visibility:hidden}
+.bfhint{display:flex;align-items:center;justify-content:center;gap:5px;margin:-4px 0 8px;font:700 11px var(--f-body);color:var(--muted)}.bfhint svg{transform:rotate(90deg);animation:bfNudge 1.6s ease-in-out infinite}
+@keyframes bfNudge{50%{transform:rotate(90deg) translateX(3px)}}
+.bfsw.known .bfhint{display:none}
+.bfgrids{display:grid}.bfg{grid-area:1/1;grid-template-columns:repeat(2,minmax(0,1fr))!important;align-content:start}
+.bfsw.sj .bfgb,.bfsw.sb .bfgj{visibility:hidden;pointer-events:none}
+.bfgj{--bfc:var(--bf-job)}.bfgb{--bfc:var(--bf-biz)}
+.bfg .atile{align-items:flex-start;text-align:start;padding:13px;gap:5px;min-height:98px;background:color-mix(in srgb,var(--bfc) 8%,var(--surface));border:1px solid color-mix(in srgb,var(--bfc) 14%,transparent)}
+.bfg .atile .aic{color:var(--bfc)}.bfg .atile b{font-size:13.5px}.bfg .atile:hover{background:color-mix(in srgb,var(--bfc) 14%,var(--surface))}
+.bftodo2{margin-top:12px}html.pc:not(.tabp) .bftodo2{display:none}
+html:not(.pc) .bftop .bftodo,html.tabp .bftop .bftodo{display:none}
+html.tabp .bfg{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html.pc:not(.tabp) .bftop{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}
+html.pc:not(.tabp) .bfsw{--bfduo:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:12px 16px;align-items:start}
+html.pc:not(.tabp) .bfbands,html.pc:not(.tabp) .bfgrids{display:contents}
+html.pc:not(.tabp) .bfhint{display:none}
+html.pc:not(.tabp) .bfband{transform:none!important;opacity:1!important;filter:none!important;cursor:default}
+html.pc:not(.tabp) .bfband .bfbtn{visibility:visible!important}
+html.pc:not(.tabp) .bfj{grid-column:1;grid-row:1}html.pc:not(.tabp) .bfb{grid-column:2;grid-row:1}
+html.pc:not(.tabp) .bfgj{grid-column:1;grid-row:2;visibility:visible!important;pointer-events:auto!important}html.pc:not(.tabp) .bfgb{grid-column:2;grid-row:2;visibility:visible!important;pointer-events:auto!important;grid-template-columns:repeat(4,minmax(0,1fr))!important}
+html.istab:not(.tabp) .bfgb{grid-template-columns:repeat(2,minmax(0,1fr))!important}html.istab:not(.tabp) .bfsw{grid-template-columns:minmax(0,1fr) minmax(0,1.6fr)}
+@media (prefers-reduced-motion:reduce){.bfband{transition:none}.bfbar i,.bfhint svg{animation:none}}
 .areacard{padding:14px}
 .areahd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 10px;font:800 12px var(--f-body);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
 .areagear{display:inline-flex;align-items:center;gap:6px;border:0;background:var(--sunk);color:var(--muted);border-radius:999px;padding:6px 11px 6px 8px;font:700 11.5px var(--f-body);text-transform:none;letter-spacing:0;cursor:pointer}
@@ -2891,7 +2932,7 @@ const P = {sound:"<path d=\"M4 9.5h3.2L12 5.5v13l-4.8-4H4z\"/><path d=\"M15.5 9.
   palette:'<path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.8 1.8-1.7 0-1.3-1-1.5-1-2.6 0-.9.7-1.6 1.7-1.6h2.2a3.8 3.8 0 0 0 3.8-3.8C20.5 6.9 16.7 3.5 12 3.5Z"/><circle cx="7.6" cy="11" r="1.1"/><circle cx="10" cy="7.3" r="1.1"/><circle cx="14.4" cy="7.3" r="1.1"/>',
   piggy:'<path d="M5 11.5a6.5 5.5 0 0 1 11.6-3.3L19 7.5v3.2l1.5.8v3l-2 .5a6.5 5.5 0 0 1-2.5 2.2V20h-3v-2.2h-3V20H7v-3.2A5.5 5.5 0 0 1 5 11.5z"/><circle cx="14.5" cy="11" r=".7"/>'
 };
-Object.assign(P,{link:"<path d=\"M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2\"/><path d=\"M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2\"/>",copy:"<rect x=\"8.5\" y=\"8.5\" width=\"11\" height=\"11\" rx=\"2.5\"/><path d=\"M15.5 8.5V6A1.5 1.5 0 0 0 14 4.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5\"/>",pause:"<path d=\"M9 6v12M15 6v12\"/>",play:"<path d=\"M8 5.5v13l10.5-6.5z\"/>"});
+Object.assign(P,{store:"<path d=\"M4 9l1.5-5h13L20 9\"/><path d=\"M4 9h16v1.5a2.7 2.7 0 0 1-5.3 0 2.7 2.7 0 0 1-5.4 0A2.7 2.7 0 0 1 4 10.5z\"/><path d=\"M5.5 13v7h13v-7M10 20v-4.5h4V20\"/>",link:"<path d=\"M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1.2 1.2\"/><path d=\"M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2\"/>",copy:"<rect x=\"8.5\" y=\"8.5\" width=\"11\" height=\"11\" rx=\"2.5\"/><path d=\"M15.5 8.5V6A1.5 1.5 0 0 0 14 4.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5\"/>",pause:"<path d=\"M9 6v12M15 6v12\"/>",play:"<path d=\"M8 5.5v13l10.5-6.5z\"/>"});
 function ic(name, size){ return `<svg class="i" viewBox="0 0 24 24"${size?` style="width:${size}px;height:${size}px"`:""}>${P[name]||P.tag}</svg>`; }
 function iconFor(kind, name){
   const n = (name||"").toLowerCase();
@@ -3686,6 +3727,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.40.5", "20. November 2026", ["Beruf: Wer angestellt und selbstständig ist, sieht „Mein Job“ und „Mein Geschäft“ jetzt getrennt – oben dein Einkommen aus beidem und was zu tun ist", "Handy und Tablet hochkant: das Geschäft liegt hinter dem Job – nach unten wischen oder antippen, die Kacheln fliegen nach links raus und die anderen kommen von rechts"]],
   ["0.40.4", "20. November 2026", ["PC: Bei den Fixkosten verschwand die Auswahl „Monatlich / Vierteljährlich / Jährlich …“, wenn man vorher einen Namen oder Betrag eingetippt hatte – behoben, auch in anderen Listen mit Auswahlfeldern"]],
   ["0.40.3", "19. November 2026", ["„Alle Konten“ klappt jetzt wie ein Kartenstapel auf: die Spaces ziehen sich hinter der Hauptkarte zusammen und werden dann nacheinander darunter ausgeteilt – beim Schließen läuft es rückwärts"]],
   ["0.40.2", "19. November 2026", ["Neu in den Einladungen: „Link für Posts“ – ein Link für Facebook & Co., jeder Besucher bekommt automatisch seinen eigenen Code", "Wer den Link nochmal öffnet, sieht wieder seinen Code von vorhin – höchstens 20 neue Codes am Tag", "Link pausieren oder erneuern; die Pinnwand zeigt, wie viele über den Link kamen"]],
@@ -3933,6 +3975,7 @@ const PTOUR_FN=()=>({
     {sel:'[data-view="zukunft"] .invtile', raw:1, ic:"up", t:nt("trz_inv_t"), p:[nt("trz_inv_p")]},
   ]},
   beruf:{t:nt("trb_t"), s:[
+    {sel:'#bfsw .bfbands', raw:1, ic:"case", t:nt("nw_bf_t"), p:[nt("nw_bf_p")]},
     {sel:'[data-view="beruf"] .ahero', raw:1, ic:"receipt", t:nt("trb_hero_t"), p:[nt("trb_hero_p")]},
     {sel:'[data-view="beruf"] .areacard .agrid', raw:1, ic:"case", t:nt("trb_tiles_t"), p:[nt("trb_tiles_p")]},
     {sel:'[data-view="beruf"] [data-stbopen].atile', raw:1, ic:"doc", t:nt("trb_stb_t"), p:[nt("trb_stb_p")]},
@@ -3967,6 +4010,7 @@ function ptourOpen(v){ const P=PTOUR[v]; if (!P) return; const steps=P.s.filter(
   TOUR.page=v; TOUR.steps=steps; tourGo(0); }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR=[
+  {v:"0.40.5", s:()=>hasJob()&&hasSelf() ? [{sel:"#ntNone", center:1, ic:"store", t:nt("nw_bf_t"), p:[nt("nw_bf_p")]}] : []},
   {v:"0.40.2", s:()=>updKey() ? [{sel:"#ntNone", center:1, ic:"link", t:nt("nw_pl_t"), p:[nt("nw_pl_p")]}] : []},
   {v:"0.40.1", s:()=>updKey() ? [{sel:"#ntNone", center:1, ic:"bell", t:nt("nw_nu_t"), p:[nt("nw_nu_p")]}] : []},
   {v:"0.39.9", s:()=>IS_DESK ? [{sel:".tab.plus", ic:"plus", t:nt("nw_fan_t"), p:[nt("nw_fan_p")]}] : []},
@@ -4564,6 +4608,52 @@ function homeHub(ym, c){ let t; const fx=fixedForMonth(ym,true).length, done=fx-
   if (!(hasExtra("partner") || spList().length) && (hasExtra("kinder") || kidsList().length)) t.pop();
   if (hasExtra("kinder") || kidsList().length){ const kg=kidsSum(Number(ym.slice(0,4))); t.splice(5,0,areaTile(ic("kids",22),"Kinder",kidsList().length?`Kindergeld ${esc(eur0(kg))}`:"eintragen","data-kidsopen")); }
   return `<div class="card areacard">${areaHead("Alles im Haushalt","konten","Einstellungen Haushalt")}<div class="agrid">${t.join("")}</div></div>`; }
+/* ===== Beruf: Job und Geschäft getrennt (wer angestellt UND selbstständig ist) =====
+   PC + Tablet quer: zwei Bereiche nebeneinander. Handy + Tablet hochkant: Job vorne, Geschäft versetzt dahinter –
+   nach unten wischen (oder auf den hinteren Balken tippen) tauscht; die Kacheln gehen nach links raus, die anderen kommen von rechts. */
+const BF_JOB=["lohn","wk","tax","hourly","beihilfe","bab","mjgrenze","quellen"], BF_BIZ=["euer","ruecklage","kunden"];
+function bfSide(){ try{ return localStorage.getItem("hb-bfside")==="b"?"b":"j"; }catch(_){ return "j"; } }
+function bfMonth(ym){ let job=0, biz=0, cost=0; for (const t of S.tx){ if (!(t.date||"").startsWith(ym)) continue; const a=Math.abs(Number(t.amount)||0);
+  if (t.kind==="einnahme"){ const r=incArt(t.cat); if (r==="lohn"||r==="sonderzahlung") job+=a; else if (r==="selbst") biz+=a; } else if (t.kind==="betrieb") cost+=a; }
+  return {job, biz:Math.max(0,biz-cost), rev:biz}; }
+function berufDuo(el, tiles, T, exJ, exB, hints){
+  const tl=t=>areaTile(ic(t.icon,22), (typeof TL_!=="undefined"&&TL_[t.k]?TL_[t.k][0]:t.title), t.short?esc(String(t.short)):"", `data-anaopen="${esc(t.k)}"`);
+  const keysB=new Set(BF_BIZ), J=tiles.filter(t=>!keysB.has(t.k)).map(tl).concat(exJ), Bk=[...BF_BIZ].map(k=>T.find(t=>t.k===k)).filter(Boolean).map(tl);
+  const B=exB.concat(Bk), M=bfMonth(UI.ym), mn=fxDate(UI.ym+"-01",{month:"long"}), tot=M.job+M.biz, side=bfSide(), E=v=>esc(eur0(v));
+  const band=(k,icn,t,sub,btn)=>`<div class="bfband bf${k}" data-bfband="${k}" role="button" tabindex="0" aria-label="${esc(t)}"><span class="bfbi">${ic(icn,20)}</span><span class="bfbt"><b data-noi18n>${esc(t)}</b><small data-noi18n>${esc(sub)}</small></span>${btn}</div>`;
+  const bJ=band("j","case",nt("bf_job"),nt("bf_job_s",{n:eur0(M.job),m:mn}),`<button type="button" class="bfbtn" data-anaopen="lohn" data-noi18n>${esc(nt("bf_all"))} ›</button>`);
+  const bB=band("b","store",nt("bf_biz"),nt("bf_biz_s",{n:eur0(M.rev),m:mn}),`<button type="button" class="bfbtn" data-rchopen data-noi18n>+ ${esc(nt("bf_inv"))}</button>`);
+  el.innerHTML=`<div class="bftop"><div class="card bfinc"><div class="bfih">${ic("chart",17)}<b data-noi18n>${esc(nt("bf_inc",{m:mn}))}</b><span data-noi18n>${E(tot)}</span></div>
+    <div class="bfbar" role="img" aria-label="${esc(nt("bf_inc_job"))} ${E(M.job)}, ${esc(nt("bf_inc_biz"))} ${E(M.biz)}"><i class="j" style="--w:${tot?M.job/tot*100:50}%"></i><i class="b" style="--w:${tot?M.biz/tot*100:50}%"></i></div>
+    <div class="bfleg" data-noi18n><span><i class="j"></i>${esc(nt("bf_inc_job"))} <b>${E(M.job)}</b></span><span><i class="b"></i>${esc(nt("bf_inc_biz"))} <b>${E(M.biz)}</b></span></div></div>
+   <div class="card bftodo"><div class="bfih">${ic("bell",17)}<b data-noi18n>${esc(nt("bf_todo"))}</b>${hints.length?`<span class="bfn">${hints.length}</span>`:""}</div>${hints.length?`<div class="ahints bfh">${hints.slice(0,3).join("")}</div>`:`<div class="bfok">${ic("check",18)}<span data-noi18n>${esc(nt("bf_none"))}</span></div>`}</div></div>
+  <div class="bfsw ${side==="b"?"sb":"sj"}" id="bfsw"><div class="bfbands">${bJ}${bB}</div><div class="bfhint" aria-hidden="true">${ic("chev",14)}<span data-noi18n>${esc(nt("bf_swipe"))}</span></div>
+   <div class="bfgrids"><div class="agrid bfg bfgj">${J.join("")}</div><div class="agrid bfg bfgb">${B.join("")}</div></div></div>
+  ${hints.length?`<div class="card bftodo bftodo2"><div class="bfih">${ic("bell",17)}<b data-noi18n>${esc(nt("bf_todo"))}</b><span class="bfn">${hints.length}</span></div><div class="ahints bfh">${hints.slice(0,3).join("")}</div></div>`:""}`;
+  try{ if (localStorage.getItem("hb-bfside")) $("bfsw").classList.add("known"); }catch(_){}
+  bfWire(); }
+function bfSwap(to, anim){ const w=$("bfsw"); if (!w) return; const cur=w.classList.contains("sb")?"b":"j"; to=to||(cur==="j"?"b":"j"); if (to===cur) return;
+  try{ localStorage.setItem("hb-bfside", to); }catch(_){}
+  const duo=getComputedStyle(w).getPropertyValue("--bfduo").trim()==="1", still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (duo || still || !anim || !document.body.animate){ w.classList.toggle("sb",to==="b"); w.classList.toggle("sj",to==="j"); return; }
+  if (w._busy) return; w._busy=1; SND.play("whoosh"); try{ navigator.vibrate&&navigator.vibrate(8); }catch(_){}
+  const front=w.querySelector(cur==="j"?".bfj":".bfb"), back=w.querySelector(cur==="j"?".bfb":".bfj"), gOut=w.querySelector(cur==="j"?".bfgj":".bfgb"), gIn=w.querySelector(cur==="j"?".bfgb":".bfgj");
+  const E="cubic-bezier(.32,.72,.2,1)";
+  front.animate([{transform:"translateY(var(--bfdy,0px)) scale(1)",opacity:1},{transform:"translateY(var(--bfoff)) scale(.92)",opacity:.42}],{duration:520,easing:E});
+  back.animate([{transform:"translateY(var(--bfoff)) scale(.92)",opacity:.42},{transform:"translateY(calc(var(--bfoff) + 14px)) scale(.95)",opacity:.7,offset:.35},{transform:"translateY(0) scale(1)",opacity:1}],{duration:560,easing:E});
+  setTimeout(()=>{ w.classList.toggle("sb",to==="b"); w.classList.toggle("sj",to==="j"); },260);
+  gOut.style.visibility="visible"; gIn.style.visibility="visible";
+  [...gOut.children].forEach((c,k)=>c.animate([{transform:"none",opacity:1},{transform:"translateX(-115%) rotate(-5deg)",opacity:0}],{duration:360,delay:k*32,easing:"cubic-bezier(.55,0,.8,.2)",fill:"both"}));
+  const n=gIn.children.length; [...gIn.children].forEach((c,k)=>c.animate([{transform:"translateX(115%) rotate(5deg)",opacity:0},{transform:"translateX(-4%) rotate(-.6deg)",opacity:1,offset:.75},{transform:"none",opacity:1}],{duration:560,delay:140+k*38,easing:"cubic-bezier(.2,.8,.3,1)",fill:"both"}));
+  setTimeout(()=>{ [...gOut.children,...gIn.children].forEach(c=>c.getAnimations().forEach(a=>a.cancel())); gOut.style.visibility=""; gIn.style.visibility=""; w._busy=0; }, 140+n*38+600); }
+function bfWire(){ const w=$("bfsw"); if (!w) return; const bands=w.querySelector(".bfbands"); let y0=null, dy=0, id=null;
+  bands.addEventListener("pointerdown", e=>{ if (e.target.closest(".bfbtn")) return; y0=e.clientY; dy=0; id=e.pointerId; });
+  bands.addEventListener("pointermove", e=>{ if (y0==null||e.pointerId!==id) return; dy=Math.max(0,e.clientY-y0); if (dy>4){ const f=w.querySelector(w.classList.contains("sb")?".bfb":".bfj"); f.style.setProperty("--bfdy",(Math.min(60,dy)*.55)+"px"); f.classList.add("drag"); } });
+  const up=e=>{ if (y0==null) return; const f=w.querySelector(".bfband.drag"); if (f){ f.classList.remove("drag"); f.style.removeProperty("--bfdy"); }
+    const t=e.target.closest(".bfband"), backTap=dy<6 && t && !t.classList.contains(w.classList.contains("sb")?"bfb":"bfj");
+    if (dy>34 || backTap){ bfSwap(null,true); } y0=null; };
+  bands.addEventListener("pointerup", up); bands.addEventListener("pointercancel", ()=>{ y0=null; const f=w.querySelector(".bfband.drag"); if (f){ f.classList.remove("drag"); f.style.removeProperty("--bfdy"); } });
+  bands.addEventListener("keydown", e=>{ if (e.key==="Enter"||e.key===" "||e.key==="ArrowDown"){ const t=e.target.closest(".bfband"); if (t){ e.preventDefault(); bfSwap(t.dataset.bfband,true); } } }); }
 function renderBeruf(){ const el=document.querySelector(`[data-view="beruf"]`); if (!el) return; const y=Number(UI.ym.slice(0,4)), g=anaGrp();
   try{ const keep=UI.anaSel; UI.anaSel=""; renderYear(); UI.anaSel=keep; }catch(e){ console.warn("beruf", e); }
   const T=UI.anaTiles||[], keys=[...g[1]]; if (hasSelf()) for (const k of ["kunden","euer"]) if (!keys.includes(k)) keys.push(k);
@@ -4583,11 +4673,13 @@ function renderBeruf(){ const el=document.querySelector(`[data-view="beruf"]`); 
   const extra=[]; if (staat){ const m=bwMonth(ymOf(new Date())), g2=Number(bwCfg().goal)||0, wj=jlCfg(), wn=wj.bwzEnd?daysTo(wj.bwzEnd):null; extra.push(areaTile(ic("repeat",22), esc(nt("wb_h")), wj.bwzEnd?(wj.wbDone===wj.bwzEnd?"✓":esc(fxDate(wj.bwzEnd,{day:"numeric",month:"short"}))):esc(nt("wb_end")), "data-wbopen")); extra.push(areaTile(ic("send",22),"Bewerbungen",`${m.length}${g2?" / "+g2:""} im Monat`,"data-bwopen")); }
   if (isJobless()){ const j=jlCfg(), up=(j.terms||[]).filter(t=>!t.done&&t.d>=isoToday()).sort((a,c)=>a.d.localeCompare(c.d))[0], mini=Number(j.mini)||0;
     extra.push(areaTile(ic("clock",22),"Termine & Fristen",up?esc(dLong(up.d,{day:"numeric",month:"short"})):"keine offen","data-tmopen"), areaTile(ic("cashplus",22),"Zuverdienst",mini?"+"+esc(eur0(jlKeep(mini))):"Rechner","data-zvopen"), areaTile(ic("doccheck",22),"Bescheid-Check",(j.bescheide||[]).length?esc(eur0((j.bescheide.slice().sort((a,c)=>(c.from||"").localeCompare(a.from||""))[0]||{}).total||0)):"scannen","data-bsopen")); }
-  if (hasSelf()){ try{ rchAutoPaid(); }catch(_){} const io=rchList().filter(i=>!i.paid), od=rchOver().length; extra.push(areaTile(ic("docout",22), esc(nt("rch_h")), od?esc(nt("rch_over_n",{n:String(od)})):io.length?`${io.length} · ${esc(eur0(io.reduce((s,i)=>s+i.amt,0)))}`:esc(nt("rch_new")), "data-rchopen")); }
-  { const BL=brList().filter(x=>!x.done), bn=BL.map(brNext).filter(Boolean).sort()[0]; extra.push(areaTile(ic("mail",22), esc(nt("br_title")), BL.length?`${BL.length} ${esc(nt("br_open"))}${bn?" · "+esc(fxDate(bn,{day:"numeric",month:"short"})):""}`:esc(nt("br_tile_s0")), "data-bropen")); }
-  if (hasSelf()||hasJob()){ const SL=stbSorted(), l0=SL[0], v0=l0?stbAmt(l0):0; extra.push(areaTile(ic("doctax",22), esc(nt("stb_title")), l0?`${v0>0?"+":v0<0?"−":"±"}${esc(eur0(Math.abs(v0)))} · ${esc(String(l0.year))}`:esc(nt("stb_tile_s0")), "data-stbopen"));
+  const duo=hasJob()&&hasSelf()&&!staat, exB=[], exJ=[];
+  if (hasSelf()){ try{ rchAutoPaid(); }catch(_){} const io=rchList().filter(i=>!i.paid), od=rchOver().length; (duo?exB:extra).push(areaTile(ic("docout",22), esc(nt("rch_h")), od?esc(nt("rch_over_n",{n:String(od)})):io.length?`${io.length} · ${esc(eur0(io.reduce((s,i)=>s+i.amt,0)))}`:esc(nt("rch_new")), "data-rchopen")); }
+  { const BL=brList().filter(x=>!x.done), bn=BL.map(brNext).filter(Boolean).sort()[0]; (duo?exJ:extra).push(areaTile(ic("mail",22), esc(nt("br_title")), BL.length?`${BL.length} ${esc(nt("br_open"))}${bn?" · "+esc(fxDate(bn,{day:"numeric",month:"short"})):""}`:esc(nt("br_tile_s0")), "data-bropen")); }
+  if (hasSelf()||hasJob()){ const SL=stbSorted(), l0=SL[0], v0=l0?stbAmt(l0):0; (duo?exJ:extra).push(areaTile(ic("doctax",22), esc(nt("stb_title")), l0?`${v0>0?"+":v0<0?"−":"±"}${esc(eur0(Math.abs(v0)))} · ${esc(String(l0.year))}`:esc(nt("stb_tile_s0")), "data-stbopen"));
     for (const x of SL){ const w=dLeft(stbWid(x)); if (w!=null&&w>=0&&w<=14){ hints.unshift(`<button type="button" class="ahint" data-stbopen>${ic("doctax",16)} <span data-noi18n>${esc(nt("stb_h_ein",{y:String(x.year),n:String(w)}))}</span></button>`); break; } } }
-  if (hasSelf()||["angestellt","beamte","beides","azubi"].includes(S.settings.work||"beides")||hasExtra("angestellt")){ const H=hoCalc(y); extra.push(areaTile(ic("home",22),"Homeoffice",H.on?esc(eur0(H.amt)):"eintragen","data-hoopen")); }
+  if (hasSelf()||["angestellt","beamte","beides","azubi"].includes(S.settings.work||"beides")||hasExtra("angestellt")){ const H=hoCalc(y); (duo?exJ:extra).push(areaTile(ic("home",22),"Homeoffice",H.on?esc(eur0(H.amt)):"eintragen","data-hoopen")); }
+  if (duo) return berufDuo(el, tiles, T, exJ, exB, hints);
   el.innerHTML = `${hero}${hints.length?`<div class="ahints">${hints.slice(0,3).join("")}</div>`:""}
     <div class="card areacard">${areaHead(g[0], hasJob()||hasSelf()?"steuer":"amt", "Einstellungen")}<div class="agrid">${tiles.filter(t=>!(tax&&t.k==="tax"&&false)).map(t=>areaTile(ic(t.icon,22), (typeof TL_!=="undefined"&&TL_[t.k]?TL_[t.k][0]:t.title), t.short?esc(String(t.short)):"", `data-anaopen="${esc(t.k)}"`)).join("")}${extra.join("")}</div></div>${IS_PC?`<div class="apcgrid">${["tax","kunden"].map(k=>T.find(t=>t.k===k)).filter(Boolean).map(t=>`<div class="card apcc"><div class="card-head"><h2>${hIc(t.icon)}${(typeof TL_!=="undefined"&&TL_[t.k]?TL_[t.k][0]:t.title)}</h2></div>${t.body||""}</div>`).join("")}</div>`:""}`;
 }
@@ -10037,6 +10129,20 @@ pl_grp:["{n} Codes über den Link", "{n} codes via the link", "Bağlantıyla {n}
 pl_grp_s:["Seite geöffnet, noch nicht geladen", "Page opened, not downloaded yet", "Sayfa açıldı, henüz indirilmedi", "Страница открыта, ещё не скачано", "Сторінку відкрито, ще не завантажено", "Strona otwarta, jeszcze nie pobrano", "فُتحت الصفحة، لم يتم التنزيل بعد", "Pagina deschisă, încă nedescărcată"],
 nw_pl_t:["Ein Link für alle", "One link for everyone", "Herkes için tek bağlantı", "Одна ссылка для всех", "Одне посилання для всіх", "Jeden link dla wszystkich", "رابط واحد للجميع", "Un link pentru toți"],
 nw_pl_p:["Neu in den Einladungen: „Link für Posts“. Ein Link für Facebook & Co. – jeder, der ihn öffnet, bekommt seinen eigenen Code. Höchstens 20 neue am Tag, pausierbar und erneuerbar.", "New in invitations: “Link for posts”. One link for Facebook & co. – everyone who opens it gets their own code. Up to 20 new ones a day, can be paused and renewed.", "Davetlerde yeni: “Paylaşımlar için bağlantı”. Facebook vb. için tek bağlantı – açan herkes kendi kodunu alır. Günde en fazla 20 yeni, duraklatılabilir ve yenilenebilir.", "Новое в приглашениях: «Ссылка для постов». Одна ссылка для Facebook и т. д. — каждый, кто её откроет, получит свой код. Не больше 20 новых в день, можно поставить на паузу и обновить.", "Нове в запрошеннях: «Посилання для дописів». Одне посилання для Facebook тощо — кожен, хто його відкриє, отримає свій код. Не більше 20 нових на день, можна призупинити й оновити.", "Nowość w zaproszeniach: „Link do postów”. Jeden link na Facebooka itp. – każdy, kto go otworzy, dostaje własny kod. Do 20 nowych dziennie, można wstrzymać i odnowić.", "جديد في الدعوات: «رابط للمنشورات». رابط واحد لفيسبوك وغيره – كل من يفتحه يحصل على رمزه الخاص. حتى 20 رمزًا جديدًا يوميًا، ويمكن إيقافه وتجديده.", "Nou la invitații: „Link pentru postări”. Un singur link pentru Facebook etc. – oricine îl deschide primește propriul cod. Cel mult 20 noi pe zi, se poate opri și reînnoi."],
+bf_job:["Mein Job", "My job", "İşim", "Моя работа", "Моя робота", "Moja praca", "وظيفتي", "Jobul meu"],
+bf_biz:["Mein Geschäft", "My business", "İşletmem", "Мой бизнес", "Мій бізнес", "Moja firma", "عملي الخاص", "Afacerea mea"],
+bf_job_s:["Gehalt {n} im {m}", "Salary {n} in {m}", "{m} maaşı {n}", "Зарплата {n} за {m}", "Зарплата {n} за {m}", "Pensja {n} w {m}", "الراتب {n} في {m}", "Salariu {n} în {m}"],
+bf_biz_s:["Umsatz {n} im {m}", "Revenue {n} in {m}", "{m} cirosu {n}", "Выручка {n} за {m}", "Виручка {n} за {m}", "Przychód {n} w {m}", "الإيرادات {n} في {m}", "Venituri {n} în {m}"],
+bf_all:["Alle", "All", "Tümü", "Все", "Усі", "Wszystko", "الكل", "Toate"],
+bf_inv:["Rechnung", "Invoice", "Fatura", "Счёт", "Рахунок", "Faktura", "فاتورة", "Factură"],
+bf_inc:["Dein Einkommen im {m}", "Your income in {m}", "{m} gelirin", "Твой доход за {m}", "Твій дохід за {m}", "Twój dochód w {m}", "دخلك في {m}", "Venitul tău în {m}"],
+bf_inc_job:["Job", "Job", "İş", "Работа", "Робота", "Praca", "الوظيفة", "Job"],
+bf_inc_biz:["Geschäft (Gewinn)", "Business (profit)", "İşletme (kâr)", "Бизнес (прибыль)", "Бізнес (прибуток)", "Firma (zysk)", "العمل الخاص (الربح)", "Afacere (profit)"],
+bf_todo:["Jetzt zu tun", "To do now", "Şimdi yapılacaklar", "Сделать сейчас", "Зробити зараз", "Do zrobienia teraz", "المطلوب الآن", "De făcut acum"],
+bf_none:["Alles erledigt", "All done", "Hepsi tamam", "Всё сделано", "Усе зроблено", "Wszystko zrobione", "تم كل شيء", "Totul e gata"],
+bf_swipe:["nach unten wischen zum Wechseln", "swipe down to switch", "değiştirmek için aşağı kaydır", "смахни вниз, чтобы переключить", "проведи вниз, щоб перемкнути", "przesuń w dół, aby przełączyć", "اسحب للأسفل للتبديل", "glisează în jos pentru a comuta"],
+nw_bf_t:["Job und Geschäft getrennt", "Job and business separated", "İş ve işletme ayrı", "Работа и бизнес отдельно", "Робота й бізнес окремо", "Praca i firma osobno", "الوظيفة والعمل الخاص منفصلان", "Job și afacere separat"],
+nw_bf_p:["Bist du angestellt und selbstständig? Auf „Beruf“ stehen jetzt „Mein Job“ und „Mein Geschäft“ getrennt. Am Handy liegt das Geschäft hinter dem Job – nach unten wischen oder antippen, dann wechseln die Kacheln.", "Employed and self-employed? “Work” now shows “My job” and “My business” separately. On your phone the business sits behind the job – swipe down or tap it and the tiles switch.", "Hem çalışan hem serbest misin? „İş“ sayfasında artık „İşim“ ve „İşletmem“ ayrı. Telefonda işletme işin arkasında – aşağı kaydır ya da dokun, kutucuklar değişir.", "Работаешь по найму и на себя? На странице «Работа» теперь отдельно «Моя работа» и «Мой бизнес». На телефоне бизнес лежит за работой – смахни вниз или нажми, и плитки сменятся.", "Працюєш найманим і на себе? На сторінці «Робота» тепер окремо «Моя робота» і «Мій бізнес». На телефоні бізнес лежить за роботою – проведи вниз або торкнись, і плитки зміняться.", "Pracujesz na etacie i na swoim? Na stronie „Praca” są teraz osobno „Moja praca” i „Moja firma”. Na telefonie firma leży za pracą – przesuń w dół albo dotknij, a kafelki się zmienią.", "موظف وتعمل لحسابك؟ في صفحة „العمل“ تظهر الآن „وظيفتي“ و„عملي الخاص“ منفصلين. على الهاتف يكون العمل الخاص خلف الوظيفة – اسحب للأسفل أو انقر فتتبدل البطاقات.", "Ești angajat și pe cont propriu? Pe „Muncă” apar acum separat „Jobul meu” și „Afacerea mea”. Pe telefon afacerea stă în spatele jobului – glisează în jos sau atinge și plăcile se schimbă."],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
