@@ -3887,7 +3887,9 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
-  ["0.42.1", "21. November 2026", ["Beruf am PC: Die Steuer-Kästen unten sind weg – alles dazu findest du in der Kachel „Steuer“.", "Space-Hinweis („… schuldet dem Hauptkonto …“): Mit „Erledigt – weg damit“ ist er verschwunden und verschiebt nichts mehr zwischen den Konten.", "Einkauf: neue Karte „Was du beim Einkaufen ausgibst“ – Durchschnitt pro Tag, Woche und Monat. In der Analyse zählt „Ø pro Tag“ jetzt ohne Einkäufe."]],
+  ["0.42.3", "21. November 2026", ["Fehlermeldungen: Ein Seitenwechsel per Wischen wurde fälschlich als „Wischgeste ohne Wirkung“ gemeldet – behoben."]],
+  ["0.42.2", "21. November 2026", ["Space-Hinweis („… schuldet dem Hauptkonto …“): Mit „Erledigt – weg damit“ ist er verschwunden und verschiebt nichts mehr zwischen den Konten.", "Einkauf: neue Karte „Was du beim Einkaufen ausgibst“ – Durchschnitt pro Tag, Woche und Monat. In der Analyse zählt „Ø pro Tag“ jetzt ohne Einkäufe."]],
+  ["0.42.1", "21. November 2026", ["Beruf am PC: Die Steuer-Kästen unten sind weg – alles dazu findest du in der Kachel „Steuer“."]],
   ["0.42.0", "20. November 2026", ["Beruf am PC: Einkommensteuer und Umsatzsteuer stehen jetzt nebeneinander statt in Reitern; der Kasten mit den Kunden-Einnahmen ist weg.", "Die Kachel „Kunden“ öffnet jetzt deine Kundendaten: Suche, Kundennummer, Logo, Adresse, Ansprechpartner – bearbeiten, neu anlegen, entfernen oder direkt eine Rechnung schreiben."]],
   ["0.41.9", "20. November 2026", ["Kontoauszug als PDF: Die Buchungen zählen jetzt zum Kontostand, und der Endstand aus dem Auszug („Neuer Kontostand“) wird übernommen – bisher blieb der Kontostand nach einem PDF-Import gleich.", "PDF-Auszüge: Eingänge ohne Plus-Zeichen werden nicht mehr als Ausgabe gelesen."]],
   ["0.41.8", "20. November 2026", ["Rechnung: Kunden kannst du jetzt entfernen (Kunde antippen → „Entfernen“, mit Rückgängig). Fertige Rechnungen bleiben dabei unverändert.", "Aus hochgeladenen Rechnungen (Fotos und PDFs) übernimmt die App jetzt auch Adresse, Ansprechpartner/Inhaber und E-Mail deiner Kunden – auch nachträglich für schon gelesene Rechnungen."]],
@@ -5069,13 +5071,13 @@ function dbgAdd(k, s){ const now=Date.now(); DBG.log.push({t:now, k, s:String(s|
 function dbgSince(ms){ const now=Date.now(); return DBG.log.filter(x=>now-x.t<=ms).map(x=>`${((x.t-now)/1000).toFixed(1).padStart(6)} s  ${x.k.padEnd(6)} ${x.s}`).join("\n"); }
 function dbgSig(el){ const st=el && el.closest && el.closest(".astack,.srail");
   let sc=0; for (let e=el; e && e!==document.body; e=e.parentElement){ if (e.scrollWidth>e.clientWidth+2) sc+=e.scrollLeft; }
-  return [window.UI&&UI.view, window.UI&&UI.cardIdx, window.UI&&UI.zkIdx, window.UI&&UI.ym, document.querySelectorAll(".backdrop:not([hidden]),.hobg:not([hidden])").length,
+  return [(typeof UI!=="undefined")&&UI.view, (typeof UI!=="undefined")&&UI.cardIdx, (typeof UI!=="undefined")&&UI.zkIdx, (typeof UI!=="undefined")&&UI.ym, document.querySelectorAll(".backdrop:not([hidden]),.hobg:not([hidden])").length,
     st?[...st.children].slice(0,8).map(c=>c.style.transform).join(","):"", Math.round(sc), scrollY>>3].join("|"); }
 const DBG_NOSWIPE="input,textarea,select,.sheet,.backdrop,.hobg,[data-noswipe],.bt3,.bubbles,.fxchips,#monthpill,.tabs,nav,.tmview,#tourBg,.pcfbsheet";
 function dbgDead(g, dx, dy, dt){
   const want=g.el.closest(".astack:not(.one),.srail") ? "Karten/Leiste" : (!IS_PC && !g.el.closest(DBG_NOSWIPE) && !document.body.classList.contains("locked") ? "Seitenwechsel" : null);
   if (!want) return;
-  const info=`Erwartet: ${want}\nElement: ${dbgEl(g.el)}\nAnsicht: ${(window.UI&&UI.view)||"?"}\nStrecke: dx ${Math.round(dx)} / dy ${Math.round(dy)} px in ${Math.round(dt)} ms`;
+  const info=`Erwartet: ${want}\nElement: ${dbgEl(g.el)}\nAnsicht: ${((typeof UI!=="undefined")&&UI.view)||"?"}\nStrecke: dx ${Math.round(dx)} / dy ${Math.round(dy)} px in ${Math.round(dt)} ms`;
   dbgAdd("tot", `${want} – ${dbgEl(g.el)}`); g.dead=true;
   if (typeof window.hbAutoReport==="function") window.hbAutoReport(`Verdacht: Wischgeste ohne Wirkung (${want})`, info); }
 document.addEventListener("pointerdown", e=>{ if (!e.isPrimary) return;
@@ -5091,8 +5093,8 @@ const dbgUp=e=>{ const g=DBG.g; if (!g || !e.isPrimary) return; DBG.g=null;
   g.end=performance.now(); if (DBG.touch) dbgDraw(); };
 document.addEventListener("pointerup", dbgUp, {capture:true, passive:true});
 document.addEventListener("pointercancel", e=>{ const g=DBG.g; if (g){ g.cancel=true; dbgUp(e); } }, {capture:true, passive:true});
-setInterval(()=>{ const v=window.UI&&UI.view; if (v && v!==DBG.lastView){ if (DBG.lastView) dbgAdd("seite", v); DBG.lastView=v; } }, 600);
-function dbgErr(msg){ dbgAdd("fehler", msg); DBG.errs.push({t:Date.now(), m:String(msg).slice(0,300), v:window.UI&&UI.view}); DBG.errs=DBG.errs.slice(-20); dbgLS("hb-dev-errs", JSON.stringify(DBG.errs)); }
+setInterval(()=>{ const v=(typeof UI!=="undefined")&&UI.view; if (v && v!==DBG.lastView){ if (DBG.lastView) dbgAdd("seite", v); DBG.lastView=v; } }, 600);
+function dbgErr(msg){ dbgAdd("fehler", msg); DBG.errs.push({t:Date.now(), m:String(msg).slice(0,300), v:(typeof UI!=="undefined")&&UI.view}); DBG.errs=DBG.errs.slice(-20); dbgLS("hb-dev-errs", JSON.stringify(DBG.errs)); }
 addEventListener("error", e=>dbgErr(e.message||"Fehler"));
 addEventListener("unhandledrejection", e=>{ const r=e.reason; dbgErr(r&&r.message||String(r)); });
 /* Fingerspur */
@@ -5173,7 +5175,7 @@ setTimeout(()=>{ try { const B=window.AndroidBridge; if (B && B.lastCrash){ cons
     try { st=JSON.parse(localStorage.getItem("hb-crash")||"{}"); } catch(_){}
     if (st.d!==day) st={d:day, n:0, k:{}}; if (!force && (st.k[key] || st.n>=10)) return; st.k[key]=1; st.n++;
     try { localStorage.setItem("hb-crash", JSON.stringify(st)); } catch(_){}
-    const info=`Finanz MAMI ${verFull()} · ${IS_DESK?"PC":IS_TAB?"Tablet":"Android"} · ${devModel()} · Ansicht: ${(window.UI&&UI.view)||"?"}`;
+    const info=`Finanz MAMI ${verFull()} · ${IS_DESK?"PC":IS_TAB?"Tablet":"Android"} · ${devModel()} · Ansicht: ${((typeof UI!=="undefined")&&UI.view)||"?"}`;
     const steps=(typeof dbgSince==="function")?dbgSince(30000):"";
     setTimeout(()=>fbPost({kind:"absturz", text:`${msg}\n\n${String(where||"").slice(0,3000)}${steps?`\n\nLetzte Schritte (30 s):\n${steps.slice(-2500)}`:""}\n\n---\n${info}`}).catch(()=>{}), 2500);
   } catch(_){} };
