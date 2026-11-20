@@ -3877,6 +3877,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.41.9", "20. November 2026", ["Kontoauszug als PDF: Die Buchungen zählen jetzt zum Kontostand, und der Endstand aus dem Auszug („Neuer Kontostand“) wird übernommen – bisher blieb der Kontostand nach einem PDF-Import gleich.", "PDF-Auszüge: Eingänge ohne Plus-Zeichen werden nicht mehr als Ausgabe gelesen."]],
   ["0.41.8", "20. November 2026", ["Rechnung: Kunden kannst du jetzt entfernen (Kunde antippen → „Entfernen“, mit Rückgängig). Fertige Rechnungen bleiben dabei unverändert.", "Aus hochgeladenen Rechnungen (Fotos und PDFs) übernimmt die App jetzt auch Adresse, Ansprechpartner/Inhaber und E-Mail deiner Kunden – auch nachträglich für schon gelesene Rechnungen."]],
   ["0.41.7", "20. November 2026", ["Rechnung: Kunden haben jetzt eine Kundennummer (fortlaufend ab 1001, änderbar) und bekommen ihr Firmenlogo automatisch aus dem Internet (wenn „Logos online laden“ an ist).", "Leistungen werden sofort gespeichert und stehen als Liste mit Suche, Preis und Plus bereit – oft benutzte oben. Unter „Bearbeiten“ änderst du Preise oder löschst sie.", "Kunden und Leistungen holt die App sich aus deinen schon hochgeladenen und geschriebenen Rechnungen – auch aus neuen Fotos/PDFs.", "Herangezoomte Rechnungs-Vorschau: Beim Verschieben wird nichts mehr markiert."]],
   ["0.41.6", "20. November 2026", ["Rechnungsnummer frei gestalten: laufende Nummer vorne, fester Text dahinter (auch Buchstaben, z. B. 001-MF). Sie zählt durchgehend weiter; das Jahr kannst du optional einbauen.", "Steuer-Rücklage: Liegt sie woanders (z. B. bei deinem Partner), trägst du das jetzt ein – dann zählt sie nicht mehr gegen dein Guthaben.", "Space-Hinweis verständlicher: „Einkauf schuldet dem Hauptkonto 6,58 €“ statt „Schieb …“.", "Neue Datenschutzerklärung: übersichtlicher und jetzt auch mit Rechnungen, Kundendaten, Archiv, Briefe mit KI, Feedback und Einladungen. Du wirst einmal neu um Zustimmung gebeten."]],
@@ -10564,6 +10565,9 @@ rv_learn_busy:["Lese deine Rechnungen … {a} von {b}", "Reading your invoices �
 rv_learn_done:["Aus deinen Rechnungen übernommen: {a} Leistungen, {b} Kunden", "Taken from your invoices: {a} services, {b} customers", "Faturalarından alındı: {a} hizmet, {b} müşteri", "Взято из счетов: {a} услуг, {b} клиентов", "Взято з рахунків: {a} послуг, {b} клієнтів", "Przejęto z faktur: {a} usług, {b} klientów", "تم النقل من فواتيرك: {a} خدمات، {b} عملاء", "Preluat din facturi: {a} servicii, {b} clienți"],
 rv_k_del:["Entfernen", "Remove", "Kaldır", "Удалить", "Видалити", "Usuń", "إزالة", "Elimină"],
 rv_k_deleted:["{n} entfernt – deine Rechnungen bleiben unverändert", "{n} removed – your invoices stay unchanged", "{n} kaldırıldı – faturaların değişmez", "{n} удалён – счета не меняются", "{n} видалено – рахунки не змінюються", "Usunięto {n} – faktury pozostają bez zmian", "تمت إزالة {n} – فواتيرك تبقى كما هي", "{n} eliminat – facturile rămân neschimbate"],
+pdf_bal_set:["{a}: Kontostand aus dem Auszug übernommen – {v} am {d}", "{a}: balance taken from the statement – {v} on {d}", "{a}: bakiye ekstreden alındı – {d} tarihinde {v}", "{a}: остаток взят из выписки – {v} на {d}", "{a}: залишок узято з виписки – {v} на {d}", "{a}: saldo przejęte z wyciągu – {v} na {d}", "{a}: تم أخذ الرصيد من الكشف – {v} في {d}", "{a}: sold preluat din extras – {v} la {d}"],
+pdf_bal_old:["{a}: Der Auszug geht bis {d} – dein eingetragener Stand vom {e} ist neuer und bleibt. Buchungen danach zählen dazu.", "{a}: the statement ends {d} – your entered balance from {e} is newer and stays.", "{a}: ekstre {d} tarihine kadar – {e} tarihli girdiğin bakiye daha yeni ve kalıyor.", "{a}: выписка до {d} – твой остаток от {e} новее и остаётся.", "{a}: виписка до {d} – твій залишок від {e} новіший і лишається.", "{a}: wyciąg do {d} – twoje saldo z {e} jest nowsze i zostaje.", "{a}: الكشف حتى {d} – رصيدك المُدخل في {e} أحدث ويبقى.", "{a}: extrasul e până la {d} – soldul tău din {e} e mai nou și rămâne."],
+pdf_bal_rows:["{a}: Buchungen aus dem Auszug zählen jetzt zum Kontostand", "{a}: bookings from the statement now count towards the balance", "{a}: ekstredeki işlemler artık bakiyeye sayılıyor", "{a}: операции из выписки теперь учитываются в остатке", "{a}: операції з виписки тепер враховуються в залишку", "{a}: transakcje z wyciągu liczą się teraz do salda", "{a}: معاملات الكشف تُحتسب الآن في الرصيد", "{a}: tranzacțiile din extras contează acum la sold"],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
@@ -13789,12 +13793,15 @@ function pdfStatementRows(lines){
     if (dt && dt.full && l.cells.length>2) { cur=null; continue; }
     cur.cont.push(l.cells.map(c=>c.s).join(" "));
   }
+  const expNeg=txs.some(t=>t.sign<0) && !txs.some(t=>t.sign>0) && txs.some(t=>!t.sign);
   return txs.map(t=>{
     let first=t.first.replace(/\s+/g," ").trim(), type="";
     const tm=PDF_TYPES.exec(first); if (tm){ type=tm[0].trim().replace(/\.$/,""); first=first.slice(tm[0].length).trim(); }
     const rest=t.cont.map(s=>s.replace(/^(\d{1,2}\.\d{1,2}\.(\d{4}|\d{2})?\s*)+/,"").replace(/\s+/g," ").trim()).filter(s=>s && !PDF_JUNK.test(s));
     let payee=first; if (!payee || /^[\d\s.\/:-]+$/.test(payee)){ payee=rest.shift()||""; const tm2=!type && PDF_TYPES.exec(payee); if (tm2){ type=tm2[0].trim(); payee=payee.slice(tm2[0].length).trim()||rest.shift()||""; } }
     let sign=t.sign;
+    /* Stehen Abbuchungen ausdrücklich mit „-“ da (und nichts mit „+“), sind Beträge ohne Vorzeichen Eingänge */
+    if (!sign && expNeg) sign=1;
     if (!sign) sign = /gutschrift|eingang|gehalt|lohn|rente|einzahlung|erstattung|zinsen haben/i.test(type+" "+t.first) ? 1 : -1;
     const amount=(sign<0?"-":"")+t.v.toFixed(2);
     return [t.date, payee.replace(/\s+/g," ").slice(0,90), rest.join(" ").slice(0,160), amount, type];
@@ -14122,14 +14129,33 @@ async function loadPdf(file){
   toast("PDF wird gelesen …");
   let rows;
   let pp=false;
-  try { const L=await pdfLines(await file.arrayBuffer()); pp=/paypal/i.test(file.name||"") || /transaktionscode|transaktions-id|paypal[- ]?(kontoauszug|konto\b)|paypal \(europe\)[^\n]{0,40}(kontoauszug|aktivit)/i.test(L.filter(l=>l.page===1).slice(0,14).map(l=>l.text).join("\n")); rows = pdfStatementRows(L); }
+  let L0=[];
+  try { const L=await pdfLines(await file.arrayBuffer()); L0=L; pp=/paypal/i.test(file.name||"") || /transaktionscode|transaktions-id|paypal[- ]?(kontoauszug|konto\b)|paypal \(europe\)[^\n]{0,40}(kontoauszug|aktivit)/i.test(L.filter(l=>l.page===1).slice(0,14).map(l=>l.text).join("\n")); rows = pdfStatementRows(L); }
   catch(e){ toast(e && /PDF-Leser/.test(e.message) ? e.message : (e && e.name==="PasswordException" ? "Die PDF ist mit Passwort geschützt" : "Die PDF konnte nicht gelesen werden")); return; }
   if (!rows.length){ toast("In der PDF wurden keine Buchungen gefunden. Am sichersten ist der CSV-Export deiner Bank."); return; }
   const headers=["Datum","Empfänger","Verwendungszweck","Betrag","Buchungsart"];
   UI.imp = { fileName:file.name, headers, raw:rows.slice(0,2000), map:{date:0, payee:1, payer:-1, ref:2, amount:3, type:4, account:-1, status:-1, sh:-1, soll:-1, haben:-1, paypal:pp}, items:null, pdf:true };
   buildItems();
+  /* Kontostände: PDF-Buchungen dem Konto zuordnen und den Endstand aus dem Auszug übernehmen */
+  if (!pp){ try{ const acc=pdfAcct(L0); for (const it of (UI.imp.items||[])) if (!it.acct) it.acct=acc; recordAccounts(UI.imp.items); UI.imp.balMsg=pdfBalApply(acc, pdfBalance(L0), UI.imp.items); }catch(_){} }
   UI.view="import"; render(); window.scrollTo({top:0});
+  if (UI.imp && UI.imp.balMsg) setTimeout(()=>toast(UI.imp.balMsg, null, null, 5200), 900);
 }
+/* Endstand („Neuer Kontostand“, „Saldo am …“) aus dem PDF-Text lesen */
+function pdfBalance(L){ const T=(L||[]).map(l=>String(l.text||"").replace(/\s+/g," ").trim()).filter(Boolean); let best=null;
+  const KEY=/(neuer|aktueller|end|schluss)[-\s]*(kontostand|saldo)|(kontostand|saldo)\s*(am|per|zum|vom)\b|endsaldo|schlusssaldo|^\s*kontostand\b|^\s*saldo\b/i, OLD=/(alter|vorheriger|anfangs|letzter|bisheriger|start)[-\s]*(kontostand|saldo)|(kontostand|saldo)\s*alt\b|übertrag|vortrag/i, AM=/(-|−|minus)?\s*(\d{1,3}(?:\.\d{3})+|\d{1,9}),(\d{2})(?!\d)\s*(-(?!\d)|S\b|Soll\b|H\b|Haben\b)?/gi;
+  const pick=t=>{ let m, last=null; AM.lastIndex=0; while ((m=AM.exec(t))) last=m; if (!last) return null; const v=Number(last[2].replace(/\./g,"")+"."+last[3]); const neg=!!last[1] || /^(-|s|soll)$/i.test(last[4]||""); return (neg?-1:1)*v; };
+  for (let i=0;i<T.length;i++){ const t=T[i]; if (!KEY.test(t) || OLD.test(t)) continue; const tt=t.replace(/\d{1,2}\.\d{1,2}\.\d{2,4}/g," "); let v=pick(tt); if (v===null && T[i+1]) v=pick(T[i+1].replace(/\d{1,2}\.\d{1,2}\.\d{2,4}/g," ")); if (v===null) continue;
+    best={v, date:bsDate(t)||null}; }
+  return best; }
+/* Welches Konto? Über die IBAN im Auszug wiedererkennen, sonst Hauptkonto */
+function pdfAcct(L){ const tx=(L||[]).slice(0,60).map(l=>l.text||"").join(" ").replace(/\s+/g,""), m=tx.match(/DE\d{20}/); const map=S.settings.ibanAcct||{}; if (m && map[m[0]]) return map[m[0]];
+  if (m){ S.settings.ibanAcct={...map, [m[0]]:"Hauptkonto"}; } return "Hauptkonto"; }
+function pdfBalApply(acc, b, items){ const ds=(items||[]).map(i=>i.date).filter(Boolean).sort(), last=ds[ds.length-1]||null; if (!b || !isFinite(b.v)) return last?nt("pdf_bal_rows",{a:acc}):"";
+  const date=(b.date && (!last || b.date>=last)) ? b.date : (last||isoToday()); const AN={...(S.settings.accountAnchors||{})}, a=AN[acc];
+  if (a && a.date>date) return nt("pdf_bal_old",{a:acc, d:shortDate(date), e:shortDate(a.date)});
+  AN[acc]={date, balance:Math.round(b.v*100)/100, ts:Date.now(), src:"pdf"}; S.settings.accountAnchors=AN; saveSettings();
+  return nt("pdf_bal_set",{a:acc, v:eur(b.v), d:shortDate(date)}); }
 async function loadCsv(file){
   if (!file) return;
   if (file.size > 15*1024*1024){ toast("Die Datei ist zu groß"); return; }
