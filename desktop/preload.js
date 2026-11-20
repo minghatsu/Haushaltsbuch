@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld("AndroidBridge", {
   saveFile: (name, text) => ipcRenderer.sendSync("saveFile", String(name), String(text)),
   printHtml: (id, html, mode) => ipcRenderer.send("printHtml", String(id), String(html), String(mode || "print")),
   saveFileB64: (name, mime, b64) => ipcRenderer.sendSync("saveFileB64", String(name), String(b64)),
+  mailFile: (to, subject, body, name, b64) => ipcRenderer.sendSync("mailFile", String(to || ""), String(subject || ""), String(body || ""), String(name), String(b64)),
   autoBackup: (name, text, keep) => ipcRenderer.sendSync("autoBackup", String(name), String(text), Number(keep) || 8),
   saveApp: (html) => ipcRenderer.sendSync("saveApp", String(html)),
   reloadApp: () => ipcRenderer.send("reloadApp"),

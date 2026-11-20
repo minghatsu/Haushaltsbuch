@@ -189,6 +189,29 @@ ipcMain.on("saveFileB64", (e, name, b64) => {
   }
 });
 
+ipcMain.on("mailFile", (e, to, subject, body, name, b64) => {
+  try {
+    const safe = String(name).replace(/[\\/:*?"<>|]/g, "_") || "rechnung.pdf";
+    const file = path.join(app.getPath("downloads"), safe);
+    fs.writeFileSync(file, Buffer.from(String(b64), "base64"));
+    const tbs = [process.env.ProgramFiles, process.env["ProgramFiles(x86)"], process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, "Programs")]
+      .filter(Boolean).map(d => path.join(d, "Mozilla Thunderbird", "thunderbird.exe"));
+    const tb = process.platform === "win32" ? tbs.find(f => { try { return fs.existsSync(f); } catch (_) { return false; } }) : null;
+    if (tb) {
+      const txt = path.join(app.getPath("temp"), "finanz-mami-mail.txt"); fs.writeFileSync(txt, String(body), "utf8");
+      const q = v => String(v).replace(/'/g, "’").replace(/[\r\n]+/g, " ");
+      const arg = `to='${q(to)}',subject='${q(subject)}',message='${txt}',attachment='${require("url").pathToFileURL(file).href}'`;
+      require("child_process").spawn(tb, ["-compose", arg], { detached: true, stdio: "ignore" }).unref();
+      e.returnValue = "tb"; return;
+    }
+    shell.openExternal("mailto:" + encodeURIComponent(String(to)) + "?subject=" + encodeURIComponent(String(subject)) + "&body=" + encodeURIComponent(String(body)));
+    shell.showItemInFolder(file);
+    e.returnValue = "mailto";
+  } catch (err) {
+    e.returnValue = "";
+  }
+});
+
 ipcMain.on("printHtml", async (e, id, html, mode) => {
   const done = (ok, msg) => { if (!e.sender.isDestroyed()) e.sender.executeJavaScript(`window.hbPrintDone && window.hbPrintDone(${JSON.stringify(String(id))}, ${ok ? "true" : "false"}, ${JSON.stringify(String(msg || ""))})`).catch(() => {}); };
   let pw = null, file = "";

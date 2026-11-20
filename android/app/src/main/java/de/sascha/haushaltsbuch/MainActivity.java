@@ -1134,6 +1134,28 @@ public class MainActivity extends Activity {
             }
         }
         @JavascriptInterface
+        public boolean sendFile(String to, String subject, String body, String name, String mime, String b64) {
+            try {
+                File dir = new File(getCacheDir(), "share");
+                if (!dir.exists()) dir.mkdirs();
+                String safe = (name == null || name.isEmpty() ? "datei.pdf" : name).replaceAll("[\\\\/:*?\"<>|]", "_");
+                File f = new File(dir, safe);
+                try (FileOutputStream os = new FileOutputStream(f)) { os.write(Base64.decode(b64, Base64.DEFAULT)); }
+                Uri u = FileProvider.getUriForFile(MainActivity.this, MainActivity.this.getPackageName() + ".files", f);
+                Intent send = new Intent(Intent.ACTION_SEND).setType(mime == null || mime.isEmpty() ? "application/pdf" : mime);
+                send.putExtra(Intent.EXTRA_STREAM, u);
+                send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                if (to != null && !to.isEmpty()) send.putExtra(Intent.EXTRA_EMAIL, new String[]{ to });
+                send.putExtra(Intent.EXTRA_SUBJECT, subject);
+                send.putExtra(Intent.EXTRA_TEXT, body);
+                final Intent chooser = Intent.createChooser(send, subject);
+                runOnUiThread(() -> { try { startActivity(chooser); } catch (Exception ignored) {} });
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        @JavascriptInterface
         public boolean sendMail(String to, String subject, String body, String imagesJson) {
             try {
                 java.util.ArrayList<Uri> uris = new java.util.ArrayList<>();

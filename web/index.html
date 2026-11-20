@@ -3810,6 +3810,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.41.2", "20. November 2026", ["Rechnung „Per E-Mail“: Am PC öffnet Thunderbird mit der Rechnung schon im Anhang, am Handy die Mail-App mit PDF (neue App-Version nötig)."]],
   ["0.41.1", "20. November 2026", ["Rechnungs-Vorschau zoomen: am PC mit dem Mausrad, an Tablet und Handy mit zwei Fingern – Doppelklick/-tipp zoomt hinein, Ziehen verschiebt.", "Beruf: „Mein Job“ und „Mein Geschäft“ teilen sich den Bildschirm genau zur Hälfte und nutzen die ganze Breite – darunter Steuer und Kunden.", "„Jetzt zu tun“ steht jetzt dezent oben in der Einkommenskarte, lange Hinweise brechen in eine zweite Zeile um."]],
   ["0.40.9", "20. November 2026", ["Rechnungen: Abschlagsrechnungen (und in der Schlussrechnung abziehen), Gutschriften und wiederkehrende Rechnungen – Mami erinnert dich und legt die nächste fertig an.", "Eigene Rechnungsnummern: Vorsilbe (z. B. RE-) und Startnummer, falls du schon Rechnungen woanders geschrieben hast."]],
   ["0.40.8", "20. November 2026", ["Neu: Rechnungen schreiben – in 4 kleinen Schritten mit Mami-Tipps: Kunde, Leistungen, Details, Prüfen.", "Fertige PDF mit farbigem Kopf, „Bitte überweisen bis …“ und QR-Code (GiroCode) zum Bezahlen per Banking-App.", "Pflichtangaben-Check, Kleinunternehmer-Hinweis nach § 19, Kunden und Leistungen merkt sich die App.", "Jede Rechnung landet in „Rechnungen im Blick“ – mit PDF, Bearbeiten und „Als Vorlage“ für die nächste."]],
@@ -10364,6 +10365,7 @@ rv_zoom_touch:["Mit zwei Fingern zoomen", "Pinch with two fingers to zoom", "İk
 rv_zoom_in:["Vergrößern", "Zoom in", "Yakınlaştır", "Увеличить", "Збільшити", "Powiększ", "تكبير", "Mărește"],
 rv_zoom_out:["Verkleinern", "Zoom out", "Uzaklaştır", "Уменьшить", "Зменшити", "Pomniejsz", "تصغير", "Micșorează"],
 rv_zoom_reset:["Zurück auf 100 %", "Reset to 100 %", "%100'e dön", "Вернуть 100 %", "Повернути 100 %", "Wróć do 100 %", "العودة إلى 100 ٪", "Înapoi la 100 %"],
+rv_mail_tb:["Thunderbird ist offen – die Rechnung hängt schon dran", "Thunderbird is open – the invoice is already attached", "Thunderbird açık – fatura zaten ekli", "Thunderbird открыт – счёт уже прикреплён", "Thunderbird відкрито – рахунок уже прикріплено", "Thunderbird otwarty – faktura już załączona", "Thunderbird مفتوح – الفاتورة مرفقة", "Thunderbird e deschis – factura e deja atașată"],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
@@ -11854,7 +11856,13 @@ async function rvSavePdf(d){ d=d||(rvSync(),RV.d); const blob=rvPdf(d), name=("R
   await saveBinary(name, blob, nt("rv_pdf_ok")); }
 function rvMail(d){ d=d||(rvSync(),RV.d); const sum=rvSum(d), nm=rvBiz().owner||rvBiz().name||"", due=addDays(d.date,Number(d.z)||14);
   const txt=`${d.k.person?"Hallo "+d.k.person:"Sehr geehrte Damen und Herren"},\n\nanbei erhalten Sie meine Rechnung Nr. ${d.nr} über ${rvE(sum.gross)}.\nBitte überweisen Sie den Betrag bis zum ${rvD(due)}.\n\nVielen Dank für die gute Zusammenarbeit!\n\nViele Grüße\n${nm}`;
-  rvSavePdf(d).finally(()=>{ setTimeout(()=>{ location.href="mailto:"+encodeURIComponent(d.k.email||"")+"?subject="+encodeURIComponent("Rechnung "+d.nr)+"&body="+encodeURIComponent(txt); }, 500); toast(nt("rv_mail_hint")); }); }
+  rvMailGo(d, txt); }
+async function rvMailGo(d, txt){ const blob=rvPdf(d), name=("Rechnung "+(d.nr||"")+" "+(d.k&&d.k.name||"")).trim().replace(/[\\/:*?"<>|]+/g,"-")+".pdf", subj="Rechnung "+d.nr, to=d.k.email||"", br=window.AndroidBridge;
+  const b64=await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(String(fr.result).split(",")[1]||""); fr.readAsDataURL(blob); });
+  if (br && br.mailFile){ try{ const r=br.mailFile(to, subj, txt, name, b64); if (r){ toast(nt(r==="tb"?"rv_mail_tb":"rv_mail_hint")); return; } }catch(_){} }
+  if (br && br.sendFile){ try{ if (br.sendFile(to, subj, txt, name, "application/pdf", b64)) return; }catch(_){} }
+  if (!NATIVE && navigator.canShare){ try{ const f=new File([blob],name,{type:"application/pdf"}); if (navigator.canShare({files:[f]})){ await navigator.share({files:[f], title:subj, text:txt}); return; } }catch(e){ if (e && e.name==="AbortError") return; } }
+  await saveBinary(name, blob, nt("rv_pdf_ok")); setTimeout(()=>{ location.href="mailto:"+encodeURIComponent(to)+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(txt); }, 500); toast(nt("rv_mail_hint")); }
 document.addEventListener("click", e=>{ const t=e.target;
   if (t.closest("[data-rvnew]")){ e.preventDefault(); let dr=null; try{ dr=JSON.parse(localStorage.getItem("hb-rvdraft")||"null"); }catch(_){} if (dr && (dr.pos||[]).length && !rchList().some(i=>i.nr===dr.nr)){ hbSheetClose&&hbSheetClose("rchBg"); rvOpen(dr); toast(nt("rv_draft_back")); return; } try{ hbSheetClose("rchBg"); }catch(_){} rvOpen(); return; }
   const rr=t.closest("[data-rvrec]"); if (rr){ rvRecOpen(rr.dataset.rvrec); return; }
