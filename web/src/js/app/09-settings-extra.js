@@ -239,6 +239,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.44.6",
+    "21. November 2026",
+    [
+      "Behoben (PC): Beim Verschieben einer Fixkosten-Kachel im Kalender ging das Fenster „Datei angekommen“ mit dem Logo auf.",
+    ],
+  ],
+  [
     "0.44.5",
     "21. November 2026",
     [

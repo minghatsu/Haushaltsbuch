@@ -404,7 +404,13 @@ setTimeout(() => {
     o.querySelector("b").textContent = uiText("in_drop");
     return o;
   };
-  const hasF = (e) => e.dataTransfer && [...(e.dataTransfer.types || [])].includes("Files");
+  /* Zieht man etwas innerhalb der App (z. B. eine Fixkosten-Kachel mit Logo), legt der Browser das
+     Logo-Bild als „Datei“ mit in den Zug. Solche Züge sind keine Dateien von außen. */
+  let inside = false;
+  document.addEventListener("dragstart", () => (inside = true), true);
+  document.addEventListener("dragend", () => (inside = false), true);
+  document.addEventListener("pointerdown", () => (inside = false), true);
+  const hasF = (e) => !inside && e.dataTransfer && [...(e.dataTransfer.types || [])].includes("Files");
   window.addEventListener("dragenter", (e) => {
     if (!hasF(e)) return;
     e.preventDefault();
@@ -428,7 +434,10 @@ setTimeout(() => {
     }
   });
   window.addEventListener("drop", (e) => {
-    if (!hasF(e)) return;
+    if (!hasF(e)) {
+      inside = false;
+      return;
+    }
     e.preventDefault();
     dc = 0;
     const o = ov();
