@@ -1578,6 +1578,7 @@ $("loginGo").onclick = doLogin;
         MEM[ui.view] = sY;
         ui.view = k;
         if (window.ANIM) ANIM.skip = true;
+        UX.quiet = true;
         render.keep = true;
         render();
         sY = nY;
