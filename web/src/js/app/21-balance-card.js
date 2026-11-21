@@ -95,6 +95,9 @@ function initStack(id, key, dotsId) {
     last = cards.map((_, i) => rel(i));
     if (dots) [...dots.children].forEach((b, i) => b.classList.toggle("on", i === ui[key]));
   };
+  /* beim ersten Zeichnen nichts überblenden – sonst blitzen die Texte der Nachbarkarten kurz auf */
+  st.classList.add("init");
+  requestAnimationFrame(() => requestAnimationFrame(() => st.classList.remove("init")));
   place(0, false);
   st.style.height = Math.max(...cards.map((c) => c.offsetHeight)) + 16 + "px";
   if (n < 2) return;

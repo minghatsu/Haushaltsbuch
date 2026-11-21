@@ -59,20 +59,23 @@ function mvOpen() {
   } catch (_) {}
   el.classList.toggle("hint", n < 3);
 }
+function mvClosed() {
+  const el = $("mvBg");
+  el._closing = 0;
+  el.hidden = true;
+  el.classList.remove("pull");
+  el.style.removeProperty("--mvp");
+  document.body.classList.remove("locked");
+  document.querySelectorAll("#astack .acard,.pchero .pcaccs button").forEach((c) => {
+    c.style.visibility = "";
+  });
+  render();
+  if (MV.home) mvUnstack();
+}
 function mvClose() {
   const el = $("mvBg");
   if (!el || el.hidden || el._closing) return;
   SND.play("whooshin");
-  const done = () => {
-    el._closing = 0;
-    el.hidden = true;
-    document.body.classList.remove("locked");
-    document.querySelectorAll("#astack .acard,.pchero .pcaccs button").forEach((c) => {
-      c.style.visibility = "";
-    });
-    render();
-    if (MV.home) mvUnstack();
-  };
   if (!mvFxOk() || !MV.home) {
     el.classList.remove("show");
     document.body.classList.remove("locked");
@@ -83,7 +86,13 @@ function mvClose() {
     return;
   }
   el._closing = 1;
-  mvGather(el, done);
+  const F = mvFoldPrep(el);
+  if (!F) {
+    el.classList.remove("show");
+    setTimeout(mvClosed, 320);
+    return;
+  }
+  mvFoldRun(F, 1, 520, () => mvFoldHandover(F));
 }
 function mvFxOk() {
   try {
@@ -189,6 +198,7 @@ function mvPullMove(dy) {
       sc = mvLerp(S.s, 1, t);
     c.style.transform = `translate(${x}px,${y}px) scale(${sc})`;
     c.style.opacity = k ? String(Math.min(1, 0.25 + p * 2)) : "1";
+    if (k) c.style.setProperty("--mvci", String(Math.min(1, Math.max(0, (t - 0.15) * 2.5))));
   });
 }
 function mvPullEnd(go) {
@@ -223,6 +233,7 @@ function mvPullEnd(go) {
     cards.forEach((c, k) => {
       const from = c.style.transform;
       c.style.opacity = "";
+      c.style.removeProperty("--mvci");
       c.style.transform = "";
       const a = c.animate(
         [
@@ -270,16 +281,13 @@ function mvPullEnd(go) {
     MV.home = null;
   }, 230);
 }
-/* Zuklappen als Umkehrung vom Aufklappen: Die Konten schieben sich unter die Hauptkarte
-   (die bleibt obenauf), dann gleitet der Stapel zurück an seinen Platz auf der Startseite. */
-function mvGather(el, done) {
+/* Zuklappen als Umkehrung vom Aufklappen: Die Konten wandern unter die Hauptkarte (die bleibt
+   obenauf), dann gleitet der Stapel zurück an seinen Platz auf der Startseite. Derselbe Ablauf
+   folgt beim Hochwischen dem Finger (p = 0 offen … 1 zu). */
+function mvFoldPrep(el) {
   const cards = [...el.querySelectorAll(".mvc")],
     H = mvFront();
-  if (!cards.length || !H) {
-    el.classList.remove("show");
-    setTimeout(done, 320);
-    return;
-  }
+  if (!cards.length || !H) return null;
   const fr = H.c.getBoundingClientRect();
   MV.home = { top: fr.top, left: fr.left, width: fr.width, height: fr.height };
   const S = cards.map((c, k) => {
@@ -291,55 +299,145 @@ function mvGather(el, done) {
       s: sc,
     };
   });
-  const E = "cubic-bezier(.45,0,.2,1)",
-    n = cards.length,
-    first = cards[0].getBoundingClientRect();
+  const h0 = cards[0].getBoundingClientRect().height;
   cards.forEach((c, k) => {
+    c.getAnimations().forEach((a) => a.cancel());
     c.style.transition = "none";
     c.style.transformOrigin = "0 0";
     c.style.zIndex = String(20 - k);
-    if (!k) return;
-    /* erst unter die Hauptkarte in der Liste, dann mit ihr zusammen zurück */
-    const r = c.getBoundingClientRect(),
-      under = `translate(${first.left - r.left + 8}px,${first.top - r.top + Math.min(k, 4) * 8}px) scale(${0.96 - Math.min(k, 4) * 0.015})`;
-    c.animate(
-      [
-        { transform: "none", opacity: 1 },
-        { transform: under, opacity: 1, offset: 0.45 },
-        { transform: `translate(${S[k].x}px,${S[k].y}px) scale(${S[k].s})`, opacity: 0 },
-      ],
-      { duration: 520, delay: (n - 1 - k) * 25, easing: E, fill: "forwards" }
-    );
   });
-  /* die Hauptkarte wächst unterwegs auf die Höhe der Karte auf der Startseite – kein Sprung beim Übergeben */
-  const h0 = first.height,
-    h1 = MV.home.height / S[0].s;
-  cards[0].animate(
-    [
-      { transform: "none", height: h0 + "px", offset: 0 },
-      { transform: "none", height: h0 + "px", offset: 0.3 },
-      { transform: `translate(${S[0].x}px,${S[0].y}px) scale(${S[0].s})`, height: h1 + "px" },
-    ],
-    { duration: 520, easing: E, fill: "forwards" }
-  );
-  /* Hintergrund und Überschrift gehen mit */
   el.classList.add("pull");
   el.classList.remove("show");
-  const fade = el.animate([{ "--mvp": 1 }, { "--mvp": 0 }], { duration: 420, easing: "ease-in", fill: "forwards" });
-  /* am Ziel: die echte Hauptkarte übernimmt, ohne Lücke und ohne Doppelbild */
-  setTimeout(() => {
-    H.c.getAnimations().forEach((a) => a.cancel());
-    H.c.style.visibility = "";
-    H.c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 110 });
-    cards[0].animate([{ opacity: 1 }, { opacity: 0 }], { duration: 110, fill: "forwards" });
-    setTimeout(() => {
-      fade.cancel();
-      el.classList.remove("pull");
-      el.style.removeProperty("--mvp");
-      done();
-    }, 110);
-  }, 500);
+  return { el, H, cards, S, h0, h1: MV.home.height / S[0].s, p: 0 };
 }
+function mvFoldSet(F, p) {
+  F.p = p;
+  F.el.style.setProperty("--mvp", (1 - p).toFixed(3));
+  F.cards.forEach((c, k) => {
+    const S = F.S[k],
+      t = k
+        ? Math.max(0, Math.min(1, p * 1.25 - (F.cards.length - 1 - k) * 0.03))
+        : Math.max(0, Math.min(1, (p - 0.2) / 0.8)),
+      e = t * t * (3 - 2 * t);
+    c.style.transform = `translate(${S.x * e}px,${S.y * e}px) scale(${mvLerp(1, S.s, e)})`;
+    if (!k) c.style.height = mvLerp(F.h0, F.h1, e) + "px";
+    else {
+      c.style.opacity = String(1 - Math.max(0, (e - 0.6) / 0.4));
+      /* unter der Hauptkarte keine durchscheinenden Beträge */
+      c.style.setProperty("--mvci", String(Math.max(0, 1 - e * 2)));
+    }
+  });
+}
+/* von F.p nach „to“ laufen lassen, dann then() */
+function mvFoldRun(F, to, ms, then) {
+  const from = F.p,
+    t0 = performance.now(),
+    dur = Math.max(120, ms * Math.abs(to - from));
+  (function step(now) {
+    const k = Math.min(1, (now - t0) / dur),
+      e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    mvFoldSet(F, mvLerp(from, to, e));
+    if (k < 1) requestAnimationFrame(step);
+    else then && then();
+  })(t0);
+}
+/* am Ziel: die echte Hauptkarte übernimmt, ohne Lücke und ohne Doppelbild */
+function mvFoldHandover(F) {
+  const { H, cards } = F;
+  H.c.getAnimations().forEach((a) => a.cancel());
+  H.c.style.visibility = "";
+  H.c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 110 });
+  cards[0].animate([{ opacity: 1 }, { opacity: 0 }], { duration: 110, fill: "forwards" });
+  setTimeout(mvClosed, 110);
+}
+/* nicht weit genug hochgewischt: Liste wieder auf */
+function mvFoldBack(F) {
+  mvFoldRun(F, 0, 420, () => {
+    F.cards.forEach((c) => {
+      c.style.transform =
+        c.style.height =
+        c.style.opacity =
+        c.style.transition =
+        c.style.transformOrigin =
+        c.style.zIndex =
+          "";
+    });
+    F.el.classList.add("show");
+    F.el.classList.remove("pull");
+    F.el.style.removeProperty("--mvp");
+  });
+}
+/* Liste nach oben wischen klappt die Konten wieder zusammen */
+(function () {
+  let F = null,
+    y0 = null,
+    x0 = 0,
+    ly = 0,
+    t0 = 0;
+  const atEnd = (el) => el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
+  document.addEventListener(
+    "touchstart",
+    (e) => {
+      const el = $("mvBg");
+      F = null;
+      y0 = null;
+      if (!el || el.hidden || el._closing || !mvFxOk() || e.touches.length !== 1) return;
+      if (!el.contains(e.target) || e.target.closest("#mvSheet,button,input")) return;
+      y0 = ly = e.touches[0].clientY;
+      x0 = e.touches[0].clientX;
+      t0 = performance.now();
+    },
+    { passive: true }
+  );
+  document.addEventListener(
+    "touchmove",
+    (e) => {
+      if (y0 == null) return;
+      const el = $("mvBg"),
+        y = e.touches[0].clientY,
+        dy = y - y0,
+        dx = Math.abs(e.touches[0].clientX - x0);
+      ly = y;
+      if (!F) {
+        if (Math.abs(dy) < 10 && dx < 10) return;
+        if (dy >= 0 || dx * 1.2 > -dy || !atEnd(el) || document.body.classList.contains("mvdragging")) {
+          y0 = null;
+          return;
+        }
+        el._closing = 1;
+        F = mvFoldPrep(el);
+        if (!F) {
+          el._closing = 0;
+          y0 = null;
+          return;
+        }
+        y0 = y;
+      }
+      if (e.cancelable) e.preventDefault();
+      mvFoldSet(F, Math.max(0, Math.min(1, (y0 - y) / MVP_FULL)));
+    },
+    { passive: false }
+  );
+  const end = () => {
+    if (!F) {
+      y0 = null;
+      return;
+    }
+    const f = F,
+      v = (y0 - ly) / Math.max(1, performance.now() - t0);
+    F = null;
+    y0 = null;
+    if (f.p > 0.3 || (v > 0.5 && f.p > 0.08)) {
+      SND.play("whooshin");
+      mvFoldRun(f, 1, 420, () => mvFoldHandover(f));
+    } else {
+      f.el._closing = 0;
+      mvFoldBack(f);
+    }
+  };
+  document.addEventListener("touchend", end);
+  document.addEventListener("touchcancel", end);
+})();
 function mvUnstack() {
   const H = mvFront();
   if (!H) return;

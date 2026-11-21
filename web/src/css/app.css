@@ -1496,6 +1496,10 @@ main {
 .acard > * {
   transition: opacity 0.25s;
 }
+.astack.init .acard,
+.astack.init .acard > * {
+  transition: none !important;
+}
 /* seitlich hervorschauende Karten: nur die Farbe, keine abgeschnittenen Beträge */
 .astack .acard.side > * {
   opacity: 0 !important;
@@ -25085,6 +25089,10 @@ html[data-theme="dark"] .sndic {
 .mvbg.pull .mvtop,
 .mvbg.pull .mvhint {
   transition: opacity 0.25s;
+}
+.mvbg.pull .mvc > * {
+  opacity: var(--mvci, 1);
+  transition: opacity 0.15s;
 }
 .mvtop {
   display: flex;

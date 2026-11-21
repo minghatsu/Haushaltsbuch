@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.45.5",
+    "21. November 2026",
+    [
+      "Konten: Nach oben wischen klappt sie wieder zusammen – die Karten folgen dem Finger zurück unter das Hauptkonto. Kurz gewischt und losgelassen, gehen sie wieder auf.",
+      "Behoben: Beim Zuklappen blitzten die Beträge der Karten hinter dem Hauptkonto kurz auf.",
+    ],
+  ],
+  [
     "0.45.4",
     "21. November 2026",
     [
