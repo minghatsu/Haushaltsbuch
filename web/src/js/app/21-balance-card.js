@@ -434,7 +434,7 @@ function renderHome() {
   const anchored =
     ym <= cur
       ? Object.keys(store.settings.accountAnchors || {})
-          .filter((n) => known.has(n) || ym === cur)
+          .filter((n) => (known.has(n) || ym === cur) && acctOn(n, ym))
           .sort((a, b) => (b === "Hauptkonto") - (a === "Hauptkonto") || a.localeCompare(b, "de"))
       : [];
   const mainName = anchored.includes("Hauptkonto") ? "Hauptkonto" : "";
@@ -456,7 +456,7 @@ function renderHome() {
     })),
   ];
   if (mainName) {
-    const open = [...known].filter((n) => n !== mainName && !others.includes(n) && !/paypal/i.test(n));
+    const open = [...known].filter((n) => n !== mainName && !others.includes(n) && !/paypal/i.test(n) && acctOn(n, ym));
     const rest = round2(cum.balance - mainBal - sum(others, (n) => accountBalance(n, asOf) || 0));
     if (open.length === 1)
       accts.push({

@@ -4844,7 +4844,7 @@ if (IS_PC) {
           )}${f && f.rhythm === "monate" ? `<option value="monate" selected>Bestimmte Monate</option>` : ""}</select>`
       )}
         ${field("Art", `<select class="in" data-pf="kind"><option value="privat" ${!f || f.kind !== "betrieb" ? "selected" : ""}>Privat</option><option value="betrieb" ${f && f.kind === "betrieb" ? "selected" : ""}>Betrieblich</option></select>`)}</div>
-      ${field(escHtml(uiText("fxa_from")), `<select class="in" data-pf="acct">${(kaNames().length ? kaNames() : ["Hauptkonto"]).map((n) => `<option value="${escHtml(n)}" ${(f ? fxAcct(f) : "Hauptkonto") === n ? "selected" : ""}>${escHtml(n)}</option>`).join("")}<option value="__new">+ ${escHtml(uiText("fxa_new"))} …</option></select><input class="in" data-pf="acctnew" placeholder="${escHtml(uiText("fxa_new_ph"))}" maxlength="40" hidden style="margin-top:6px">`)}
+      ${field(escHtml(uiText("fxa_from")), `<select class="in" data-pf="acct">${[...new Set([...(kaNames().length ? kaNames() : ["Hauptkonto"]), f ? fxAcct(f) : "Hauptkonto"])].map((n) => `<option value="${escHtml(n)}" ${(f ? fxAcct(f) : "Hauptkonto") === n ? "selected" : ""}>${escHtml(n)}</option>`).join("")}<option value="__new">+ ${escHtml(uiText("fxa_new"))} …</option></select><input class="in" data-pf="acctnew" placeholder="${escHtml(uiText("fxa_new_ph"))}" maxlength="40" hidden style="margin-top:6px">`)}
       ${(() => {
         const a = (f && aboCfg()[f.id]) || {};
         return `<div class="pfsec">Vertrag <small>(optional – Erinnerung 30 Tage vor der Frist)</small></div><div class="pr2">${field("Läuft bis", `<input class="in" type="date" data-pf="aboend" value="${escHtml(a.end || "")}">`)}${field("Kündigungsfrist", `<select class="in" data-pf="abonot">${ABO_NOT.map(([v, l]) => `<option value="${v}" ${Number(a.notice || 0) === v ? "selected" : ""}>${l}</option>`).join("")}</select>`)}</div>`;
@@ -4904,7 +4904,7 @@ if (IS_PC) {
     if (ac.value !== "__new") return ac.value || "Hauptkonto";
     const n = (pop.querySelector("[data-pf=acctnew]").value || "").trim();
     if (!n) return "Hauptkonto";
-    const ex = kaNames().find((x) => normText(x) === normText(n));
+    const ex = kaAll().find((x) => normText(x) === normText(n));
     if (ex) return ex;
     store.settings.spaces = [...(store.settings.spaces || []), n];
     saveSettings();
@@ -7673,7 +7673,7 @@ if (IS_PC) {
         })
         .join("")}
       <div class="pctk" style="--i:${names.length}"><small class="muted">Kontostand am 1. Januar ${y}</small><div class="pctbig"><input class="pctin big" data-pcstart="${y}" value="${sb != null ? escHtml(numStr(sb)) : ""}" placeholder="0,00" inputmode="decimal" aria-label="Kontostand Jahresanfang"> <span>€</span></div><small class="muted">damit die Jahresrechnung stimmt</small></div>
-      ${ui.pctAdd === "konten" ? `<div class="pctk pctform" style="--i:${names.length + 1}"><b>Neues Konto oder Space</b><label>Name<input class="in" id="pcaName" placeholder="z. B. Urlaub"></label><label>Stand heute<input class="in" id="pcaBal" inputmode="decimal" placeholder="0,00"></label><div class="pctbtns"><button class="btn" data-pctcancel>Abbrechen</button><button class="btn primary" data-pcaadd>Anlegen</button></div></div>` : `<button class="pctk pctnew" data-pctnew="konten" style="--i:${names.length + 1}">+ Konto oder Space</button>`}</div>`;
+      ${ui.pctAdd === "konten" ? `<div class="pctk pctform" style="--i:${names.length + 1}"><b>Neues Konto oder Space</b><label>Name<input class="in" id="pcaName" placeholder="z. B. Urlaub"></label><label>Stand heute<input class="in" id="pcaBal" inputmode="decimal" placeholder="0,00"></label><div class="pctbtns"><button class="btn" data-pctcancel>Abbrechen</button><button class="btn primary" data-pcaadd>Anlegen</button></div></div>` : `<button class="pctk pctnew" data-pctnew="konten" style="--i:${names.length + 1}">+ Konto oder Space</button>`}</div>${acctYearBlock()}`;
   };
   const aboList = () => {
     const A = aboCfg();
@@ -7766,6 +7766,7 @@ if (IS_PC) {
     repaint();
   };
   document.addEventListener("click", async (e) => {
+    if (e.target.closest(".pctpane .ayblk") && (await acctYearClick(e, () => after("")))) return;
     const n = e.target.closest("[data-pctnew]");
     if (n) {
       ui.pctAdd = n.dataset.pctnew;
@@ -8912,7 +8913,7 @@ if (IS_DESK) {
     if (!w) {
       ref.insertAdjacentHTML(
         "beforebegin",
-        `<span class="pcdevw" id="pcDevW"><button class="roundbtn pcdev" id="pcDev" aria-haspopup="menu" aria-expanded="false" aria-label="${escHtml(uiText("dv_t"))}" title="${escHtml(uiText("dv_t"))}">${WR}<i class="badge" hidden></i><i class="dot" hidden></i></button></span>`
+        `<span class="pcdevw" id="pcDevW"><button class="roundbtn pcdev" id="pcDev" aria-haspopup="menu" aria-expanded="false" aria-label="${escHtml(uiText("dv_t"))}" title="${escHtml(uiText("dv_t") + " – " + uiText("dv_note"))}">${WR}<i class="badge" hidden></i><i class="dot" hidden></i></button></span>`
       );
       w = $("pcDevW");
     }
@@ -8965,26 +8966,40 @@ if (IS_DESK) {
   }
   const row = (k, svg, t, sub, badge) =>
     `<button class="pcdvr" data-pcdv="${k}" role="menuitem"><span class="pcdvi">${svg}</span><span class="pcdvt"><b>${escHtml(t)}</b><small>${escHtml(sub)}</small></span>${badge ? `<i class="badge">${escHtml(badge)}</i>` : `<span class="pcdva" aria-hidden="true">›</span>`}</button>`;
+  const UP = `<svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>`,
+    INBOX = `<svg class="i" viewBox="0 0 24 24"><path d="M4 13.5 6.5 5h11l2.5 8.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 13.5h4.5l1 2h5l1-2H20"/></svg>`,
+    PEOPLE = `<svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><path d="M16 4.6a3 3 0 0 1 0 6.3M17.5 14c2 .5 3.2 2.1 3.5 5"/></svg>`;
+  /* Tester, die noch eine ältere Version haben – bekannt, sobald die Einladungen einmal geladen wurden */
+  function oldTesters() {
+    try {
+      const L = ui.invL || [];
+      if (!L.length) return 0;
+      const N = invNewest(L);
+      return L.filter((x) => invStage(x) === 2 && invOld(x, N)).length;
+    } catch (_) {
+      return 0;
+    }
+  }
+  const group = (k) => `<div class="pcdvg">${escHtml(uiText(k))}</div>`;
   function paint(p) {
     const ib = $("pcInbox"),
       bd = ib && ib.querySelector(".badge"),
-      n = bd && !bd.hidden ? bd.textContent : "";
+      n = bd && !bd.hidden ? bd.textContent : "",
+      old = oldTesters();
     p.innerHTML =
-      `<div class="pcdvh" data-noi18n>${escHtml(uiText("dv_t"))}</div>` +
+      `<div class="pcdvh">${escHtml(uiText("dv_t"))}<small>${escHtml(uiText("dv_note"))}</small></div>` +
+      group("dv_g_rel") +
+      row("rel", UP, uiText("dv_rel"), uiText("dv_rel_s"), "") +
+      group("dv_g_test") +
       row(
-        "rel",
-        `<svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>`,
-        uiText("dv_rel"),
-        uiText("dv_rel_s"),
-        ""
+        "inv",
+        PEOPLE,
+        uiText("dv_inv"),
+        old ? uiText("dv_inv_old", { n: old }) : uiText("dv_inv_s"),
+        old ? String(old) : ""
       ) +
-      row(
-        "fb",
-        `<svg class="i" viewBox="0 0 24 24"><path d="M4 13.5 6.5 5h11l2.5 8.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 13.5h4.5l1 2h5l1-2H20"/></svg>`,
-        uiText("dv_fb"),
-        uiText("dv_fb_s"),
-        n
-      ) +
+      row("fb", INBOX, uiText("dv_fb"), uiText("dv_fb_s"), n) +
+      group("dv_g_dbg") +
       row("tools", WR, uiText("dv_tools"), uiText("dv_tools_s"), "");
     p.setAttribute("data-noi18n", "");
   }
@@ -9012,6 +9027,24 @@ if (IS_DESK) {
     );
     paint(p);
     document.body.appendChild(p);
+    /* frischen Stand der Tester holen und nur die Tester-Zeile nachziehen */
+    if (typeof canInvite === "function" && canInvite()) {
+      const before = oldTesters();
+      invLoad().then(() => {
+        const q = $("pcDevPop"),
+          now = oldTesters();
+        if (!q || now === before) return;
+        const r = q.querySelector('[data-pcdv="inv"]');
+        if (r)
+          r.outerHTML = row(
+            "inv",
+            PEOPLE,
+            uiText("dv_inv"),
+            now ? uiText("dv_inv_old", { n: now }) : uiText("dv_inv_s"),
+            now ? String(now) : ""
+          );
+      });
+    }
     b.setAttribute("aria-expanded", "true");
     SND.play("pop");
     const f = p.querySelector(".pcdvr");
@@ -9043,6 +9076,8 @@ if (IS_DESK) {
         } else if (k === "fb") {
           const b = $("pcInbox");
           if (b) setTimeout(() => b.click(), 20);
+        } else if (k === "inv") {
+          setTimeout(() => invOpen(), 20);
         } else if (k === "tools") {
           setTimeout(() => {
             try {

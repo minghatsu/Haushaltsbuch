@@ -6297,6 +6297,22 @@ html.pc .pcdvh {
   font: 800 15px var(--f-body);
   padding: 6px 6px 2px;
 }
+html.pc .pcdvh small {
+  display: block;
+  font: 500 12px var(--f-body);
+  color: var(--muted);
+  margin-top: 1px;
+}
+html.pc .pcdvg {
+  font: 700 11px var(--f-body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 12px 8px 4px;
+}
+html.pc .pcdvr:nth-of-type(4) {
+  animation-delay: 0.12s;
+}
 html.pc .pcdvr {
   display: flex;
   gap: 12px;

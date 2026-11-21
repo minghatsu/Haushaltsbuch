@@ -25330,6 +25330,100 @@ html.pc:not(.istab) .mvopen {
     animation: none;
   }
 }
+
+/* Konten je Jahr */
+.ayblk {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--sunk);
+}
+.ayt {
+  display: block;
+  font-size: 15px;
+}
+.ayblk > p {
+  margin: 4px 0 10px;
+}
+.ayyrs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.ayy {
+  flex: 1 0 auto;
+  min-width: 58px;
+  border: 0;
+  border-radius: 11px;
+  padding: 9px 10px;
+  font: 700 13px var(--f-body);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    transform 0.15s;
+}
+.ayy.on {
+  background: var(--accent);
+  color: #fff;
+}
+.ayy:active {
+  transform: scale(0.95);
+}
+.aylist {
+  margin-top: 10px;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 2px 10px;
+}
+.ayrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  transition: opacity 0.25s;
+}
+.ayrow + .ayrow {
+  border-top: 1px solid var(--line);
+}
+.ayrow > i {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  flex: none;
+}
+.ayrow > i .i {
+  stroke: #fff;
+}
+.ayn {
+  flex: 1;
+  min-width: 0;
+}
+.ayn b {
+  display: block;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ayn small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.ayrow.off > i,
+.ayrow.off .ayn b {
+  opacity: 0.45;
+}
+html.pc .pctpane .ayblk {
+  grid-column: 1 / -1;
+}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -50262,6 +50356,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.44.7",
+    "21. November 2026",
+    [
+      "Neu: Konten je Jahr. Unter Einstellungen › Konten wählst du ein Jahr und schaltest aus, welche Konten es damals nicht gab. Startseite, Buchen und Fixkosten zeigen dann nur die Konten des jeweiligen Jahres.",
+      "PC: Das Entwickler-Menü ist übersichtlicher – mit Bereichen und klaren Beschreibungen. Neu darin: „Tester & Einladungen“ mit Pinnwand, Link für Posts und Update-Erinnerung.",
+    ],
+  ],
+  [
     "0.44.6",
     "21. November 2026",
     [
@@ -52396,6 +52498,13 @@ const PTOUR_FN = () => ({
             : "Geld, Anpassen, Sicherheit und Hilfe – darunter klappen die Punkte auf.",
           "Geld: Konten, Budgets, Abos, Sparen & Anlegen. Anpassen: Farben, Sprache, Kategorien.",
         ],
+      },
+      {
+        sel: '[data-pcset="konten"],[data-accgo="konten"],[data-acc="konten"]',
+        raw: 1,
+        ic: "bank",
+        t: uiText("ay_t"),
+        p: [uiText("tr_ay")],
       },
       {
         sel: '[data-phsw="sound"],[data-acc="toene"],[data-accgo="toene"]',
@@ -62274,7 +62383,7 @@ function renderHome() {
   const anchored =
     ym <= cur
       ? Object.keys(store.settings.accountAnchors || {})
-          .filter((n) => known.has(n) || ym === cur)
+          .filter((n) => (known.has(n) || ym === cur) && acctOn(n, ym))
           .sort((a, b) => (b === "Hauptkonto") - (a === "Hauptkonto") || a.localeCompare(b, "de"))
       : [];
   const mainName = anchored.includes("Hauptkonto") ? "Hauptkonto" : "";
@@ -62296,7 +62405,7 @@ function renderHome() {
     })),
   ];
   if (mainName) {
-    const open = [...known].filter((n) => n !== mainName && !others.includes(n) && !/paypal/i.test(n));
+    const open = [...known].filter((n) => n !== mainName && !others.includes(n) && !/paypal/i.test(n) && acctOn(n, ym));
     const rest = round2(cum.balance - mainBal - sum(others, (n) => accountBalance(n, asOf) || 0));
     if (open.length === 1)
       accts.push({
@@ -67770,7 +67879,7 @@ function debtFor(fid) {
 function fxCol(n) {
   const P = ["#8a4fb5", "#c47a12", "#3d63a8", "#b42318", "#0f8a8a", "#a0522d"];
   if (n === "Hauptkonto") return "var(--accent)";
-  const L = kaNames().filter((x) => x !== "Hauptkonto");
+  const L = kaAll().filter((x) => x !== "Hauptkonto");
   return P[Math.max(0, L.indexOf(n)) % P.length];
 }
 function fxAcctOn() {
@@ -67783,7 +67892,7 @@ function fxAcctOn() {
 function fxAcct(f) {
   const n = f && f.acct;
   try {
-    return n && kaNames().includes(n) ? n : "Hauptkonto";
+    return n && kaAll().includes(n) ? n : "Hauptkonto";
   } catch (_) {
     return "Hauptkonto";
   }
@@ -67827,7 +67936,7 @@ function fxAcctStats(ym) {
       if (d && d < o.first) o.first = d;
     }
   }
-  for (const n of kaNames())
+  for (const n of kaNames(ym))
     if (!by[n])
       by[n] = {
         n,
@@ -67919,7 +68028,7 @@ document.addEventListener("click", (e) => {
       "blur",
       () => {
         const n = inp.value.trim();
-        if (n && !kaNames().some((x) => normText(x) === normText(n))) {
+        if (n && !kaAll().some((x) => normText(x) === normText(n))) {
           store.settings.spaces = [...(store.settings.spaces || []), n];
           saveSettings();
           toast(
@@ -80373,55 +80482,64 @@ const TEXTS = {
   ],
   dv_t: ["Entwickler", "Developer", "Geliştirici", "Разработчик", "Розробник", "Deweloper", "المطوّر", "Dezvoltator"],
   dv_rel: [
-    "Freigabe & Tester",
-    "Release & testers",
-    "Yayın ve test edenler",
-    "Выпуск и тестеры",
-    "Випуск і тестувальники",
-    "Wydanie i testerzy",
-    "الإصدار والمختبِرون",
-    "Lansare și testeri",
+    "Update an Tester geben",
+    "Send update to testers",
+    "Güncellemeyi test edenlere ver",
+    "Отдать обновление тестерам",
+    "Передати оновлення тестувальникам",
+    "Przekaż aktualizację testerom",
+    "إرسال التحديث للمختبِرين",
+    "Trimite actualizarea testerilor",
   ],
   dv_rel_s: [
-    "Version freigeben, Testplätze, Testdaten",
-    "Release a version, test slots, test data",
-    "Sürüm yayınla, test yerleri, test verileri",
-    "Выпустить версию, места, тестовые данные",
-    "Випустити версію, місця, тестові дані",
-    "Wydaj wersję, miejsca testowe, dane testowe",
-    "نشر إصدار، أماكن الاختبار، بيانات تجريبية",
-    "Lansează o versiune, locuri de test, date de test",
+    "Neue Version für Handy, Tablet oder PC freigeben",
+    "Release a new version for phone, tablet or PC",
+    "Telefon, tablet veya PC için yeni sürüm yayınla",
+    "Выпустить новую версию для телефона, планшета или ПК",
+    "Випустити нову версію для телефона, планшета чи ПК",
+    "Wydaj nową wersję na telefon, tablet lub PC",
+    "نشر إصدار جديد للهاتف أو الجهاز اللوحي أو الحاسوب",
+    "Lansează o versiune nouă pentru telefon, tabletă sau PC",
   ],
   dv_fb: [
-    "Feedback-Eingang",
-    "Feedback inbox",
-    "Geri bildirim kutusu",
-    "Входящие отзывы",
-    "Вхідні відгуки",
-    "Skrzynka opinii",
-    "صندوق الملاحظات",
-    "Mesaje de feedback",
+    "Nachrichten von Testern",
+    "Messages from testers",
+    "Test edenlerden mesajlar",
+    "Сообщения от тестеров",
+    "Повідомлення від тестувальників",
+    "Wiadomości od testerów",
+    "رسائل من المختبِرين",
+    "Mesaje de la testeri",
   ],
   dv_fb_s: [
-    "Fehler, Ideen und Fragen der Tester",
-    "Bugs, ideas and questions from testers",
-    "Test edenlerden hatalar, fikirler ve sorular",
-    "Ошибки, идеи и вопросы тестеров",
-    "Помилки, ідеї та запитання тестувальників",
-    "Błędy, pomysły i pytania testerów",
-    "أخطاء وأفكار وأسئلة المختبِرين",
-    "Erori, idei și întrebări de la testeri",
+    "Fehler, Ideen und Fragen lesen und beantworten",
+    "Read and answer bugs, ideas and questions",
+    "Hataları, fikirleri ve soruları oku ve yanıtla",
+    "Читать ошибки, идеи и вопросы и отвечать",
+    "Читати помилки, ідеї й запитання та відповідати",
+    "Czytaj błędy, pomysły i pytania i odpowiadaj",
+    "اقرأ الأخطاء والأفكار والأسئلة وأجب عنها",
+    "Citește și răspunde la erori, idei și întrebări",
   ],
-  dv_tools: ["Werkzeuge", "Tools", "Araçlar", "Инструменты", "Інструменти", "Narzędzia", "الأدوات", "Unelte"],
+  dv_tools: [
+    "Fehlersuche",
+    "Troubleshooting",
+    "Hata ayıklama",
+    "Поиск ошибок",
+    "Пошук помилок",
+    "Szukanie błędów",
+    "البحث عن الأخطاء",
+    "Depanare",
+  ],
   dv_tools_s: [
-    "Fingerspur, Ruckel-Anzeige, Protokoll, Fehler",
-    "Touch trail, frame rate, log, errors",
-    "Dokunma izi, kare hızı, kayıt, hatalar",
-    "След касаний, FPS, журнал, ошибки",
-    "Слід дотиків, FPS, журнал, помилки",
-    "Ślad dotyku, FPS, dziennik, błędy",
-    "أثر اللمس، معدل الإطارات، السجل، الأخطاء",
-    "Urmă atingeri, FPS, jurnal, erori",
+    "Fingerspur, Ruckel-Anzeige, Protokoll der letzten Schritte",
+    "Touch trail, stutter meter, log of recent steps",
+    "Dokunma izi, takılma göstergesi, son adımların kaydı",
+    "След касаний, индикатор рывков, журнал последних шагов",
+    "Слід дотиків, індикатор ривків, журнал останніх кроків",
+    "Ślad dotyku, wskaźnik zacięć, dziennik ostatnich kroków",
+    "أثر اللمس، مؤشر التقطع، سجل الخطوات الأخيرة",
+    "Urmă atingeri, indicator de sacadări, jurnalul ultimilor pași",
   ],
   nw_fan_t: [
     "Neues Plus-Menü",
@@ -83428,6 +83546,128 @@ const TEXTS = {
     "Koszty stałe schodzą z różnych kont?",
     "هل تُخصم التكاليف الثابتة من حسابات مختلفة؟",
     "Costurile fixe se debitează din conturi diferite?",
+  ],
+  dv_inv: [
+    "Tester & Einladungen",
+    "Testers & invitations",
+    "Test edenler ve davetler",
+    "Тестеры и приглашения",
+    "Тестувальники та запрошення",
+    "Testerzy i zaproszenia",
+    "المختبِرون والدعوات",
+    "Testeri și invitații",
+  ],
+  dv_inv_s: [
+    "Wer testet, Link für Posts, an Updates erinnern",
+    "Who is testing, link for posts, update reminders",
+    "Kim test ediyor, gönderi bağlantısı, güncelleme hatırlatması",
+    "Кто тестирует, ссылка для постов, напоминания об обновлении",
+    "Хто тестує, посилання для дописів, нагадування про оновлення",
+    "Kto testuje, link do postów, przypomnienia o aktualizacji",
+    "من يختبر، رابط للمنشورات، تذكير بالتحديث",
+    "Cine testează, link pentru postări, amintiri de actualizare",
+  ],
+  dv_inv_old: [
+    "{n} Tester nicht auf dem neuesten Stand",
+    "{n} testers not up to date",
+    "{n} test eden güncel değil",
+    "{n} тестеров без последней версии",
+    "{n} тестувальників без останньої версії",
+    "{n} testerów bez najnowszej wersji",
+    "{n} مختبِرين ليسوا على آخر إصدار",
+    "{n} testeri nu au ultima versiune",
+  ],
+  dv_note: [
+    "Nur du siehst diesen Knopf",
+    "Only you can see this button",
+    "Bu düğmeyi yalnızca sen görürsün",
+    "Эту кнопку видишь только ты",
+    "Цю кнопку бачиш лише ти",
+    "Tylko ty widzisz ten przycisk",
+    "أنت فقط ترى هذا الزر",
+    "Doar tu vezi acest buton",
+  ],
+  dv_g_rel: [
+    "Neue Version",
+    "New version",
+    "Yeni sürüm",
+    "Новая версия",
+    "Нова версія",
+    "Nowa wersja",
+    "إصدار جديد",
+    "Versiune nouă",
+  ],
+  dv_g_test: ["Tester", "Testers", "Test edenler", "Тестеры", "Тестувальники", "Testerzy", "المختبِرون", "Testeri"],
+  dv_g_dbg: [
+    "Für dich",
+    "Just for you",
+    "Sadece senin için",
+    "Только для тебя",
+    "Лише для тебе",
+    "Tylko dla ciebie",
+    "لك فقط",
+    "Doar pentru tine",
+  ],
+  ay_t: [
+    "Konten je Jahr",
+    "Accounts per year",
+    "Yıllara göre hesaplar",
+    "Счета по годам",
+    "Рахунки за роками",
+    "Konta według roku",
+    "الحسابات حسب السنة",
+    "Conturi pe an",
+  ],
+  ay_hint: [
+    "Wähl ein Jahr und schalte aus, welche Konten es damals nicht gab. Ein neues Jahr übernimmt die Konten vom Vorjahr.",
+    "Pick a year and switch off the accounts you didn’t have then. A new year takes over the accounts of the year before.",
+    "Bir yıl seç ve o zaman olmayan hesapları kapat. Yeni yıl, önceki yılın hesaplarını devralır.",
+    "Выбери год и выключи счета, которых тогда не было. Новый год берёт счета прошлого года.",
+    "Обери рік і вимкни рахунки, яких тоді не було. Новий рік бере рахунки попереднього року.",
+    "Wybierz rok i wyłącz konta, których wtedy nie było. Nowy rok przejmuje konta z poprzedniego roku.",
+    "اختر سنة وأوقف الحسابات التي لم تكن لديك آنذاك. السنة الجديدة تأخذ حسابات السنة السابقة.",
+    "Alege un an și oprește conturile pe care nu le aveai atunci. Un an nou preia conturile anului dinainte.",
+  ],
+  ay_on: [
+    "{a} in {y}: an",
+    "{a} in {y}: on",
+    "{a} – {y}: açık",
+    "{a} в {y}: вкл.",
+    "{a} у {y}: увімк.",
+    "{a} w {y}: wł.",
+    "{a} في {y}: مفعّل",
+    "{a} în {y}: pornit",
+  ],
+  ay_off: [
+    "{a} in {y}: aus",
+    "{a} in {y}: off",
+    "{a} – {y}: kapalı",
+    "{a} в {y}: выкл.",
+    "{a} у {y}: вимк.",
+    "{a} w {y}: wył.",
+    "{a} في {y}: متوقف",
+    "{a} în {y}: oprit",
+  ],
+  ay_main: ["immer da", "always on", "her zaman açık", "всегда", "завжди", "zawsze", "دائمًا", "mereu"],
+  ay_hid: [
+    "in diesem Jahr ausgeblendet",
+    "hidden this year",
+    "bu yıl gizli",
+    "скрыт в этом году",
+    "прихований цього року",
+    "ukryte w tym roku",
+    "مخفي هذه السنة",
+    "ascuns în acest an",
+  ],
+  tr_ay: [
+    "Unter Konten kannst du je Jahr einstellen, welche Konten es gab. Hattest du früher ein anderes Konto, schalte es für die Jahre danach einfach aus.",
+    "Under Accounts you can set which accounts you had in each year. If you used to have another account, just switch it off for the years after.",
+    "Hesaplar bölümünde her yıl hangi hesaplarının olduğunu ayarlayabilirsin. Eskiden başka bir hesabın varsa, sonraki yıllar için kapat.",
+    "В разделе «Счета» можно указать, какие счета были в каждом году. Если раньше был другой счёт, просто выключи его для следующих лет.",
+    "У розділі «Рахунки» можна вказати, які рахунки були в кожному році. Якщо раніше був інший рахунок, просто вимкни його для наступних років.",
+    "W sekcji Konta ustawisz, jakie konta miałeś w danym roku. Jeśli kiedyś miałeś inne konto, po prostu wyłącz je na kolejne lata.",
+    "في قسم الحسابات يمكنك تحديد الحسابات التي كانت لديك في كل سنة. إذا كان لديك حساب آخر سابقًا، أوقفه للسنوات التالية.",
+    "La Conturi poți seta ce conturi ai avut în fiecare an. Dacă înainte aveai alt cont, oprește-l pentru anii următori.",
   ],
   zk_debts_c: [
     "{n} Kredite offen",
@@ -98423,7 +98663,8 @@ document.addEventListener("change", (e) => {
 });
 
 /* ===== Konto / Space bei der Buchung ===== */
-function kaNames() {
+/* Alle Konten und Spaces, egal in welchem Jahr */
+function kaAll() {
   const s = new Set(accountNames());
   for (const k of Object.keys(store.settings.accountAnchors || {})) s.add(k);
   for (const k of store.settings.spaces || []) if (k) s.add(k);
@@ -98431,12 +98672,105 @@ function kaNames() {
   s.add("Hauptkonto");
   return [...s].sort((a, b) => (b === "Hauptkonto") - (a === "Hauptkonto") || a.localeCompare(b, "de"));
 }
+/* Konten je Jahr: settings.acctYears = { "2023": ["Girokonto alt"], … } hält die ausgeschalteten
+   Konten eines Jahres. Ein Jahr ohne eigenen Eintrag übernimmt den letzten Eintrag davor. */
+function acctOffIn(year) {
+  const Y = store.settings.acctYears || {},
+    ks = Object.keys(Y)
+      .map(Number)
+      .filter((k) => k <= year)
+      .sort((a, b) => b - a);
+  return new Set(ks.length ? Y[ks[0]] : []);
+}
+function acctOn(name, ym) {
+  if (name === "Hauptkonto") return true;
+  const y = Number(String(ym || ui.ym || isoToday()).slice(0, 4));
+  return !acctOffIn(y).has(name);
+}
+async function acctSetYear(name, year, on) {
+  if (name === "Hauptkonto") return;
+  const Y = { ...(store.settings.acctYears || {}) },
+    before = [...acctOffIn(year)],
+    off = new Set(before);
+  if (on) off.delete(name);
+  else off.add(name);
+  /* ein vergangenes Jahr ändern: die Jahre danach bleiben, wie sie waren */
+  if (year < new Date().getFullYear() && !Y[year + 1]) Y[year + 1] = before;
+  Y[year] = [...off].sort();
+  store.settings.acctYears = Y;
+  await saveSettings();
+}
+function acctYearsList() {
+  const now = new Date().getFullYear();
+  let min = now;
+  const see = (v) => {
+    const y = Number(String(v || "").slice(0, 4));
+    if (y > 2000 && y < min) min = y;
+  };
+  for (const t of store.tx || []) see(t.date);
+  for (const k of Object.keys(store.months || {})) see(k);
+  for (const k of Object.keys(store.settings.acctYears || {})) see(k);
+  const out = [];
+  /* mindestens die letzten drei Jahre, auch wenn es dort noch keine Buchungen gibt */
+  for (let y = Math.max(Math.min(min, now - 3), now - 7); y <= now; y++) out.push(y);
+  return out;
+}
+/* Einstellungen: Jahr wählen, Konten für dieses Jahr an- oder ausschalten */
+function acctYearBlock() {
+  const names = kaAll();
+  if (names.length < 2) return "";
+  const ys = acctYearsList(),
+    shown = Number(String(ui.ym || isoToday()).slice(0, 4)),
+    y = ys.includes(ui.acctY) ? ui.acctY : ys.includes(shown) ? shown : ys[ys.length - 1],
+    off = acctOffIn(y);
+  return `<div class="ayblk"><b class="ayt">${escHtml(uiText("ay_t"))}</b><p class="small muted">${escHtml(uiText("ay_hint"))}</p>
+    <div class="ayyrs" role="tablist">${ys.map((v) => `<button type="button" class="ayy ${v === y ? "on" : ""}" role="tab" aria-selected="${v === y}" data-ayyear="${v}" data-noi18n>${v}</button>`).join("")}</div>
+    <div class="aylist">${names
+      .map((n) => {
+        const main = n === "Hauptkonto",
+          on = main || !off.has(n);
+        return `<div class="ayrow ${on ? "" : "off"}"><i style="background:${kaCol(n)}">${kaIcon(n)}</i><span class="ayn"><b data-noi18n>${escHtml(n)}</b>${main || !on ? `<small>${escHtml(uiText(main ? "ay_main" : "ay_hid"))}</small>` : ""}</span>${main ? "" : `<button type="button" class="tg ${on ? "on" : ""}" role="switch" aria-checked="${on}" data-ayacct="${escHtml(n)}" data-ayy="${y}" aria-label="${escHtml(uiText(on ? "ay_on" : "ay_off", { a: n, y }))}"></button>`}</div>`;
+      })
+      .join("")}</div></div>`;
+}
+async function acctYearClick(e, repaint) {
+  const yb = e.target.closest("[data-ayyear]");
+  if (yb) {
+    ui.acctY = Number(yb.dataset.ayyear);
+    SND.play("tick");
+    repaint();
+    return true;
+  }
+  const tb = e.target.closest("[data-ayacct]");
+  if (!tb) return false;
+  const n = tb.dataset.ayacct,
+    y = Number(tb.dataset.ayy),
+    on = tb.getAttribute("aria-checked") !== "true";
+  ui.acctY = y;
+  await acctSetYear(n, y, on);
+  toast(uiText(on ? "ay_on" : "ay_off", { a: n, y }));
+  repaint();
+  return true;
+}
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".ayblk") || e.target.closest(".pctpane")) return;
+  acctYearClick(e, () => {
+    try {
+      document.activeElement && document.activeElement.blur();
+    } catch (_) {}
+    render();
+  });
+});
+/* Konten, die es im Jahr des gezeigten Monats gibt */
+function kaNames(ym) {
+  return kaAll().filter((n) => acctOn(n, ym));
+}
 function kaOn() {
   return kaNames().length > 1;
 }
-function kaFor(cat) {
+function kaFor(cat, ym) {
   const m = store.settings.acctByCat || {},
-    n = kaNames();
+    n = kaNames(ym);
   const v = cat && m[cat];
   return v && n.includes(v) ? v : "Hauptkonto";
 }
@@ -98475,7 +98809,7 @@ function kaIcon(n) {
 }
 function kaCol(n) {
   try {
-    const i = kaNames().indexOf(n);
+    const i = kaAll().indexOf(n);
     return (
       acctColor(n, i) ||
       (n === "Hauptkonto"
@@ -98499,7 +98833,8 @@ function kaRender() {
     ui.kaOpen = false;
     return;
   }
-  if (!ui.acct || !kaNames().includes(ui.acct)) ui.acct = kaFor(ui.cat);
+  const fy = ($("fDate") && $("fDate").value) || isoToday();
+  if (!ui.acct || !kaNames(fy).includes(ui.acct)) ui.acct = kaFor(ui.cat, fy);
   const n = ui.acct,
     bal = accountBalance(n, isoToday()),
     amt = parseAmt($("fAmount").value) || 0,
@@ -98526,7 +98861,9 @@ function kaRender() {
         )}</span>`
       : ""
   }</small></span><span class="kach">${escHtml(uiText("ka_change"))} <em>›</em></span></button>
-    <div class="kalist"${ui.kaOpen ? "" : " hidden"}><div class="kalh">${escHtml(ui.kind === "einnahme" ? uiText("ka_pick_in") : uiText("ka_pick"))}</div>${kaNames()
+    <div class="kalist"${ui.kaOpen ? "" : " hidden"}><div class="kalh">${escHtml(ui.kind === "einnahme" ? uiText("ka_pick_in") : uiText("ka_pick"))}</div>${kaNames(
+      fy
+    )
       .map((x) => {
         const b = accountBalance(x, isoToday());
         return `<button type="button" class="kaopt ${x === n ? "on" : ""}" data-kapick="${escHtml(x)}"><i style="background:${kaCol(x)}">${kaIcon(x)}</i><span class="kaon" data-noi18n>${escHtml(x)}</span><small>${b == null ? escHtml(uiText("ka_nobal")) : escHtml(fmtEur(b))}</small>${x === n ? "<b>✓</b>" : ""}</button>`;
@@ -106150,7 +106487,7 @@ function potCache() {
   for (const d of Object.values(memStore.acct || {})) n += Object.keys(d.rows || {}).length;
   if (POT.tok && POT.tok[0] === store.tx && POT.tok[1] === n) return POT.c;
   const out = {},
-    known = new Set(kaNames()),
+    known = new Set(kaAll()),
     dd = (a, b) => Math.abs((new Date(a + "T12:00:00") - new Date(b + "T12:00:00")) / 864e5);
   for (const t of store.tx || []) {
     if (!t.importKey || !t.acct || !t.date) continue;
@@ -106297,13 +106634,12 @@ function lastDayOf(ym) {
 function renderAccounts() {
   const el = $("acctEd");
   if (!el || el.contains(document.activeElement)) return;
-  const names = accountNames(),
-    today = isoOf(new Date());
-  if (!names.length) {
-    el.innerHTML = `<span class="small muted">Importier einmal deine Kontoauszüge. Dann erscheinen hier deine Konten (bei N26 auch Hauptkonto und Spaces).</span>`;
-    return;
-  }
-  el.innerHTML = acctRows(names);
+  const names = accountNames();
+  el.innerHTML =
+    (names.length
+      ? acctRows(names)
+      : `<span class="small muted">Importier einmal deine Kontoauszüge. Dann erscheinen hier deine Konten (bei N26 auch Hauptkonto und Spaces).</span>`) +
+    acctYearBlock();
 }
 function acctRows(names) {
   const today = isoOf(new Date());

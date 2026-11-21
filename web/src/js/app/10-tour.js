@@ -1568,6 +1568,13 @@ const PTOUR_FN = () => ({
         ],
       },
       {
+        sel: '[data-pcset="konten"],[data-accgo="konten"],[data-acc="konten"]',
+        raw: 1,
+        ic: "bank",
+        t: uiText("ay_t"),
+        p: [uiText("tr_ay")],
+      },
+      {
         sel: '[data-phsw="sound"],[data-acc="toene"],[data-accgo="toene"]',
         raw: 1,
         ic: "sound",

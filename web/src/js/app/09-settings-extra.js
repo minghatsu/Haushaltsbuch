@@ -239,6 +239,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.44.7",
+    "21. November 2026",
+    [
+      "Neu: Konten je Jahr. Unter Einstellungen › Konten wählst du ein Jahr und schaltest aus, welche Konten es damals nicht gab. Startseite, Buchen und Fixkosten zeigen dann nur die Konten des jeweiligen Jahres.",
+      "PC: Das Entwickler-Menü ist übersichtlicher – mit Bereichen und klaren Beschreibungen. Neu darin: „Tester & Einladungen“ mit Pinnwand, Link für Posts und Update-Erinnerung.",
+    ],
+  ],
+  [
     "0.44.6",
     "21. November 2026",
     [

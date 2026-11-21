@@ -1,5 +1,6 @@
 /* ===== Konto / Space bei der Buchung ===== */
-function kaNames() {
+/* Alle Konten und Spaces, egal in welchem Jahr */
+function kaAll() {
   const s = new Set(accountNames());
   for (const k of Object.keys(store.settings.accountAnchors || {})) s.add(k);
   for (const k of store.settings.spaces || []) if (k) s.add(k);
@@ -7,12 +8,105 @@ function kaNames() {
   s.add("Hauptkonto");
   return [...s].sort((a, b) => (b === "Hauptkonto") - (a === "Hauptkonto") || a.localeCompare(b, "de"));
 }
+/* Konten je Jahr: settings.acctYears = { "2023": ["Girokonto alt"], … } hält die ausgeschalteten
+   Konten eines Jahres. Ein Jahr ohne eigenen Eintrag übernimmt den letzten Eintrag davor. */
+function acctOffIn(year) {
+  const Y = store.settings.acctYears || {},
+    ks = Object.keys(Y)
+      .map(Number)
+      .filter((k) => k <= year)
+      .sort((a, b) => b - a);
+  return new Set(ks.length ? Y[ks[0]] : []);
+}
+function acctOn(name, ym) {
+  if (name === "Hauptkonto") return true;
+  const y = Number(String(ym || ui.ym || isoToday()).slice(0, 4));
+  return !acctOffIn(y).has(name);
+}
+async function acctSetYear(name, year, on) {
+  if (name === "Hauptkonto") return;
+  const Y = { ...(store.settings.acctYears || {}) },
+    before = [...acctOffIn(year)],
+    off = new Set(before);
+  if (on) off.delete(name);
+  else off.add(name);
+  /* ein vergangenes Jahr ändern: die Jahre danach bleiben, wie sie waren */
+  if (year < new Date().getFullYear() && !Y[year + 1]) Y[year + 1] = before;
+  Y[year] = [...off].sort();
+  store.settings.acctYears = Y;
+  await saveSettings();
+}
+function acctYearsList() {
+  const now = new Date().getFullYear();
+  let min = now;
+  const see = (v) => {
+    const y = Number(String(v || "").slice(0, 4));
+    if (y > 2000 && y < min) min = y;
+  };
+  for (const t of store.tx || []) see(t.date);
+  for (const k of Object.keys(store.months || {})) see(k);
+  for (const k of Object.keys(store.settings.acctYears || {})) see(k);
+  const out = [];
+  /* mindestens die letzten drei Jahre, auch wenn es dort noch keine Buchungen gibt */
+  for (let y = Math.max(Math.min(min, now - 3), now - 7); y <= now; y++) out.push(y);
+  return out;
+}
+/* Einstellungen: Jahr wählen, Konten für dieses Jahr an- oder ausschalten */
+function acctYearBlock() {
+  const names = kaAll();
+  if (names.length < 2) return "";
+  const ys = acctYearsList(),
+    shown = Number(String(ui.ym || isoToday()).slice(0, 4)),
+    y = ys.includes(ui.acctY) ? ui.acctY : ys.includes(shown) ? shown : ys[ys.length - 1],
+    off = acctOffIn(y);
+  return `<div class="ayblk"><b class="ayt">${escHtml(uiText("ay_t"))}</b><p class="small muted">${escHtml(uiText("ay_hint"))}</p>
+    <div class="ayyrs" role="tablist">${ys.map((v) => `<button type="button" class="ayy ${v === y ? "on" : ""}" role="tab" aria-selected="${v === y}" data-ayyear="${v}" data-noi18n>${v}</button>`).join("")}</div>
+    <div class="aylist">${names
+      .map((n) => {
+        const main = n === "Hauptkonto",
+          on = main || !off.has(n);
+        return `<div class="ayrow ${on ? "" : "off"}"><i style="background:${kaCol(n)}">${kaIcon(n)}</i><span class="ayn"><b data-noi18n>${escHtml(n)}</b>${main || !on ? `<small>${escHtml(uiText(main ? "ay_main" : "ay_hid"))}</small>` : ""}</span>${main ? "" : `<button type="button" class="tg ${on ? "on" : ""}" role="switch" aria-checked="${on}" data-ayacct="${escHtml(n)}" data-ayy="${y}" aria-label="${escHtml(uiText(on ? "ay_on" : "ay_off", { a: n, y }))}"></button>`}</div>`;
+      })
+      .join("")}</div></div>`;
+}
+async function acctYearClick(e, repaint) {
+  const yb = e.target.closest("[data-ayyear]");
+  if (yb) {
+    ui.acctY = Number(yb.dataset.ayyear);
+    SND.play("tick");
+    repaint();
+    return true;
+  }
+  const tb = e.target.closest("[data-ayacct]");
+  if (!tb) return false;
+  const n = tb.dataset.ayacct,
+    y = Number(tb.dataset.ayy),
+    on = tb.getAttribute("aria-checked") !== "true";
+  ui.acctY = y;
+  await acctSetYear(n, y, on);
+  toast(uiText(on ? "ay_on" : "ay_off", { a: n, y }));
+  repaint();
+  return true;
+}
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".ayblk") || e.target.closest(".pctpane")) return;
+  acctYearClick(e, () => {
+    try {
+      document.activeElement && document.activeElement.blur();
+    } catch (_) {}
+    render();
+  });
+});
+/* Konten, die es im Jahr des gezeigten Monats gibt */
+function kaNames(ym) {
+  return kaAll().filter((n) => acctOn(n, ym));
+}
 function kaOn() {
   return kaNames().length > 1;
 }
-function kaFor(cat) {
+function kaFor(cat, ym) {
   const m = store.settings.acctByCat || {},
-    n = kaNames();
+    n = kaNames(ym);
   const v = cat && m[cat];
   return v && n.includes(v) ? v : "Hauptkonto";
 }
@@ -51,7 +145,7 @@ function kaIcon(n) {
 }
 function kaCol(n) {
   try {
-    const i = kaNames().indexOf(n);
+    const i = kaAll().indexOf(n);
     return (
       acctColor(n, i) ||
       (n === "Hauptkonto"
@@ -75,7 +169,8 @@ function kaRender() {
     ui.kaOpen = false;
     return;
   }
-  if (!ui.acct || !kaNames().includes(ui.acct)) ui.acct = kaFor(ui.cat);
+  const fy = ($("fDate") && $("fDate").value) || isoToday();
+  if (!ui.acct || !kaNames(fy).includes(ui.acct)) ui.acct = kaFor(ui.cat, fy);
   const n = ui.acct,
     bal = accountBalance(n, isoToday()),
     amt = parseAmt($("fAmount").value) || 0,
@@ -102,7 +197,9 @@ function kaRender() {
         )}</span>`
       : ""
   }</small></span><span class="kach">${escHtml(uiText("ka_change"))} <em>›</em></span></button>
-    <div class="kalist"${ui.kaOpen ? "" : " hidden"}><div class="kalh">${escHtml(ui.kind === "einnahme" ? uiText("ka_pick_in") : uiText("ka_pick"))}</div>${kaNames()
+    <div class="kalist"${ui.kaOpen ? "" : " hidden"}><div class="kalh">${escHtml(ui.kind === "einnahme" ? uiText("ka_pick_in") : uiText("ka_pick"))}</div>${kaNames(
+      fy
+    )
       .map((x) => {
         const b = accountBalance(x, isoToday());
         return `<button type="button" class="kaopt ${x === n ? "on" : ""}" data-kapick="${escHtml(x)}"><i style="background:${kaCol(x)}">${kaIcon(x)}</i><span class="kaon" data-noi18n>${escHtml(x)}</span><small>${b == null ? escHtml(uiText("ka_nobal")) : escHtml(fmtEur(b))}</small>${x === n ? "<b>✓</b>" : ""}</button>`;

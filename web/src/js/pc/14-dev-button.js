@@ -18,7 +18,7 @@ if (IS_DESK) {
     if (!w) {
       ref.insertAdjacentHTML(
         "beforebegin",
-        `<span class="pcdevw" id="pcDevW"><button class="roundbtn pcdev" id="pcDev" aria-haspopup="menu" aria-expanded="false" aria-label="${escHtml(uiText("dv_t"))}" title="${escHtml(uiText("dv_t"))}">${WR}<i class="badge" hidden></i><i class="dot" hidden></i></button></span>`
+        `<span class="pcdevw" id="pcDevW"><button class="roundbtn pcdev" id="pcDev" aria-haspopup="menu" aria-expanded="false" aria-label="${escHtml(uiText("dv_t"))}" title="${escHtml(uiText("dv_t") + " – " + uiText("dv_note"))}">${WR}<i class="badge" hidden></i><i class="dot" hidden></i></button></span>`
       );
       w = $("pcDevW");
     }
@@ -71,26 +71,40 @@ if (IS_DESK) {
   }
   const row = (k, svg, t, sub, badge) =>
     `<button class="pcdvr" data-pcdv="${k}" role="menuitem"><span class="pcdvi">${svg}</span><span class="pcdvt"><b>${escHtml(t)}</b><small>${escHtml(sub)}</small></span>${badge ? `<i class="badge">${escHtml(badge)}</i>` : `<span class="pcdva" aria-hidden="true">›</span>`}</button>`;
+  const UP = `<svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>`,
+    INBOX = `<svg class="i" viewBox="0 0 24 24"><path d="M4 13.5 6.5 5h11l2.5 8.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 13.5h4.5l1 2h5l1-2H20"/></svg>`,
+    PEOPLE = `<svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><path d="M16 4.6a3 3 0 0 1 0 6.3M17.5 14c2 .5 3.2 2.1 3.5 5"/></svg>`;
+  /* Tester, die noch eine ältere Version haben – bekannt, sobald die Einladungen einmal geladen wurden */
+  function oldTesters() {
+    try {
+      const L = ui.invL || [];
+      if (!L.length) return 0;
+      const N = invNewest(L);
+      return L.filter((x) => invStage(x) === 2 && invOld(x, N)).length;
+    } catch (_) {
+      return 0;
+    }
+  }
+  const group = (k) => `<div class="pcdvg">${escHtml(uiText(k))}</div>`;
   function paint(p) {
     const ib = $("pcInbox"),
       bd = ib && ib.querySelector(".badge"),
-      n = bd && !bd.hidden ? bd.textContent : "";
+      n = bd && !bd.hidden ? bd.textContent : "",
+      old = oldTesters();
     p.innerHTML =
-      `<div class="pcdvh" data-noi18n>${escHtml(uiText("dv_t"))}</div>` +
+      `<div class="pcdvh">${escHtml(uiText("dv_t"))}<small>${escHtml(uiText("dv_note"))}</small></div>` +
+      group("dv_g_rel") +
+      row("rel", UP, uiText("dv_rel"), uiText("dv_rel_s"), "") +
+      group("dv_g_test") +
       row(
-        "rel",
-        `<svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>`,
-        uiText("dv_rel"),
-        uiText("dv_rel_s"),
-        ""
+        "inv",
+        PEOPLE,
+        uiText("dv_inv"),
+        old ? uiText("dv_inv_old", { n: old }) : uiText("dv_inv_s"),
+        old ? String(old) : ""
       ) +
-      row(
-        "fb",
-        `<svg class="i" viewBox="0 0 24 24"><path d="M4 13.5 6.5 5h11l2.5 8.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 13.5h4.5l1 2h5l1-2H20"/></svg>`,
-        uiText("dv_fb"),
-        uiText("dv_fb_s"),
-        n
-      ) +
+      row("fb", INBOX, uiText("dv_fb"), uiText("dv_fb_s"), n) +
+      group("dv_g_dbg") +
       row("tools", WR, uiText("dv_tools"), uiText("dv_tools_s"), "");
     p.setAttribute("data-noi18n", "");
   }
@@ -118,6 +132,24 @@ if (IS_DESK) {
     );
     paint(p);
     document.body.appendChild(p);
+    /* frischen Stand der Tester holen und nur die Tester-Zeile nachziehen */
+    if (typeof canInvite === "function" && canInvite()) {
+      const before = oldTesters();
+      invLoad().then(() => {
+        const q = $("pcDevPop"),
+          now = oldTesters();
+        if (!q || now === before) return;
+        const r = q.querySelector('[data-pcdv="inv"]');
+        if (r)
+          r.outerHTML = row(
+            "inv",
+            PEOPLE,
+            uiText("dv_inv"),
+            now ? uiText("dv_inv_old", { n: now }) : uiText("dv_inv_s"),
+            now ? String(now) : ""
+          );
+      });
+    }
     b.setAttribute("aria-expanded", "true");
     SND.play("pop");
     const f = p.querySelector(".pcdvr");
@@ -149,6 +181,8 @@ if (IS_DESK) {
         } else if (k === "fb") {
           const b = $("pcInbox");
           if (b) setTimeout(() => b.click(), 20);
+        } else if (k === "inv") {
+          setTimeout(() => invOpen(), 20);
         } else if (k === "tools") {
           setTimeout(() => {
             try {

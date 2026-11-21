@@ -244,7 +244,7 @@ if (IS_PC) {
         })
         .join("")}
       <div class="pctk" style="--i:${names.length}"><small class="muted">Kontostand am 1. Januar ${y}</small><div class="pctbig"><input class="pctin big" data-pcstart="${y}" value="${sb != null ? escHtml(numStr(sb)) : ""}" placeholder="0,00" inputmode="decimal" aria-label="Kontostand Jahresanfang"> <span>€</span></div><small class="muted">damit die Jahresrechnung stimmt</small></div>
-      ${ui.pctAdd === "konten" ? `<div class="pctk pctform" style="--i:${names.length + 1}"><b>Neues Konto oder Space</b><label>Name<input class="in" id="pcaName" placeholder="z. B. Urlaub"></label><label>Stand heute<input class="in" id="pcaBal" inputmode="decimal" placeholder="0,00"></label><div class="pctbtns"><button class="btn" data-pctcancel>Abbrechen</button><button class="btn primary" data-pcaadd>Anlegen</button></div></div>` : `<button class="pctk pctnew" data-pctnew="konten" style="--i:${names.length + 1}">+ Konto oder Space</button>`}</div>`;
+      ${ui.pctAdd === "konten" ? `<div class="pctk pctform" style="--i:${names.length + 1}"><b>Neues Konto oder Space</b><label>Name<input class="in" id="pcaName" placeholder="z. B. Urlaub"></label><label>Stand heute<input class="in" id="pcaBal" inputmode="decimal" placeholder="0,00"></label><div class="pctbtns"><button class="btn" data-pctcancel>Abbrechen</button><button class="btn primary" data-pcaadd>Anlegen</button></div></div>` : `<button class="pctk pctnew" data-pctnew="konten" style="--i:${names.length + 1}">+ Konto oder Space</button>`}</div>${acctYearBlock()}`;
   };
   const aboList = () => {
     const A = aboCfg();
@@ -337,6 +337,7 @@ if (IS_PC) {
     repaint();
   };
   document.addEventListener("click", async (e) => {
+    if (e.target.closest(".pctpane .ayblk") && (await acctYearClick(e, () => after("")))) return;
     const n = e.target.closest("[data-pctnew]");
     if (n) {
       ui.pctAdd = n.dataset.pctnew;

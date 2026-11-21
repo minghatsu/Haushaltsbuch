@@ -3,7 +3,7 @@
 function fxCol(n) {
   const P = ["#8a4fb5", "#c47a12", "#3d63a8", "#b42318", "#0f8a8a", "#a0522d"];
   if (n === "Hauptkonto") return "var(--accent)";
-  const L = kaNames().filter((x) => x !== "Hauptkonto");
+  const L = kaAll().filter((x) => x !== "Hauptkonto");
   return P[Math.max(0, L.indexOf(n)) % P.length];
 }
 function fxAcctOn() {
@@ -16,7 +16,7 @@ function fxAcctOn() {
 function fxAcct(f) {
   const n = f && f.acct;
   try {
-    return n && kaNames().includes(n) ? n : "Hauptkonto";
+    return n && kaAll().includes(n) ? n : "Hauptkonto";
   } catch (_) {
     return "Hauptkonto";
   }
@@ -60,7 +60,7 @@ function fxAcctStats(ym) {
       if (d && d < o.first) o.first = d;
     }
   }
-  for (const n of kaNames())
+  for (const n of kaNames(ym))
     if (!by[n])
       by[n] = {
         n,
@@ -152,7 +152,7 @@ document.addEventListener("click", (e) => {
       "blur",
       () => {
         const n = inp.value.trim();
-        if (n && !kaNames().some((x) => normText(x) === normText(n))) {
+        if (n && !kaAll().some((x) => normText(x) === normText(n))) {
           store.settings.spaces = [...(store.settings.spaces || []), n];
           saveSettings();
           toast(

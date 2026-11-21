@@ -100,7 +100,7 @@ function potCache() {
   for (const d of Object.values(memStore.acct || {})) n += Object.keys(d.rows || {}).length;
   if (POT.tok && POT.tok[0] === store.tx && POT.tok[1] === n) return POT.c;
   const out = {},
-    known = new Set(kaNames()),
+    known = new Set(kaAll()),
     dd = (a, b) => Math.abs((new Date(a + "T12:00:00") - new Date(b + "T12:00:00")) / 864e5);
   for (const t of store.tx || []) {
     if (!t.importKey || !t.acct || !t.date) continue;
@@ -247,13 +247,12 @@ function lastDayOf(ym) {
 function renderAccounts() {
   const el = $("acctEd");
   if (!el || el.contains(document.activeElement)) return;
-  const names = accountNames(),
-    today = isoOf(new Date());
-  if (!names.length) {
-    el.innerHTML = `<span class="small muted">Importier einmal deine Kontoauszüge. Dann erscheinen hier deine Konten (bei N26 auch Hauptkonto und Spaces).</span>`;
-    return;
-  }
-  el.innerHTML = acctRows(names);
+  const names = accountNames();
+  el.innerHTML =
+    (names.length
+      ? acctRows(names)
+      : `<span class="small muted">Importier einmal deine Kontoauszüge. Dann erscheinen hier deine Konten (bei N26 auch Hauptkonto und Spaces).</span>`) +
+    acctYearBlock();
 }
 function acctRows(names) {
   const today = isoOf(new Date());

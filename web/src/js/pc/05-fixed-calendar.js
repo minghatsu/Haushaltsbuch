@@ -684,7 +684,7 @@ if (IS_PC) {
           )}${f && f.rhythm === "monate" ? `<option value="monate" selected>Bestimmte Monate</option>` : ""}</select>`
       )}
         ${field("Art", `<select class="in" data-pf="kind"><option value="privat" ${!f || f.kind !== "betrieb" ? "selected" : ""}>Privat</option><option value="betrieb" ${f && f.kind === "betrieb" ? "selected" : ""}>Betrieblich</option></select>`)}</div>
-      ${field(escHtml(uiText("fxa_from")), `<select class="in" data-pf="acct">${(kaNames().length ? kaNames() : ["Hauptkonto"]).map((n) => `<option value="${escHtml(n)}" ${(f ? fxAcct(f) : "Hauptkonto") === n ? "selected" : ""}>${escHtml(n)}</option>`).join("")}<option value="__new">+ ${escHtml(uiText("fxa_new"))} …</option></select><input class="in" data-pf="acctnew" placeholder="${escHtml(uiText("fxa_new_ph"))}" maxlength="40" hidden style="margin-top:6px">`)}
+      ${field(escHtml(uiText("fxa_from")), `<select class="in" data-pf="acct">${[...new Set([...(kaNames().length ? kaNames() : ["Hauptkonto"]), f ? fxAcct(f) : "Hauptkonto"])].map((n) => `<option value="${escHtml(n)}" ${(f ? fxAcct(f) : "Hauptkonto") === n ? "selected" : ""}>${escHtml(n)}</option>`).join("")}<option value="__new">+ ${escHtml(uiText("fxa_new"))} …</option></select><input class="in" data-pf="acctnew" placeholder="${escHtml(uiText("fxa_new_ph"))}" maxlength="40" hidden style="margin-top:6px">`)}
       ${(() => {
         const a = (f && aboCfg()[f.id]) || {};
         return `<div class="pfsec">Vertrag <small>(optional – Erinnerung 30 Tage vor der Frist)</small></div><div class="pr2">${field("Läuft bis", `<input class="in" type="date" data-pf="aboend" value="${escHtml(a.end || "")}">`)}${field("Kündigungsfrist", `<select class="in" data-pf="abonot">${ABO_NOT.map(([v, l]) => `<option value="${v}" ${Number(a.notice || 0) === v ? "selected" : ""}>${l}</option>`).join("")}</select>`)}</div>`;
@@ -744,7 +744,7 @@ if (IS_PC) {
     if (ac.value !== "__new") return ac.value || "Hauptkonto";
     const n = (pop.querySelector("[data-pf=acctnew]").value || "").trim();
     if (!n) return "Hauptkonto";
-    const ex = kaNames().find((x) => normText(x) === normText(n));
+    const ex = kaAll().find((x) => normText(x) === normText(n));
     if (ex) return ex;
     store.settings.spaces = [...(store.settings.spaces || []), n];
     saveSettings();
