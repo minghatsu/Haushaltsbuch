@@ -239,6 +239,11 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.45.0",
+    "21. November 2026",
+    ["Startseite: „Noch pro Tag“ – dein Hauptkonto geteilt durch die restlichen Tage im Monat"],
+  ],
+  [
     "0.44.9",
     "21. November 2026",
     ["Konten & Spaces: Wählst du unten ein früheres Jahr, zeigen die Kacheln oben die Stände am 31.12. dieses Jahres – nur mit den Konten, die es damals gab."],

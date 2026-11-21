@@ -74,12 +74,6 @@ function fxAcctStats(ym) {
     (a, b) => (b.n === "Hauptkonto") - (a.n === "Hauptkonto") || b.total - a.total || a.n.localeCompare(b.n, "de")
   );
 }
-function fxOpenMain(ym) {
-  const paid = (store.months[ym] && store.months[ym].paid) || {};
-  let v = 0;
-  for (const f of fixedForMonth(ym, true)) if (!(f.id in paid) && fxAcct(f) === "Hauptkonto") v += planAmt(f, ym);
-  return v;
-}
 function fxAcctCard(ym) {
   if (!fxAcctOn())
     return (store.fixed || []).length

@@ -329,7 +329,7 @@ function pcHome(o) {
       }
     ).bal,
     isCur = ym === cur;
-  const FP = isCur && typeof freePerDay === "function" ? freePerDay(ym, mainBal, c) : null,
+  const FP = isCur && typeof freePerDay === "function" ? freePerDay(ym, mainBal) : null,
     left = isCur ? (FP ? FP.left : Math.max(1, dim - new Date().getDate() + 1)) : 0,
     perDay = isCur ? (FP ? FP.v : Math.max(0, mainBal / left)) : 0;
   const pct = isCur ? left / dim : ym > cur ? 1 : 0;
