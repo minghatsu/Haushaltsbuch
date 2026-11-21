@@ -997,7 +997,7 @@ if (IS_PC){
         ${field("Tag",`<select class="in" data-pf="day"><option value="0">ohne</option>${Array.from({length:D},(_,i)=>`<option value="${i+1}" ${day===i+1?"selected":""}>${i+1}.</option>`).join("")}</select>`)}</div>
       <div class="pr2">${field("Rhythmus",`<select class="in" data-pf="rhythm">${RHYTHMS.filter(r=>r[0]!=="monate").map(([k,l])=>`<option value="${k}" ${(f&&f.rhythm||"monatlich")===k?"selected":""}>${l}</option>`).join("")}${f&&f.rhythm==="monate"?`<option value="monate" selected>Bestimmte Monate</option>`:""}</select>`)}
         ${field("Art",`<select class="in" data-pf="kind"><option value="privat" ${!f||f.kind!=="betrieb"?"selected":""}>Privat</option><option value="betrieb" ${f&&f.kind==="betrieb"?"selected":""}>Betrieblich</option></select>`)}</div>
-      ${fxAcctOn()?field(esc(nt("fxa_from")),`<select class="in" data-pf="acct">${kaNames().map(n=>`<option value="${esc(n)}" ${(f?fxAcct(f):"Hauptkonto")===n?"selected":""}>${esc(n)}</option>`).join("")}</select>`):""}
+      ${field(esc(nt("fxa_from")),`<select class="in" data-pf="acct">${(kaNames().length?kaNames():["Hauptkonto"]).map(n=>`<option value="${esc(n)}" ${(f?fxAcct(f):"Hauptkonto")===n?"selected":""}>${esc(n)}</option>`).join("")}<option value="__new">+ ${esc(nt("fxa_new"))} …</option></select><input class="in" data-pf="acctnew" placeholder="${esc(nt("fxa_new_ph"))}" maxlength="40" hidden style="margin-top:6px">`)}
       ${(()=>{ const a=f&&aboCfg()[f.id]||{}; return `<div class="pfsec">Vertrag <small>(optional – Erinnerung 30 Tage vor der Frist)</small></div><div class="pr2">${field("Läuft bis",`<input class="in" type="date" data-pf="aboend" value="${esc(a.end||"")}">`)}${field("Kündigungsfrist",`<select class="in" data-pf="abonot">${ABO_NOT.map(([v,l])=>`<option value="${v}" ${Number(a.notice||0)===v?"selected":""}>${l}</option>`).join("")}</select>`)}</div>`; })()}
       <div class="small muted pnote">${f?`Änderungen gelten ab ${esc(mon)} – frühere Monate bleiben, wie sie waren.`:`Gilt ab ${esc(mon)} für alle folgenden Monate.`}</div>
       <div class="pa">${f?`<button class="btn pdel" data-pfdel>${SV.bin}<span>Löschen</span></button>`:""}<span style="flex:1"></span><button class="btn" data-pfx>Abbrechen</button><button class="btn primary" data-pfok>${f?"Speichern":"Eintragen"}</button></div>`;
@@ -1010,6 +1010,8 @@ if (IS_PC){
     return form(null, day).replace('</div>', '</div>'+seg(m)); }
   function popNew(day, anchor, m){ if (!anchor) return; popGen++; pop.getAnimations().forEach(a=>a.cancel()); popFor={id:null, day, anchor, mode:m||"fix"}; pop.innerHTML=newHtml(day, popFor.mode); pop.hidden=false; place(anchor); const i=pop.querySelector('[data-pf=name],[data-rf=name]'); if (i) i.focus(); }
   const val=k=>{ const el=pop.querySelector(`[data-pf="${k}"]`); return el?el.value:""; };
+  function fxAcctPick(){ const ac=pop.querySelector("[data-pf=acct]"); if (!ac) return null; if (ac.value!=="__new") return ac.value||"Hauptkonto"; const n=(pop.querySelector("[data-pf=acctnew]").value||"").trim(); if (!n) return "Hauptkonto";
+    const ex=kaNames().find(x=>nrm(x)===nrm(n)); if (ex) return ex; S.settings.spaces=[...(S.settings.spaces||[]), n]; saveSettings(); return n; }
   async function popSave(){
     if (popFor && !popFor.id && popFor.mode==="rate"){ const r=rateRead(pop), err=rateCheck(r); if (err){ toast(err); return; } popClose(); const n=await rateCreate(r); if (n) toast(`${n} als Rate eingetragen`); return; }
     const ym=UI.ym, name=val("name").trim(), v=parseAmt(val("amount")||"0"), day=+val("day")||0, rh=val("rhythm"), kind=val("kind");
@@ -1017,13 +1019,13 @@ if (IS_PC){
     if (!(v>=0)){ toast("Betrag ungültig"); return; }
     const nv=Math.round(v*100)/100, cm=Number(ym.slice(5,7));
     if (!popFor.id){
-      const id=newId(), d={name, amount:nv, kind, order:S.fixed.length, from:ym, days:[{from:ym, day}]}; { const ac=pop.querySelector("[data-pf=acct]"); if (ac && ac.value && ac.value!=="Hauptkonto") d.acct=ac.value; }
+      const id=newId(), d={name, amount:nv, kind, order:S.fixed.length, from:ym, days:[{from:ym, day}]}; { const ac=fxAcctPick(); if (ac && ac!=="Hauptkonto") d.acct=ac; }
       if (rh!=="monatlich"){ d.rhythm=rh; d.months=rhythmMonths(rh, cm); }
       F.fresh=id; const ae=val("aboend"), an=Number(val("abonot"))||0; popClose(); if (ae||an){ S.settings.abos={...(S.settings.abos||{}), [id]:{end:ae, notice:an}}; saveSettings(); } if (await safe(()=>put("fixed", id, d))) toast(`${name} eingetragen`, ()=>safe(()=>del("fixed", id)), "Rückgängig"); return;
     }
     const f=S.fixed.find(x=>x.id===popFor.id); if (!f){ popClose(); return; }
     { const ae=val("aboend"), an=Number(val("abonot"))||0, A={...(S.settings.abos||{})}, o=A[f.id]||{}; if ((o.end||"")!==ae || Number(o.notice||0)!==an){ if (ae||an||o.abo) A[f.id]={...o, end:ae, notice:an}; else delete A[f.id]; S.settings.abos=A; saveSettings(); } }
-    const before=clean(f), d=clean(f); d.name=name; d.kind=kind; { const ac=pop.querySelector("[data-pf=acct]"); if (ac){ if (ac.value && ac.value!=="Hauptkonto") d.acct=ac.value; else delete d.acct; } }
+    const before=clean(f), d=clean(f); d.name=name; d.kind=kind; { const ac=fxAcctPick(); if (ac){ if (ac!=="Hauptkonto") d.acct=ac; else delete d.acct; } }
     if (Math.abs(nv-listAmt(f,ym))>0.004){ const np=withPrice(f, ym, nv); d.amount=np.amount; if (np.prices) d.prices=np.prices; else delete d.prices; }
     if ((dayOf(f,ym)||0)!==day){ d.days=withDay(f,ym,day); delete d.day; }
     if (rh!==(f.rhythm||"monatlich")){ if (rh==="monatlich"){ delete d.rhythm; delete d.months; } else if (rh!=="monate"){ d.rhythm=rh; d.months=rhythmMonths(rh, Array.isArray(f.months)&&f.months.length?Math.min(...f.months):cm); } }
@@ -1845,3 +1847,4 @@ if (IS_DESK){
 }
 
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-fxcol]"); if (!b) return; S.settings.fxColBy=b.dataset.fxcol; saveSettings(); renderFix(); });
+document.addEventListener("change", e=>{ const a=e.target.closest("[data-pf=acct]"); if (!a) return; const i=a.parentElement.querySelector("[data-pf=acctnew]"); if (i){ i.hidden=a.value!=="__new"; if (!i.hidden) i.focus(); } });
