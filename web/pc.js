@@ -1598,7 +1598,7 @@ if (IS_PC){
     b=e.target.closest("[data-pcadel]"); if (b){ if (!armed(b)) return; const n2=b.dataset.pcadel, A={...(S.settings.accountAnchors||{})}; delete A[n2]; S.settings.accountAnchors=A; S.settings.spaces=(S.settings.spaces||[]).filter(x=>x!==n2); await saveSettings(); after(`${n2} entfernt`); return; }
     if (e.target.closest("[data-pcaadd]")){ const nm=$("pcaName").value.trim(), raw=$("pcaBal").value.trim(); if (!nm){ toast("Bitte einen Namen eingeben"); $("pcaName").focus(); return; }
       if (nm!=="Hauptkonto" && !(S.settings.spaces||[]).includes(nm)) S.settings.spaces=[...(S.settings.spaces||[]), nm];
-      if (raw){ const v=parseAmt(raw); if (!isFinite(v)){ toast("Bitte eine Zahl eingeben"); return; } S.settings.accountAnchors={...(S.settings.accountAnchors||{}), [nm]:{date:isoToday(), balance:Math.round(v*100)/100}}; }
+      if (raw){ const v=parseAmt(raw); if (!isFinite(v)){ toast("Bitte eine Zahl eingeben"); return; } S.settings.accountAnchors={...(S.settings.accountAnchors||{}), [nm]:{date:isoToday(), balance:Math.round(v*100)/100, ts:Date.now()}}; }
       await saveSettings(); after(`${nm} angelegt`); return; }
     b=e.target.closest("[data-pcodel]"); if (b){ if (!armed(b)) return; const id=b.dataset.pcodel, f=S.fixed.find(x=>x.id===id); const A={...(S.settings.abos||{})}; delete A[id]; S.settings.abos=A;
       if (await safe(()=>del("fixed", id))){ await saveSettings(); after(`${f?f.name:"Abo"} gelöscht`); } return; }
@@ -1609,7 +1609,7 @@ if (IS_PC){
   document.addEventListener("change", async e=>{
     const t=e.target;
     if (t.dataset.pcbset){ const v=parseAmt(t.value); const B={...(S.settings.budgets||{})}; if (!(v>0)){ toast("Bitte einen Betrag eingeben"); t.value=numStr(B[t.dataset.pcbset]||""); return; } B[t.dataset.pcbset]=Math.round(v*100)/100; S.settings.budgets=B; t.blur(); await saveSettings(); toast("Budget gespeichert"); repaint(); return; }
-    if (t.dataset.pcaset){ const raw=t.value.trim(); if (!raw) return; const v=parseAmt(raw); if (!isFinite(v)){ toast("Bitte eine Zahl eingeben"); return; } S.settings.accountAnchors={...(S.settings.accountAnchors||{}), [t.dataset.pcaset]:{date:isoToday(), balance:Math.round(v*100)/100}}; t.blur(); await saveSettings(); toast("Stand gespeichert"); repaint(); return; }
+    if (t.dataset.pcaset){ const raw=t.value.trim(); if (!raw) return; const v=parseAmt(raw); if (!isFinite(v)){ toast("Bitte eine Zahl eingeben"); return; } S.settings.accountAnchors={...(S.settings.accountAnchors||{}), [t.dataset.pcaset]:{date:isoToday(), balance:Math.round(v*100)/100, ts:Date.now()}}; t.blur(); await saveSettings(); toast("Stand gespeichert"); repaint(); return; }
     if (t.dataset.pcstart){ const y=t.dataset.pcstart, raw=t.value.trim(), sb={...(S.settings.startBalance||{})}; if (!raw) delete sb[y]; else { const v=parseAmt(raw); if (!isFinite(v)){ toast("Bitte eine Zahl eingeben"); return; } sb[y]=Math.round(v*100)/100; } S.settings.startBalance=sb; t.blur(); await saveSettings(); toast("Gespeichert"); repaint(); return; }
     if ((t.dataset.aboend!=null || t.dataset.abonot!=null) && t.closest(".pctpane")) setTimeout(repaint, 50);
   });

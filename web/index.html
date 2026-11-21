@@ -3896,7 +3896,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
-  ["0.43.3", "21. November 2026", ["Sparen & Anlegen: „Öffnen“ öffnete am Handy die Einladungen statt des Zinseszins-Rechners – behoben. Auch „Mit Zinsen“ beim neuen Ziel und die Anlage-Gläser öffnen jetzt wieder den Rechner."]],
+  ["0.43.8", "21. November 2026", ["Nach dem Speichern einer Buchung steht jetzt dabei, auf welches Konto sie ging (z. B. „· Bargeld“ oder „· Einkauf“) – wenn nicht aufs Hauptkonto.", "Kontostand aus PDF mit Datum in der Zukunft (z. B. „bis 30.11.“) hat eingetippte Buchungen von heute verschluckt – behoben.", "Kontostand am PC eintragen: Buchungen, die vorher am selben Tag eingetippt wurden, werden nicht mehr doppelt abgezogen.", "Sparen & Anlegen: „Öffnen“ öffnete am Handy die Einladungen statt des Zinseszins-Rechners – behoben. Auch „Mit Zinsen“ beim neuen Ziel und die Anlage-Gläser öffnen jetzt wieder den Rechner."]],
   ["0.43.2", "21. November 2026", ["PC-Fixkosten: Tippfehler „Fixkoste“ im Hinweis an den Kalendertagen korrigiert.", "Kontoauszug als CSV: Bei der DKB wurde „2.350“ als 2,35 € gelesen – jetzt richtig 2.350 €. Deutsche Bank/Postbank mit getrennten Soll-/Haben-Spalten und Revolut (Namen) funktionieren jetzt auch.",
     "Android-Zurück-Taste und Esc schließen jetzt auch Rechnung, Analyse, Bargeld, Kredit, Bank-Auswahl und weitere Fenster – statt dahinter die Seite zu wechseln.",
     "Bank-Auswahl lässt sich abbrechen, wenn du sie selbst geöffnet hast.",
@@ -9734,7 +9734,7 @@ async function saveTx(){
     try { const b=Number((S.settings.budgets||{})[doc.cat])||0; if (!editing && doc.kind==="ausgabe" && b>0){ const sp=sum(monthCalc(date.slice(0,7)).tx.filter(t=>t.kind==="ausgabe"&&t.cat===doc.cat), t=>t.amount); if (sp>b && sp-doc.amount<=b) k="warn"; } } catch(_){}
     SND.play(k); }
   if (editing){ toast("Geändert", old ? ()=>safe(()=>saveTxDoc(id, plainTx(old), S.tx.find(t=>t.id===id))) : null); }
-  else toast(`${eur(doc.amount)} gespeichert`, ()=>safe(()=>delTxDoc(S.tx.find(t=>t.id===id))));
+  else toast(`${eur(doc.amount)} gespeichert${doc.pay==="bar"?" · Bargeld":doc.acct?" · "+doc.acct:""}`, ()=>safe(()=>delTxDoc(S.tx.find(t=>t.id===id))));
   if (!editing) try{ srAfterSave(doc); }catch(_){}
   if (!editing) motAdd(`[data-edit="${id}"]`,"add");
   if (afaBig(doc) && !doc.afa && (!old || !afaBig(old))) setTimeout(()=>afaAsk(id), 450);
@@ -14313,7 +14313,7 @@ function pdfBalances(L, PA, single){ if (single) { const b=pdfBalance(L); return
   return Object.entries(res).map(([acc,b])=>({acc, ...b})); }
 function pdfBalsApply(list, end, items){ if (!list.length){ const ds=(items||[]).map(i=>i.date).filter(Boolean).sort(); return ds.length?nt("pdf_bal_rows",{a:[...new Set((items||[]).map(i=>i.acct).filter(Boolean))].join(", ")}):""; }
   const ds=(items||[]).map(i=>i.date).filter(Boolean).sort(), last=ds[ds.length-1]||null, set=[], old=[];
-  for (const b of list){ const date=end || (b.date && (!last || b.date>=last) ? b.date : (last||isoToday())); const AN={...(S.settings.accountAnchors||{})}, a=AN[b.acc];
+  for (const b of list){ let date=end || (b.date && (!last || b.date>=last) ? b.date : (last||isoToday())); const AN={...(S.settings.accountAnchors||{})}, a=AN[b.acc]; if (date>isoToday()) date=isoToday();
     if (a && a.date>date){ old.push(b.acc); continue; } AN[b.acc]={date, balance:Math.round(b.v*100)/100, ts:Date.now(), src:"pdf"}; S.settings.accountAnchors=AN; set.push(`${b.acc} ${eur(b.v)}`); }
   if (set.length) saveSettings();
   return set.length ? nt("pdf_bals_set",{l:set.join(" · "), d:shortDate(end||last||isoToday())}) : old.length ? nt("pdf_bal_old",{a:old.join(", "), d:shortDate(end||last||isoToday()), e:shortDate((S.settings.accountAnchors||{})[old[0]].date)}) : ""; }
@@ -14381,7 +14381,7 @@ function accountNames(){
 function manualSign(t){ if (!t || t.importKey || t.pay==="bar" || t.source==="bank") return 0; const k=t.kind; if (k==="einnahme") return 1; if (k==="ausgabe"||k==="betrieb"||k==="vorauszahlung") return -1; return 0; }
 function manualDelta(a, lastImp, asOf, name){ const at=a.ts||0; let d=0; let cut=""; if (lastImp){ const x=new Date(lastImp+"T12:00:00"); x.setDate(x.getDate()-10); cut=isoOf(x); }
   for (const t of (S.tx||[])){ const sg=manualSign(t); if (!sg || !t.date || t.date>asOf || t.date<=cut || (t.acct||"Hauptkonto")!==(name||"Hauptkonto")) continue;
-    const after=t.date>a.date || (t.date===a.date && (!at || (t.ts||0)>at)); if (after) d+=sg*(Number(t.amount)||0); }
+    const ad=a.date>asOf?asOf:a.date; const after=t.date>ad || (t.date===ad && (!at || (t.ts||0)>at || a.date>asOf)); if (after) d+=sg*(Number(t.amount)||0); }
   return d; }
 /* Buchung einem Space zugeordnet, die Bank hat aber vom Hauptkonto abgebucht:
    Space sinkt, Hauptkonto bekommt es zurück – bis du in der Bank umbuchst (wird am Kontoauszug erkannt). */
