@@ -1850,7 +1850,7 @@ html.istab:not(.tabp) .bfgb,html.istab:not(.tabp) .bfgj{grid-template-columns:re
 .atile{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:var(--sunk);border-radius:16px;padding:12px 6px 10px;cursor:pointer;color:var(--fg);font-family:var(--f-body);text-align:center;min-width:0;transition:transform .15s,background .15s}
 .atile:hover{background:var(--accent-soft)}.atile:active{transform:scale(.96)}
 .atile .aic{width:38px;height:38px;border-radius:12px;background:var(--surface);display:grid;place-items:center;color:var(--accent)}.atile .aemo{font-size:20px}
-.atile b{font-size:12.5px;line-height:1.2;max-width:100%;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}.atile small{color:var(--muted);font-size:11px;font-weight:600;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.atile b{font-size:12.5px;line-height:1.2;max-width:100%;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}.atile small{color:color-mix(in srgb,var(--muted) 78%,var(--fg));font-size:11px;font-weight:600;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 .ahero{display:block;width:100%;border:0;text-align:start;color:#fff;border-radius:22px;padding:16px 18px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 70%,#3fb98a));box-shadow:var(--shadow);cursor:pointer;font-family:var(--f-body)}
 .ahero.beruf{background:linear-gradient(135deg,var(--pg-beruf,#c2410c),color-mix(in srgb,var(--pg-beruf,#c2410c) 72%,#fff))}.ahero.amt{background:linear-gradient(135deg,var(--pg-beruf,#0f8a8a),color-mix(in srgb,var(--pg-beruf,#0f8a8a) 72%,#fff))}
 .kidc .hofr .in{max-width:none;text-align:start}.kidc .hofr .in[data-kidb]{max-width:110px}.kidedu{display:flex;gap:8px;align-items:center;font-size:12.5px;padding:2px 0 6px;color:var(--muted)}
@@ -2527,7 +2527,7 @@ html[data-theme="dark"] .qi-sound,html[data-theme="dark"] .sndic{background:#2a2
 .invioschip{display:inline-flex;align-items:center;gap:4px;margin-inline-start:auto;padding:5px 9px;border-radius:99px;background:var(--sunk);color:var(--muted);font:800 13px var(--f-body);font-variant-numeric:tabular-nums}.invioschip+.invcapb{margin-inline-start:6px}
 
 /* Konten aufklappen + umbuchen */
-.mvopen{display:flex;align-items:center;gap:6px;margin:4px auto 10px;border:0;background:var(--sunk);color:var(--muted);font:700 13px var(--f-body);padding:8px 14px;border-radius:99px;cursor:pointer;min-height:36px;transition:transform .15s,color .2s}
+.mvopen{display:flex;align-items:center;gap:6px;margin:4px auto 10px;border:0;background:var(--sunk);color:color-mix(in srgb,var(--muted) 78%,var(--fg));font:700 13px var(--f-body);padding:8px 14px;border-radius:99px;cursor:pointer;min-height:36px;transition:transform .15s,color .2s}
 .mvopen:active{transform:scale(.95)}.mvopen:hover{color:var(--fg)}.mvopen svg{animation:mvNudge 2.6s ease-in-out 1.2s 2}
 @keyframes mvNudge{0%,70%,100%{transform:none}80%{transform:translateY(3px)}90%{transform:translateY(-1px)}}
 .mvbg{position:fixed;inset:0;z-index:70;text-align:start;background:color-mix(in srgb,var(--bg) 94%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);overflow-y:auto;overscroll-behavior:contain;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px));opacity:0;transition:opacity .3s}
@@ -3897,6 +3897,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.44.3", "21. November 2026", ["Bessere Lesbarkeit: graue Untertitel auf den Kacheln und „Alle Konten · umbuchen“ etwas kräftiger; Kalendertage im Dunkelmodus gut lesbar."]],
   ["0.44.2", "21. November 2026", ["Selbst angelegte Konten/Spaces (Einstellungen › Spaces) erscheinen jetzt überall zur Auswahl – bei Fixkosten, im Konten-Plan und beim Buchen.", "Neues Konto direkt anlegen: im Konten-Plan („+ Konto hinzufügen“) und am PC unter „Abgebucht von“."]],
   ["0.44.1", "21. November 2026", ["Fixkosten: Du kannst jetzt einstellen, von welchem Konto sie abgehen – z. B. Hauptkonto oder dein Space „Monatliche Kosten“. Abhaken senkt dann genau dieses Konto.", "Handy: neue Karte „Wo wird abgebucht?“ mit Aufteilung je Konto und Warnung, wenn auf einem Space zu wenig für die offenen Fixkosten liegt – mit „Jetzt umbuchen“.", "Handy: „Konten-Plan“ – Posten gedrückt halten und ins andere Konto ziehen, oder antippen und das Konto wählen.", "PC: Im Kalender „Farbe: Konto“ färbt jeden Posten nach seinem Konto; im Bearbeiten-Fenster gibt es „Abgebucht von“.", "„Noch pro Tag“ und die Vorschau ziehen Fixkosten, die von einem Space abgehen, nicht mehr vom Hauptkonto ab."]],
   ["0.44.0", "21. November 2026", ["Neu: „Anlegen“ im Buchungsfenster – für Geld, das du investierst (z. B. ETF). Es geht vom Hauptkonto ab, zählt aber nicht als Ausgabe im Ø pro Tag. Wählst du ein Anlage-Ziel, wächst dessen Stand automatisch mit.", "In der Vorschau bis Monatsende gibt es dafür den Schalter „Anlegen“: Wenn du willst, rechnet Mami deine Investitionen doch im Tagesschnitt mit."]],
@@ -7653,7 +7654,7 @@ function renderList(){
     for (const t of list) if (t.kind==="ausgabe"||t.kind==="betrieb") per[Number(t.date.slice(8,10))]+=t.amount;
     const mx=Math.max(1,...per), first=(new Date(UI.ym+"-01T12:00:00").getDay()+6)%7;
     $("calCard").innerHTML = `<div class="calg">${["Mo","Di","Mi","Do","Fr","Sa","So"].map(w=>`<span class="w">${w}</span>`).join("")}${"<span></span>".repeat(first)}${Array.from({length:D},(_,k)=>{ const d=k+1, iso=UI.ym+"-"+pad(d), v=per[d], a=v>0?0.15+0.85*Math.sqrt(v/mx):0;
-      return `<button data-calday="${iso}" class="${a>0.78?"hot mid":a>0.5?"mid":""} ${UI.calDay===iso?"sel":""} ${iso===today?"today":""}" style="${v>0?`background:color-mix(in srgb, var(--accent) ${Math.round(a*100)}%, var(--sunk))`:""}" aria-label="${d}. ${esc(MONTHS[ymParts(UI.ym)[1]-1])}: ${esc(eur(v))} ausgegeben">${d}${v>0?`<small>${esc(shortK(v))}</small>`:""}</button>`; }).join("")}</div>
+      return `<button data-calday="${iso}" class="${a>0.78?"hot mid":a>0.66?"mid":""} ${UI.calDay===iso?"sel":""} ${iso===today?"today":""}" style="${v>0?`background:color-mix(in srgb, var(--accent) ${Math.round(a*100)}%, var(--sunk))`:""}" aria-label="${d}. ${esc(MONTHS[ymParts(UI.ym)[1]-1])}: ${esc(eur(v))} ausgegeben">${d}${v>0?`<small>${esc(shortK(v))}</small>`:""}</button>`; }).join("")}</div>
       <div class="calleg"><span>wenig</span><i></i><span>viel ausgegeben</span></div>`;
     if (UI.calDay) list = list.filter(t=>t.date===UI.calDay);
   }
