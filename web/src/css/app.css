@@ -25427,3 +25427,11 @@ html.pc:not(.istab) .mvopen {
 html.pc .pctpane .ayblk {
   grid-column: 1 / -1;
 }
+.ayval {
+  font: 800 18px var(--f-display);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.acct-row.ayold {
+  animation: invPop 0.35s both;
+}

@@ -255,7 +255,18 @@ function renderAccounts() {
     acctYearBlock();
 }
 function acctRows(names) {
-  const today = isoOf(new Date());
+  const today = isoOf(new Date()),
+    y = acctYearSel();
+  if (y < new Date().getFullYear()) {
+    const asOf = acctYearAsOf(y);
+    return names
+      .filter((n) => acctOn(n, y + "-01"))
+      .map((n) => {
+        const b = accountBalance(n, asOf);
+        return `<div class="edit-row acct-row ayold"><span><b>${escHtml(n)}</b><br><span class="small muted">${escHtml(b == null ? uiText("ay_nobal") : uiText("ay_end", { y }))}</span></span><b class="ayval" data-noi18n>${b == null ? "–" : escHtml(fmtEur(b))}</b></div>`;
+      })
+      .join("");
+  }
   return names
     .map((n) => {
       const b = accountBalance(n, today),

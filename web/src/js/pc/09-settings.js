@@ -230,21 +230,29 @@ if (IS_PC) {
   };
   PT.konten = () => {
     const today = isoToday(),
-      names = acctList(),
+      y = acctYearSel(),
+      past = y < new Date().getFullYear(),
+      asOf = acctYearAsOf(y),
+      names = acctList().filter((n) => acctOn(n, y + "-01")),
       A = store.settings.accountAnchors || {},
       imp = new Set(accountNames()),
       sp = new Set(store.settings.spaces || []);
-    const y = new Date().getFullYear(),
-      sb = (store.settings.startBalance || {})[y];
-    return `<p class="pcthint">Trag einmal ein, was heute auf einem Konto ist – die App rechnet von da an mit deinen Buchungen weiter. Geld zwischen diesen Konten zählt als Umbuchung, nicht als Ausgabe.</p>
+    const sb = (store.settings.startBalance || {})[y];
+    /* vergangenes Jahr: Stände am 31.12. nur anzeigen – eingetragen wird immer der Stand von heute */
+    const pastTile = (n, i) => {
+      const bal = accountBalance(n, asOf);
+      return `<div class="pctk ayold" style="--i:${i}"><small class="muted">${escHtml(n)}</small><div class="pctbig"><b class="pctval" data-noi18n>${bal == null ? "–" : escHtml(fmtEur(bal))}</b></div><small class="muted">${escHtml(bal == null ? uiText("ay_nobal") : uiText("ay_end", { y }))}</small></div>`;
+    };
+    return `<p class="pcthint">${past ? escHtml(uiText("ay_past_hint", { y })) : "Trag einmal ein, was heute auf einem Konto ist – die App rechnet von da an mit deinen Buchungen weiter. Geld zwischen diesen Konten zählt als Umbuchung, nicht als Ausgabe."}</p>
       <div class="pctg">${names
         .map((n, i) => {
+          if (past) return pastTile(n, i);
           const bal = accountBalance(n, today);
           return `<div class="pctk" style="--i:${i}">${n === "Hauptkonto" ? "" : delBtn("data-pcadel", n)}<small class="muted">${escHtml(n)}${imp.has(n) ? " · aus Kontoauszug" : sp.has(n) ? " · Space" : ""}</small><div class="pctbig"><input class="pctin big" data-pcaset="${escHtml(n)}" value="${bal == null ? "" : escHtml(numStr(round2(bal)))}" placeholder="Stand eintragen" inputmode="decimal" aria-label="Stand ${escHtml(n)}"> <span>€</span></div><small class="muted">${A[n] ? `Stand heute${A[n].date !== today ? ` · eingetragen am ${escHtml(shortDate(A[n].date))}` : ""}` : "noch kein Stand"}</small></div>`;
         })
         .join("")}
       <div class="pctk" style="--i:${names.length}"><small class="muted">Kontostand am 1. Januar ${y}</small><div class="pctbig"><input class="pctin big" data-pcstart="${y}" value="${sb != null ? escHtml(numStr(sb)) : ""}" placeholder="0,00" inputmode="decimal" aria-label="Kontostand Jahresanfang"> <span>€</span></div><small class="muted">damit die Jahresrechnung stimmt</small></div>
-      ${ui.pctAdd === "konten" ? `<div class="pctk pctform" style="--i:${names.length + 1}"><b>Neues Konto oder Space</b><label>Name<input class="in" id="pcaName" placeholder="z. B. Urlaub"></label><label>Stand heute<input class="in" id="pcaBal" inputmode="decimal" placeholder="0,00"></label><div class="pctbtns"><button class="btn" data-pctcancel>Abbrechen</button><button class="btn primary" data-pcaadd>Anlegen</button></div></div>` : `<button class="pctk pctnew" data-pctnew="konten" style="--i:${names.length + 1}">+ Konto oder Space</button>`}</div>${acctYearBlock()}`;
+      ${past ? "" : ui.pctAdd === "konten" ? `<div class="pctk pctform" style="--i:${names.length + 1}"><b>Neues Konto oder Space</b><label>Name<input class="in" id="pcaName" placeholder="z. B. Urlaub"></label><label>Stand heute<input class="in" id="pcaBal" inputmode="decimal" placeholder="0,00"></label><div class="pctbtns"><button class="btn" data-pctcancel>Abbrechen</button><button class="btn primary" data-pcaadd>Anlegen</button></div></div>` : `<button class="pctk pctnew" data-pctnew="konten" style="--i:${names.length + 1}">+ Konto oder Space</button>`}</div>${acctYearBlock()}`;
   };
   const aboList = () => {
     const A = aboCfg();

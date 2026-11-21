@@ -51,13 +51,22 @@ function acctYearsList() {
   for (let y = Math.max(Math.min(min, now - 3), now - 7); y <= now; y++) out.push(y);
   return out;
 }
+/* das in Einstellungen › Konten gewählte Jahr (sonst das Jahr des gezeigten Monats) */
+function acctYearSel() {
+  const ys = acctYearsList(),
+    shown = Number(String(ui.ym || isoToday()).slice(0, 4));
+  return ys.includes(ui.acctY) ? ui.acctY : ys.includes(shown) ? shown : ys[ys.length - 1];
+}
+/* Stichtag für die Kontostände im gewählten Jahr: heute oder der 31.12. */
+function acctYearAsOf(y) {
+  return y >= new Date().getFullYear() ? isoToday() : y + "-12-31";
+}
 /* Einstellungen: Jahr wählen, Konten für dieses Jahr an- oder ausschalten */
 function acctYearBlock() {
   const names = kaAll();
   if (names.length < 2) return "";
   const ys = acctYearsList(),
-    shown = Number(String(ui.ym || isoToday()).slice(0, 4)),
-    y = ys.includes(ui.acctY) ? ui.acctY : ys.includes(shown) ? shown : ys[ys.length - 1],
+    y = acctYearSel(),
     off = acctOffIn(y);
   return `<div class="ayblk"><b class="ayt">${escHtml(uiText("ay_t"))}</b><p class="small muted">${escHtml(uiText("ay_hint"))}</p>
     <div class="ayyrs" role="tablist">${ys.map((v) => `<button type="button" class="ayy ${v === y ? "on" : ""}" role="tab" aria-selected="${v === y}" data-ayyear="${v}" data-noi18n>${v}</button>`).join("")}</div>

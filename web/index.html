@@ -25430,6 +25430,14 @@ html.pc:not(.istab) .mvopen {
 html.pc .pctpane .ayblk {
   grid-column: 1 / -1;
 }
+.ayval {
+  font: 800 18px var(--f-display);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.acct-row.ayold {
+  animation: invPop 0.35s both;
+}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -50361,6 +50369,11 @@ document.addEventListener("click", (e) => {
 
 /* Einstellungen extra */
 const CHANGELOG = [
+  [
+    "0.44.9",
+    "21. November 2026",
+    ["Konten & Spaces: Wählst du unten ein früheres Jahr, zeigen die Kacheln oben die Stände am 31.12. dieses Jahres – nur mit den Konten, die es damals gab."],
+  ],
   [
     "0.44.8",
     "21. November 2026",
@@ -83680,6 +83693,36 @@ const TEXTS = {
     "في قسم الحسابات يمكنك تحديد الحسابات التي كانت لديك في كل سنة. إذا كان لديك حساب آخر سابقًا، أوقفه للسنوات التالية.",
     "La Conturi poți seta ce conturi ai avut în fiecare an. Dacă înainte aveai alt cont, oprește-l pentru anii următori.",
   ],
+  ay_end: [
+    "Stand am 31.12.{y}",
+    "Balance on 31 Dec {y}",
+    "31.12.{y} bakiyesi",
+    "Остаток на 31.12.{y}",
+    "Залишок на 31.12.{y}",
+    "Saldo na 31.12.{y}",
+    "الرصيد في 31.12.{y}",
+    "Sold la 31.12.{y}",
+  ],
+  ay_nobal: [
+    "kein Stand bekannt",
+    "no balance known",
+    "bakiye bilinmiyor",
+    "остаток неизвестен",
+    "залишок невідомий",
+    "saldo nieznane",
+    "الرصيد غير معروف",
+    "sold necunoscut",
+  ],
+  ay_past_hint: [
+    "So standen deine Konten am Ende von {y}. Ausgerechnet aus deinem heutigen Stand und den Buchungen dazwischen.",
+    "This is how your accounts stood at the end of {y}, worked out from today’s balance and the transactions in between.",
+    "{y} sonunda hesaplarının durumu. Bugünkü bakiye ve aradaki işlemlerden hesaplandı.",
+    "Так выглядели твои счета в конце {y} года – рассчитано по сегодняшнему остатку и операциям между ними.",
+    "Так виглядали твої рахунки наприкінці {y} року – розраховано з сьогоднішнього залишку та операцій між ними.",
+    "Tak wyglądały twoje konta pod koniec {y} – obliczone z dzisiejszego salda i transakcji pomiędzy.",
+    "هكذا كانت حساباتك في نهاية {y}، محسوبة من رصيد اليوم والمعاملات بينهما.",
+    "Așa arătau conturile tale la sfârșitul lui {y}, calculat din soldul de azi și tranzacțiile dintre ele.",
+  ],
   zk_debts_c: [
     "{n} Kredite offen",
     "{n} loans open",
@@ -98726,13 +98769,22 @@ function acctYearsList() {
   for (let y = Math.max(Math.min(min, now - 3), now - 7); y <= now; y++) out.push(y);
   return out;
 }
+/* das in Einstellungen › Konten gewählte Jahr (sonst das Jahr des gezeigten Monats) */
+function acctYearSel() {
+  const ys = acctYearsList(),
+    shown = Number(String(ui.ym || isoToday()).slice(0, 4));
+  return ys.includes(ui.acctY) ? ui.acctY : ys.includes(shown) ? shown : ys[ys.length - 1];
+}
+/* Stichtag für die Kontostände im gewählten Jahr: heute oder der 31.12. */
+function acctYearAsOf(y) {
+  return y >= new Date().getFullYear() ? isoToday() : y + "-12-31";
+}
 /* Einstellungen: Jahr wählen, Konten für dieses Jahr an- oder ausschalten */
 function acctYearBlock() {
   const names = kaAll();
   if (names.length < 2) return "";
   const ys = acctYearsList(),
-    shown = Number(String(ui.ym || isoToday()).slice(0, 4)),
-    y = ys.includes(ui.acctY) ? ui.acctY : ys.includes(shown) ? shown : ys[ys.length - 1],
+    y = acctYearSel(),
     off = acctOffIn(y);
   return `<div class="ayblk"><b class="ayt">${escHtml(uiText("ay_t"))}</b><p class="small muted">${escHtml(uiText("ay_hint"))}</p>
     <div class="ayyrs" role="tablist">${ys.map((v) => `<button type="button" class="ayy ${v === y ? "on" : ""}" role="tab" aria-selected="${v === y}" data-ayyear="${v}" data-noi18n>${v}</button>`).join("")}</div>
@@ -106653,7 +106705,18 @@ function renderAccounts() {
     acctYearBlock();
 }
 function acctRows(names) {
-  const today = isoOf(new Date());
+  const today = isoOf(new Date()),
+    y = acctYearSel();
+  if (y < new Date().getFullYear()) {
+    const asOf = acctYearAsOf(y);
+    return names
+      .filter((n) => acctOn(n, y + "-01"))
+      .map((n) => {
+        const b = accountBalance(n, asOf);
+        return `<div class="edit-row acct-row ayold"><span><b>${escHtml(n)}</b><br><span class="small muted">${escHtml(b == null ? uiText("ay_nobal") : uiText("ay_end", { y }))}</span></span><b class="ayval" data-noi18n>${b == null ? "–" : escHtml(fmtEur(b))}</b></div>`;
+      })
+      .join("");
+  }
   return names
     .map((n) => {
       const b = accountBalance(n, today),

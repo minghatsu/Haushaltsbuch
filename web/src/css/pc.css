@@ -3724,6 +3724,15 @@ html.pc .pctin.big {
   text-align: left;
   font-family: var(--f-display);
 }
+html.pc .pctval {
+  font: 800 22px var(--f-display);
+  padding: 4px 0;
+  font-variant-numeric: tabular-nums;
+}
+html.pc .pctk.ayold {
+  animation: invPop 0.35s both;
+  animation-delay: calc(var(--i, 0) * 25ms);
+}
 html.pc .pctin.big::placeholder {
   font-size: 14px;
   font-family: var(--f-body);
