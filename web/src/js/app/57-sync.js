@@ -1718,7 +1718,7 @@ $("loginGo").onclick = doLogin;
     busy = false;
   const blocked = (t) =>
     t.closest(
-      "#moBg,#mbBg,#tourBg,.hobg,.sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,.srail,.stack,.bt3,input[type=range],textarea,.wiz"
+      "#moBg,#mbBg,#tourBg,.hobg,.sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,#astack,.mvbg,.srail,.stack,.bt3,input[type=range],textarea,.wiz"
     ) || document.querySelector(".backdrop:not([hidden])");
   const set = (v, rot) => {
     el.style.transform = `translateY(${v - 50}px) rotate(${rot}deg)`;

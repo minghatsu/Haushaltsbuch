@@ -25061,6 +25061,24 @@ html[data-theme="dark"] .sndic {
 .mvbg[hidden] {
   display: none;
 }
+/* während des Ziehens: Hintergrund und Kopfzeile kommen mit dem Finger */
+.mvbg.pull {
+  opacity: 1;
+  transition: none;
+}
+.mvbg.pull:not(.show) {
+  background: color-mix(in srgb, var(--bg) calc(var(--mvp, 0) * 94%), transparent);
+  -webkit-backdrop-filter: blur(calc(var(--mvp, 0) * 14px));
+  backdrop-filter: blur(calc(var(--mvp, 0) * 14px));
+}
+.mvbg.pull:not(.show) .mvtop,
+.mvbg.pull:not(.show) .mvhint {
+  opacity: var(--mvp, 0);
+}
+.mvbg.pull .mvtop,
+.mvbg.pull .mvhint {
+  transition: opacity 0.25s;
+}
 .mvtop {
   display: flex;
   align-items: center;

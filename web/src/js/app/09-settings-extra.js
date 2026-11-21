@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.45.2",
+    "21. November 2026",
+    [
+      "Konten aufklappen: Ziehst du den Kartenstapel nach unten, fächern sich die Konten schon unter deinem Finger auf und federn beim Loslassen an ihren Platz. Kurz angezogen und losgelassen, rutschen sie zurück.",
+      "Behoben: Das Ziehen am Kartenstapel hat zusätzlich „Aktualisieren“ ausgelöst.",
+    ],
+  ],
+  [
     "0.45.1",
     "21. November 2026",
     [

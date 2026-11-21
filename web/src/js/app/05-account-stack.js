@@ -23,27 +23,35 @@ function mvCol(m) {
 function mvHas(m) {
   return m.cash || !!(store.settings.accountAnchors || {})[m.name];
 }
-function mvOpen() {
+function mvEl() {
   let el = $("mvBg");
   if (!el) {
     el = document.createElement("div");
     el.id = "mvBg";
     el.className = "mvbg";
+    el.hidden = true;
     el.setAttribute("role", "dialog");
     el.setAttribute("aria-modal", "true");
     el.setAttribute("aria-labelledby", "mvT");
     document.body.appendChild(el);
   }
-  const fx = mvFxOk();
+  return el;
+}
+function mvOpen() {
+  const el = mvEl();
+  if (mvFxOk() && mvPullStart()) {
+    requestAnimationFrame(() => mvPullEnd(true));
+    return;
+  }
+  MV.home = null;
   el.hidden = false;
   document.body.classList.add("locked");
-  mvRender(!fx);
+  mvRender(true);
   SND.play("whoosh");
   try {
     navigator.vibrate && navigator.vibrate(8);
   } catch (_) {}
-  if (fx) mvDeal(el);
-  else requestAnimationFrame(() => el.classList.add("show"));
+  requestAnimationFrame(() => el.classList.add("show"));
   let n = 0;
   try {
     n = Number(localStorage.getItem("hb-mvhint")) || 0;
@@ -115,14 +123,21 @@ function mvFront() {
   }
   return null;
 }
-function mvDeal(el) {
+/* Aufklappen, das dem Finger folgt: Die Konten liegen zuerst als Stapel unter der Hauptkarte
+   und fächern sich beim Ziehen nach unten auf. Beim Loslassen federn sie an ihren Platz.
+   Ein Tipp auf „Alle Konten“ spielt dasselbe ohne Finger ab. */
+const MVP = {
+  on: false,
+  p: 0,
+  cards: [],
+  start: [],
+};
+const MVP_FULL = 210;
+const mvLerp = (a, b, t) => a + (b - a) * t;
+function mvPullStart() {
   const H = mvFront(),
-    cards = [...el.querySelectorAll(".mvc")];
-  MV.home = null;
-  if (!H || !cards.length) {
-    requestAnimationFrame(() => el.classList.add("show"));
-    return;
-  }
+    el = mvEl();
+  if (!H) return false;
   const fr = H.c.getBoundingClientRect();
   MV.home = {
     top: fr.top,
@@ -130,125 +145,123 @@ function mvDeal(el) {
     width: fr.width,
     height: fr.height,
   };
-  const E1 = "cubic-bezier(.45,0,.2,1)";
-  // 1) Spaces ziehen sich hinter der Hauptkarte zusammen
-  H.side.forEach((c) => {
-    c.animate(
-      [
-        {
-          transform: H.to(c),
-          opacity: 0.9,
-        },
-      ],
-      {
-        duration: 260,
-        easing: E1,
-        fill: "forwards",
-      }
-    );
+  el.hidden = false;
+  el.classList.add("pull");
+  el.classList.remove("show");
+  document.body.classList.add("locked");
+  mvRender(false);
+  const cards = [...el.querySelectorAll(".mvc")];
+  if (!cards.length) {
+    el.classList.remove("pull");
+    return false;
+  }
+  MVP.on = true;
+  MVP.p = 0;
+  MVP.cards = cards;
+  MVP.start = cards.map((c, k) => {
+    const r = c.getBoundingClientRect(),
+      sc = Math.min(1, MV.home.width / r.width) * (k ? 0.94 - Math.min(k, 4) * 0.02 : 1);
+    return {
+      x: MV.home.left + (MV.home.width - r.width * sc) / 2 - r.left,
+      y: MV.home.top - r.top + Math.min(k, 4) * 12,
+      s: sc,
+    };
   });
-  H.c.animate(
-    [
-      {
-        transform: "none",
-      },
-      {
-        transform: "scale(.965)",
-      },
-      {
-        transform: "none",
-      },
-    ],
-    {
-      duration: 300,
-      easing: "ease-in-out",
-    }
-  );
-  cards.forEach((c) => {
-    c.style.opacity = "0";
+  cards.forEach((c, k) => {
+    c.style.transition = "none";
+    c.style.transformOrigin = "0 0";
+    c.style.zIndex = String(20 - k);
   });
-  const first = cards[0].getBoundingClientRect();
-  setTimeout(() => {
+  [H.c, ...H.side].forEach((c) => c.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: "forwards" }));
+  mvPullMove(0);
+  return true;
+}
+function mvPullMove(dy) {
+  if (!MVP.on) return;
+  const el = $("mvBg"),
+    p = Math.max(0, Math.min(1, dy / MVP_FULL)),
+    lift = Math.max(0, dy) * 0.2;
+  MVP.p = p;
+  el.style.setProperty("--mvp", p.toFixed(3));
+  MVP.cards.forEach((c, k) => {
+    const S = MVP.start[k],
+      t = k ? Math.max(0, Math.min(1, p * 0.85 - k * 0.025)) : p * 0.35,
+      x = mvLerp(S.x, 0, t),
+      y = mvLerp(S.y + lift, 0, t),
+      sc = mvLerp(S.s, 1, t);
+    c.style.transform = `translate(${x}px,${y}px) scale(${sc})`;
+    c.style.opacity = k ? String(Math.min(1, 0.25 + p * 2)) : "1";
+  });
+}
+function mvPullEnd(go) {
+  if (!MVP.on) return;
+  MVP.on = false;
+  const el = $("mvBg"),
+    H = mvFront(),
+    cards = MVP.cards;
+  if (go) {
     el.classList.add("show");
-    setTimeout(() => {
-      if (!el.hidden)
-        [H.c, ...H.side].forEach((c) => {
-          c.style.visibility = "hidden";
-        });
-    }, 170);
-    const fl = (r, sc = 1) =>
-      `translate(${MV.home.left - r.left}px,${MV.home.top - r.top}px) scale(${(MV.home.width / r.width) * sc},${(MV.home.height / r.height) * sc})`;
+    el.style.removeProperty("--mvp");
+    SND.play("whoosh");
+    try {
+      navigator.vibrate && navigator.vibrate(8);
+    } catch (_) {}
+    let n = 0;
+    try {
+      n = Number(localStorage.getItem("hb-mvhint")) || 0;
+      localStorage.setItem("hb-mvhint", String(n + 1));
+    } catch (_) {}
+    el.classList.toggle("hint", n < 3);
     cards.forEach((c, k) => {
-      const r = c.getBoundingClientRect();
+      const from = c.style.transform;
       c.style.opacity = "";
-      c.style.transformOrigin = "0 0";
-      c.style.zIndex = String(20 - k);
-      const end = (a) => {
-        a.onfinish = () => {
-          c.style.transformOrigin = "";
-          c.style.zIndex = "";
-        };
-      };
-      if (k === 0) {
-        end(
-          c.animate(
-            [
-              {
-                transform: fl(r),
-              },
-              {
-                transform: "none",
-              },
-            ],
-            {
-              duration: 380,
-              easing: "cubic-bezier(.2,.9,.3,1)",
-            }
-          )
-        );
-        return;
-      }
-      // hinter der ersten Karte warten, dann austeilen
-      const up = `translate(${first.left - r.left + 6}px,${first.top - r.top + k * 4}px) scale(${(first.width - 12) / r.width},${Math.min(1, (first.height - 8) / r.height)})`,
-        d = 380 + (k - 1) * 105,
-        tot = d + 420;
-      const w = (k % 2 ? -1 : 1) * 2.2;
-      c.animate(
+      c.style.transform = "";
+      const a = c.animate(
         [
-          {
-            transform: fl(r, 0.94),
-            offset: 0,
-          },
-          {
-            transform: up,
-            offset: d / tot,
-            easing: "cubic-bezier(.3,1.35,.5,1)",
-          },
-          {
-            transform: `rotate(${w}deg)`,
-            offset: (d + 260) / tot,
-          },
-          {
-            transform: `rotate(${-w * 0.4}deg)`,
-            offset: (d + 350) / tot,
-          },
-          {
-            transform: "none",
-            offset: 1,
-          },
+          { transform: from, opacity: k ? Math.min(1, 0.25 + MVP.p * 2) : 1 },
+          { transform: "none", opacity: 1 },
         ],
         {
-          duration: tot,
-          easing: "cubic-bezier(.2,.9,.3,1)",
+          duration: 520,
+          delay: k * 35,
+          easing: "cubic-bezier(.2,1.25,.35,1)",
+          fill: "backwards",
         }
       );
-      end(c.getAnimations()[0]);
-      setTimeout(() => {
-        if (!el.hidden) SND.play("tick");
-      }, d + 180);
+      a.onfinish = () => {
+        c.style.transition = c.style.transformOrigin = c.style.zIndex = "";
+      };
+      if (k) setTimeout(() => !el.hidden && SND.play("tick"), 140 + k * 35);
     });
-    H.side.forEach((c) => c.getAnimations().forEach((a) => a.cancel()));
-  }, 200);
+    setTimeout(() => {
+      el.classList.remove("pull");
+      if (H && !el.hidden)
+        [H.c, ...H.side].forEach((c) => {
+          c.getAnimations().forEach((a) => a.cancel());
+          c.style.visibility = "hidden";
+        });
+    }, 160);
+    return;
+  }
+  /* nicht weit genug gezogen: alles zurück auf den Stapel */
+  cards.forEach((c, k) => {
+    const S = MVP.start[k];
+    c.animate([{ transform: c.style.transform }, { transform: `translate(${S.x}px,${S.y}px) scale(${S.s})` }], {
+      duration: 220,
+      easing: "cubic-bezier(.3,0,.2,1)",
+      fill: "forwards",
+    });
+  });
+  el.style.setProperty("--mvp", "0");
+  if (H) [H.c, ...H.side].forEach((c) => c.getAnimations().forEach((a) => a.reverse()));
+  setTimeout(() => {
+    el.hidden = true;
+    el.classList.remove("pull");
+    el.style.removeProperty("--mvp");
+    document.body.classList.remove("locked");
+    if (H) [H.c, ...H.side].forEach((c) => c.getAnimations().forEach((a) => a.cancel()));
+    MV.home = null;
+  }, 230);
 }
 function mvGather(el, done) {
   const cards = [...el.querySelectorAll(".mvc")],
@@ -701,20 +714,25 @@ document.addEventListener("keydown", (e) => {
     }
   );
 })();
-/* Kartenstapel nach unten ziehen öffnet alle Konten */
+/* Kartenstapel nach unten ziehen: Konten fächern sich unter dem Finger auf */
 (function () {
   let y0 = null,
-    x0 = 0;
+    x0 = 0,
+    t0 = 0,
+    ly = 0,
+    pulling = false;
   document.addEventListener(
     "touchstart",
     (e) => {
       const s = e.target.closest("#astack");
-      if (!s || window.scrollY > 4 || !document.querySelector("[data-mvopen]")) {
+      pulling = false;
+      if (!s || e.touches.length !== 1 || window.scrollY > 4 || !document.querySelector("[data-mvopen]")) {
         y0 = null;
         return;
       }
-      y0 = e.touches[0].clientY;
+      y0 = ly = e.touches[0].clientY;
       x0 = e.touches[0].clientX;
+      t0 = performance.now();
     },
     {
       passive: true,
@@ -724,19 +742,48 @@ document.addEventListener("keydown", (e) => {
     "touchmove",
     (e) => {
       if (y0 == null) return;
-      const dy = e.touches[0].clientY - y0,
+      const y = e.touches[0].clientY,
+        dy = y - y0,
         dx = Math.abs(e.touches[0].clientX - x0);
-      if (dx > dy) {
-        y0 = null;
-        return;
+      ly = y;
+      if (!pulling) {
+        if (dy < 10 && dx < 10) return;
+        if (dx > dy || dy <= 0) {
+          y0 = null;
+          return;
+        }
+        if (!mvFxOk()) {
+          if (dy > 70) {
+            y0 = null;
+            mvOpen();
+          }
+          return;
+        }
+        pulling = mvPullStart();
+        if (!pulling) {
+          y0 = null;
+          return;
+        }
+        y0 = y - dy;
       }
-      if (dy > 70) {
-        y0 = null;
-        mvOpen();
-      }
+      if (e.cancelable) e.preventDefault();
+      mvPullMove(dy);
     },
     {
-      passive: true,
+      passive: false,
     }
   );
+  const end = () => {
+    if (!pulling) {
+      y0 = null;
+      return;
+    }
+    const dy = ly - y0,
+      v = dy / Math.max(1, performance.now() - t0);
+    pulling = false;
+    y0 = null;
+    mvPullEnd(dy > 70 || (v > 0.5 && dy > 30));
+  };
+  document.addEventListener("touchend", end);
+  document.addEventListener("touchcancel", end);
 })();
