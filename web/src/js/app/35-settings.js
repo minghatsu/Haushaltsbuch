@@ -495,6 +495,8 @@ function quickToggle(k, btn) {
   try {
     const sl = $("sLogos");
     if (sl) sl.checked = store.settings.logos === true;
+    const mf = $("sMoneyFx");
+    if (mf) mf.checked = store.settings.moneyFx !== false;
   } catch (_) {}
 }
 document.addEventListener("click", (e) => {
@@ -1339,6 +1341,7 @@ function renderMore() {
   if (document.activeElement !== $("sKinder")) $("sKinder").value = String(st.kinder || 0);
   if (document.activeElement !== $("sLand")) $("sLand").value = st.land || "NW";
   $("sLogos").checked = st.logos === true;
+  $("sMoneyFx").checked = st.moneyFx !== false;
   $("sKirche").checked = !!st.kirche;
   $("sGew").checked = !!st.gewerbe;
   $("hebeField").hidden = !st.gewerbe;

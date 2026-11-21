@@ -25209,6 +25209,25 @@ html[data-theme="dark"] .sndic {
 body.mvdragging {
   cursor: grabbing;
 }
+/* Umbuchen mit Geld: Scheine und Münzen über allem, ohne Klicks abzufangen */
+.mvfx {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  overflow: hidden;
+  pointer-events: none;
+}
+.mvfx img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: auto;
+  opacity: 0;
+  will-change: transform;
+  filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.28));
+  -webkit-user-select: none;
+  user-select: none;
+}
 .mvsheet {
   position: fixed;
   left: 0;
@@ -25622,6 +25641,7 @@ html.pc .pctpane .ayblk {
       <div class="pc-sect">Startseite <span>Antippen blendet aus oder ein · gedrückt halten und ziehen zum Sortieren · Konten bleiben immer oben</span></div>
       <div id="homeEd"></div>
       <div class="card"><div class="switch"><label for="sLogos"><b>Fehlende Händler-Logos online laden</b><br><span class="small muted">Bekannte Läden haben ihr Logo schon eingebaut. Für alle anderen fragt die App bei Google und DuckDuckGo – die erfahren dabei, welche Läden du nutzt. Aus: farbiger Anfangsbuchstabe.</span></label><input type="checkbox" id="sLogos"></div></div>
+      <div class="card"><div class="switch"><label for="sMoneyFx"><b>Geld-Animation beim Umbuchen</b><br><span class="small muted">Ziehst du Geld von einem Konto auf ein anderes, fliegen Scheine mit und verlieren unterwegs ein paar Münzen. Aus: Es wird wie bisher die Karte gezogen.</span></label><input type="checkbox" id="sMoneyFx"></div></div>
     </div>
     <div class="sp pc" data-sp="notify" hidden><div id="notifyEd" class="nfed"></div></div>
     <div class="card sp" data-sp="sicherheit" hidden>
@@ -28346,6 +28366,9 @@ const I18N_K = [
   "An diesem Tag nichts gebucht",
   "Tipp auf einen anderen Tag oder noch einmal auf den Tag, um alle zu sehen.",
   "Backup wird heruntergeladen",
+  "Geld-Animation beim Umbuchen",
+  "Ziehst du Geld von einem Konto auf ein anderes, fliegen Scheine mit und verlieren unterwegs ein paar Münzen. Aus: Es wird wie bisher die Karte gezogen.",
+  "Umbuchen: Beim Ziehen fliegen jetzt Geldscheine von Konto zu Konto und verlieren unterwegs ein paar Münzen – mit leisen Tönen. Abschalten kannst du das in den Einstellungen unter „Startseite“.",
 ];
 const I18N_T = {
   en: [
@@ -30933,6 +30956,9 @@ const I18N_T = {
     "Nothing booked on this day",
     "Tap another day, or tap this day again to see everything.",
     "Backup is downloading",
+    "Money animation when moving money",
+    "When you drag money from one account onto another, banknotes fly along and lose a few coins on the way. Off: the card itself is dragged, as before.",
+    "Moving money: banknotes now fly from account to account as you drag and lose a few coins on the way – with soft sounds. You can switch this off in the settings under “Home page”.",
   ],
   tr: [
     "{n} {m}: {n} € harcandı",
@@ -33519,6 +33545,9 @@ const I18N_T = {
     "Bu gün kayıt yok",
     "Başka bir güne dokun ya da hepsini görmek için bu güne tekrar dokun.",
     "Yedek indiriliyor",
+    "Para aktarırken para animasyonu",
+    "Parayı bir hesaptan diğerine sürüklediğinde banknotlar da uçar ve yolda birkaç madeni para düşürür. Kapalı: eskisi gibi kartın kendisi sürüklenir.",
+    "Aktarma: Sürüklerken artık banknotlar hesaptan hesaba uçuyor ve yolda birkaç madeni para düşürüyor – hafif seslerle. Bunu ayarlarda “Ana sayfa” altında kapatabilirsin.",
   ],
   ru: [
     "{n} {m}: потрачено {n} €",
@@ -36105,6 +36134,9 @@ const I18N_T = {
     "В этот день ничего нет",
     "Нажми на другой день или ещё раз на этот, чтобы увидеть всё.",
     "Резервная копия загружается",
+    "Анимация денег при переводе",
+    "Когда ты перетаскиваешь деньги с одного счёта на другой, купюры летят следом и теряют по пути несколько монет. Выкл.: как раньше, перетаскивается сама карточка.",
+    "Перевод: при перетаскивании купюры теперь летят со счёта на счёт и теряют по пути несколько монет – с тихими звуками. Отключить это можно в настройках в разделе «Главная».",
   ],
   uk: [
     "{n} {m}: витрачено {n} €",
@@ -38691,6 +38723,9 @@ const I18N_T = {
     "Цього дня нічого немає",
     "Натисни на інший день або ще раз на цей, щоб побачити все.",
     "Резервна копія завантажується",
+    "Анімація грошей під час переказу",
+    "Коли ти перетягуєш гроші з одного рахунку на інший, купюри летять слідом і гублять дорогою кілька монет. Вимк.: як раніше, перетягується сама картка.",
+    "Переказ: під час перетягування купюри тепер летять з рахунку на рахунок і гублять дорогою кілька монет – із тихими звуками. Вимкнути це можна в налаштуваннях у розділі «Головна».",
   ],
   pl: [
     "{n} {m}: wydano {n} €",
@@ -41277,6 +41312,9 @@ const I18N_T = {
     "Tego dnia nic nie zapisano",
     "Stuknij inny dzień albo jeszcze raz ten, aby zobaczyć wszystko.",
     "Kopia zapasowa jest pobierana",
+    "Animacja pieniędzy przy przelewie",
+    "Gdy przeciągasz pieniądze z jednego konta na drugie, banknoty lecą razem z palcem i gubią po drodze kilka monet. Wył.: jak dotąd przeciągana jest sama karta.",
+    "Przelew: przy przeciąganiu banknoty lecą teraz z konta na konto i gubią po drodze kilka monet – z cichymi dźwiękami. Wyłączysz to w ustawieniach w sekcji „Strona główna”.",
   ],
   ar: [
     "{n} {m}: تم إنفاق {n} €",
@@ -43863,6 +43901,9 @@ const I18N_T = {
     "لا شيء مسجّل في هذا اليوم",
     "اضغط على يوم آخر، أو على هذا اليوم مرة أخرى لرؤية الكل.",
     "يجري تنزيل النسخة الاحتياطية",
+    "حركة النقود عند التحويل",
+    "عندما تسحب المال من حساب إلى آخر تطير الأوراق النقدية معك وتسقط منها بعض العملات في الطريق. إيقاف: تُسحب البطاقة نفسها كما في السابق.",
+    "التحويل: عند السحب تطير الأوراق النقدية الآن من حساب إلى آخر وتسقط منها بعض العملات في الطريق – مع أصوات هادئة. يمكنك إيقاف ذلك من الإعدادات ضمن «الصفحة الرئيسية».",
   ],
   ro: [
     "{n} {m}: {n} € cheltuiți",
@@ -46449,6 +46490,9 @@ const I18N_T = {
     "Nimic înregistrat în această zi",
     "Atinge altă zi sau din nou această zi ca să vezi tot.",
     "Copia de rezervă se descarcă",
+    "Animație cu bani la mutarea banilor",
+    "Când tragi bani dintr-un cont în altul, bancnotele zboară odată cu degetul și pierd câteva monede pe drum. Oprit: se trage cardul, ca până acum.",
+    "Mutarea banilor: când tragi, bancnotele zboară acum din cont în cont și pierd câteva monede pe drum – cu sunete discrete. Poți opri asta în setări, la „Pagina principală”.",
   ],
 };
 const MONTHS = [
@@ -48440,14 +48484,15 @@ document.addEventListener("keydown", (e) => {
 });
 /* Ziehen: kurz gedrückt halten, dann auf eine andere Karte ziehen */
 (function () {
-  let st = null;
+  let st = null,
+    busy = 0;
   const end = () => {
     if (!st) return;
     clearTimeout(st.t);
     const d = st;
     st = null;
     if (!d.on) return;
-    d.ghost.remove();
+    if (d.ghost) d.ghost.remove();
     d.src.classList.remove("src");
     document.body.classList.remove("mvdragging");
     const tg = document.querySelector("#mvBg .mvc.tgt");
@@ -48455,13 +48500,26 @@ document.addEventListener("keydown", (e) => {
       const to = +tg.dataset.mvc;
       if (!mvHas(mvList().find((x) => x.i === to))) {
         tg.classList.remove("tgt");
+        MVFX.drop(null);
         toast(uiText("mv_nostand_t"));
         return;
       }
       d.src.classList.add("src");
-      SND.play("pop");
-      mvSheet(d.from, to);
-    } else SND.play("whooshin");
+      if (d.fx) {
+        /* erst landen die Scheine, dann kommt das Betrag-Fenster */
+        MVFX.drop(tg);
+        busy = setTimeout(() => {
+          busy = 0;
+          mvSheet(d.from, to);
+        }, 380);
+      } else {
+        SND.play("pop");
+        mvSheet(d.from, to);
+      }
+    } else {
+      MVFX.drop(null);
+      SND.play("whooshin");
+    }
     setTimeout(() => {
       MV.moved = false;
     }, 50);
@@ -48470,7 +48528,7 @@ document.addEventListener("keydown", (e) => {
     "pointerdown",
     (e) => {
       const c = e.target.closest("#mvBg .mvc");
-      if (!c || (e.pointerType === "mouse" && e.button !== 0) || !$("mvSheet").hidden) return;
+      if (!c || busy || (e.pointerType === "mouse" && e.button !== 0) || !$("mvSheet").hidden) return;
       if (!mvHas(mvList().find((x) => x.i === +c.dataset.mvc))) return;
       st = {
         src: c,
@@ -48483,18 +48541,22 @@ document.addEventListener("keydown", (e) => {
       st.t = setTimeout(
         () => {
           if (!st) return;
-          const r = c.getBoundingClientRect();
-          const g = c.cloneNode(true);
-          g.classList.add("mvghost");
-          g.classList.remove("in");
-          g.style.width = r.width + "px";
-          g.style.height = r.height + "px";
-          g.style.left = r.left + "px";
-          g.style.top = r.top + "px";
-          document.body.appendChild(g);
-          st.ghost = g;
-          st.dx = st.x0 - r.left;
-          st.dy = st.y0 - r.top;
+          st.fx = MVFX.on();
+          if (st.fx) MVFX.start(c, "#mvBg .mvc", st.x0, st.y0, e.pointerType !== "mouse");
+          else {
+            const r = c.getBoundingClientRect();
+            const g = c.cloneNode(true);
+            g.classList.add("mvghost");
+            g.classList.remove("in");
+            g.style.width = r.width + "px";
+            g.style.height = r.height + "px";
+            g.style.left = r.left + "px";
+            g.style.top = r.top + "px";
+            document.body.appendChild(g);
+            st.ghost = g;
+            st.dx = st.x0 - r.left;
+            st.dy = st.y0 - r.top;
+          }
           st.on = true;
           MV.moved = true;
           c.classList.add("src");
@@ -48502,7 +48564,7 @@ document.addEventListener("keydown", (e) => {
           try {
             navigator.vibrate && navigator.vibrate(12);
           } catch (_) {}
-          SND.play("detent");
+          if (!st.fx) SND.play("detent");
         },
         e.pointerType === "mouse" ? 120 : 260
       );
@@ -48522,11 +48584,13 @@ document.addEventListener("keydown", (e) => {
       }
       e.preventDefault();
       const g = st.ghost;
-      g.style.left = e.clientX - st.dx + "px";
-      g.style.top = e.clientY - st.dy + "px";
-      g.style.visibility = "hidden";
+      if (g) {
+        g.style.left = e.clientX - st.dx + "px";
+        g.style.top = e.clientY - st.dy + "px";
+        g.style.visibility = "hidden";
+      } else MVFX.move(e.clientX, e.clientY);
       const under = document.elementFromPoint(e.clientX, e.clientY);
-      g.style.visibility = "";
+      if (g) g.style.visibility = "";
       const t = under && under.closest("#mvBg .mvc");
       document.querySelectorAll("#mvBg .mvc.tgt").forEach((x) => {
         if (x !== t) x.classList.remove("tgt");
@@ -48600,6 +48664,314 @@ document.addEventListener("keydown", (e) => {
   );
 })();
 
+/* Umbuchen mit Geld: Beim Ziehen fliegen Scheine mit, unterwegs fallen ein paar Münzen heraus.
+   Handy/Tablet (05-account-stack.js) und PC (pc/12-drag-transfer.js) nutzen dasselbe Stück. */
+const MVFX_IMG = {
+  bill: "data:image/webp;base64,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",
+  coin: "data:image/webp;base64,UklGRrAEAABXRUJQVlA4WAoAAAAQAAAALwAAHgAAQUxQSHoBAAABkGvb1rE9+32er4qdyk4qO61tu7LV2bbt5BbsG7BZ2c5zztnF5ydqI2ICkN35BADKNeo4Zu6yjTt2bFo+b2ynxuUBIEk55O08gGr9Vp15+Jk5f3l0ds3AGgC8yy1xQLXJpz8x3VRVRERVjelfzk2rAbgkBw+02PuWpAZRY86mIkLy/YHWgM/iUW1vIEWMBTYRUg/Vgs/gMPQFGYxFNTG+Hg0HwGMJGRihkCvhE4/FFGWUGrgKHt0ZjJFaYH+UuG7KaNXule5FY8TGwSsoMYlt2hEZD/9/7YztyCqLyzb3pcWkHFbylmk8ag/Log+DxWKBQ+CxksHisMAN8InHKlJiEHI9fAI4jHtLEyuOifHDeLgEADzqHCMpYoUyFZKnGsAhswfaHflIUkQtH1MRkp9PdAA8sjsH1J51+TvTTVUyqhrTf1ydUxdwDjk7D6DOsM1Xnv1gzj+fX9s6sj4A75G3SyUAUKVJrwnz1+0+fGTP+gUTezepivSUQ3ZWUDggEAMAAJAQAJ0BKjAAHwA+QRqKQ6KhoRqkACgEBLYATplCPa/Vfxg5Z/dRsM6VGX/Fu8A8wH7EeuL6EPOZ6gDnxvZE/bb0osBezp6Gpgn7ubgnIH+Y/KPmM0mUzD/l+cv549gn9Rf9t+a3wgdCSSLk9/t0CD1OfAvcvfY9Go3Cmib78/5PzOQy4Ei2R8S/C51yAAD9IMKsj90qIOb08TQOFYd/4xI9qCzUj/+DRf/EmMQ1vw+5ZtxwRT29IDiubhsGUSMaGJXPdH4ppHOULx8ZDb4KaXbhiYr6a9dZjUen+2oDkUtijjFQRru4J85ezUMyESbo//3ebebCc8zNpOOly9iY/4YV9clz+r/iufwewjh89N9vJwZT7//vk/t/9dKZRMTb/Exxw7S/1Qg3VNMqqpe/EfXtnG6bvK+QRCOLOY7Pm9UJZ+mbJ1/8F9x0m5VFr20megTwK7GQ7+/R4wcwALxmP29/OfrsNW1hRd9xjEq5cQIQd8CPy3/1Hvwthjj8w8OBur1y6n5vkX+q8cJ7fSo+Onk9ft7or9stTmWzs6Wk1RjSPU6BjR1XrAUFfYR6r5edUUWPnMBdsy7SwmTJxiG4O6ZdvJb4wNx4m3bmAqs/8R5EExPPsXiT6o3DHX6Fzpv+JVaderKIcDBRsoZyp8FVwfUuXJng7g4w3GEqxSoBbJqqCh3lMHODF4O9Laof+UoXF+B8rX588VndFYrlj95Sw0xQzt8/4xAruAFZlaMoEcLIZWUQDjgKpPYbLbmNuFMXinYd8IUFrVYFB1tW8ax5A18bAIhTsqZtWhlxkyqIWr/lkrVNTmOzSH9H/4FUlR/rcQIfc55pHb5C68Rg5gCNnpYvaULEhR2lrVOmrrXl23uP/tpsZRkcjnMb8cdmfuKJsMcfs47aSmIRKQuuw4Vv8ShFMCUy0mbQAwIMVKCe9Zmwl/yq5Xnv7ezSJeQVNHrT4QNtxTAirUUmQu5RmMlbkTHRJzf2GpzCYYNH0k3P0f3JTUBgvLNG1kim5VAHVzazcjJWYi1taSBWTX4tniT5AAA=",
+};
+const MVFX = {
+  d: null,
+  on() {
+    return store.settings.moneyFx !== false && !reducedMotion();
+  },
+  /* src: gegriffene Karte · sel: alle Karten, die mitgehen · touch: Scheine über dem Finger zeigen */
+  start(src, sel, x, y, touch) {
+    this.stop();
+    const layer = document.createElement("div");
+    layer.className = "mvfx";
+    layer.setAttribute("aria-hidden", "true");
+    const amt = src.querySelector(".mvv, b") || src,
+      ar = amt.getBoundingClientRect(),
+      o = { x: ar.left + ar.width / 2, y: ar.top + ar.height / 2 },
+      lift = touch ? 48 : 20;
+    const bills = [46, 46, 50].map((w, i) => {
+      const el = this.img(layer, MVFX_IMG.bill, w);
+      return { el, w, h: (w * 102) / 132, x: x + this.OFF[i][0], y: y + this.OFF[i][1] - lift, cx: o.x, cy: o.y };
+    });
+    document.body.appendChild(layer);
+    const now = performance.now();
+    this.d = {
+      layer,
+      src,
+      sel,
+      o,
+      lift,
+      bills,
+      coins: [],
+      tiles: new Map(),
+      p: { x, y },
+      l: { x, y },
+      vx: 0,
+      vy: 0,
+      dist: 0,
+      next: 70,
+      n: 0,
+      act: 0,
+      end: null,
+      t0: now,
+      last: now,
+    };
+    SND.play("bills");
+    this.d.raf = requestAnimationFrame((t) => this.frame(t));
+  },
+  move(x, y) {
+    if (this.d) this.d.p = { x, y };
+  },
+  /* tgt: Karte, auf der losgelassen wurde – ohne Ziel fliegen die Scheine zurück */
+  drop(tgt) {
+    const d = this.d;
+    if (!d || d.end) return;
+    const t = (performance.now() - d.t0) / 1000;
+    let z = d.o;
+    if (tgt) {
+      const r = tgt.getBoundingClientRect();
+      z = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      SND.play("cash");
+    }
+    d.end = { t, z, tgt: tgt || null };
+    d.bills.forEach((b) => {
+      b.fx = b.cx;
+      b.fy = b.cy;
+    });
+  },
+  stop() {
+    const d = this.d;
+    if (!d) return;
+    cancelAnimationFrame(d.raf);
+    d.tiles.forEach((s, el) => {
+      el.style.translate = el.style.rotate = el.style.scale = "";
+    });
+    d.layer.remove();
+    this.d = null;
+  },
+  OFF: [
+    [-11, 9],
+    [10, 6],
+    [0, -11],
+  ],
+  ROT: [-24, 16, -6],
+  LAG: [9, 12, 17],
+  img(layer, src, w) {
+    const el = new Image();
+    el.src = src;
+    el.width = w;
+    el.alt = "";
+    el.draggable = false;
+    layer.appendChild(el);
+    return el;
+  },
+  /* Karten in Ruhelage (ohne die eigene Verschiebung), damit Münzen daran abprallen können */
+  rects(d) {
+    const out = [];
+    document.querySelectorAll(d.sel).forEach((el) => {
+      let s = d.tiles.get(el);
+      if (!s) {
+        s = { mx: 0, my: 0, hits: [], cr: Math.min(parseFloat(getComputedStyle(el).borderRadius) || 0, 26) };
+        d.tiles.set(el, s);
+      }
+      const r = el.getBoundingClientRect();
+      s.x0 = r.left - s.mx;
+      s.y0 = r.top - s.my;
+      s.x1 = r.right - s.mx;
+      s.y1 = r.bottom - s.my;
+      s.el = el;
+      out.push(s);
+    });
+    return out;
+  },
+  coin(d, t) {
+    const w = 14 + (d.n % 4),
+      b = d.bills[2],
+      dir = d.n % 2 ? 1 : -1;
+    d.coins.push({
+      el: this.img(d.layer, MVFX_IMG.coin, w),
+      w,
+      r: w * 0.42,
+      x: b.cx,
+      y: b.cy + 4,
+      vx: dir * (30 + Math.random() * 50) + d.vx * 0.15,
+      vy: -150,
+      t,
+      n: d.n,
+      nb: 0,
+      maxB: 1 + (d.n % 2),
+      free: null,
+    });
+    d.n++;
+    d.next = 85 + Math.random() * 70;
+    d.dist = 0;
+  },
+  /* Münze: freier Fall, höchstens zwei Abpraller an Karten, dann fällt sie aus dem Bild */
+  fall(c, tiles, dt, t) {
+    const sub = Math.max(1, Math.ceil(dt * 480)),
+      h = dt / sub;
+    if (!c.free) c.free = new Set();
+    for (let i = 0; i < sub; i++) {
+      c.vy += 1150 * h;
+      c.x += c.vx * h;
+      c.y += c.vy * h;
+      if (c.nb >= c.maxB) continue;
+      for (const s of tiles) {
+        const cr = Math.min(s.cr, (s.y1 - s.y0) / 2),
+          qx = Math.max(s.x0 + cr, Math.min(c.x, s.x1 - cr)),
+          qy = Math.max(s.y0 + cr, Math.min(c.y, s.y1 - cr)),
+          R = c.r + cr;
+        let dx = c.x - qx,
+          dy = c.y - qy,
+          ds = Math.hypot(dx, dy);
+        /* Karten, in denen die Münze startet, zählen erst, wenn sie einmal draußen war */
+        if (!c.free.has(s)) {
+          if (ds > R + 1) c.free.add(s);
+          continue;
+        }
+        if (ds >= R || c.nb >= c.maxB) continue;
+        if (ds < 1e-6) {
+          dx = 0;
+          dy = -1;
+          ds = 1;
+        }
+        const nx = dx / ds,
+          ny = dy / ds;
+        let vn = c.vx * nx + c.vy * ny,
+          vt = -c.vx * ny + c.vy * nx;
+        if (vn >= 0) continue;
+        c.x = qx + nx * R;
+        c.y = qy + ny * R;
+        s.hits.push({ t, s: Math.min(1, -vn / 420) });
+        c.nb++;
+        SND.play("coin");
+        vn = Math.max(-vn * 0.55, 140);
+        vt = vt * 0.9 + Math.sign(vt || c.vx || 1) * 40;
+        c.vx = vn * nx - vt * ny;
+        c.vy = vn * ny + vt * nx;
+      }
+    }
+  },
+  frame(now) {
+    const d = this.d;
+    if (!d) return;
+    const cl = (v) => Math.max(0, Math.min(1, v)),
+      eo = (v) => 1 - Math.pow(1 - cl(v), 3),
+      eio = (v) => ((v = cl(v)) < 0.5 ? 4 * v * v * v : 1 - Math.pow(-2 * v + 2, 3) / 2),
+      mix = (a, b, k) => a + (b - a) * k,
+      dt = Math.min(0.034, Math.max(0.001, (now - d.last) / 1000)),
+      t = (now - d.t0) / 1000,
+      e = d.end;
+    d.last = now;
+    /* Leitpunkt läuft dem Finger weich hinterher */
+    const k = 1 - Math.exp(-dt * 18),
+      lx = d.l.x,
+      ly = d.l.y;
+    d.l.x += (d.p.x - lx) * k;
+    d.l.y += (d.p.y - ly) * k;
+    d.vx += ((d.l.x - lx) / dt - d.vx) * 0.25;
+    d.vy += ((d.l.y - ly) / dt - d.vy) * 0.25;
+    const mv = e ? 0 : cl(Math.hypot(d.vx, d.vy) / 520);
+    /* Scheine */
+    d.bills.forEach((b, i) => {
+      if (!e) {
+        const f = 1 - Math.exp(-dt * this.LAG[i]);
+        b.x += (d.l.x + this.OFF[i][0] - b.x) * f;
+        b.y += (d.l.y + this.OFF[i][1] - d.lift - b.y) * f;
+      }
+      const a = t - (2 - i) * 0.08,
+        em = eio(a / 0.38),
+        fl = Math.sin(t * 9 + i * 2.1) * 9 * (0.4 + mv) + Math.sin(t * 5.3 + i) * 4,
+        lean = Math.max(-28, Math.min(28, d.vx * 0.035));
+      let x = mix(d.o.x, b.x, em),
+        y = mix(d.o.y, b.y, em) - Math.sin(em * Math.PI) * 9,
+        sc = mix(0.28, 1, em),
+        op = cl(a / 0.12);
+      b.cx = x;
+      b.cy = y;
+      if (e) {
+        const dv = (t - e.t - (e.tgt ? i * 0.12 : 0)) / 0.24,
+          dive = cl(dv);
+        x = mix(b.fx, e.z.x, eio(dive));
+        y = mix(b.fy, e.z.y, eio(dive)) - (dv > 0 && dv < 1 ? Math.sin(dive * Math.PI) * 14 : 0);
+        sc *= 1 - 0.72 * eo(dive);
+        op = dv >= 1 ? 0 : op * (1 - cl((dive - 0.7) / 0.3));
+      }
+      b.el.style.opacity = op;
+      b.el.style.transform = `translate(${x - b.w / 2}px,${y - b.h / 2}px) rotate(${(this.ROT[i] + lean + fl) * em}deg) scale(${sc * (1 - 0.22 * mv * (0.5 + 0.5 * Math.sin(t * 11 + i * 1.7)))},${sc})`;
+    });
+    /* Münzen */
+    const tiles = this.rects(d);
+    if (!e && t > 0.5) {
+      d.dist += Math.hypot(d.l.x - lx, d.l.y - ly);
+      if (d.dist > d.next && d.coins.length < 7) this.coin(d, t);
+    }
+    d.coins = d.coins.filter((c) => {
+      this.fall(c, tiles, dt, t);
+      if (c.y > innerHeight + 40) {
+        c.el.remove();
+        return false;
+      }
+      const ph = (t - c.t) * 13 + c.n * 1.3;
+      c.el.style.opacity = 1;
+      c.el.style.transform = `translate(${c.x - c.w / 2}px,${c.y - c.w * 0.32}px) rotate(${Math.sin(ph * 0.6) * 22}deg) scale(1,${0.45 + 0.55 * Math.abs(Math.cos(ph))})`;
+      return true;
+    });
+    /* Karten gehen mit dem Geld mit, kippen leicht und zucken, wenn eine Münze sie trifft */
+    d.act += ((e ? 0 : cl((t - 0.2) / 0.3)) - d.act) * (1 - Math.exp(-dt * 9));
+    tiles.forEach((s) => {
+      const cx = (s.x0 + s.x1) / 2,
+        cy = (s.y0 + s.y1) / 2,
+        wd = s.x1 - s.x0,
+        dx = d.l.x - cx,
+        dy = d.l.y - cy,
+        ds = Math.hypot(dx, dy),
+        sig = Math.max(170, Math.min(wd, 330)),
+        w = d.act * Math.exp((-ds * ds) / (sig * sig));
+      let mx = (dx / (ds + 60)) * 10 * w,
+        my = (dy / (ds + 60)) * 10 * w,
+        sx = 1,
+        sy = 1;
+      s.hits = s.hits.filter((h) => t - h.t < 0.28);
+      s.hits.forEach((h) => {
+        const a = (t - h.t) / 0.28;
+        my += Math.sin(a * Math.PI) * (1 - a) * h.s * 4;
+      });
+      if (e && e.tgt) {
+        if (s.el === e.tgt)
+          [0, 0.12, 0.24].forEach((dl) => {
+            const a = (t - e.t - dl - 0.16) / 0.28;
+            if (a > 0 && a < 1) {
+              const bump = Math.sin(a * Math.PI) * 0.06 * (1 - a * 0.3);
+              sx += bump;
+              sy -= bump * 0.6;
+            }
+          });
+        else {
+          const rx = cx - e.z.x,
+            ry = cy - e.z.y,
+            rd = Math.hypot(rx, ry) || 1,
+            a = (t - e.t - 0.22 - rd / 420) / 0.5;
+          if (a > 0 && a < 1) {
+            const wv = Math.sin(a * Math.PI * 2) * (1 - a) * 7;
+            mx += (rx / rd) * wv;
+            my += (ry / rd) * wv;
+          }
+        }
+      }
+      s.mx = mx;
+      s.my = my;
+      s.el.style.translate = `${mx.toFixed(2)}px ${my.toFixed(2)}px`;
+      s.el.style.rotate = `${((dx / (ds + 60)) * 2.4 * w * Math.min(1, 200 / wd)).toFixed(2)}deg`;
+      s.el.style.scale = sx === 1 ? "" : `${sx.toFixed(3)} ${sy.toFixed(3)}`;
+    });
+    if (e && t - e.t > 1.4 && !d.coins.length) this.stop();
+    else d.raf = requestAnimationFrame((n) => this.frame(n));
+  },
+};
+document.addEventListener("change", (e) => {
+  if (e.target.id !== "sMoneyFx") return;
+  store.settings.moneyFx = e.target.checked;
+  saveSettings();
+  if (e.target.checked) SND.play("cash");
+});
+
 /* ===== Töne: leise, kurze Klänge nur an wenigen Stellen (WebAudio, ohne Dateien) ===== */
 /* Pegel je Klang, gemessen und angeglichen (ziel: −27 bis −38 LUFS, je nach Wichtigkeit) */
 const SND_G = {
@@ -48626,6 +48998,9 @@ const SND_G = {
     fanfare: 2.51,
     warn: 2.64,
     err: 6.32,
+    bills: 12,
+    coin: 4,
+    cash: 3,
   },
   glas: {
     save: 3.29,
@@ -48650,6 +49025,9 @@ const SND_G = {
     fanfare: 1.9,
     warn: 2.05,
     err: 5.65,
+    bills: 12,
+    coin: 4,
+    cash: 2,
   },
   holz: {
     save: 9.89,
@@ -48674,6 +49052,9 @@ const SND_G = {
     fanfare: 5.69,
     warn: 4.87,
     err: 5.47,
+    bills: 12,
+    coin: 4,
+    cash: 7,
   },
 };
 const SND = {
@@ -48907,6 +49288,17 @@ const SND = {
     } else if (k === "warn") {
       N(0.75, 0, 0.22, 0.38);
       N(0.6, 0.14, 0.36, 0.36);
+    } else if (k === "bills") {
+      /* Umbuchen: Scheine rascheln, Münze klimpert, Geld landet */
+      this.hiss(t, 0.07, 2600, 4400, 0.07 * v, 1.6);
+      this.hiss(t + 0.08, 0.09, 3000, 5200, 0.05 * v, 1.6);
+    } else if (k === "coin") {
+      const m = 4 + Math.random() * 1.2;
+      this.note(r * m, t, 0.1, 0.11 * v, "glas");
+    } else if (k === "cash") {
+      this.hiss(t, 0.12, 3600, 1500, 0.06 * v, 1.4);
+      N(2, 0.05, 0.16, 0.3);
+      N(3, 0.13, 0.3, 0.26);
     } else if (k === "err") {
       this.note(r * 0.5, t, 0.1, 0.42 * v, "holz");
       this.note(r * 0.45, t + 0.11, 0.14, 0.4 * v, "holz");
@@ -50270,6 +50662,7 @@ LEGAL.lizenzen = [
   () => `<p>Finanz MAMI verwendet diese freien Bausteine – danke an alle, die sie bauen:</p>
 <h3>Caveat (Schrift der Unterschrift)</h3><p>© The Caveat Project Authors (Impallari Type). SIL Open Font License 1.1.</p><h3>Inter (Schrift)</h3><p>© The Inter Project Authors (Rasmus Andersson). SIL Open Font License 1.1 – die Schrift darf frei genutzt und weitergegeben werden, aber nicht allein verkauft werden.</p>
 <h3>Simple Icons (Laden-Logos)</h3><p>CC0 1.0 – gemeinfrei. Die Logos sind Marken der jeweiligen Unternehmen und dienen nur zur Erkennung; es besteht keine Verbindung zu diesen Unternehmen.</p>
+<h3>Geldscheine und Münzen (Umbuchen)</h3><p>Grafik von Freepik (Magnific), genutzt mit Namensnennung.</p>
 <h3>Tesseract.js (Texterkennung)</h3><p>© Tesseract.js-Autoren, Apache License 2.0.</p>
 <h3>jsQR (QR-Codes lesen)</h3><p>© Cosmo Wolfe, Apache License 2.0.</p>
 <h3>pdf.js (PDF lesen)</h3><p>© Mozilla Foundation, Apache License 2.0.</p>`,
@@ -50369,6 +50762,11 @@ document.addEventListener("click", (e) => {
 
 /* Einstellungen extra */
 const CHANGELOG = [
+  [
+    "0.45.1",
+    "21. November 2026",
+    ["Umbuchen: Beim Ziehen fliegen jetzt Geldscheine von Konto zu Konto und verlieren unterwegs ein paar Münzen – mit leisen Tönen. Abschalten kannst du das in den Einstellungen unter „Startseite“."],
+  ],
   [
     "0.45.0",
     "21. November 2026",
@@ -52638,6 +53036,17 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.45.1",
+    s: () => [
+      {
+        sel: IS_DESK ? "#pcHero .pcaccs:has(.mvd)" : "[data-mvopen]",
+        ic: "repeat",
+        t: uiText("nw_mfx_t"),
+        p: [uiText("nw_mfx_p")],
+      },
+    ],
+  },
   {
     v: "0.41.7",
     s: () =>
@@ -74280,6 +74689,8 @@ function quickToggle(k, btn) {
   try {
     const sl = $("sLogos");
     if (sl) sl.checked = store.settings.logos === true;
+    const mf = $("sMoneyFx");
+    if (mf) mf.checked = store.settings.moneyFx !== false;
   } catch (_) {}
 }
 document.addEventListener("click", (e) => {
@@ -75124,6 +75535,7 @@ function renderMore() {
   if (document.activeElement !== $("sKinder")) $("sKinder").value = String(st.kinder || 0);
   if (document.activeElement !== $("sLand")) $("sLand").value = st.land || "NW";
   $("sLogos").checked = st.logos === true;
+  $("sMoneyFx").checked = st.moneyFx !== false;
   $("sKirche").checked = !!st.kirche;
   $("sGew").checked = !!st.gewerbe;
   $("hebeField").hidden = !st.gewerbe;
@@ -80349,6 +80761,26 @@ const TEXTS = {
     "Ciche dźwięki przy zapisywaniu, odhaczaniu i przelewach. W ustawieniach w „Dźwięki” włączysz je lub wyłączysz i wybierzesz brzmienie oraz głośność.",
     "أصوات هادئة عند الحفظ والتأشير والتحويل. من «الأصوات» في الإعدادات تشغّلها أو توقفها وتختار النغمة ومستوى الصوت.",
     "Sunete discrete la salvare, bifare și mutarea banilor. În setări, la „Sunete”, le pornești sau oprești și alegi stilul și volumul.",
+  ],
+  nw_mfx_t: [
+    "Neu: Geld fliegt mit",
+    "New: money flies along",
+    "Yeni: Para da uçuyor",
+    "Новое: деньги летят следом",
+    "Нове: гроші летять слідом",
+    "Nowość: pieniądze lecą razem",
+    "جديد: النقود تطير معك",
+    "Nou: banii zboară cu tine",
+  ],
+  nw_mfx_p: [
+    "Beim Umbuchen ziehst du jetzt Geldscheine von einem Konto aufs andere – unterwegs fallen ein paar Münzen heraus. Wer es ruhiger mag, schaltet das in den Einstellungen unter „Startseite“ aus.",
+    "When moving money you now drag banknotes from one account onto another – a few coins drop out on the way. If you prefer it calmer, switch it off in the settings under “Home page”.",
+    "Para aktarırken artık banknotları bir hesaptan diğerine sürüklüyorsun – yolda birkaç madeni para düşüyor. Daha sakin olsun istersen ayarlarda “Ana sayfa” altında kapat.",
+    "При переводе ты теперь перетаскиваешь купюры с одного счёта на другой – по пути выпадает несколько монет. Если хочется поспокойнее, отключи это в настройках в разделе «Главная».",
+    "Під час переказу ти тепер перетягуєш купюри з одного рахунку на інший – дорогою випадає кілька монет. Якщо хочеться спокійніше, вимкни це в налаштуваннях у розділі «Головна».",
+    "Przy przelewie przeciągasz teraz banknoty z jednego konta na drugie – po drodze wypada kilka monet. Jeśli wolisz spokojniej, wyłącz to w ustawieniach w sekcji „Strona główna”.",
+    "عند التحويل تسحب الآن الأوراق النقدية من حساب إلى آخر – وتسقط بعض العملات في الطريق. إن أردتها أهدأ فأوقفها من الإعدادات ضمن «الصفحة الرئيسية».",
+    "Când muți bani, tragi acum bancnote dintr-un cont în altul – pe drum cad câteva monede. Dacă vrei mai liniștit, oprește asta în setări, la „Pagina principală”.",
   ],
   nw_inv_t: [
     "Neu: Freunde einladen",
