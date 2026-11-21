@@ -348,7 +348,7 @@ function mvUnstack() {
       [
         {
           transform: H.to(c),
-          opacity: 0.9,
+          opacity: 0,
         },
       ],
       {

@@ -1496,8 +1496,9 @@ main {
 .acard > * {
   transition: opacity 0.25s;
 }
+/* seitlich hervorschauende Karten: nur die Farbe, keine abgeschnittenen Beträge */
 .astack .acard.side > * {
-  opacity: 0.12 !important;
+  opacity: 0 !important;
 }
 .acard.alt {
   background: linear-gradient(135deg, #34413b, #1e2723);

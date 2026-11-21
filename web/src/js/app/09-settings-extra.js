@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.45.4",
+    "21. November 2026",
+    [
+      "Kartenstapel auf der Startseite: Die Karten, die links und rechts hinter dem Hauptkonto hervorschauen, zeigen nur noch ihre Farbe statt abgeschnittener Beträge. Nach dem Zuklappen gleiten sie sanft eingeblendet heraus.",
+    ],
+  ],
+  [
     "0.45.3",
     "21. November 2026",
     [

@@ -1499,8 +1499,9 @@ main {
 .acard > * {
   transition: opacity 0.25s;
 }
+/* seitlich hervorschauende Karten: nur die Farbe, keine abgeschnittenen Beträge */
 .astack .acard.side > * {
-  opacity: 0.12 !important;
+  opacity: 0 !important;
 }
 .acard.alt {
   background: linear-gradient(135deg, #34413b, #1e2723);
@@ -48295,7 +48296,7 @@ function mvUnstack() {
       [
         {
           transform: H.to(c),
-          opacity: 0.9,
+          opacity: 0,
         },
       ],
       {
@@ -50837,6 +50838,13 @@ document.addEventListener("click", (e) => {
 
 /* Einstellungen extra */
 const CHANGELOG = [
+  [
+    "0.45.4",
+    "21. November 2026",
+    [
+      "Kartenstapel auf der Startseite: Die Karten, die links und rechts hinter dem Hauptkonto hervorschauen, zeigen nur noch ihre Farbe statt abgeschnittener Beträge. Nach dem Zuklappen gleiten sie sanft eingeblendet heraus.",
+    ],
+  ],
   [
     "0.45.3",
     "21. November 2026",
