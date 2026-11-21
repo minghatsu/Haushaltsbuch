@@ -530,14 +530,29 @@ if (IS_PC){
     const k=rest.lastIndexOf("\n\n---\n"); if (k>=0){ const m=rest.slice(k+6).trim(); rest=rest.slice(0,k);
       const parts=m.replace(/^Finanz MAMI\s*/,"").split(" · "); meta={Version:parts[0]||"", Rolle:parts[1]||"", Gerät:parts[2]||"", Gruppe:parts[3]||""}; }
     rest=rest.trim(); return {pgs, body:rest, title:(rest.split("\n")[0]||"(ohne Text)").slice(0,140), meta}; }
+  function fbVis(){ const f=FB.flt||"all"; return FB.items.filter(x=>f==="all"||(f==="new"?!x.read:x.kind===f)); }
+  async function fbBulk(act){ const ids=[...FB.sel], L=FB.items.filter(x=>FB.sel.has(x.id)); if (!ids.length) return;
+    if (act==="none"){ FB.sel.clear(); FB.bulkArm=false; fbRender(); return; }
+    if (act==="read"||act==="unread"){ const want=act==="read"; for (const x of L){ if (!!x.read===want) continue; x.read=want; devReq("feedread","",want?{id:x.id}:{id:x.id, unread:1}).catch(()=>{}); } FB.sel.clear(); fbRender(); fbBtn(); toast(`${L.length} als ${want?"gelesen":"ungelesen"} markiert`); return; }
+    if (act==="copy"){ const fbTxt=x=>{ const [kl]=KIND[x.kind]||KIND.idee, d=new Date(x.ts*1000); return `### ${kl} vom ${d.toLocaleDateString("de-DE")} ${d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}\n${String(x.text||"").trim()}`; };
+      try{ await navigator.clipboard.writeText(`Feedback aus Finanz MAMI (${L.length}):\n\n`+L.map(fbTxt).join("\n\n")); toast(`${L.length} kopiert – einfach bei Claude einfügen`); }catch(_){ toast("Kopieren ging nicht"); } return; }
+    if (act==="del"){ if (!FB.bulkArm){ FB.bulkArm=true; fbRender(); clearTimeout(FB.bulkT); FB.bulkT=setTimeout(()=>{ FB.bulkArm=false; fbRender(); }, 4000); return; }
+      FB.bulkArm=false; clearTimeout(FB.bulkT); const rows=ids.map(id=>document.querySelector(`[data-pcfbrow="${CSS.escape(id)}"]`)).filter(Boolean);
+      if (!pcCalm()) rows.forEach((r,i)=>r.animate([{opacity:1,transform:"none"},{opacity:.25,transform:"translateX(-24px)"}],{duration:240,delay:Math.min(i,12)*30,easing:"ease-in",fill:"forwards"}));
+      let ok=0, bad=""; for (const id of ids){ try{ await devReq("feeddel","",{id}); ok++; FB.items=FB.items.filter(i=>i.id!==id); FB.sel.delete(id); if (FB.open===id) FB.open=null; }catch(err){ bad=err.message; } }
+      fbRender(); fbBtn(); toast(bad?`${ok} gelöscht – ${ids.length-ok} gingen nicht: ${bad}`:`${ok} Meldung${ok===1?"":"en"} gelöscht`); return; } }
   function fbRender(){
     const el=$("pcFbBody"); if (!el) return;
     const crashes=FB.items.filter(x=>x.kind==="absturz").length;
     if (!FB.items.length){ el.innerHTML=`<p class="muted" style="padding:20px 0;text-align:center">${FB.err?esc(FB.err):"Noch kein Feedback angekommen."}</p>`; return; }
     if (!FB.open || !FB.items.some(x=>x.id===FB.open)) FB.open=null;
-    const top=`<div class="pcfbtop"><button class="btn" data-pcfbcopyall="1">Alles Ungelesene für Claude kopieren</button>${crashes?`<button class="btn" data-pcfbcopyall="absturz">Alle ${crashes} Abstürze kopieren</button>`:""}</div>`;
-    const list=FB.items.map(x=>{ const [kl,kc]=KIND[x.kind]||KIND.idee, f=fbParse(x); x.images=Math.max(0,Math.min(5,parseInt(x.images,10)||0));
-      return `<button class="pcfbi ${x.read?"":"new"} ${FB.open===x.id?"on":""}" data-pcfb="${esc(x.id)}" style="--kc:${kc}"><span class="pcfbih"><span class="pcfbk">${KIC[x.kind]||""} ${kl}</span><small>${esc(ago(x.ts))}${x.images?` · 🖼 ${x.images}`:""}</small></span><b>${esc(f.title)}</b>${f.pgs.length?`<span class="pcfbpgs">${f.pgs.map(g=>`<span class="pcfbpg">${esc(g)}</span>`).join("")}</span>`:""}</button>`; }).join("");
+    FB.sel=FB.sel||new Set(); for (const id of [...FB.sel]) if (!FB.items.some(x=>x.id===id)) FB.sel.delete(id);
+    const V=fbVis(), nSel=FB.sel.size, allOn=V.length && V.every(x=>FB.sel.has(x.id)), cnt=k=>k==="all"?FB.items.length:k==="new"?FB.items.filter(x=>!x.read).length:FB.items.filter(x=>x.kind===k).length;
+    const flt=`<div class="pcfbflt"><button class="pcfbck ${allOn?"on":nSel?"part":""}" data-pcfbselall="1" aria-label="Alle sichtbaren auswählen" title="Alle auswählen (Strg+A)">${allOn?"✓":nSel?"–":""}</button>${[["all","Alle"],["new","Ungelesen"],["absturz","Abstürze"],["fehler","Fehler"],["idee","Ideen"],["lob","Lob"]].filter(([k])=>k==="all"||cnt(k)).map(([k,l])=>`<button class="pcfbf ${(FB.flt||"all")===k?"on":""}" data-pcfbflt="${k}">${l} <small>${cnt(k)}</small></button>`).join("")}</div>`;
+    const top = nSel ? `<div class="pcfbtop pcfbsel"><b>${nSel} ausgewählt</b><button class="btn" data-pcfbbulk="read">✓ Gelesen</button><button class="btn" data-pcfbbulk="unread">● Ungelesen</button><button class="btn" data-pcfbbulk="copy">Für Claude kopieren</button><button class="btn danger" data-pcfbbulk="del">${FB.bulkArm?`Wirklich ${nSel} endgültig löschen?`:"Löschen"}</button><button class="btn ghost" data-pcfbbulk="none">Auswahl aufheben</button></div>`
+      : `<div class="pcfbtop"><button class="btn" data-pcfbcopyall="1">Alles Ungelesene für Claude kopieren</button>${crashes?`<button class="btn" data-pcfbcopyall="absturz">Alle ${crashes} Abstürze kopieren</button>`:""}</div>`;
+    const list=flt+(V.map(x=>{ const [kl,kc]=KIND[x.kind]||KIND.idee, f=fbParse(x), on=FB.sel.has(x.id); x.images=Math.max(0,Math.min(5,parseInt(x.images,10)||0));
+      return `<div class="pcfbrow ${on?"sel":""}" data-pcfbrow="${esc(x.id)}"><button class="pcfbck ${on?"on":""}" data-pcfbsel="${esc(x.id)}" aria-pressed="${on}" aria-label="Auswählen">${on?"✓":""}</button><button class="pcfbi ${x.read?"":"new"} ${FB.open===x.id?"on":""}" data-pcfb="${esc(x.id)}" style="--kc:${kc}"><span class="pcfbih"><span class="pcfbk">${KIC[x.kind]||""} ${kl}</span><small>${esc(ago(x.ts))}${x.images?` · 🖼 ${x.images}`:""}</small></span><b>${esc(f.title)}</b>${f.pgs.length?`<span class="pcfbpgs">${f.pgs.map(g=>`<span class="pcfbpg">${esc(g)}</span>`).join("")}</span>`:""}</button></div>`; }).join("")||`<p class="muted small" style="padding:14px 4px">Hier ist nichts.</p>`);
     const x=FB.items.find(i=>i.id===FB.open); let det;
     if (!x) det=`<div class="pcfbd empty"><div><div style="font-size:40px">📬</div><b>Meldung anklicken</b><p class="muted small">Dann erscheint sie hier groß – mit Bildern und Gerät.</p></div></div>`;
     else { const [kl,kc]=KIND[x.kind]||KIND.idee, f=fbParse(x), d=new Date(x.ts*1000);
@@ -559,7 +574,13 @@ if (IS_PC){
   document.addEventListener("click", e=>{
     if (e.target.closest("#pcInbox")){ fbOpen(); return; }
     if (e.target.closest("[data-pcfbx]") || e.target===$("pcFbBg")){ fbClose(); return; }
-    const h=e.target.closest("[data-pcfb]"); if (h){ fbShow(h.dataset.pcfb); return; }
+    const sb=e.target.closest("[data-pcfbsel]"); if (sb){ const id=sb.dataset.pcfbsel, V=fbVis(); FB.sel=FB.sel||new Set(); FB.bulkArm=false;
+      if (e.shiftKey && FB.lastSel){ const a=V.findIndex(x=>x.id===FB.lastSel), b=V.findIndex(x=>x.id===id); if (a>=0&&b>=0){ const on=!FB.sel.has(id); for (const x of V.slice(Math.min(a,b), Math.max(a,b)+1)) on?FB.sel.add(x.id):FB.sel.delete(x.id); } }
+      else FB.sel.has(id)?FB.sel.delete(id):FB.sel.add(id); FB.lastSel=id; fbRender(); const nb=document.querySelector(`[data-pcfbsel="${CSS.escape(id)}"]`); if (nb && !pcCalm()) nb.animate([{transform:"scale(.75)"},{transform:"scale(1.12)"},{transform:"none"}],{duration:280,easing:"cubic-bezier(.3,1.6,.5,1)"}); return; }
+    if (e.target.closest("[data-pcfbselall]")){ const V=fbVis(); FB.sel=FB.sel||new Set(); FB.bulkArm=false; const all=V.length && V.every(x=>FB.sel.has(x.id)); for (const x of V) all?FB.sel.delete(x.id):FB.sel.add(x.id); fbRender(); return; }
+    const ff=e.target.closest("[data-pcfbflt]"); if (ff){ FB.flt=ff.dataset.pcfbflt; fbRender(); return; }
+    const bk=e.target.closest("[data-pcfbbulk]"); if (bk){ fbBulk(bk.dataset.pcfbbulk); return; }
+    const h=e.target.closest("[data-pcfb]"); if (h){ if (e.ctrlKey||e.metaKey){ const sb2=h.parentElement.querySelector("[data-pcfbsel]"); if (sb2) sb2.click(); return; } fbShow(h.dataset.pcfb); return; }
     const fbTxt=x=>{ const [kl]=KIND[x.kind]||KIND.idee, d=new Date(x.ts*1000); return `### ${kl} vom ${d.toLocaleDateString("de-DE")} ${d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})}${x.images?` (${x.images} Bild${x.images>1?"er":""} – im Posteingang)`:""}\n${String(x.text||"").trim()}`; };
     const cp=async(t,msg)=>{ try { await navigator.clipboard.writeText(t); toast(msg); } catch(_){ toast("Kopieren ging nicht"); } };
     const c1=e.target.closest("[data-pcfbcopy]"); if (c1){ const x=FB.items.find(i=>i.id===c1.dataset.pcfbcopy); if (x) cp("Feedback aus Finanz MAMI:\n\n"+fbTxt(x), "Kopiert – einfach bei Claude einfügen"); return; }
@@ -575,7 +596,10 @@ if (IS_PC){
       return; }
     const im=e.target.closest("[data-pcfbimg]"); if (im){ const w=window.open(""); if (w) w.document.write(`<img src="${im.dataset.pcfbimg}" style="max-width:100%">`); }
   });
-  document.addEventListener("keydown", e=>{ if (e.key==="Escape" && !$("pcFbBg").hidden) fbClose(); });
+  document.addEventListener("keydown", e=>{ if ($("pcFbBg").hidden) return; if (e.key==="Escape"){ if (FB.sel && FB.sel.size){ FB.sel.clear(); FB.bulkArm=false; fbRender(); } else fbClose(); return; }
+    if (e.target.matches && e.target.matches("input,textarea")) return;
+    if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="a"){ e.preventDefault(); FB.sel=FB.sel||new Set(); for (const x of fbVis()) FB.sel.add(x.id); fbRender(); return; }
+    if ((e.key==="Delete"||e.key==="Backspace") && FB.sel && FB.sel.size){ e.preventDefault(); fbBulk("del"); } });
   setTimeout(()=>fbLoad(true), 5000); setInterval(()=>fbLoad(false), 60*1000);
   addEventListener("focus", ()=>fbLoad(false)); document.addEventListener("visibilitychange", ()=>{ if (!document.hidden) fbLoad(false); });
   const _r4=render; render = (...a) => { const x=_r4(...a); try { fbBtn(); } catch(e){} return x; };

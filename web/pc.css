@@ -1057,3 +1057,12 @@ html.pc[data-theme="dark"] .fan.pcw .fanb span,html.pc[data-theme="dark"] .fan.p
 html.pc[data-theme="dark"] .fan.pcw .fanhint kbd{background:color-mix(in srgb,var(--bg) 18%,transparent);color:var(--bg)}
 
 html.pc .pcscol{display:flex;flex-direction:column;gap:16px;min-width:0}html.pc .pcscol .sagrid{grid-template-columns:1fr;gap:6px}html.pc .pcscol .sagrid>div{display:flex;align-items:baseline;justify-content:space-between;gap:8px}html.pc .pcscol .sagrid b{font-size:18px}
+
+.pcfbflt{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:2px 2px 6px;position:sticky;top:0;background:var(--surface);z-index:1}
+.pcfbf{border:0;background:var(--sunk);color:var(--fg);font:700 12px var(--f-body);padding:6px 10px;border-radius:999px;cursor:pointer;transition:background .15s,color .15s}.pcfbf small{color:var(--muted);font-weight:700;margin-left:2px}.pcfbf.on{background:var(--fg);color:var(--bg)}.pcfbf.on small{color:inherit;opacity:.7}
+.pcfbrow{display:flex;gap:6px;align-items:stretch}.pcfbrow .pcfbi{flex:1;min-width:0}.pcfbrow.sel .pcfbi{box-shadow:inset 0 0 0 2px var(--accent)}
+.pcfbck{flex:none;width:26px;min-height:26px;align-self:center;border-radius:8px;border:2px solid color-mix(in srgb,var(--fg) 22%,transparent);background:var(--surface);color:#fff;font:900 14px/1 var(--f-body);cursor:pointer;display:grid;place-items:center;padding:0;transition:background .15s,border-color .15s}
+.pcfbck:hover{border-color:var(--accent)}.pcfbck.on,.pcfbck.part{background:var(--accent);border-color:var(--accent)}
+.pcfbtop.pcfbsel{align-items:center;flex-wrap:wrap;background:color-mix(in srgb,var(--accent) 10%,var(--surface));padding:8px 10px;border-radius:14px;animation:pcfbIn .22s cubic-bezier(.2,.9,.3,1)}.pcfbsel b{margin-right:6px}.pcfbsel .btn.ghost{background:transparent}
+@keyframes pcfbIn{from{opacity:0;transform:translateY(-6px)}}
+@media (prefers-reduced-motion:reduce){.pcfbtop.pcfbsel{animation:none}}
