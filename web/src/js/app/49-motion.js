@@ -191,6 +191,68 @@ const UX = {
   ym: null,
   quiet: false,
 };
+/* Seite kommt an: Karten federn von unten nach, Kacheln atmen kurz, Ziffern großer Beträge rollen ein.
+   Nichts wird dabei unsichtbar – so blinkt auch nichts, falls die Animation unterbrochen wird. */
+const UX_MONEY = /^[-−]?\s?\d{1,3}(\.\d{3})*(,\d{2})?\s*€$/;
+function uxArrive(el) {
+  [...el.children]
+    .filter((c) => c.offsetParent)
+    .slice(0, 8)
+    .forEach((c, k) =>
+      c.animate(
+        [
+          { transform: "translateY(26px) scale(.97)" },
+          { transform: "translateY(-4px) scale(1.005)", offset: 0.55 },
+          { transform: "none" },
+        ],
+        { duration: 620, delay: k * 65, easing: "cubic-bezier(.25,.9,.3,1)", fill: "backwards" }
+      )
+    );
+  [...el.querySelectorAll(".atile")]
+    .filter((t) => t.offsetParent)
+    .forEach((t, i) =>
+      t.animate(
+        [
+          { borderRadius: "28px", transform: "scale(.9)" },
+          { borderRadius: "12px", offset: 0.6 },
+          { borderRadius: "16px", transform: "none" },
+        ],
+        { duration: 600, delay: 180 + i * 40, easing: "cubic-bezier(.3,1.3,.5,1)", fill: "backwards" }
+      )
+    );
+  el.querySelectorAll("b, strong, span, div").forEach((e) => {
+    if (e.children.length || !e.offsetParent || e.closest(".hbodo")) return;
+    const t = e.textContent.trim();
+    if (!UX_MONEY.test(t) || parseFloat(getComputedStyle(e).fontSize) < 20) return;
+    const token = String(Math.random());
+    e.dataset.roll = token;
+    e.textContent = "";
+    [...t].forEach((ch, i) => {
+      const s = document.createElement("span");
+      s.textContent = ch;
+      s.style.display = "inline-block";
+      e.appendChild(s);
+      if (/\d/.test(ch))
+        s.animate(
+          [
+            { transform: "translateY(.6em)", opacity: 0.2, filter: "blur(3px)" },
+            { transform: "none", opacity: 1, filter: "blur(0)" },
+          ],
+          { duration: 420, delay: 120 + i * 35, easing: "cubic-bezier(.2,1.2,.4,1)", fill: "backwards" }
+        );
+    });
+    /* danach wieder normaler Text (falls die Seite nicht inzwischen neu gezeichnet wurde) */
+    setTimeout(
+      () => {
+        if (e.dataset.roll === token) {
+          e.textContent = t;
+          delete e.dataset.roll;
+        }
+      },
+      120 + t.length * 35 + 480
+    );
+  });
+}
 function uxEnter() {
   try {
     motRun();
@@ -207,10 +269,14 @@ function uxEnter() {
   const prevYm = UX.ym;
   UX.v = v;
   UX.ym = ym;
-  /* nach dem Wisch-Würfel steht die Seite schon fertig da – kein zweites Einblenden */
+  /* nach dem Wisch-Würfel steht die Seite schon fertig da – sie federt nur noch an */
   const quiet = UX.quiet;
   UX.quiet = false;
-  if (quiet || !(first || vc || mc) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (!(quiet || first || vc || mc) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (quiet || (vc && !first)) {
+    uxArrive(el);
+    return;
+  }
   const kids = [...el.children].filter((c) => c.offsetParent !== null && c.offsetHeight > 0).slice(0, 10),
     dir = mc ? (ym > prevYm ? 1 : -1) : 0;
   kids.forEach((c, i) =>

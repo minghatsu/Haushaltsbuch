@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.45.8",
+    "21. November 2026",
+    [
+      "Nach dem Wischen federn die Karten nacheinander von unten in ihre Position, die Kacheln atmen kurz und die Ziffern großer Beträge rollen ein.",
+      "Die Untertitel der Kacheln dürfen zwei Zeilen haben und werden nicht mehr mitten im Wort abgeschnitten.",
+    ],
+  ],
+  [
     "0.45.7",
     "21. November 2026",
     [
