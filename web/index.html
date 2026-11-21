@@ -3887,6 +3887,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.42.7", "21. November 2026", ["„Ø pro Tag“ zeigt jetzt nur noch deine Alltags-Ausgaben: ohne Einkäufe, Fixkosten, Betriebsausgaben und Steuer-Vorauszahlungen."]],
   ["0.42.6", "21. November 2026", ["Feedback-Eingang (PC): Meldungen mit Häkchen auswählen – auch mehrere mit Umschalt-Klick oder Strg+A – und dann gemeinsam als gelesen/ungelesen markieren, für Claude kopieren oder löschen. Dazu Filter: Ungelesen, Abstürze, Fehler, Ideen, Lob."]],
   ["0.42.5", "21. November 2026", ["Fehlermeldungen: Kurze, langsame Wischer, die absichtlich keine Seite wechseln, werden nicht mehr als Absturz gemeldet."]],
   ["0.42.4", "21. November 2026", ["Kontoauszug als PDF mit Spaces (z. B. N26): Jede Buchung landet jetzt im richtigen Space, und für Hauptkonto und jeden Space wird der Endstand aus dem Auszug übernommen. Vorher wurde der Stand des letzten Spaces fälschlich beim Hauptkonto eingetragen."]],
@@ -6378,7 +6379,7 @@ function renderHome(){
       <div class="hkpi one">
         ${ym===cur ? (()=>{ const left=Math.max(1, daysIn(ym)-new Date().getDate()), v=Math.max(0, mainBal/left);
           return `<button data-go="year" aria-label="Noch ${eur0(v)} pro Tag für ${left} Tage"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small><span>Noch pro Tag</span> · <span>${left} ${left===1?"Tag":"Tage"}</span></small><b>${esc(eur0(v))}</b></span>${(()=>{ const d=new Date().getDate(), sp=sum(c.tx.filter(hxOut),t=>t.amount); return `<span class="hkavg"><small>bisher Ø</small><b>${esc(eur0(sp/Math.max(1,d)))}</b><small>pro Tag</small></span>`; })()}</button>`; })()
-        : `<button data-go="year"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small>Ø pro Tag ohne Einkäufe</small><b>${esc(eur0(Math.max(0,c.expenses-shopSum(ym+"-01",lastDayOf(ym)).v)/Math.max(1, daysIn(ym))))}</b></span></button>`}
+        : `<button data-go="year"><span class="hki" style="--tc:${themeCol("#c27c0e",3)}">${ic("chart",18)}</span><span><small>Ø pro Tag im Alltag</small><b>${esc(eur0(dayAvg(ym+"-01",lastDayOf(ym),daysIn(ym))))}</b></span></button>`}
       </div>
       ${ym===cur?fcMini():""}
     </div>
@@ -6853,11 +6854,11 @@ function homeExtra({ym, cur, c, g, mainName, mainBal, asOf}){
   const out={}, mon=MONTHS[ymParts(ym)[1]-1], today=new Date().getDate();
   const spentList=c.tx.filter(hxOut), spent=sum(spentList,t=>t.amount);
   { const D=daysIn(ym), left=ym===cur?Math.max(1, D-today+1):ym>cur?D:0, past=ym===cur?today:ym<cur?D:0;
-    const per=left?Math.max(0, mainBal/left):0, avg=past?Math.max(0, spent-sum(spentList.filter(isShopTx),t=>t.amount))/past:0, pct=Math.round(past/D*100);
+    const per=left?Math.max(0, mainBal/left):0, avg=past?dayAvg(ym+"-01", ym===cur?isoToday():lastDayOf(ym), past):0, pct=Math.round(past/D*100);
     out.perday = `<div class="card">${hxHead("perday","Noch pro Tag")}
-      ${left?`<div class="hxbig">${esc(eur0(per))}</div><div class="small muted"><span>noch ${left} ${left===1?"Tag":"Tage"} bis Monatsende</span></div>`:`<div class="hxbig">${esc(eur0(avg))}</div><div class="small muted"><span>Ø pro Tag ausgegeben</span></div>`}
+      ${left?`<div class="hxbig">${esc(eur0(per))}</div><div class="small muted"><span>noch ${left} ${left===1?"Tag":"Tage"} bis Monatsende</span></div>`:`<div class="hxbig">${esc(eur0(avg))}</div><div class="small muted"><span>Ø pro Tag im Alltag</span></div>`}
       <div class="hxbar" style="margin-top:12px"><i style="width:${pct}%"></i></div>
-      <div class="meta-row small" style="margin-top:6px"><span class="muted">${pct} % des Monats vorbei</span>${left&&past?`<span><span class="muted">Ø bisher pro Tag (ohne Einkäufe)</span> <b>${esc(eur0(avg))}</b></span>`:""}</div></div>`; }
+      <div class="meta-row small" style="margin-top:6px"><span class="muted">${pct} % des Monats vorbei</span>${left&&past?`<span><span class="muted">Ø bisher pro Tag im Alltag</span> <b>${esc(eur0(avg))}</b></span>`:""}</div></div>`; }
   { const paid=c.paid||{}, open=fixedForMonth(ym,true).filter(f=>!(f.id in paid)).map(f=>({f, d:fixDay(f,ym), v:planAmt(f,ym)}));
     const soon = ym===cur ? open.filter(x=>x.d!=null && x.d>=today && x.d<=today+6).sort((a,b)=>a.d-b.d) : open.sort((a,b)=>(a.d||99)-(b.d||99)).slice(0,5);
     const rest=open.length-soon.length, when=d=>d===today?"heute":d===today+1?"morgen":`in ${d-today} Tagen`;
@@ -7145,6 +7146,8 @@ function zMiniCard(T){
 /* Einkäufe (Läden, Einkaufszettel) getrennt vom übrigen Alltag rechnen */
 function isShopTx(t){ if (!t || t.kind!=="ausgabe") return false; if (t.src==="zettel") return true; const n=nrm((t.note||"")+" "+(t.bank||"")); return !!n && SHOPS.some(x=>x.re.test(n)); }
 function shopSum(from, to){ let v=0, n=0; for (const t of S.tx){ if (!t.date || t.date<from || t.date>to || !isShopTx(t)) continue; v+=Math.abs(Number(t.amount)||0); n++; } return {v, n}; }
+/* Ø pro Tag „Alltag“: nur normale Ausgaben – ohne Einkäufe, Fixkosten, Betriebsausgaben und Steuer-Vorauszahlungen */
+function dayAvg(from, to, days){ let v=0; for (const t of S.tx){ if (t.kind!=="ausgabe" || !t.date || t.date<from || t.date>to || isShopTx(t)) continue; v+=Math.abs(Number(t.amount)||0); } return v/Math.max(1,days); }
 function shopAvg(){ const td=isoToday(), d0=new Date(td+"T12:00"); d0.setDate(d0.getDate()-89); let first=td; for (const t of S.tx) if (t.date && t.date<first) first=t.date;
   const from=first>isoOf(d0)?first:isoOf(d0), span=Math.max(14, Math.round((new Date(td+"T12:00")-new Date(from+"T12:00"))/864e5)+1), A=shopSum(from, td), M=shopSum(td.slice(0,7)+"-01", td), day=A.v/span;
   return {day, week:day*7, month:day*30.44, n:A.n, span, mon:M.v, monN:M.n}; }
@@ -7701,7 +7704,7 @@ function analyseTop(ym){
       <div class="card-head"><h2>${hIc("insight")}Auf einen Blick</h2><span class="small muted">${esc(MONTHS[ymParts(ym)[1]-1])}</span></div>
       <div class="insights">
         <div class="ins"><span class="eyebrow">Saldo</span><b class="${c.net<0?"neg":"pos"}">${c.net>=0?"+":"−"} ${esc(eur0(Math.abs(c.net)))}</b><span class="small muted">${c.income?`${Math.round(Math.max(0,c.net)/c.income*100)} % gespart`:"Einnahmen − Ausgaben"}</span></div>
-        <div class="ins"><span class="eyebrow">Ø pro Tag</span><b>${esc(eur0(Math.max(0,c.expenses-shopSum(ym+"-01",ym===cur?isoToday():lastDayOf(ym)).v)/Math.max(1, ym===cur?new Date().getDate():daysIn(ym))))}</b><span class="small muted">ohne Einkäufe</span></div>
+        <div class="ins"><span class="eyebrow">Ø pro Tag</span><b>${esc(eur0(dayAvg(ym+"-01",ym===cur?isoToday():lastDayOf(ym),ym===cur?new Date().getDate():daysIn(ym))))}</b><span class="small muted">im Alltag</span></div>
         <div class="ins"><span class="eyebrow">Vormonat</span>${prevExp>0?`<b class="${expDelta>0?"neg":"pos"}">${expDelta>0?"+":"−"} ${Math.abs(Math.round(expDelta))} %</b><span class="small muted">${ym===cur?"bis heute ":""}${expDelta>0?"mehr":"weniger"} als ${esc(MSHORT[ymParts(prevYm)[1]-1])}</span>`:`<b>–</b><span class="small muted">keine Daten</span>`}</div>
         <div class="ins"><span class="eyebrow">Größte Ausgabe</span>${topTx?`<b>${esc(eur0(topTx.amount))}</b><span class="small muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(topTx.note||topTx.cat||"")}</span>`:`<b>–</b><span class="small muted">noch keine</span>`}</div>
       </div>
@@ -7858,7 +7861,7 @@ function renderYear(){
   const ym=UI.ym, mc=monthCalc(ym), prevYm=shiftYm(ym,-1), dayNow=new Date().getDate();
   const prevExp = sum(monthCalc(prevYm).tx.filter(t=>(t.kind==="ausgabe"||t.kind==="betrieb") && (ym!==cur || Number(t.date.slice(8,10))<=dayNow)),t=>t.amount) + (ym!==cur ? monthCalc(prevYm).fixPaid : 0);
   const curExp = ym===cur ? sum(mc.tx.filter(t=>t.kind==="ausgabe"||t.kind==="betrieb"),t=>t.amount) : mc.expenses;
-  const delta = prevExp>0 ? (curExp/prevExp-1)*100 : null, shopM = shopSum(ym+"-01", ym===cur?isoToday():lastDayOf(ym)).v, perDay = Math.max(0, mc.expenses-shopM)/Math.max(1, ym===cur?dayNow:daysIn(ym)), shopDay = shopM/Math.max(1, ym===cur?dayNow:daysIn(ym));
+  const delta = prevExp>0 ? (curExp/prevExp-1)*100 : null, shopM = shopSum(ym+"-01", ym===cur?isoToday():lastDayOf(ym)).v, perDay = dayAvg(ym+"-01", ym===cur?isoToday():lastDayOf(ym), ym===cur?dayNow:daysIn(ym)), shopDay = shopM/Math.max(1, ym===cur?dayNow:daysIn(ym));
   const mode = UI.anaChart||"cat", tiles=[];
   const nice2=niceMax(Math.max(1,...rows.map(r=>r.c.expenses))), sy2=v=>pt+(H-pt-pb)*(1-v/nice2), avgExp=exp/Math.max(1,rows.filter(r=>r.c.expenses>0).length);
   let svg2=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ausgaben pro Monat ${y}">`;
@@ -7875,7 +7878,7 @@ function renderYear(){
   const accRow=(k,icon,title,sub,body,short)=>{ tiles.push({k,icon,title,sub,body,short}); return ""; };
   const kpisHtml=`    <div class="kpis">
       <div class="kpi"><small>${mc.net>=0?"Übrig":"Mehr ausgegeben"}</small><b class="${mc.net<0?"neg":"pos"}">${mc.net>=0?"+":"−"} ${esc(eur0(Math.abs(mc.net)))}</b><span>${mc.income?`${Math.round(Math.max(0,mc.net)/mc.income*100)} % gespart`:esc(MONTHS[ymParts(ym)[1]-1])}</span></div>
-      <div class="kpi"><small>Ø pro Tag</small><b>${esc(eur0(perDay))}</b><span>${shopM>0?`ohne Einkäufe · Einkauf Ø ${esc(eur0(shopDay))}`:"ausgegeben"}</span></div>
+      <div class="kpi"><small>Ø pro Tag</small><b>${esc(eur0(perDay))}</b><span>im Alltag${shopM>0?` · Einkauf Ø ${esc(eur0(shopDay))}`:""}</span></div>
       <div class="kpi"><small>vs. ${esc(MONTHS[ymParts(prevYm)[1]-1])}</small>${delta===null?`<b>–</b><span>keine Daten</span>`:`<b class="${delta>0?"neg":"pos"}">${delta>0?"+":"−"} ${Math.abs(Math.round(delta))} %</b><span>${ym===cur?"bis heute ":""}${delta>0?"mehr":"weniger"} ausgegeben</span>`}</div>
       ${!hasSelf() && !TS.show ? `<div class="kpi"><small>Einnahmen</small><b class="pos">+ ${esc(eur0(mc.income))}</b><span>im ${esc(MONTHS[ymParts(ym)[1]-1])}</span></div>` : `<div class="kpi"><small>Steuer ${y}</small>${!hasSelf()?(Math.abs(tax.due)<1?`<b>–</b><span>ausgeglichen</span>`:tax.due<0?`<b class="pos">+ ${esc(eur0(-tax.due))}</b><span>Erstattung (Schätzung)</span>`:`<b class="neg">− ${esc(eur0(tax.due))}</b><span>Nachzahlung (Schätzung)</span>`):need<=0&&!tax.resBal?`<b>–</b><span>keine Nachzahlung</span>`:resCover>=0?`<b class="pos">✓ reicht</b><span>Rücklage ${esc(eur0(tax.resBal))}</span>`:`<b class="neg">− ${esc(eur0(-resCover))}</b><span>fehlen noch</span>`}</div>`}
     </div>`;
@@ -7952,7 +7955,7 @@ function anaTabsHtml({tiles, GRP, TL, ord, rows, ym, mc, y, inc, exp}){
     const zins = mode==="m" && ym===cur ? sum(S.debts,d=>debtState(d).zinsNow||0) : 0;
     body = `<div class="card anet" data-anaopen="io"><small>${net>=0?"Übrig":"Mehr ausgegeben"} ${mode==="m"?"im "+esc(mn):esc(String(y))}</small><div class="big ${net>=0?"pos":"neg"}">${esc(sg(net))}</div>${chart}<div class="ml">${pts.map(p=>`<span>${esc(p.l)}</span>`).join("")}</div></div>
       <div class="akg"><div><small>Einnahmen</small><b class="pos">${esc(eur0(mode==="m"?mc.income:inc))}</b></div><div><small>Ausgaben</small><b>${esc(eur0(mode==="m"?mc.expenses:exp))}</b></div>
-        <div><small>Fixkosten</small><b>${esc(eur0(fixP))}</b></div>${zins>0?`<div><small>Zinsen</small><b class="neg">${esc(eur0(zins))}</b></div>`:`<div><small>Ø pro Tag <span class="muted">ohne Einkäufe</span></small><b>${esc(eur0(Math.max(0,(mode==="m"?mc.expenses-shopSum(ym+"-01",ym===cur?isoToday():lastDayOf(ym)).v:exp-shopSum(ymParts(ym)[0]+"-01-01",ymParts(ym)[0]+"-12-31").v))/Math.max(1, mode==="m" ? (ym===cur?new Date().getDate():daysIn(ym)) : 365)))}</b></div>`}</div>
+        <div><small>Fixkosten</small><b>${esc(eur0(fixP))}</b></div>${zins>0?`<div><small>Zinsen</small><b class="neg">${esc(eur0(zins))}</b></div>`:`<div><small>Ø pro Tag <span class="muted">im Alltag</span></small><b>${esc(eur0(mode==="m"?dayAvg(ym+"-01",ym===cur?isoToday():lastDayOf(ym),ym===cur?new Date().getDate():daysIn(ym)):dayAvg(ymParts(ym)[0]+"-01-01",ymParts(ym)[0]+"-12-31",365)))}</b></div>`}</div>
       ${ct.length?`<div class="sgl">Top-Kategorien</div><div class="arl">${ct.slice(0,5).map(([c,v])=>`<button class="arw" data-anaopen="cat" style="--tc:${catColor("ausgabe",c)}"><span class="ai">${esc(String(c).trim().slice(0,1).toUpperCase())}</span><span class="an"><b>${esc(c)}</b><small>${tot>0?Math.round(v/tot*100):0} %</small></span><span class="av">${esc(eur0(v))}</span></button>`).join("")}<button class="arw" data-anaopen="cat"><span class="an"><b style="color:var(--accent);font-size:14px">Alle Kategorien</b></span><span class="av"><span class="ch">›</span></span></button></div>`:""}
       <div class="sgl">Mehr</div>${rowsFor(["kpi","trend","io","calc","plan"])}`;
   } else if (tab==="plan") body = rowsFor(GRP[1][1]);
@@ -7981,8 +7984,8 @@ function storyMonth(ym){
   const g=(S.settings.goals||[]).find(x=>Number(x.target)>0);
   if (g){ const v=goalSaved(g).v, p=Math.max(0,Math.min(1,v/Number(g.target)));
     out.push(["s-y",`Sparziel ${g.name}`,Math.round(p*100)+" %", p>=1?"Geschafft! Das Ziel ist erreicht.":`Noch ${eur0(Number(g.target)-v)} bis zum Ziel.`, sring(p)]); }
-  else { const cur=ymOf(new Date()), days=ym===cur?new Date().getDate():daysIn(ym), pd=c.expenses/Math.max(1,days);
-    out.push(["s-y","Pro Tag",eur0(pd),`So viel hast du im ${mn} im Schnitt pro Tag ausgegeben.`, sbars(Array.from({length:7},(_,k)=>{ const d=new Date(y,m-1,Math.max(1,days-6+k)); const iso=isoOf(d); return Math.min(100, sum(c.tx.filter(t=>t.date===iso&&(t.kind==="ausgabe"||t.kind==="betrieb")),t=>t.amount)/Math.max(1,pd*2)*100); }))]); }
+  else { const cur=ymOf(new Date()), days=ym===cur?new Date().getDate():daysIn(ym), pd=dayAvg(ym+"-01", ym===cur?isoToday():lastDayOf(ym), days);
+    out.push(["s-y","Pro Tag",eur0(pd),`So viel hast du im ${mn} im Schnitt pro Tag im Alltag ausgegeben – ohne Einkäufe und Fixkosten.`, sbars(Array.from({length:7},(_,k)=>{ const d=new Date(y,m-1,Math.max(1,days-6+k)); const iso=isoOf(d); return Math.min(100, sum(c.tx.filter(t=>t.date===iso&&(t.kind==="ausgabe"||t.kind==="betrieb")),t=>t.amount)/Math.max(1,pd*2)*100); }))]); }
   if (ym===ymOf(new Date())){ const sp=debtSplitNow();
     if (sp.z>0) out.push(["s-r","Kreditraten",eur0(sp.z)+" Zinsen",`Von deinen Raten sind ${eur0(sp.z)} Zinsen – das Geld ist weg. ${eur0(sp.t)} bauen deine Schulden ab.`, scmp("Zinsen",eur0(sp.z),"Tilgung",eur0(sp.t))]);
     else if (sp.t>0) out.push(["s-r","Kreditraten",eur0(sp.t)+" Tilgung",`Deine Raten sind zinslos eingetragen – alles davon baut Schulden ab. Hat ein Kredit Zinsen, trag den Zinssatz ein.`, scmp("Zinsen","0 €","Tilgung",eur0(sp.t))]); }
