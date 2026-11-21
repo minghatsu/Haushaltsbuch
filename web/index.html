@@ -50940,6 +50940,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.45.9",
+    "21. November 2026",
+    [
+      "Beim Wischen auf die nächste Seite blenden Kacheln und Schrift wie eine Welle von oben nach unten aus – und auf der neuen Seite genauso ein, kurz unscharf und dann gestochen scharf.",
+    ],
+  ],
+  [
     "0.45.8",
     "21. November 2026",
     [
@@ -101230,7 +101237,9 @@ function uxEnter() {
   const quiet = UX.quiet;
   UX.quiet = false;
   if (!(quiet || first || vc || mc) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  if (quiet || (vc && !first)) {
+  /* nach dem Würfel hat die Welle die Seite schon eingeblendet */
+  if (quiet) return;
+  if (vc && !first) {
     uxArrive(el);
     return;
   }
@@ -110161,6 +110170,53 @@ $("loginGo").onclick = doLogin;
     sY = 0,
     nY = 0;
   const MEM = {};
+  /* Welle: Kacheln und Schrift blenden von oben nach unten aus und auf der neuen Seite
+     genauso ein – unscharf und etwas kleiner, solange sie im Übergang sind */
+  const WAVE = new WeakMap(),
+    WBAND = 0.35,
+    calm = matchMedia("(prefers-reduced-motion: reduce)");
+  function waveItems(f, c, top, H) {
+    const pick = new Set(c.querySelectorAll(".atile,.hbodo"));
+    c.querySelectorAll("*").forEach((e) => {
+      if ([...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) || e.matches("svg,canvas,img,button"))
+        pick.add(e);
+    });
+    const cTop = c.getBoundingClientRect().top,
+      list = [];
+    pick.forEach((e) => {
+      for (let p = e.parentElement; p && p !== c; p = p.parentElement) if (pick.has(p)) return;
+      const r = e.getBoundingClientRect();
+      if (!r.height) return;
+      const y = top + r.top - cTop + r.height / 2;
+      if (y < -40 || y > H + 40) return;
+      list.push([e, Math.min(1, Math.max(0, y / H)), e.style.transform]);
+    });
+    WAVE.set(f, list);
+  }
+  function wave(f, q, entering) {
+    const list = WAVE.get(f);
+    if (!list || calm.matches) return;
+    for (const [e, y, base] of list) {
+      const t = Math.min(1, Math.max(0, (q * (1 + WBAND) - y) / WBAND)),
+        o = entering ? t : 1 - t,
+        s = e.style;
+      if (o >= 1) {
+        if (s.opacity) {
+          s.opacity = s.filter = "";
+          s.transform = base;
+        }
+        continue;
+      }
+      const k = 1 - o;
+      s.opacity = o.toFixed(3);
+      s.transform = `${base} scale(${(1 - 0.06 * k).toFixed(3)})`;
+      s.filter = `blur(${(4 * k).toFixed(1)}px)`;
+    }
+  }
+  function waveAll(a) {
+    if (fC) wave(fC, a, false);
+    if (fN) wave(fN, a, true);
+  }
   function face(srcSec, top, trim = true) {
     const f = document.createElement("div");
     f.className = "cubeface";
@@ -110222,6 +110278,7 @@ $("loginGo").onclick = doLogin;
     f.appendChild(c);
     f.appendChild(sh);
     stage.appendChild(f);
+    if (!calm.matches) waveItems(f, c, top, H);
     return [f, sh];
   }
   let PREP = null,
@@ -110403,6 +110460,7 @@ $("loginGo").onclick = doLogin;
     shC.style.opacity = String(a * 0.6);
     fN.style.transform = `translateZ(${-h}px) rotateY(${th - s * 90}deg) translateZ(${h}px)`;
     shN.style.opacity = String((1 - a) * 0.6);
+    if (!busy) waveAll(a);
   }
   function reset() {
     if (stage) stage.remove();
@@ -110425,6 +110483,16 @@ $("loginGo").onclick = doLogin;
     const target = go && nbKey;
     p = target ? (dir < 0 ? -1 : 1) : 0;
     draw();
+    /* Der Würfel dreht per CSS zu Ende – die Welle liest den Winkel bei jedem Bild mit */
+    const f0 = fC,
+      t0w = performance.now();
+    if (nbKey)
+      (function follow() {
+        if (fC !== f0) return;
+        const m = new DOMMatrix(getComputedStyle(f0).transform);
+        waveAll(Math.acos(Math.max(-1, Math.min(1, m.m11))) / (Math.PI / 2));
+        if (performance.now() - t0w < 340) requestAnimationFrame(follow);
+      })();
     /* Titel und Leiste schon jetzt mitnehmen – nicht erst, wenn der Würfel steht */
     if (target)
       try {

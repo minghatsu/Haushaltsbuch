@@ -273,7 +273,9 @@ function uxEnter() {
   const quiet = UX.quiet;
   UX.quiet = false;
   if (!(quiet || first || vc || mc) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  if (quiet || (vc && !first)) {
+  /* nach dem Würfel hat die Welle die Seite schon eingeblendet */
+  if (quiet) return;
+  if (vc && !first) {
     uxArrive(el);
     return;
   }

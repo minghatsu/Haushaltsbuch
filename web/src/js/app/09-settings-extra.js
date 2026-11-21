@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.45.9",
+    "21. November 2026",
+    [
+      "Beim Wischen auf die nächste Seite blenden Kacheln und Schrift wie eine Welle von oben nach unten aus – und auf der neuen Seite genauso ein, kurz unscharf und dann gestochen scharf.",
+    ],
+  ],
+  [
     "0.45.8",
     "21. November 2026",
     [
