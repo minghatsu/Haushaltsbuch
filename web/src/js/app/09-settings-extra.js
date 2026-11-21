@@ -239,6 +239,11 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.44.10",
+    "21. November 2026",
+    ["Wischen: Nach dem Seitenwechsel blinkt die neue Seite nicht mehr kurz weg und wieder ein."],
+  ],
+  [
     "0.44.9",
     "21. November 2026",
     ["Konten & Spaces: Wählst du unten ein früheres Jahr, zeigen die Kacheln oben die Stände am 31.12. dieses Jahres – nur mit den Konten, die es damals gab."],

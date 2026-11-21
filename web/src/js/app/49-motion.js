@@ -189,6 +189,7 @@ function motSheet() {
 const UX = {
   v: null,
   ym: null,
+  quiet: false,
 };
 function uxEnter() {
   try {
@@ -206,7 +207,10 @@ function uxEnter() {
   const prevYm = UX.ym;
   UX.v = v;
   UX.ym = ym;
-  if (!(first || vc || mc) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  /* nach dem Wisch-Würfel steht die Seite schon fertig da – kein zweites Einblenden */
+  const quiet = UX.quiet;
+  UX.quiet = false;
+  if (quiet || !(first || vc || mc) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const kids = [...el.children].filter((c) => c.offsetParent !== null && c.offsetHeight > 0).slice(0, 10),
     dir = mc ? (ym > prevYm ? 1 : -1) : 0;
   kids.forEach((c, i) =>

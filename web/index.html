@@ -50370,6 +50370,11 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.44.10",
+    "21. November 2026",
+    ["Wischen: Nach dem Seitenwechsel blinkt die neue Seite nicht mehr kurz weg und wieder ein."],
+  ],
+  [
     "0.44.9",
     "21. November 2026",
     ["Konten & Spaces: Wählst du unten ein früheres Jahr, zeigen die Kacheln oben die Stände am 31.12. dieses Jahres – nur mit den Konten, die es damals gab."],
@@ -100476,6 +100481,7 @@ function motSheet() {
 const UX = {
   v: null,
   ym: null,
+  quiet: false,
 };
 function uxEnter() {
   try {
@@ -100493,7 +100499,10 @@ function uxEnter() {
   const prevYm = UX.ym;
   UX.v = v;
   UX.ym = ym;
-  if (!(first || vc || mc) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  /* nach dem Wisch-Würfel steht die Seite schon fertig da – kein zweites Einblenden */
+  const quiet = UX.quiet;
+  UX.quiet = false;
+  if (quiet || !(first || vc || mc) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const kids = [...el.children].filter((c) => c.offsetParent !== null && c.offsetHeight > 0).slice(0, 10),
     dir = mc ? (ym > prevYm ? 1 : -1) : 0;
   kids.forEach((c, i) =>
@@ -109670,6 +109679,7 @@ $("loginGo").onclick = doLogin;
         MEM[ui.view] = sY;
         ui.view = k;
         if (window.ANIM) ANIM.skip = true;
+        UX.quiet = true;
         render.keep = true;
         render();
         sY = nY;
