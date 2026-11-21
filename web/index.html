@@ -271,10 +271,10 @@ main{padding-block:6px 120px}
 .lseg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 3px 8px -5px rgba(0,0,0,.3)}
 #lseg{margin:0 0 2px}
 .calg{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.calg .w{font-size:11px;color:var(--faint);text-align:center;font-weight:600;padding-bottom:2px}
+.calg .w{font-size:11px;color:var(--muted);text-align:center;font-weight:600;padding-bottom:2px}
 .calg button{border:0;height:38px;border-radius:11px;font-weight:600;font-size:12.5px;color:var(--fg);background:var(--sunk);padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
 .calg button small{font-size:9px;font-weight:700;opacity:.8}
-.calg button.hot{color:#fff}.calg button.sel{outline:2.5px solid var(--fg);outline-offset:1px}.calg button.today{box-shadow:inset 0 0 0 2px var(--accent)}
+.calg button.hot{color:#fff}[data-theme="dark"] .calg button.mid,[data-theme="dark"] .calg button.hot{color:#0b1a15}.calg button.sel{outline:2.5px solid var(--fg);outline-offset:1px}.calg button.today{box-shadow:inset 0 0 0 2px var(--accent)}
 .calleg{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--muted);margin-top:10px}.calleg i{flex:1;height:6px;border-radius:9px;background:linear-gradient(90deg,var(--sunk),var(--accent))}
 .kpad{display:none;grid-template-columns:repeat(3,1fr);gap:7px}
 html.touch .kpad{display:grid}
@@ -2921,6 +2921,7 @@ function LOCD(){ const l=LANGS.find(x=>x[0]===LANG); return l?l[2]:"de-DE"; }
   for (const [a,b] of M){ const i=I18N_K.indexOf(a); if (i<0) continue; let j=I18N_K.indexOf(b); if (j<0){ I18N_K.push(b); j=I18N_K.length-1; } LL.forEach(l=>{ const t=(I18N_T[l]=I18N_T[l]||[]); if (!t[j] && t[i]) t[j]=st(t[i]); }); } })();
 (function(){ const N={"Noch keine Belegfotos in {n} – fotografiere einen Kassenbon beim Eintragen": ["No receipt photos in {n} yet – take a photo of a receipt when you add a booking", "{n} yılında henüz fiş fotoğrafı yok – kayıt eklerken bir fişin fotoğrafını çek", "В {n} году ещё нет фото чеков – сфотографируй чек при вводе операции", "У {n} році ще немає фото чеків – сфотографуй чек під час внесення операції", "Brak zdjęć paragonów w {n} – zrób zdjęcie paragonu przy dodawaniu wpisu", "لا توجد صور إيصالات في {n} بعد – صوّر إيصالًا عند إضافة معاملة", "Încă nu există fotografii de bonuri în {n} – fotografiază un bon când adaugi o tranzacție"], "App weitergeben": ["Share the app", "Uygulamayı paylaş", "Поделиться приложением", "Поділитися застосунком", "Udostępnij aplikację", "مشاركة التطبيق", "Dă aplicația mai departe"], "App-Sperre & Sicherheit": ["App lock & security", "Uygulama kilidi ve güvenlik", "Блокировка и безопасность", "Блокування й безпека", "Blokada aplikacji i bezpieczeństwo", "قفل التطبيق والأمان", "Blocare aplicație și securitate"], "Automatische Updates": ["Automatic updates", "Otomatik güncellemeler", "Автоматические обновления", "Автоматичні оновлення", "Automatyczne aktualizacje", "تحديثات تلقائية", "Actualizări automate"], "Benachrichtigungen": ["Notifications", "Bildirimler", "Уведомления", "Сповіщення", "Powiadomienia", "الإشعارات", "Notificări"], "Eigene Rechnungen, kein Job daneben – Steuer-Felder sind ausgeblendet.": ["Own invoices, no job alongside – tax fields are hidden.", "Kendi faturaların var, yanında iş yok – vergi alanları gizli.", "Свои счета, без работы по найму – налоговые поля скрыты.", "Власні рахунки, без роботи за наймом – податкові поля приховано.", "Własne faktury, bez etatu – pola podatkowe są ukryte.", "فواتير خاصة بك بلا وظيفة إلى جانبها – حقول الضرائب مخفية.", "Facturi proprii, fără job pe lângă – câmpurile fiscale sunt ascunse."], "Gruppe": ["Group", "Grup", "Группа", "Група", "Grupa", "المجموعة", "Grup"], "Rolle": ["Role", "Rol", "Роль", "Роль", "Rola", "الدور", "Rol"], "Kontostand am {n} {m} {n}": ["Balance on {n} {m} {n}", "{n} {m} {n} bakiyesi", "Остаток на {n} {m} {n}", "Залишок на {n} {m} {n}", "Saldo na {n} {m} {n}", "الرصيد في {n} {m} {n}", "Sold la {n} {m} {n}"], "Profil bearbeiten": ["Edit profile", "Profili düzenle", "Изменить профиль", "Редагувати профіль", "Edytuj profil", "تعديل الملف الشخصي", "Editează profilul"], "Scannen": ["Scan", "Tara", "Сканировать", "Сканувати", "Skanuj", "مسح", "Scanează"], "vorher nichts": ["nothing before", "önceden yok", "раньше ничего", "раніше нічого", "wcześniej nic", "لا شيء من قبل", "nimic înainte"], "{n} € von": ["{n} € of", "{n} € /", "{n} € из", "{n} € з", "{n} € z", "{n} € من", "{n} € din"], "Lade die Datei hier hoch. Schon importierte Buchungen werden erkannt und übersprungen.": ["Upload the file here. Bookings you already imported are recognised and skipped.", "Dosyayı buraya yükle. Daha önce aktarılan kayıtlar tanınır ve atlanır.", "Загрузи файл сюда. Уже импортированные операции распознаются и пропускаются.", "Завантаж файл сюди. Уже імпортовані операції розпізнаються й пропускаються.", "Prześlij plik tutaj. Już zaimportowane transakcje zostaną rozpoznane i pominięte.", "ارفع الملف هنا. يتم التعرف على المعاملات المستوردة سابقًا وتخطيها.", "Încarcă fișierul aici. Tranzacțiile deja importate sunt recunoscute și sărite."], "Datei sichern oder laden": ["Save or load a file", "Dosya kaydet veya yükle", "Сохранить или загрузить файл", "Зберегти або завантажити файл", "Zapisz lub wczytaj plik", "حفظ ملف أو تحميله", "Salvează sau încarcă un fișier"], "Fragen und Antworten": ["Questions and answers", "Sorular ve cevaplar", "Вопросы и ответы", "Питання та відповіді", "Pytania i odpowiedzi", "أسئلة وأجوبة", "Întrebări și răspunsuri"], "Blöcke sortieren": ["Sort blocks", "Blokları sırala", "Упорядочить блоки", "Упорядкувати блоки", "Sortuj bloki", "ترتيب الأقسام", "Sortează blocurile"], "Für jeden Tester ein eigener Code": ["A personal code for every tester", "Her test eden için ayrı bir kod", "Свой код для каждого тестера", "Власний код для кожного тестувальника", "Osobny kod dla każdego testera", "رمز خاص لكل مختبِر", "Un cod propriu pentru fiecare tester"], "Abgleich aus": ["Sync off", "Senkronizasyon kapalı", "Синхронизация выкл.", "Синхронізацію вимкнено", "Synchronizacja wył.", "المزامنة متوقفة", "Sincronizare oprită"], "{n} Gerät": ["{n} device", "{n} cihaz", "{n} устройство", "{n} пристрій", "{n} urządzenie", "{n} جهاز", "{n} dispozitiv"], "{n} Geräte": ["{n} devices", "{n} cihaz", "{n} устройства", "{n} пристрої", "{n} urządzenia", "{n} أجهزة", "{n} dispozitive"], "Dieses Gerät": ["This device", "Bu cihaz", "Это устройство", "Цей пристрій", "To urządzenie", "هذا الجهاز", "Acest dispozitiv"], "jetzt aktiv": ["active now", "şu an etkin", "активно сейчас", "активний зараз", "aktywne teraz", "نشط الآن", "activ acum"], "Frei für die App: ca. {n} MB": ["Free for the app: approx. {n} MB", "Uygulama için boş: yakl. {n} MB", "Свободно для приложения: ок. {n} МБ", "Вільно для застосунку: бл. {n} МБ", "Wolne dla aplikacji: ok. {n} MB", "المساحة المتاحة للتطبيق: حوالي {n} ميغابايت", "Liber pentru aplicație: cca {n} MB"], "Kurze Touren zu jeder Seite": ["Short tours for every page", "Her sayfa için kısa turlar", "Короткие туры по каждой странице", "Короткі тури по кожній сторінці", "Krótkie przewodniki po każdej stronie", "جولات قصيرة لكل صفحة", "Tururi scurte pentru fiecare pagină"], "Belege {n} als ZIP": ["Receipts {n} as ZIP", "{n} fişleri ZIP olarak", "Чеки за {n} в ZIP", "Чеки за {n} у ZIP", "Paragony {n} jako ZIP", "إيصالات {n} كملف ZIP", "Bonuri {n} ca ZIP"], "Alle {n} Belegfotos des Jahres mit einer Liste": ["All {n} receipt photos of the year with a list", "Yılın {n} fiş fotoğrafının tümü, bir listeyle", "Все {n} фото чеков за год со списком", "Усі {n} фото чеків за рік зі списком", "Wszystkie {n} zdjęcia paragonów z roku z listą", "كل صور الإيصالات ({n}) لهذا العام مع قائمة", "Toate cele {n} fotografii de bonuri ale anului, cu o listă"], "Alle {n} Belegfotos des Jahres, sortiert nach privat und betrieblich, mit einer Liste für den Steuerberater": ["All {n} receipt photos of the year, sorted into private and business, with a list for your tax advisor", "Yılın {n} fiş fotoğrafının tümü, özel ve işletme olarak ayrılmış, mali müşavir için bir listeyle", "Все {n} фото чеков за год, разделённые на личные и рабочие, со списком для налогового консультанта", "Усі {n} фото чеків за рік, поділені на особисті й робочі, зі списком для податкового консультанта", "Wszystkie {n} zdjęcia paragonów z roku, podzielone na prywatne i firmowe, z listą dla doradcy podatkowego", "كل صور الإيصالات ({n}) لهذا العام، مرتبة بين خاصة وتجارية، مع قائمة للمستشار الضريبي", "Toate cele {n} fotografii de bonuri ale anului, împărțite în personale și de firmă, cu o listă pentru consultantul fiscal"], "Benachrichtigungen gibt es in der Handy- und PC-App. Dort kannst du hier einstellen, worüber sie dich informiert – auch wenn die App geschlossen ist.": ["Notifications are available in the phone and PC app. There you can choose here what it tells you about – even when the app is closed.", "Bildirimler telefon ve PC uygulamasında var. Orada, uygulama kapalıyken bile seni neyle ilgili bilgilendireceğini buradan seçebilirsin.", "Уведомления есть в приложении для телефона и ПК. Там здесь можно выбрать, о чём оно сообщает – даже когда приложение закрыто.", "Сповіщення є в застосунку для телефона й ПК. Там тут можна вибрати, про що він повідомляє – навіть коли застосунок закрито.", "Powiadomienia są w aplikacji na telefon i PC. Tam ustawisz tutaj, o czym ma cię informować – nawet gdy aplikacja jest zamknięta.", "الإشعارات متوفرة في تطبيق الهاتف والكمبيوتر. هناك تختار من هنا ما الذي يخبرك به – حتى عندما يكون التطبيق مغلقًا.", "Notificările există în aplicația de telefon și PC. Acolo alegi aici despre ce te anunță – chiar și când aplicația e închisă."], "{m} gegen deinen Schnitt": ["{m} vs. your average", "{m}, ortalamana göre", "{m} по сравнению с твоим средним", "{m} порівняно з твоїм середнім", "{m} na tle twojej średniej", "{m} مقارنة بمتوسطك", "{m} față de media ta"]}, LL=["en","tr","ru","uk","pl","ar","ro"];
   for (const [k,v] of Object.entries(N)){ let i=I18N_K.indexOf(k); if (i<0){ I18N_K.push(k); i=I18N_K.length-1; } LL.forEach((l,j)=>{ const a=(I18N_T[l]=I18N_T[l]||[]); if (!a[i]) a[i]=v[j]; }); } })();
+(function(){ const N={"{n} Buchung übernommen": ["{n} transaction imported", "{n} kayıt aktarıldı", "{n} запись перенесена", "{n} запис перенесено", "Przeniesiono {n} wpis", "تم استيراد {n} قيد", "{n} înregistrare preluată"], "{n} Buchungen übernommen": ["{n} transactions imported", "{n} kayıt aktarıldı", "Перенесено записей: {n}", "Перенесено записів: {n}", "Przeniesiono wpisy: {n}", "تم استيراد {n} قيود", "{n} înregistrări preluate"], "{n} Fixkosten abgehakt": ["{n} fixed costs ticked off", "{n} sabit gider işaretlendi", "Отмечено постоянных расходов: {n}", "Позначено постійних витрат: {n}", "Odhaczono koszty stałe: {n}", "تم تأشير {n} تكاليف ثابتة", "{n} costuri fixe bifate"], "{n} mit vorhandenen verknüpft": ["{n} linked to existing ones", "{n} tanesi mevcutlarla eşleştirildi", "Связано с существующими: {n}", "Пов’язано з наявними: {n}", "Połączono z istniejącymi: {n}", "تم ربط {n} بالموجودة", "{n} legate de cele existente"], "{n} Buchung gefunden": ["{n} transaction found", "{n} kayıt bulundu", "Найдена {n} запись", "Знайдено {n} запис", "Znaleziono {n} wpis", "تم العثور على {n} قيد", "{n} înregistrare găsită"], "{n} Beleg wird gepackt …": ["Packing {n} receipt …", "{n} fiş paketleniyor …", "Упаковывается {n} чек …", "Пакується {n} чек …", "Pakowanie {n} paragonu …", "يجري تجميع {n} إيصال …", "Se împachetează {n} bon …"], "{n} Belege werden gepackt …": ["Packing {n} receipts …", "{n} fiş paketleniyor …", "Упаковываются чеки: {n} …", "Пакуються чеки: {n} …", "Pakowanie paragonów: {n} …", "يجري تجميع {n} إيصالات …", "Se împachetează {n} bonuri …"], "Dieser Monat: {n} Tag": ["This month: {n} day", "Bu ay: {n} gün", "В этом месяце: {n} день", "Цього місяця: {n} день", "W tym miesiącu: {n} dzień", "هذا الشهر: {n} يوم", "Luna aceasta: {n} zi"], "noch {n} Tag": ["{n} day left", "{n} gün kaldı", "остался {n} день", "залишився {n} день", "został {n} dzień", "تبقّى {n} يوم", "mai e {n} zi"], "noch {n} Tage": ["{n} days left", "{n} gün kaldı", "осталось {n} дн.", "залишилось {n} дн.", "zostało {n} dni", "تبقّى {n} أيام", "mai sunt {n} zile"], "noch {n} Woche": ["{n} week left", "{n} hafta kaldı", "осталась {n} неделя", "залишився {n} тиждень", "został {n} tydzień", "تبقّى {n} أسبوع", "mai e {n} săptămână"], "noch {n} Wochen": ["{n} weeks left", "{n} hafta kaldı", "осталось недель: {n}", "залишилось тижнів: {n}", "zostało tygodni: {n}", "تبقّى {n} أسابيع", "mai sunt {n} săptămâni"], "Bis jetzt ({n} Monat) hast du {n} € mehr eingenommen als ausgegeben.": ["So far ({n} month) you have earned {n} € more than you spent.", "Şimdiye kadar ({n} ay) harcadığından {n} € fazla kazandın.", "Пока ({n} месяц) ты заработал на {n} € больше, чем потратил.", "Поки що ({n} місяць) ти заробив на {n} € більше, ніж витратив.", "Do tej pory ({n} miesiąc) zarobiłeś o {n} € więcej, niż wydałeś.", "حتى الآن ({n} شهر) كسبت {n} € أكثر مما أنفقت.", "Până acum ({n} lună) ai câștigat cu {n} € mai mult decât ai cheltuit."], "Bis jetzt ({n} Monat) hast du {n} € mehr ausgegeben als eingenommen.": ["So far ({n} month) you have spent {n} € more than you earned.", "Şimdiye kadar ({n} ay) kazandığından {n} € fazla harcadın.", "Пока ({n} месяц) ты потратил на {n} € больше, чем заработал.", "Поки що ({n} місяць) ти витратив на {n} € більше, ніж заробив.", "Do tej pory ({n} miesiąc) wydałeś o {n} € więcej, niż zarobiłeś.", "حتى الآن ({n} شهر) أنفقت {n} € أكثر مما كسبت.", "Până acum ({n} lună) ai cheltuit cu {n} € mai mult decât ai câștigat."], "{n} Buchung": ["{n} transaction", "{n} kayıt", "{n} запись", "{n} запис", "{n} wpis", "{n} قيد", "{n} înregistrare"], "{n} Buchungen": ["{n} transactions", "{n} kayıt", "Записей: {n}", "Записів: {n}", "Wpisy: {n}", "{n} قيود", "{n} înregistrări"], "{n} Beleg": ["{n} receipt", "{n} fiş", "{n} чек", "{n} чек", "{n} paragon", "{n} إيصال", "{n} bon"], "{n} Belege": ["{n} receipts", "{n} fiş", "Чеков: {n}", "Чеків: {n}", "Paragony: {n}", "{n} إيصالات", "{n} bonuri"], "{n} Buchung gespeichert": ["{n} transaction saved", "{n} kayıt kaydedildi", "Сохранена {n} запись", "Збережено {n} запис", "Zapisano {n} wpis", "تم حفظ {n} قيد", "{n} înregistrare salvată"], "{n} Buchungen gespeichert": ["{n} transactions saved", "{n} kayıt kaydedildi", "Сохранено записей: {n}", "Збережено записів: {n}", "Zapisano wpisy: {n}", "تم حفظ {n} قيود", "{n} înregistrări salvate"], "{n} Tag × {n} € · höchstens {n} €": ["{n} day × {n} € · at most {n} €", "{n} gün × {n} € · en fazla {n} €", "{n} день × {n} € · не более {n} €", "{n} день × {n} € · не більше {n} €", "{n} dzień × {n} € · maksymalnie {n} €", "{n} يوم × {n} € · بحد أقصى {n} €", "{n} zi × {n} € · cel mult {n} €"], "{n} Tag × {n} km × {n} €": ["{n} day × {n} km × {n} €", "{n} gün × {n} km × {n} €", "{n} день × {n} км × {n} €", "{n} день × {n} км × {n} €", "{n} dzień × {n} km × {n} €", "{n} يوم × {n} كم × {n} €", "{n} zi × {n} km × {n} €"], "{n} Tag × {n} €": ["{n} day × {n} €", "{n} gün × {n} €", "{n} день × {n} €", "{n} день × {n} €", "{n} dzień × {n} €", "{n} يوم × {n} €", "{n} zi × {n} €"]}, LL=["en","tr","ru","uk","pl","ar","ro"]; for (const [k,v] of Object.entries(N)){ let i=I18N_K.indexOf(k); if (i<0){ I18N_K.push(k); i=I18N_K.length-1; } LL.forEach((l,j)=>{ const a=(I18N_T[l]=I18N_T[l]||[]); if (!a[i]) a[i]=v[j]; }); } })();
 (function(){ const N={"🗑 Löschen": ["🗑 Delete", "🗑 Sil", "🗑 Удалить", "🗑 Видалити", "🗑 Usuń", "🗑 حذف", "🗑 Șterge"], "{m} bis {m} · noch keine Buchungen": ["{m} to {m} · no transactions yet", "{m} – {m} · henüz kayıt yok", "{m} – {m} · пока нет записей", "{m} – {m} · ще немає записів", "{m} – {m} · jeszcze brak wpisów", "{m} إلى {m} · لا توجد قيود بعد", "{m} – {m} · încă nicio înregistrare"], "Foto hinzufügen": ["Add photo", "Fotoğraf ekle", "Добавить фото", "Додати фото", "Dodaj zdjęcie", "إضافة صورة", "Adaugă poză"], "Buchung ändern": ["Edit transaction", "Kaydı düzenle", "Изменить запись", "Змінити запис", "Edytuj wpis", "تعديل القيد", "Modifică înregistrarea"], "Noch kein Foto an dieser Buchung": ["No photo on this transaction yet", "Bu kayıtta henüz fotoğraf yok", "К этой записи ещё нет фото", "До цього запису ще немає фото", "Brak zdjęcia przy tym wpisie", "لا توجد صورة لهذا القيد بعد", "Încă nicio poză la această înregistrare"], "Änderung speichern": ["Save changes", "Değişikliği kaydet", "Сохранить изменения", "Зберегти зміни", "Zapisz zmiany", "حفظ التغيير", "Salvează modificarea"], "{n} Tage × {n} €": ["{n} days × {n} €", "{n} gün × {n} €", "{n} дн. × {n} €", "{n} дн. × {n} €", "{n} dni × {n} €", "{n} أيام × {n} €", "{n} zile × {n} €"], "höchstens {n} €": ["at most {n} €", "en fazla {n} €", "не более {n} €", "не більше {n} €", "maksymalnie {n} €", "بحد أقصى {n} €", "cel mult {n} €"], "höchstens {n} € ·": ["at most {n} € ·", "en fazla {n} € ·", "не более {n} € ·", "не більше {n} € ·", "maksymalnie {n} € ·", "بحد أقصى {n} € ·", "cel mult {n} € ·"], "Geld zur Seite legen": ["Put money aside", "Kenara para ayır", "Откладывать деньги", "Відкладати гроші", "Odkładaj pieniądze", "ادّخر المال جانبًا", "Pune bani deoparte"], "Neues Ziel": ["New goal", "Yeni hedef", "Новая цель", "Нова ціль", "Nowy cel", "هدف جديد", "Obiectiv nou"], "An diesem Tag nichts gebucht": ["Nothing booked on this day", "Bu gün kayıt yok", "В этот день ничего нет", "Цього дня нічого немає", "Tego dnia nic nie zapisano", "لا شيء مسجّل في هذا اليوم", "Nimic înregistrat în această zi"], "Tipp auf einen anderen Tag oder noch einmal auf den Tag, um alle zu sehen.": ["Tap another day, or tap this day again to see everything.", "Başka bir güne dokun ya da hepsini görmek için bu güne tekrar dokun.", "Нажми на другой день или ещё раз на этот, чтобы увидеть всё.", "Натисни на інший день або ще раз на цей, щоб побачити все.", "Stuknij inny dzień albo jeszcze raz ten, aby zobaczyć wszystko.", "اضغط على يوم آخر، أو على هذا اليوم مرة أخرى لرؤية الكل.", "Atinge altă zi sau din nou această zi ca să vezi tot."], "Backup wird heruntergeladen": ["Backup is downloading", "Yedek indiriliyor", "Резервная копия загружается", "Резервна копія завантажується", "Kopia zapasowa jest pobierana", "يجري تنزيل النسخة الاحتياطية", "Copia de rezervă se descarcă"]}, LL=["en","tr","ru","uk","pl","ar","ro"]; for (const [k,v] of Object.entries(N)){ let i=I18N_K.indexOf(k); if (i<0){ I18N_K.push(k); i=I18N_K.length-1; } LL.forEach((l,j)=>{ const a=(I18N_T[l]=I18N_T[l]||[]); if (!a[i]) a[i]=v[j]; }); } })();
 const MNAME={en:"Mommy",tr:"Anne",ru:"Мама",uk:"Мама",pl:"Mama",ar:"ماما",ro:"Mami"};
 function mNm(v){ const n=MNAME[LANG]; if (!n||typeof v!=="string") return v; return v.replace(/\bMami\b(?!-Studio)/g,n).replace(/Мами|Мамі/g,n); }
@@ -3290,8 +3291,11 @@ function monthName(ym){ const [y,m]=ymParts(ym); return MONTHS[m-1]+" "+y; }
 function monthShort(ym){ const [y,m]=ymParts(ym); return MSHORT[m-1]+" "+y; }
 const fmtE = new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"});
 const fmtE0 = new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR",maximumFractionDigits:0});
-function eur(v){ return fmtE.format(Math.round((v||0)*100)/100); }
-function eur0(v){ return fmtE0.format(v||0); }
+/* Einzahl/Mehrzahl: „1 Buchung“, „2 Buchungen“ */
+function plN(n, one, many){ return `${n} ${Number(n)===1?one:many}`; }
+/* „-0,00 €“ vermeiden: winzige Minusreste werden zu 0 */
+function eur(v){ return fmtE.format(Math.round((v||0)*100)/100 || 0); }
+function eur0(v){ v=Number(v)||0; return fmtE0.format(Math.sign(v)*Math.round(Math.abs(v)) || 0); }
 function numStr(v){ return (v===undefined||v===null||v==="") ? "" : String(Math.round(v*100)/100).replace(".",","); }
 function parseAmt(s){
   if (typeof s==="number") return s;
@@ -3696,7 +3700,7 @@ function joblessTop(ym, free, c){
     tiles.push(`<button class="card" ${go}><span class="jli">${ic("health",17)}</span><b>Beihilfe</b><small>${open.length?`${open.length} offen<br><b>${esc(eur0(sumO))} ausstehend</b>`:"keine Rechnung offen"}</small></button>`); }
   else if (P.side==="steuer"){ const y=Number(ym.slice(0,4)), tx=taxCalc(y), ts=taxStatus(y,tx);
     tiles.push(`<button class="card" data-go="year"><span class="jli">${ic("receipt",17)}</span><b>Steuer ${y}</b><small>${ts.kind==="pflicht"?`<b class="neg">Erklärung Pflicht</b><br>ca. ${esc(eur0(Math.max(0,tx.due)))}`:ts.kind==="erstattung"?`<b class="pos">ca. ${esc(eur0(-tx.due))} zurück</b>`:"keine Erklärung nötig"}</small></button>`); }
-  if (P.cd) tiles.push(`<button class="card" ${go}><span class="jli">${ic("cal",17)}</span><b>${esc(P.cd)}</b><small>${end?`${endDays<0?"seit":"am"} ${esc(new Date(end+"T12:00").toLocaleDateString("de-DE"))}<br><b class="${endDays>=0&&endDays<=90?"neg":""}">${endDays<0?"vorbei":endDays<62?`noch ${endDays} Tage`:`noch ${Math.round(endDays/30.4)} Monate`}</b>`:P.since?"Beginn eintragen":"Datum eintragen"}</small></button>`);
+  if (P.cd) tiles.push(`<button class="card" ${go}><span class="jli">${ic("cal",17)}</span><b>${esc(P.cd)}</b><small>${end?`${endDays<0?"seit":"am"} ${esc(new Date(end+"T12:00").toLocaleDateString("de-DE"))}<br><b class="${endDays>=0&&endDays<=90?"neg":""}">${endDays<0?"vorbei":endDays<62?`noch ${plN(endDays,"Tag","Tage")}`:`noch ${Math.round(endDays/30.4)} Monate`}</b>`:P.since?"Beginn eintragen":"Datum eintragen"}</small></button>`);
   if (tiles.length<2) tiles.push(goal?`<button class="card" data-goalsopen="1"><span class="jli">${ic("piggy",17)}</span><b>${S.settings.work==="schule"?"Sparziel":"Rücklage"}</b><small>${esc(goal.name)}<br><b>${esc(eur0(goalSaved(goal).v))} / ${esc(eur0(goal.target))}</b></small></button>`
         :`<button class="card" id="goalFirst"><span class="jli">${ic("piggy",17)}</span><b>${S.settings.work==="schule"?"Sparziel":"Rücklage"}</b><small>${S.settings.work==="schule"?"auf etwas hin sparen":"für teure Monate anlegen"}</small></button>`);
   return `<div class="jl">
@@ -3892,6 +3896,15 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.43.2", "21. November 2026", ["Kontoauszug als CSV: Bei der DKB wurde „2.350“ als 2,35 € gelesen – jetzt richtig 2.350 €. Deutsche Bank/Postbank mit getrennten Soll-/Haben-Spalten und Revolut (Namen) funktionieren jetzt auch.",
+    "Android-Zurück-Taste und Esc schließen jetzt auch Rechnung, Analyse, Bargeld, Kredit, Bank-Auswahl und weitere Fenster – statt dahinter die Seite zu wechseln.",
+    "Bank-Auswahl lässt sich abbrechen, wenn du sie selbst geöffnet hast.",
+    "Seitenwechsel per Wischen: Auf langsamen Handys zählt jetzt auch die Stelle, an der der Finger loslässt.",
+    "Summen-Karte im Kontostapel antippen zeigt jetzt einen Hinweis statt nichts zu tun.",
+    "Kein „-0,00 €“ mehr bei winzigen Rundungsresten.",
+    "Einzahl richtig: „1 Buchung übernommen“, „1 Tag“, „noch 1 Woche“, „1 Beleg“ – und diese Meldungen sind jetzt auch übersetzt.",
+    "Kalender in den Buchungen: Wochentage besser lesbar, Tageszahlen im Dunkelmodus gut lesbar.",
+    "Neue Kategorie oder neuen Space anlegen und dabei woanders hintippen löste einen Fehler aus – behoben."]],
   ["0.43.1", "21. November 2026", ["Fehlersuche auf Handy, Tablet und PC: Beträge wie „3,-“, „1.234“, „+20“ oder „10 EUR“ werden jetzt richtig gelesen.",
     "„Noch pro Tag“ rechnet überall gleich: Hauptkonto minus offene Fixkosten und Steuer-Rücklage, verteilt auf die restlichen Tage inklusive heute.",
     "Von Hand abgehakte Fixkosten senken jetzt sofort den Kontostand – „Noch pro Tag“ springt dabei nicht mehr.",
@@ -4690,7 +4703,7 @@ function hoRender(){ const b=$("hoBody"); if (!b) return; const y=HOUI.y, c=hoCf
       <div class="hocal">${wd.map(w=>`<i>${esc(w)}</i>`).join("")}${cells}</div>
       <div class="hochips"><button type="button" data-hofill="5">Alle Werktage</button><button type="button" data-hofill="4">Mo–Do</button><button type="button" data-hofill="0">Monat leeren</button></div>
       <div class="hoprog"><i style="width:${Math.min(100,H.days/HO_DMAX*100)}%"></i></div>
-      <div class="small muted"><span>Dieser Monat: ${mc} Tage</span> · <span>${y}: ${H.days} von ${HO_DMAX} Tagen</span> · <span>${H.days<HO_DMAX?`noch ${HO_DMAX-H.days} Tage bis zur Grenze`:"Grenze erreicht"}</span></div></div>`; }
+      <div class="small muted"><span>Dieser Monat: ${plN(mc,"Tag","Tage")}</span> · <span>${y}: ${H.days} von ${HO_DMAX} Tagen</span> · <span>${H.days<HO_DMAX?`noch ${HO_DMAX-H.days} Tage bis zur Grenze`:"Grenze erreicht"}</span></div></div>`; }
   h+=`<div class="hores"><span><small>${self?"Wird vom Gewinn abgezogen":"Wird vom Lohn abgezogen (Werbungskosten)"}</small>${H.pick?esc(OL[H.pick][1]):""}</span><b>−${E(H.amt)}</b></div>
     <p class="small muted" style="margin:10px 4px 0">Computer, Möbel und Software trägst du zusätzlich als ${self?"Betriebsausgabe":"Werbungskosten"} ein. An einem Tag zählt nur eine Pauschale, auch wenn du mehrere Jobs hast. Schätzung – ersetzt keine Steuerberatung.</p>`;
   b.innerHTML=h; }
@@ -5105,10 +5118,10 @@ document.addEventListener("pointerdown", e=>{ if (!e.isPrimary) return;
   if (DBG.touch) dbgTrail(DBG.g); }, {capture:true, passive:true});
 document.addEventListener("pointermove", e=>{ const g=DBG.g; if (!g || !e.isPrimary) return; g.lx=e.clientX; g.ly=e.clientY;
   g.max=Math.max(g.max, Math.hypot(e.clientX-g.x, e.clientY-g.y)); if (DBG.touch && g.pts.length<400) { g.pts.push([e.clientX,e.clientY]); dbgDraw(); } }, {capture:true, passive:true});
-const dbgUp=e=>{ const g=DBG.g; if (!g || !e.isPrimary) return; DBG.g=null;
+const dbgUp=e=>{ const g=DBG.g; if (!g || !e.isPrimary) return; DBG.g=null; if (e.type==="pointerup" && (e.clientX||e.clientY)){ g.lx=e.clientX; g.ly=e.clientY; g.max=Math.max(g.max, Math.hypot(g.lx-g.x, g.ly-g.y)); } g.cx=e.type==="pointercancel";
   const dx=g.lx-g.x, dy=g.ly-g.y, dt=performance.now()-g.t;
   if (g.max<12){ dbgAdd("tipp", dbgEl(g.el)); g.kind="tap"; }
-  else { const dir=Math.abs(dx)>Math.abs(dy)?(dx<0?"←":"→"):(dy<0?"↑":"↓"); dbgAdd("wisch", `${dir} ${Math.round(Math.hypot(dx,dy))} px · ${dbgEl(g.el)}`); g.kind="swipe";
+  else { const dir=Math.abs(dx)>Math.abs(dy)?(dx<0?"←":"→"):(dy<0?"↑":"↓"); dbgAdd("wisch", `${dir} ${Math.round(Math.hypot(dx,dy))} px${g.cx?" (abgebrochen)":""} · ${dbgEl(g.el)}`); g.kind="swipe";
     const ax=Math.abs(dx), cardish=g.el && g.el.closest && g.el.closest(".astack:not(.one),.srail"), far=cardish ? ax>90 : (ax>innerWidth*0.4 || (ax/Math.max(1,dt)>0.75 && ax>innerWidth*0.2));
     /* nur melden, wenn die Geste auch wirklich hätte wechseln müssen (kurze, langsame Wischer wechseln absichtlich nicht) */
     if (g.touch && far && Math.abs(dy)<ax*0.5 && dt<900) setTimeout(()=>{ if (dbgSig(g.el)===g.sig) dbgDead(g, dx, dy, dt); }, 900); }
@@ -5554,7 +5567,7 @@ document.addEventListener("click", e=>{ const b=e.target.closest("[data-exp]"); 
   if (k==="report"){ saveTextFile(`Monatsbericht-${ym}.html`, reportHtml(ym), "text/html", "Monatsbericht gespeichert"); return; }
   const r = k==="month" ? exportCsv(ym+"-01", ym+"-31") : exportCsv(y+"-01-01", y+"-12-31");
   if (!r.n){ toast("Keine Buchungen in diesem Zeitraum"); return; }
-  saveTextFile(`Buchungen-${k==="month"?ym:y}.csv`, r.text, "text/csv", `${r.n} Buchungen gespeichert`); });
+  saveTextFile(`Buchungen-${k==="month"?ym:y}.csv`, r.text, "text/csv", plN(r.n,"Buchung gespeichert","Buchungen gespeichert")); });
 
 /* Währungen */
 const FX_CODES=["USD","GBP","CHF","TRY","PLN","RON","CZK","HUF","SEK","DKK","NOK","JPY","CNY","CAD","AUD"];
@@ -5633,7 +5646,7 @@ async function renderSpeicher(){ const el=$("speicherEd"); if (!el) return;
   const tot=rb+lb+ls, bar=(v,c)=>`<i style="width:${tot?Math.max(v?2:0,v/tot*100):0}%;background:${c}"></i>`;
   el.innerHTML=`<div class="stor"><b>${mb(tot)}</b><span class="small muted">belegt die App auf diesem Gerät</span><div class="storbar">${bar(rb,"var(--accent)")}${bar(ls,"#7a5bc2")}${bar(lb,"#c27c0e")}</div></div>
     <div class="exr"><span class="exi" style="background:var(--accent)">${ic("camera",20)}</span><span class="n"><b>Belegfotos</b><small>${rc} ${rc===1?"Foto":"Fotos"} · ${mb(rb)}</small></span><button class="btn primary" id="spBelege">Ansehen</button></div>
-    <div class="exr"><span class="exi" style="background:#7a5bc2">${ic("doc",20)}</span><span class="n"><b>Buchungen & Einstellungen</b><small>${S.tx.length} Buchungen · ${mb(ls)}</small></span></div>
+    <div class="exr"><span class="exi" style="background:#7a5bc2">${ic("doc",20)}</span><span class="n"><b>Buchungen & Einstellungen</b><small>${plN(S.tx.length,"Buchung","Buchungen")} · ${mb(ls)}</small></span></div>
     <div class="exr"><span class="exi" style="background:#c27c0e">${ic("cart",20)}</span><span class="n"><b>Geladene Logos</b><small>${lc} · ${mb(lb)}</small></span>${lc?`<button class="btn" id="logoClear">Leeren</button>`:""}</div>
     ${est&&est.quota?`<p class="small muted" style="margin:10px 0 0">Frei für die App: ca. ${mb(Math.max(0,est.quota-est.usage))}</p>`:""}`;
 }
@@ -6266,7 +6279,7 @@ function acFlip(card, mid, done){ const base=card.style.transform||"", R=RMo&&RM
   if (R){ mid(); done&&done(); return; }
   const a=card.animate([{transform:`perspective(1000px) ${base} rotateY(0deg)`},{transform:`perspective(1000px) ${base} rotateY(90deg)`}],{duration:170,easing:"ease-in"});
   a.onfinish=()=>{ mid(); const b=card.animate([{transform:`perspective(1000px) ${base} rotateY(-90deg)`},{transform:`perspective(1000px) ${base} rotateY(0deg)`}],{duration:220,easing:"cubic-bezier(.2,.9,.3,1.25)"}); b.onfinish=()=>done&&done(); }; }
-function acEditOpen(card){ const i=+card.dataset.ci, m=(UI.acctEd||[])[i]; if (!m || card.querySelector(".aback")) return;
+function acEditOpen(card){ const i=+card.dataset.ci, m=(UI.acctEd||[])[i]; if (!m && !card.querySelector(".aback")){ toast(nt("ac_sum")); return; } if (!m || card.querySelector(".aback")) return;
   document.querySelectorAll(".aback").forEach(x=>acEditClose(x.closest(".acard")));
   const v=Math.round(m.bal*100)/100;
   acFlip(card, ()=>{ card.classList.add("acflip"); card.insertAdjacentHTML("beforeend",`<form class="aback" data-acform="${i}" onsubmit="return false"><b>${esc(nt("ac_t",{n:m.label}))}</b><small>${esc(nt(m.cash?"ac_s_cash":"ac_s"))}</small>
@@ -7628,7 +7641,7 @@ function renderList(){
     for (const t of list) if (t.kind==="ausgabe"||t.kind==="betrieb") per[Number(t.date.slice(8,10))]+=t.amount;
     const mx=Math.max(1,...per), first=(new Date(UI.ym+"-01T12:00:00").getDay()+6)%7;
     $("calCard").innerHTML = `<div class="calg">${["Mo","Di","Mi","Do","Fr","Sa","So"].map(w=>`<span class="w">${w}</span>`).join("")}${"<span></span>".repeat(first)}${Array.from({length:D},(_,k)=>{ const d=k+1, iso=UI.ym+"-"+pad(d), v=per[d], a=v>0?0.15+0.85*Math.sqrt(v/mx):0;
-      return `<button data-calday="${iso}" class="${a>0.5?"hot":""} ${UI.calDay===iso?"sel":""} ${iso===today?"today":""}" style="${v>0?`background:color-mix(in srgb, var(--accent) ${Math.round(a*100)}%, var(--sunk))`:""}" aria-label="${d}. ${esc(MONTHS[ymParts(UI.ym)[1]-1])}: ${esc(eur(v))} ausgegeben">${d}${v>0?`<small>${esc(shortK(v))}</small>`:""}</button>`; }).join("")}</div>
+      return `<button data-calday="${iso}" class="${a>0.78?"hot mid":a>0.5?"mid":""} ${UI.calDay===iso?"sel":""} ${iso===today?"today":""}" style="${v>0?`background:color-mix(in srgb, var(--accent) ${Math.round(a*100)}%, var(--sunk))`:""}" aria-label="${d}. ${esc(MONTHS[ymParts(UI.ym)[1]-1])}: ${esc(eur(v))} ausgegeben">${d}${v>0?`<small>${esc(shortK(v))}</small>`:""}</button>`; }).join("")}</div>
       <div class="calleg"><span>wenig</span><i></i><span>viel ausgegeben</span></div>`;
     if (UI.calDay) list = list.filter(t=>t.date===UI.calDay);
   }
@@ -7850,7 +7863,7 @@ function anaGroupTiles(y, ym, mc, tax, TS){
   if (need("kgverlauf")){ const tx=yIncByArt(y,["lohnersatz"]), tot=sum(tx,t=>t.amount);
     add("kgverlauf", `${esc(eur0(tot))} in ${y}`, aCard(`Krankengeld ${y}`, `<div class="abig"><b>${esc(eur0(tot))}</b><span class="small muted">bisher in ${y}${j.amount?` · ${esc(eur0(j.amount))} im Monat`:""}</span></div>${monthsRow(tx,y)}<p class="small muted" style="margin:10px 0 0">Krankengeld ist steuerfrei, erhöht aber den Steuersatz auf anderes Einkommen.</p>`), eur0(tot)); }
   if (need("kgende")){ const end=st.work==="krank"?profEnd():null, dl=dLeft(end), wk=dl!=null?Math.max(0,Math.ceil(dl/7)):null;
-    add("kgende", end?(dl<0?"Ende erreicht":`noch ${wk} Wochen`):"Beginn eintragen", aCard("78-Wochen-Grenze", end?`${aBar("vergangen", 546-Math.max(0,dl), 546, dl<=60?"var(--bad)":"var(--accent)", `${Math.round((546-Math.max(0,dl))/7)} von 78 Wochen`)}<p class="small muted" style="margin:10px 0 0">Krankengeld endet spätestens am <b>${esc(new Date(end+"T12:00").toLocaleDateString("de-DE"))}</b>. Danach: Arbeitslosengeld (Nahtlosigkeit) oder Erwerbsminderungsrente – rechtzeitig bei Agentur für Arbeit und Rentenversicherung melden.</p>`:`<p class="small muted" style="margin:0">Trag ein, seit wann du krank bist.</p>`, `<button class="link" data-go="more" data-sp="amt">Ändern</button>`), end?(dl<0?"vorbei":`${wk} Wo.`):"eintragen"); }
+    add("kgende", end?(dl<0?"Ende erreicht":`noch ${plN(wk,"Woche","Wochen")}`):"Beginn eintragen", aCard("78-Wochen-Grenze", end?`${aBar("vergangen", 546-Math.max(0,dl), 546, dl<=60?"var(--bad)":"var(--accent)", `${Math.round((546-Math.max(0,dl))/7)} von 78 Wochen`)}<p class="small muted" style="margin:10px 0 0">Krankengeld endet spätestens am <b>${esc(new Date(end+"T12:00").toLocaleDateString("de-DE"))}</b>. Danach: Arbeitslosengeld (Nahtlosigkeit) oder Erwerbsminderungsrente – rechtzeitig bei Agentur für Arbeit und Rentenversicherung melden.</p>`:`<p class="small muted" style="margin:0">Trag ein, seit wann du krank bist.</p>`, `<button class="link" data-go="more" data-sp="amt">Ändern</button>`), end?(dl<0?"vorbei":`${wk} Wo.`):"eintragen"); }
   if (need("zuzahl")){ const tx=yExpByCat(y,/zuzahl|apothek|medikament|arzt|gesund|physio|zahn/), tot=sum(tx,t=>t.amount), incY=sum(S.tx.filter(t=>t.kind==="einnahme"&&(t.date||"").startsWith(String(y))),t=>t.amount), lim=incY*0.02;
     add("zuzahl", `${esc(eur0(tot))} von ca. ${esc(eur0(lim))}`, aCard(`Zuzahlungen ${y}`, aBar("Gesundheitskosten", tot, Math.max(lim,tot), tot>=lim&&lim>0?"var(--good)":"var(--accent)", `${esc(eur0(tot))} / ${esc(eur0(lim))}`)+`<p class="small muted" style="margin:10px 0 0">Belastungsgrenze: <b>2 %</b> deiner Bruttoeinnahmen im Jahr (bei chronischer Krankheit 1 %). Darüber kannst du dich bei der Krankenkasse von Zuzahlungen befreien lassen – Quittungen aufheben! Hier zählen Ausgaben in Kategorien wie Gesundheit, Apotheke, Zuzahlungen.</p>`), lim>0?`${Math.round(tot/lim*100)} %`:eur0(tot)); }
   return out;
@@ -8013,7 +8026,7 @@ function storyYear(y){
   const rows=Array.from({length:12},(_,i)=>{ const ym=y+"-"+pad(i+1); return i<until ? monthCalc(ym) : null; });
   const done=rows.filter(Boolean), inc=sum(done,r=>r.income), exp=sum(done,r=>r.expenses), net=inc-exp, act=done.filter(r=>r.expenses>0);
   const out=[];
-  out.push(["s-g",`${y} · ${net>=0?"übrig":"zu viel ausgegeben"}`,(net>=0?"+ ":"− ")+eur0(Math.abs(net)), (until<12?`Bis jetzt (${until} Monate)`:"Übers ganze Jahr")+` hast du ${eur0(Math.abs(net))} ${net>=0?"mehr eingenommen als ausgegeben":"mehr ausgegeben als eingenommen"}.`, scmp("Einnahmen",eur0(inc),"Ausgaben",eur0(exp))]);
+  out.push(["s-g",`${y} · ${net>=0?"übrig":"zu viel ausgegeben"}`,(net>=0?"+ ":"− ")+eur0(Math.abs(net)), (until<12?`Bis jetzt (${plN(until,"Monat","Monate")})`:"Übers ganze Jahr")+` hast du ${eur0(Math.abs(net))} ${net>=0?"mehr eingenommen als ausgegeben":"mehr ausgegeben als eingenommen"}.`, scmp("Einnahmen",eur0(inc),"Ausgaben",eur0(exp))]);
   if (act.length){ const ex=rows.map(r=>r?r.expenses:0), mx=Math.max(...ex), mi=ex.indexOf(mx), avg=exp/act.length;
     out.push(["s-b","Alle Monate","Ø "+eur0(avg),"So viel hast du im Schnitt pro Monat ausgegeben. Der hellste Balken ist der teuerste Monat.", sbars(ex.map(v=>v/mx*100),mi,MSHORT.map(s=>s[0]))]);
     out.push(["s-r","Teuerster Monat",MONTHS[mi],`${eur0(mx)} ausgegeben – ${eur0(mx-avg)} mehr als im Schnitt.`, sbars(ex.map(v=>v/mx*100),mi)]);
@@ -8431,7 +8444,7 @@ async function saveBinary(name, blob, okMsg){
 async function belegeZip(year){
   const txs=S.tx.filter(t=>t.date&&t.date.startsWith(year)&&hasReceipt(t.id)).sort((a,b)=>a.date.localeCompare(b.date));
   if (!txs.length){ toast(`Für ${year} sind keine Belege gespeichert`); return; }
-  toast(`${txs.length} Belege werden gepackt …`);
+  toast(txs.length===1?"1 Beleg wird gepackt …":`${txs.length} Belege werden gepackt …`);
   const files=[], used=new Set(), rows=[["Datum","Art","Kategorie","Beschreibung","Betrag (€)","Datei"]];
   for (const t of txs){
     const img=await rcptGet(t.id); if (!img) continue;
@@ -8575,8 +8588,8 @@ function wkSection(y){
       <div class="progress-big" style="margin:8px 0 4px"><div class="fill" style="width:${Math.min(100,w.total/P*100)}%"></div></div>
       <span class="small muted">${w.total>P?`Alles über der Pauschale von ${esc(eur0(P))} senkt deine Steuer – hier etwa um ${esc(eur0(over*rate))}.`:`Bis ${esc(eur0(P))} rechnet das Finanzamt sowieso pauschal. Noch ${esc(eur0(P-w.total))}, dann lohnt sich das Sammeln.`}</span>
       <div class="wkl">
-        ${w.HO.on?`<button type="button" class="wkr wkho" data-hoopen><span class="ic">${ic("home",18)}</span><span class="n"><b>Homeoffice</b><small>${w.HO.amt&&hasSelf()?"Zählt bei der Selbstständigkeit":esc(hoLine(w.HO))}</small></span><b>${esc(eur0(w.home))} ›</b></button>`:`<div class="wkr"><span class="ic">${ic("home",18)}</span><span class="n"><b>Homeoffice</b><small>${w.homeDays} Tage × 6 € · höchstens 1.260 € · <button type="button" class="linkbtn" data-hoopen>Mehr Möglichkeiten</button></small></span><span class="stp"><button data-wkhome="-1" aria-label="Ein Tag weniger">−</button><b>${esc(eur0(w.home))}</b><button class="p" data-wkhome="1" aria-label="Ein Homeoffice-Tag mehr">+</button></span></div>`}
-        <div class="wkr"><span class="ic">${ic("car",18)}</span><span class="n"><b>Fahrten zur Arbeit</b><small>${w.days} Tage × ${w.km} km × ${Number(y)>=2026?"0,38 €":"0,30/0,38 €"}</small></span><b>${esc(eur0(w.fahrt))}</b></div>
+        ${w.HO.on?`<button type="button" class="wkr wkho" data-hoopen><span class="ic">${ic("home",18)}</span><span class="n"><b>Homeoffice</b><small>${w.HO.amt&&hasSelf()?"Zählt bei der Selbstständigkeit":esc(hoLine(w.HO))}</small></span><b>${esc(eur0(w.home))} ›</b></button>`:`<div class="wkr"><span class="ic">${ic("home",18)}</span><span class="n"><b>Homeoffice</b><small>${plN(w.homeDays,"Tag","Tage")} × 6 € · höchstens 1.260 € · <button type="button" class="linkbtn" data-hoopen>Mehr Möglichkeiten</button></small></span><span class="stp"><button data-wkhome="-1" aria-label="Ein Tag weniger">−</button><b>${esc(eur0(w.home))}</b><button class="p" data-wkhome="1" aria-label="Ein Homeoffice-Tag mehr">+</button></span></div>`}
+        <div class="wkr"><span class="ic">${ic("car",18)}</span><span class="n"><b>Fahrten zur Arbeit</b><small>${plN(w.days,"Tag","Tage")} × ${w.km} km × ${Number(y)>=2026?"0,38 €":"0,30/0,38 €"}</small></span><b>${esc(eur0(w.fahrt))}</b></div>
         <div class="grid2" style="margin:0 0 6px 48px"><div class="field"><label for="wkKm">Entfernung (km, einfach)</label><input class="in" id="wkKm" inputmode="decimal" value="${w.km||""}" placeholder="0"></div><div class="field"><label for="wkDays">Tage im Betrieb</label><input class="in" id="wkDays" inputmode="numeric" value="${w.days||""}" placeholder="0"></div></div>
         <div class="wkr"><span class="ic">${ic("tag",18)}</span><span class="n"><b>Arbeitsmittel aus Buchungen</b><small>${w.txs.length?esc(w.txs.slice(0,3).map(t=>txPayee(t)||t.cat).join(", "))+(w.txs.length>3?" …":""):"In einer Ausgabe „Werbungskosten (Job)“ einschalten"}</small></span><b>${esc(eur0(w.mittel))}</b></div>
         ${w.own.map(x=>`<div class="wkr"><span class="ic">${ic("doc",18)}</span><span class="n"><b>${esc(x.name)}</b><small>eigener Posten</small></span><span class="stp"><b>${esc(eur0(Number(x.amount)||0))}</b><button data-wkdel="${esc(x.id)}" aria-label="${esc(x.name)} entfernen">×</button></span></div>`).join("")}
@@ -8754,16 +8767,17 @@ function bankGuide(){
       <li>${pdf?"Wähle den Monat bzw. Zeitraum und speichere die <b>PDF</b>.":"Wähle den Zeitraum, z. B. seit deinem letzten Import."}</li>
       <li>Lade die Datei hier hoch. Schon importierte Buchungen werden erkannt und übersprungen.</li></ol>
     <p class="small muted" style="margin:12px 0 0">${pdf?"Die App liest Datum, Empfänger und Betrag aus dem PDF – kurz drüberschauen, ob alles stimmt.":"Je nach App- oder Browser-Version heißen die Punkte leicht anders. Klappt es nicht, geht auch der <b>PDF-Kontoauszug</b> – oder fotografier ihn über Plus › Foto."} Die Datei bleibt nur in deiner App.</p></div>`; }
-function bankAskOpen(){ let el=$("bankBg"); if (!el){ el=document.createElement("div"); el.id="bankBg"; el.className="wizbg"; document.body.appendChild(el); }
+function bankAskOpen(manual){ UI.bankManual=!!manual; let el=$("bankBg"); if (!el){ el=document.createElement("div"); el.id="bankBg"; el.className="wizbg"; document.body.appendChild(el); }
   UI.bankSel=(S.settings.bank&&S.settings.bank.id)||""; UI.bankOther=(S.settings.bank&&S.settings.bank.name)||"";
   el.hidden=false; document.body.classList.add("locked"); bankAskRender(); }
 function bankAskRender(){ const el=$("bankBg"); if (!el) return;
   el.innerHTML=`<div class="wiz" role="dialog" aria-label="Bank"><h2 class="wt">Bei welcher Bank ist dein Konto?</h2><p class="ws">Dann zeigt dir die App genau, wie du deine Umsätze von dort holst.</p>${bankPicker(UI.bankSel, UI.bankOther)}
-    <div class="wfoot solo"><button class="btn primary" id="bankSave" ${UI.bankSel&&(UI.bankSel!=="andere"||(UI.bankOther||"").trim())?"":"disabled"}>Speichern</button></div></div>`; }
+    <div class="wfoot ${S.settings.bank||UI.bankManual?"":"solo"}">${S.settings.bank||UI.bankManual?`<button class="btn" data-bankx>${esc(nt("sh_cancel"))}</button>`:""}<button class="btn primary" id="bankSave" ${UI.bankSel&&(UI.bankSel!=="andere"||(UI.bankOther||"").trim())?"":"disabled"}>Speichern</button></div></div>`; }
 function bankAskShould(){ return S.settings && S.settings.wizDone && !S.settings.bank && !UI.wiz && (!$("legalBg")||$("legalBg").hidden) && (!$("bankBg")||$("bankBg").hidden) && (!$("loginBg")||$("loginBg").hidden); }
 document.addEventListener("click", async e=>{
   const t=e.target, bb=t.closest("#bankBg");
-  if (t.closest("[data-bankchange]")){ bankAskOpen(); return; }
+  if (t.closest("[data-bankchange]")){ bankAskOpen(true); return; }
+  if (t.closest("[data-bankx]")){ const b=$("bankBg"); if (b) b.hidden=true; document.body.classList.remove("locked"); return; }
   const k=t.closest("[data-bank]"); if (k){
     if (bb){ UI.bankSel=k.dataset.bank; bankAskRender(); if (UI.bankSel==="andere") setTimeout(()=>$("bankOther")&&$("bankOther").focus(),30); return; }
     if (t.closest("#wizBg") && UI.wiz){ UI.wiz.bank=k.dataset.bank; wizRender(); if (UI.wiz.bank==="andere") setTimeout(()=>$("bankOther")&&$("bankOther").focus(),30); return; } }
@@ -9082,7 +9096,7 @@ function profLine(){ const w=WORK.find(x=>x[0]===S.settings.work), ex=(S.setting
   const first=S.tx.reduce((m,t)=>t.date&&t.date<m?t.date:m,"9999"); const since = first<"9999" ? ` · seit ${MSHORT[Number(first.slice(5,7))-1]} ${first.slice(0,4)}` : "";
   return (w?w[1]:"Profil bearbeiten")+(ex.length?" + "+ex.join(", "):"")+since; }
 function profStats(){ const n=S.tx.length, c=abCfg(); const bk = c.last ? (()=>{ const d=Math.floor((Date.now()-c.last)/864e5); return d<1?"Backup heute":d===1?"Backup gestern":`Backup vor ${d} Tagen`; })() : "noch kein Backup";
-  return `${n.toLocaleString("de-DE")} ${n===1?"Buchung":"Buchungen"} · ${RCPT.ids.size} Belege · ${bk}`; }
+  return `${n.toLocaleString("de-DE")} ${n===1?"Buchung":"Buchungen"} · ${plN(RCPT.ids.size,"Beleg","Belege")} · ${bk}`; }
 /* Einstellungen */
 var ACC = { tab:"geld", open:new Set(), nodes:{}, built:"", q:"" };
 const ACC_TABS = [["geld","Geld"],["anpassen","Anpassen"],["sicherheit","Sicherheit"],["hilfe","Hilfe"]];
@@ -10660,6 +10674,7 @@ fcp_pd:["{v} pro Tag × {n} Tage", "{v} per day × {n} days", "günlük {v} × {
 fcp_stb:["Steuer-Erstattung", "Tax refund", "Vergi iadesi", "Возврат налога", "Повернення податку", "Zwrot podatku", "استرداد الضريبة", "Rambursare de impozit"],
 fcp_stb_s:["angekündigt, noch nicht da", "announced, not here yet", "duyuruldu, henüz gelmedi", "объявлен, ещё нет", "оголошено, ще немає", "zapowiedziany, jeszcze nie ma", "مُعلن، لم يصل بعد", "anunțată, încă nu a venit"],
 fc_how2:["Gerechnet mit dem, was du oben eingeschaltet hast – zusammen ca. {n} Ausgaben pro Tag.", "Calculated with what you switched on above – about {n} spending per day in total.", "Yukarıda açtıklarınla hesaplandı – toplam günlük yaklaşık {n} harcama.", "Рассчитано по тому, что ты включил выше – всего около {n} расходов в день.", "Розраховано з тим, що ти увімкнув вище – разом близько {n} витрат на день.", "Liczone z tym, co włączyłeś powyżej – razem ok. {n} wydatków dziennie.", "محسوب بما فعّلته أعلاه – إجمالي نحو {n} مصاريف يومياً.", "Calculat cu ce ai activat mai sus – în total cca {n} cheltuieli pe zi."],
+ac_sum:["Diese Karte rechnet nur zusammen – tippe ein einzelnes Konto an, um seinen Stand zu ändern.","This card only adds up – tap a single account to change its balance.","Bu kart sadece toplar – bakiyesini değiştirmek için tek bir hesaba dokun.","Эта карточка только суммирует – нажми на отдельный счёт, чтобы изменить его баланс.","Ця картка лише підсумовує – натисни на окремий рахунок, щоб змінити його залишок.","Ta karta tylko sumuje – stuknij pojedyncze konto, aby zmienić jego saldo.","هذه البطاقة تجمع فقط – اضغط على حساب واحد لتغيير رصيده.","Acest card doar adună – atinge un singur cont ca să-i schimbi soldul."],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
@@ -12093,7 +12108,7 @@ function rvCp(s){ let o=""; for (const ch of String(s??"")){ const c=ch.codePoin
 function rvW(s, sz, b){ const W=RV_HW[b?"Helvetica-Bold":"Helvetica"], t=rvCp(s); let w=0; for (let i=0;i<t.length;i++){ const c=t.charCodeAt(i); w+=(c>=32?W[c-32]:0)||556; } return w*sz/1000; }
 function rvWrap(s, sz, b, max){ const out=[]; for (const para of String(s||"").split(/\n/)){ let line=""; for (const w of para.split(/\s+/).filter(Boolean)){ const t=line?line+" "+w:w; if (rvW(t,sz,b)<=max) line=t; else { if (line) out.push(line); line=w; while (rvW(line,sz,b)>max && line.length>1){ let k=line.length; while (k>1 && rvW(line.slice(0,k),sz,b)>max) k--; out.push(line.slice(0,k)); line=line.slice(k); } } } out.push(line); } return out; }
 function rvFit(s, sz, b, max){ s=String(s||""); if (rvW(s,sz,b)<=max) return s; while (s.length>1 && rvW(s+"…",sz,b)>max) s=s.slice(0,-1); return s+"…"; }
-const rvE=v=>new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(Math.round((v||0)*100)/100);
+const rvE=v=>new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(Math.round((v||0)*100)/100 || 0);
 const rvN=v=>new Intl.NumberFormat("de-DE",{maximumFractionDigits:2}).format(v||0);
 const rvD=iso=>iso?new Date(iso+"T12:00").toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric"}):"";
 function rvNew(){ const b=rvBiz(); return {nr:rchNextNr(), date:isoToday(), z:b.z||14, lz:"", kid:"", k:{name:"",person:"",street:"",city:"",email:""}, pos:[], vat:19, typ:"r", abz:[], rep:0, title:"", intro:b.intro||"Vielen Dank für Ihren Auftrag. Hiermit stelle ich Ihnen folgende Leistungen in Rechnung:", note:b.outro||""}; }
@@ -12870,7 +12885,7 @@ document.addEventListener("click", async e => {
   const dd = t.closest("[data-ddel]"); if (dd){ const d=S.debts.find(x=>x.id===dd.dataset.ddel); const prev=d?(({id:_,...r})=>r)(d):null; if (await safe(()=>del("debts", dd.dataset.ddel))) toast("Gelöscht", prev?()=>safe(()=>put("debts", d.id, prev)):null); return; }
   const cdel = t.closest("[data-catdel]"); if (cdel){ const [k,n]=cdel.dataset.catdel.split("|"); const c=clone(S.settings.cats||DEFAULT_SETTINGS.cats); c[k]=c[k].filter(x=>(typeof x==="string"?x:x.name)!==n); S.settings.cats=c; render(); saveSettings(); return; }
   const cadd = t.closest("[data-catadd]"); if (cadd){ const k=cadd.dataset.catadd; const inp=document.createElement("input"); inp.className="in"; inp.style.width="190px"; inp.id="newcat-"+k; inp.placeholder="Name, dann Enter"; cadd.replaceWith(inp); inp.focus();
-    const commit=()=>{ const n=inp.value.trim(); if (n){ const c=clone(S.settings.cats||DEFAULT_SETTINGS.cats); const names=c[k].map(x=>typeof x==="string"?x:x.name); if (!names.includes(n)) c[k].push(k==="einnahme"?{name:n,art:"sonstige"}:n); S.settings.cats=c; saveSettings(); } renderMore(); };
+    const commit=()=>{ const n=inp.value.trim(); if (n){ const c=clone(S.settings.cats||DEFAULT_SETTINGS.cats); const names=c[k].map(x=>typeof x==="string"?x:x.name); if (!names.includes(n)) c[k].push(k==="einnahme"?{name:n,art:"sonstige"}:n); S.settings.cats=c; saveSettings(); } setTimeout(renderMore,0); /* nicht während eines anderen Neuzeichnens (Blur beim Entfernen) */ };
     inp.addEventListener("keydown",ev=>{ if (ev.key==="Enter") inp.blur(); if (ev.key==="Escape"){ inp.value=""; inp.blur(); } }); inp.addEventListener("blur",commit,{once:true}); return; }
 });
 $("settingsBtn").onclick = () => { UI.view = UI.view==="more" ? "home" : "more"; UI.sp=null; render(); window.scrollTo({top:0}); };
@@ -13664,9 +13679,9 @@ $("v-fix").addEventListener("keydown", e => {
 });
 $("v-fix").addEventListener("focusout", e => {
   const el=e.target; if (el.id!=="fxAmtIn") return;
-  if (el.dataset.cancel==="1"){ UI.amtEdit=null; renderFix(); return; }
+  if (el.dataset.cancel==="1"){ UI.amtEdit=null; setTimeout(renderFix,0); return; }
   const v=parseAmt(el.value);
-  if (!(v>=0)){ toast("Betrag ungültig"); UI.amtEdit=null; renderFix(); return; }
+  if (!(v>=0)){ toast("Betrag ungültig"); UI.amtEdit=null; setTimeout(renderFix,0); return; }
   setMonthAmount(el.dataset.fxamtin, v);
 });
 $("v-fix").addEventListener("change", async e => {
@@ -13781,8 +13796,9 @@ function parseDate(s){
   return null;
 }
 function parseBankAmt(s){
-  s=String(s||"").replace(/[€\s]/g,"").replace(/^\+/,""); if (!s) return NaN;
-  if (/,\d{1,2}$/.test(s)) s=s.replace(/\./g,"").replace(",","."); else s=s.replace(/,/g,"");
+  s=String(s||"").replace(/[€\s]|eur\b/gi,"").replace(/^\+/,"").replace(/^[−–]/,"-"); if (/^[\d.,]+[-−]$/.test(s)) s="-"+s.slice(0,-1); if (!s) return NaN;
+  /* „2.350“ ist bei Euro-Beträgen immer Tausender (drei Nachkommastellen gibt es nicht) */
+  if (/,\d{1,2}$/.test(s)) s=s.replace(/\./g,"").replace(",","."); else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s=s.replace(/\./g,""); else s=s.replace(/,/g,"");
   const v=Number(s); return isFinite(v)?v:NaN;
 }
 function hashKey(s){ let h=5381; for (let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))|0; return "k"+(h>>>0).toString(36)+s.length.toString(36); }
@@ -14211,7 +14227,7 @@ function camRevRender(){
       <span class="d">${esc(r.d?r.d.slice(8,10)+"."+r.d.slice(5,7)+".":"")}</span><span class="n">${esc(String(r.r[1]||r.r[2]||"").slice(0,40))}${r.dup?`<small class="warnt">schon gebucht</small>`:""}</span>
       <input class="a ${r.v<0?"neg":"pos"}" inputmode="decimal" data-cramt="${i}" value="${esc((r.v<0?"-":"")+Math.abs(r.v).toFixed(2).replace(".",","))}"></div>`).join("")}</div>`;
     btn=`<button class="btn" data-cr="more">Weitere Seite</button><button class="btn primary" data-cr="ok" ${n?"":"disabled"}>${n} übernehmen</button>`; }
-  el.innerHTML=`<div class="crin"><div class="crh"><b>${R.f?"Stimmt das so?":`${R.rows.length} Buchungen gefunden`}</b><button class="camx2" data-cr="close" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  el.innerHTML=`<div class="crin"><div class="crh"><b>${R.f?"Stimmt das so?":plN(R.rows.length,"Buchung gefunden","Buchungen gefunden")}</b><button class="camx2" data-cr="close" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="crtypes">${pills}</div>
     <div class="crshot"><div class="crpic" style="aspect-ratio:${R.W}/${R.H}"><img src="${R.img}" alt="Foto"><svg viewBox="0 0 ${R.W} ${R.H}" preserveAspectRatio="none">${camBoxes()}</svg></div></div>
     ${body}<div class="crbtns"><button class="btn" data-cr="again">Nochmal</button>${btn}</div></div>`;
@@ -14334,6 +14350,7 @@ async function loadCsv(file){
   const hn = headers.map(nrm);
   map.soll = hn.indexOf("soll"); map.haben = hn.indexOf("haben");
   if (map.amount<0 && map.soll>=0 && map.haben>=0) map.amount = map.soll;
+  if (map.payee<0){ const i=hn.findIndex(h=>h==="beschreibung"||h==="description"); if (i>=0 && i!==map.ref) map.payee=i; }
   if ([map.payee, map.payer, map.ref, map.date].includes(map.account) || (/iban|kontonummer/.test(hn[map.account]||"") && !/inhaber|auftragskonto/.test(hn[map.account]||""))) map.account=-1;
   if (map.payer===map.payee) map.payer=-1;
   map.paypal = hn.includes("transaktionscode") || hn.includes("transaction id");
@@ -14512,7 +14529,7 @@ function buildItems(){
   for (const [ri,r] of imp.raw.entries()){
     const date=parseDate(r[m.date]);
     let amount=parseBankAmt(r[m.amount]);
-    if (m.soll>=0 && m.haben>=0 && m.amount===m.soll){ const so=parseBankAmt(r[m.soll]), ha=parseBankAmt(r[m.haben]); amount=(isFinite(ha)?Math.abs(ha):0)-(isFinite(so)?Math.abs(so):0); }
+    if (m.soll>=0 && m.haben>=0 && (m.amount===m.soll || !String(r[m.amount]||"").trim())){ const so=parseBankAmt(r[m.soll]), ha=parseBankAmt(r[m.haben]); amount=(isFinite(ha)?Math.abs(ha):0)-(isFinite(so)?Math.abs(so):0); }
     if (m.sh>=0 && isFinite(amount)){ const sh=nrm(r[m.sh]); if (sh==="s"||sh==="soll") amount=-Math.abs(amount); else if (sh==="h"||sh==="haben") amount=Math.abs(amount); }
     if (!date || !isFinite(amount) || amount===0) continue;
     if (m.status>=0 && /vorgemerkt|pending|ausstehend|offen|storniert|abgelehnt/.test(nrm(r[m.status]))) continue;
@@ -14674,7 +14691,7 @@ async function commitImport(){
     S.settings.ignoredKeys = [...new Set([...(S.settings.ignoredKeys||[]).filter(k=>!takenKeys.has(k)), ...skipped])].slice(-3000);
     if (!mem) await withRetry(()=>db.doc("app/settings").set(clone(S.settings)));
     UI.importing=null; UI.imp=null; UI.view="list"; if (lastYm) UI.ym=lastYm; render(); window.scrollTo({top:0});
-    toast(`${nTx} Buchungen übernommen${nFix?`, ${nFix} Fixkosten abgehakt`:""}${nMerge?`, ${nMerge} mit vorhandenen verknüpft`:""}`);
+    toast([plN(nTx,"Buchung übernommen","Buchungen übernommen"), nFix?`${nFix} Fixkosten abgehakt`:"", nMerge?`${nMerge} mit vorhandenen verknüpft`:""].filter(Boolean).join(" · "));
     setTimeout(()=>{ try { if (recurCands().length){ RECUR_TOLD=true; recurSheet(); } } catch(e){} }, 900);
     dupSoon();
   } catch(e){
@@ -14694,7 +14711,7 @@ document.addEventListener("click", e => {
   if (e.target.closest("#spClean")){ cleanSpaces(); return; }
   if (e.target.closest("#spAdd")){ const btn=e.target.closest("#spAdd"); const inp=document.createElement("input"); inp.className="in"; inp.style.width="190px"; inp.id="newspace"; inp.placeholder="Name, dann Enter"; btn.replaceWith(inp); inp.focus();
     inp.addEventListener("keydown",ev=>{ if (ev.key==="Enter") inp.blur(); if (ev.key==="Escape"){ inp.value=""; inp.blur(); } });
-    inp.addEventListener("blur",()=>{ const n=inp.value.trim(); if (n && !(S.settings.spaces||[]).some(x=>nrm(x)===nrm(n))){ S.settings.spaces=[...(S.settings.spaces||[]), n]; saveSettings(); } renderMore(); },{once:true}); return; }
+    inp.addEventListener("blur",()=>{ const n=inp.value.trim(); if (n && !(S.settings.spaces||[]).some(x=>nrm(x)===nrm(n))){ S.settings.spaces=[...(S.settings.spaces||[]), n]; saveSettings(); } setTimeout(renderMore,0); },{once:true}); return; }
   if (e.target.closest("#backupSave")){ saveBackup(); return; }
   if (e.target.closest("#backupLoad")){ const b=e.target.closest("#backupLoad"); if (b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Alles ersetzen?"; setTimeout(()=>{ b.dataset.armed=""; b.textContent="Laden"; },4000); return; } b.dataset.armed=""; b.textContent="Laden"; $("backupFile").click(); return; }
   if (e.target.closest("#impDone")){ UI.imp=null; UI.view="home"; render(); window.scrollTo({top:0}); return; }
@@ -14790,6 +14807,11 @@ $("backupFile").addEventListener("change", async e => {
   catch(err){ toast("Diese Datei ist kein gültiges Backup"); }
 });
 
+/* Offene Fenster ohne eigene Zurück-/Esc-Behandlung schließen (Android-Zurück-Taste, Esc am PC) */
+const OV_CLOSE=[["rvBg","[data-rvclose]"],["anaBg","[data-anaclose]"],["artBg","[data-artclose]"],["tcBg","[data-tcclose]"],["hintBg","[data-hintclose]"],["addBg","[data-addclose]"],["cashBg","[data-cashclose]"],["loanBg","[data-loanclose]"],["recurBg","[data-rcclose]"],["kidBg","[data-kidclose]"],["afaBg","[data-afaclose]"],["bwBg","[data-bwclose]"],["hlBg","[data-hlclose]"],["loginBg","#loginX"],["bankBg","[data-bankx]"],["invBg","[data-invback],[data-invclose]"]];
+function ovCloseTop(){ for (const [id,sel] of OV_CLOSE){ const bg=$(id); if (!bg || bg.hidden || getComputedStyle(bg).display==="none") continue; const c=bg.querySelector(sel); if (c){ c.click(); return true; } } return false; }
+document.addEventListener("keydown", e=>{ if (e.key!=="Escape" || e.defaultPrevented) return; if (document.querySelector(".hobg:not([hidden]),#sheetBg:not([hidden])")) return;
+  for (const id of ["artBg","tcBg","loginBg","cashBg","loanBg","recurBg","kidBg","afaBg","bwBg","bankBg","invBg"]){ const bg=$(id); if (bg && !bg.hidden && getComputedStyle(bg).display!=="none"){ const c=bg.querySelector((OV_CLOSE.find(x=>x[0]===id)||[])[1]||"x"); if (c){ e.preventDefault(); c.click(); } return; } } });
 window.hbBack = () => {
   if (nudgeClose()) return true;
   if (!$("mvBg") && $("mvSheet") && !$("mvSheet").hidden){ mvSheetClose(); return true; }
@@ -14809,6 +14831,7 @@ window.hbBack = () => {
   if (UI.wiz && $("wizBg") && !$("wizBg").hidden){ if (!wizBackOne() && !UI.wiz.forced) wizClose(); return true; }
   if (!$("docRev").hidden){ drFinish(null); return true; }
   if (!$("fanBg").hidden){ fanClose(); return true; }
+  if (ovCloseTop()) return true;
   if (!$("sheetBg").hidden){ closeSheet(); return true; }
   if (UI.view==="import" && UI.importing) return true;
   if ((!IS_PC || PH_SET) && UI.view==="more" && ACC.page){ phPageClose(); return true; }
@@ -15369,7 +15392,10 @@ $("loginGo").onclick = doLogin;
     p = Math.max(-1,Math.min(1, ddx/W * (nbKey?1:0.5)));
     if (!draw.q){ draw.q=requestAnimationFrame(()=>{ draw.q=0; if (fC) draw(); }); }
   }, {passive:false});
-  const end=()=>{ if (!on) return; on=false; if (lock!=="x" || !cur) return;
+  const end=e=>{ if (!on) return; on=false; if (lock!=="x" || !cur) return;
+    /* Auf langsamen Geräten gehen Zwischen-Bewegungen verloren – die Stelle, an der der Finger loslässt, zählt mit */
+    const ct=e && e.type==="touchend" && e.changedTouches && e.changedTouches[0];
+    if (ct){ const cx=ct.clientX, ddx=cx-x0, now=Date.now(); if (ddx!==0 && (ddx<0?-1:1)===dir){ const np=Math.max(-1,Math.min(1, ddx/W*(nbKey?1:0.5))); if (Math.abs(np)>Math.abs(p)){ if (now>lastT) vx=0.5*vx+0.5*(cx-lastX)/(now-lastT); p=np; } } }
     const fling = Math.abs(vx)>0.6 && (vx<0?-1:1)===dir && Math.abs(p)>0.15;
     settle(Math.abs(p)>0.35 || fling); };
   document.addEventListener("touchend", end); document.addEventListener("touchcancel", end);

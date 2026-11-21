@@ -82,6 +82,8 @@ const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out',
   }
   // 2) Startseite: Konto-Karte antippen dreht um, Abbrechen dreht zurück
   await p.evaluate(()=>{ try{ window.__hbt.go('home'); }catch(_){} }); await sleep(2500); await hide();
+  /* vorne die erste Karte (Hauptkonto) – die Summen-Karte lässt sich absichtlich nicht ändern */
+  await p.evaluate(()=>{ const d=document.querySelector('#adots [data-cdot="0"]'); if (d) d.click(); }); await sleep(900);
   const card=await p.evaluate(()=>{ const c=[...document.querySelectorAll('#astack .acard:not(.side)[data-ci]')].find(x=>x.getBoundingClientRect().width>40); if(!c) return null; const r=c.getBoundingClientRect(); return [r.x+r.width/2,r.y+r.height*0.6]; });
   if (card){ const hit=await p.evaluate(c=>{ try{ return window.__hbt.at(c[0],c[1]); }catch(_){ return '?'; } },card); await tap(...card); const flipped=await until(()=>p.evaluate(()=>!!document.querySelector('#astack .aback')),5000); ok('Konto-Karte antippen dreht um', flipped, flipped?'':'Treffer: '+hit); if (!flipped) console.log('DIAG Karte:\n'+await p.evaluate(()=>{ try{ return window.__hbt.dbg(20000); }catch(_){ return '-'; } })); shot('karte');
     const x=await p.evaluate(()=>{ const b=document.querySelector('[data-acx]'); if(!b) return null; const r=b.getBoundingClientRect(); return [r.x+r.width/2,r.y+r.height/2]; }); if (x){ await tap(...x); ok('Abbrechen dreht Karte zurück', await until(()=>p.evaluate(()=>!document.querySelector('#astack .aback')),5000)); } }
