@@ -3896,6 +3896,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.43.3", "21. November 2026", ["Sparen & Anlegen: „Öffnen“ öffnete am Handy die Einladungen statt des Zinseszins-Rechners – behoben. Auch „Mit Zinsen“ beim neuen Ziel und die Anlage-Gläser öffnen jetzt wieder den Rechner."]],
   ["0.43.2", "21. November 2026", ["PC-Fixkosten: Tippfehler „Fixkoste“ im Hinweis an den Kalendertagen korrigiert.", "Kontoauszug als CSV: Bei der DKB wurde „2.350“ als 2,35 € gelesen – jetzt richtig 2.350 €. Deutsche Bank/Postbank mit getrennten Soll-/Haben-Spalten und Revolut (Namen) funktionieren jetzt auch.",
     "Android-Zurück-Taste und Esc schließen jetzt auch Rechnung, Analyse, Bargeld, Kredit, Bank-Auswahl und weitere Fenster – statt dahinter die Seite zu wechseln.",
     "Bank-Auswahl lässt sich abbrechen, wenn du sie selbst geöffnet hast.",
@@ -6611,9 +6612,9 @@ function invTile(){
     body=`<div class="small muted">${invE(v.cmp.m)} im Monat · ${v.cmp.y} Jahre</div><div class="invbig s">${invE(Math.min(...D.map(x=>x.end)))} – ${invE(Math.max(...D.map(x=>x.end)))}</div><svg class="invch s" viewBox="0 0 300 60" preserveAspectRatio="none">${invLines(D,300,60,true)}</svg><div class="invleg">${D.map(x=>`<span><i style="background:${INV_COL[x.i]}"></i>${INV_NAME[x.i]}</span>`).join("")}</div>`; }
   else { const c=v.calc, d=invRun(c.P,c.m,c.r,c.y), L=d[d.length-1];
     body=`<div class="invbig s">${invE(L[1])}</div><div class="small muted">${invE(c.m)} im Monat · ${c.y} Jahre · ${invPct(c.r)} % · davon ${invE(L[1]-L[0])} Zinsen</div><svg class="invch s" viewBox="0 0 300 56" preserveAspectRatio="none">${invArea(d,300,56)}</svg>`; }
-  return `<div class="card invtile"><div class="card-head"><h2>${hIc("piggy")}Sparen &amp; Anlegen</h2><button class="link" data-invopen="1">Öffnen ${ic("right",16)}</button></div>
+  return `<div class="card invtile"><div class="card-head"><h2>${hIc("piggy")}Sparen &amp; Anlegen</h2><button class="link" data-anlopen="1">Öffnen ${ic("right",16)}</button></div>
     <div class="invsub s">${[["calc","Zinseszins"],["cmp","Vergleich"]].map(([k,l])=>`<button data-invtile="${k}" class="${t===k||(k==="calc"&&t==="goals"&&!v.goals.length)?"on":""}">${l}</button>`).join("")}</div>
-    ${t==="goals"&&!v.goals.length?`<p class="small muted" style="margin:6px 0">Noch kein Anlage-Ziel. Leg eins an, dann siehst du hier Plan gegen Wirklichkeit.</p><button class="btn small" data-invopen="goals">+ Ziel anlegen</button>`:body}</div>`;
+    ${t==="goals"&&!v.goals.length?`<p class="small muted" style="margin:6px 0">Noch kein Anlage-Ziel. Leg eins an, dann siehst du hier Plan gegen Wirklichkeit.</p><button class="btn small" data-anlopen="goals">+ Ziel anlegen</button>`:body}</div>`;
 }
 const INV_LIM={P:[0,10000000], m:[0,100000], r:[0,30], y:[1,60], T:[1,100000000]};
 function invLive(key, raw){
@@ -6632,7 +6633,7 @@ document.addEventListener("click", async e=>{
   const tb=e.target.closest("[data-invtab]"); if (tb){ UI.invTab=tb.dataset.invtab; renderInvest(); return; }
   const sb=e.target.closest("[data-invsub]"); if (sb){ UI.invSub=sb.dataset.invsub; renderInvest(); return; }
   const tt=e.target.closest("[data-invtile]"); if (tt){ UI.invTileTab=tt.dataset.invtile; const c=tt.closest(".invtile"); if (c) c.outerHTML=invTile(); return; }
-  const op=e.target.closest("[data-invopen]"); if (op){ UI.invTab = op.dataset.invopen==="goals" ? "goals" : (UI.invTileTab==="goals"?"goals":UI.invTileTab==="cmp"?"cmp":"calc"); if (op.dataset.invopen==="goals") UI.invNewGoal={}; spSheetOpen("invest"); return; }
+  const op=e.target.closest("[data-anlopen]"); if (op){ UI.invTab = op.dataset.anlopen==="goals" ? "goals" : (UI.invTileTab==="goals"?"goals":UI.invTileTab==="cmp"?"cmp":"calc"); if (op.dataset.anlopen==="goals") UI.invNewGoal={}; spSheetOpen("invest"); return; }
   if (e.target.closest("[data-invgnew]")){ UI.invNewGoal={}; renderInvest(); setTimeout(()=>{ const n=$("invgN"); if (n) n.focus(); },30); return; }
   if (e.target.closest("[data-invgcancel]")){ UI.invNewGoal=null; renderInvest(); return; }
   if (e.target.closest("[data-invgoalfrom]")){ const p=inv().plan; UI.invTab="goals"; UI.invNewGoal={T:p.T, r:p.r, P:p.P, until:numYm(ymNum(ymOf(new Date()))+Math.round(p.y*12))}; renderInvest(); setTimeout(()=>{ const n=$("invgN"); if (n) n.focus(); },30); return; }
@@ -6829,7 +6830,7 @@ function fxContract(f){ if (debtFor(f.id)) return ""; const a=aboCfg()[f.id]||{}
   if (!isAbo) return `<button class="fxconadd" data-fxcon="${esc(f.id)}">+ Laufzeit / Kündigungsfrist</button>`;
   const dl=aboDeadline(a);
   return `<div class="fxcon"><label><span>Läuft bis</span><input class="in" type="date" data-aboend="${esc(f.id)}" value="${esc(a.end||"")}"></label><label><span>Frist</span><select class="in" data-abonot="${esc(f.id)}">${ABO_NOT.map(([v,l])=>`<option value="${v}" ${Number(a.notice||0)===v?"selected":""}>${l}</option>`).join("")}</select></label>${dl?`<small class="muted">kündigen bis ${esc(new Date(dl+"T12:00").toLocaleDateString("de-DE"))}</small>`:""}</div>`; }
-document.addEventListener("click", e=>{ if (e.target.closest("[data-goalnew]")){ UI.goalNew=!UI.goalNew; render(); return; } if (e.target.closest("#goalAddRing,#goalFirst,[data-invopen]")) UI.goalNew=false; });
+document.addEventListener("click", e=>{ if (e.target.closest("[data-goalnew]")){ UI.goalNew=!UI.goalNew; render(); return; } if (e.target.closest("#goalAddRing,#goalFirst,[data-anlopen]")) UI.goalNew=false; });
 document.addEventListener("click", e=>{ const b=e.target.closest("[data-fxcon]"); if (!b) return; UI.fxCon=b.dataset.fxcon; render(); });
 function fixedAreas(ym){
   if (!S.fixed.length) return `<div class="card" style="order:5"><div class="card-head"><h2>${hIc("list")}Fixkosten</h2><button class="link" data-go="fix">Eintragen ${ic("right",16)}</button></div><span class="small muted">Trag Miete, Versicherungen und Abos einmal ein – dann siehst du hier, wohin dein festes Geld geht.</span></div>`;
@@ -6958,9 +6959,9 @@ function goalsRings(){
     <div class="jars">${goals.map(g=>{ const sv=goalSaved(g), t=Number(g.target)||0, pct=t?Math.max(0,Math.min(1,sv.v/t)):0, done=t>0&&sv.v>=t;
       return `<button class="jarb" data-goalsopen="1" aria-label="${esc(g.name)}: ${esc(eur(sv.v))} von ${esc(eur(t))}"><span class="jar ${done?"done":""}"><span class="w" style="height:${Math.round(pct*82)}%"></span><span class="goal"></span><span class="ji">${ic(goalIcon(g.name),18)}</span><span class="jp ${pct<0.3?"low":""}">${done?"✓":Math.round(pct*100)+" %"}</span></span><b>${esc(g.name)}</b><small>${esc(eur0(sv.v).replace(/\s?€/,""))} / ${esc(eur0(t))}</small></button>`; }).join("")}
       ${ig.map(g=>{ const R=invGoal(g), pct=Math.max(0,Math.min(1,R.last/(g.T||1))), done=R.last>=g.T;
-        return `<button class="jarb" data-invopen="goals" aria-label="${esc(g.name)}: ${esc(eur(R.last))} von ${esc(eur(g.T))}, ${invPct(g.r)} % Zins"><span class="jar inv ${done?"done":""}"><span class="w" style="height:${Math.round(pct*82)}%"></span><span class="goal"></span><span class="ji">${ic("chart",18)}</span><span class="jp ${pct<0.3?"low":""}">${Math.round(pct*100)} %</span></span><b>${esc(g.name)}</b><small><span class="jz">${invPct(g.r)} %</span> ${esc(eur0(R.last))} / ${esc(eur0(g.T))}</small></button>`; }).join("")}
+        return `<button class="jarb" data-anlopen="goals" aria-label="${esc(g.name)}: ${esc(eur(R.last))} von ${esc(eur(g.T))}, ${invPct(g.r)} % Zins"><span class="jar inv ${done?"done":""}"><span class="w" style="height:${Math.round(pct*82)}%"></span><span class="goal"></span><span class="ji">${ic("chart",18)}</span><span class="jp ${pct<0.3?"low":""}">${Math.round(pct*100)} %</span></span><b>${esc(g.name)}</b><small><span class="jz">${invPct(g.r)} %</span> ${esc(eur0(R.last))} / ${esc(eur0(g.T))}</small></button>`; }).join("")}
       <button class="jarb" data-goalnew="1" aria-label="Ziel hinzufügen"><span class="jar add">${ic("plusIn",24)}</span><b>${goals.length||ig.length?"Neu":"Ziel anlegen"}</b><small>&nbsp;</small></button>
-    </div>${UI.goalNew?`<div class="goalnew"><button class="btn" id="${goals.length?"goalAddRing":"goalFirst"}">${ic("piggy",16)} Sparziel<small>Geld zur Seite legen</small></button><button class="btn" data-invopen="goals">${ic("chart",16)} Mit Zinsen<small>Anlage, z. B. ETF</small></button></div>`:""}</div>`;
+    </div>${UI.goalNew?`<div class="goalnew"><button class="btn" id="${goals.length?"goalAddRing":"goalFirst"}">${ic("piggy",16)} Sparziel<small>Geld zur Seite legen</small></button><button class="btn" data-anlopen="goals">${ic("chart",16)} Mit Zinsen<small>Anlage, z. B. ETF</small></button></div>`:""}</div>`;
 }
 /* Sparen */
 /* Einkauf */
