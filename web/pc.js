@@ -90,7 +90,7 @@ function pcHome(o){
   pcOn();
   const {ym, cur, c, accts, mainBal, mainName}=o, [y,m]=ymParts(ym), dim=daysIn(ym);
   const tot=(accts.find(a=>a.total)||{bal:mainBal}).bal, isCur=ym===cur;
-  const left=isCur ? Math.max(1, dim-new Date().getDate()) : 0, perDay=isCur ? Math.max(0, mainBal/left) : 0;
+  const FP=isCur&&typeof freePerDay==="function"?freePerDay(ym, mainBal, c):null, left=isCur ? (FP?FP.left:Math.max(1, dim-new Date().getDate()+1)) : 0, perDay=isCur ? (FP?FP.v:Math.max(0, mainBal/left)) : 0;
   const pct=isCur ? left/dim : ym>cur ? 1 : 0;
   const first=String(S.settings.name||"").trim().split(/\s+/)[0], greet=first ? (I18N.tr ? I18N.tr("Hallo") : "Hallo") : devModel();
   const many=accts.filter(a=>!a.total).length>1;
