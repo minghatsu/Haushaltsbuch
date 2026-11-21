@@ -189,7 +189,7 @@ if (IS_PC){
     "bezahlt · {n} von {n}":["paid · {n} of {n}","ödendi · {n}/{n}","оплачено · {n} из {n}","оплачено · {n} з {n}","zapłacone · {n} z {n}","مدفوع · {n} من {n}","plătit · {n} din {n}"],
     "Klick = abhaken · Betrag anklicken = nur für {m} ändern · Ziehen = Tag ändern":["Click = tick off · Click the amount = change for {m} only · Drag = change the day","Tıkla = işaretle · Tutara tıkla = yalnızca {m} için değiştir · Sürükle = günü değiştir","Клик = отметить · Клик по сумме = изменить только на {m} · Перетащить = сменить день","Клік = позначити · Клік по сумі = змінити лише на {m} · Перетягнути = змінити день","Klik = odhacz · Klik w kwotę = zmień tylko na {m} · Przeciągnij = zmień dzień","نقرة = تأشير · النقر على المبلغ = تغيير {m} فقط · السحب = تغيير اليوم","Clic = bifează · Clic pe sumă = schimbă doar pentru {m} · Trage = schimbă ziua"],
     "nichts":["nothing","hiçbir şey","ничего","нічого","nic","لا شيء","nimic"],
-    "Fixkoste am {n}. eintragen":["Add a fixed cost on the {n}","{n}. güne sabit gider ekle","Добавить расход на {n}-е","Додати витрату на {n}-те","Dodaj koszt stały na {n}.","أضف تكلفة ثابتة في يوم {n}","Adaugă o cheltuială fixă pe {n}"],
+    "Fixkosten am {n}. eintragen":["Add a fixed cost on the {n}","{n}. güne sabit gider ekle","Добавить расход на {n}-е","Додати витрату на {n}-те","Dodaj koszt stały na {n}.","أضف تكلفة ثابتة في يوم {n}","Adaugă o cheltuială fixă pe {n}"],
     "Neue Fixkosten":["New fixed cost","Yeni sabit gider","Новый постоянный расход","Нова постійна витрата","Nowy koszt stały","تكلفة ثابتة جديدة","Cheltuială fixă nouă"],
     "Betrag ab {m} {n}":["Amount from {m} {n}","{m} {n} itibarıyla tutar","Сумма с {m} {n}","Сума з {m} {n}","Kwota od {m} {n}","المبلغ من {m} {n}","Sumă din {m} {n}"],
     "ohne":["none","yok","нет","немає","brak","بدون","fără"],
@@ -896,7 +896,7 @@ if (IS_PC){
     let cells="";
     for (let i=0;i<first;i++) cells+=`<div class="pcfd x"></div>`;
     for (let d=1; d<=D; d++){ const fs=by[d]||[], s=sum(fs,amtOf), wd=(first+d-1)%7;
-      cells+=`<div class="pcfd ${d===today?"today":""} ${wd>4?"we":""}" data-pcfday="${d}"><div class="dh"><b>${pad(d)}</b>${s?`<span>${esc(eur0(s))}</span>`:""}</div>${fs.map(chip).join("")}<button class="pcfadd" data-pcfnew="${d}" title="Fixkoste am ${d}. eintragen" aria-label="Fixkoste am ${d}. eintragen">${SV.plus}</button></div>`; }
+      cells+=`<div class="pcfd ${d===today?"today":""} ${wd>4?"we":""}" data-pcfday="${d}"><div class="dh"><b>${pad(d)}</b>${s?`<span>${esc(eur0(s))}</span>`:""}</div>${fs.map(chip).join("")}<button class="pcfadd" data-pcfnew="${d}" title="Fixkosten am ${d}. eintragen" aria-label="Fixkosten am ${d}. eintragen">${SV.plus}</button></div>`; }
     const wk=["Mo","Di","Mi","Do","Fr","Sa","So"].map(w=>`<span>${w}</span>`).join("");
     const soon=ym===cur ? all.filter(f=>!(f.id in paid)).map(f=>({f,d:dayOf(f,ym)})).filter(x=>x.d && x.d>=today && x.d<=today+6) : [];
     const groups={}; for (const f of all) (groups[fixArea(f)]=groups[fixArea(f)]||[]).push(f);
