@@ -239,6 +239,11 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.44.8",
+    "21. November 2026",
+    ["Behoben (PC): Bei den Einladungen rutschte der QR-Code aus der linken Spalte und war abgeschnitten."],
+  ],
+  [
     "0.44.7",
     "21. November 2026",
     [

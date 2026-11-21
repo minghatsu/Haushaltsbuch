@@ -24196,7 +24196,13 @@ html.pc:not(.istab) .invside > * {
 }
 html.pc:not(.istab) .invside > .invnext {
   flex-direction: column;
+  flex-wrap: nowrap;
   align-items: stretch;
+}
+/* in der schmalen Spalte unter den Knöpfen, nicht als zweite Spalte daneben */
+html.pc:not(.istab) .invside > .invnext .invqrs {
+  flex: none;
+  align-self: center;
 }
 html.pc:not(.istab) .invside > .invnext .invnb {
   flex-direction: row;
