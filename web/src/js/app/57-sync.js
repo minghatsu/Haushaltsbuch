@@ -1593,6 +1593,15 @@ $("loginGo").onclick = doLogin;
     const target = go && nbKey;
     p = target ? (dir < 0 ? -1 : 1) : 0;
     draw();
+    /* Titel und Leiste schon jetzt mitnehmen – nicht erst, wenn der Würfel steht */
+    if (target)
+      try {
+        $("viewTitle").textContent = nbKey === "beruf" ? berufLbl() : TITLES[nbKey];
+        document
+          .querySelectorAll(".tab[data-go]")
+          .forEach((b) => b.setAttribute("aria-selected", String(b.dataset.go === nbKey)));
+        navPill(true);
+      } catch (_) {}
     setTimeout(() => {
       const k = nbKey;
       if (target) {

@@ -13138,23 +13138,6 @@ tfoot td {
     font-size: 16px;
   }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .sagrid > div {
-    animation: saIn 0.5s cubic-bezier(0.2, 1.2, 0.35, 1) both;
-  }
-  .sagrid > div:nth-child(2) {
-    animation-delay: 0.07s;
-  }
-  .sagrid > div:nth-child(3) {
-    animation-delay: 0.14s;
-  }
-  @keyframes saIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px) scale(0.97);
-    }
-  }
-}
 .zstack > .card {
   order: 0 !important;
   margin: 0;
@@ -13872,6 +13855,8 @@ main.wrap {
 .cubing * {
   will-change: auto !important;
   backdrop-filter: none !important;
+  /* Einblend-Animationen der Kopie nicht neu abspielen – sie soll den Endstand zeigen */
+  animation: none !important;
 }
 .cubing .filters,
 .cubing .rings,

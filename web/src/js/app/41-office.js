@@ -390,11 +390,11 @@ setTimeout(() => {
   } catch (_) {}
 }, 600);
 
-/* Kachel-Namen: zu lange Wörter etwas kleiner statt mitten im Wort trennen.
+/* Kachel-Namen und Beträge in kleinen Kästen: zu lange Wörter etwas kleiner statt abschneiden oder mitten im Wort trennen.
    Jede Kachel wird nur neu gemessen, wenn sich Text oder Breite geändert haben – sonst
    würden die Mess-Stile ständig neue Änderungen auslösen (und das Wischen ausbremsen). */
 function fitTiles(root) {
-  (root || document).querySelectorAll(".atile b").forEach((b) => {
+  (root || document).querySelectorAll(".atile b, .sagrid b").forEach((b) => {
     if (b.closest(".cubestage") || !b.getClientRects().length) return;
     const t = b.parentElement,
       key = b.textContent + "|" + t.clientWidth;
@@ -408,7 +408,7 @@ function fitTiles(root) {
     const ts = getComputedStyle(t),
       av = t.clientWidth - parseFloat(ts.paddingLeft) - parseFloat(ts.paddingRight);
     b.style.width = "min-content";
-    while (b.scrollWidth > av - 2 && f > 10.5 && n++ < 5) {
+    while (b.scrollWidth > av - 2 && f > 10.5 && n++ < 14) {
       f -= 0.5;
       b.style.fontSize = f + "px";
     }
@@ -421,7 +421,11 @@ function fitTiles(root) {
   let fq = 0;
   const hasTile = (n) => {
     const e = n.nodeType === 1 ? n : n.parentElement;
-    return !!e && !e.closest(".cubestage") && (e.matches(".atile, .atile *") || !!e.querySelector(".atile"));
+    return (
+      !!e &&
+      !e.closest(".cubestage") &&
+      (e.matches(".atile, .atile *, .sagrid, .sagrid *") || !!e.querySelector(".atile, .sagrid"))
+    );
   };
   new MutationObserver((list) => {
     if (fq || !list.some((m) => hasTile(m.target) || [...m.addedNodes].some(hasTile))) return;

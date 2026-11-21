@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.45.7",
+    "21. November 2026",
+    [
+      "Einkauf: „Ø pro Tag / Woche / Monat“ blinken beim Wischen nicht mehr weg, und die Beträge stehen ganz da statt „112,0…“.",
+      "Beim Seitenwechsel springen Überschrift und Leiste unten jetzt gleichzeitig um, schon während der Würfel ausdreht.",
+    ],
+  ],
+  [
     "0.45.6",
     "21. November 2026",
     [

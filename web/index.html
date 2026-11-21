@@ -13141,23 +13141,6 @@ tfoot td {
     font-size: 16px;
   }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .sagrid > div {
-    animation: saIn 0.5s cubic-bezier(0.2, 1.2, 0.35, 1) both;
-  }
-  .sagrid > div:nth-child(2) {
-    animation-delay: 0.07s;
-  }
-  .sagrid > div:nth-child(3) {
-    animation-delay: 0.14s;
-  }
-  @keyframes saIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px) scale(0.97);
-    }
-  }
-}
 .zstack > .card {
   order: 0 !important;
   margin: 0;
@@ -13875,6 +13858,8 @@ main.wrap {
 .cubing * {
   will-change: auto !important;
   backdrop-filter: none !important;
+  /* Einblend-Animationen der Kopie nicht neu abspielen – sie soll den Endstand zeigen */
+  animation: none !important;
 }
 .cubing .filters,
 .cubing .rings,
@@ -50950,6 +50935,14 @@ document.addEventListener("click", (e) => {
 
 /* Einstellungen extra */
 const CHANGELOG = [
+  [
+    "0.45.7",
+    "21. November 2026",
+    [
+      "Einkauf: „Ø pro Tag / Woche / Monat“ blinken beim Wischen nicht mehr weg, und die Beträge stehen ganz da statt „112,0…“.",
+      "Beim Seitenwechsel springen Überschrift und Leiste unten jetzt gleichzeitig um, schon während der Würfel ausdreht.",
+    ],
+  ],
   [
     "0.45.6",
     "21. November 2026",
@@ -89758,11 +89751,11 @@ setTimeout(() => {
   } catch (_) {}
 }, 600);
 
-/* Kachel-Namen: zu lange Wörter etwas kleiner statt mitten im Wort trennen.
+/* Kachel-Namen und Beträge in kleinen Kästen: zu lange Wörter etwas kleiner statt abschneiden oder mitten im Wort trennen.
    Jede Kachel wird nur neu gemessen, wenn sich Text oder Breite geändert haben – sonst
    würden die Mess-Stile ständig neue Änderungen auslösen (und das Wischen ausbremsen). */
 function fitTiles(root) {
-  (root || document).querySelectorAll(".atile b").forEach((b) => {
+  (root || document).querySelectorAll(".atile b, .sagrid b").forEach((b) => {
     if (b.closest(".cubestage") || !b.getClientRects().length) return;
     const t = b.parentElement,
       key = b.textContent + "|" + t.clientWidth;
@@ -89776,7 +89769,7 @@ function fitTiles(root) {
     const ts = getComputedStyle(t),
       av = t.clientWidth - parseFloat(ts.paddingLeft) - parseFloat(ts.paddingRight);
     b.style.width = "min-content";
-    while (b.scrollWidth > av - 2 && f > 10.5 && n++ < 5) {
+    while (b.scrollWidth > av - 2 && f > 10.5 && n++ < 14) {
       f -= 0.5;
       b.style.fontSize = f + "px";
     }
@@ -89789,7 +89782,11 @@ function fitTiles(root) {
   let fq = 0;
   const hasTile = (n) => {
     const e = n.nodeType === 1 ? n : n.parentElement;
-    return !!e && !e.closest(".cubestage") && (e.matches(".atile, .atile *") || !!e.querySelector(".atile"));
+    return (
+      !!e &&
+      !e.closest(".cubestage") &&
+      (e.matches(".atile, .atile *, .sagrid, .sagrid *") || !!e.querySelector(".atile, .sagrid"))
+    );
   };
   new MutationObserver((list) => {
     if (fq || !list.some((m) => hasTile(m.target) || [...m.addedNodes].some(hasTile))) return;
@@ -110350,6 +110347,15 @@ $("loginGo").onclick = doLogin;
     const target = go && nbKey;
     p = target ? (dir < 0 ? -1 : 1) : 0;
     draw();
+    /* Titel und Leiste schon jetzt mitnehmen – nicht erst, wenn der Würfel steht */
+    if (target)
+      try {
+        $("viewTitle").textContent = nbKey === "beruf" ? berufLbl() : TITLES[nbKey];
+        document
+          .querySelectorAll(".tab[data-go]")
+          .forEach((b) => b.setAttribute("aria-selected", String(b.dataset.go === nbKey)));
+        navPill(true);
+      } catch (_) {}
     setTimeout(() => {
       const k = nbKey;
       if (target) {
