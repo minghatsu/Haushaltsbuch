@@ -1302,7 +1302,7 @@ $("loginGo").onclick = doLogin;
   };
   const blocked = (t) =>
     t.closest(
-      "#moBg,#mbBg,#tourBg,.hobg,.sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,#astack,#zstack,.srail,.bt3,.bubbles,.fxchips,input,select,textarea,.wiz,[data-noswipe]"
+      "#moBg,#mbBg,#tourBg,.hobg,.sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,#astack,#zstack,.srail,.bt3,.bubbles,.fxchips,input[type=range],input:focus,select:focus,textarea:focus,.wiz,[data-noswipe]"
     ) ||
     hScroll(t) ||
     document.querySelector(".backdrop:not([hidden])");
@@ -1437,7 +1437,7 @@ $("loginGo").onclick = doLogin;
           ),
           y = Math.min(MEM[k] || 0, maxY);
         const fn = face(nb, top0 - sTop - y);
-        fn[0].style.display = full ? "none" : "";
+        if (full) fn[0].style.visibility = "hidden";
         out.nb[k] = {
           f: fn,
           nY: y,
@@ -1450,8 +1450,13 @@ $("loginGo").onclick = doLogin;
   }
   function prep() {
     prepT = 0;
-    if (IS_PC || on || busy || stage || !ORDER.includes(ui.view) || document.querySelector(".backdrop:not([hidden])"))
+    if (IS_PC || !ORDER.includes(ui.view)) return;
+    /* Gerade offen oder in Bewegung: später nochmal versuchen, sonst baut erst das nächste Wischen
+       die Seiten zusammen – und das ruckelt */
+    if (on || busy || stage || document.querySelector(".backdrop:not([hidden])")) {
+      prepT = setTimeout(prep, 800);
       return;
+    }
     if (PREP) {
       PREP.stage.remove();
       PREP = null;
@@ -1512,7 +1517,7 @@ $("loginGo").onclick = doLogin;
       cur = sec(ui.view);
       [fC, shC] = PREP.cur;
       fC.firstChild.style.top = cur.getBoundingClientRect().top - PREP.sTop + "px";
-      for (const [k, v] of Object.entries(PREP.nb)) v.f[0].style.display = k === nbKey ? "" : "none";
+      for (const [k, v] of Object.entries(PREP.nb)) v.f[0].style.visibility = k === nbKey ? "" : "hidden";
       [fN, shN] = PREP.nb[nbKey].f;
       nY = PREP.nb[nbKey].nY;
       stage.style.visibility = "";
@@ -1528,7 +1533,7 @@ $("loginGo").onclick = doLogin;
       nY = b.nb[nbKey].nY;
     }
     PREP = null;
-    cur.style.visibility = "hidden";
+    cur.style.opacity = "0";
     sY = scrollY;
     draw();
   }
@@ -1549,7 +1554,7 @@ $("loginGo").onclick = doLogin;
   function reset() {
     if (stage) stage.remove();
     if (cur) {
-      cur.style.visibility = "";
+      cur.style.opacity = "";
       if (Math.abs(scrollY - sY) > 1)
         window.scrollTo({
           top: sY,
@@ -1646,7 +1651,7 @@ $("loginGo").onclick = doLogin;
         now = Date.now();
       if (lock === null) {
         if (Math.abs(dx) < 14 && Math.abs(dy) < 14) return;
-        lock = Math.abs(dx) > Math.abs(dy) * 1.8 && window.scrollX === 0 ? "x" : "y";
+        lock = Math.abs(dx) > Math.abs(dy) * 1.3 && window.scrollX === 0 ? "x" : "y";
         if (lock === "x") {
           x0 = cx;
           setup(dx < 0 ? -1 : 1);
@@ -1745,7 +1750,8 @@ $("loginGo").onclick = doLogin;
       if (!decided) {
         if (Math.abs(dy) < 8 && Math.abs(dx) < 8) return;
         decided = true;
-        if (dy <= 0 || Math.abs(dx) > Math.abs(dy) || window.scrollY > 0) {
+        /* nur eindeutig nach unten – schräge Wischer gehören dem Seitenwechsel */
+        if (dy <= 0 || Math.abs(dx) * 1.5 > dy || window.scrollY > 0) {
           on = false;
           return;
         }

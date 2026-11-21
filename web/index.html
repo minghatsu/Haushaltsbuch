@@ -50262,6 +50262,16 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.44.5",
+    "21. November 2026",
+    [
+      "Wischen zwischen den Seiten ist deutlich flüssiger: die Nachbarseiten liegen jetzt schon bereit, statt erst beim Wischen gebaut zu werden.",
+      "Behoben: Die App hat im Hintergrund ständig Kachel-Namen neu vermessen – das hat Wischen und Scrollen ausgebremst.",
+      "Schräge Wischer wechseln jetzt die Seite, statt aus Versehen „Aktualisieren“ auszulösen; über dem Einkaufszettel-Feld lässt sich ebenfalls wischen.",
+      "Konto-Karten folgen dem Finger ruhiger.",
+    ],
+  ],
+  [
     "0.44.4",
     "21. November 2026",
     ["Unter der Haube aufgeräumt: der Programmcode ist neu sortiert und lesbarer. An der Bedienung ändert sich nichts."],
@@ -57412,7 +57422,7 @@ document.addEventListener(
   "pointerdown",
   (e) => {
     if (!e.isPrimary) return;
-    DBG.g = {
+    const g = (DBG.g = {
       x: e.clientX,
       y: e.clientY,
       t: performance.now(),
@@ -57421,9 +57431,14 @@ document.addEventListener(
       max: 0,
       lx: e.clientX,
       ly: e.clientY,
-      sig: dbgSig(e.target),
+      sig: null,
       pts: [[e.clientX, e.clientY]],
-    };
+    });
+    /* Zustand erst im nächsten Bild lesen: dbgSig misst Scroll-Breiten, und das würde hier
+       beim Aufsetzen des Fingers ein komplettes Neu-Layout erzwingen */
+    requestAnimationFrame(() => {
+      g.sig = dbgSig(g.el);
+    });
     if (DBG.touch) dbgTrail(DBG.g);
   },
   {
@@ -57475,7 +57490,7 @@ const dbgUp = (e) => {
     /* nur melden, wenn die Geste auch wirklich hätte wechseln müssen (kurze, langsame Wischer wechseln absichtlich nicht) */
     if (g.touch && far && Math.abs(dy) < ax * 0.5 && dt < 900)
       setTimeout(() => {
-        if (dbgSig(g.el) === g.sig) dbgDead(g, dx, dy, dt);
+        if (g.sig !== null && dbgSig(g.el) === g.sig) dbgDead(g, dx, dy, dt);
       }, 900);
   }
   g.end = performance.now();
@@ -61948,7 +61963,11 @@ function initStack(id, key, dotsId) {
     }
     if (lock !== "x") return;
     dx = mx;
-    place(dx, false);
+    if (!st._raf)
+      st._raf = requestAnimationFrame(() => {
+        st._raf = 0;
+        if (lock === "x") place(dx, false);
+      });
   });
   const end = () => {
     if (x0 === null) return;
@@ -88777,17 +88796,22 @@ setTimeout(() => {
   } catch (_) {}
 }, 600);
 
-/* Kachel-Namen: zu lange Wörter etwas kleiner statt mitten im Wort trennen */
+/* Kachel-Namen: zu lange Wörter etwas kleiner statt mitten im Wort trennen.
+   Jede Kachel wird nur neu gemessen, wenn sich Text oder Breite geändert haben – sonst
+   würden die Mess-Stile ständig neue Änderungen auslösen (und das Wischen ausbremsen). */
 function fitTiles(root) {
   (root || document).querySelectorAll(".atile b").forEach((b) => {
-    if (!b.getClientRects().length) return;
+    if (b.closest(".cubestage") || !b.getClientRects().length) return;
+    const t = b.parentElement,
+      key = b.textContent + "|" + t.clientWidth;
+    if (b.dataset.fit === key) return;
+    b.dataset.fit = key;
     b.style.fontSize = "";
     b.style.overflowWrap = "normal";
     b.style.hyphens = "manual";
     let f = parseFloat(getComputedStyle(b).fontSize) || 12.5,
       n = 0;
-    const t = b.parentElement,
-      ts = getComputedStyle(t),
+    const ts = getComputedStyle(t),
       av = t.clientWidth - parseFloat(ts.paddingLeft) - parseFloat(ts.paddingRight);
     b.style.width = "min-content";
     while (b.scrollWidth > av - 2 && f > 10.5 && n++ < 5) {
@@ -88801,8 +88825,12 @@ function fitTiles(root) {
 }
 {
   let fq = 0;
-  new MutationObserver(() => {
-    if (fq) return;
+  const hasTile = (n) => {
+    const e = n.nodeType === 1 ? n : n.parentElement;
+    return !!e && !e.closest(".cubestage") && (e.matches(".atile, .atile *") || !!e.querySelector(".atile"));
+  };
+  new MutationObserver((list) => {
+    if (fq || !list.some((m) => hasTile(m.target) || [...m.addedNodes].some(hasTile))) return;
     fq = requestAnimationFrame(() => {
       fq = 0;
       fitTiles();
@@ -88810,6 +88838,7 @@ function fitTiles(root) {
   }).observe(document.documentElement, {
     childList: true,
     subtree: true,
+    characterData: true,
   });
   addEventListener("resize", () => fitTiles());
   try {
@@ -108939,7 +108968,7 @@ $("loginGo").onclick = doLogin;
   };
   const blocked = (t) =>
     t.closest(
-      "#moBg,#mbBg,#tourBg,.hobg,.sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,#astack,#zstack,.srail,.bt3,.bubbles,.fxchips,input,select,textarea,.wiz,[data-noswipe]"
+      "#moBg,#mbBg,#tourBg,.hobg,.sheet,.backdrop,.fan,.docrev,.pfed,#lockBg,#loginBg,#astack,#zstack,.srail,.bt3,.bubbles,.fxchips,input[type=range],input:focus,select:focus,textarea:focus,.wiz,[data-noswipe]"
     ) ||
     hScroll(t) ||
     document.querySelector(".backdrop:not([hidden])");
@@ -109074,7 +109103,7 @@ $("loginGo").onclick = doLogin;
           ),
           y = Math.min(MEM[k] || 0, maxY);
         const fn = face(nb, top0 - sTop - y);
-        fn[0].style.display = full ? "none" : "";
+        if (full) fn[0].style.visibility = "hidden";
         out.nb[k] = {
           f: fn,
           nY: y,
@@ -109087,8 +109116,13 @@ $("loginGo").onclick = doLogin;
   }
   function prep() {
     prepT = 0;
-    if (IS_PC || on || busy || stage || !ORDER.includes(ui.view) || document.querySelector(".backdrop:not([hidden])"))
+    if (IS_PC || !ORDER.includes(ui.view)) return;
+    /* Gerade offen oder in Bewegung: später nochmal versuchen, sonst baut erst das nächste Wischen
+       die Seiten zusammen – und das ruckelt */
+    if (on || busy || stage || document.querySelector(".backdrop:not([hidden])")) {
+      prepT = setTimeout(prep, 800);
       return;
+    }
     if (PREP) {
       PREP.stage.remove();
       PREP = null;
@@ -109149,7 +109183,7 @@ $("loginGo").onclick = doLogin;
       cur = sec(ui.view);
       [fC, shC] = PREP.cur;
       fC.firstChild.style.top = cur.getBoundingClientRect().top - PREP.sTop + "px";
-      for (const [k, v] of Object.entries(PREP.nb)) v.f[0].style.display = k === nbKey ? "" : "none";
+      for (const [k, v] of Object.entries(PREP.nb)) v.f[0].style.visibility = k === nbKey ? "" : "hidden";
       [fN, shN] = PREP.nb[nbKey].f;
       nY = PREP.nb[nbKey].nY;
       stage.style.visibility = "";
@@ -109165,7 +109199,7 @@ $("loginGo").onclick = doLogin;
       nY = b.nb[nbKey].nY;
     }
     PREP = null;
-    cur.style.visibility = "hidden";
+    cur.style.opacity = "0";
     sY = scrollY;
     draw();
   }
@@ -109186,7 +109220,7 @@ $("loginGo").onclick = doLogin;
   function reset() {
     if (stage) stage.remove();
     if (cur) {
-      cur.style.visibility = "";
+      cur.style.opacity = "";
       if (Math.abs(scrollY - sY) > 1)
         window.scrollTo({
           top: sY,
@@ -109283,7 +109317,7 @@ $("loginGo").onclick = doLogin;
         now = Date.now();
       if (lock === null) {
         if (Math.abs(dx) < 14 && Math.abs(dy) < 14) return;
-        lock = Math.abs(dx) > Math.abs(dy) * 1.8 && window.scrollX === 0 ? "x" : "y";
+        lock = Math.abs(dx) > Math.abs(dy) * 1.3 && window.scrollX === 0 ? "x" : "y";
         if (lock === "x") {
           x0 = cx;
           setup(dx < 0 ? -1 : 1);
@@ -109382,7 +109416,8 @@ $("loginGo").onclick = doLogin;
       if (!decided) {
         if (Math.abs(dy) < 8 && Math.abs(dx) < 8) return;
         decided = true;
-        if (dy <= 0 || Math.abs(dx) > Math.abs(dy) || window.scrollY > 0) {
+        /* nur eindeutig nach unten – schräge Wischer gehören dem Seitenwechsel */
+        if (dy <= 0 || Math.abs(dx) * 1.5 > dy || window.scrollY > 0) {
           on = false;
           return;
         }

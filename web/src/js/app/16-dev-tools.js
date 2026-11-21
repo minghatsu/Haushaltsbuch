@@ -106,7 +106,7 @@ document.addEventListener(
   "pointerdown",
   (e) => {
     if (!e.isPrimary) return;
-    DBG.g = {
+    const g = (DBG.g = {
       x: e.clientX,
       y: e.clientY,
       t: performance.now(),
@@ -115,9 +115,14 @@ document.addEventListener(
       max: 0,
       lx: e.clientX,
       ly: e.clientY,
-      sig: dbgSig(e.target),
+      sig: null,
       pts: [[e.clientX, e.clientY]],
-    };
+    });
+    /* Zustand erst im nächsten Bild lesen: dbgSig misst Scroll-Breiten, und das würde hier
+       beim Aufsetzen des Fingers ein komplettes Neu-Layout erzwingen */
+    requestAnimationFrame(() => {
+      g.sig = dbgSig(g.el);
+    });
     if (DBG.touch) dbgTrail(DBG.g);
   },
   {
@@ -169,7 +174,7 @@ const dbgUp = (e) => {
     /* nur melden, wenn die Geste auch wirklich hätte wechseln müssen (kurze, langsame Wischer wechseln absichtlich nicht) */
     if (g.touch && far && Math.abs(dy) < ax * 0.5 && dt < 900)
       setTimeout(() => {
-        if (dbgSig(g.el) === g.sig) dbgDead(g, dx, dy, dt);
+        if (g.sig !== null && dbgSig(g.el) === g.sig) dbgDead(g, dx, dy, dt);
       }, 900);
   }
   g.end = performance.now();

@@ -130,7 +130,11 @@ function initStack(id, key, dotsId) {
     }
     if (lock !== "x") return;
     dx = mx;
-    place(dx, false);
+    if (!st._raf)
+      st._raf = requestAnimationFrame(() => {
+        st._raf = 0;
+        if (lock === "x") place(dx, false);
+      });
   });
   const end = () => {
     if (x0 === null) return;

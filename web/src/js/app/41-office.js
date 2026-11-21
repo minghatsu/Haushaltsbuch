@@ -390,17 +390,22 @@ setTimeout(() => {
   } catch (_) {}
 }, 600);
 
-/* Kachel-Namen: zu lange Wörter etwas kleiner statt mitten im Wort trennen */
+/* Kachel-Namen: zu lange Wörter etwas kleiner statt mitten im Wort trennen.
+   Jede Kachel wird nur neu gemessen, wenn sich Text oder Breite geändert haben – sonst
+   würden die Mess-Stile ständig neue Änderungen auslösen (und das Wischen ausbremsen). */
 function fitTiles(root) {
   (root || document).querySelectorAll(".atile b").forEach((b) => {
-    if (!b.getClientRects().length) return;
+    if (b.closest(".cubestage") || !b.getClientRects().length) return;
+    const t = b.parentElement,
+      key = b.textContent + "|" + t.clientWidth;
+    if (b.dataset.fit === key) return;
+    b.dataset.fit = key;
     b.style.fontSize = "";
     b.style.overflowWrap = "normal";
     b.style.hyphens = "manual";
     let f = parseFloat(getComputedStyle(b).fontSize) || 12.5,
       n = 0;
-    const t = b.parentElement,
-      ts = getComputedStyle(t),
+    const ts = getComputedStyle(t),
       av = t.clientWidth - parseFloat(ts.paddingLeft) - parseFloat(ts.paddingRight);
     b.style.width = "min-content";
     while (b.scrollWidth > av - 2 && f > 10.5 && n++ < 5) {
@@ -414,8 +419,12 @@ function fitTiles(root) {
 }
 {
   let fq = 0;
-  new MutationObserver(() => {
-    if (fq) return;
+  const hasTile = (n) => {
+    const e = n.nodeType === 1 ? n : n.parentElement;
+    return !!e && !e.closest(".cubestage") && (e.matches(".atile, .atile *") || !!e.querySelector(".atile"));
+  };
+  new MutationObserver((list) => {
+    if (fq || !list.some((m) => hasTile(m.target) || [...m.addedNodes].some(hasTile))) return;
     fq = requestAnimationFrame(() => {
       fq = 0;
       fitTiles();
@@ -423,6 +432,7 @@ function fitTiles(root) {
   }).observe(document.documentElement, {
     childList: true,
     subtree: true,
+    characterData: true,
   });
   addEventListener("resize", () => fitTiles());
   try {

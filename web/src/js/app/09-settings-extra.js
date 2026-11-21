@@ -239,6 +239,16 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.44.5",
+    "21. November 2026",
+    [
+      "Wischen zwischen den Seiten ist deutlich flüssiger: die Nachbarseiten liegen jetzt schon bereit, statt erst beim Wischen gebaut zu werden.",
+      "Behoben: Die App hat im Hintergrund ständig Kachel-Namen neu vermessen – das hat Wischen und Scrollen ausgebremst.",
+      "Schräge Wischer wechseln jetzt die Seite, statt aus Versehen „Aktualisieren“ auszulösen; über dem Einkaufszettel-Feld lässt sich ebenfalls wischen.",
+      "Konto-Karten folgen dem Finger ruhiger.",
+    ],
+  ],
+  [
     "0.44.4",
     "21. November 2026",
     ["Unter der Haube aufgeräumt: der Programmcode ist neu sortiert und lesbarer. An der Bedienung ändert sich nichts."],
