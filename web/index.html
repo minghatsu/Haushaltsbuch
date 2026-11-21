@@ -6209,7 +6209,7 @@ function moneyFlowCard(ym){
     </div>`;
 }
 /* Nur in der Test-App „MAMI Test“ (Debug-Build): Lese-Zugriff für automatische Tests */
-try { if (window.AndroidBridge && AndroidBridge.isTest && AndroidBridge.isTest()) window.__hbt={ view:()=>UI.view, idx:k=>UI[k], go:v=>{ UI.view=v; render(); }, legal:()=>LEGAL_VER, log:()=>CHANGELOG[0][0],
+try { if (window.AndroidBridge && AndroidBridge.isTest && AndroidBridge.isTest()) window.__hbt={ dbg:ms=>{ try{ return dbgSince(ms||60000); }catch(e){ return String(e); } }, at:(x,y)=>{ const e=document.elementFromPoint(x,y); try{ return dbgEl(e); }catch(_){ return e?e.tagName+'.'+e.className:'-'; } }, view:()=>UI.view, idx:k=>UI[k], go:v=>{ UI.view=v; render(); }, legal:()=>LEGAL_VER, log:()=>CHANGELOG[0][0],
   seed:()=>{ const d=isoToday(); S.settings.accountAnchors={Hauptkonto:{date:d,balance:1200,ts:Date.now()},Tagesgeld:{date:d,balance:400,ts:Date.now()}}; S.settings.name="Test"; UI.ym=ymOf(new Date()); render(); } };
   if (window.__hbt && localStorage.getItem("hb-testseed")==="1"){ localStorage.setItem("hb-testseed","2"); setTimeout(()=>{ try{ window.__hbt.seed(); if (typeof saveSettings==="function") saveSettings(); }catch(_){} }, 2500); } } catch(_){}
 function initStack(id, key, dotsId){ id=id||"astack"; key=key||"cardIdx"; dotsId=dotsId||"adots";

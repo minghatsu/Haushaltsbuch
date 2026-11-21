@@ -56,6 +56,7 @@ const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out',
       const snap=()=>p.evaluate(i=>{const e=document.querySelector(`[data-tq="${i}"]`); return e?[...e.children].map(c=>c.style.transform+'|'+c.getAttribute('aria-hidden')).join(';'):'WEG';},s.i);
       const v0=await view(), a=await snap(); await swipe(r[0]+vw*0.28,r[1],r[0]-vw*0.28,r[1],220); const b2=await until(async()=>{ const x=await snap(); return x!==a?x:null; },5000)||a; await settle(); const v1=await view();
       ok(`${label}: ${s.n} wischbar`, a!==b2 && v0===v1, v0!==v1?'Seite hat stattdessen gewechselt':a===b2?'nichts bewegt':'');
+      if (!(a!==b2 && v0===v1)) console.log('DIAG Stapel:\n'+await p.evaluate(()=>{ try{ return window.__hbt.dbg(10000); }catch(_){ return '-'; } }));
       await p.evaluate(()=>scrollTo(0,0)); await sleep(300);
     }
   }
@@ -76,13 +77,13 @@ const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out',
     for (const f of [0.6,0.55,0.65,0.5,0.7,0.45,0.75,0.4,0.35,0.8]){ const y=innerHeight*f; let good=true; for (const fx of [0.2,0.5,0.8]){ const e=document.elementFromPoint(innerWidth*fx,y); if(!e||e.closest(B)||hs(e)){ good=false; break; } } if (good) return y; } return innerHeight*0.6; });
   // 1) Seiten per echtem Seitwärts-Wischen
   for (let k=0;k<4;k++){ const from=await view(); await sleep(2500); { const y=await freeY(); await swipe(vw-70,y,70,y,300); } await until(async()=>(await view())!==from,6000); await settle(); await hide(); const to=await view();
-    ok(`Seitwärts-Wischen ${from} → ${to}`, to!==from); shot('wisch-'+to); await checkSwipers('auf '+to); }
+    ok(`Seitwärts-Wischen ${from} → ${to}`, to!==from); if (to===from) console.log('DIAG Wischen:\n'+await p.evaluate(()=>{ try{ return window.__hbt.dbg(12000); }catch(_){ return '-'; } })); shot('wisch-'+to); await checkSwipers('auf '+to); }
   for (let k=0;k<2;k++){ const from=await view(); await sleep(2500); { const y=await freeY(); await swipe(70,y,vw-70,y,300); } await until(async()=>(await view())!==from,6000); await settle(); await hide(); const to=await view(); ok(`Zurück-Wischen ${from} → ${to}`, to!==from); await checkSwipers('zurück auf '+to); }
   }
   // 2) Startseite: Konto-Karte antippen dreht um, Abbrechen dreht zurück
   await p.evaluate(()=>{ try{ window.__hbt.go('home'); }catch(_){} }); await sleep(2500); await hide();
   const card=await p.evaluate(()=>{ const c=[...document.querySelectorAll('#astack .acard:not(.side)[data-ci]')].find(x=>x.getBoundingClientRect().width>40); if(!c) return null; const r=c.getBoundingClientRect(); return [r.x+r.width/2,r.y+r.height*0.6]; });
-  if (card){ await tap(...card); ok('Konto-Karte antippen dreht um', await until(()=>p.evaluate(()=>!!document.querySelector('#astack .aback')),5000)); shot('karte');
+  if (card){ const hit=await p.evaluate(c=>{ try{ return window.__hbt.at(c[0],c[1]); }catch(_){ return '?'; } },card); await tap(...card); const flipped=await until(()=>p.evaluate(()=>!!document.querySelector('#astack .aback')),5000); ok('Konto-Karte antippen dreht um', flipped, flipped?'':'Treffer: '+hit); if (!flipped) console.log('DIAG Karte:\n'+await p.evaluate(()=>{ try{ return window.__hbt.dbg(20000); }catch(_){ return '-'; } })); shot('karte');
     const x=await p.evaluate(()=>{ const b=document.querySelector('[data-acx]'); if(!b) return null; const r=b.getBoundingClientRect(); return [r.x+r.width/2,r.y+r.height/2]; }); if (x){ await tap(...x); ok('Abbrechen dreht Karte zurück', await until(()=>p.evaluate(()=>!document.querySelector('#astack .aback')),5000)); } }
   // 3) Profilbild -> Einstellungen, echte Android-Zurück-Taste
   const av=await p.evaluate(()=>{ const a=document.getElementById('topAv'); if(!a) return null; const r=a.getBoundingClientRect(); return [r.x+r.width/2,r.y+r.height/2]; });
