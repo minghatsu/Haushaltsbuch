@@ -50,7 +50,7 @@ function render() {
     navPill(true);
   } catch (_) {}
   document
-    .querySelectorAll("[data-view]")
+    .querySelectorAll("[data-view]:not(.cubing)")
     .forEach((s) => (s.hidden = s.dataset.view !== ui.view && !(s.id === "v-gemeinsam" && SPS.open === "gemeinsam")));
   $("banner").innerHTML =
     mem && !LOCAL

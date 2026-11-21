@@ -23159,6 +23159,12 @@ body.scrolled .top {
     transition: none;
   }
 }
+/* Handy: genau vier Kacheln in eine Reihe statt drei plus eine einzelne darunter */
+@media (max-width: 639px) {
+  html:not(.pc) .agrid:has(> :nth-child(4):last-child) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
 /* Tablet/PC Layout */
 @media (min-width: 640px) {
   html:not(.pc) [data-view="home"] .agrid {

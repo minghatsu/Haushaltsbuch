@@ -51,10 +51,15 @@ function hbOdo(el, str, dur) {
   el._s = str;
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
+      /* auf einer gerade versteckten Seite (vorbereitet für den Würfel) sofort den Endstand –
+         sonst rollen die Ziffern erst los, wenn die Seite sichtbar wird, und sind so lange leer */
+      const hid = !el.getClientRects().length;
       [...str].forEach((ch, i) => {
         const c = el.children[i],
           st = c && c.querySelector(".hs");
         if (st) {
+          if (hid) st.style.transition = "none";
+          else st.style.transition = "";
           if (dur) st.style.transitionDuration = dur + "ms";
           st.style.transitionDelay = i * 45 + "ms";
           st.style.transform = `translateY(${-Number(ch)}em)`;

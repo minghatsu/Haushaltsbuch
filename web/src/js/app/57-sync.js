@@ -1334,12 +1334,29 @@ $("loginGo").onclick = doLogin;
     f.className = "cubeface";
     const c = srcSec.cloneNode(true);
     c.hidden = false;
-    c.removeAttribute("data-view");
+    /* data-view bleibt an der Kopie: viele Regeln hängen daran (Spalten der Kacheln,
+       grüner Kartenrand) – ohne sie sähe die Seite im Würfel anders aus als danach */
+    c.removeAttribute("id");
     c.querySelectorAll("[id],[data-view]").forEach((e) => {
       e.removeAttribute("id");
       e.removeAttribute("data-view");
     });
     c.classList.add("cubing");
+    /* Zählwerke drehen ihre Ziffern erst zwei Bilder nach dem Zeichnen – in der Kopie gleich den Endstand zeigen */
+    const so = [...srcSec.querySelectorAll(".hbodo")],
+      co = [...c.querySelectorAll(".hbodo")];
+    so.forEach((e, i) => {
+      const str = e._s,
+        x = co[i];
+      if (!str || !x) return;
+      [...str].forEach((ch, j) => {
+        const st = x.children[j] && x.children[j].querySelector(".hs");
+        if (st) {
+          st.style.transition = "none";
+          st.style.transform = `translateY(${-Number(ch)}em)`;
+        }
+      });
+    });
     const r = cur.getBoundingClientRect();
     Object.assign(c.style, {
       position: "absolute",
@@ -1431,6 +1448,10 @@ $("loginGo").onclick = doLogin;
             FRESH[k] = freshKey();
           } catch (e) {}
         }
+        /* Kachel-Schriftgrößen sofort anpassen – sonst passiert das erst nach dem Ankommen */
+        try {
+          fitTiles(nb);
+        } catch (e) {}
         const maxY = Math.max(
             0,
             Math.round(document.documentElement.scrollHeight - c0.offsetHeight + nb.offsetHeight - innerHeight)

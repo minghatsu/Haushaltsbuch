@@ -240,6 +240,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.45.6",
+    "21. November 2026",
+    [
+      "Seitenwechsel per Wischen: Die Seite im Würfel sieht jetzt genau so aus wie danach – Kacheln springen nicht mehr um, Karten behalten ihren Rand, nichts rutscht nach dem Ankommen nach.",
+      "Einkauf: Die Beträge „pro Tag/Woche/Monat“ sind nach dem Wischen sofort da statt erst nach ein paar Sekunden.",
+      "Vier Kacheln stehen am Handy in einer Reihe statt drei plus einer einzelnen darunter.",
+    ],
+  ],
+  [
     "0.45.5",
     "21. November 2026",
     [

@@ -23162,6 +23162,12 @@ body.scrolled .top {
     transition: none;
   }
 }
+/* Handy: genau vier Kacheln in eine Reihe statt drei plus eine einzelne darunter */
+@media (max-width: 639px) {
+  html:not(.pc) .agrid:has(> :nth-child(4):last-child) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
 /* Tablet/PC Layout */
 @media (min-width: 640px) {
   html:not(.pc) [data-view="home"] .agrid {
@@ -50945,6 +50951,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.45.6",
+    "21. November 2026",
+    [
+      "Seitenwechsel per Wischen: Die Seite im Würfel sieht jetzt genau so aus wie danach – Kacheln springen nicht mehr um, Karten behalten ihren Rand, nichts rutscht nach dem Ankommen nach.",
+      "Einkauf: Die Beträge „pro Tag/Woche/Monat“ sind nach dem Wischen sofort da statt erst nach ein paar Sekunden.",
+      "Vier Kacheln stehen am Handy in einer Reihe statt drei plus einer einzelnen darunter.",
+    ],
+  ],
+  [
     "0.45.5",
     "21. November 2026",
     [
@@ -62305,7 +62320,7 @@ function render() {
     navPill(true);
   } catch (_) {}
   document
-    .querySelectorAll("[data-view]")
+    .querySelectorAll("[data-view]:not(.cubing)")
     .forEach((s) => (s.hidden = s.dataset.view !== ui.view && !(s.id === "v-gemeinsam" && SPS.open === "gemeinsam")));
   $("banner").innerHTML =
     mem && !LOCAL
@@ -85755,10 +85770,15 @@ function hbOdo(el, str, dur) {
   el._s = str;
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
+      /* auf einer gerade versteckten Seite (vorbereitet für den Würfel) sofort den Endstand –
+         sonst rollen die Ziffern erst los, wenn die Seite sichtbar wird, und sind so lange leer */
+      const hid = !el.getClientRects().length;
       [...str].forEach((ch, i) => {
         const c = el.children[i],
           st = c && c.querySelector(".hs");
         if (st) {
+          if (hid) st.style.transition = "none";
+          else st.style.transition = "";
           if (dur) st.style.transitionDuration = dur + "ms";
           st.style.transitionDelay = i * 45 + "ms";
           st.style.transform = `translateY(${-Number(ch)}em)`;
@@ -110071,12 +110091,29 @@ $("loginGo").onclick = doLogin;
     f.className = "cubeface";
     const c = srcSec.cloneNode(true);
     c.hidden = false;
-    c.removeAttribute("data-view");
+    /* data-view bleibt an der Kopie: viele Regeln hängen daran (Spalten der Kacheln,
+       grüner Kartenrand) – ohne sie sähe die Seite im Würfel anders aus als danach */
+    c.removeAttribute("id");
     c.querySelectorAll("[id],[data-view]").forEach((e) => {
       e.removeAttribute("id");
       e.removeAttribute("data-view");
     });
     c.classList.add("cubing");
+    /* Zählwerke drehen ihre Ziffern erst zwei Bilder nach dem Zeichnen – in der Kopie gleich den Endstand zeigen */
+    const so = [...srcSec.querySelectorAll(".hbodo")],
+      co = [...c.querySelectorAll(".hbodo")];
+    so.forEach((e, i) => {
+      const str = e._s,
+        x = co[i];
+      if (!str || !x) return;
+      [...str].forEach((ch, j) => {
+        const st = x.children[j] && x.children[j].querySelector(".hs");
+        if (st) {
+          st.style.transition = "none";
+          st.style.transform = `translateY(${-Number(ch)}em)`;
+        }
+      });
+    });
     const r = cur.getBoundingClientRect();
     Object.assign(c.style, {
       position: "absolute",
@@ -110168,6 +110205,10 @@ $("loginGo").onclick = doLogin;
             FRESH[k] = freshKey();
           } catch (e) {}
         }
+        /* Kachel-Schriftgrößen sofort anpassen – sonst passiert das erst nach dem Ankommen */
+        try {
+          fitTiles(nb);
+        } catch (e) {}
         const maxY = Math.max(
             0,
             Math.round(document.documentElement.scrollHeight - c0.offsetHeight + nb.offsetHeight - innerHeight)
