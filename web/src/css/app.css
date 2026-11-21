@@ -13885,6 +13885,10 @@ main.wrap {
   background: var(--bg);
   will-change: transform;
   transform-origin: 50% 50%;
+  /* Am Anfang zeigt die Nachbarseite noch ihre Innenseite – die bleibt unsichtbar, sonst
+     liegt sie gespiegelt über der Hauptseite */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 .cubeshade {
   position: absolute;

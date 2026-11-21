@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.46.0",
+    "21. November 2026",
+    [
+      "Beim Wischen auf die nächste Seite legt sich die Nachbarseite nicht mehr schon beim ersten Zucken über den Rand der Hauptseite – sie erscheint erst, wenn der Würfel sie wirklich zeigt.",
+    ],
+  ],
+  [
     "0.45.9",
     "21. November 2026",
     [
