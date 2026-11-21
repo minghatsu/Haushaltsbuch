@@ -50370,6 +50370,11 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.45.0",
+    "21. November 2026",
+    ["Startseite: „Noch pro Tag“ – dein Hauptkonto geteilt durch die restlichen Tage im Monat"],
+  ],
+  [
     "0.44.9",
     "21. November 2026",
     ["Konten & Spaces: Wählst du unten ein früheres Jahr, zeigen die Kacheln oben die Stände am 31.12. dieses Jahres – nur mit den Konten, die es damals gab."],
@@ -62766,7 +62771,7 @@ function renderHome() {
         ${
           ym === cur
             ? (() => {
-                const { left, v } = freePerDay(ym, mainBal, c);
+                const { left, v } = freePerDay(ym, mainBal);
                 return `<button data-go="year" aria-label="Noch ${fmtEur0(v)} pro Tag für ${left} Tage"><span class="hki" style="--tc:${themeCol("#c27c0e", 3)}">${svgIcon("chart", 18)}</span><span><small><span>Noch pro Tag</span> · <span>${left} ${left === 1 ? "Tag" : "Tage"}</span></small><b>${escHtml(fmtEur0(v))}</b></span></button>`;
               })()
             : `<button data-go="year"><span class="hki" style="--tc:${themeCol("#c27c0e", 3)}">${svgIcon("chart", 18)}</span><span><small>Ø pro Tag im Alltag</small><b>${escHtml(fmtEur0(dayAvg(ym + "-01", lastDayOf(ym), daysIn(ym))))}</b></span></button>`
@@ -64541,7 +64546,7 @@ function homeExtra({ ym, cur, c, g, mainName, mainBal, asOf }) {
     const D = daysIn(ym),
       left = ym === cur ? Math.max(1, D - today + 1) : ym > cur ? D : 0,
       past = ym === cur ? today : ym < cur ? D : 0;
-    const per = left ? (ym === cur ? freePerDay(ym, mainBal, c).v : Math.max(0, mainBal / left)) : 0,
+    const per = left ? (ym === cur ? freePerDay(ym, mainBal).v : Math.max(0, mainBal / left)) : 0,
       avg = past ? dayAvg(ym + "-01", ym === cur ? isoToday() : lastDayOf(ym), past) : 0,
       pct = Math.round((past / D) * 100);
     out.perday = `<div class="card">${hxHead("perday", "Noch pro Tag")}
@@ -65722,20 +65727,12 @@ function dayAvg(from, to, days) {
   }
   return v / Math.max(1, days);
 }
-/* „Noch pro Tag“: Hauptkonto minus offene Fixkosten und Steuer-Rücklage, geteilt durch die restlichen Tage (inkl. heute) */
-function freePerDay(ym, mainBal, c) {
+/* „Noch pro Tag“: Hauptkonto geteilt durch die restlichen Tage (inkl. heute) */
+function freePerDay(ym, mainBal) {
   const left = Math.max(1, daysIn(ym) - new Date().getDate() + 1);
-  let res = 0;
-  try {
-    res = yearCum(ym).reserveAcc || 0;
-  } catch (_) {}
-  let fo = c ? c.fixOpen : 0;
-  try {
-    if (fxAcctOn()) fo = fxOpenMain(ym);
-  } catch (_) {}
   return {
     left,
-    v: Math.max(0, (Number(mainBal) || 0) - fo - res) / left,
+    v: Math.max(0, Number(mainBal) || 0) / left,
   };
 }
 function shopAvg() {
@@ -67973,12 +67970,6 @@ function fxAcctStats(ym) {
   return Object.values(by).sort(
     (a, b) => (b.n === "Hauptkonto") - (a.n === "Hauptkonto") || b.total - a.total || a.n.localeCompare(b.n, "de")
   );
-}
-function fxOpenMain(ym) {
-  const paid = (store.months[ym] && store.months[ym].paid) || {};
-  let v = 0;
-  for (const f of fixedForMonth(ym, true)) if (!(f.id in paid) && fxAcct(f) === "Hauptkonto") v += planAmt(f, ym);
-  return v;
 }
 function fxAcctCard(ym) {
   if (!fxAcctOn())
