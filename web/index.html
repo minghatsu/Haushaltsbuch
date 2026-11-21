@@ -271,7 +271,7 @@ main{padding-block:6px 120px}
 .lseg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 3px 8px -5px rgba(0,0,0,.3)}
 #lseg{margin:0 0 2px}
 .calg{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.calg .w{font-size:11px;color:var(--muted);text-align:center;font-weight:600;padding-bottom:2px}
+.fxabar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--sunk);margin:4px 0 6px}.fxabar i{display:block;height:100%}.fxar{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}.fxar:last-of-type{border-bottom:0}.fxar>span:first-child{display:flex;align-items:center;gap:8px;min-width:0}.fxad{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}.fxaw{display:flex;gap:8px;align-items:flex-start;background:var(--warn-soft);color:var(--fg);border-radius:12px;padding:10px 12px;font-size:13px;margin-top:8px}.fxaw .i{flex:none;margin-top:2px;color:var(--warn)}.fxachip{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10.5px;font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 13%,transparent);border-radius:6px;padding:1px 6px;margin-top:2px;align-self:flex-start}.fxpl{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}.fxpln{background:var(--surface);border-radius:16px;padding:10px;min-height:120px;border:2px solid transparent;transition:border-color .15s,background .15s}.fxpln.over{border-color:var(--c);background:color-mix(in srgb,var(--c) 8%,var(--surface))}.fxpln h4{margin:0;font-size:14px;display:flex;align-items:center;gap:6px}.fxpln small{color:var(--muted)}.fxpp{display:flex;justify-content:space-between;gap:6px;width:100%;border:0;border-radius:11px;padding:10px;margin-top:7px;font-size:13px;background:color-mix(in srgb,var(--c) 20%,var(--surface));color:var(--fg);text-align:left;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}.fxpp span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fxpp.fxsrc{opacity:.35}.fxghost{position:fixed;z-index:9999;pointer-events:none;box-shadow:0 10px 24px #0004;border:2px solid var(--c,var(--accent));background:var(--surface)}.fxpick{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.fxpick button{border:0;border-radius:9px;padding:7px 9px;font-size:12px;font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}.fxpe{margin:10px 2px}.calg .w{font-size:11px;color:var(--muted);text-align:center;font-weight:600;padding-bottom:2px}
 .calg button{border:0;height:38px;border-radius:11px;font-weight:600;font-size:12.5px;color:var(--fg);background:var(--sunk);padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
 .calg button small{font-size:9px;font-weight:700;opacity:.8}
 .calg button.hot{color:#fff}[data-theme="dark"] .calg button.mid,[data-theme="dark"] .calg button.hot{color:#0b1a15}.calg button.sel{outline:2.5px solid var(--fg);outline-offset:1px}.calg button.today{box-shadow:inset 0 0 0 2px var(--accent)}
@@ -3897,6 +3897,7 @@ document.addEventListener("click", e=>{ if (!e.target.closest("#lgOk")) return; 
 
 /* Einstellungen extra */
 const CHANGELOG=[
+  ["0.44.1", "21. November 2026", ["Fixkosten: Du kannst jetzt einstellen, von welchem Konto sie abgehen – z. B. Hauptkonto oder dein Space „Monatliche Kosten“. Abhaken senkt dann genau dieses Konto.", "Handy: neue Karte „Wo wird abgebucht?“ mit Aufteilung je Konto und Warnung, wenn auf einem Space zu wenig für die offenen Fixkosten liegt – mit „Jetzt umbuchen“.", "Handy: „Konten-Plan“ – Posten gedrückt halten und ins andere Konto ziehen, oder antippen und das Konto wählen.", "PC: Im Kalender „Farbe: Konto“ färbt jeden Posten nach seinem Konto; im Bearbeiten-Fenster gibt es „Abgebucht von“.", "„Noch pro Tag“ und die Vorschau ziehen Fixkosten, die von einem Space abgehen, nicht mehr vom Hauptkonto ab."]],
   ["0.44.0", "21. November 2026", ["Neu: „Anlegen“ im Buchungsfenster – für Geld, das du investierst (z. B. ETF). Es geht vom Hauptkonto ab, zählt aber nicht als Ausgabe im Ø pro Tag. Wählst du ein Anlage-Ziel, wächst dessen Stand automatisch mit.", "In der Vorschau bis Monatsende gibt es dafür den Schalter „Anlegen“: Wenn du willst, rechnet Mami deine Investitionen doch im Tagesschnitt mit."]],
   ["0.43.9", "21. November 2026", ["Einladungen am Handy: nur noch Code, Name, Einladen und QR-Code – die Übersicht mit Spalten, Post-Link und Tester-Erinnerung gibt es nur am PC."]],
   ["0.43.8", "21. November 2026", ["Nach dem Speichern einer Buchung steht jetzt dabei, auf welches Konto sie ging (z. B. „· Bargeld“ oder „· Einkauf“) – wenn nicht aufs Hauptkonto.", "Kontostand aus PDF mit Datum in der Zukunft (z. B. „bis 30.11.“) hat eingetippte Buchungen von heute verschluckt – behoben.", "Kontostand am PC eintragen: Buchungen, die vorher am selben Tag eingetippt wurden, werden nicht mehr doppelt abgezogen.", "Sparen & Anlegen: „Öffnen“ öffnete am Handy die Einladungen statt des Zinseszins-Rechners – behoben. Auch „Mit Zinsen“ beim neuen Ziel und die Anlage-Gläser öffnen jetzt wieder den Rechner."]],
@@ -4162,6 +4163,7 @@ const PTOUR_FN=()=>({
     {sel:".pcfcalc,.fgroup", ic:"check", t:"Abhaken", p:[IS_PC?"Posten anklicken = bezahlt. Am Rand ziehen = anderer Tag. Das + in einem Tag legt dort einen neuen Posten an.":"Kachel antippen = bezahlt. Betrag antippen = nur für diesen Monat ändern.", "Beim Kontoauszug-Import hakt die App passende Posten selbst ab."]},
     {sel:".pcfgr,.fgroup:nth-of-type(2)", ic:"tag", t:"Gruppen", p:["Wohnen, Auto, Abos, Sparen … – die App sortiert deine Posten automatisch ein und zeigt, wie viel je Gruppe abgeht."]},
     {sel:"#payAll", ic:"check", t:"Alle abhaken", p:["Wenn alles bezahlt ist: ein Klick hakt den ganzen Monat ab."]},
+    {sel:".fxacc,.pcfleg", ic:"bank", t:"Wo wird abgebucht?", p:[IS_PC?"Oben im Kalender: „Farbe: Konto“ färbt jeden Posten nach dem Konto, von dem er abgeht. Welches Konto, stellst du beim Bearbeiten (Stift) unter „Abgebucht von“ ein.":"Hier siehst du, wie viel von welchem Konto abgeht – und ob auf dem Space genug liegt. Über „Konten-Plan“ ziehst du Posten von einem Konto ins andere."]},
     {sel:"#fixEditBtn", ic:"sliders", t:"Liste bearbeiten", p:["Neue Fixkosten anlegen, Beträge, Tag und Rhythmus ändern.", "Ein neuer Betrag gilt ab dem gewählten Monat – frühere Monate bleiben, wie sie waren."]},
   ]},
   shop:{t:"Einkauf", s:[
@@ -7187,7 +7189,7 @@ function invGoalNames(){ return ((S.settings.inv&&S.settings.inv.goals)||[]).map
 function invTxSum(gid, after){ let v=0; for (const t of (S.tx||[])) if (isInvTx(t) && t.inv===gid && (!after || t.date>after)) v+=Number(t.amount)||0; return Math.round(v*100)/100; }
 function dayAvg(from, to, days){ let v=0; for (const t of S.tx){ if (t.kind!=="ausgabe" || !t.date || t.date<from || t.date>to || isShopTx(t) || (isInvTx(t) && !fcCfg().inv)) continue; v+=Math.abs(Number(t.amount)||0); } return v/Math.max(1,days); }
 /* „Noch pro Tag“: Hauptkonto minus offene Fixkosten und Steuer-Rücklage, geteilt durch die restlichen Tage (inkl. heute) */
-function freePerDay(ym, mainBal, c){ const left=Math.max(1, daysIn(ym)-new Date().getDate()+1); let res=0; try{ res=yearCum(ym).reserveAcc||0; }catch(_){} return {left, v:Math.max(0, (Number(mainBal)||0)-(c?c.fixOpen:0)-res)/left}; }
+function freePerDay(ym, mainBal, c){ const left=Math.max(1, daysIn(ym)-new Date().getDate()+1); let res=0; try{ res=yearCum(ym).reserveAcc||0; }catch(_){} let fo=c?c.fixOpen:0; try{ if (fxAcctOn()) fo=fxOpenMain(ym); }catch(_){} return {left, v:Math.max(0, (Number(mainBal)||0)-fo-res)/left}; }
 function shopAvg(){ const td=isoToday(), d0=new Date(td+"T12:00"); d0.setDate(d0.getDate()-89); let first=td; for (const t of S.tx) if (t.date && t.date<first) first=t.date;
   const from=first>isoOf(d0)?first:isoOf(d0), span=Math.max(14, Math.round((new Date(td+"T12:00")-new Date(from+"T12:00"))/864e5)+1), A=shopSum(from, td), M=shopSum(td.slice(0,7)+"-01", td), day=A.v/span;
   return {day, week:day*7, month:day*30.44, n:A.n, span, mon:M.v, monN:M.n}; }
@@ -7708,7 +7710,7 @@ function renderFix(){
     return `<div class="ftile ${isPaid?"on":""}" role="checkbox" tabindex="0" aria-checked="${isPaid}" data-pay="${esc(f.id)}" aria-label="${esc(f.name)} ${esc(eur(amt))} ${isPaid?"bezahlt":"abhaken"}">
       <span class="fc">${isPaid?`<svg class="i" viewBox="0 0 24 24" style="width:13px;height:13px;stroke-width:3"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>`:""}</span>
       ${brandFor(f.name)?brandBadge(brandFor(f.name)):tile(f.kind==="betrieb"?"betrieb":"fix", f.name)}
-      <b lang="de">${esc(f.name)}</b>
+      <b lang="de">${esc(f.name)}</b>${fxAcctOn()?`<span class="fxachip" style="--c:${fxCol(fxAcct(f))}">${esc(fxAcct(f))}</span>`:""}
       ${editing?`<input class="in fxamt-in" id="fxAmtIn" data-fxamtin="${esc(f.id)}" inputmode="decimal" value="${esc(numStr(amt))}" aria-label="Betrag für ${esc(f.name)} im ${esc(mName)}">`
         :`<button class="famt" data-fxamt="${esc(f.id)}" aria-label="Betrag für ${esc(mName)} ändern">${esc(eur(amt))}</button>`}
       ${only?`<span class="fbdg">nur ${esc(MSHORT[ymParts(UI.ym)[1]-1])}.${!isPaid?` · <span role="button" tabindex="0" data-fxreset="${esc(f.id)}">zurück</span>`:""}</span>`:d?`<span class="fsub">noch ${esc(shortK(debtState(d).remaining))} €</span>`:rhythmText(f)?`<span class="fsub">${esc(rhythmText(f))}</span>`:""}
@@ -7719,6 +7721,7 @@ function renderFix(){
       <div class="pbar"><i style="width:${total?Math.round(c.fixPaid/total*100):0}%"></i></div>
       <div class="meta-row small muted"><span>${esc(eur(c.fixPaid))} bezahlt</span><span>${nPaid} von ${all.length} abgehakt</span></div>
       <div class="small muted" style="margin-top:8px">Kachel antippen = abhaken. Betrag antippen = nur für ${esc(mName)} ändern. Nur Abgehaktes zählt in deinen Zahlen.</div></div>
+    ${fxAcctCard(UI.ym)}
     ${order.map(([a,fs])=>{ const open = a in UI.fxOpen ? UI.fxOpen[a] : fs.some(f=>!(f.id in paid)); const sp=fs.filter(f=>f.id in paid).length, gs=sum(fs,f=>f.id in paid?Number(paid[f.id])||0:planAmt(f,UI.ym));
       return `<div class="card fgroup">
         <button class="fgh" data-fxgroup="${esc(a)}" aria-expanded="${open}"><span class="gi">${ic(AREA_IC[a]||"dots",19)}</span><span class="n"><b>${esc(a)}</b><span class="small muted">${esc(fs.map(f=>f.name).slice(0,3).join(", "))}${fs.length>3?" …":""}</span></span><span class="a"><b>${esc(eur0(gs))}</b><span class="small muted">${sp} von ${fs.length}</span></span>${ic(open?"up":"down",18)}</button>
@@ -7728,6 +7731,45 @@ function renderFix(){
     <div class="row-btns">${nPaid<all.length?`<button class="btn" id="payAll">Alle abhaken</button>`:""}<button class="btn" id="fixEditBtn">Liste bearbeiten</button></div>`;
 }
 function debtFor(fid){ return S.debts.find(d=>d.fixedId===fid); }
+/* Fixkosten: von welchem Konto/Space wird abgebucht? (f.acct, sonst Hauptkonto) */
+/* Eigene, gut unterscheidbare Farbe je Konto (die Kontofarbe, wenn sie sich vom Hauptkonto abhebt) */
+function fxCol(n){ const P=["#8a4fb5","#c47a12","#3d63a8","#b42318","#0f8a8a","#a0522d"]; if (n==="Hauptkonto") return "var(--accent)"; const L=kaNames().filter(x=>x!=="Hauptkonto"); return P[Math.max(0,L.indexOf(n))%P.length]; }
+function fxAcctOn(){ try{ return kaNames().length>1; }catch(_){ return false; } }
+function fxAcct(f){ const n=f&&f.acct; try{ return n && kaNames().includes(n) ? n : "Hauptkonto"; }catch(_){ return "Hauptkonto"; } }
+async function fxSetAcct(fid, acc){ const f=S.fixed.find(x=>x.id===fid); if (!f || fxAcct(f)===acc) return; const before={...f}; delete before.id; const d={...before}; if (acc==="Hauptkonto") delete d.acct; else d.acct=acc;
+  if (await safe(()=>put("fixed", fid, d))) toast(`${f.name} → ${acc}`, ()=>safe(()=>put("fixed", fid, before)), "Rückgängig"); }
+function fxAcctStats(ym){ const paid=(S.months[ym]&&S.months[ym].paid)||{}, all=fixedSorted().filter(f=>dueIn(f,ym) || f.id in paid), by={};
+  for (const f of all){ const a=fxAcct(f), amt=f.id in paid?Number(paid[f.id])||0:planAmt(f,ym), o=by[a]=by[a]||{n:a, total:0, open:0, openN:0, items:[], first:99};
+    o.total+=amt; o.items.push(f); if (!(f.id in paid)){ o.open+=amt; o.openN++; const d=payDay(f,ym); if (d && d<o.first) o.first=d; } }
+  for (const n of kaNames()) if (!by[n]) by[n]={n, total:0, open:0, openN:0, items:[], first:99};
+  return Object.values(by).sort((a,b)=>(b.n==="Hauptkonto")-(a.n==="Hauptkonto") || b.total-a.total || a.n.localeCompare(b.n,"de")); }
+function fxOpenMain(ym){ const paid=(S.months[ym]&&S.months[ym].paid)||{}; let v=0; for (const f of fixedForMonth(ym,true)) if (!(f.id in paid) && fxAcct(f)==="Hauptkonto") v+=planAmt(f,ym); return v; }
+function fxAcctCard(ym){ if (!fxAcctOn()) return ""; const L=fxAcctStats(ym).filter(x=>x.items.length || x.n==="Hauptkonto"), tot=sum(L,x=>x.total)||1, cur=ym===ymOf(new Date()), td=isoToday();
+  let warn=""; if (cur) for (const x of L){ if (x.n==="Hauptkonto" || !x.open) continue; const b=accountBalance(x.n, td); if (b==null || b>=x.open-0.005) continue;
+    warn=`<div class="fxaw">${ic("bell",15)}<span>${esc(nt("fxa_warn",{a:x.n, b:eur0(b), m:eur0(x.open-b), d:x.first<99?String(x.first):"–"}))} <button class="link" data-fxamove="${esc(x.n)}" data-amt="${(Math.ceil((x.open-b)*100)/100).toFixed(2)}">${esc(nt("fxa_move"))} ›</button></span></div>`; break; }
+  return `<div class="card fxacc"><div class="card-head"><h2>${hIc("bank")}${esc(nt("fxa_t"))}</h2><button class="link" data-fxaplan>${esc(nt("fxa_plan"))} ${ic("right",16)}</button></div>
+    <div class="fxabar">${L.filter(x=>x.total>0).map(x=>`<i style="width:${(x.total/tot*100).toFixed(1)}%;background:${fxCol(x.n)}"></i>`).join("")}</div>
+    ${L.map(x=>`<div class="fxar"><span><i class="fxad" style="background:${fxCol(x.n)}"></i>${esc(x.n)}</span><span><b>${esc(eur0(x.total))}</b>${x.open?` · <span class="muted">${esc(nt("fxa_open",{v:eur0(x.open)}))}</span>`:""}</span></div>`).join("")}${warn}</div>`; }
+/* Konten-Plan: Fixkosten zwischen Konten verschieben (gedrückt halten & ziehen, oder antippen & Konto wählen) */
+function fxPlanOpen(){ hbSheet("fxpBg", nt("fxa_plan")); fxPlanRender(); }
+document.addEventListener("click", e=>{ const t=e.target;
+  if (t.closest("[data-fxaplan]")){ fxPlanOpen(); return; }
+  const mv=t.closest("[data-fxamove]"); if (mv){ try{ mvOpen(); const L=mvList(), a=L.find(x=>x.label==="Hauptkonto"), b=L.find(x=>x.label===mv.dataset.fxamove); if (a&&b){ mvSheet(a.i,b.i); setTimeout(()=>{ const i=$("mvAmt"); if (i){ i.value=String(mv.dataset.amt).replace(".",","); i.dispatchEvent(new Event("input",{bubbles:true})); } }, 60); } }catch(_){} return; }
+  const ch=t.closest("[data-fxpick]"); if (ch){ const [fid,acc]=ch.dataset.fxpick.split("|"); fxSetAcct(fid,acc).then(fxPlanRender); return; }
+  const pp=t.closest("[data-fxpp]"); if (pp && !FXD.moved){ const was=pp.nextElementSibling&&pp.nextElementSibling.classList.contains("fxpick"); document.querySelectorAll("#fxpBg .fxpick").forEach(x=>x.remove()); if (was) return;
+    const fid=pp.dataset.fxpp, f=S.fixed.find(x=>x.id===fid); pp.insertAdjacentHTML("afterend", `<div class="fxpick">${kaNames().filter(n=>n!==fxAcct(f)).map(n=>`<button data-fxpick="${esc(fid)}|${esc(n)}" style="--c:${fxCol(n)}">→ ${esc(n)}</button>`).join("")}</div>`); } });
+const FXD={moved:false};
+document.addEventListener("pointerdown", e=>{ const pp=e.target.closest("#fxpBg [data-fxpp]"); if (!pp || e.button>0) return; FXD.moved=false; const x0=e.clientX, y0=e.clientY; let ghost=null, over=null;
+  const t=setTimeout(()=>{ const r=pp.getBoundingClientRect(); ghost=pp.cloneNode(true); ghost.classList.add("fxghost"); Object.assign(ghost.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px"}); document.body.appendChild(ghost); pp.classList.add("fxsrc"); try{ navigator.vibrate&&navigator.vibrate(12); }catch(_){} }, 280);
+  const mvH=ev=>{ if (!ghost){ if (Math.hypot(ev.clientX-x0, ev.clientY-y0)>8) clearTimeout(t); return; } ev.preventDefault(); FXD.moved=true; ghost.style.transform=`translate(${ev.clientX-x0}px,${ev.clientY-y0}px) rotate(-3deg)`;
+    const el=document.elementFromPoint(ev.clientX, ev.clientY), ln=el&&el.closest("[data-fxlane]"); if (over!==ln){ if (over) over.classList.remove("over"); over=ln; if (ln) ln.classList.add("over"); } };
+  const up=()=>{ clearTimeout(t); removeEventListener("pointermove",mvH); removeEventListener("pointerup",up); removeEventListener("pointercancel",up); pp.classList.remove("fxsrc");
+    if (ghost){ ghost.remove(); if (over){ over.classList.remove("over"); fxSetAcct(pp.dataset.fxpp, over.dataset.fxlane).then(fxPlanRender); } setTimeout(()=>{ FXD.moved=false; }, 50); } };
+  addEventListener("pointermove",mvH,{passive:false}); addEventListener("pointerup",up); addEventListener("pointercancel",up); });
+function fxPlanRender(){ const bg=$("fxpBg"); if (!bg) return; const body=bg.querySelector(".hobody"), ym=UI.ym, paid=(S.months[ym]&&S.months[ym].paid)||{}, L=fxAcctStats(ym);
+  body.innerHTML=`<div class="fxpl">${L.map(x=>`<div class="fxpln" data-fxlane="${esc(x.n)}" style="--c:${fxCol(x.n)}"><h4><i class="fxad" style="background:${fxCol(x.n)}"></i>${esc(x.n)}</h4><small>${esc(nt("fxa_pm",{v:eur0(x.total)}))}</small>
+    ${x.items.map(f=>`<button class="fxpp" data-fxpp="${esc(f.id)}"><span>${esc(f.name)}</span><b>${esc(eur0(f.id in paid?Number(paid[f.id])||0:planAmt(f,ym)))}</b></button>`).join("")||`<p class="small muted fxpe">${esc(nt("fxa_empty"))}</p>`}</div>`).join("")}</div>
+    <p class="small muted" style="margin:10px 2px 0">${esc(nt("fxa_hint"))}</p>`; }
 
 function analyseTop(ym){
   const c=monthCalc(ym), cur=ymOf(new Date()), prevYm=shiftYm(ym,-1), dayNow=new Date().getDate();
@@ -10690,6 +10732,18 @@ fcp_inv:["Anlegen","Investing","Yatırım","Инвестиции","Інвест�
 fcp_inv_s:["diesen Monat {v} angelegt – im Ø mitrechnen?","{v} invested this month – include in the average?","bu ay {v} yatırıldı – ortalamaya dahil edilsin mi?","в этом месяце вложено {v} – учитывать в среднем?","цього місяця вкладено {v} – враховувати в середньому?","w tym miesiącu zainwestowano {v} – wliczać do średniej?","تم استثمار {v} هذا الشهر – إدراجه في المتوسط؟","{v} investiți luna aceasta – incluzi în medie?"],
 inv_nogoal:["Ohne Ziel","No goal","Hedefsiz","Без цели","Без цілі","Bez celu","بدون هدف","Fără obiectiv"],
 inv_hint_sheet:["Geht vom Konto ins Depot – zählt nicht als Ausgabe im Ø pro Tag. Mit Ziel wächst dessen Stand mit.","Goes from your account into your portfolio – doesn't count as spending in the daily average. With a goal, its balance grows too.","Hesaptan portföye gider – günlük ortalamada harcama sayılmaz. Hedef seçilirse onun bakiyesi de artar.","Уходит со счёта в портфель – не считается расходом в среднем за день. С целью растёт и её баланс.","Йде з рахунку в портфель – не рахується витратою в середньому за день. З ціллю зростає і її залишок.","Idzie z konta do portfela – nie liczy się jako wydatek w średniej dziennej. Z celem rośnie też jego stan.","ينتقل من الحساب إلى المحفظة – لا يُحسب كمصروف في المتوسط اليومي. مع هدف يزداد رصيده أيضًا.","Merge din cont în portofoliu – nu contează ca cheltuială în media zilnică. Cu un obiectiv, crește și soldul lui."],
+fxa_t:["Wo wird abgebucht?","Where is it debited?","Nereden çekiliyor?","Откуда списывается?","Звідки списується?","Skąd jest pobierane?","من أين يُخصم؟","De unde se debitează?"],
+fxa_plan:["Konten-Plan","Account plan","Hesap planı","План по счетам","План за рахунками","Plan kont","خطة الحسابات","Planul conturilor"],
+fxa_open:["noch {v} offen","{v} still open","{v} hâlâ açık","ещё {v} открыто","ще {v} відкрито","jeszcze {v} otwarte","{v} لا يزال مفتوحًا","încă {v} deschis"],
+fxa_warn:["Auf „{a}“ liegen {b} – es fehlen {m}, bevor ab dem {d}. die Fixkosten abgehen.","“{a}” holds {b} – {m} is missing before the fixed costs go out from the {d}th.","“{a}” hesabında {b} var – {d}. günden itibaren sabit giderler çıkmadan önce {m} eksik.","На «{a}» лежит {b} – не хватает {m}, прежде чем с {d}-го спишутся постоянные расходы.","На «{a}» лежить {b} – бракує {m}, перш ніж з {d}-го спишуться постійні витрати.","Na „{a}” jest {b} – brakuje {m}, zanim od {d}. zejdą koszty stałe.","في „{a}“ يوجد {b} – ينقص {m} قبل خصم التكاليف الثابتة من يوم {d}.","În „{a}” sunt {b} – lipsesc {m} până când, din {d}, se debitează costurile fixe."],
+fxa_move:["Jetzt umbuchen","Transfer now","Şimdi aktar","Перевести сейчас","Переказати зараз","Przelej teraz","حوّل الآن","Transferă acum"],
+fxa_pm:["{v} im Monat","{v} per month","ayda {v}","{v} в месяц","{v} на місяць","{v} miesięcznie","{v} شهريًا","{v} pe lună"],
+fxa_empty:["Noch nichts – hierher ziehen","Nothing yet – drag here","Henüz yok – buraya sürükle","Пока пусто – перетащи сюда","Поки порожньо – перетягни сюди","Jeszcze nic – przeciągnij tutaj","لا شيء بعد – اسحب إلى هنا","Încă nimic – trage aici"],
+fxa_hint:["Posten gedrückt halten und ins andere Konto ziehen – oder antippen und das Konto wählen.","Hold an item and drag it to the other account – or tap it and choose the account.","Bir kalemi basılı tut ve diğer hesaba sürükle – ya da dokun ve hesabı seç.","Удерживай пункт и перетащи на другой счёт – или нажми и выбери счёт.","Утримуй пункт і перетягни на інший рахунок – або натисни й обери рахунок.","Przytrzymaj pozycję i przeciągnij na inne konto – albo stuknij i wybierz konto.","اضغط مطولًا على البند واسحبه إلى الحساب الآخر – أو اضغط عليه واختر الحساب.","Ține apăsat un element și trage-l în celălalt cont – sau atinge-l și alege contul."],
+fxa_from:["Abgebucht von","Debited from","Çekildiği hesap","Списывается с","Списується з","Pobierane z","يُخصم من","Debitat din"],
+fxa_col:["Farbe","Colour","Renk","Цвет","Колір","Kolor","اللون","Culoare"],
+fxa_area:["Bereich","Area","Alan","Раздел","Розділ","Obszar","المجال","Categorie"],
+fxa_acct:["Konto","Account","Hesap","Счёт","Рахунок","Konto","الحساب","Cont"],
 zk_debts_c:["{n} Kredite offen", "{n} loans open", "{n} açık kredi", "{n} открытых кредита", "{n} відкриті кредити", "{n} otwarte kredyty", "{n} قروض مفتوحة", "{n} credite deschise"],
 zk_debts_s:["{n} Kredite · {r} Rate im Monat", "{n} loans · {r} monthly payment", "{n} kredi · aylık {r} taksit", "{n} кредита · {r} в месяц", "{n} кредити · {r} на місяць", "{n} kredyty · {r} rata miesięcznie", "{n} قروض · {r} قسط شهري", "{n} credite · {r} rată pe lună"],
 zk_debts0:["Schuldenfrei 🎉", "Debt-free 🎉", "Borçsuz 🎉", "Без долгов 🎉", "Без боргів 🎉", "Bez długów 🎉", "بلا ديون 🎉", "Fără datorii 🎉"],
@@ -10980,7 +11034,7 @@ function fcCalc(){ const ym=ymOf(new Date()), dim=daysIn(ym), d0=new Date().getD
   if (d0<6){ const pm=shiftYm(ym,-1), p=monthCalc(pm), dp=daysIn(pm); aA=Math.max(aA, typ(p.tx.filter(isA))/dp); sA=Math.max(sA, sum(p.tx.filter(isS),t=>t.amount)/dp); bA=Math.max(bA, typ(p.tx.filter(isB))/dp); }
   const iSum=sum(c.tx.filter(t=>isI(t)&&upto(t)),t=>t.amount), iA=iSum/Math.max(1,d0);
   const avg=(CF.alltag?aA:0)+(CF.shop?sA:0)+(CF.biz?bA:0)+(CF.inv?iA:0);
-  const fut=Array(dim+2).fill(0), fixL=[]; for (const f of fixedForMonth(ym,true)){ if (f.id in paid) continue; let d=payDay(f,ym)||d0+1; if (d<=d0) d=Math.min(dim,d0+1); const a=planAmt(f,ym); if (CF.fix) fut[d]-=a; fixL.push({d,a,n:f.name}); }
+  const fut=Array(dim+2).fill(0), fixL=[]; for (const f of fixedForMonth(ym,true)){ if (f.id in paid) continue; if (!CF.spaces && fxAcct(f)!=="Hauptkonto") continue; let d=payDay(f,ym)||d0+1; if (d<=d0) d=Math.min(dim,d0+1); const a=planAmt(f,ym); if (CF.fix) fut[d]-=a; fixL.push({d,a,n:f.name}); }
   const inc=[]; const prev=monthCalc(shiftYm(ym,-1)).tx.filter(t=>t.kind==="einnahme"&&t.amount>=50);
   for (const t of prev){ const got=c.tx.some(x=>x.kind==="einnahme"&&x.cat===t.cat&&Math.abs(x.amount-t.amount)<t.amount*0.3); if (got) continue; let d=Math.min(dim,Number(t.date.slice(8,10))); if (d<=d0){ if (d0-d>10 || d0>=dim) continue; d=d0+1; } if (CF.inc) fut[d]+=t.amount; inc.push({d, v:t.amount, n:t.cat||"", k:"inc"}); }
   try{ for (const x of (S.settings.stb||[])){ if (x.res!=="ref" || !(Number(x.amt)>0) || !x.date || x.got) continue; const exp=addDays(x.date,21), last=addDays(x.date,70), td=isoToday(); if (td>last) continue;
@@ -14429,8 +14483,8 @@ function accountBalance(name, asOf){
   }
   b+=manualDelta(a, last, asOf, name);
   /* Von Hand abgehakte Fixkosten: das Geld ist weg, auch wenn noch kein Kontoauszug da ist (bis die Bank-Buchung kommt) */
-  if (name==="Hauptkonto"){ let cut=""; if (last){ const x=new Date(last+"T12:00:00"); x.setDate(x.getDate()-10); cut=isoOf(x); }
-    for (const [ym,m] of Object.entries(S.months||{})){ if (!m || !m.man) continue; for (const [fid,x] of Object.entries(m.man)){ if (!x || !(fid in (m.paid||{})) || !x.d || x.d>asOf || x.d<=cut) continue;
+  { let cut=""; if (last){ const x=new Date(last+"T12:00:00"); x.setDate(x.getDate()-10); cut=isoOf(x); }
+    for (const [ym,m] of Object.entries(S.months||{})){ if (!m || !m.man) continue; for (const [fid,x] of Object.entries(m.man)){ if (!x || !(fid in (m.paid||{})) || !x.d || x.d>asOf || x.d<=cut) continue; if (fxAcct(S.fixed.find(f=>f.id===fid))!==name) continue;
       if (x.d>a.date || (x.d===a.date && (x.ts||0)>(a.ts||0))) b-=Number(m.paid[fid])||0; } } }
   /* In der App umgebuchtes Geld (ziehen & senden) – bis die Bank-Umbuchung im Kontoauszug auftaucht */
   for (const m of (S.settings.moves||[])){ if (m.from!==name && m.to!==name) continue; if (!m.date || m.date>asOf) continue;

@@ -887,8 +887,9 @@ if (IS_PC){
     const amtOf=f=>f.id in paid?Number(paid[f.id])||0:planAmt(f,ym);
     const total=sum(all,amtOf), pSum=sum(all.filter(f=>f.id in paid),amtOf), nPaid=all.filter(f=>f.id in paid).length;
     const by={}, none=[]; for (const f of all){ const d=dayOf(f,ym); if (d) (by[d]=by[d]||[]).push(f); else none.push(f); }
+    const byAcc=fxAcctOn() && S.settings.fxColBy==="konto";
     const chip=f=>{ const on=f.id in paid, a=fixArea(f), d=dayOf(f,ym), late=!on && d && d<today, ed=UI.amtEdit===f.id;
-      return `<div class="pcfc ${on?"on":""} ${late?"late":""}" style="--c:${col(a)}" data-pay="${esc(f.id)}" data-pcfid="${esc(f.id)}" draggable="${ed?"false":"true"}" role="checkbox" tabindex="0" aria-checked="${on}" title="${esc(f.name)} · ${esc(a)}${late?" · überfällig":""}">
+      return `<div class="pcfc ${on?"on":""} ${late?"late":""} ${byAcc?"acc":""}" style="--c:${byAcc?fxCol(fxAcct(f)):col(a)}" data-pay="${esc(f.id)}" data-pcfid="${esc(f.id)}" draggable="${ed?"false":"true"}" role="checkbox" tabindex="0" aria-checked="${on}" title="${esc(f.name)} · ${esc(a)}${fxAcctOn()?" · "+esc(fxAcct(f)):""}${late?" · überfällig":""}">
         ${brandFor(f.name)?brandBadge(brandFor(f.name)):tile(f.kind==="betrieb"?"betrieb":"fix", f.name)}<span class="n" lang="de">${esc(f.name)}</span>
         ${ed?`<input class="in fxamt-in" id="fxAmtIn" data-fxamtin="${esc(f.id)}" inputmode="decimal" value="${esc(numStr(amtOf(f)))}" aria-label="Betrag für ${esc(f.name)} im ${esc(mName)}">`
           :`<button class="a" data-fxamt="${esc(f.id)}" title="Betrag nur für ${esc(mName)} ändern">${esc(eur(amtOf(f)))}</button>`}
@@ -905,7 +906,7 @@ if (IS_PC){
     const R=50, C=2*Math.PI*R, pct=total?pSum/total:0;
     $("v-fix").classList.add("pcfcal");
     $("v-fix").innerHTML = `
-      <div class="card pcfcalc"><div class="wd">${wk}</div><div class="grid">${cells}</div></div>
+      <div class="card pcfcalc">${fxAcctOn()?`<div class="pcfleg"><span class="pcfseg" role="group" aria-label="${esc(nt("fxa_col"))}"><button data-fxcol="bereich" aria-pressed="${!byAcc}">${esc(nt("fxa_col"))}: ${esc(nt("fxa_area"))}</button><button data-fxcol="konto" aria-pressed="${byAcc}">${esc(nt("fxa_col"))}: ${esc(nt("fxa_acct"))}</button></span>${byAcc?fxAcctStats(ym).filter(x=>x.items.length||x.n==="Hauptkonto").map(x=>`<span class="pcfacc"><i style="background:${fxCol(x.n)}"></i>${esc(x.n)} · <b>${esc(eur0(x.total))}</b></span>`).join(""):""}</div>`:""}<div class="wd">${wk}</div><div class="grid">${cells}</div></div>
       <div class="pcfside">
         <div class="card pcfsum"><span class="small muted">Im ${esc(mName)} fest verplant</span><div class="big" data-v="${total}">${esc(eur0(total))}</div>
           <div class="pcfring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${R}" class="bg"/><circle cx="60" cy="60" r="${R}" class="fg" style="stroke-dasharray:${C.toFixed(1)};stroke-dashoffset:${(C*(1-F.ring)).toFixed(1)}" data-to="${(C*(1-pct)).toFixed(1)}"/></svg>
@@ -996,6 +997,7 @@ if (IS_PC){
         ${field("Tag",`<select class="in" data-pf="day"><option value="0">ohne</option>${Array.from({length:D},(_,i)=>`<option value="${i+1}" ${day===i+1?"selected":""}>${i+1}.</option>`).join("")}</select>`)}</div>
       <div class="pr2">${field("Rhythmus",`<select class="in" data-pf="rhythm">${RHYTHMS.filter(r=>r[0]!=="monate").map(([k,l])=>`<option value="${k}" ${(f&&f.rhythm||"monatlich")===k?"selected":""}>${l}</option>`).join("")}${f&&f.rhythm==="monate"?`<option value="monate" selected>Bestimmte Monate</option>`:""}</select>`)}
         ${field("Art",`<select class="in" data-pf="kind"><option value="privat" ${!f||f.kind!=="betrieb"?"selected":""}>Privat</option><option value="betrieb" ${f&&f.kind==="betrieb"?"selected":""}>Betrieblich</option></select>`)}</div>
+      ${fxAcctOn()?field(esc(nt("fxa_from")),`<select class="in" data-pf="acct">${kaNames().map(n=>`<option value="${esc(n)}" ${(f?fxAcct(f):"Hauptkonto")===n?"selected":""}>${esc(n)}</option>`).join("")}</select>`):""}
       ${(()=>{ const a=f&&aboCfg()[f.id]||{}; return `<div class="pfsec">Vertrag <small>(optional – Erinnerung 30 Tage vor der Frist)</small></div><div class="pr2">${field("Läuft bis",`<input class="in" type="date" data-pf="aboend" value="${esc(a.end||"")}">`)}${field("Kündigungsfrist",`<select class="in" data-pf="abonot">${ABO_NOT.map(([v,l])=>`<option value="${v}" ${Number(a.notice||0)===v?"selected":""}>${l}</option>`).join("")}</select>`)}</div>`; })()}
       <div class="small muted pnote">${f?`Änderungen gelten ab ${esc(mon)} – frühere Monate bleiben, wie sie waren.`:`Gilt ab ${esc(mon)} für alle folgenden Monate.`}</div>
       <div class="pa">${f?`<button class="btn pdel" data-pfdel>${SV.bin}<span>Löschen</span></button>`:""}<span style="flex:1"></span><button class="btn" data-pfx>Abbrechen</button><button class="btn primary" data-pfok>${f?"Speichern":"Eintragen"}</button></div>`;
@@ -1015,13 +1017,13 @@ if (IS_PC){
     if (!(v>=0)){ toast("Betrag ungültig"); return; }
     const nv=Math.round(v*100)/100, cm=Number(ym.slice(5,7));
     if (!popFor.id){
-      const id=newId(), d={name, amount:nv, kind, order:S.fixed.length, from:ym, days:[{from:ym, day}]};
+      const id=newId(), d={name, amount:nv, kind, order:S.fixed.length, from:ym, days:[{from:ym, day}]}; { const ac=pop.querySelector("[data-pf=acct]"); if (ac && ac.value && ac.value!=="Hauptkonto") d.acct=ac.value; }
       if (rh!=="monatlich"){ d.rhythm=rh; d.months=rhythmMonths(rh, cm); }
       F.fresh=id; const ae=val("aboend"), an=Number(val("abonot"))||0; popClose(); if (ae||an){ S.settings.abos={...(S.settings.abos||{}), [id]:{end:ae, notice:an}}; saveSettings(); } if (await safe(()=>put("fixed", id, d))) toast(`${name} eingetragen`, ()=>safe(()=>del("fixed", id)), "Rückgängig"); return;
     }
     const f=S.fixed.find(x=>x.id===popFor.id); if (!f){ popClose(); return; }
     { const ae=val("aboend"), an=Number(val("abonot"))||0, A={...(S.settings.abos||{})}, o=A[f.id]||{}; if ((o.end||"")!==ae || Number(o.notice||0)!==an){ if (ae||an||o.abo) A[f.id]={...o, end:ae, notice:an}; else delete A[f.id]; S.settings.abos=A; saveSettings(); } }
-    const before=clean(f), d=clean(f); d.name=name; d.kind=kind;
+    const before=clean(f), d=clean(f); d.name=name; d.kind=kind; { const ac=pop.querySelector("[data-pf=acct]"); if (ac){ if (ac.value && ac.value!=="Hauptkonto") d.acct=ac.value; else delete d.acct; } }
     if (Math.abs(nv-listAmt(f,ym))>0.004){ const np=withPrice(f, ym, nv); d.amount=np.amount; if (np.prices) d.prices=np.prices; else delete d.prices; }
     if ((dayOf(f,ym)||0)!==day){ d.days=withDay(f,ym,day); delete d.day; }
     if (rh!==(f.rhythm||"monatlich")){ if (rh==="monatlich"){ delete d.rhythm; delete d.months; } else if (rh!=="monate"){ d.rhythm=rh; d.months=rhythmMonths(rh, Array.isArray(f.months)&&f.months.length?Math.min(...f.months):cm); } }
@@ -1841,3 +1843,5 @@ if (IS_DESK){
   const _rd=render; render=(...a)=>{ const x=_rd(...a); try{ devW(); }catch(_){} return x; };
   setInterval(()=>{ try{ devW(); }catch(_){} }, 3000); setTimeout(()=>{ try{ devW(); }catch(_){} }, 600);
 }
+
+document.addEventListener("click", e=>{ const b=e.target.closest("[data-fxcol]"); if (!b) return; S.settings.fxColBy=b.dataset.fxcol; saveSettings(); renderFix(); });
