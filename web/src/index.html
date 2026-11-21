@@ -1,0 +1,319 @@
+<title>Finanz MAMI</title>
+<style>
+<!-- include: css/fonts.css -->
+<!-- include: css/app.css -->
+</style>
+<style id="pcCss" media="not all">/*PC-CSS*/</style>
+
+<div class="backdrop" id="addBg" hidden><div class="sheet addsheet" role="dialog" aria-label="Was möchtest du hinzufügen?"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><h2>Was möchtest du hinzufügen?</h2><button class="icon-btn" data-addclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <button class="addopt" data-addpick="hand"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span><span class="grow"><b>Von Hand eintragen</b><span class="small muted">Eine Ausgabe oder Einnahme</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+  <button class="addopt" data-addpick="receipt"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span class="grow"><b>Beleg fotografieren</b><span class="small muted">Quittung, Rechnung oder Kontoauszug – wird erkannt</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+  <button class="addopt" data-addpick="import"><span class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span class="grow"><b>Kontoauszug importieren</b><span class="small muted">CSV oder PDF von deiner Bank – viele Buchungen auf einmal</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+</div></div>
+<div class="ptr" id="ptr" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg></div>
+<div class="docrev" id="docRev" hidden role="dialog" aria-label="Foto prüfen">
+  <div class="drtop"><b>Foto prüfen</b><div class="drseg"><button data-drmode="frame" aria-pressed="true">Rahmen</button><button data-drmode="result" aria-pressed="false">Ergebnis</button></div><button class="drx" id="drClose" aria-label="Abbrechen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="drstage" id="drStage"><img id="drImg" alt="" draggable="false"><svg id="drSvg" width="100%" height="100%"></svg><canvas id="drOut" hidden></canvas></div>
+  <div class="drbot">
+    <div class="drchecks" id="drChecks"></div>
+    <p class="drtip" id="drTip" hidden></p>
+    <div class="drtune" id="drTune" hidden><label>Schärfen<input type="range" id="drSha" min="0" max="100"></label><label>Kontrast<input type="range" id="drCon" min="0" max="100"></label></div>
+    <div class="drbtns"><button class="btn" id="drRetake">Neu aufnehmen</button><button class="btn primary" id="drUse">Übernehmen</button></div>
+  </div>
+</div>
+<div class="fan" id="fanBg" hidden>
+  <button class="fanb" data-addpick="hand" style="--i:0;--fc:#3d63a8"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg><span>Eintippen</span></button>
+  <button class="fanb" data-addpick="receipt" style="--i:1;--fc:#d14d72"><svg class="i" viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg><span>Foto</span></button>
+  <button class="fanb" data-addpick="import" style="--i:2;--fc:#c27c0e"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg><span>Import</span></button>
+  <button class="fanb fanx" data-addpick="settings" style="--i:3;--fc:#5b6472"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span>Einstellungen</span></button>
+  <button class="fanb fanx" data-addpick="profil" style="--i:4;--fc:#7a5bc2"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5a7 7 0 0 1 14 0"/></svg><span>Profil</span></button>
+  <button class="fanb fanx" data-addpick="hilfe" style="--i:5;--fc:#0f8a8a"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.7 9.5a2.4 2.4 0 1 1 3.3 2.2c-.6.3-1 .8-1 1.5v.6M12 16.8v.2"/></svg><span>Hilfe</span></button>
+  <button class="fanb fanx" data-addpick="qr" hidden style="--i:6;--fc:#2f5d73"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 14h2M14 18h2M18 18h2v2M16 16h2v2"/></svg><span>QR-Code</span></button>
+  <div class="fanhint" id="fanHint">↻ <span>Drehen für mehr</span></div>
+  <div class="fandots" id="fanDots"><b>‹</b><span id="fanDw"></span><b>›</b></div>
+</div>
+<div class="pfed" id="pfEd" hidden role="dialog" aria-label="Profilfoto zuschneiden">
+  <div class="pfedtop"><b>Foto zuschneiden</b><small>Ziehen zum Verschieben · Regler oder zwei Finger zum Zoomen</small></div>
+  <div class="pfstage" id="pfStage"><img id="pfImg" alt="" draggable="false"><div class="pfmask"></div></div>
+  <div class="pfzoom"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5M8.5 11h5"/></svg><input type="range" id="pfZoom" min="1" max="4" step="0.01" value="1" aria-label="Zoom"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5M8.5 11h5M11 8.5v5"/></svg></div>
+  <div class="pfedbtns"><button class="btn" id="pfEdCancel">Abbrechen</button><button class="btn primary" id="pfEdOk">Übernehmen</button></div>
+</div>
+<div class="backdrop" id="spBg" hidden><div class="sheet spsheet" role="dialog" aria-label="Einstellungen"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 10px"><h2 id="spSheetTitle"></h2><button class="icon-btn" data-spclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="spBody"></div></div></div>
+<div class="backdrop" id="tcBg" hidden><div class="sheet tcsheet" role="dialog" aria-label="Kachelfarbe"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 6px"><h2 id="tcTitle"></h2><button class="icon-btn" data-tcclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="tcBody"></div></div></div>
+<div class="backdrop" id="artBg" hidden><div class="sheet artsheet" role="dialog" aria-label="Art der Einnahme"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 6px"><h2 id="artTitle"></h2><button class="icon-btn" data-artclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><p class="small muted" id="artSub" style="margin:-2px 0 8px">Danach rechnet die App Steuer &amp; Co.</p><div id="artList"></div></div></div>
+<div class="backdrop" id="anaBg" hidden><div class="sheet anasheet" role="dialog" aria-label="Analyse"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 12px"><div class="aph" id="anaHead"></div><button class="icon-btn" data-anaclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="anab" id="anaBody"></div></div></div>
+<div class="backdrop" id="hintBg" hidden><div class="sheet hintsheet" role="dialog" aria-label="Hinweise"><div class="grab"></div><div class="sheet-head" style="margin:8px 0 6px"><h2>Hinweise</h2><button class="icon-btn" data-hintclose="1" aria-label="Schließen"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div id="hintList"></div></div></div>
+<header class="top">
+  <div class="wrap">
+    <button class="roundbtn backbtn" id="backBtn" hidden aria-label="Zurück"><svg class="i" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>
+    <button class="topav" id="topAv" hidden aria-label="Ich & Einstellungen"></button>
+    <div class="hello"><small id="greet">Hallo</small><b id="viewTitle">Übersicht</b></div>
+    <div class="monthpill" id="monthpill">
+      <button id="prevM" aria-label="Vorheriger Monat"><svg class="i" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>
+      <select id="selM" class="msel" aria-label="Monat"></select><select id="selY" class="msel" aria-label="Jahr"></select>
+      <button id="nextM" aria-label="Nächster Monat"><svg class="i" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+    </div>
+    <button class="roundbtn bell" id="bellBtn" aria-label="Hinweise"><svg class="i" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9M10 20.5h4"/></svg><span class="badge" hidden>0</span></button>
+    <button class="roundbtn" id="settingsBtn" aria-label="Schulden und Einstellungen" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="banner"></div>
+  <section class="view" id="v-home" data-view="home"></section>
+  <section class="view" id="v-beruf" data-view="beruf" hidden></section>
+  <section class="view" id="v-zukunft" data-view="zukunft" hidden></section>
+  <section class="view" id="v-import" data-view="import" hidden></section>
+  <input type="file" id="planFile" accept=".csv,.pdf,.txt,text/csv,text/plain,application/pdf" hidden>
+  <input type="file" id="slipFile" accept=".pdf,application/pdf" hidden>
+  <input type="file" id="csvFile" accept=".csv,.pdf,text/csv,text/plain,application/pdf" hidden>
+  <section class="view" id="v-list" data-view="list" hidden>
+    <label class="search"><svg class="i muted" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="q" type="search" placeholder="Suchen, z. B. Rewe oder Tanken" autocomplete="off" aria-label="Buchungen durchsuchen"></label>
+    <div class="lseg" id="lseg" role="group" aria-label="Ansicht" hidden><button data-lmode="list" aria-pressed="true"><svg class="i" viewBox="0 0 24 24" style="width:17px;height:17px"><path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/></svg>Liste</button><button data-lmode="cal" aria-pressed="false"><svg class="i" viewBox="0 0 24 24" style="width:17px;height:17px"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M8 3.5v4M16 3.5v4M4 10h16"/></svg>Kalender</button></div>
+    <div id="dupCard" hidden></div>
+    <div class="card" id="calCard" hidden></div>
+    <div class="filters" id="filters"></div>
+    <div class="card" id="listCard"></div>
+  </section>
+  <section class="view" id="v-fix" data-view="fix" hidden></section>
+  <section class="view" id="v-belege" data-view="belege" hidden></section>
+  <section class="view" id="v-gemeinsam" data-view="gemeinsam" hidden></section>
+  <section class="view" id="v-year" data-view="year" hidden></section>
+  <section class="view" id="v-ziele" data-view="ziele" hidden></section>
+  <section class="view" id="v-shop" data-view="shop" hidden></section>
+  <section class="view" id="v-more" data-view="more" hidden>
+    <div id="setHome"></div>
+    <div class="sphead" id="spHead" hidden><button class="spback" id="spBack" aria-label="Zurück zu den Einstellungen">‹</button><h2 id="spTitle"></h2></div>
+    <div class="sphero" id="spHero" hidden></div>
+    <div class="card sp" id="debtCard" data-sp="schulden" hidden></div>
+    <div class="card sp" data-sp="konten" hidden>
+      <div class="field"><span class="small muted" style="margin-top:-2px">Trag einmal ein, was heute auf einem Konto ist. Die App rechnet den Stand für jeden Monat aus deinen importierten Kontoauszügen aus.</span><div id="acctEd"></div></div>
+      <div class="field"><label for="sStart">Kontostand Jahresanfang <span id="sStartYear"></span></label><input class="in" id="sStart" inputmode="decimal" placeholder="0,00"></div>
+      <div class="field"><label>Meine Spaces und eigenen Konten</label><span class="small muted" style="margin-top:-2px">Geld zwischen diesen Konten ist eine Umbuchung, keine Einnahme oder Ausgabe.</span><div class="chips" id="spaceEd"></div><div id="spaceClean"></div></div>
+    </div>
+    <div class="card sp" data-sp="budgets" hidden>
+      <div class="field"><div id="budgetEd"></div><span class="small muted">Leer lassen = kein Budget.</span></div>
+    </div>
+    <div class="card sp bk" data-sp="sync" id="syncBox" hidden>
+      <div class="shero" id="syncHero" aria-live="polite"></div>
+      <div class="sacts" id="syncActs" style="grid-template-columns:1fr">
+        <button class="sact" id="syncNow"><i data-ic="repeat"></i>Jetzt abgleichen</button>
+      </div>
+      <button class="btn primary block" id="syncConnect" style="margin-top:12px" hidden>Wieder verbinden</button>
+      <div class="sbadge" id="syncBadge"><i data-ic="shield"></i><span><b>Ende-zu-Ende verschlüsselt.</b> Der Server sieht nur Zahlensalat.</span></div>
+      <span id="syncState" hidden></span><span id="syncTitle" hidden></span><span id="syncDetail" hidden></span><i id="syncDot" hidden></i>
+      <button class="smore" id="syncMoreBtn" aria-expanded="false"><span>Erweitert: abmelden, Server-Daten löschen</span><i data-ic="chevron"></i></button>
+      <div id="syncMore" hidden>
+        <div id="syncSec"></div>
+        <div class="bkb" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)"><button class="btn" id="syncLogout">Auf diesem Gerät abmelden</button></div>
+      </div>
+    </div>
+    <div class="card sp bk" data-sp="backup" hidden>
+      <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span class="n"><b>Backup</b><span id="backupInfo">Alle Buchungen, Fixkosten, Schulden und Einstellungen in einer Datei.</span></span></div>
+      <div class="bkb"><button class="btn primary" id="backupSave">Speichern</button><span id="backupLoadRow" style="display:contents"><button class="btn" id="backupLoad">Laden</button></span></div>
+      <span class="small muted">„Laden“ ersetzt alle Daten in dieser App durch die Datei. Fotos von Belegen sind nicht im Backup.</span>
+      <div id="autoBk"></div>
+      <div class="wipe" id="wipeBox"><b>Neu anfangen</b><span class="small muted">Löscht alle Buchungen, Fixkosten, Schulden, Sparziele, Belegfotos und Einstellungen – auf diesem Gerät, auf dem PC und auf dem Server.</span><button class="btn wipebtn" id="wipeStart">Alle Daten löschen …</button></div>
+      <input type="file" id="backupFile" accept=".json,application/json,text/plain" hidden>
+    </div>
+    <div class="card sp bk" data-sp="sync" id="updCard" hidden>
+      <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg></span><span class="n"><b>Automatische Updates</b><span id="updState">Die App holt neue Versionen selbst.</span></span></div>
+      <div id="updBody"></div>
+    </div>
+    <div class="card sp" data-sp="steuer" hidden>
+      <div class="field"><label for="sWork">Wie verdienst du dein Geld?</label><select class="in" id="sWork"></select><span class="small muted" id="sWorkInfo"></span></div>
+      <div class="field"><label>Was gehört noch dazu?</label><div class="exchips" id="sExtra"></div></div>
+      <div class="section-title" style="font-size:14px">Allgemein</div>
+      <div class="grid2 stack">
+        <div class="field"><label for="sKlasse">Steuerklasse</label><select class="in" id="sKlasse">
+          <option value="1">I – ledig, geschieden</option><option value="2">II – alleinerziehend</option><option value="3">III – verheiratet, mehr Einkommen</option>
+          <option value="4">IV – verheiratet, ähnliches Einkommen</option><option value="5">V – verheiratet, weniger Einkommen</option><option value="6">VI – Zweitjob</option></select></div>
+        <div class="field"><label for="sKinder">Kinderfreibeträge</label><select class="in" id="sKinder"><option value="0">keine</option><option value="0.5">0,5</option><option value="1">1</option><option value="1.5">1,5</option><option value="2">2</option><option value="2.5">2,5</option><option value="3">3</option><option value="3.5">3,5</option><option value="4">4</option><option value="5">5</option></select></div>
+      </div>
+      <div class="switch"><label for="sSplit"><b>Zusammenveranlagung</b><br><span class="small muted">Verheiratet, gemeinsame Steuererklärung (Splitting)</span></label><input type="checkbox" id="sSplit"></div>
+      <div class="field" id="partnerField"><label for="sPartner">Zu versteuerndes Einkommen Partner/in (€ pro Jahr)</label><input class="in" id="sPartner" inputmode="decimal"></div>
+      <div class="switch"><label for="sKirche"><b>Kirchensteuer</b><br><span class="small muted">Mitglied einer Kirche, die Kirchensteuer erhebt</span></label><input type="checkbox" id="sKirche"></div>
+      <div class="field"><label for="sLand">Bundesland</label><select class="in" id="sLand"></select></div>
+      <button type="button" class="hoent" data-hoopen><span class="ic"><svg class="i" viewBox="0 0 24 24" style="width:22px;height:22px">None</svg></span><span class="n"><b>Homeoffice &amp; Arbeitszimmer</b><small>Bürotage, Pauschale oder echte Kosten</small></span><span class="ch">›</span></button>
+      <div id="sJobBox" style="display:contents">
+      <div class="section-title" style="font-size:14px">Angestellt <span class="small muted" id="sLohnYear"></span></div>
+      <div class="switch"><label for="sMind"><b>Ich bekomme Mindestlohn</b><br><span class="small muted" id="sMindInfo">Gehalt steigt jedes Jahr automatisch mit</span></label><input type="checkbox" id="sMind"></div>
+      <div class="field" id="sMindHF"><label for="sMindH">Stunden pro Woche</label><input class="in" id="sMindH" inputmode="decimal" placeholder="z. B. 40"></div>
+      <div class="grid2 stack">
+        <div class="field"><label for="sLohnM">Bruttogehalt pro Monat (€)</label><input class="in" id="sLohnM" inputmode="decimal" placeholder="leer = nicht angestellt"></div>
+        <div class="field"><label for="sLohnN">Gehälter im Jahr</label><select class="in" id="sLohnN"><option value="12">12 (normal)</option><option value="12.5">12,5</option><option value="13">13 – mit 13. Gehalt</option><option value="13.5">13,5</option><option value="14">14 – 13. und 14. Gehalt</option></select></div>
+        <div class="field"><label for="sUrlaub">Urlaubsgeld im Jahr (€)</label><input class="in" id="sUrlaub" inputmode="decimal" placeholder="0"></div>
+        <div class="field"><label for="sWeih">Weihnachtsgeld im Jahr (€)</label><input class="in" id="sWeih" inputmode="decimal" placeholder="0"></div>
+        <div class="field"><label for="sBonus">Bonus, Prämie, Sonstiges (€)</label><input class="in" id="sBonus" inputmode="decimal" placeholder="0"></div>
+        <div class="field"><label for="sLSt">Lohnsteuer im Jahr laut Abrechnung (€)</label><input class="in" id="sLSt" inputmode="decimal" placeholder="leer = schätzen"></div>
+      </div>
+      <div class="notice info" id="sLohnSum" hidden style="margin:-2px 0 12px"></div>
+      <div class="field"><label for="sWK">Werbungskosten aus dem Job (€ pro Jahr)</label><input class="in" id="sWK" inputmode="decimal" placeholder="1.230 (Pauschale)"></div>
+      </div>
+      <div id="sSelfBox" style="display:contents">
+      <div class="section-title" style="font-size:14px">Selbstständig</div>
+      <div class="field"><label for="sRate">Rücklage auf selbstständige Einnahmen (%)</label><input class="in" id="sRate" inputmode="decimal"></div>
+      <div class="switch"><label for="sKU"><b>Kleinunternehmer</b><br><span class="small muted">Keine Umsatzsteuer auf deine Rechnungen</span></label><input type="checkbox" id="sKU"></div>
+      <div class="grid2 stack">
+        <div class="field"><label for="sKUlimit">Umsatzgrenze Kleinunternehmer (€)</label><input class="in" id="sKUlimit" inputmode="decimal"></div>
+        <div class="field"><label for="sVat">Umsatzsteuersatz (%)</label><input class="in" id="sVat" inputmode="decimal"></div>
+      </div>
+      <div class="switch"><label for="sGew"><b>Gewerbe</b><br><span class="small muted">Aus: Freiberufler (keine Gewerbesteuer)</span></label><input type="checkbox" id="sGew"></div>
+      <div class="field" id="hebeField"><label for="sHebe">Gewerbesteuer-Hebesatz deiner Gemeinde (%)</label><input class="in" id="sHebe" inputmode="decimal" placeholder="z. B. 400"></div>
+      </div>
+      <div class="section-title" style="font-size:14px">Abzüge</div>
+      <div class="grid2 stack">
+        <div class="field"><label for="sVors">Vorsorge pro Jahr (€)</label><input class="in" id="sVors" inputmode="decimal" placeholder="Kranken-, Pflege-, Rentenversicherung"></div>
+        <div class="field"><label for="sAbz">Sonstige Abzüge pro Jahr (€)</label><input class="in" id="sAbz" inputmode="decimal" placeholder="Spenden, Kinderbetreuung …"></div>
+      </div>
+    </div>
+    <div class="sp pc" data-sp="profil" hidden>
+      <div class="pc-hero"><button class="pfav" id="pfAv" aria-label="Foto zuschneiden"></button><div class="pc-hn"><b id="pfHeroName">Dein Profil</b><small id="pfHeroSub"></small></div></div>
+      <div class="pc-act">
+        <button id="pfPick"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m20 16-5-5-8 8"/></svg><span id="pfPickLbl">Galerie</span></button>
+        <button id="pfCam" hidden><svg class="i" viewBox="0 0 24 24"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Kamera</span></button>
+        <button id="pfEdit" hidden><svg class="i" viewBox="0 0 24 24"><path d="M7 3v14h14M3 7h14v14"/></svg><span>Zuschnitt</span></button>
+        <button id="pfDel" class="red" hidden><svg class="i" viewBox="0 0 24 24"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13"/></svg><span>Löschen</span></button>
+      </div>
+      <input type="file" id="pfFile" accept="image/*" hidden>
+      <div class="card"><div class="field"><label for="sName">Wie sollen wir dich nennen?</label><input class="in pc-big" id="sName" autocomplete="given-name" placeholder="z. B. Sascha" maxlength="30"><span class="small muted">Für die Begrüßung oben links.</span></div></div>
+      <div hidden><button class="btn" id="wizAgain">Einrichtung starten</button></div>
+    </div>
+    <div class="sp pc" data-sp="laeden" hidden>
+      <div id="shopEd" class="shoped"></div>
+    </div>
+    <div class="sp pc" data-sp="start" hidden>
+      <div class="pc-sect">Startseite <span>Antippen blendet aus oder ein · gedrückt halten und ziehen zum Sortieren · Konten bleiben immer oben</span></div>
+      <div id="homeEd"></div>
+      <div class="card"><div class="switch"><label for="sLogos"><b>Fehlende Händler-Logos online laden</b><br><span class="small muted">Bekannte Läden haben ihr Logo schon eingebaut. Für alle anderen fragt die App bei Google und DuckDuckGo – die erfahren dabei, welche Läden du nutzt. Aus: farbiger Anfangsbuchstabe.</span></label><input type="checkbox" id="sLogos"></div></div>
+    </div>
+    <div class="sp pc" data-sp="notify" hidden><div id="notifyEd" class="nfed"></div></div>
+    <div class="card sp" data-sp="sicherheit" hidden>
+      <div class="field" id="lockEd"></div>
+    </div>
+    <div class="card sp" data-sp="toene" id="sndEd" hidden></div>
+    <div class="card sp" data-sp="farben" id="colorEd" hidden></div>
+    <div class="card sp" data-sp="amt" id="amtEd" hidden></div>
+    <div class="card sp" data-sp="recht" id="rechtEd" hidden></div>
+    <div class="card sp" data-sp="abos" id="abosEd" hidden></div>
+    <div class="card sp" data-sp="invest" id="investEd" hidden></div>
+    <div class="card sp" data-sp="export" id="exportEd" hidden></div>
+    <div class="card sp" data-sp="sprache" id="spracheEd" hidden></div>
+    <div class="card sp" data-sp="neu" id="neuEd" hidden></div>
+    <div class="card sp" data-sp="hilfe" id="hilfeEd" hidden></div>
+    <div class="card sp" data-sp="feedback" id="fbEd" hidden></div>
+    <div class="card sp" data-sp="speicher" id="speicherEd" hidden></div>
+    <div class="card sp" data-sp="geraete" id="geraeteEd" hidden></div>
+
+    <div class="sp pc" data-sp="kategorien" hidden>
+      <div class="pc-sect">Ausgaben privat <span id="catMon"></span></div>
+      <div class="crows" id="catEd-ausgabe"></div>
+      <div id="catBetField"><div class="pc-sect">Ausgaben betrieblich</div><div class="crows" id="catEd-betrieb"></div></div>
+      <div class="pc-sect">Einnahmen</div>
+      <div class="crows" id="catEd-einnahme"></div>
+    </div>
+    <div class="card sp bk" data-sp="kategorien" hidden>
+      <div class="bkh"><span class="bki"><svg class="i" viewBox="0 0 24 24"><path d="M5 12a7 7 0 1 1 2 5M5 18v-4h4"/></svg></span><span class="n"><b>Gemerkte Zuordnungen</b><span id="rulesInfo"></span></span></div>
+      <span class="small muted">Beim Kontoauszug-Import merkt sich die App, welcher Empfänger in welche Kategorie gehört. Zurücksetzen löscht nur diese Merkliste.</span>
+      <div class="bkb"><button class="btn" id="rulesReset">Zurücksetzen</button></div>
+    </div>
+  </section>
+</main>
+
+<div id="tourBg" class="tourbg" hidden></div>
+<nav class="tabs" aria-label="Bereiche" role="tablist"><i class="tabind" aria-hidden="true"></i>
+  <div class="brand"><img src="data:image/webp;base64,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" width="36" height="36" style="width:36px;height:36px;flex:none;border-radius:10px" alt="">Finanz MAMI</div>
+  <button class="tab" role="tab" data-go="home" aria-selected="true" aria-label="Haushalt"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span class="tname">Haushalt</span></button>
+  <button class="tab" role="tab" data-go="beruf" aria-selected="false" aria-label="Beruf"><svg class="i" viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="12.5" rx="2.5"/><path d="M8.5 7V5.5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2V7M3.5 12.5h17"/></svg><span class="tname">Beruf</span></button>
+  <button class="tab plus" data-addmenu="1" aria-label="Neue Buchung"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="tlabel">Neue Buchung</span></button>
+  <button class="tab" role="tab" data-go="zukunft" aria-selected="false" aria-label="Sparen"><svg class="i" viewBox="0 0 24 24"><path d="M4 11.5c0-3 3-5.5 7.5-5.5 1.7 0 3.2.3 4.4.9L19 5.5v3.3c.8.7 1.4 1.6 1.6 2.7H22v3h-1.6c-.4 1-1.2 1.9-2.4 2.5V20h-3v-1.6h-3V20H9v-2.8c-3-1-5-3.2-5-5.7Z"/><circle cx="15.5" cy="10.5" r=".7"/></svg><span class="tname">Sparen</span></button>
+  <button class="tab" role="tab" data-go="shop" aria-selected="false" aria-label="Einkauf"><svg class="i" viewBox="0 0 24 24"><path d="M3 4h2.2l2.1 11h10.4l2-8H6.3"/><circle cx="9.5" cy="19" r="1.4"/><circle cx="16.5" cy="19" r="1.4"/></svg><span class="tname">Einkauf</span></button>
+</nav>
+
+<div class="backdrop" id="sheetBg" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="grab"></div>
+    <div class="sheet-head"><h2 id="sheetTitle">Neue Buchung</h2><button class="icon-btn" id="sheetClose" aria-label="Schließen" style="color:var(--muted)"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <button class="importbtn" id="sheetImport" style="box-shadow:none;background:var(--sunk);padding:10px 12px"><span class="ictile" style="width:34px;height:34px;border-radius:11px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg></span><span style="flex:1;text-align:left"><b>Kontoauszug importieren</b><br><span class="small muted">CSV- oder PDF-Datei deiner Bank auswählen</span></span><svg class="i muted" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+    <div class="scanrow" id="scanRow">
+      <button class="importbtn" id="scanCam" style="box-shadow:none;background:var(--sunk);padding:10px 12px"><span class="ictile" style="width:34px;height:34px;border-radius:11px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span style="flex:1;text-align:left"><b id="scanTitle">Quittung fotografieren</b><br><span class="small muted" id="scanSub">Betrag, Datum und Geschäft werden ausgefüllt</span></span></button>
+      <button class="btn" id="scanPick" hidden>Aus Galerie</button>
+    </div>
+    <input type="file" id="scanFile" accept="image/*" multiple hidden>
+    <div class="rcptrow" id="rcptRow" hidden>
+      <div id="rcptHave" class="rcpthave"><img id="rcptThumb" alt="Beleg"><span class="grow"><b>Beleg</b><br><span class="small muted" id="rcptInfo"></span></span><span class="rbtns"><button class="btn" id="rcptView">Ansehen</button><button class="btn" id="rcptShare" hidden>Teilen</button><button class="btn" id="rcptReplace">Ersetzen</button><button class="btn" id="rcptRemove" aria-label="Beleg entfernen" style="color:var(--bad)">Entfernen</button></span></div>
+      <div id="rcptAddWrap" class="rcpthave"><span class="grow"><b>Beleg</b><br><span class="small muted">Noch kein Foto an dieser Buchung</span></span><button class="btn" id="rcptNone" hidden>Bon gibt’s nicht</button><button class="btn" id="rcptAdd">Foto hinzufügen</button><button class="btn" id="rcptGallery" hidden>Galerie</button></div>
+    </div>
+    <div class="zbon" id="zBonBox" hidden></div>
+    <div class="seg" id="kindSeg" role="group" aria-label="Art der Buchung">
+      <button data-kind="ausgabe" aria-pressed="true">Ausgabe</button>
+      <button data-kind="einnahme" aria-pressed="false">Einnahme</button>
+      <button data-kind="betrieb" aria-pressed="false">Betrieb</button>
+      <button data-kind="vorauszahlung" aria-pressed="false">Steuer</button>
+      <button data-kind="anlage" aria-pressed="false">Anlegen</button>
+    </div>
+    <div class="amount"><input id="fAmount" inputmode="decimal" autocomplete="off" placeholder="0,00" aria-label="Betrag in Euro"><select id="fCur" class="fcur" aria-label="Bezahlt in"><option value="EUR">€</option><option value="USD">USD</option><option value="GBP">GBP</option><option value="CHF">CHF</option><option value="TRY">TRY</option><option value="PLN">PLN</option><option value="RON">RON</option><option value="CZK">CZK</option><option value="HUF">HUF</option><option value="SEK">SEK</option><option value="DKK">DKK</option><option value="NOK">NOK</option><option value="JPY">JPY</option><option value="CNY">CNY</option><option value="CAD">CAD</option><option value="AUD">AUD</option></select></div>
+    <div class="hint" id="fxHint" hidden></div>
+    <div class="payseg" id="paySeg" role="group" aria-label="Bezahlt mit" hidden><button type="button" data-pay="karte"><i><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/></svg></i><span>Karte</span></button><button type="button" data-pay="bar"><i><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="3" y="6.5" width="18" height="11" rx="2.5"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 10v4M17.5 10v4"/></svg></i><span>Bar</span></button></div><div class="acctrow" id="acctRow" hidden></div>
+    <div class="hint" id="amountHint"></div>
+    <div class="kpad" id="kpad" aria-label="Zahlentasten"><button data-kp="1">1</button><button data-kp="2">2</button><button data-kp="3">3</button><button data-kp="4">4</button><button data-kp="5">5</button><button data-kp="6">6</button><button data-kp="7">7</button><button data-kp="8">8</button><button data-kp="9">9</button><button data-kp=",">,</button><button data-kp="0">0</button><button data-kp="back" aria-label="Löschen"><svg class="i" viewBox="0 0 24 24"><path d="M9 5h10.5A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5H9l-6-7zM12 9.5l5 5M17 9.5l-5 5"/></svg></button></div>
+    <div id="catWrap"><span class="lbl">Kategorie</span><div class="catgrid" id="catGrid"></div></div>
+    <div><span class="lbl">Datum</span><div class="datechips" id="dateChips">
+      <button class="dchip" data-day="0">Heute</button><button class="dchip" data-day="1">Gestern</button>
+    </div>
+    <input type="hidden" id="fDate">
+    <div class="datesel"><select class="in" id="dD" aria-label="Tag"></select><select class="in" id="dM" aria-label="Monat"></select><select class="in" id="dY" aria-label="Jahr"></select></div></div>
+    <div><label class="lbl" for="fNote">Notiz (optional)</label><input class="in" id="fNote" placeholder="z. B. Rewe, Kino, Tankstelle" autocomplete="off"></div>
+    <div class="switch" id="wkRow" hidden><label for="fWk"><b>Werbungskosten (Job)</b><br><span class="small muted">Arbeitsmittel, Fachbücher, Fortbildung … – zählt in der Steuer</span></label><input type="checkbox" id="fWk"></div>
+    <button class="btn primary block" id="saveBtn">Speichern</button>
+    <div class="row-btns" id="editBtns" hidden><button class="btn danger" id="delBtn">Löschen</button></div>
+  </div>
+</div>
+<div class="backdrop show" id="loginBg" hidden style="align-items:center">
+  <div class="sheet" style="transform:none;border-radius:28px;max-width:420px;gap:14px;position:relative" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <button class="icon-btn" id="loginX" aria-label="Schließen" style="position:absolute;top:14px;right:14px;color:var(--muted)"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <span class="ictile" style="width:52px;height:52px;border-radius:17px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24" style="width:26px;height:26px"><path d="M7 18.5a4 4 0 0 1-.6-8 5.5 5.5 0 0 1 10.6-1.3A4.3 4.3 0 0 1 17.5 18.5z"/></svg></span>
+    <h2 id="loginTitle" style="font-family:var(--f-display);margin:0">Mit deinem Server verbinden</h2>
+    <div class="seg lseg" id="loginSeg" role="group" aria-label="Art des Abgleichs" hidden><button data-lm="pair" aria-pressed="true">Koppeln</button><button data-lm="cloud" aria-pressed="false">Konto</button><button data-lm="nas" aria-pressed="false">Eigener Server</button></div>
+    <div id="loginPair" hidden></div>
+    <p class="small muted" id="loginText" style="margin:0"></p>
+    <div class="field" id="loginCloudRow" hidden><label for="loginCloud">Adresse des Abgleich-Servers</label><input class="in" id="loginCloud" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="z. B. 192.168.178.32/haushaltsbuch/cloud.php"><span class="small muted">Nur in der Testphase nötig – später ist die Adresse fest eingebaut.</span></div>
+    <div class="field" id="loginEmailRow" hidden><label for="loginEmail">E-Mail-Adresse</label><input class="in" type="email" id="loginEmail" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="name@beispiel.de"></div>
+    <div class="field" id="loginRCodeRow" hidden><label for="loginRCode">Code aus der E-Mail</label><input class="in" id="loginRCode" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="ABCD-EFGH" style="letter-spacing:.12em;text-align:center"></div>
+    <div class="field" id="loginUrlRow" hidden><label for="loginUrl">Adresse des Servers</label><input class="in" id="loginUrl" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="z. B. 192.168.178.32"></div>
+    <div class="field" id="loginPwRow"><label for="loginPw" id="loginPwLbl">Passwort</label><input class="in" type="password" id="loginPw" autocomplete="current-password"></div>
+    <div class="field" id="loginCodeRow" hidden><label for="loginCode">Code aus der Authenticator-App</label><input class="in" id="loginCode" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" style="letter-spacing:.12em;text-align:center"></div>
+    <div class="field" id="loginPw2Row" hidden><label for="loginPw2">Passwort wiederholen</label><input class="in" type="password" id="loginPw2" autocomplete="new-password"></div>
+    <div class="small" id="loginErr" style="color:var(--bad)"></div>
+    <button class="btn primary block" id="loginGo">Verbinden</button>
+    <div class="llinks" id="loginLinks" hidden><button class="lnk" id="loginToggle">Neu hier? Konto erstellen</button><button class="lnk" id="loginForgot">Passwort vergessen?</button></div>
+    <button class="btn" id="loginSkip">Erst einmal ohne Abgleich</button>
+  </div>
+</div>
+<div class="rcptviewer" id="rcptViewer" hidden role="dialog" aria-label="Beleg"><img id="rcptBig" alt="Beleg"><button class="btn" id="rcptViewerClose">Schließen</button></div>
+<div class="lockbg" id="lockBg" hidden role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <div class="lockbox">
+    <span class="ictile" style="width:56px;height:56px;border-radius:18px;background:var(--accent-soft);color:var(--accent)"><svg class="i" viewBox="0 0 24 24" style="width:28px;height:28px"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg></span>
+    <h2 id="lockTitle">Finanz MAMI gesperrt</h2>
+    <p class="small muted" id="lockText">Gib deine PIN ein.</p>
+    <div class="pindots" id="pinDots" aria-hidden="true"></div>
+    <div class="small" id="lockErr" role="alert"></div>
+    <div class="keypad" id="keypad">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button data-k="bio" id="bioKey" aria-label="Mit Fingerabdruck entsperren"><svg class="i" viewBox="0 0 24 24"><path d="M12 11v3.5a6 6 0 0 1-1.5 4M8.5 19.5A9 9 0 0 0 9 14v-2a3 3 0 0 1 6 0v1M15 16.5c0 1.2-.2 2.4-.6 3.5M5.5 15.5A12 12 0 0 0 6 12a6 6 0 0 1 10.5-4M18 11.5V12a17 17 0 0 1-.3 3.5M7 5.5A8.5 8.5 0 0 1 19.5 9"/></svg></button><button data-k="0">0</button><button data-k="del" aria-label="Löschen"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h10.5A1.5 1.5 0 0 1 21 7.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-6-6z"/><path d="m12 10 4 4M16 10l-4 4"/></svg></button>
+    </div>
+    <button class="btn primary" id="lockNext" hidden>Weiter</button>
+    <button class="btn" id="lockCancel" hidden>Abbrechen</button>
+    <button class="link small" id="lockForgot">PIN vergessen?</button>
+    <div class="lockalt" id="lockAlt" hidden></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toastText"></span><button id="toastAct" hidden>Rückgängig</button></div>
+
+<script>
+<!-- include: js/vendor/jsqr.min.js -->
+<!-- include: js/theme.js -->
+<!-- app: js/app -->
+</script>
