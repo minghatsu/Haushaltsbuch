@@ -24,6 +24,9 @@ const SND_G = {
     fanfare: 2.51,
     warn: 2.64,
     err: 6.32,
+    bills: 12,
+    coin: 4,
+    cash: 3,
   },
   glas: {
     save: 3.29,
@@ -48,6 +51,9 @@ const SND_G = {
     fanfare: 1.9,
     warn: 2.05,
     err: 5.65,
+    bills: 12,
+    coin: 4,
+    cash: 2,
   },
   holz: {
     save: 9.89,
@@ -72,6 +78,9 @@ const SND_G = {
     fanfare: 5.69,
     warn: 4.87,
     err: 5.47,
+    bills: 12,
+    coin: 4,
+    cash: 7,
   },
 };
 const SND = {
@@ -305,6 +314,17 @@ const SND = {
     } else if (k === "warn") {
       N(0.75, 0, 0.22, 0.38);
       N(0.6, 0.14, 0.36, 0.36);
+    } else if (k === "bills") {
+      /* Umbuchen: Scheine rascheln, Münze klimpert, Geld landet */
+      this.hiss(t, 0.07, 2600, 4400, 0.07 * v, 1.6);
+      this.hiss(t + 0.08, 0.09, 3000, 5200, 0.05 * v, 1.6);
+    } else if (k === "coin") {
+      const m = 4 + Math.random() * 1.2;
+      this.note(r * m, t, 0.1, 0.11 * v, "glas");
+    } else if (k === "cash") {
+      this.hiss(t, 0.12, 3600, 1500, 0.06 * v, 1.4);
+      N(2, 0.05, 0.16, 0.3);
+      N(3, 0.13, 0.3, 0.26);
     } else if (k === "err") {
       this.note(r * 0.5, t, 0.1, 0.42 * v, "holz");
       this.note(r * 0.45, t + 0.11, 0.14, 0.4 * v, "holz");

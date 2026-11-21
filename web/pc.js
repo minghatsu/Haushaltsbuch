@@ -329,7 +329,7 @@ function pcHome(o) {
       }
     ).bal,
     isCur = ym === cur;
-  const FP = isCur && typeof freePerDay === "function" ? freePerDay(ym, mainBal, c) : null,
+  const FP = isCur && typeof freePerDay === "function" ? freePerDay(ym, mainBal) : null,
     left = isCur ? (FP ? FP.left : Math.max(1, dim - new Date().getDate() + 1)) : 0,
     perDay = isCur ? (FP ? FP.v : Math.max(0, mainBal / left)) : 0;
   const pct = isCur ? left / dim : ym > cur ? 1 : 0;
@@ -8441,6 +8441,7 @@ if (IS_DESK) {
     }
   };
   let st = null,
+    busy = 0,
     eat = false;
   const tgtAt = (x, y, src) => {
     const el = document.elementFromPoint(x, y);
@@ -8456,33 +8457,46 @@ if (IS_DESK) {
     setTimeout(() => {
       eat = false;
     }, 60);
-    d.ghost.classList.add("drop");
-    setTimeout(() => d.ghost.remove(), 160);
+    if (d.ghost) {
+      d.ghost.classList.add("drop");
+      setTimeout(() => d.ghost.remove(), 160);
+    }
     document.body.classList.remove("mvdragging");
     document.querySelectorAll("#pcHero [data-mvi]").forEach((c) => c.classList.remove("tgt", "dragok"));
     const tg = e && e.type !== "pointercancel" ? tgtAt(e.clientX, e.clientY, d.src) : null;
     if (!tg) {
       d.src.classList.remove("src");
+      MVFX.drop(null);
       SND.play("whooshin");
       return;
     }
     const to = +tg.dataset.mvi;
     if (!mvHas(mvList().find((x) => x.i === to))) {
       d.src.classList.remove("src");
+      MVFX.drop(null);
       toast(uiText("mv_nostand_t"));
       SND.play("warn");
       return;
     }
     tg.classList.add("tgt");
-    SND.play("pop");
     sheetEl();
-    mvSheet(d.from, to);
+    if (d.fx) {
+      /* erst landen die Scheine, dann kommt das Betrag-Fenster */
+      MVFX.drop(tg);
+      busy = setTimeout(() => {
+        busy = 0;
+        mvSheet(d.from, to);
+      }, 380);
+    } else {
+      SND.play("pop");
+      mvSheet(d.from, to);
+    }
   };
   document.addEventListener(
     "pointerdown",
     (e) => {
       const c = e.target.closest("#pcHero [data-mvi]");
-      if (!c || e.pointerType !== "mouse" || e.button !== 0 || !sheetEl().hidden) return;
+      if (!c || busy || e.pointerType !== "mouse" || e.button !== 0 || !sheetEl().hidden) return;
       st = {
         src: c,
         from: +c.dataset.mvi,
@@ -8503,31 +8517,37 @@ if (IS_DESK) {
         toast(uiText("mv_nostand_t"));
         return;
       }
-      const r = st.src.getBoundingClientRect(),
-        g = st.src.cloneNode(true);
-      g.removeAttribute("data-mvi");
-      g.removeAttribute("data-spgo");
-      g.className = "mvpcghost";
-      const gw = Math.min(r.width, 190);
-      g.style.width = gw + "px";
-      g.style.left = Math.max(8, st.x0 - gw + 22) + "px";
-      g.style.top = Math.max(8, st.y0 - r.height + 14) + "px";
-      g.style.background = getComputedStyle(document.getElementById("pcHero")).backgroundImage;
-      document.body.appendChild(g);
-      st.ghost = g;
-      st.dx = gw - 22;
-      st.dy = r.height - 14;
+      st.fx = MVFX.on();
+      if (st.fx) MVFX.start(st.src, "#pcHero [data-mvi]", st.x0, st.y0, false);
+      else {
+        const r = st.src.getBoundingClientRect(),
+          g = st.src.cloneNode(true);
+        g.removeAttribute("data-mvi");
+        g.removeAttribute("data-spgo");
+        g.className = "mvpcghost";
+        const gw = Math.min(r.width, 190);
+        g.style.width = gw + "px";
+        g.style.left = Math.max(8, st.x0 - gw + 22) + "px";
+        g.style.top = Math.max(8, st.y0 - r.height + 14) + "px";
+        g.style.background = getComputedStyle(document.getElementById("pcHero")).backgroundImage;
+        document.body.appendChild(g);
+        st.ghost = g;
+        st.dx = gw - 22;
+        st.dy = r.height - 14;
+      }
       st.on = true;
       st.src.classList.add("src");
       document.body.classList.add("mvdragging");
       document.querySelectorAll("#pcHero [data-mvi]").forEach((c) => {
         if (c !== st.src) c.classList.add("dragok");
       });
-      SND.play("detent");
+      if (!st.fx) SND.play("detent");
     }
     e.preventDefault();
-    st.ghost.style.left = Math.max(8, e.clientX - st.dx) + "px";
-    st.ghost.style.top = Math.max(8, e.clientY - st.dy) + "px";
+    if (st.ghost) {
+      st.ghost.style.left = Math.max(8, e.clientX - st.dx) + "px";
+      st.ghost.style.top = Math.max(8, e.clientY - st.dy) + "px";
+    } else MVFX.move(e.clientX, e.clientY);
     const t = tgtAt(e.clientX, e.clientY, st.src);
     document.querySelectorAll("#pcHero [data-mvi].tgt").forEach((c) => {
       if (c !== t) c.classList.remove("tgt");
@@ -8541,7 +8561,8 @@ if (IS_DESK) {
   document.addEventListener("pointercancel", end, true);
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && st && st.on) {
-      st.ghost.remove();
+      if (st.ghost) st.ghost.remove();
+      MVFX.drop(null);
       st.src.classList.remove("src");
       document.body.classList.remove("mvdragging");
       document.querySelectorAll("#pcHero [data-mvi]").forEach((c) => c.classList.remove("tgt", "dragok"));

@@ -793,7 +793,7 @@ function renderHome() {
         ${
           ym === cur
             ? (() => {
-                const { left, v } = freePerDay(ym, mainBal, c);
+                const { left, v } = freePerDay(ym, mainBal);
                 return `<button data-go="year" aria-label="Noch ${fmtEur0(v)} pro Tag für ${left} Tage"><span class="hki" style="--tc:${themeCol("#c27c0e", 3)}">${svgIcon("chart", 18)}</span><span><small><span>Noch pro Tag</span> · <span>${left} ${left === 1 ? "Tag" : "Tage"}</span></small><b>${escHtml(fmtEur0(v))}</b></span></button>`;
               })()
             : `<button data-go="year"><span class="hki" style="--tc:${themeCol("#c27c0e", 3)}">${svgIcon("chart", 18)}</span><span><small>Ø pro Tag im Alltag</small><b>${escHtml(fmtEur0(dayAvg(ym + "-01", lastDayOf(ym), daysIn(ym))))}</b></span></button>`

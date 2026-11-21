@@ -1673,6 +1673,17 @@ function ptourOpen(v) {
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
   {
+    v: "0.45.1",
+    s: () => [
+      {
+        sel: IS_DESK ? "#pcHero .pcaccs:has(.mvd)" : "[data-mvopen]",
+        ic: "repeat",
+        t: uiText("nw_mfx_t"),
+        p: [uiText("nw_mfx_p")],
+      },
+    ],
+  },
+  {
     v: "0.41.7",
     s: () =>
       hasSelf()

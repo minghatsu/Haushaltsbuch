@@ -25206,6 +25206,25 @@ html[data-theme="dark"] .sndic {
 body.mvdragging {
   cursor: grabbing;
 }
+/* Umbuchen mit Geld: Scheine und Münzen über allem, ohne Klicks abzufangen */
+.mvfx {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  overflow: hidden;
+  pointer-events: none;
+}
+.mvfx img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: auto;
+  opacity: 0;
+  will-change: transform;
+  filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.28));
+  -webkit-user-select: none;
+  user-select: none;
+}
 .mvsheet {
   position: fixed;
   left: 0;

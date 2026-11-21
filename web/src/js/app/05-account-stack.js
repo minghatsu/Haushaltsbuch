@@ -561,14 +561,15 @@ document.addEventListener("keydown", (e) => {
 });
 /* Ziehen: kurz gedrückt halten, dann auf eine andere Karte ziehen */
 (function () {
-  let st = null;
+  let st = null,
+    busy = 0;
   const end = () => {
     if (!st) return;
     clearTimeout(st.t);
     const d = st;
     st = null;
     if (!d.on) return;
-    d.ghost.remove();
+    if (d.ghost) d.ghost.remove();
     d.src.classList.remove("src");
     document.body.classList.remove("mvdragging");
     const tg = document.querySelector("#mvBg .mvc.tgt");
@@ -576,13 +577,26 @@ document.addEventListener("keydown", (e) => {
       const to = +tg.dataset.mvc;
       if (!mvHas(mvList().find((x) => x.i === to))) {
         tg.classList.remove("tgt");
+        MVFX.drop(null);
         toast(uiText("mv_nostand_t"));
         return;
       }
       d.src.classList.add("src");
-      SND.play("pop");
-      mvSheet(d.from, to);
-    } else SND.play("whooshin");
+      if (d.fx) {
+        /* erst landen die Scheine, dann kommt das Betrag-Fenster */
+        MVFX.drop(tg);
+        busy = setTimeout(() => {
+          busy = 0;
+          mvSheet(d.from, to);
+        }, 380);
+      } else {
+        SND.play("pop");
+        mvSheet(d.from, to);
+      }
+    } else {
+      MVFX.drop(null);
+      SND.play("whooshin");
+    }
     setTimeout(() => {
       MV.moved = false;
     }, 50);
@@ -591,7 +605,7 @@ document.addEventListener("keydown", (e) => {
     "pointerdown",
     (e) => {
       const c = e.target.closest("#mvBg .mvc");
-      if (!c || (e.pointerType === "mouse" && e.button !== 0) || !$("mvSheet").hidden) return;
+      if (!c || busy || (e.pointerType === "mouse" && e.button !== 0) || !$("mvSheet").hidden) return;
       if (!mvHas(mvList().find((x) => x.i === +c.dataset.mvc))) return;
       st = {
         src: c,
@@ -604,18 +618,22 @@ document.addEventListener("keydown", (e) => {
       st.t = setTimeout(
         () => {
           if (!st) return;
-          const r = c.getBoundingClientRect();
-          const g = c.cloneNode(true);
-          g.classList.add("mvghost");
-          g.classList.remove("in");
-          g.style.width = r.width + "px";
-          g.style.height = r.height + "px";
-          g.style.left = r.left + "px";
-          g.style.top = r.top + "px";
-          document.body.appendChild(g);
-          st.ghost = g;
-          st.dx = st.x0 - r.left;
-          st.dy = st.y0 - r.top;
+          st.fx = MVFX.on();
+          if (st.fx) MVFX.start(c, "#mvBg .mvc", st.x0, st.y0, e.pointerType !== "mouse");
+          else {
+            const r = c.getBoundingClientRect();
+            const g = c.cloneNode(true);
+            g.classList.add("mvghost");
+            g.classList.remove("in");
+            g.style.width = r.width + "px";
+            g.style.height = r.height + "px";
+            g.style.left = r.left + "px";
+            g.style.top = r.top + "px";
+            document.body.appendChild(g);
+            st.ghost = g;
+            st.dx = st.x0 - r.left;
+            st.dy = st.y0 - r.top;
+          }
           st.on = true;
           MV.moved = true;
           c.classList.add("src");
@@ -623,7 +641,7 @@ document.addEventListener("keydown", (e) => {
           try {
             navigator.vibrate && navigator.vibrate(12);
           } catch (_) {}
-          SND.play("detent");
+          if (!st.fx) SND.play("detent");
         },
         e.pointerType === "mouse" ? 120 : 260
       );
@@ -643,11 +661,13 @@ document.addEventListener("keydown", (e) => {
       }
       e.preventDefault();
       const g = st.ghost;
-      g.style.left = e.clientX - st.dx + "px";
-      g.style.top = e.clientY - st.dy + "px";
-      g.style.visibility = "hidden";
+      if (g) {
+        g.style.left = e.clientX - st.dx + "px";
+        g.style.top = e.clientY - st.dy + "px";
+        g.style.visibility = "hidden";
+      } else MVFX.move(e.clientX, e.clientY);
       const under = document.elementFromPoint(e.clientX, e.clientY);
-      g.style.visibility = "";
+      if (g) g.style.visibility = "";
       const t = under && under.closest("#mvBg .mvc");
       document.querySelectorAll("#mvBg .mvc.tgt").forEach((x) => {
         if (x !== t) x.classList.remove("tgt");

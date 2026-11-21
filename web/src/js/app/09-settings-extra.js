@@ -139,6 +139,7 @@ LEGAL.lizenzen = [
   () => `<p>Finanz MAMI verwendet diese freien Bausteine – danke an alle, die sie bauen:</p>
 <h3>Caveat (Schrift der Unterschrift)</h3><p>© The Caveat Project Authors (Impallari Type). SIL Open Font License 1.1.</p><h3>Inter (Schrift)</h3><p>© The Inter Project Authors (Rasmus Andersson). SIL Open Font License 1.1 – die Schrift darf frei genutzt und weitergegeben werden, aber nicht allein verkauft werden.</p>
 <h3>Simple Icons (Laden-Logos)</h3><p>CC0 1.0 – gemeinfrei. Die Logos sind Marken der jeweiligen Unternehmen und dienen nur zur Erkennung; es besteht keine Verbindung zu diesen Unternehmen.</p>
+<h3>Geldscheine und Münzen (Umbuchen)</h3><p>Grafik von Freepik (Magnific), genutzt mit Namensnennung.</p>
 <h3>Tesseract.js (Texterkennung)</h3><p>© Tesseract.js-Autoren, Apache License 2.0.</p>
 <h3>jsQR (QR-Codes lesen)</h3><p>© Cosmo Wolfe, Apache License 2.0.</p>
 <h3>pdf.js (PDF lesen)</h3><p>© Mozilla Foundation, Apache License 2.0.</p>`,
@@ -239,7 +240,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
-    "0.44.10",
+    "0.45.1",
+    "21. November 2026",
+    [
+      "Umbuchen: Beim Ziehen fliegen jetzt Geldscheine von Konto zu Konto und verlieren unterwegs ein paar Münzen – mit leisen Tönen. Abschalten kannst du das in den Einstellungen unter „Startseite“.",
+      "Startseite: „Noch pro Tag“ – dein Hauptkonto geteilt durch die restlichen Tage im Monat",
+    ],
+  ],
+  [
+    "0.45.0",
     "21. November 2026",
     ["Wischen: Nach dem Seitenwechsel blinkt die neue Seite nicht mehr kurz weg und wieder ein."],
   ],

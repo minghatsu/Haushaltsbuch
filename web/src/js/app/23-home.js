@@ -704,7 +704,7 @@ function homeExtra({ ym, cur, c, g, mainName, mainBal, asOf }) {
     const D = daysIn(ym),
       left = ym === cur ? Math.max(1, D - today + 1) : ym > cur ? D : 0,
       past = ym === cur ? today : ym < cur ? D : 0;
-    const per = left ? (ym === cur ? freePerDay(ym, mainBal, c).v : Math.max(0, mainBal / left)) : 0,
+    const per = left ? (ym === cur ? freePerDay(ym, mainBal).v : Math.max(0, mainBal / left)) : 0,
       avg = past ? dayAvg(ym + "-01", ym === cur ? isoToday() : lastDayOf(ym), past) : 0,
       pct = Math.round((past / D) * 100);
     out.perday = `<div class="card">${hxHead("perday", "Noch pro Tag")}
