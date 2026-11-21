@@ -25065,6 +25065,11 @@ html[data-theme="dark"] .sndic {
   display: none;
 }
 /* während des Ziehens: Hintergrund und Kopfzeile kommen mit dem Finger */
+@property --mvp {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
 .mvbg.pull {
   opacity: 1;
   transition: none;
@@ -25076,7 +25081,8 @@ html[data-theme="dark"] .sndic {
 }
 .mvbg.pull:not(.show) .mvtop,
 .mvbg.pull:not(.show) .mvhint {
-  opacity: var(--mvp, 0);
+  opacity: calc(var(--mvp, 0) * 2 - 1);
+  transform: translateY(calc((1 - var(--mvp, 0)) * -10px));
 }
 .mvbg.pull .mvtop,
 .mvbg.pull .mvhint {
@@ -48026,8 +48032,6 @@ function mvClose() {
   el._closing = 1;
   mvGather(el, done);
 }
-/* Aufklappen wie ein Kartenstapel: erst ziehen sich die Karten hinter der Hauptkarte zusammen,
-     dann wird eine nach der anderen darunter ausgeteilt. Zuklappen läuft rückwärts. */
 function mvFxOk() {
   try {
     return !!document.body.animate && !matchMedia("(prefers-reduced-motion: reduce)").matches && !IS_DESK;
@@ -48141,8 +48145,18 @@ function mvPullEnd(go) {
     H = mvFront(),
     cards = MVP.cards;
   if (go) {
-    el.classList.add("show");
-    el.style.removeProperty("--mvp");
+    /* Hintergrund vom Stand beim Loslassen weich auf voll */
+    const bg = el.animate([{ "--mvp": MVP.p }, { "--mvp": 1 }], {
+      duration: 260,
+      easing: "ease-out",
+      fill: "forwards",
+    });
+    bg.onfinish = () => {
+      el.classList.add("show");
+      el.classList.remove("pull");
+      bg.cancel();
+      el.style.removeProperty("--mvp");
+    };
     SND.play("whoosh");
     try {
       navigator.vibrate && navigator.vibrate(8);
@@ -48175,7 +48189,6 @@ function mvPullEnd(go) {
       if (k) setTimeout(() => !el.hidden && SND.play("tick"), 140 + k * 35);
     });
     setTimeout(() => {
-      el.classList.remove("pull");
       if (H && !el.hidden)
         [H.c, ...H.side].forEach((c) => {
           c.getAnimations().forEach((a) => a.cancel());
@@ -48204,78 +48217,75 @@ function mvPullEnd(go) {
     MV.home = null;
   }, 230);
 }
+/* Zuklappen als Umkehrung vom Aufklappen: Die Konten schieben sich unter die Hauptkarte
+   (die bleibt obenauf), dann gleitet der Stapel zurück an seinen Platz auf der Startseite. */
 function mvGather(el, done) {
   const cards = [...el.querySelectorAll(".mvc")],
-    H = MV.home;
-  if (!cards.length) {
+    H = mvFront();
+  if (!cards.length || !H) {
     el.classList.remove("show");
     setTimeout(done, 320);
     return;
   }
-  const first = cards[0].getBoundingClientRect(),
-    n = cards.length;
+  const fr = H.c.getBoundingClientRect();
+  MV.home = { top: fr.top, left: fr.left, width: fr.width, height: fr.height };
+  const S = cards.map((c, k) => {
+    const r = c.getBoundingClientRect(),
+      sc = Math.min(1, MV.home.width / r.width) * (k ? 0.94 - Math.min(k, 4) * 0.02 : 1);
+    return {
+      x: MV.home.left + (MV.home.width - r.width * sc) / 2 - r.left,
+      y: MV.home.top - r.top + Math.min(k, 4) * 12,
+      s: sc,
+    };
+  });
+  const E = "cubic-bezier(.45,0,.2,1)",
+    n = cards.length,
+    first = cards[0].getBoundingClientRect();
   cards.forEach((c, k) => {
-    if (!k) return;
-    const r = c.getBoundingClientRect();
+    c.style.transition = "none";
     c.style.transformOrigin = "0 0";
+    c.style.zIndex = String(20 - k);
+    if (!k) return;
+    /* erst unter die Hauptkarte in der Liste, dann mit ihr zusammen zurück */
+    const r = c.getBoundingClientRect(),
+      under = `translate(${first.left - r.left + 8}px,${first.top - r.top + Math.min(k, 4) * 8}px) scale(${0.96 - Math.min(k, 4) * 0.015})`;
     c.animate(
       [
-        {
-          transform: "none",
-        },
-        {
-          transform: `translate(${first.left - r.left + 6}px,${first.top - r.top + k * 4}px) scale(${(first.width - 12) / r.width},${Math.min(1, (first.height - 8) / r.height)})`,
-        },
+        { transform: "none", opacity: 1 },
+        { transform: under, opacity: 1, offset: 0.45 },
+        { transform: `translate(${S[k].x}px,${S[k].y}px) scale(${S[k].s})`, opacity: 0 },
       ],
-      {
-        duration: 240,
-        delay: (n - 1 - k) * 45,
-        easing: "cubic-bezier(.5,0,.75,0)",
-        fill: "forwards",
-      }
+      { duration: 520, delay: (n - 1 - k) * 25, easing: E, fill: "forwards" }
     );
   });
-  const wait = 240 + (n - 2) * 45;
-  setTimeout(
-    () => {
-      const c = cards[0];
-      c.style.transformOrigin = "0 0";
-      el.classList.remove("show");
-      c.animate(
-        [
-          {
-            transform: "none",
-          },
-          {
-            transform: `translate(${H.left - first.left}px,${H.top - first.top}px) scale(${H.width / first.width},${H.height / first.height})`,
-          },
-        ],
-        {
-          duration: 300,
-          easing: "cubic-bezier(.2,.8,.3,1)",
-          fill: "forwards",
-        }
-      );
-      cards.slice(1).forEach((x) =>
-        x.animate(
-          [
-            {
-              opacity: 1,
-            },
-            {
-              opacity: 0,
-            },
-          ],
-          {
-            duration: 200,
-            fill: "forwards",
-          }
-        )
-      );
-      setTimeout(done, 300);
-    },
-    Math.max(0, wait)
+  /* die Hauptkarte wächst unterwegs auf die Höhe der Karte auf der Startseite – kein Sprung beim Übergeben */
+  const h0 = first.height,
+    h1 = MV.home.height / S[0].s;
+  cards[0].animate(
+    [
+      { transform: "none", height: h0 + "px", offset: 0 },
+      { transform: "none", height: h0 + "px", offset: 0.3 },
+      { transform: `translate(${S[0].x}px,${S[0].y}px) scale(${S[0].s})`, height: h1 + "px" },
+    ],
+    { duration: 520, easing: E, fill: "forwards" }
   );
+  /* Hintergrund und Überschrift gehen mit */
+  el.classList.add("pull");
+  el.classList.remove("show");
+  const fade = el.animate([{ "--mvp": 1 }, { "--mvp": 0 }], { duration: 420, easing: "ease-in", fill: "forwards" });
+  /* am Ziel: die echte Hauptkarte übernimmt, ohne Lücke und ohne Doppelbild */
+  setTimeout(() => {
+    H.c.getAnimations().forEach((a) => a.cancel());
+    H.c.style.visibility = "";
+    H.c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 110 });
+    cards[0].animate([{ opacity: 1 }, { opacity: 0 }], { duration: 110, fill: "forwards" });
+    setTimeout(() => {
+      fade.cancel();
+      el.classList.remove("pull");
+      el.style.removeProperty("--mvp");
+      done();
+    }, 110);
+  }, 500);
 }
 function mvUnstack() {
   const H = mvFront();
@@ -50827,6 +50837,13 @@ document.addEventListener("click", (e) => {
 
 /* Einstellungen extra */
 const CHANGELOG = [
+  [
+    "0.45.3",
+    "21. November 2026",
+    [
+      "Konten zuklappen: Die Konten schieben sich unter die Hauptkarte, die obenauf bleibt, und gleiten zusammen zurück auf die Startseite – ohne Doppelbild und ohne Lücke. Der Hintergrund blendet dabei weich aus.",
+    ],
+  ],
   [
     "0.45.2",
     "21. November 2026",

@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.45.3",
+    "21. November 2026",
+    [
+      "Konten zuklappen: Die Konten schieben sich unter die Hauptkarte, die obenauf bleibt, und gleiten zusammen zurück auf die Startseite – ohne Doppelbild und ohne Lücke. Der Hintergrund blendet dabei weich aus.",
+    ],
+  ],
+  [
     "0.45.2",
     "21. November 2026",
     [
