@@ -317,7 +317,7 @@ jobs:
           TITLE="Finanz MAMI · v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · Handy, Tablet & PC"
           NOTES="Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=${{ needs.web.outputs.ra }} exe=${{ needs.web.outputs.re }} appv=$APPV pcv=$PCV"
           if gh release view neueste >/dev/null 2>&1; then
-            gh release upload neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --clobber
+            for i in 1 2 3 4; do gh release upload neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --clobber && break; [ $i = 4 ] && exit 1; echo "Hochladen fehlgeschlagen – neuer Versuch in 20 s"; sleep 20; done
             gh release edit neueste --title "$TITLE" --notes "$NOTES" --latest
             git tag -f neueste ${{ github.sha }} && git push -f origin refs/tags/neueste || true
           else
@@ -493,7 +493,7 @@ jobs:
           TITLE="Finanz MAMI · v0.$(( (${{ github.run_number }} - 88) / 10 )).$(( (${{ github.run_number }} - 88) % 10 )) · Handy, Tablet & PC"
           NOTES="Neueste Version. Handy: Haushaltsbuch.apk installieren. PC (Windows): Haushaltsbuch-Setup.exe ausführen. Versionen für die automatischen Updates: web=${{ github.run_number }} apk=$APK exe=$EXE appv=${{ needs.web.outputs.appv }} pcv=${{ needs.web.outputs.pcv }}"
           if gh release view neueste >/dev/null 2>&1; then
-            gh release upload neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --clobber
+            for i in 1 2 3 4; do gh release upload neueste Haushaltsbuch.apk Haushaltsbuch-Setup.exe app.html --clobber && break; [ $i = 4 ] && exit 1; echo "Hochladen fehlgeschlagen – neuer Versuch in 20 s"; sleep 20; done
             gh release edit neueste --title "$TITLE" --notes "$NOTES" --latest
             git tag -f neueste ${{ github.sha }} && git push -f origin refs/tags/neueste || true
           else
