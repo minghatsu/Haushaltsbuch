@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.47.7",
+    "22. November 2026",
+    [
+      "Zahlungen zuordnen: Nach dem Einlesen des Kontoauszugs zeigt die App, welche Zahlungen zu deinen Rechnungen und Eingangsrechnungen passen – erkannt an Rechnungsnummer, Name und Betrag, auch Teilzahlungen und Skonto. Du bestätigst mit „Passt“ oder lehnst ab.",
+      "Rechnungen werden nicht mehr allein wegen eines gleichen Betrags still als bezahlt abgehakt.",
+    ],
+  ],
+  [
     "0.47.6",
     "22. November 2026",
     [

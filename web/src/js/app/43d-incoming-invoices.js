@@ -161,7 +161,6 @@ async function erAdd(inv) {
     };
   await rcptPut("er-" + rec.id, `data:${mime};base64,${b64Of(buf)}`);
   erList().push(rec);
-  erAutoPaid();
   await saveSettings();
   return rec;
 }
@@ -198,34 +197,6 @@ function erUsedTx() {
       .map((x) => x.tx)
   );
 }
-function erAutoPaid() {
-  const used = erUsedTx();
-  let hit = null;
-  for (const i of erList()) {
-    if (i.paid || i.typ === "g") continue;
-    const nr = String(i.nr || "").toLowerCase(),
-      who = String(i.from || "")
-        .toLowerCase()
-        .split(/\s+/)[0];
-    const t = (store.tx || []).find(
-      (t) =>
-        (t.kind === "betrieb" || t.kind === "ausgabe") &&
-        !used.has(t.id) &&
-        Math.abs(t.amount - i.pay) < 0.01 &&
-        t.date >= addDays(i.date, -7) &&
-        ((nr && (t.note || "").toLowerCase().includes(nr)) ||
-          (who.length > 2 && (t.note || "").toLowerCase().includes(who)) ||
-          t.date <= addDays(i.date, 60))
-    );
-    if (t) {
-      i.paid = t.date;
-      i.tx = t.id;
-      used.add(t.id);
-      hit = i;
-    }
-  }
-  return hit;
-}
 function addDays(iso, n) {
   const d = new Date(iso + "T12:00");
   d.setDate(d.getDate() + n);
@@ -253,7 +224,6 @@ function erState(i) {
 
 /* --- Fenster --- */
 function erOpen() {
-  if (erAutoPaid()) saveSettings();
   const b = hbSheet("erBg", uiText("er_h"));
   b.innerHTML = ER.sel ? erDetail(erList().find((x) => x.id === ER.sel)) : erListHtml();
   if (!reducedMotion())
@@ -274,7 +244,7 @@ function erListHtml() {
       ),
     tab = (k, t) =>
       `<button type="button" class="${ER.tab === k ? "on" : ""}" data-ertab="${k}">${escHtml(uiText(t))}</button>`;
-  return `<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${open.length} · ${escHtml(fmtEur(open.reduce((s, i) => s + i.pay, 0)))}</b></div><div><small>${escHtml(uiText("er_sum_paid"))}</small><b>${paidM.length} · ${escHtml(fmtEur(paidM.reduce((s, i) => s + i.pay, 0)))}</b></div></div>
+  return `${pmBanner()}<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${open.length} · ${escHtml(fmtEur(open.reduce((s, i) => s + i.pay, 0)))}</b></div><div><small>${escHtml(uiText("er_sum_paid"))}</small><b>${paidM.length} · ${escHtml(fmtEur(paidM.reduce((s, i) => s + i.pay, 0)))}</b></div></div>
     <div class="erseg" role="tablist">${tab("open", "er_open")}${tab("paid", "er_paid")}${tab("all", "er_all")}</div>
     <div class="erl">${
       L.map((i) => {
@@ -336,14 +306,14 @@ function erBook(i) {
   }, 240);
 }
 /* Nach dem Speichern: gebuchte Rechnung abhaken */
-function erAfterSave() {
+function erAfterSave(txId) {
   if (!ER.book) return;
-  const i = erList().find((x) => x.id === ER.book);
+  const i = erList().find((x) => x.id === ER.book),
+    t = store.tx.find((x) => x.id === txId);
   ER.book = null;
-  if (!i) return;
-  if (!i.tx) erAutoPaid();
-  const t = i.tx && store.tx.find((x) => x.id === i.tx);
-  if (!t) return;
+  if (!i || !t) return;
+  i.paid = t.date;
+  i.tx = t.id;
   if (t.cat) i.cat = t.cat;
   saveSettings();
 }

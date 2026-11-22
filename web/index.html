@@ -24591,6 +24591,117 @@ html.pc .pctpane .ayblk {
 .eohint {
   margin: 0 0 12px;
 }
+
+/* Zahlungen zu Rechnungen zuordnen */
+#pmBg {
+  z-index: 220;
+}
+.pmban {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--warn-soft);
+  color: var(--fg);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.pmban > span {
+  color: var(--warn);
+  display: grid;
+}
+.pmban b {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 800;
+}
+.pml {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.pmc {
+  background: var(--sunk);
+  border-radius: 18px;
+  padding: 12px;
+}
+.pmt {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.pmi {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+}
+.pmi.in {
+  color: var(--good);
+}
+.pmi.out {
+  color: var(--bad);
+}
+.pmn {
+  flex: 1;
+  min-width: 0;
+}
+.pmn b {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+}
+.pmn small {
+  display: block;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.pmn .pmref {
+  font-size: 11.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pmb {
+  display: inline-block;
+  margin-top: 6px;
+  font-style: normal;
+  font-size: 11.5px;
+  font-weight: 800;
+  border-radius: 99px;
+  padding: 3px 9px;
+  background: var(--surface);
+  color: var(--muted);
+}
+.pmc.sure .pmb,
+.pmc.skonto .pmb {
+  background: var(--good-soft);
+  color: var(--good);
+}
+.pmc.part .pmb {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.pma {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.pmhint {
+  margin: 10px 0 0;
+}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -50033,6 +50144,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.47.7",
+    "22. November 2026",
+    [
+      "Zahlungen zuordnen: Nach dem Einlesen des Kontoauszugs zeigt die App, welche Zahlungen zu deinen Rechnungen und Eingangsrechnungen passen – erkannt an Rechnungsnummer, Name und Betrag, auch Teilzahlungen und Skonto. Du bestätigst mit „Passt“ oder lehnst ab.",
+      "Rechnungen werden nicht mehr allein wegen eines gleichen Betrags still als bezahlt abgehakt.",
+    ],
+  ],
+  [
     "0.47.6",
     "22. November 2026",
     [
@@ -52452,6 +52571,20 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.47.7",
+    s: () =>
+      hasSelf()
+        ? [
+            {
+              sel: '[data-view="beruf"] [data-rchopen].atile',
+              ic: "bank",
+              t: uiText("nw_pm_t"),
+              p: [uiText("nw_pm_p")],
+            },
+          ]
+        : [],
+  },
   {
     v: "0.47.6",
     s: () =>
@@ -56431,9 +56564,6 @@ function renderBeruf() {
     exB = [],
     exJ = [];
   if (hasSelf()) {
-    try {
-      rchAutoPaid();
-    } catch (_) {}
     const io = rchList().filter((i) => !i.paid),
       od = rchOver().length;
     (duo ? exB : extra).push(
@@ -56452,9 +56582,6 @@ function renderBeruf() {
         "data-rchopen"
       )
     );
-    try {
-      erAutoPaid();
-    } catch (_) {}
     const eo = erOpenList(),
       eod = eo.filter((i) => i.due && daysTo(i.due) < 0).length;
     (duo ? exB : extra).push(
@@ -75358,7 +75485,7 @@ async function saveTx() {
   btn.disabled = false;
   if (!ok) return;
   await rcptSaveFor(id);
-  erAfterSave();
+  erAfterSave(id);
   closeSheet();
   if (date.slice(0, 7) !== ui.ym) {
     ui.ym = date.slice(0, 7);
@@ -85153,6 +85280,139 @@ const TEXTS = {
     "عندما تحفظ فاتورة أو ترسلها أسألك الآن عن الصيغة: PDF بفاتورة إلكترونية للشركات، أو XRechnung للجهات الحكومية، أو PDF عادي. سأتذكر اختيارك لكل عميل.",
     "Când salvezi sau trimiți o factură, te întreb acum formatul: PDF cu e-factură pentru firme, XRechnung pentru autorități sau PDF obișnuit. Îmi amintesc alegerea pentru fiecare client.",
   ],
+  pm_h: [
+    "{n} Zahlungen passen zu Rechnungen",
+    "{n} payments match invoices",
+    "{n} ödeme faturalarla eşleşiyor",
+    "{n} платежей подходят к счетам",
+    "{n} платежів підходять до рахунків",
+    "{n} płatności pasuje do faktur",
+    "{n} دفعات تطابق الفواتير",
+    "{n} plăți se potrivesc cu facturi",
+  ],
+  pm_h1: [
+    "1 Zahlung passt zu einer Rechnung",
+    "1 payment matches an invoice",
+    "1 ödeme bir faturayla eşleşiyor",
+    "1 платёж подходит к счёту",
+    "1 платіж підходить до рахунку",
+    "1 płatność pasuje do faktury",
+    "دفعة واحدة تطابق فاتورة",
+    "1 plată se potrivește cu o factură",
+  ],
+  pm_sure: ["sicher", "certain", "kesin", "точно", "точно", "pewne", "مؤكد", "sigur"],
+  pm_maybe: [
+    "nur Betrag gleich",
+    "amount only",
+    "sadece tutar aynı",
+    "совпадает только сумма",
+    "збігається лише сума",
+    "tylko kwota",
+    "المبلغ فقط",
+    "doar suma",
+  ],
+  pm_part: [
+    "Teilzahlung · Rest {a}",
+    "Part payment · {a} left",
+    "Kısmi ödeme · kalan {a}",
+    "Частичная оплата · остаток {a}",
+    "Часткова оплата · залишок {a}",
+    "Częściowa · zostaje {a}",
+    "دفعة جزئية · المتبقي {a}",
+    "Plată parțială · rest {a}",
+  ],
+  pm_skonto: [
+    "mit Skonto ({a} weniger)",
+    "with discount ({a} less)",
+    "indirimli ({a} eksik)",
+    "со скидкой ({a} меньше)",
+    "зі знижкою ({a} менше)",
+    "ze skontem ({a} mniej)",
+    "مع خصم ({a} أقل)",
+    "cu scont ({a} mai puțin)",
+  ],
+  pm_to: [
+    "{a} am {d} → Rechnung {n}",
+    "{a} on {d} → invoice {n}",
+    "{d} tarihinde {a} → fatura {n}",
+    "{a} {d} → счёт {n}",
+    "{a} {d} → рахунок {n}",
+    "{a} dnia {d} → faktura {n}",
+    "{a} في {d} ← فاتورة {n}",
+    "{a} pe {d} → factura {n}",
+  ],
+  pm_yes: ["Passt", "Match", "Doğru", "Верно", "Так", "Pasuje", "مطابقة", "Corect"],
+  pm_no: ["Nein", "No", "Hayır", "Нет", "Ні", "Nie", "لا", "Nu"],
+  pm_all: [
+    "Alle bestätigen",
+    "Confirm all",
+    "Tümünü onayla",
+    "Подтвердить все",
+    "Підтвердити всі",
+    "Potwierdź wszystkie",
+    "تأكيد الكل",
+    "Confirmă tot",
+  ],
+  pm_done: [
+    "Alles zugeordnet",
+    "All matched",
+    "Hepsi eşleştirildi",
+    "Всё сопоставлено",
+    "Усе зіставлено",
+    "Wszystko przypisane",
+    "تمت المطابقة",
+    "Totul e asociat",
+  ],
+  pm_ban: [
+    "{n} Zahlungen gefunden – jetzt prüfen",
+    "{n} payments found – check now",
+    "{n} ödeme bulundu – şimdi kontrol et",
+    "Найдено платежей: {n} – проверь",
+    "Знайдено платежів: {n} – перевір",
+    "Znaleziono płatności: {n} – sprawdź",
+    "تم العثور على {n} دفعات – تحقّق الآن",
+    "{n} plăți găsite – verifică acum",
+  ],
+  pm_ban1: [
+    "1 Zahlung gefunden – jetzt prüfen",
+    "1 payment found – check now",
+    "1 ödeme bulundu – şimdi kontrol et",
+    "Найден 1 платёж – проверь",
+    "Знайдено 1 платіж – перевір",
+    "Znaleziono 1 płatność – sprawdź",
+    "تم العثور على دفعة واحدة – تحقّق الآن",
+    "1 plată găsită – verifică acum",
+  ],
+  pm_hint: [
+    "Ich erkenne Zahlungen an Rechnungsnummer, Name und Betrag. Was du ablehnst, schlage ich nicht noch einmal vor.",
+    "I recognise payments by invoice number, name and amount. Anything you reject won’t be suggested again.",
+    "Ödemeleri fatura numarası, isim ve tutardan tanırım. Reddettiğini tekrar önermem.",
+    "Я узнаю платежи по номеру счёта, имени и сумме. Отклонённое больше не предложу.",
+    "Я впізнаю платежі за номером рахунку, ім’ям і сумою. Відхилене більше не запропоную.",
+    "Rozpoznaję płatności po numerze faktury, nazwie i kwocie. Czego odmówisz, nie zaproponuję ponownie.",
+    "أتعرف على الدفعات من رقم الفاتورة والاسم والمبلغ. ما ترفضه لن أقترحه مجددًا.",
+    "Recunosc plățile după numărul facturii, nume și sumă. Ce respingi nu mai propun.",
+  ],
+  nw_pm_t: [
+    "Zahlungen zuordnen",
+    "Matching payments",
+    "Ödemeleri eşleştirme",
+    "Сопоставление платежей",
+    "Зіставлення платежів",
+    "Przypisywanie płatności",
+    "مطابقة الدفعات",
+    "Asocierea plăților",
+  ],
+  nw_pm_p: [
+    "Nach dem Kontoauszug zeige ich dir, welche Zahlungen zu deinen Rechnungen passen – auch Teilzahlungen und Skonto. Du tippst nur noch auf „Passt“.",
+    "After a bank statement I show you which payments match your invoices – including part payments and discounts. You just tap “Match”.",
+    "Hesap dökümünden sonra hangi ödemelerin faturalarına uyduğunu gösteririm – kısmi ödemeler ve indirimler dahil. Sadece “Doğru”ya dokun.",
+    "После выписки я покажу, какие платежи подходят к твоим счетам – и частичные, и со скидкой. Тебе остаётся нажать «Верно».",
+    "Після виписки я покажу, які платежі підходять до твоїх рахунків – і часткові, і зі знижкою. Тобі лишається натиснути «Так».",
+    "Po wyciągu pokażę ci, które płatności pasują do faktur – także częściowe i ze skontem. Wystarczy stuknąć „Pasuje”.",
+    "بعد كشف الحساب أريك أي الدفعات تطابق فواتيرك – بما فيها الجزئية والخصم. فقط اضغط «مطابقة».",
+    "După extras îți arăt ce plăți se potrivesc cu facturile – inclusiv parțiale și cu scont. Doar apeși „Corect”.",
+  ],
 };
 
 /* Texte aus TEXTS in der aktuellen Sprache, Monatsnamen und das Zählwerk für Beträge */
@@ -93180,31 +93440,6 @@ function hlLohn() {
 function rchList() {
   return (store.settings.rchs = store.settings.rchs || []);
 }
-function rchAutoPaid() {
-  let ch = false;
-  const used = new Set(
-    rchList()
-      .filter((i) => i.paidTx)
-      .map((i) => i.paidTx)
-  );
-  for (const i of rchList()) {
-    if (i.paid || i.storno || !(i.amt > 0)) continue;
-    const rest = rchRest(i);
-    const t = (store.tx || []).find(
-      (t) => t.kind === "einnahme" && !used.has(t.id) && t.date >= i.date && Math.abs(t.amount - rest) <= 0.5
-    );
-    if (t) {
-      i.paid = t.date;
-      i.paidTx = t.id;
-      used.add(t.id);
-      ch = true;
-      try {
-        rvLog("paid", i.nr, "auto");
-      } catch (_) {}
-    }
-  }
-  return ch;
-}
 function rchOver() {
   return rchList().filter((i) => !i.paid && !i.storno && i.due && daysTo(i.due) < 0);
 }
@@ -93395,7 +93630,16 @@ function hlItems() {
   } catch (_) {}
   try {
     if (hasSelf()) {
-      rchAutoPaid();
+      const pm = pmFind().length;
+      if (pm)
+        L.push({
+          k: "pm",
+          lvl: "w",
+          t: uiText(pm === 1 ? "pm_ban1" : "pm_ban", { n: String(pm) }),
+          s: uiText("pm_hint"),
+          raw: 1,
+          hl: {},
+        });
       for (const i of rchOver().slice(0, 2))
         L.push({
           k: "rch",
@@ -93465,6 +93709,7 @@ function hlAct(x) {
     return;
   }
   if (x.k === "rch") return rchOpen2(h.id);
+  if (x.k === "pm") return pmOpen();
   if (x.k === "rvrec") return rvRecOpen(h.id);
   if (x.k === "kiz") return kizOpen();
 }
@@ -93550,7 +93795,6 @@ const RCHU = {
   edit: null,
 };
 function rchOpen2(focus) {
-  rchAutoPaid();
   const b = hbSheet("rchBg", uiText("rch_h"));
   if (RCHU.scan) {
     b.innerHTML = `<div class="bsscan">${RCHU.scan.img ? `<img src="${RCHU.scan.img}" alt="">` : `<div class="stbpdf">${svgIcon("docout", 70)}</div>`}<i class="bsbeam"></i><span class="bscorner"></span></div><p class="bsstat"><span class="dots3"><i></i><i></i><i></i></span> ${escHtml(uiText("rch_reading"))}</p>`;
@@ -93561,7 +93805,7 @@ function rchOpen2(focus) {
     .sort((a, c) => (a.paid ? 1 : 0) - (c.paid ? 1 : 0) || (a.due || "").localeCompare(c.due || ""));
   const open = L.filter((i) => !i.paid && !i.storno),
     sumO = open.reduce((s, i) => s + rchRest(i), 0);
-  b.innerHTML = `<div class="ahero beruf" style="margin-bottom:10px"><small>${escHtml(uiText("rch_open"))}</small><b>${escHtml(fmtEur(sumO))}</b><span>${open.length} ${escHtml(uiText("br_open"))}${
+  b.innerHTML = `${pmBanner()}<div class="ahero beruf" style="margin-bottom:10px"><small>${escHtml(uiText("rch_open"))}</small><b>${escHtml(fmtEur(sumO))}</b><span>${open.length} ${escHtml(uiText("br_open"))}${
     rchOver().length
       ? " · " +
         escHtml(
@@ -98012,7 +98256,6 @@ async function erAdd(inv) {
     };
   await rcptPut("er-" + rec.id, `data:${mime};base64,${b64Of(buf)}`);
   erList().push(rec);
-  erAutoPaid();
   await saveSettings();
   return rec;
 }
@@ -98049,34 +98292,6 @@ function erUsedTx() {
       .map((x) => x.tx)
   );
 }
-function erAutoPaid() {
-  const used = erUsedTx();
-  let hit = null;
-  for (const i of erList()) {
-    if (i.paid || i.typ === "g") continue;
-    const nr = String(i.nr || "").toLowerCase(),
-      who = String(i.from || "")
-        .toLowerCase()
-        .split(/\s+/)[0];
-    const t = (store.tx || []).find(
-      (t) =>
-        (t.kind === "betrieb" || t.kind === "ausgabe") &&
-        !used.has(t.id) &&
-        Math.abs(t.amount - i.pay) < 0.01 &&
-        t.date >= addDays(i.date, -7) &&
-        ((nr && (t.note || "").toLowerCase().includes(nr)) ||
-          (who.length > 2 && (t.note || "").toLowerCase().includes(who)) ||
-          t.date <= addDays(i.date, 60))
-    );
-    if (t) {
-      i.paid = t.date;
-      i.tx = t.id;
-      used.add(t.id);
-      hit = i;
-    }
-  }
-  return hit;
-}
 function addDays(iso, n) {
   const d = new Date(iso + "T12:00");
   d.setDate(d.getDate() + n);
@@ -98104,7 +98319,6 @@ function erState(i) {
 
 /* --- Fenster --- */
 function erOpen() {
-  if (erAutoPaid()) saveSettings();
   const b = hbSheet("erBg", uiText("er_h"));
   b.innerHTML = ER.sel ? erDetail(erList().find((x) => x.id === ER.sel)) : erListHtml();
   if (!reducedMotion())
@@ -98125,7 +98339,7 @@ function erListHtml() {
       ),
     tab = (k, t) =>
       `<button type="button" class="${ER.tab === k ? "on" : ""}" data-ertab="${k}">${escHtml(uiText(t))}</button>`;
-  return `<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${open.length} · ${escHtml(fmtEur(open.reduce((s, i) => s + i.pay, 0)))}</b></div><div><small>${escHtml(uiText("er_sum_paid"))}</small><b>${paidM.length} · ${escHtml(fmtEur(paidM.reduce((s, i) => s + i.pay, 0)))}</b></div></div>
+  return `${pmBanner()}<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${open.length} · ${escHtml(fmtEur(open.reduce((s, i) => s + i.pay, 0)))}</b></div><div><small>${escHtml(uiText("er_sum_paid"))}</small><b>${paidM.length} · ${escHtml(fmtEur(paidM.reduce((s, i) => s + i.pay, 0)))}</b></div></div>
     <div class="erseg" role="tablist">${tab("open", "er_open")}${tab("paid", "er_paid")}${tab("all", "er_all")}</div>
     <div class="erl">${
       L.map((i) => {
@@ -98187,14 +98401,14 @@ function erBook(i) {
   }, 240);
 }
 /* Nach dem Speichern: gebuchte Rechnung abhaken */
-function erAfterSave() {
+function erAfterSave(txId) {
   if (!ER.book) return;
-  const i = erList().find((x) => x.id === ER.book);
+  const i = erList().find((x) => x.id === ER.book),
+    t = store.tx.find((x) => x.id === txId);
   ER.book = null;
-  if (!i) return;
-  if (!i.tx) erAutoPaid();
-  const t = i.tx && store.tx.find((x) => x.id === i.tx);
-  if (!t) return;
+  if (!i || !t) return;
+  i.paid = t.date;
+  i.tx = t.id;
   if (t.cat) i.cat = t.cat;
   saveSettings();
 }
@@ -98538,6 +98752,191 @@ document.addEventListener("input", (e) => {
     m.textContent = uiText("eo_miss", { x: miss.join(", ") });
     m.hidden = !miss.length;
   }
+});
+
+/* Zahlungen zu Rechnungen zuordnen: die App schlägt vor, du bestätigst */
+const PM_STOP = /^(gmbh|mbh|und|the|ltd|gbr|ohg|kg|ug|haftungsbeschr|firma|herr|frau)$/;
+const pmNorm = (s) =>
+  String(s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9äöüß]/g, "");
+function pmWord(name) {
+  return (
+    String(name || "")
+      .toLowerCase()
+      .split(/[\s,.&/+-]+/)
+      .find((w) => w.length >= 4 && !PM_STOP.test(w)) || ""
+  );
+}
+function pmUsed() {
+  const s = new Set();
+  for (const i of rchList()) {
+    if (i.paidTx) s.add(i.paidTx);
+    for (const p of i.parts || []) if (p.tx) s.add(p.tx);
+  }
+  for (const i of erList()) if (i.tx) s.add(i.tx);
+  return s;
+}
+function pmOpenItems() {
+  return [
+    ...rchList()
+      .filter((i) => !i.paid && !i.storno && i.typ !== "s" && i.typ !== "g" && i.amt > 0)
+      .map((i) => ({ dir: "in", inv: i, rest: rchRest(i), nr: i.nr, who: i.kunde, date: i.date })),
+    ...erOpenList().map((i) => ({ dir: "out", inv: i, rest: i.pay, nr: i.nr, who: i.from, date: i.date })),
+  ];
+}
+function pmScore(o, t) {
+  const raw = `${t.note || ""} ${t.ref || ""}`.toLowerCase(),
+    nr = pmNorm(o.nr),
+    byNr = nr.length >= 3 && pmNorm(raw).includes(nr),
+    w = pmWord(o.who),
+    byName = !!w && raw.includes(w),
+    named = byNr || byName,
+    diff = round2(o.rest - t.amount);
+  if (Math.abs(diff) < 0.01) return { lvl: named ? "sure" : "maybe", s: (byNr ? 7 : 0) + (byName ? 3 : 0) + 2 };
+  if (!named || diff < 0) return null;
+  if (diff <= o.rest * 0.031) return { lvl: "skonto", s: (byNr ? 5 : 3) + 1, diff };
+  if (o.dir === "in") return { lvl: "part", s: byNr ? 4 : 2, diff };
+  return null;
+}
+function pmFind() {
+  if (!hasSelf()) return [];
+  const used = pmUsed(),
+    cands = [];
+  for (const o of pmOpenItems()) {
+    const no = new Set(o.inv.no || []),
+      from = addDays(o.date, -7),
+      to = addDays(o.date, 180);
+    for (const t of store.tx || []) {
+      if (!t.date || t.date < from || t.date > to || used.has(t.id) || no.has(t.id)) continue;
+      if (o.dir === "in" ? t.kind !== "einnahme" : t.kind !== "betrieb" && t.kind !== "ausgabe") continue;
+      const sc = pmScore(o, t);
+      if (sc) cands.push({ ...sc, o, t });
+    }
+  }
+  cands.sort((a, c) => c.s - a.s || a.t.date.localeCompare(c.t.date));
+  const tk = new Set(),
+    ik = new Set();
+  return cands.filter((c) => {
+    if (tk.has(c.t.id) || ik.has(c.o.inv.id)) return false;
+    tk.add(c.t.id);
+    ik.add(c.o.inv.id);
+    return true;
+  });
+}
+function pmApply(c) {
+  const i = c.o.inv,
+    t = c.t;
+  if (c.o.dir === "out") {
+    i.paid = t.date;
+    i.tx = t.id;
+    if (t.cat) i.cat = t.cat;
+    return;
+  }
+  if (c.lvl === "part") {
+    (i.parts = i.parts || []).push({ d: t.date, a: t.amount, tx: t.id });
+    rvLog("part", i.nr, fmtEur(t.amount));
+    if (rchRest(i) <= 0.005) i.paid = t.date;
+    return;
+  }
+  i.paid = t.date;
+  i.paidTx = t.id;
+  if (c.lvl === "skonto") i.skonto = c.diff;
+  rvLog("paid", i.nr, c.lvl === "skonto" ? "skonto " + fmtEur(c.diff) : "");
+}
+function pmReject(c) {
+  const i = c.o.inv;
+  i.no = [...(i.no || []), c.t.id].slice(-50);
+}
+
+/* --- Fenster --- */
+const PM = { L: [] };
+function pmOpen() {
+  PM.L = pmFind();
+  if (!PM.L.length) return;
+  pmRender(true);
+}
+function pmRender(first) {
+  const n = PM.L.length,
+    b = hbSheet("pmBg", uiText(n === 1 ? "pm_h1" : "pm_h", { n: String(n) })),
+    D = (d) => fxDate(d, { day: "numeric", month: "short" });
+  b.innerHTML = `<div class="pml">${PM.L.map((c, k) => {
+    const inc = c.o.dir === "in",
+      badge =
+        c.lvl === "part"
+          ? uiText("pm_part", { a: fmtEur(c.diff) })
+          : c.lvl === "skonto"
+            ? uiText("pm_skonto", { a: fmtEur(c.diff) })
+            : uiText(c.lvl === "sure" ? "pm_sure" : "pm_maybe");
+    return `<div class="pmc ${c.lvl}" data-pmk="${k}"><div class="pmt"><span class="pmi ${inc ? "in" : "out"}">${svgIcon(inc ? "arrowDown" : "arrowUp", 18)}</span><span class="pmn"><b data-noi18n>${escHtml(c.o.who || "–")}</b><small data-noi18n>${escHtml(
+      uiText("pm_to", { a: (inc ? "+" : "−") + fmtEur(c.t.amount), d: D(c.t.date), n: c.o.nr || "–" })
+    )}</small>${c.t.ref ? `<small class="pmref" data-noi18n>${escHtml(c.t.ref)}</small>` : ""}<em class="pmb">${escHtml(badge)}</em></span></div><div class="pma"><button type="button" class="btn" data-pmno="${k}">${escHtml(uiText("pm_no"))}</button><button type="button" class="btn primary" data-pmyes="${k}">${svgIcon("check", 15)} ${escHtml(uiText("pm_yes"))}</button></div></div>`;
+  }).join("")}</div>
+    <button type="button" class="btn primary block pmall" data-pmall>${escHtml(uiText("pm_all"))}</button>
+    <p class="small muted pmhint">${escHtml(uiText("pm_hint"))}</p>`;
+  if (first && !reducedMotion()) stbAnim(b, ".pmc,.pmall,.pmhint");
+}
+async function pmDecide(k, yes) {
+  const c = PM.L[k],
+    card = document.querySelector(`#pmBg [data-pmk="${k}"]`);
+  if (!c) return;
+  if (yes) pmApply(c);
+  else pmReject(c);
+  await saveSettings();
+  SND.play(yes ? "done" : "untick");
+  const next = () => {
+    PM.L = pmFind();
+    if (!PM.L.length) {
+      hbSheetClose("pmBg");
+      toast(uiText("pm_done"));
+      pmRefresh();
+      return;
+    }
+    pmRender();
+  };
+  if (card && !reducedMotion())
+    card
+      .animate(
+        [
+          { opacity: 1, transform: "none" },
+          { opacity: 0, transform: `translateX(${yes ? 40 : -40}px) scale(.96)` },
+        ],
+        { duration: 260, easing: "cubic-bezier(.4,0,.6,1)", fill: "forwards" }
+      )
+      .finished.then(next);
+  else next();
+}
+async function pmAll() {
+  for (const c of PM.L) pmApply(c);
+  await saveSettings();
+  SND.play("done");
+  hbSheetClose("pmBg");
+  toast(uiText("pm_done"));
+  pmRefresh();
+}
+function pmRefresh() {
+  render();
+  if ($("rchBg") && !$("rchBg").hidden) rchOpen2();
+  if ($("erBg") && !$("erBg").hidden) erOpen();
+}
+function pmBanner() {
+  const n = pmFind().length;
+  return n
+    ? `<button type="button" class="pmban" data-pmopen><span>${svgIcon("bank", 18)}</span><b>${escHtml(uiText(n === 1 ? "pm_ban1" : "pm_ban", { n: String(n) }))}</b>${svgIcon("right", 16)}</button>`
+    : "";
+}
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  if (t.closest("[data-pmopen]")) {
+    pmOpen();
+    return;
+  }
+  if (!t.closest("#pmBg")) return;
+  const y = t.closest("[data-pmyes]"),
+    n = t.closest("[data-pmno]");
+  if (y) pmDecide(Number(y.dataset.pmyes), true);
+  else if (n) pmDecide(Number(n.dataset.pmno), false);
+  else if (t.closest("[data-pmall]")) pmAll();
 });
 
 /* --- Kinderzuschlag-Check --- */
@@ -108636,7 +109035,8 @@ async function commitImport() {
     );
     setTimeout(() => {
       try {
-        if (recurCands().length) {
+        if (pmFind().length) pmOpen();
+        else if (recurCands().length) {
           RECUR_TOLD = true;
           recurSheet();
         }

@@ -537,9 +537,6 @@ function renderBeruf() {
     exB = [],
     exJ = [];
   if (hasSelf()) {
-    try {
-      rchAutoPaid();
-    } catch (_) {}
     const io = rchList().filter((i) => !i.paid),
       od = rchOver().length;
     (duo ? exB : extra).push(
@@ -558,9 +555,6 @@ function renderBeruf() {
         "data-rchopen"
       )
     );
-    try {
-      erAutoPaid();
-    } catch (_) {}
     const eo = erOpenList(),
       eod = eo.filter((i) => i.due && daysTo(i.due) < 0).length;
     (duo ? exB : extra).push(

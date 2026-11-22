@@ -1046,7 +1046,8 @@ async function commitImport() {
     );
     setTimeout(() => {
       try {
-        if (recurCands().length) {
+        if (pmFind().length) pmOpen();
+        else if (recurCands().length) {
           RECUR_TOLD = true;
           recurSheet();
         }

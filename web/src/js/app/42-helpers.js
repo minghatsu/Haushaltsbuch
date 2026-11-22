@@ -159,31 +159,6 @@ function hlLohn() {
 function rchList() {
   return (store.settings.rchs = store.settings.rchs || []);
 }
-function rchAutoPaid() {
-  let ch = false;
-  const used = new Set(
-    rchList()
-      .filter((i) => i.paidTx)
-      .map((i) => i.paidTx)
-  );
-  for (const i of rchList()) {
-    if (i.paid || i.storno || !(i.amt > 0)) continue;
-    const rest = rchRest(i);
-    const t = (store.tx || []).find(
-      (t) => t.kind === "einnahme" && !used.has(t.id) && t.date >= i.date && Math.abs(t.amount - rest) <= 0.5
-    );
-    if (t) {
-      i.paid = t.date;
-      i.paidTx = t.id;
-      used.add(t.id);
-      ch = true;
-      try {
-        rvLog("paid", i.nr, "auto");
-      } catch (_) {}
-    }
-  }
-  return ch;
-}
 function rchOver() {
   return rchList().filter((i) => !i.paid && !i.storno && i.due && daysTo(i.due) < 0);
 }
@@ -374,7 +349,16 @@ function hlItems() {
   } catch (_) {}
   try {
     if (hasSelf()) {
-      rchAutoPaid();
+      const pm = pmFind().length;
+      if (pm)
+        L.push({
+          k: "pm",
+          lvl: "w",
+          t: uiText(pm === 1 ? "pm_ban1" : "pm_ban", { n: String(pm) }),
+          s: uiText("pm_hint"),
+          raw: 1,
+          hl: {},
+        });
       for (const i of rchOver().slice(0, 2))
         L.push({
           k: "rch",
@@ -444,6 +428,7 @@ function hlAct(x) {
     return;
   }
   if (x.k === "rch") return rchOpen2(h.id);
+  if (x.k === "pm") return pmOpen();
   if (x.k === "rvrec") return rvRecOpen(h.id);
   if (x.k === "kiz") return kizOpen();
 }
@@ -529,7 +514,6 @@ const RCHU = {
   edit: null,
 };
 function rchOpen2(focus) {
-  rchAutoPaid();
   const b = hbSheet("rchBg", uiText("rch_h"));
   if (RCHU.scan) {
     b.innerHTML = `<div class="bsscan">${RCHU.scan.img ? `<img src="${RCHU.scan.img}" alt="">` : `<div class="stbpdf">${svgIcon("docout", 70)}</div>`}<i class="bsbeam"></i><span class="bscorner"></span></div><p class="bsstat"><span class="dots3"><i></i><i></i><i></i></span> ${escHtml(uiText("rch_reading"))}</p>`;
@@ -540,7 +524,7 @@ function rchOpen2(focus) {
     .sort((a, c) => (a.paid ? 1 : 0) - (c.paid ? 1 : 0) || (a.due || "").localeCompare(c.due || ""));
   const open = L.filter((i) => !i.paid && !i.storno),
     sumO = open.reduce((s, i) => s + rchRest(i), 0);
-  b.innerHTML = `<div class="ahero beruf" style="margin-bottom:10px"><small>${escHtml(uiText("rch_open"))}</small><b>${escHtml(fmtEur(sumO))}</b><span>${open.length} ${escHtml(uiText("br_open"))}${
+  b.innerHTML = `${pmBanner()}<div class="ahero beruf" style="margin-bottom:10px"><small>${escHtml(uiText("rch_open"))}</small><b>${escHtml(fmtEur(sumO))}</b><span>${open.length} ${escHtml(uiText("br_open"))}${
     rchOver().length
       ? " · " +
         escHtml(

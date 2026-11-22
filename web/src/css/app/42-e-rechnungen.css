@@ -387,3 +387,114 @@
 .eohint {
   margin: 0 0 12px;
 }
+
+/* Zahlungen zu Rechnungen zuordnen */
+#pmBg {
+  z-index: 220;
+}
+.pmban {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--warn-soft);
+  color: var(--fg);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.pmban > span {
+  color: var(--warn);
+  display: grid;
+}
+.pmban b {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 800;
+}
+.pml {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.pmc {
+  background: var(--sunk);
+  border-radius: 18px;
+  padding: 12px;
+}
+.pmt {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.pmi {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+}
+.pmi.in {
+  color: var(--good);
+}
+.pmi.out {
+  color: var(--bad);
+}
+.pmn {
+  flex: 1;
+  min-width: 0;
+}
+.pmn b {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+}
+.pmn small {
+  display: block;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.pmn .pmref {
+  font-size: 11.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pmb {
+  display: inline-block;
+  margin-top: 6px;
+  font-style: normal;
+  font-size: 11.5px;
+  font-weight: 800;
+  border-radius: 99px;
+  padding: 3px 9px;
+  background: var(--surface);
+  color: var(--muted);
+}
+.pmc.sure .pmb,
+.pmc.skonto .pmb {
+  background: var(--good-soft);
+  color: var(--good);
+}
+.pmc.part .pmb {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+.pma {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.pmhint {
+  margin: 10px 0 0;
+}
