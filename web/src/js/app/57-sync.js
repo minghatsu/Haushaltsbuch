@@ -1318,9 +1318,11 @@ $("loginGo").onclick = doLogin;
     W = 1,
     p = 0,
     busy = false,
-    lastX = 0,
-    lastT = 0,
-    vx = 0;
+    /* Fingerspur mit den Zeitstempeln der Ereignisse – Date.now() im Handler wäre auf langsamen Geräten
+       verzerrt, weil das Zeichnen die Ereignisse verzögert */
+    trail = [],
+    xL = 0,
+    tL = 0;
   let stage = null,
     fC = null,
     fN = null,
@@ -1721,10 +1723,10 @@ $("loginGo").onclick = doLogin;
         return;
       const x = e.touches[0].clientX;
       if (x < 18 || x > innerWidth - 18) return;
-      x0 = lastX = x;
+      x0 = x;
+      trail = [[e.timeStamp, x]];
       y0 = e.touches[0].clientY;
-      t0 = lastT = Date.now();
-      vx = 0;
+      t0 = Date.now();
       lock = null;
       on = true;
     },
@@ -1743,13 +1745,16 @@ $("loginGo").onclick = doLogin;
       }
       const cx = e.touches[0].clientX,
         dx = cx - x0,
-        dy = e.touches[0].clientY - y0,
-        now = Date.now();
+        dy = e.touches[0].clientY - y0;
+      trail.push([e.timeStamp, cx]);
+      if (trail.length > 10) trail.shift();
       if (lock === null) {
         if (Math.abs(dx) < 14 && Math.abs(dy) < 14) return;
         lock = Math.abs(dx) > Math.abs(dy) * 1.3 && window.scrollX === 0 ? "x" : "y";
         if (lock === "x") {
-          x0 = cx;
+          /* nur die Totzone abziehen – war das Ereignis verzögert, ist der Finger schon weit gewandert */
+          x0 += Math.sign(dx) * 14;
+          [tL, xL] = trail[0];
           setup(dx < 0 ? -1 : 1);
         }
       }
@@ -1759,11 +1764,6 @@ $("loginGo").onclick = doLogin;
       if (ddx !== 0 && (ddx < 0 ? -1 : 1) !== dir) {
         reset();
         setup(ddx < 0 ? -1 : 1);
-      }
-      if (now > lastT) {
-        vx = 0.7 * vx + (0.3 * (cx - lastX)) / (now - lastT);
-        lastX = cx;
-        lastT = now;
       }
       p = Math.max(-1, Math.min(1, (ddx / W) * (nbKey ? 1 : 0.5)));
       if (!draw.q) {
@@ -1785,17 +1785,20 @@ $("loginGo").onclick = doLogin;
     const ct = e && e.type === "touchend" && e.changedTouches && e.changedTouches[0];
     if (ct) {
       const cx = ct.clientX,
-        ddx = cx - x0,
-        now = Date.now();
+        ddx = cx - x0;
+      trail.push([e.timeStamp, cx]);
       if (ddx !== 0 && (ddx < 0 ? -1 : 1) === dir) {
         const np = Math.max(-1, Math.min(1, (ddx / W) * (nbKey ? 1 : 0.5)));
-        if (Math.abs(np) > Math.abs(p)) {
-          if (now > lastT) vx = 0.5 * vx + (0.5 * (cx - lastX)) / (now - lastT);
-          p = np;
-        }
+        if (Math.abs(np) > Math.abs(p)) p = np;
       }
     }
-    const fling = Math.abs(vx) > 0.6 && (vx < 0 ? -1 : 1) === dir && Math.abs(p) > 0.15;
+    /* Schwung: Tempo der letzten ~80 ms und Durchschnitt seit Beginn des Wischens (px/ms) */
+    const [tE, xE] = trail[trail.length - 1],
+      old = trail.find((s) => tE - s[0] <= 80) || trail[0],
+      recent = tE > old[0] ? (xE - old[1]) / (tE - old[0]) : 0,
+      avg = tE > tL ? (xE - xL) / (tE - tL) : 0,
+      fast = (v) => Math.abs(v) > 0.45 && (v < 0 ? -1 : 1) === dir;
+    const fling = Math.abs(p) > 0.12 && (fast(recent) || (fast(avg) && Math.abs(avg) > 0.5));
     settle(Math.abs(p) > 0.35 || fling);
   };
   document.addEventListener("touchend", end);

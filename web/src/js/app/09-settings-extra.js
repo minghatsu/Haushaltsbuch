@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.46.3",
+    "22. November 2026",
+    [
+      "Kurzes, schnelles Wischen wechselt die Seite jetzt zuverlässig – auch auf langsameren Handys.",
+    ],
+  ],
+  [
     "0.46.2",
     "22. November 2026",
     [
