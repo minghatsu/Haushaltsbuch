@@ -20,25 +20,26 @@ function rvSum(d) {
     G = {};
   let sub = 0;
   for (const p of d.pos || []) {
-    const n = (Number(p.q) || 0) * (Number(p.p) || 0),
+    const n = round2((Number(p.q) || 0) * (Number(p.p) || 0)),
       r = kl ? 0 : p.v === undefined || p.v === null || p.v === "" ? def : Number(p.v);
     sub += n;
-    G[r] = (G[r] || 0) + n;
+    G[r] = round2((G[r] || 0) + n);
   }
   sub = round2(sub);
-  const disc = Math.round(sub * rab) / 100,
-    groups = Object.keys(G)
-      .map(Number)
-      .sort((a, b) => b - a)
-      .map((r) => {
-        const net = round2(G[r] * (1 - rab / 100));
-        return {
-          rate: r,
-          net,
-          vat: Math.round(net * r) / 100,
-        };
-      });
-  const net = round2(sub - disc),
+  const groups = Object.keys(G)
+    .map(Number)
+    .sort((a, b) => b - a)
+    .map((r) => {
+      const net = round2(G[r] * (1 - rab / 100));
+      return {
+        rate: r,
+        sum: G[r],
+        net,
+        vat: Math.round(net * r) / 100,
+      };
+    });
+  const net = round2(groups.reduce((s, g) => s + g.net, 0)),
+    disc = round2(sub - net),
     vat = round2(groups.reduce((s, g) => s + g.vat, 0)),
     gross = round2(net + vat),
     ded = d.typ === "r" || !d.typ ? round2((d.abz || []).reduce((s, a) => s + (Number(a.amt) || 0), 0)) : 0;
@@ -52,6 +53,7 @@ function rvSum(d) {
     rate,
     groups: groups.map((g) => ({
       rate: g.rate,
+      sum: sg * g.sum,
       net: sg * g.net,
       vat: sg * g.vat,
     })),
@@ -582,7 +584,7 @@ function rvSvg(d, cls) {
   return pages.map(one).join("");
 }
 /* Kleiner PDF-Schreiber: Standard-Schrift Helvetica, Vektoren, GiroCode */
-function rvPdf(d) {
+function rvPdf(d, xml) {
   const { pages } = rvLayout(d),
     H = 842,
     col = (h) => {
@@ -651,7 +653,20 @@ function rvPdf(d) {
   const info = objs.length;
   objs[info] =
     `<< /Title (${es("Rechnung " + (d.nr || ""))}) /Author (${es(rvBiz().name || "")}) /Producer (Finanz MAMI) >>`;
-  let out = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
+  if (xml) {
+    const data = binStr(xml),
+      meta = rvXmp(d),
+      ef = objs.length,
+      spec = ef + 1,
+      md = ef + 2;
+    objs[ef] =
+      `<< /Type /EmbeddedFile /Subtype /text#2Fxml /Params << /Size ${data.length} >> /Length ${data.length} >>\nstream\n${data}\nendstream`;
+    objs[spec] =
+      `<< /Type /Filespec /F (factur-x.xml) /UF (factur-x.xml) /Desc (Factur-X) /AFRelationship /Alternative /EF << /F ${ef} 0 R /UF ${ef} 0 R >> >>`;
+    objs[md] = `<< /Type /Metadata /Subtype /XML /Length ${meta.length} >>\nstream\n${meta}\nendstream`;
+    objs[1] = `<< /Type /Catalog /Pages 2 0 R /Names << /EmbeddedFiles << /Names [(factur-x.xml) ${spec} 0 R] >> >> /AF [${spec} 0 R] /Metadata ${md} 0 R >>`;
+  }
+  let out = (xml ? "%PDF-1.7" : "%PDF-1.4") + "\n%\xE2\xE3\xCF\xD3\n";
   const off = [];
   for (let i = 1; i < objs.length; i++) {
     off[i] = out.length;

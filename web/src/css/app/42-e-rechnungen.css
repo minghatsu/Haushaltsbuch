@@ -1,4 +1,4 @@
-/* Eingangsrechnungen */
+/* E-Rechnungen: Eingangsrechnungen und Format beim Senden */
 .ersum {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -286,4 +286,104 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+
+/* E-Rechnung: Format beim Senden wählen */
+#rvFmtBg {
+  z-index: 260;
+}
+.eolist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.eoopt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: start;
+  padding: 12px;
+  border-radius: 18px;
+  border: 2px solid transparent;
+  background: var(--sunk);
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.15s;
+}
+.eoopt:active {
+  transform: scale(0.98);
+}
+.eoopt.on {
+  border-color: var(--accent);
+  background: var(--surface);
+}
+.eoic {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  color: var(--accent);
+}
+.eoopt.on .eoic {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.eot {
+  flex: 1;
+  min-width: 0;
+}
+.eot b {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+}
+.eot em {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 99px;
+  padding: 2px 8px;
+  margin-inline-start: 4px;
+  vertical-align: 2px;
+}
+.eot small {
+  display: block;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.eot .eomiss {
+  color: var(--warn);
+  font-weight: 700;
+}
+.eodot {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  transition:
+    border 0.2s,
+    box-shadow 0.2s;
+}
+.eoopt.on .eodot {
+  border: 6px solid var(--accent);
+}
+.eolw {
+  display: block;
+  margin-bottom: 10px;
+}
+.eohint {
+  margin: 0 0 12px;
 }

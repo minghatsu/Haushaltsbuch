@@ -1447,7 +1447,7 @@ async function rvStorno(id) {
     uiText("rch_storno_ok", {
       n: nr,
     }),
-    () => rvSavePdf(d),
+    () => rvFmtAsk(d, "save"),
     uiText("rv_pdf"),
     8000
   );
@@ -1630,6 +1630,7 @@ async function rvArchive() {
     await saveBinary(zn, zb, uiText("rch_arch_ok"));
   }
 }
+const rvOkKey = (mime) => (mime === "application/xml" ? "eo_saved_xr" : "rv_pdf_ok");
 async function rvSaveAs(blob, name, mime) {
   const br = window.AndroidBridge;
   if (br && br.saveFileAs) {
@@ -1667,7 +1668,7 @@ async function rvSaveAs(blob, name, mime) {
           res("");
         }
       });
-      if (r === "ok") toast(uiText("rv_pdf_ok"));
+      if (r === "ok") toast(uiText(rvOkKey(mime)));
       if (r) return r;
     }
   }
@@ -1688,7 +1689,7 @@ async function rvSaveAs(blob, name, mime) {
       const w = await h.createWritable();
       await w.write(blob);
       await w.close();
-      toast(uiText("rv_pdf_ok"));
+      toast(uiText(rvOkKey(mime)));
       return "ok";
     } catch (e) {
       if (e && e.name === "AbortError") return "cancel";
@@ -1696,13 +1697,11 @@ async function rvSaveAs(blob, name, mime) {
   }
   return "";
 }
-async function rvSavePdf(d) {
+async function rvSavePdf(d, f) {
   d = d || (rvSync(), RV.d);
-  const blob = rvPdf(d),
-    name =
-      ("Rechnung " + (d.nr || "") + " " + ((d.k && d.k.name) || "")).trim().replace(/[\\/:*?"<>|]+/g, "-") + ".pdf";
+  const { blob, name, mime } = f || rvOutFile(d, "pdf");
   {
-    const r = await rvSaveAs(blob, name, "application/pdf");
+    const r = await rvSaveAs(blob, name, mime);
     if (r === "cancel") return;
     if (r === "ok") {
       try {
@@ -1714,16 +1713,16 @@ async function rvSavePdf(d) {
   }
   if (!NATIVE && navigator.canShare && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
     try {
-      const f = new File([blob], name, {
-        type: "application/pdf",
+      const file = new File([blob], name, {
+        type: mime,
       });
       if (
         navigator.canShare({
-          files: [f],
+          files: [file],
         })
       ) {
         await navigator.share({
-          files: [f],
+          files: [file],
           title: name,
         });
         return;
@@ -1735,20 +1734,18 @@ async function rvSavePdf(d) {
   try {
     if (d.nr && rchList().some((i) => i.nr === d.nr)) rvLog("pdf", d.nr, "");
   } catch (_) {}
-  await saveBinary(name, blob, uiText("rv_pdf_ok"));
+  await saveBinary(name, blob, uiText(rvOkKey(mime)));
 }
-function rvMail(d) {
+function rvMail(d, f) {
   d = d || (rvSync(), RV.d);
   const sum = rvSum(d),
     nm = rvBiz().owner || rvBiz().name || "",
     due = addDays(d.date, Number(d.z) || 14);
   const txt = `${d.k.person ? "Hallo " + d.k.person : "Sehr geehrte Damen und Herren"},\n\nanbei erhalten Sie meine Rechnung Nr. ${d.nr} über ${rvEuro(sum.gross)}.\nBitte überweisen Sie den Betrag bis zum ${rvDate(due)}.\n\nVielen Dank für die gute Zusammenarbeit!\n\nViele Grüße\n${nm}`;
-  rvMailGo(d, txt);
+  rvMailGo(d, txt, f);
 }
-async function rvMailGo(d, txt) {
-  const blob = rvPdf(d),
-    name =
-      ("Rechnung " + (d.nr || "") + " " + ((d.k && d.k.name) || "")).trim().replace(/[\\/:*?"<>|]+/g, "-") + ".pdf",
+async function rvMailGo(d, txt, f) {
+  const { blob, name, mime } = f || rvOutFile(d, "pdf"),
     subj = "Rechnung " + d.nr,
     to = d.k.email || "",
     br = window.AndroidBridge;
@@ -1771,21 +1768,21 @@ async function rvMailGo(d, txt) {
   }
   if (br && br.sendFile) {
     try {
-      if (br.sendFile(to, subj, txt, name, "application/pdf", b64)) return;
+      if (br.sendFile(to, subj, txt, name, mime, b64)) return;
     } catch (_) {}
   }
   if (!NATIVE && navigator.canShare) {
     try {
-      const f = new File([blob], name, {
-        type: "application/pdf",
+      const file = new File([blob], name, {
+        type: mime,
       });
       if (
         navigator.canShare({
-          files: [f],
+          files: [file],
         })
       ) {
         await navigator.share({
-          files: [f],
+          files: [file],
           title: subj,
           text: txt,
         });
@@ -1795,7 +1792,7 @@ async function rvMailGo(d, txt) {
       if (e && e.name === "AbortError") return;
     }
   }
-  await saveBinary(name, blob, uiText("rv_pdf_ok"));
+  await saveBinary(name, blob, uiText(rvOkKey(mime)));
   setTimeout(() => {
     location.href =
       "mailto:" + encodeURIComponent(to) + "?subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(txt);
@@ -1940,7 +1937,7 @@ document.addEventListener("click", (e) => {
   const rp = t.closest("[data-rvpdfid]");
   if (rp) {
     const i = rchList().find((x) => x.id === rp.dataset.rvpdfid);
-    if (i && i.doc) rvSavePdf(i.doc);
+    if (i && i.doc) rvFmtAsk(i.doc, "save");
     return;
   }
   if (!t.closest("#rvBg")) return;
@@ -1972,11 +1969,13 @@ document.addEventListener("click", (e) => {
     return;
   }
   if (t.closest("[data-rvpdf]")) {
-    rvSavePdf();
+    rvSync();
+    rvFmtAsk(RV.d, "save");
     return;
   }
   if (t.closest("[data-rvmail]")) {
-    rvMail();
+    rvSync();
+    rvFmtAsk(RV.d, "mail");
     return;
   }
   if (t.closest("[data-rvpv]")) {

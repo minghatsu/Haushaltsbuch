@@ -1664,6 +1664,20 @@ function ptourOpen(v) {
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
   {
+    v: "0.47.6",
+    s: () =>
+      hasSelf()
+        ? [
+            {
+              sel: '[data-view="beruf"] [data-rchopen].atile',
+              ic: "doccheck",
+              t: uiText("nw_eo_t"),
+              p: [uiText("nw_eo_p")],
+            },
+          ]
+        : [],
+  },
+  {
     v: "0.47.5",
     s: () =>
       hasSelf()

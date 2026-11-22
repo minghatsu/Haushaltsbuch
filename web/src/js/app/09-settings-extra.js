@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.47.6",
+    "22. November 2026",
+    [
+      "Neu für Selbstständige: Rechnungen als E-Rechnung. Beim Speichern oder Versenden wählst du das Format – E-Rechnung als PDF (ZUGFeRD) für Firmen, XRechnung mit Leitweg-ID für Behörden oder eine normale PDF. Die App merkt sich die Wahl je Kunde und sagt dir, welche Angaben noch fehlen.",
+      "Rechnungen mit Rabatt und mehreren Steuersätzen: Netto, Steuer und Gesamtbetrag konnten um einen Cent auseinanderliegen – jetzt passt die Rechnung immer auf den Cent.",
+    ],
+  ],
+  [
     "0.47.5",
     "22. November 2026",
     [
