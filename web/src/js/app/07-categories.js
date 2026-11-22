@@ -131,17 +131,6 @@ document.addEventListener("click", (e) => {
   artClose();
   toast(`${name}: ${artLabel(v)}`);
 });
-function incArtOptions(sel) {
-  const hide = (v) =>
-    v !== sel && ((v === "selbst" && !hasSelf()) || ((v === "lohn" || v === "sonderzahlung") && !hasJob()));
-  return INC_ARTS.map(
-    ([g, os]) =>
-      `<optgroup label="${g}">${os
-        .filter(([v]) => !hide(v))
-        .map(([v, l]) => `<option value="${v}" ${v === sel ? "selected" : ""}>${l}</option>`)
-        .join("")}</optgroup>`
-  ).join("");
-}
 const YV = {
   2025: {
     ml: 12.82,

@@ -879,25 +879,6 @@ $("spBg").addEventListener("click", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !$("spBg").hidden) spSheetClose();
 });
-/* Farben */
-const COLSW = [
-  "#1a7a5c",
-  "#2e9c74",
-  "#0f8a8a",
-  "#2f7fb8",
-  "#3d63a8",
-  "#5b4fc7",
-  "#7a5bc2",
-  "#a64ca6",
-  "#d14d72",
-  "#c2410c",
-  "#d4813a",
-  "#c27c0e",
-  "#8a6d1f",
-  "#4d7c0f",
-  "#5b6472",
-  "#1f2937",
-];
 const TABDEF = {
   home: ["Haushalt", "#1a7a5c", "home"],
   beruf: ["Beruf", "#c2410c", "case"],
@@ -1185,11 +1166,6 @@ var TED = {
   year: {},
   more: {},
 };
-function tedBar(page) {
-  return ui.tileEdit === page
-    ? `<div class="tedbar on"><span>${svgIcon("palette", 16)} Tippe eine Kachel an, um ihre Farbe zu ändern</span><button class="btn primary" data-tedit="">Fertig</button></div>`
-    : `<div class="tedbar"><button class="tedbtn" data-tedit="${page}" aria-label="Kachelfarben bearbeiten">${svgIcon("palette", 16)} Farben</button></div>`;
-}
 function tedOpen(page, k) {
   const d = TED[page][k];
   if (!d) return;

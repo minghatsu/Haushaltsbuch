@@ -1471,7 +1471,6 @@ const amtVariants = (v) => {
     t = a >= 1000 ? Math.floor(a).toLocaleString("de-DE") + "," + s.slice(-2) : s;
   return [s, t, a.toFixed(2)];
 };
-const isoToDe = (d) => (d ? `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4)}` : "");
 function dateFrom(s) {
   const m = /(\d{1,2})\.\s?(\d{1,2})\.\s?(\d{2,4})/.exec(s || "");
   if (!m) return null;
@@ -2240,43 +2239,6 @@ function pdfAcct(L) {
     };
   }
   return "Hauptkonto";
-}
-function pdfBalApply(acc, b, items) {
-  const ds = (items || [])
-      .map((i) => i.date)
-      .filter(Boolean)
-      .sort(),
-    last = ds[ds.length - 1] || null;
-  if (!b || !isFinite(b.v))
-    return last
-      ? uiText("pdf_bal_rows", {
-          a: acc,
-        })
-      : "";
-  const date = b.date && (!last || b.date >= last) ? b.date : last || isoToday();
-  const AN = {
-      ...(store.settings.accountAnchors || {}),
-    },
-    a = AN[acc];
-  if (a && a.date > date)
-    return uiText("pdf_bal_old", {
-      a: acc,
-      d: shortDate(date),
-      e: shortDate(a.date),
-    });
-  AN[acc] = {
-    date,
-    balance: round2(b.v),
-    ts: Date.now(),
-    src: "pdf",
-  };
-  store.settings.accountAnchors = AN;
-  saveSettings();
-  return uiText("pdf_bal_set", {
-    a: acc,
-    v: fmtEur(b.v),
-    d: shortDate(date),
-  });
 }
 async function loadCsv(file) {
   if (!file) return;

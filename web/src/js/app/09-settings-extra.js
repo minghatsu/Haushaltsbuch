@@ -913,20 +913,12 @@ const CHANGELOG = [
     ],
   ],
 ];
-const verNum = (x) => "0." + Math.floor(x / 10) + "." + (x % 10);
 function curVerShort() {
   const n = +((document.querySelector('meta[name="hb-version"]') || {}).content || 0);
   return n ? verName(n).replace(/^v/, "") : CHANGELOG[0][0];
 }
 const verRole = () => (typeof updKey === "function" && updKey() ? "Entwickler" : "Tester");
 const verFull = () => "v" + curVerShort() + " · " + verRole();
-function neuUnseen() {
-  try {
-    return localStorage.getItem("hb-seenlog") !== CHANGELOG[0][0];
-  } catch (e) {
-    return false;
-  }
-}
 function renderNeu() {
   const el = $("neuEd");
   if (!el) return;

@@ -1696,23 +1696,3 @@ function spSummary(k) {
   }
   return "";
 }
-function profLine() {
-  const w = WORK.find((x) => x[0] === store.settings.work),
-    ex = (store.settings.extra || [])
-      .map((k) => (EXTRA.find((x) => x[0] === k) || [, ""])[1].replace(/ nebenbei| \/ Nebenjob/, ""))
-      .filter(Boolean);
-  const first = store.tx.reduce((m, t) => (t.date && t.date < m ? t.date : m), "9999");
-  const since = first < "9999" ? ` · seit ${MSHORT[Number(first.slice(5, 7)) - 1]} ${first.slice(0, 4)}` : "";
-  return (w ? w[1] : "Profil bearbeiten") + (ex.length ? " + " + ex.join(", ") : "") + since;
-}
-function profStats() {
-  const n = store.tx.length,
-    c = abCfg();
-  const bk = c.last
-    ? (() => {
-        const d = Math.floor((Date.now() - c.last) / 864e5);
-        return d < 1 ? "Backup heute" : d === 1 ? "Backup gestern" : `Backup vor ${d} Tagen`;
-      })()
-    : "noch kein Backup";
-  return `${n.toLocaleString("de-DE")} ${n === 1 ? "Buchung" : "Buchungen"} · ${plural(RCPT.ids.size, "Beleg", "Belege")} · ${bk}`;
-}

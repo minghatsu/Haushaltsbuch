@@ -386,10 +386,6 @@ function monthName(ym) {
   const [y, m] = ymParts(ym);
   return MONTHS[m - 1] + " " + y;
 }
-function monthShort(ym) {
-  const [y, m] = ymParts(ym);
-  return MSHORT[m - 1] + " " + y;
-}
 const fmtE = new Intl.NumberFormat("de-DE", {
   style: "currency",
   currency: "EUR",

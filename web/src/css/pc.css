@@ -57,9 +57,6 @@ html.pc .tabs .brand {
   color: var(--fg);
   transform: none;
 }
-html.pc .tabs .spacer {
-  display: none;
-}
 html.pc .tab {
   flex: none;
   height: auto;
@@ -105,12 +102,6 @@ html.pc .tab .tname *,
 html.pc .tab[aria-selected="true"] .tname {
   font-size: inherit !important;
   font-weight: inherit;
-}
-html.pc .tab .tlong {
-  display: inline;
-}
-html.pc .tab .tshort {
-  display: none;
 }
 html.pc .tab:hover {
   background: var(--sunk);
@@ -792,23 +783,6 @@ html.pc .pcfb {
 html.pc .pcfb.new {
   box-shadow: inset 4px 0 0 var(--kc);
 }
-html.pc .pcfbh {
-  width: 100%;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 12px;
-  align-items: center;
-  border: 0;
-  background: none;
-  padding: 12px 14px;
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-  color: var(--fg);
-}
-html.pc .pcfb.new .pcfbt {
-  font-weight: 800;
-}
 html.pc .pcfbk {
   background: color-mix(in srgb, var(--kc) 16%, transparent);
   color: var(--kc);
@@ -816,26 +790,6 @@ html.pc .pcfbk {
   padding: 3px 9px;
   font-weight: 800;
   font-size: 12px;
-}
-html.pc .pcfbt {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-html.pc .pcfbh small {
-  color: var(--muted);
-  white-space: nowrap;
-}
-html.pc .pcfbb {
-  padding: 0 14px 14px;
-}
-html.pc .pcfbb pre {
-  white-space: pre-wrap;
-  font: inherit;
-  margin: 0;
-  padding: 12px;
-  border-radius: 12px;
-  background: var(--surface);
 }
 html.pc .pcfbimgs {
   display: flex;
@@ -2957,13 +2911,11 @@ html.pc .pcabig {
     transform 0.18s,
     box-shadow 0.18s;
 }
-html.pc .pcabig:hover,
-html.pc .pcak:hover {
+html.pc .pcabig:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 26px rgba(20, 32, 27, 0.08);
 }
-html.pc .pcabig > small,
-html.pc .pcak small {
+html.pc .pcabig > small {
   display: block;
   font-size: 12px;
   font-weight: 800;
@@ -3000,29 +2952,6 @@ html.pc .pcabg .b {
 }
 html.pc .pcabg:hover .b {
   opacity: 1;
-}
-html.pc .pcakg {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-html.pc .pcak {
-  padding: 14px 18px;
-  cursor: pointer;
-  transition:
-    transform 0.18s,
-    box-shadow 0.18s;
-}
-html.pc .pcak b {
-  display: block;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  margin-top: 6px;
-}
-html.pc .pcak span {
-  font-size: 13px;
-  color: var(--muted);
 }
 html.pc .pcarl {
   padding: 8px 20px;
@@ -3931,12 +3860,6 @@ html.pc .ptq {
   vertical-align: 4px;
 }
 
-html.pc .pcring .pcravg {
-  opacity: 0.75;
-  font-size: 11px;
-  margin-top: 2px;
-}
-
 html.pc .pfsec {
   font-size: 11.5px;
   font-weight: 800;
@@ -4587,46 +4510,6 @@ html.pc .pcds h4 {
   letter-spacing: 0.05em;
   color: var(--muted);
 }
-html.pc .pcdsk {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 8px;
-}
-html.pc .pcdsk div {
-  background: var(--sunk);
-  border-radius: 12px;
-  padding: 10px;
-}
-html.pc .pcdsk b {
-  display: block;
-  font: 800 22px var(--f-display);
-}
-html.pc .pcdsk small {
-  color: var(--muted);
-  font-size: 12px;
-}
-html.pc .pcdsr {
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 13px;
-}
-html.pc .pcdsr b {
-  flex: none;
-}
-html.pc .pcdsr span {
-  flex: 1;
-  color: var(--muted);
-  font-family: ui-monospace, monospace;
-  font-size: 12.5px;
-}
-html.pc .pcdsr em {
-  font-style: normal;
-  font-weight: 700;
-}
 html.pc .tssw button.nav > span {
   display: flex;
   flex-direction: column;
@@ -4726,9 +4609,6 @@ html.pc.istab.tabp .pcring {
 html.pc.istab.tabp .pcring b {
   font-size: 24px !important;
 }
-html.pc.istab.tabp .pcravg {
-  display: none;
-}
 html.pc.istab.tabp .pcminis {
   display: flex !important;
   flex-direction: column;
@@ -4785,9 +4665,6 @@ html.pc.istab:not(.tabp) .pcring b {
 }
 html.pc.istab:not(.tabp) .pcring small {
   font-size: 11px;
-}
-html.pc.istab:not(.tabp) .pcravg {
-  display: none;
 }
 html.pc.istab:not(.tabp) .pcminis {
   gap: 6px;

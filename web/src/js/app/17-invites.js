@@ -1187,24 +1187,6 @@ async function invLoad() {
   }
   invRender();
 }
-async function invNext() {
-  try {
-    const r = await pairCall(
-      "invmake",
-      "",
-      {
-        dev: devId(),
-      },
-      true
-    );
-    ui.inv = invFrom(r);
-  } catch (e) {
-    ui.inv = {
-      err: e.message || "Server nicht erreichbar",
-    };
-  }
-  invRender();
-}
 function invAfterSend() {
   const I = ui.inv || {};
   if (!canShare() || !I.code) return;

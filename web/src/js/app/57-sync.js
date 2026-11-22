@@ -592,7 +592,6 @@ const REL = {
     pc: true,
   },
 };
-const relShort = (n) => String(n || "").replace(/^Finanz MAMI · /, "");
 async function relLoad(force) {
   if (!updKey() || !canGh() || REL.busy || (!force && Date.now() - REL.t < 60e3)) return;
   REL.t = Date.now();
@@ -3144,30 +3143,6 @@ document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-preq]");
   if (b) preqAnswer(b.dataset.preq === "1");
 });
-async function shortFetch(code) {
-  const box = await shortBox(code),
-    K = await spKeys(box);
-  let res;
-  try {
-    res = await spRequest(box, "pull", "&since=0");
-  } catch (e) {
-    throw new Error(
-      e.status === 401
-        ? "Diesen Code gibt es nicht (mehr) – er gilt 10 Minuten. Lass dir am Handy einen neuen zeigen."
-        : "Server nicht erreichbar – bist du online?"
-    );
-  }
-  for (const d of res.docs || []) {
-    try {
-      const o = await spDec(K, d.b);
-      if (o && o.d && o.d.code) {
-        spRequest(box, "wipe", "", {}).catch(() => {});
-        return o.d.code;
-      }
-    } catch (_) {}
-  }
-  throw new Error("Diesen Code gibt es nicht (mehr) – er gilt 10 Minuten. Lass dir am Handy einen neuen zeigen.");
-}
 async function pairJoin(code) {
   if (!pairParse(code)) {
     const q = String(code || "").match(/HBQ1\.([0-9A-Za-z]{10})/),

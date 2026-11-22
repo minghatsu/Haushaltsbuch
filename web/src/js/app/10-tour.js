@@ -170,22 +170,6 @@ const TOUR = {
   i: -1,
   steps: [],
 };
-function tourCard(end) {
-  const el = $("tourBg");
-  const nm = store.settings.name,
-    wl = (WORK.find((x) => x[0] === store.settings.work) || [])[1];
-  el.className = "tourbg card";
-  el.hidden = false;
-  document.body.classList.add("locked");
-  el.innerHTML = end
-    ? `<div class="tcard"><span class="ttag">Fertig</span><div class="till">🎉</div><h2>Du bist startklar</h2>
-        <p>Die Tour kannst du jederzeit wieder ansehen: „?“ ${IS_PC ? "oben rechts" : "neben dem Titel"} › Große Tour durch die App.</p>
-        <div class="tbot"><button class="tw" data-tour="close">Los geht's</button></div></div>`
-    : `<div class="tcard"><span class="ttag">Kurze Tour · ca. 2 Minuten</span><div class="till">👋</div>
-        <h2>${nm ? `Hallo, ${escHtml(nm)}!` : "Hallo!"}</h2>
-        <p>${wl ? `<span>Du hast „${escHtml(wl)}“ gewählt.</span> ` : ""}<span>Ich zeig dir in ${TOUR.steps.length} kurzen Schritten, wo du was findest – passend zu dir.</span></p>
-        <div class="tbot"><button class="tw" data-tour="go">Tour starten</button><button class="tg2" data-tour="close">Später – findest du unter Hilfe</button></div></div>`;
-}
 function tourOpen() {
   TOUR.page = null;
   if (ui.view !== "home") {

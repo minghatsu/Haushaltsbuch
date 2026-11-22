@@ -297,45 +297,6 @@ function fxPlanRender() {
   )}<div class="fxpln fxpadd"><button class="link" data-fxpnew>+ ${escHtml(uiText("fxa_new"))}</button></div></div>
     <p class="small muted" style="margin:10px 2px 0">${escHtml(uiText("fxa_hint"))}</p>`;
 }
-function analyseTop(ym) {
-  const c = monthCalc(ym),
-    cur = ymOf(new Date()),
-    prevYm = shiftYm(ym, -1),
-    dayNow = new Date().getDate();
-  const prevExp =
-    sum(
-      monthCalc(prevYm).tx.filter(
-        (t) => (t.kind === "ausgabe" || t.kind === "betrieb") && (ym !== cur || Number(t.date.slice(8, 10)) <= dayNow)
-      ),
-      (t) => t.amount
-    ) + (ym !== cur ? monthCalc(prevYm).fixPaid : 0);
-  const curExp =
-    ym === cur
-      ? sum(
-          c.tx.filter((t) => t.kind === "ausgabe" || t.kind === "betrieb"),
-          (t) => t.amount
-        )
-      : c.expenses;
-  const expDelta = prevExp > 0 ? (curExp / prevExp - 1) * 100 : 0;
-  const topTx = c.tx.filter((t) => t.kind === "ausgabe" || t.kind === "betrieb").sort((a, b) => b.amount - a.amount)[0];
-  const ins = insightLine(ym);
-  return `<div class="cols"><div class="col">
-    ${ins ? `<div class="tipline"><span class="e">${svgIcon("spark", 19)}</span><span>${ins}</span></div>` : ""}
-    ${moneyFlowCard(ym)}
-    </div><div class="col">
-    <div class="card">
-      <div class="card-head"><h2>${headIcon("insight")}Auf einen Blick</h2><span class="small muted">${escHtml(MONTHS[ymParts(ym)[1] - 1])}</span></div>
-      <div class="insights">
-        <div class="ins"><span class="eyebrow">Saldo</span><b class="${c.net < 0 ? "neg" : "pos"}">${c.net >= 0 ? "+" : "−"} ${escHtml(fmtEur0(Math.abs(c.net)))}</b><span class="small muted">${c.income ? `${Math.round((Math.max(0, c.net) / c.income) * 100)} % gespart` : "Einnahmen − Ausgaben"}</span></div>
-        <div class="ins"><span class="eyebrow">Ø pro Tag</span><b>${escHtml(fmtEur0(dayAvg(ym + "-01", ym === cur ? isoToday() : lastDayOf(ym), ym === cur ? new Date().getDate() : daysIn(ym))))}</b><span class="small muted">im Alltag</span></div>
-        <div class="ins"><span class="eyebrow">Vormonat</span>${prevExp > 0 ? `<b class="${expDelta > 0 ? "neg" : "pos"}">${expDelta > 0 ? "+" : "−"} ${Math.abs(Math.round(expDelta))} %</b><span class="small muted">${ym === cur ? "bis heute " : ""}${expDelta > 0 ? "mehr" : "weniger"} als ${escHtml(MSHORT[ymParts(prevYm)[1] - 1])}</span>` : `<b>–</b><span class="small muted">keine Daten</span>`}</div>
-        <div class="ins"><span class="eyebrow">Größte Ausgabe</span>${topTx ? `<b>${escHtml(fmtEur0(topTx.amount))}</b><span class="small muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(topTx.note || topTx.cat || "")}</span>` : `<b>–</b><span class="small muted">noch keine</span>`}</div>
-      </div>
-      <div class="duo" style="margin-top:14px"><div><span class="eyebrow">Einnahmen</span><div class="v pos">${escHtml(fmtEur(c.income))}</div></div><div><span class="eyebrow">Ausgaben</span><div class="v">${escHtml(fmtEur(c.expenses))}</div></div></div>
-    </div>
-    </div></div>
-    <h2 class="section-h">Jahr ${escHtml(ym.slice(0, 4))}</h2>`;
-}
 function planQuarters(rows, cur) {
   const curQ = rows.findIndex((r) => r.ym === cur) >= 0 ? Math.floor(rows.findIndex((r) => r.ym === cur) / 3) : -1;
   ui.planQ = ui.planQ || {};

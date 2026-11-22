@@ -226,35 +226,6 @@ function renderBelege() {
   setTimeout(render, 0);
   return;
 }
-function renderBelegeOld() {
-  const ym = ui.ym,
-    y = ym.slice(0, 4);
-  const tx = monthCalc(ym).tx.filter((t) => t.kind !== "vorauszahlung");
-  const withR = tx.filter((t) => hasReceipt(t.id)),
-    betNo = tx.filter((t) => t.kind === "betrieb" && !hasReceipt(t.id));
-  const f = ui.belegF;
-  const shown = f === "ohne" ? betNo : withR.filter((t) => f !== "betrieb" || t.kind === "betrieb");
-  const yearN = store.tx.filter((t) => t.date && t.date.startsWith(y) && hasReceipt(t.id)).length;
-  const chips = hasSelf()
-    ? [
-        ["alle", "Alle"],
-        ["betrieb", "Betrieblich"],
-        ["ohne", betNo.length ? `Ohne Beleg (${betNo.length})` : "Ohne Beleg"],
-      ]
-    : [];
-  $("v-belege").innerHTML = `
-    <div class="belhead"><button class="spback" data-go="list" aria-label="Zurück zu den Buchungen">‹</button><span class="small muted">${escHtml(MONTHS[Number(ym.slice(5, 7)) - 1])} ${y} · ${withR.length} ${withR.length === 1 ? "Beleg" : "Belege"}</span></div>
-    ${chips.length ? "" : `<span></span>`}<div class="filters" ${chips.length ? "" : "hidden"}>${chips.map(([k, l]) => `<button class="fchip" data-belf="${k}" aria-pressed="${f === k}">${l}</button>`).join("")}</div>
-    ${f === "ohne" ? (betNo.length ? `<div class="card">${betNo.map((t) => tlRow(t, shortDate(t.date))).join("")}</div><p class="small muted" style="margin:0 4px">Antippen und unter „Beleg“ ein Foto hinzufügen.</p>` : emptyState("check", "Alles belegt", "Jede betriebliche Ausgabe in diesem Monat hat einen Beleg.")) : shown.length ? `<div class="belgal">${shown.map((t) => `<button class="belg" data-edit="${escHtml(t.id)}"><span class="bimg"><img data-rimg="${escHtml(t.id)}" alt=""></span><b>${escHtml(txPayee(t) || t.cat || "Beleg")}</b><small>${escHtml(fmtEur(t.amount))} · ${escHtml(shortDate(t.date))}${t.kind === "betrieb" ? " · betriebl." : ""}</small></button>`).join("")}</div>` : emptyState("camera", f === "betrieb" ? "Keine betrieblichen Belege" : "Noch keine Belege", "Fotografiere eine Quittung über den Plus-Knopf – das Foto bleibt an der Buchung.")}
-    ${hasSelf() && betNo.length && f !== "ohne" ? `<div class="notice warn"><span>${betNo.length} betriebliche ${betNo.length === 1 ? "Ausgabe hat" : "Ausgaben haben"} noch keinen Beleg – für die Steuer am besten nachfotografieren.</span><button class="btn" data-belf="ohne">Anzeigen</button></div>` : ""}
-    <div class="card"><div class="card-head"><h2>${svgIcon("doc")} Belege ${y} sichern</h2></div><p class="small muted" style="margin:-4px 0 10px">Alle ${yearN} Belege des Jahres als ZIP${hasSelf() ? ", sortiert nach privat und betrieblich," : ""} mit einer Liste${hasSelf() ? " für den Steuerberater" : ""}.</p><button class="btn primary" id="belZip" ${yearN ? "" : "disabled"}>Als ZIP speichern</button></div>`;
-  (async () => {
-    for (const im of document.querySelectorAll("#v-belege img[data-rimg]")) {
-      const src = await rcptGet(im.dataset.rimg);
-      if (src && im.isConnected) im.src = src;
-    }
-  })();
-}
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-belf]");
   if (b) {

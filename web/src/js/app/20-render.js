@@ -128,24 +128,6 @@ function render() {
     uxEnter();
   } catch (e) {}
 }
-function txRow(t, showDate) {
-  const isIn = t.kind === "einnahme" || (t.kind === "umbuchung" && t._k0 === "einnahme");
-  const title = t.note || t.cat || KIND_LABEL[t.kind];
-  const sub = [
-    t.note ? t.cat : "",
-    t.kind === "betrieb"
-      ? "Betrieblich"
-      : t.kind === "vorauszahlung"
-        ? "aus Rücklage"
-        : t.kind === "umbuchung"
-          ? "Umschuldung · zählt nicht"
-          : "",
-    showDate ? shortDate(t.date) : "",
-  ]
-    .filter(Boolean)
-    .join(" · ");
-  return `<button class="tx" data-edit="${escHtml(t.id)}">${avatar(t)}<span class="grow"><div class="t">${escHtml(title)}${t.nobon && !hasReceipt(t.id) ? ` <span class="nobon">BON FEHLT</span>` : ""}${hasReceipt(t.id) ? `<svg class="i clip" viewBox="0 0 24 24" style="width:14px;height:14px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3.5"/></svg>` : ""}</div>${sub ? `<div class="s">${escHtml(sub)}</div>` : ""}</span><span class="amt ${isIn ? "inc" : ""}">${isIn ? "+" : "−"} ${escHtml(fmtEur(t.amount))}</span></button>`;
-}
 function tlRow(t, when) {
   const isIn = t.kind === "einnahme" || (t.kind === "umbuchung" && t._k0 === "einnahme"),
     title = t.note || t.cat || KIND_LABEL[t.kind];

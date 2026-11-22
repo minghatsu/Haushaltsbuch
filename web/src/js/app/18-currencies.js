@@ -112,16 +112,6 @@ function fxLine(v) {
   const x = fxConv(v, "EUR", c);
   return x == null ? "" : `<div class="fx2">≈ ${escHtml(fxFmt(x, c, Math.abs(x) >= 100))}</div>`;
 }
-const LANG_FLAG = {
-  de: "🇩🇪",
-  en: "🇬🇧",
-  tr: "🇹🇷",
-  ru: "🇷🇺",
-  uk: "🇺🇦",
-  pl: "🇵🇱",
-  ar: "🇸🇦",
-  ro: "🇷🇴",
-};
 const CUR_FLAG = {
   EUR: "🇪🇺",
   USD: "🇺🇸",

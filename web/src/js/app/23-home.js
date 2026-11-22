@@ -247,15 +247,6 @@ matchMedia("(min-width:1000px)").addEventListener("change", () => {
     }
   });
 })();
-/* Profilbild */
-async function avatarFrom(blob) {
-  const bmp = await createImageBitmap(blob),
-    z = Math.min(bmp.width, bmp.height),
-    c = document.createElement("canvas");
-  c.width = c.height = 256;
-  c.getContext("2d").drawImage(bmp, (bmp.width - z) / 2, (bmp.height - z) / 2, z, z, 0, 0, 256, 256);
-  return c.toDataURL("image/jpeg", 0.82);
-}
 function renderAvatar() {
   const p = store.settings && store.settings.photo,
     n = String((store.settings && store.settings.name) || "").trim();

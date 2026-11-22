@@ -2411,10 +2411,6 @@ function stbRender(first) {
     }
   }
 }
-function stbNum(s) {
-  const a = amountsIn(" " + s + " ");
-  return a.length ? a[0] : null;
-}
 function stbInt(s) {
   const m = String(s).match(/(\d{1,3}(?:\.\d{3})+|\d{4,6})(?:,\d{2})?(?!\d)/);
   return m ? Number(m[1].replace(/\./g, "")) : null;

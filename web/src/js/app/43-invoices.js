@@ -694,10 +694,6 @@ const rvEuro = (v) =>
     style: "currency",
     currency: "EUR",
   }).format(round2(v || 0) || 0);
-const rvNumber = (v) =>
-  new Intl.NumberFormat("de-DE", {
-    maximumFractionDigits: 2,
-  }).format(v || 0);
 const rvDate = (iso) =>
   iso
     ? new Date(iso + "T12:00").toLocaleDateString("de-DE", {

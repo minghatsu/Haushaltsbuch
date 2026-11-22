@@ -994,11 +994,6 @@ JA ja!|GUT gut|GUENSTIG günstig|KNUSPR Knusper|KNUSP Knusper|K-CLASSIC K-Classi
     });
   return o;
 })();
-const ZAB_FULL = new Set(
-  Object.values(ZAB).map((v) =>
-    v.toUpperCase().replace(/Ä/g, "AE").replace(/Ö/g, "OE").replace(/Ü/g, "UE").replace(/ß/g, "SS")
-  )
-);
 const zaUml = (w) =>
   w
     .replace(/(?<![EQ])UE(?!$)/g, "Ü")

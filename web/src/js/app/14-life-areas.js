@@ -112,8 +112,7 @@ function homeHub(ym, c) {
 /* ===== Beruf: Job und Geschäft getrennt (wer angestellt UND selbstständig ist) =====
      PC + Tablet quer: zwei Bereiche nebeneinander. Handy + Tablet hochkant: Job vorne, Geschäft versetzt dahinter –
      nach unten wischen (oder auf den hinteren Balken tippen) tauscht; die Kacheln gehen nach links raus, die anderen kommen von rechts. */
-const BF_JOB = ["lohn", "wk", "tax", "hourly", "beihilfe", "bab", "mjgrenze", "quellen"],
-  BF_BIZ = ["euer", "ruecklage", "kunden"];
+const BF_BIZ = ["euer", "ruecklage", "kunden"];
 function bfSide() {
   try {
     return localStorage.getItem("hb-bfside") === "b" ? "b" : "j";
@@ -139,22 +138,6 @@ function bfMonth(ym) {
     biz: Math.max(0, biz - cost),
     rev: biz,
   };
-}
-/* PC: Einkommensteuer und Umsatzsteuer als zwei Karten nebeneinander statt Reitern */
-function taxSplit(t, cls) {
-  if (!t || !t.body) return "";
-  const body = String(t.body),
-    tabs = body.match(/<div class="txtabs">[\s\S]*?<\/div>/),
-    ustL = (body.match(/data-txtab="ust"[^>]*>([^<]+)</) || [])[1];
-  const part = (m) =>
-    body
-      .replace(/<div class="txtabs">[\s\S]*?<\/div>/, "")
-      .replace(/<div class="txc" data-txt="(est|ust)">/, `<div class="txc txone" data-txt="${m}">`);
-  const card = (m, ttl, ico, c) =>
-    `<div class="card apcc ${cls ? cls + " " + cls + c : ""} txcard"><div class="card-head"><h2>${headIcon(ico)}${escHtml(ttl)}</h2></div>${part(m)}</div>`;
-  if (!tabs || !ustL)
-    return `<div class="apcgrid ${cls}">${card("est", typeof TL_ !== "undefined" && TL_.tax ? TL_.tax[0] : t.title, t.icon, "j")}</div>`;
-  return `<div class="apcgrid ${cls}">${card("est", "Einkommensteuer", t.icon, "j")}${card("ust", ustL, "bank", "b")}</div>`;
 }
 function kdTile() {
   const n = rvKunden().length;

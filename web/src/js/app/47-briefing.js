@@ -242,13 +242,6 @@ function mbAll() {
   };
   return L.sort((a, b) => (a.k === "upd" ? -1 : 0) - (b.k === "upd" ? -1 : 0) || rk[a.lvl] - rk[b.lvl]).slice(0, 10);
 }
-function mbManual() {
-  const L = mbAll();
-  try {
-    localStorage.setItem("hb-hints-seen", JSON.stringify(allHints().map(hintKey)));
-  } catch (_) {}
-  mbOpen(L);
-}
 function mbKey() {
   return "hb-mb-" + isoToday();
 }

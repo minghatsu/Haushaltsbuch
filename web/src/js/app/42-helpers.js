@@ -9,7 +9,6 @@ function hlDismiss(k) {
   };
   saveSettings();
 }
-const HLQ = {};
 /* 1) Preis-Wecker */
 function hlPrices() {
   const out = [],
