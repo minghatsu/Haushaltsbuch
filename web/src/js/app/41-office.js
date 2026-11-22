@@ -392,9 +392,8 @@ function navPill(anim) {
    wandert zum neuen Symbol und baut dort den Kreis auf. Dazwischen hält eine Verbindung mit nach innen
    gewölbten Übergängen beide zusammen. Das Plus ist eine Wand – die Verbindung taucht darunter durch. */
 const navFlow = (() => {
-  const NS = "http://www.w3.org/2000/svg";
   let st = null,
-    svg = null;
+    cv = null;
   const lerp = (a, b, t) => a + (b - a) * t,
     clamp = (v) => Math.min(1, Math.max(0, v)),
     smooth = (t) => t * t * (3 - 2 * t),
@@ -403,32 +402,24 @@ const navFlow = (() => {
     tcol = (t) =>
       getComputedStyle(t).getPropertyValue("--tcol").trim() ||
       getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
-  /* Farbe zwischen a (t=0) und b (t=1) als rgb() – für Verlaufs-Stopps, die kein color-mix kennen */
-  function mixer(a, b) {
-    const rgb = (c) => {
-      const d = document.createElement("i");
-      d.style.color = c;
-      document.body.appendChild(d);
-      const m = getComputedStyle(d).color.match(/[\d.]+/g).map(Number);
-      d.remove();
-      return m;
-    };
-    const A = rgb(a),
-      B = rgb(b);
-    return (t) => `rgb(${[0, 1, 2].map((i) => Math.round(A[i] + (B[i] - A[i]) * t)).join(",")})`;
-  }
+  /* Gezeichnet wird auf eine Canvas statt in SVG: ständig wechselnde SVG-Füllungen und Verläufe haben die Grafik
+     älterer Android-WebViews zum Absturz gebracht. Die Pfade bleiben SVG-Pfadtexte (Path2D). */
   function layer(n) {
-    if (svg && svg.parentNode === n) return svg;
-    svg = document.createElementNS(NS, "svg");
-    svg.setAttribute("class", "navflow");
-    svg.setAttribute("aria-hidden", "true");
-    svg.innerHTML =
-      /* Farbwechsel nur in der Mitte zwischen den beiden Symbolen – die Kreise selbst bleiben in ihrer Farbe */
-      '<defs><linearGradient id="nfFill" gradientUnits="userSpaceOnUse"><stop offset=".42"/><stop offset=".58"/></linearGradient></defs>' +
-      /* fast unsichtbare Fläche über die ganze Leiste: so bleibt die Größe der Schatten-Ebene bei jedem Bild gleich */
-      '<rect width="100%" height="100%" fill="#000" fill-opacity=".003"/><g fill="url(#nfFill)"><path/><path/><path/></g>';
-    n.insertBefore(svg, n.firstChild);
-    return svg;
+    if (!cv || cv.parentNode !== n) {
+      cv = document.createElement("canvas");
+      cv.className = "navflow";
+      cv.setAttribute("aria-hidden", "true");
+      n.insertBefore(cv, n.firstChild);
+    }
+    const dpr = Math.min(2, devicePixelRatio || 1),
+      w = Math.round(n.clientWidth * dpr),
+      h = Math.round(n.clientHeight * dpr);
+    if (cv.width !== w || cv.height !== h) {
+      cv.width = w;
+      cv.height = h;
+    }
+    cv.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
+    return cv;
   }
   const circle = (cx, cy, r) =>
     r < 0.5 ? "" : `M${(cx - r).toFixed(2)} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
@@ -562,17 +553,17 @@ const navFlow = (() => {
     const ra = k1 < 1 ? 24 : r1,
       neck = Math.max(1.8, Math.min(ra, r2) * 0.42 - Math.abs(nX - oc) * 0.07) * (1 - smooth(clamp((q - 0.78) / 0.2)));
     if (r2 > 1 && ra > 1 && neck > 0.4) D[2] = bridge(k1 < 1 ? oX + side * (oW / 2 - 24) : oc, ra, nX, r2, y, neck, dip);
-    const shapes = svg.querySelectorAll("g path");
-    D.forEach((d, i) => shapes[i].setAttribute("d", d));
-    /* Ein einziger Verlauf für alle Formen (mehrere Verläufe bringen die Grafik älterer Android-WebViews zum Absturz).
-       Er wechselt in der Mitte zwischen den Symbolen; solange die alte Pille noch über die Mitte reicht, bleibt er ganz
-       in der alten Farbe, sobald die neue Pille wächst, ganz in der neuen. */
-    const grad = svg.querySelector("#nfFill"),
-      set = (el, k, v) => el.getAttribute(k) !== v && el.setAttribute(k, v);
-    set(grad, "x1", oc.toFixed(1));
-    set(grad, "x2", (Math.abs(tc - oc) < 1 ? oc + 1 : tc).toFixed(1));
-    set(grad.children[0], "stop-color", S.mix(k2));
-    set(grad.children[1], "stop-color", S.mix(k1));
+    /* alte Form in ihrer Farbe, neue Pille in ihrer – nur Verbindung und wandernde Spitze wechseln in der Mitte */
+    const cx = cv.getContext("2d"),
+      grad = cx.createLinearGradient(oc, 0, Math.abs(tc - oc) < 1 ? oc + 1 : tc, 0);
+    grad.addColorStop(0.42, S.ca);
+    grad.addColorStop(0.58, S.cb);
+    cx.clearRect(0, 0, cv.width, cv.height);
+    [S.ca, k2 > 0 ? S.cb : grad, grad].forEach((f, i) => {
+      if (!D[i]) return;
+      cx.fillStyle = f;
+      cx.fill(new Path2D(D[i]));
+    });
     /* Namen und Symbolfarben: weiß nur, solange Farbe dahinter ist */
     const na = S.ta.querySelector(".tname"),
       nb = S.tb.querySelector(".tname");
@@ -597,7 +588,7 @@ const navFlow = (() => {
       const nm = t.querySelector(".tname");
       nm.style.maxWidth = nm.style.marginLeft = nm.style.opacity = nm.style.transition = nm.style.textOverflow = "";
     }
-    if (svg) svg.style.display = "none";
+    if (cv) cv.style.display = "none";
     n.querySelector(".tabind").style.opacity = "";
     n.style.transition = "";
     if (!done) n.style.setProperty("--nc", S.nc);
@@ -626,7 +617,6 @@ const navFlow = (() => {
         B,
         q: 0,
         nc: n.style.getPropertyValue("--nc"),
-        mix: mixer(tcol(ta), tcol(tb)),
         ca: tcol(ta),
         cb: tcol(tb),
         y: (n.clientHeight - 48) / 2,

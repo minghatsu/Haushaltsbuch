@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.47.2",
+    "22. November 2026",
+    [
+      "Leiste: neu gezeichnet, damit die Wisch-Animation auch auf älteren Android-Geräten stabil läuft.",
+    ],
+  ],
+  [
     "0.47.1",
     "22. November 2026",
     [
