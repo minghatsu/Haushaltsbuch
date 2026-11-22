@@ -99,6 +99,12 @@
 html {
   -webkit-tap-highlight-color: transparent;
 }
+/* Nichts darf seitlich über den Bildschirm ragen – sonst wird die Seite auf dem Handy breiter
+   und alles Feste (Leiste, Feedback-Lasche) rutscht aus dem Bild */
+html,
+body {
+  overflow-x: clip;
+}
 body {
   background: var(--bg);
   color: var(--fg);
@@ -50954,6 +50960,13 @@ document.addEventListener("click", (e) => {
 
 /* Einstellungen extra */
 const CHANGELOG = [
+  [
+    "0.46.2",
+    "22. November 2026",
+    [
+      "Beim Umschalten zwischen „Mein Job“ und „Mein Geschäft“ rutscht die Leiste unten nicht mehr kurz aus dem Bild, und die Feedback-Lasche bleibt stehen.",
+    ],
+  ],
   [
     "0.46.1",
     "22. November 2026",

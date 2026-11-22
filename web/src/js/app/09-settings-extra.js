@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.46.2",
+    "22. November 2026",
+    [
+      "Beim Umschalten zwischen „Mein Job“ und „Mein Geschäft“ rutscht die Leiste unten nicht mehr kurz aus dem Bild, und die Feedback-Lasche bleibt stehen.",
+    ],
+  ],
+  [
     "0.46.1",
     "22. November 2026",
     [

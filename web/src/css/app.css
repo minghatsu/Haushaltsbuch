@@ -96,6 +96,12 @@
 html {
   -webkit-tap-highlight-color: transparent;
 }
+/* Nichts darf seitlich über den Bildschirm ragen – sonst wird die Seite auf dem Handy breiter
+   und alles Feste (Leiste, Feedback-Lasche) rutscht aus dem Bild */
+html,
+body {
+  overflow-x: clip;
+}
 body {
   background: var(--bg);
   color: var(--fg);
