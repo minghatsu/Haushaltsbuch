@@ -1604,6 +1604,7 @@ $("loginGo").onclick = doLogin;
     PREP = null;
     cur.style.opacity = "0";
     sY = scrollY;
+    if (nbKey) navFlow.start(ui.view, nbKey);
     draw();
   }
   function draw() {
@@ -1619,9 +1620,13 @@ $("loginGo").onclick = doLogin;
     shC.style.opacity = String(a * 0.6);
     fN.style.transform = `translateZ(${-h}px) rotateY(${th - s * 90}deg) translateZ(${h}px)`;
     shN.style.opacity = String((1 - a) * 0.6);
-    if (!busy) waveAll(a);
+    if (!busy) {
+      waveAll(a);
+      navFlow.move(a);
+    }
   }
   function reset() {
+    if (!busy) navFlow.stop();
     if (stage) stage.remove();
     if (cur) {
       cur.style.opacity = "";
@@ -1661,6 +1666,7 @@ $("loginGo").onclick = doLogin;
           .forEach((b) => b.setAttribute("aria-selected", String(b.dataset.go === nbKey)));
         navPill(true);
       } catch (_) {}
+    navFlow.finish(!!target);
     setTimeout(() => {
       const k = nbKey;
       if (target) {

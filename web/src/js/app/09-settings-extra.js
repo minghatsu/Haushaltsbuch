@@ -240,6 +240,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.46.1",
+    "22. November 2026",
+    [
+      "Neue Leiste beim Wischen: Die Markierung zieht ihren Namen ein, wird zum Kreis und zieht eine Verbindung zum nächsten Symbol – dort baut sich der Kreis auf und fährt den Namen aus.",
+      "Zwischen Beruf und Sparen taucht die Verbindung unter dem Plus durch, statt dahinter zu verschwinden.",
+      "Die Bewegung folgt dem Finger weich gefedert, auch rückwärts und von Einkauf zurück zu Haushalt.",
+    ],
+  ],
+  [
     "0.46.0",
     "21. November 2026",
     [
