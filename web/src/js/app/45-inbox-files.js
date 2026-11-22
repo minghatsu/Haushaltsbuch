@@ -111,6 +111,10 @@ function inbKinds() {
 }
 function inbOpen(files, o) {
   o = o || {};
+  if (!o.checked && hasSelf() && [...files].some((f) => isXmlF(f) || isPdfF(f))) {
+    erTake([...files]).then((rest) => rest.length && inbOpen(rest, { ...o, checked: 1 }));
+    return;
+  }
   INB.urls.forEach((u) => {
     try {
       URL.revokeObjectURL(u);

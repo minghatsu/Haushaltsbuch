@@ -1,0 +1,289 @@
+/* Eingangsrechnungen */
+.ersum {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.ersum > div {
+  background: var(--sunk);
+  border-radius: 16px;
+  padding: 10px 12px;
+}
+.ersum small {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.ersum b {
+  display: block;
+  font-size: 18px;
+  font-weight: 800;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.erseg {
+  display: flex;
+  background: var(--sunk);
+  border-radius: 14px;
+  padding: 3px;
+  margin-bottom: 10px;
+}
+.erseg button {
+  flex: 1;
+  border: 0;
+  background: none;
+  padding: 9px 6px;
+  border-radius: 11px;
+  font: 700 13.5px var(--f-body);
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    box-shadow 0.2s;
+}
+.erseg button.on {
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: var(--shadow);
+}
+.erl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.err {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: start;
+  border: 0;
+  padding: 12px;
+  border-radius: 18px;
+  background: var(--sunk);
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    background 0.2s;
+}
+.err:active {
+  transform: scale(0.98);
+}
+.err.paid {
+  opacity: 0.62;
+}
+.eric {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  color: var(--accent);
+}
+.ern {
+  flex: 1;
+  min-width: 0;
+}
+.ern b,
+.era b {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ern small,
+.era small {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.era {
+  text-align: end;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.erl .due,
+.erbox .due {
+  color: var(--warn);
+}
+.erl .od,
+.erbox .od {
+  color: var(--bad);
+}
+.erl .ok,
+.erbox .ok {
+  color: var(--good);
+}
+.erempty {
+  text-align: center;
+  margin: 18px 0;
+}
+.erhint {
+  margin-top: 10px;
+}
+.erhead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.erhead b {
+  flex: 1;
+  min-width: 0;
+  font-size: 19px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.erback {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sunk);
+  color: var(--fg);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.erback svg {
+  transform: scaleX(-1);
+}
+[dir="rtl"] .erback svg {
+  transform: none;
+}
+.erfmt {
+  flex: none;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 99px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.erbox {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--sunk);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.erbox > div {
+  min-width: 0;
+}
+.erbox .r {
+  text-align: end;
+  flex: none;
+}
+.erbox small {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.erbox b {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+.erbox span {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.erpos {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.erpos > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 13px;
+  font-size: 14px;
+  border-top: 1px solid var(--line);
+}
+.erpos > div > span:last-child {
+  flex: none;
+}
+.erpos .h {
+  border-top: 0;
+  background: var(--sunk);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.erpos .s {
+  color: var(--muted);
+}
+.erpos .t {
+  font-size: 15.5px;
+}
+.eriban {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--sunk);
+  border-radius: 16px;
+  padding: 10px 12px 10px 14px;
+  margin-bottom: 12px;
+}
+.eriban small {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.eriban b {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eriban > span {
+  min-width: 0;
+}
+.eriban .btn {
+  flex: none;
+}
+.eracts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.eracts > .btn {
+  width: 100%;
+}
+.erminor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}

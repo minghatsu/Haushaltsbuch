@@ -292,6 +292,24 @@ function notifyPlan() {
             })
           );
         }
+        for (const i of erOpenList()) {
+          if (!i.due) continue;
+          const [y, m, dd] = i.due.split("-").map(Number);
+          add(
+            "er:" + i.id,
+            at(new Date(y, m - 1, dd - 2), H),
+            uiText("nf_er_due", {
+              n: i.from || "–",
+            }),
+            uiText("nf_er_due_s", {
+              a: fmtEur(i.pay),
+              d: fxDate(i.due, {
+                day: "numeric",
+                month: "long",
+              }),
+            })
+          );
+        }
         for (const r of rvRecs()) {
           const [y, m, dd] = String(r.next).split("-").map(Number);
           if (y)

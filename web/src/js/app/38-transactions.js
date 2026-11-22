@@ -186,6 +186,7 @@ async function saveTx() {
   btn.disabled = false;
   if (!ok) return;
   await rcptSaveFor(id);
+  erAfterSave();
   closeSheet();
   if (date.slice(0, 7) !== ui.ym) {
     ui.ym = date.slice(0, 7);

@@ -1502,6 +1502,13 @@ const PTOUR_FN = () => ({
         p: [uiText("trb_rch_p")],
       },
       {
+        sel: '[data-view="beruf"] [data-eropen].atile',
+        raw: 1,
+        ic: "docin",
+        t: uiText("trb_er_t"),
+        p: [uiText("trb_er_p")],
+      },
+      {
         sel: '[data-view="beruf"] [data-wbopen].atile',
         raw: 1,
         ic: "repeat",
@@ -1656,6 +1663,20 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.47.5",
+    s: () =>
+      hasSelf()
+        ? [
+            {
+              sel: '[data-view="beruf"] [data-eropen].atile',
+              ic: "docin",
+              t: uiText("trb_er_t"),
+              p: [uiText("trb_er_p")],
+            },
+          ]
+        : [],
+  },
   {
     v: "0.45.1",
     s: () => [

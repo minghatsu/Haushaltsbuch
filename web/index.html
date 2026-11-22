@@ -24201,6 +24201,296 @@ html.pc .pctpane .ayblk {
 .acct-row.ayold {
   animation: invPop 0.35s both;
 }
+
+/* Eingangsrechnungen */
+.ersum {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.ersum > div {
+  background: var(--sunk);
+  border-radius: 16px;
+  padding: 10px 12px;
+}
+.ersum small {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.ersum b {
+  display: block;
+  font-size: 18px;
+  font-weight: 800;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.erseg {
+  display: flex;
+  background: var(--sunk);
+  border-radius: 14px;
+  padding: 3px;
+  margin-bottom: 10px;
+}
+.erseg button {
+  flex: 1;
+  border: 0;
+  background: none;
+  padding: 9px 6px;
+  border-radius: 11px;
+  font: 700 13.5px var(--f-body);
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    box-shadow 0.2s;
+}
+.erseg button.on {
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: var(--shadow);
+}
+.erl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.err {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: start;
+  border: 0;
+  padding: 12px;
+  border-radius: 18px;
+  background: var(--sunk);
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    background 0.2s;
+}
+.err:active {
+  transform: scale(0.98);
+}
+.err.paid {
+  opacity: 0.62;
+}
+.eric {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  color: var(--accent);
+}
+.ern {
+  flex: 1;
+  min-width: 0;
+}
+.ern b,
+.era b {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ern small,
+.era small {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.era {
+  text-align: end;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.erl .due,
+.erbox .due {
+  color: var(--warn);
+}
+.erl .od,
+.erbox .od {
+  color: var(--bad);
+}
+.erl .ok,
+.erbox .ok {
+  color: var(--good);
+}
+.erempty {
+  text-align: center;
+  margin: 18px 0;
+}
+.erhint {
+  margin-top: 10px;
+}
+.erhead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.erhead b {
+  flex: 1;
+  min-width: 0;
+  font-size: 19px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.erback {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sunk);
+  color: var(--fg);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.erback svg {
+  transform: scaleX(-1);
+}
+[dir="rtl"] .erback svg {
+  transform: none;
+}
+.erfmt {
+  flex: none;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 99px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.erbox {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--sunk);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.erbox > div {
+  min-width: 0;
+}
+.erbox .r {
+  text-align: end;
+  flex: none;
+}
+.erbox small {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.erbox b {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  margin-top: 2px;
+}
+.erbox span {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.erpos {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.erpos > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 13px;
+  font-size: 14px;
+  border-top: 1px solid var(--line);
+}
+.erpos > div > span:last-child {
+  flex: none;
+}
+.erpos .h {
+  border-top: 0;
+  background: var(--sunk);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.erpos .s {
+  color: var(--muted);
+}
+.erpos .t {
+  font-size: 15.5px;
+}
+.eriban {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--sunk);
+  border-radius: 16px;
+  padding: 10px 12px 10px 14px;
+  margin-bottom: 12px;
+}
+.eriban small {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.eriban b {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.eriban > span {
+  min-width: 0;
+}
+.eriban .btn {
+  flex: none;
+}
+.eracts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.eracts > .btn {
+  width: 100%;
+}
+.erminor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -45599,6 +45889,8 @@ const ICON_PATHS = {
   plus: '<path d="M12 5v14M5 12h14"/>',
   docout:
     '<path d="M13 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h6.5"/><path d="M13 3.5V8h4.5"/><path d="M13 3.5l4.5 4.5v4"/><path d="M14.5 17h6.5M18.5 14.5 21 17l-2.5 2.5"/>',
+  docin:
+    '<path d="M13 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h6.5"/><path d="M13 3.5V8h4.5"/><path d="M13 3.5l4.5 4.5v4"/><path d="M21 17h-6.5M17 14.5 14.5 17l2.5 2.5"/>',
   kids: '<circle cx="8.5" cy="7.5" r="2.8"/><circle cx="16.5" cy="10" r="2.2"/><path d="M3.5 19.5v-.8a5 5 0 0 1 10 0v.8M13.5 19.5v-.5a3.2 3.2 0 0 1 6.4 0v.5"/>',
   send: '<path d="M20.5 3.5 10 14M20.5 3.5 14 20.5l-4-6.5-6.5-4z"/>',
   clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
@@ -49641,6 +49933,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.47.5",
+    "22. November 2026",
+    [
+      "Neu für Selbstständige: Eingangsrechnungen. E-Rechnungen (XRechnung und ZUGFeRD) einfach aus der Mail an Finanz MAMI teilen oder auswählen – die App zeigt sie als lesbare Rechnung mit Positionen, Steuer, Fälligkeit und IBAN.",
+      "Offene, bezahlte und überfällige Eingangsrechnungen auf einen Blick; mit einem Tipp als Ausgabe buchen – danach wird die Rechnung automatisch abgehakt. Zwei Tage vor der Fälligkeit erinnert dich die App.",
+    ],
+  ],
+  [
     "0.47.4",
     "22. November 2026",
     [
@@ -51883,6 +52183,13 @@ const PTOUR_FN = () => ({
         p: [uiText("trb_rch_p")],
       },
       {
+        sel: '[data-view="beruf"] [data-eropen].atile',
+        raw: 1,
+        ic: "docin",
+        t: uiText("trb_er_t"),
+        p: [uiText("trb_er_p")],
+      },
+      {
         sel: '[data-view="beruf"] [data-wbopen].atile',
         raw: 1,
         ic: "repeat",
@@ -52037,6 +52344,20 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.47.5",
+    s: () =>
+      hasSelf()
+        ? [
+            {
+              sel: '[data-view="beruf"] [data-eropen].atile',
+              ic: "docin",
+              t: uiText("trb_er_t"),
+              p: [uiText("trb_er_p")],
+            },
+          ]
+        : [],
+  },
   {
     v: "0.45.1",
     s: () => [
@@ -56007,6 +56328,23 @@ function renderBeruf() {
             ? `${io.length} · ${escHtml(fmtEur0(io.reduce((s, i) => s + i.amt, 0)))}`
             : escHtml(uiText("rch_new")),
         "data-rchopen"
+      )
+    );
+    try {
+      erAutoPaid();
+    } catch (_) {}
+    const eo = erOpenList(),
+      eod = eo.filter((i) => i.due && daysTo(i.due) < 0).length;
+    (duo ? exB : extra).push(
+      areaTile(
+        svgIcon("docin", 22),
+        escHtml(uiText("er_h")),
+        eod
+          ? escHtml(uiText("rch_over_n", { n: String(eod) }))
+          : eo.length
+            ? `${eo.length} · ${escHtml(fmtEur0(eo.reduce((s, i) => s + i.pay, 0)))}`
+            : escHtml(uiText("er_tile_s0")),
+        "data-eropen"
       )
     );
   }
@@ -69832,6 +70170,24 @@ function notifyPlan() {
             })
           );
         }
+        for (const i of erOpenList()) {
+          if (!i.due) continue;
+          const [y, m, dd] = i.due.split("-").map(Number);
+          add(
+            "er:" + i.id,
+            at(new Date(y, m - 1, dd - 2), H),
+            uiText("nf_er_due", {
+              n: i.from || "–",
+            }),
+            uiText("nf_er_due_s", {
+              a: fmtEur(i.pay),
+              d: fxDate(i.due, {
+                day: "numeric",
+                month: "long",
+              }),
+            })
+          );
+        }
         for (const r of rvRecs()) {
           const [y, m, dd] = String(r.next).split("-").map(Number);
           if (y)
@@ -74880,6 +75236,7 @@ async function saveTx() {
   btn.disabled = false;
   if (!ok) return;
   await rcptSaveFor(id);
+  erAfterSave();
   closeSheet();
   if (date.slice(0, 7) !== ui.ym) {
     ui.ym = date.slice(0, 7);
@@ -81361,14 +81718,14 @@ const TEXTS = {
   ],
   nf_rch_t: ["Rechnungen", "Invoices", "Faturalar", "Счета", "Рахунки", "Faktury", "الفواتير", "Facturi"],
   nf_rch_s: [
-    "Wenn eine Rechnung überfällig ist oder eine wiederkehrende dran ist",
-    "When an invoice is overdue or a recurring one is due",
-    "Bir fatura geciktiğinde veya tekrarlayan fatura zamanı geldiğinde",
-    "Когда счёт просрочен или пора выставить повторяющийся",
-    "Коли рахунок прострочено або час повторюваного",
-    "Gdy faktura jest przeterminowana lub czas na cykliczną",
-    "عندما تتأخر فاتورة أو يحين موعد فاتورة متكررة",
-    "Când o factură e restantă sau e timpul uneia recurente",
+    "Wenn eine Rechnung überfällig ist, eine wiederkehrende dran ist oder du eine Eingangsrechnung bald bezahlen musst",
+    "When an invoice is overdue, a recurring one is due or an incoming invoice must be paid soon",
+    "Bir fatura geciktiğinde, tekrarlayan fatura zamanı geldiğinde veya gelen bir faturayı yakında ödemen gerektiğinde",
+    "Когда счёт просрочен, пора выставить повторяющийся или скоро нужно оплатить входящий",
+    "Коли рахунок прострочено, час повторюваного або скоро треба сплатити вхідний",
+    "Gdy faktura jest przeterminowana, czas na cykliczną lub wkrótce trzeba zapłacić fakturę przychodzącą",
+    "عندما تتأخر فاتورة أو يحين موعد فاتورة متكررة أو يجب دفع فاتورة واردة قريبًا",
+    "Când o factură e restantă, e timpul uneia recurente sau trebuie plătită curând o factură primită",
   ],
   nf_rch_over: [
     "{n} hat noch nicht bezahlt",
@@ -84121,6 +84478,304 @@ const TEXTS = {
     "Jestem z ciebie taka dumna, {a}! 💚",
     "أنا فخورة بك جدًا يا {a}! 💚",
     "Sunt atât de mândră de tine, {a}! 💚",
+  ],
+  er_h: [
+    "Eingangsrechnungen",
+    "Incoming invoices",
+    "Gelen faturalar",
+    "Входящие счета",
+    "Вхідні рахунки",
+    "Faktury przychodzące",
+    "الفواتير الواردة",
+    "Facturi primite",
+  ],
+  er_tile_s0: [
+    "E-Rechnungen",
+    "E-invoices",
+    "E-faturalar",
+    "Э-счета",
+    "Е-рахунки",
+    "E-faktury",
+    "الفواتير الإلكترونية",
+    "E-facturi",
+  ],
+  er_open: ["Offen", "Open", "Açık", "Открыто", "Відкрито", "Otwarte", "مفتوحة", "Deschise"],
+  er_paid: ["Bezahlt", "Paid", "Ödendi", "Оплачено", "Оплачено", "Zapłacone", "مدفوعة", "Plătite"],
+  er_all: ["Alle", "All", "Tümü", "Все", "Усі", "Wszystkie", "الكل", "Toate"],
+  er_sum_paid: [
+    "Diesen Monat bezahlt",
+    "Paid this month",
+    "Bu ay ödenen",
+    "Оплачено в этом месяце",
+    "Оплачено цього місяця",
+    "Zapłacone w tym miesiącu",
+    "مدفوعة هذا الشهر",
+    "Plătite luna aceasta",
+  ],
+  er_add: [
+    "Rechnung hinzufügen",
+    "Add invoice",
+    "Fatura ekle",
+    "Добавить счёт",
+    "Додати рахунок",
+    "Dodaj fakturę",
+    "إضافة فاتورة",
+    "Adaugă factură",
+  ],
+  er_add_s: [
+    "XRechnung oder ZUGFeRD-PDF auswählen",
+    "Choose an XRechnung or ZUGFeRD PDF",
+    "XRechnung veya ZUGFeRD PDF seç",
+    "Выбери XRechnung или PDF ZUGFeRD",
+    "Обери XRechnung або PDF ZUGFeRD",
+    "Wybierz XRechnung lub PDF ZUGFeRD",
+    "اختر ملف XRechnung أو PDF بصيغة ZUGFeRD",
+    "Alege XRechnung sau PDF ZUGFeRD",
+  ],
+  er_hint: [
+    "Tipp: Teile E-Rechnungen aus deiner Mail-App direkt an Finanz MAMI – sie landen dann hier.",
+    "Tip: share e-invoices from your mail app straight to Finanz MAMI – they’ll land here.",
+    "İpucu: E-faturaları e-posta uygulamandan doğrudan Finanz MAMI ile paylaş – buraya gelirler.",
+    "Совет: делись э-счетами из почты прямо с Finanz MAMI – они появятся здесь.",
+    "Порада: поширюй е-рахунки з пошти прямо у Finanz MAMI – вони з’являться тут.",
+    "Wskazówka: udostępniaj e-faktury z poczty prosto do Finanz MAMI – trafią tutaj.",
+    "نصيحة: شارك الفواتير الإلكترونية من تطبيق البريد مباشرة مع Finanz MAMI – ستظهر هنا.",
+    "Sfat: trimite e-facturile din aplicația de e-mail direct în Finanz MAMI – ajung aici.",
+  ],
+  er_empty: [
+    "Noch keine Rechnungen hier.",
+    "No invoices here yet.",
+    "Henüz fatura yok.",
+    "Счетов пока нет.",
+    "Рахунків поки немає.",
+    "Nie ma tu jeszcze faktur.",
+    "لا توجد فواتير بعد.",
+    "Încă nu sunt facturi aici.",
+  ],
+  er_due_in: [
+    "fällig in {n} Tagen",
+    "due in {n} days",
+    "{n} gün içinde vadesi doluyor",
+    "срок через {n} дн.",
+    "термін через {n} дн.",
+    "termin za {n} dni",
+    "مستحقة خلال {n} أيام",
+    "scadentă în {n} zile",
+  ],
+  er_due_today: [
+    "heute fällig",
+    "due today",
+    "bugün vadesi doluyor",
+    "срок сегодня",
+    "термін сьогодні",
+    "termin dzisiaj",
+    "مستحقة اليوم",
+    "scadentă azi",
+  ],
+  er_over: [
+    "{n} Tage überfällig",
+    "{n} days overdue",
+    "{n} gün gecikti",
+    "просрочено на {n} дн.",
+    "прострочено на {n} дн.",
+    "{n} dni po terminie",
+    "متأخرة {n} أيام",
+    "{n} zile întârziere",
+  ],
+  er_no_due: [
+    "ohne Fälligkeit",
+    "no due date",
+    "vade yok",
+    "без срока",
+    "без терміну",
+    "bez terminu",
+    "بدون تاريخ استحقاق",
+    "fără scadență",
+  ],
+  er_paid_on: [
+    "bezahlt {d}",
+    "paid {d}",
+    "ödendi {d}",
+    "оплачено {d}",
+    "оплачено {d}",
+    "zapłacono {d}",
+    "دُفعت {d}",
+    "plătită {d}",
+  ],
+  er_credit: [
+    "Gutschrift",
+    "Credit note",
+    "Alacak dekontu",
+    "Кредит-нота",
+    "Кредит-нота",
+    "Korekta",
+    "إشعار دائن",
+    "Notă de credit",
+  ],
+  er_from: ["Von", "From", "Gönderen", "От", "Від", "Od", "من", "De la"],
+  er_due_h: ["Fällig", "Due", "Vade", "Срок", "Термін", "Termin", "الاستحقاق", "Scadență"],
+  er_date_h: ["Datum", "Date", "Tarih", "Дата", "Дата", "Data", "التاريخ", "Data"],
+  er_pos: ["Position", "Item", "Kalem", "Позиция", "Позиція", "Pozycja", "البند", "Poziție"],
+  er_amt: ["Betrag", "Amount", "Tutar", "Сумма", "Сума", "Kwota", "المبلغ", "Sumă"],
+  er_net: ["Netto", "Net", "Net", "Нетто", "Нетто", "Netto", "الصافي", "Net"],
+  er_vat: ["USt {p} %", "VAT {p} %", "KDV %{p}", "НДС {p} %", "ПДВ {p} %", "VAT {p} %", "ضريبة {p} %", "TVA {p} %"],
+  er_total: ["Gesamt", "Total", "Toplam", "Итого", "Разом", "Razem", "الإجمالي", "Total"],
+  er_iban: [
+    "Überweisen an",
+    "Transfer to",
+    "Havale edilecek",
+    "Перевести на",
+    "Переказати на",
+    "Przelew na",
+    "حوّل إلى",
+    "Transferă în",
+  ],
+  er_copy: ["Kopieren", "Copy", "Kopyala", "Копировать", "Копіювати", "Kopiuj", "نسخ", "Copiază"],
+  er_copied: [
+    "IBAN kopiert",
+    "IBAN copied",
+    "IBAN kopyalandı",
+    "IBAN скопирован",
+    "IBAN скопійовано",
+    "Skopiowano IBAN",
+    "تم نسخ IBAN",
+    "IBAN copiat",
+  ],
+  er_book: [
+    "Als Ausgabe buchen",
+    "Book as expense",
+    "Gider olarak kaydet",
+    "Записать как расход",
+    "Записати як витрату",
+    "Zaksięguj jako wydatek",
+    "سجّلها كمصروف",
+    "Înregistrează ca cheltuială",
+  ],
+  er_done: ["Erledigt", "Done", "Tamam", "Готово", "Готово", "Załatwione", "تم", "Rezolvat"],
+  er_orig: ["Original", "Original", "Orijinal", "Оригинал", "Оригінал", "Oryginał", "الأصل", "Original"],
+  er_del: ["Löschen", "Delete", "Sil", "Удалить", "Видалити", "Usuń", "حذف", "Șterge"],
+  er_deleted: [
+    "Rechnung gelöscht",
+    "Invoice deleted",
+    "Fatura silindi",
+    "Счёт удалён",
+    "Рахунок видалено",
+    "Faktura usunięta",
+    "تم حذف الفاتورة",
+    "Factură ștearsă",
+  ],
+  er_added: [
+    "E-Rechnung von {n} ist da",
+    "E-invoice from {n} added",
+    "{n} e-faturası eklendi",
+    "Э-счёт от {n} добавлен",
+    "Е-рахунок від {n} додано",
+    "E-faktura od {n} dodana",
+    "تمت إضافة فاتورة {n}",
+    "E-factura de la {n} a fost adăugată",
+  ],
+  er_dup: [
+    "Diese Rechnung ist schon da",
+    "This invoice is already here",
+    "Bu fatura zaten var",
+    "Этот счёт уже есть",
+    "Цей рахунок уже є",
+    "Ta faktura już jest",
+    "هذه الفاتورة موجودة بالفعل",
+    "Factura există deja",
+  ],
+  er_none: [
+    "Keine E-Rechnung gefunden – nur XRechnung und ZUGFeRD werden erkannt.",
+    "No e-invoice found – only XRechnung and ZUGFeRD are recognised.",
+    "E-fatura bulunamadı – yalnızca XRechnung ve ZUGFeRD tanınır.",
+    "Э-счёт не найден – распознаются только XRechnung и ZUGFeRD.",
+    "Е-рахунок не знайдено – розпізнаються лише XRechnung і ZUGFeRD.",
+    "Nie znaleziono e-faktury – rozpoznawane są tylko XRechnung i ZUGFeRD.",
+    "لم يُعثر على فاتورة إلكترونية – يُتعرّف فقط على XRechnung وZUGFeRD.",
+    "Nicio e-factură găsită – sunt recunoscute doar XRechnung și ZUGFeRD.",
+  ],
+  er_reading: [
+    "Rechnung wird gelesen …",
+    "Reading invoice …",
+    "Fatura okunuyor …",
+    "Читаю счёт …",
+    "Читаю рахунок …",
+    "Czytam fakturę …",
+    "جارٍ قراءة الفاتورة …",
+    "Citesc factura …",
+  ],
+  er_auto: [
+    "Zahlung erkannt – {n} ist bezahlt",
+    "Payment found – {n} is paid",
+    "Ödeme bulundu – {n} ödendi",
+    "Платёж найден – {n} оплачен",
+    "Платіж знайдено – {n} оплачено",
+    "Znaleziono płatność – {n} zapłacona",
+    "تم العثور على الدفعة – {n} مدفوعة",
+    "Plată găsită – {n} e plătită",
+  ],
+  trb_er_t: [
+    "Eingangsrechnungen",
+    "Incoming invoices",
+    "Gelen faturalar",
+    "Входящие счета",
+    "Вхідні рахунки",
+    "Faktury przychodzące",
+    "الفواتير الواردة",
+    "Facturi primite",
+  ],
+  trb_er_p: [
+    "Bekommst du eine E-Rechnung (XRechnung oder ZUGFeRD), teile sie einfach an mich. Ich mache daraus eine lesbare Rechnung, sage dir, wann sie fällig ist, und hake sie ab, sobald du bezahlt hast.",
+    "Got an e-invoice (XRechnung or ZUGFeRD)? Just share it with me. I’ll turn it into a readable invoice, tell you when it’s due and tick it off once you’ve paid.",
+    "Bir e-fatura mı aldın (XRechnung veya ZUGFeRD)? Bana paylaş yeter. Okunur bir faturaya çeviririm, vadesini söylerim ve ödeyince işaretlerim.",
+    "Пришёл э-счёт (XRechnung или ZUGFeRD)? Просто поделись им со мной. Я сделаю из него понятный счёт, напомню о сроке и отмечу, когда ты заплатишь.",
+    "Прийшов е-рахунок (XRechnung чи ZUGFeRD)? Просто поділися ним зі мною. Я зроблю з нього зрозумілий рахунок, нагадаю про термін і позначу, коли ти заплатиш.",
+    "Dostałeś e-fakturę (XRechnung lub ZUGFeRD)? Po prostu mi ją udostępnij. Zrobię z niej czytelną fakturę, powiem, kiedy mija termin, i odhaczę ją po zapłacie.",
+    "وصلتك فاتورة إلكترونية (XRechnung أو ZUGFeRD)؟ شاركها معي فقط. سأحوّلها إلى فاتورة مقروءة، وأخبرك بموعد استحقاقها، وأشطبها عندما تدفع.",
+    "Ai primit o e-factură (XRechnung sau ZUGFeRD)? Trimite-mi-o. O fac lizibilă, îți spun când e scadentă și o bifez după ce plătești.",
+  ],
+  er_back: ["Zurück", "Back", "Geri", "Назад", "Назад", "Wstecz", "رجوع", "Înapoi"],
+  er_saved: [
+    "Original gespeichert",
+    "Original saved",
+    "Orijinal kaydedildi",
+    "Оригинал сохранён",
+    "Оригінал збережено",
+    "Oryginał zapisany",
+    "تم حفظ الأصل",
+    "Original salvat",
+  ],
+  er_fmt_xr: ["XRechnung", "XRechnung", "XRechnung", "XRechnung", "XRechnung", "XRechnung", "XRechnung", "XRechnung"],
+  er_fmt_zf: ["ZUGFeRD", "ZUGFeRD", "ZUGFeRD", "ZUGFeRD", "ZUGFeRD", "ZUGFeRD", "ZUGFeRD", "ZUGFeRD"],
+  nf_er_due: [
+    "Rechnung von {n} ist bald fällig",
+    "Invoice from {n} is due soon",
+    "{n} faturasının vadesi yaklaşıyor",
+    "Скоро срок оплаты счёта от {n}",
+    "Скоро термін оплати рахунку від {n}",
+    "Faktura od {n} wkrótce do zapłaty",
+    "فاتورة {n} مستحقة قريبًا",
+    "Factura de la {n} e scadentă curând",
+  ],
+  nf_er_due_s: [
+    "{a} bis {d} überweisen",
+    "Transfer {a} by {d}",
+    "{a} tutarını {d} tarihine kadar öde",
+    "Перевести {a} до {d}",
+    "Переказати {a} до {d}",
+    "Przelej {a} do {d}",
+    "حوّل {a} قبل {d}",
+    "Transferă {a} până pe {d}",
+  ],
+  er_hint_pc: [
+    "Tipp: Zieh E-Rechnungen einfach ins Fenster von Finanz MAMI – sie landen dann hier.",
+    "Tip: just drag e-invoices into the Finanz MAMI window – they’ll land here.",
+    "İpucu: E-faturaları Finanz MAMI penceresine sürükle – buraya gelirler.",
+    "Совет: просто перетащи э-счета в окно Finanz MAMI – они появятся здесь.",
+    "Порада: просто перетягни е-рахунки у вікно Finanz MAMI – вони з’являться тут.",
+    "Wskazówka: po prostu przeciągnij e-faktury do okna Finanz MAMI – trafią tutaj.",
+    "نصيحة: اسحب الفواتير الإلكترونية إلى نافذة Finanz MAMI – ستظهر هنا.",
+    "Sfat: trage e-facturile în fereastra Finanz MAMI – ajung aici.",
   ],
 };
 
@@ -96804,6 +97459,433 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+/* Eingangsrechnungen: E-Rechnungen (XRechnung, ZUGFeRD) empfangen */
+const ER = {
+  tab: "open",
+  sel: null,
+  busy: false,
+};
+function erList() {
+  return (store.settings.ers = store.settings.ers || []);
+}
+
+/* --- XML lesen --- */
+const xKid = (el, n) => (el ? [...el.children].find((c) => c.localName === n) || null : null);
+const xAll = (el, n) => (el ? [...el.getElementsByTagNameNS("*", n)] : []);
+function xPath(el, path) {
+  for (const n of path.split("/")) {
+    if (!el) return null;
+    el = xKid(el, n) || xAll(el, n)[0] || null;
+  }
+  return el;
+}
+const xTxt = (el, path) => {
+  const e = path ? xPath(el, path) : el;
+  return e ? e.textContent.trim() : "";
+};
+const xNum = (el, path) => {
+  const v = parseFloat(xTxt(el, path));
+  return isFinite(v) ? round2(v) : 0;
+};
+const xDate = (s) => {
+  s = (s || "").trim();
+  if (/^\d{8}$/.test(s)) return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+  return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : "";
+};
+
+function einvUbl(r) {
+  const credit = r.localName === "CreditNote",
+    sup = xPath(r, "AccountingSupplierParty/Party"),
+    tot = xKid(r, "LegalMonetaryTotal"),
+    tax = xKid(r, "TaxTotal");
+  return {
+    typ: credit ? "g" : "r",
+    nr: xTxt(xKid(r, "ID")),
+    date: xDate(xTxt(xKid(r, "IssueDate"))),
+    due: xDate(xTxt(xKid(r, "DueDate")) || xTxt(r, "PaymentMeans/PaymentDueDate")),
+    cur: xTxt(xKid(r, "DocumentCurrencyCode")) || "EUR",
+    from: xTxt(sup, "PartyLegalEntity/RegistrationName") || xTxt(sup, "PartyName/Name"),
+    street: xTxt(sup, "PostalAddress/StreetName"),
+    city: xTxt(sup, "PostalAddress/CityName"),
+    net: xNum(tot, "TaxExclusiveAmount"),
+    vat: xNum(tax, "TaxAmount"),
+    gross: xNum(tot, "TaxInclusiveAmount"),
+    pay: xNum(tot, "PayableAmount"),
+    rates: xAll(tax, "TaxSubtotal").map((s) => [parseFloat(xTxt(s, "TaxCategory/Percent")) || 0, xNum(s, "TaxAmount")]),
+    iban: xTxt(r, "PaymentMeans/PayeeFinancialAccount/ID").replace(/\s/g, ""),
+    items: xAll(r, credit ? "CreditNoteLine" : "InvoiceLine").map((l) => ({
+      n: xTxt(l, "Item/Name"),
+      q: parseFloat(xTxt(l, credit ? "CreditedQuantity" : "InvoicedQuantity")) || 1,
+      a: xNum(l, "LineExtensionAmount"),
+    })),
+  };
+}
+function einvCii(r) {
+  const doc = xKid(r, "ExchangedDocument"),
+    tr = xKid(r, "SupplyChainTradeTransaction"),
+    st = xKid(tr, "ApplicableHeaderTradeSettlement"),
+    sel = xPath(tr, "ApplicableHeaderTradeAgreement/SellerTradeParty"),
+    sum = xKid(st, "SpecifiedTradeSettlementHeaderMonetarySummation");
+  return {
+    typ: xTxt(doc, "TypeCode") === "381" ? "g" : "r",
+    nr: xTxt(doc, "ID"),
+    date: xDate(xTxt(doc, "IssueDateTime/DateTimeString")),
+    due: xDate(xTxt(st, "SpecifiedTradePaymentTerms/DueDateDateTime/DateTimeString")),
+    cur: xTxt(st, "InvoiceCurrencyCode") || "EUR",
+    from: xTxt(sel, "Name"),
+    street: xTxt(sel, "PostalTradeAddress/LineOne"),
+    city: xTxt(sel, "PostalTradeAddress/CityName"),
+    net: xNum(sum, "TaxBasisTotalAmount"),
+    vat: xNum(sum, "TaxTotalAmount"),
+    gross: xNum(sum, "GrandTotalAmount"),
+    pay: xNum(sum, "DuePayableAmount"),
+    rates: (st ? [...st.children] : [])
+      .filter((t) => t.localName === "ApplicableTradeTax")
+      .map((t) => [parseFloat(xTxt(t, "RateApplicablePercent")) || 0, xNum(t, "CalculatedAmount")]),
+    iban: xTxt(st, "SpecifiedTradeSettlementPaymentMeans/PayeePartyCreditorFinancialAccount/IBANID").replace(/\s/g, ""),
+    items: xAll(tr, "IncludedSupplyChainTradeLineItem").map((l) => ({
+      n: xTxt(l, "SpecifiedTradeProduct/Name"),
+      q: parseFloat(xTxt(l, "SpecifiedLineTradeDelivery/BilledQuantity")) || 1,
+      a: xNum(l, "SpecifiedLineTradeSettlement/SpecifiedTradeSettlementLineMonetarySummation/LineTotalAmount"),
+    })),
+  };
+}
+function einvParse(xml) {
+  const d = new DOMParser().parseFromString(xml, "application/xml"),
+    r = d.documentElement;
+  if (!r || d.getElementsByTagName("parsererror").length) return null;
+  const inv =
+    r.localName === "CrossIndustryInvoice"
+      ? einvCii(r)
+      : r.localName === "Invoice" || r.localName === "CreditNote"
+        ? einvUbl(r)
+        : null;
+  if (!inv) return null;
+  inv.gross = inv.gross || round2(inv.net + inv.vat);
+  inv.pay = inv.pay || inv.gross;
+  return (inv.nr || inv.from) && inv.pay > 0 ? inv : null;
+}
+async function einvFromPdf(buf) {
+  const lib = await loadPdfJs();
+  const doc = await lib.getDocument({
+    data: new Uint8Array(buf),
+    isEvalSupported: false,
+  }).promise;
+  const att = (await doc.getAttachments()) || {};
+  for (const a of Object.values(att))
+    if (/\.xml$/i.test(a.filename || "")) {
+      const inv = einvParse(new TextDecoder().decode(a.content));
+      if (inv) return inv;
+    }
+  return null;
+}
+const isXmlF = (f) => /xml/i.test(f.type || "") || /\.xml$/i.test(f.name || "");
+async function einvRead(file) {
+  const buf = await file.arrayBuffer(),
+    xml = isXmlF(file);
+  let inv = null;
+  if (xml) inv = einvParse(new TextDecoder().decode(buf));
+  else if (isPdfF(file))
+    try {
+      inv = await einvFromPdf(buf.slice(0));
+    } catch (_) {}
+  if (!inv) return null;
+  inv.fmt = xml ? "xr" : "zf";
+  inv.mime = xml ? "application/xml" : "application/pdf";
+  inv.fname = file.name || inv.nr + (xml ? ".xml" : ".pdf");
+  inv.buf = buf;
+  return inv;
+}
+function b64Of(buf) {
+  const u = new Uint8Array(buf);
+  let s = "";
+  for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+
+/* --- Ablage --- */
+async function erAdd(inv) {
+  const key = (s) =>
+    String(s || "")
+      .toLowerCase()
+      .replace(/\s+/g, "");
+  if (erList().some((x) => key(x.nr) === key(inv.nr) && key(x.from) === key(inv.from))) {
+    toast(uiText("er_dup"));
+    return null;
+  }
+  const { buf, mime, ...rest } = inv,
+    rec = {
+      ...rest,
+      id: newId(),
+      added: isoToday(),
+      paid: null,
+    };
+  await rcptPut("er-" + rec.id, `data:${mime};base64,${b64Of(buf)}`);
+  erList().push(rec);
+  erAutoPaid();
+  await saveSettings();
+  return rec;
+}
+async function erTake(files) {
+  const rest = [],
+    got = [];
+  for (const f of files) {
+    if (!isXmlF(f) && !isPdfF(f)) {
+      rest.push(f);
+      continue;
+    }
+    const inv = await einvRead(f).catch(() => null);
+    if (!inv) {
+      if (isXmlF(f)) toast(uiText("er_none"));
+      else rest.push(f);
+      continue;
+    }
+    const rec = await erAdd(inv);
+    if (rec) got.push(rec);
+  }
+  if (got.length) {
+    SND.play("pop");
+    toast(uiText("er_added", { n: got[0].from || got[0].nr }));
+    ER.tab = "open";
+    ER.sel = got.length === 1 ? got[0].id : null;
+    erOpen();
+  }
+  return rest;
+}
+function erUsedTx() {
+  return new Set(
+    erList()
+      .filter((x) => x.tx)
+      .map((x) => x.tx)
+  );
+}
+function erAutoPaid() {
+  const used = erUsedTx();
+  let hit = null;
+  for (const i of erList()) {
+    if (i.paid || i.typ === "g") continue;
+    const nr = String(i.nr || "").toLowerCase(),
+      who = String(i.from || "")
+        .toLowerCase()
+        .split(/\s+/)[0];
+    const t = (store.tx || []).find(
+      (t) =>
+        (t.kind === "betrieb" || t.kind === "ausgabe") &&
+        !used.has(t.id) &&
+        Math.abs(t.amount - i.pay) < 0.01 &&
+        t.date >= addDays(i.date, -7) &&
+        ((nr && (t.note || "").toLowerCase().includes(nr)) ||
+          (who.length > 2 && (t.note || "").toLowerCase().includes(who)) ||
+          t.date <= addDays(i.date, 60))
+    );
+    if (t) {
+      i.paid = t.date;
+      i.tx = t.id;
+      used.add(t.id);
+      hit = i;
+    }
+  }
+  return hit;
+}
+function addDays(iso, n) {
+  const d = new Date(iso + "T12:00");
+  d.setDate(d.getDate() + n);
+  return isoOf(d);
+}
+const erOpenList = () => erList().filter((i) => !i.paid && i.typ !== "g");
+function erState(i) {
+  if (i.paid)
+    return [
+      "ok",
+      uiText("er_paid_on", {
+        d: fxDate(i.paid, {
+          day: "numeric",
+          month: "short",
+        }),
+      }),
+    ];
+  if (i.typ === "g") return ["", uiText("er_credit")];
+  if (!i.due) return ["", uiText("er_no_due")];
+  const n = daysTo(i.due);
+  if (n < 0) return ["od", uiText("er_over", { n: String(-n) })];
+  if (n === 0) return ["due", uiText("er_due_today")];
+  return [n <= 7 ? "due" : "", uiText("er_due_in", { n: String(n) })];
+}
+
+/* --- Fenster --- */
+function erOpen() {
+  if (erAutoPaid()) saveSettings();
+  const b = hbSheet("erBg", uiText("er_h"));
+  b.innerHTML = ER.sel ? erDetail(erList().find((x) => x.id === ER.sel)) : erListHtml();
+  if (!reducedMotion())
+    stbAnim(b, ER.sel ? ".erhead,.erbox,.erpos,.eriban,.eracts" : ".ersum>div,.erseg,.err,.rvwrite,.erhint");
+}
+function erListHtml() {
+  const ym = isoToday().slice(0, 7),
+    open = erOpenList(),
+    paidM = erList().filter((i) => i.paid && i.paid.slice(0, 7) === ym && i.typ !== "g"),
+    L = erList()
+      .filter((i) =>
+        ER.tab === "open" ? !i.paid && i.typ !== "g" : ER.tab === "paid" ? i.paid || i.typ === "g" : true
+      )
+      .sort((a, c) =>
+        ER.tab === "open"
+          ? (a.due || "9").localeCompare(c.due || "9")
+          : (c.paid || c.date || "").localeCompare(a.paid || a.date || "")
+      ),
+    tab = (k, t) =>
+      `<button type="button" class="${ER.tab === k ? "on" : ""}" data-ertab="${k}">${escHtml(uiText(t))}</button>`;
+  return `<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${open.length} · ${escHtml(fmtEur(open.reduce((s, i) => s + i.pay, 0)))}</b></div><div><small>${escHtml(uiText("er_sum_paid"))}</small><b>${paidM.length} · ${escHtml(fmtEur(paidM.reduce((s, i) => s + i.pay, 0)))}</b></div></div>
+    <div class="erseg" role="tablist">${tab("open", "er_open")}${tab("paid", "er_paid")}${tab("all", "er_all")}</div>
+    <div class="erl">${
+      L.map((i) => {
+        const [c, s] = erState(i);
+        return `<button type="button" class="err ${i.paid ? "paid" : ""}" data-ersel="${escHtml(i.id)}"><span class="eric">${svgIcon("docin", 20)}</span><span class="ern"><b data-noi18n>${escHtml(i.from || "–")}</b><small data-noi18n>${escHtml(i.nr || "")} · ${escHtml(uiText(i.fmt === "zf" ? "er_fmt_zf" : "er_fmt_xr"))}</small></span><span class="era"><b>${i.typ === "g" ? "+" : ""}${escHtml(fmtEur(i.pay))}</b><small class="${c}">${escHtml(s)}</small></span></button>`;
+      }).join("") || `<p class="small muted erempty">${escHtml(uiText("er_empty"))}</p>`
+    }</div>
+    <button type="button" class="rvwrite" data-eradd><span class="rwi">${svgIcon("docin", 24)}</span><span class="rwt"><b>${escHtml(uiText("er_add"))}</b><small>${escHtml(uiText("er_add_s"))}</small></span><span class="rwgo">${svgIcon("right", 18)}</span></button>
+    <input type="file" id="erFile" accept=".xml,application/xml,text/xml,application/pdf,.pdf" multiple hidden>
+    <p class="small muted erhint">${escHtml(uiText(IS_DESK ? "er_hint_pc" : "er_hint"))}</p>`;
+}
+function erDetail(i) {
+  if (!i) {
+    ER.sel = null;
+    return erListHtml();
+  }
+  const [c, s] = erState(i),
+    E = (v) => escHtml(fmtEur(v)),
+    D = (d) => escHtml(fxDate(d, { day: "numeric", month: "short", year: "numeric" }));
+  return `<div class="erhead"><button type="button" class="erback" data-erback aria-label="${escHtml(uiText("er_back"))}">${svgIcon("right", 18)}</button><b data-noi18n>${escHtml(i.nr || "")}</b><span class="erfmt">${escHtml(uiText(i.fmt === "zf" ? "er_fmt_zf" : "er_fmt_xr"))}</span></div>
+    <div class="erbox"><div><small>${escHtml(uiText("er_from"))}</small><b data-noi18n>${escHtml(i.from || "–")}</b>${i.city ? `<span data-noi18n>${escHtml([i.street, i.city].filter(Boolean).join(" · "))}</span>` : ""}</div><div class="r"><small>${escHtml(uiText(i.paid ? "er_paid" : "er_due_h"))}</small><b class="${c}">${i.paid ? D(i.paid) : i.due ? D(i.due) : "–"}</b><span>${escHtml(s)}</span></div></div>
+    <div class="erpos"><div class="h"><span>${escHtml(uiText("er_pos"))}</span><span>${escHtml(uiText("er_amt"))}</span></div>${(
+      i.items || []
+    )
+      .map(
+        (p) =>
+          `<div><span data-noi18n>${p.q !== 1 ? escHtml(String(p.q).replace(".", ",")) + " × " : ""}${escHtml(p.n || "–")}</span><span>${E(p.a)}</span></div>`
+      )
+      .join("")}<div class="s"><span>${escHtml(uiText("er_net"))}</span><span>${E(i.net)}</span></div>${(i.rates.length
+      ? i.rates
+      : [[0, i.vat]]
+    )
+      .map(
+        ([p, a]) =>
+          `<div class="s"><span>${escHtml(uiText("er_vat", { p: String(p).replace(".", ",") }))}</span><span>${E(a)}</span></div>`
+      )
+      .join("")}<div class="t"><b>${escHtml(uiText("er_total"))}</b><b>${E(i.pay)}</b></div></div>
+    ${i.iban && !i.paid ? `<div class="eriban"><span><small>${escHtml(uiText("er_iban"))}</small><b data-noi18n>${escHtml(i.iban.replace(/(.{4})/g, "$1 ").trim())}</b></span><button type="button" class="btn sm" data-eriban>${svgIcon("copy", 14)} ${escHtml(uiText("er_copy"))}</button></div>` : ""}
+    <div class="eracts">${
+      i.paid
+        ? ""
+        : i.typ === "g"
+          ? `<button type="button" class="btn primary" data-erdone>✓ ${escHtml(uiText("er_done"))}</button>`
+          : `<button type="button" class="btn primary" data-erbook>${escHtml(uiText("er_book"))}</button>`
+    }<div class="erminor"><button type="button" class="btn" data-erorig>${svgIcon("dl", 15)} ${escHtml(uiText("er_orig"))}</button><button type="button" class="btn ghost" data-erdel>${svgIcon("trash", 15)} ${escHtml(uiText("er_del"))}</button></div></div>`;
+}
+function erBook(i) {
+  hbSheetClose("erBg");
+  setTimeout(() => {
+    openSheet("betrieb");
+    $("fAmount").value = numStr(i.pay);
+    $("fNote").value = [i.from, i.nr].filter(Boolean).join(" · ");
+    $("fDate").value = isoToday();
+    fillDateSelects();
+    const last = erList().find((x) => x.from === i.from && x.cat);
+    if (last && cats("betrieb").includes(last.cat)) ui.cat = last.cat;
+    ER.book = i.id;
+    renderSheet();
+  }, 240);
+}
+/* Nach dem Speichern: gebuchte Rechnung abhaken */
+function erAfterSave() {
+  if (!ER.book) return;
+  const i = erList().find((x) => x.id === ER.book);
+  ER.book = null;
+  if (!i) return;
+  if (!i.tx) erAutoPaid();
+  const t = i.tx && store.tx.find((x) => x.id === i.tx);
+  if (!t) return;
+  if (t.cat) i.cat = t.cat;
+  saveSettings();
+}
+
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  if (t.closest("[data-eropen]")) {
+    ER.sel = null;
+    erOpen();
+    return;
+  }
+  if (!t.closest("#erBg")) return;
+  const tb = t.closest("[data-ertab]");
+  if (tb) {
+    ER.tab = tb.dataset.ertab;
+    erOpen();
+    return;
+  }
+  const s = t.closest("[data-ersel]");
+  if (s) {
+    ER.sel = s.dataset.ersel;
+    erOpen();
+    return;
+  }
+  if (t.closest("[data-erback]")) {
+    ER.sel = null;
+    erOpen();
+    return;
+  }
+  if (t.closest("[data-eradd]")) {
+    $("erFile").click();
+    return;
+  }
+  const i = erList().find((x) => x.id === ER.sel);
+  if (!i) return;
+  if (t.closest("[data-erbook]")) erBook(i);
+  else if (t.closest("[data-erdone]")) {
+    i.paid = isoToday();
+    await saveSettings();
+    SND.play("save");
+    erOpen();
+  } else if (t.closest("[data-eriban]")) {
+    try {
+      await navigator.clipboard.writeText(i.iban);
+      toast(uiText("er_copied"));
+    } catch (_) {}
+  } else if (t.closest("[data-erorig]")) {
+    const f = await rcptGet("er-" + i.id);
+    if (f) await saveBinary(i.fname || i.nr, await (await fetch(f)).blob(), uiText("er_saved"));
+  } else if (t.closest("[data-erdel]")) {
+    const L = erList(),
+      k = L.indexOf(i);
+    L.splice(k, 1);
+    ER.sel = null;
+    await saveSettings();
+    erOpen();
+    toast(uiText("er_deleted"), async () => {
+      L.splice(k, 0, i);
+      await saveSettings();
+      erOpen();
+    });
+    setTimeout(() => {
+      if (!erList().includes(i)) rcptDel("er-" + i.id).catch(() => {});
+    }, 8000);
+  }
+});
+document.addEventListener("change", async (e) => {
+  if (e.target.id !== "erFile") return;
+  const fs = [...(e.target.files || [])];
+  e.target.value = "";
+  if (!fs.length || ER.busy) return;
+  ER.busy = true;
+  toast(uiText("er_reading"));
+  try {
+    const rest = await erTake(fs);
+    if (rest.length) toast(uiText("er_none"));
+  } finally {
+    ER.busy = false;
+  }
+});
+
 /* --- Kinderzuschlag-Check --- */
 const KIZ = {
   a: {},
@@ -97273,6 +98355,10 @@ function inbKinds() {
 }
 function inbOpen(files, o) {
   o = o || {};
+  if (!o.checked && hasSelf() && [...files].some((f) => isXmlF(f) || isPdfF(f))) {
+    erTake([...files]).then((rest) => rest.length && inbOpen(rest, { ...o, checked: 1 }));
+    return;
+  }
   INB.urls.forEach((u) => {
     try {
       URL.revokeObjectURL(u);

@@ -558,6 +558,23 @@ function renderBeruf() {
         "data-rchopen"
       )
     );
+    try {
+      erAutoPaid();
+    } catch (_) {}
+    const eo = erOpenList(),
+      eod = eo.filter((i) => i.due && daysTo(i.due) < 0).length;
+    (duo ? exB : extra).push(
+      areaTile(
+        svgIcon("docin", 22),
+        escHtml(uiText("er_h")),
+        eod
+          ? escHtml(uiText("rch_over_n", { n: String(eod) }))
+          : eo.length
+            ? `${eo.length} · ${escHtml(fmtEur0(eo.reduce((s, i) => s + i.pay, 0)))}`
+            : escHtml(uiText("er_tile_s0")),
+        "data-eropen"
+      )
+    );
   }
   {
     const BL = brList().filter((x) => !x.done),

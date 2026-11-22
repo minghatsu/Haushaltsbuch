@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.47.5",
+    "22. November 2026",
+    [
+      "Neu für Selbstständige: Eingangsrechnungen. E-Rechnungen (XRechnung und ZUGFeRD) einfach aus der Mail an Finanz MAMI teilen oder auswählen – die App zeigt sie als lesbare Rechnung mit Positionen, Steuer, Fälligkeit und IBAN.",
+      "Offene, bezahlte und überfällige Eingangsrechnungen auf einen Blick; mit einem Tipp als Ausgabe buchen – danach wird die Rechnung automatisch abgehakt. Zwei Tage vor der Fälligkeit erinnert dich die App.",
+    ],
+  ],
+  [
     "0.47.4",
     "22. November 2026",
     [
