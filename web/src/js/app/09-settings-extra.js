@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.46.9",
+    "22. November 2026",
+    [
+      "Leiste: Die Kreise bleiben wieder in ihrer eigenen Farbe, der Wechsel liegt in der Mitte – jetzt ohne Absturzgefahr auf Android.",
+    ],
+  ],
+  [
     "0.46.8",
     "22. November 2026",
     [
