@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.46.6",
+    "22. November 2026",
+    [
+      "Auch beim Antippen der Leiste fließt die Markierung jetzt als Kreis mit Verbindung zum neuen Bereich – egal wie weit entfernt.",
+    ],
+  ],
+  [
     "0.46.5",
     "22. November 2026",
     [

@@ -279,6 +279,7 @@ new MutationObserver(() => {
 
 /* Untere Leiste: Pille mit aufklappendem Namen, Plus bleibt fest */
 var NAVX = {
+  k: null,
   L: null,
   W: 0,
 };
@@ -345,6 +346,10 @@ function navPill(anim) {
   ind.style.setProperty("--ic", col);
   ind.style.top = y + "px";
   /* Beim Wischen übernimmt navFlow die Bewegung – hier nur den Endstand setzen */
+  /* Antippen oder jeder andere Wechsel zwischen den Hauptseiten: dieselbe Flüssigkeit wie beim Wischen */
+  const key = act.dataset.go;
+  if (anim && NAVX.k && NAVX.k !== key && !navFlow.on() && navFlow.start(NAVX.k, key)) navFlow.finish(true);
+  NAVX.k = key;
   if (anim && NAVX.L != null && !reducedMotion() && !navFlow.on()) {
     ind.animate(
       [
@@ -627,6 +632,7 @@ const navFlow = (() => {
         nm.style.textOverflow = "clip";
       }
       paint(0);
+      return true;
     },
     /* folgt dem Finger mit leichter Federung */
     move(p) {

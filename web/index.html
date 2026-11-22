@@ -50961,6 +50961,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.46.6",
+    "22. November 2026",
+    [
+      "Auch beim Antippen der Leiste fließt die Markierung jetzt als Kreis mit Verbindung zum neuen Bereich – egal wie weit entfernt.",
+    ],
+  ],
+  [
     "0.46.5",
     "22. November 2026",
     [
@@ -89725,6 +89732,7 @@ new MutationObserver(() => {
 
 /* Untere Leiste: Pille mit aufklappendem Namen, Plus bleibt fest */
 var NAVX = {
+  k: null,
   L: null,
   W: 0,
 };
@@ -89791,6 +89799,10 @@ function navPill(anim) {
   ind.style.setProperty("--ic", col);
   ind.style.top = y + "px";
   /* Beim Wischen übernimmt navFlow die Bewegung – hier nur den Endstand setzen */
+  /* Antippen oder jeder andere Wechsel zwischen den Hauptseiten: dieselbe Flüssigkeit wie beim Wischen */
+  const key = act.dataset.go;
+  if (anim && NAVX.k && NAVX.k !== key && !navFlow.on() && navFlow.start(NAVX.k, key)) navFlow.finish(true);
+  NAVX.k = key;
   if (anim && NAVX.L != null && !reducedMotion() && !navFlow.on()) {
     ind.animate(
       [
@@ -90073,6 +90085,7 @@ const navFlow = (() => {
         nm.style.textOverflow = "clip";
       }
       paint(0);
+      return true;
     },
     /* folgt dem Finger mit leichter Federung */
     move(p) {
