@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.47.8",
+    "22. November 2026",
+    [
+      "Mahnungen in Stufen: Bei überfälligen Rechnungen wird aus „Erinnern“ die 1. Mahnung und danach die letzte Mahnung – jeweils als fertiger Text, per Mail mit der Rechnung im Anhang.",
+      "Auf Wunsch rechnet die App Mahngebühr, Verzugszinsen (Basiszinssatz der Bundesbank) und bei Firmenkunden die 40-€-Pauschale aus. An der Rechnung siehst du, wann du zuletzt erinnert oder gemahnt hast.",
+    ],
+  ],
+  [
     "0.47.7",
     "22. November 2026",
     [

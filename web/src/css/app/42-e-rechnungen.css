@@ -498,3 +498,167 @@
 .pmhint {
   margin: 10px 0 0;
 }
+
+/* Mahnungen */
+#dnBg {
+  z-index: 220;
+}
+.dnsteps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.dnst {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  padding: 10px 4px;
+  background: var(--sunk);
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    color 0.2s;
+}
+.dnst i {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 13px;
+  background: var(--surface);
+}
+.dnst span {
+  font-size: 12.5px;
+  font-weight: 800;
+  text-align: center;
+}
+.dnst small {
+  font-size: 11px;
+}
+.dnst.done i {
+  background: var(--good-soft);
+  color: var(--good);
+}
+.dnst.on {
+  border-color: var(--accent);
+  background: var(--surface);
+  color: var(--fg);
+}
+.dnst.on i {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.dnopts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.dnsw {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: start;
+  border: 0;
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: var(--sunk);
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+}
+.dnsw span {
+  flex: 1;
+  min-width: 0;
+}
+.dnsw b {
+  display: block;
+  font-size: 14px;
+  font-weight: 800;
+}
+.dnsw small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+.dnsw i {
+  width: 42px;
+  height: 24px;
+  flex: none;
+  border-radius: 99px;
+  background: var(--line);
+  position: relative;
+  transition: background 0.2s;
+}
+.dnsw i::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  inset-inline-start: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition: transform 0.25s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.dnsw.on i {
+  background: var(--accent);
+}
+.dnsw.on i::after {
+  transform: translateX(18px);
+}
+[dir="rtl"] .dnsw.on i::after {
+  transform: translateX(-18px);
+}
+.dntot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  margin-bottom: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.dntot span {
+  font-size: 13px;
+  font-weight: 700;
+}
+.dntot b {
+  font-size: 19px;
+  font-weight: 800;
+}
+.dnsub {
+  margin: 0 0 6px;
+}
+.dnnote {
+  margin: 8px 0 12px;
+}
+.dnchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 99px;
+  padding: 4px 9px;
+  font-size: 11.5px;
+  font-weight: 700;
+  background: var(--good-soft);
+  color: var(--good);
+}
+.btn.dnhot {
+  background: var(--bad);
+  color: #fff;
+}

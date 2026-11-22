@@ -592,7 +592,7 @@ function rchOpen2(focus) {
               )}</small>`
             : ""
         }</div><b class="amt">${escHtml(fmtEur(part ? rest : i.amt))}</b>
-      <div class="rchb">${!i.paid && !st ? `${od ? `<button class="btn sm primary" data-rchrem="${escHtml(i.id)}">${escHtml(uiText("rch_rem"))}</button>` : ""}<button class="btn sm" data-rchpaid="${escHtml(i.id)}">✓ ${escHtml(uiText("rch_mark"))}</button><button class="btn sm" data-rchpart="${escHtml(i.id)}">${escHtml(uiText("rch_part"))}</button>` : ""}${i.doc ? `<button class="btn sm" data-rvpdfid="${escHtml(i.id)}" aria-label="PDF">${svgIcon("dl", 14)}</button><button class="btn sm" data-rvcopy="${escHtml(i.id)}">${escHtml(uiText("rv_copy"))}</button>${!lk && !i.paid ? `<button class="btn sm" data-rvedit="${escHtml(i.id)}" aria-label="${escHtml(uiText("rv_edit"))}">${svgIcon("pen", 14)}</button>` : ""}${lk && !st && i.typ !== "s" && i.typ !== "g" ? `<button class="btn sm ghost" data-rvstorno="${escHtml(i.id)}">${escHtml(uiText("rch_storno"))}</button>` : ""}` : ""}${i.img ? `<button class="btn sm" data-rchview="${escHtml(i.id)}" aria-label="${escHtml(uiText("scan_view"))}">${svgIcon("doc", 14)}</button>` : ""}${lk ? "" : `<button class="btn sm ghost" data-rchdel="${escHtml(i.id)}" aria-label="${escHtml(uiText("tm_del"))}">${svgIcon("ban", 14)}</button>`}</div></div>`;
+      <div class="rchb">${!i.paid && !st ? `${od || dnHist(i).length ? dnRowBtn(i) : ""}<button class="btn sm" data-rchpaid="${escHtml(i.id)}">✓ ${escHtml(uiText("rch_mark"))}</button><button class="btn sm" data-rchpart="${escHtml(i.id)}">${escHtml(uiText("rch_part"))}</button>` : ""}${i.doc ? `<button class="btn sm" data-rvpdfid="${escHtml(i.id)}" aria-label="PDF">${svgIcon("dl", 14)}</button><button class="btn sm" data-rvcopy="${escHtml(i.id)}">${escHtml(uiText("rv_copy"))}</button>${!lk && !i.paid ? `<button class="btn sm" data-rvedit="${escHtml(i.id)}" aria-label="${escHtml(uiText("rv_edit"))}">${svgIcon("pen", 14)}</button>` : ""}${lk && !st && i.typ !== "s" && i.typ !== "g" ? `<button class="btn sm ghost" data-rvstorno="${escHtml(i.id)}">${escHtml(uiText("rch_storno"))}</button>` : ""}` : ""}${i.img ? `<button class="btn sm" data-rchview="${escHtml(i.id)}" aria-label="${escHtml(uiText("scan_view"))}">${svgIcon("doc", 14)}</button>` : ""}${lk ? "" : `<button class="btn sm ghost" data-rchdel="${escHtml(i.id)}" aria-label="${escHtml(uiText("tm_del"))}">${svgIcon("ban", 14)}</button>`}</div></div>`;
       }).join("") ||
       `<p class="small muted" style="text-align:center;margin:16px 0">${escHtml(uiText("rch_empty"))}</p>`
     }</div>
@@ -652,15 +652,6 @@ function rchForm() {
   <div class="hlr"><label class="hlf grow"><span>${escHtml(uiText("rch_amt"))}${ok("amt")}</span><input class="in" id="rchA" inputmode="decimal" value="${e.amt ? escHtml(numStr(e.amt)) : ""}" placeholder="0,00"></label><label class="hlf grow"><span>${escHtml(uiText("rch_nr"))}${ok("nr")}</span><input class="in" id="rchN" value="${escHtml(e.nr || rchNextNr())}"></label></div>
   <div class="hlr"><label class="hlf grow"><span>${escHtml(uiText("rch_date"))}${ok("date")}</span><input class="in" type="date" id="rchD" value="${escHtml(e.date || isoToday())}"></label><label class="hlf grow"><span>${escHtml(uiText("rch_days"))}${ok("z")}</span><select class="in" id="rchZ">${zs.map((n) => `<option value="${n}" ${(e.z || 14) === n ? "selected" : ""}>${n} ${escHtml(uiText("rch_tage"))}</option>`).join("")}</select></label></div>
   <div class="vabtns"><button class="btn" data-rchcancel>${escHtml(uiText("tm_cancel"))}</button><button class="btn primary" data-rchsave>${escHtml(uiText("rch_save"))}</button></div></div>`;
-}
-function rchRemind(id) {
-  const i = rchList().find((x) => x.id === id);
-  if (!i) return;
-  const nm = String(store.settings.name || "").trim() || "[Dein Name]";
-  const txt = `Hallo ${i.kunde || ""},\n\nich hoffe, es geht Ihnen gut! Mir ist aufgefallen, dass meine Rechnung Nr. ${i.nr || ""} vom ${new Date(i.date + "T12:00").toLocaleDateString("de-DE")} über ${fmtEur(i.amt)} noch offen ist (fällig am ${new Date(i.due + "T12:00").toLocaleDateString("de-DE")}).\n\nVielleicht ist sie einfach untergegangen – das passiert. Ich wäre Ihnen dankbar, wenn Sie den Betrag in den nächsten 7 Tagen überweisen. Falls Sie schon bezahlt haben, betrachten Sie diese Nachricht bitte als gegenstandslos.\n\nViele Grüße\n${nm}`;
-  const b = hbSheet("rchRBg", uiText("rch_rem_h"));
-  b.innerHTML = `<p class="hosub">${escHtml(uiText("rch_rem_s"))}</p><textarea class="in valt" id="rchTxt" rows="14" spellcheck="false">${escHtml(txt)}</textarea>
-    <div class="vabtns" style="margin-top:12px"><button class="btn" data-rchcopy>${escHtml(uiText("va_copy"))}</button><button class="btn primary" data-rchshare="${escHtml(id)}">${escHtml(uiText("va_send"))}</button></div>`;
 }
 /* Rechnung fotografieren / importieren */
 function rchParse(L) {

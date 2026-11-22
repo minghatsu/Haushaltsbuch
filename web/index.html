@@ -24702,6 +24702,170 @@ html.pc .pctpane .ayblk {
 .pmhint {
   margin: 10px 0 0;
 }
+
+/* Mahnungen */
+#dnBg {
+  z-index: 220;
+}
+.dnsteps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.dnst {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  padding: 10px 4px;
+  background: var(--sunk);
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    color 0.2s;
+}
+.dnst i {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-style: normal;
+  font-weight: 800;
+  font-size: 13px;
+  background: var(--surface);
+}
+.dnst span {
+  font-size: 12.5px;
+  font-weight: 800;
+  text-align: center;
+}
+.dnst small {
+  font-size: 11px;
+}
+.dnst.done i {
+  background: var(--good-soft);
+  color: var(--good);
+}
+.dnst.on {
+  border-color: var(--accent);
+  background: var(--surface);
+  color: var(--fg);
+}
+.dnst.on i {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.dnopts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.dnsw {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: start;
+  border: 0;
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: var(--sunk);
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+}
+.dnsw span {
+  flex: 1;
+  min-width: 0;
+}
+.dnsw b {
+  display: block;
+  font-size: 14px;
+  font-weight: 800;
+}
+.dnsw small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+.dnsw i {
+  width: 42px;
+  height: 24px;
+  flex: none;
+  border-radius: 99px;
+  background: var(--line);
+  position: relative;
+  transition: background 0.2s;
+}
+.dnsw i::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  inset-inline-start: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition: transform 0.25s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.dnsw.on i {
+  background: var(--accent);
+}
+.dnsw.on i::after {
+  transform: translateX(18px);
+}
+[dir="rtl"] .dnsw.on i::after {
+  transform: translateX(-18px);
+}
+.dntot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  margin-bottom: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.dntot span {
+  font-size: 13px;
+  font-weight: 700;
+}
+.dntot b {
+  font-size: 19px;
+  font-weight: 800;
+}
+.dnsub {
+  margin: 0 0 6px;
+}
+.dnnote {
+  margin: 8px 0 12px;
+}
+.dnchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 99px;
+  padding: 4px 9px;
+  font-size: 11.5px;
+  font-weight: 700;
+  background: var(--good-soft);
+  color: var(--good);
+}
+.btn.dnhot {
+  background: var(--bad);
+  color: #fff;
+}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -50144,6 +50308,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.47.8",
+    "22. November 2026",
+    [
+      "Mahnungen in Stufen: Bei überfälligen Rechnungen wird aus „Erinnern“ die 1. Mahnung und danach die letzte Mahnung – jeweils als fertiger Text, per Mail mit der Rechnung im Anhang.",
+      "Auf Wunsch rechnet die App Mahngebühr, Verzugszinsen (Basiszinssatz der Bundesbank) und bei Firmenkunden die 40-€-Pauschale aus. An der Rechnung siehst du, wann du zuletzt erinnert oder gemahnt hast.",
+    ],
+  ],
+  [
     "0.47.7",
     "22. November 2026",
     [
@@ -52571,6 +52743,20 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.47.8",
+    s: () =>
+      hasSelf()
+        ? [
+            {
+              sel: '[data-view="beruf"] [data-rchopen].atile',
+              ic: "alert",
+              t: uiText("nw_dn_t"),
+              p: [uiText("nw_dn_p")],
+            },
+          ]
+        : [],
+  },
   {
     v: "0.47.7",
     s: () =>
@@ -77840,7 +78026,6 @@ const TEXTS = {
     "plătit {d}",
   ],
   rch_mark: ["Bezahlt", "Paid", "Ödendi", "Оплачено", "Оплачено", "Zapłacone", "مدفوعة", "Plătit"],
-  rch_rem: ["Erinnern", "Remind", "Hatırlat", "Напомнить", "Нагадати", "Przypomnij", "ذكّر", "Amintește"],
   rch_empty: [
     "Noch keine Rechnungen. Trag deine Rechnungen ein – ich passe auf, dass das Geld ankommt.",
     "No invoices yet. Add your invoices – I’ll watch that the money arrives.",
@@ -77852,24 +78037,14 @@ const TEXTS = {
     "Încă nu ai facturi. Adaugă-le – am grijă să vină banii.",
   ],
   rch_auto: [
-    "Kommt der Betrag auf dein Konto, hake ich die Rechnung automatisch ab.",
-    "When the amount reaches your account, I tick the invoice off automatically.",
-    "Tutar hesabına gelince faturayı otomatik işaretlerim.",
-    "Когда сумма придёт на счёт, я отмечу счёт автоматически.",
-    "Коли сума надійде, я позначу рахунок автоматично.",
-    "Gdy kwota wpłynie na konto, odhaczę fakturę automatycznie.",
-    "عندما يصل المبلغ إلى حسابك، أعلّم الفاتورة تلقائيًا.",
-    "Când suma ajunge în cont, bifez factura automat.",
-  ],
-  rch_rem_h: [
-    "Zahlungserinnerung",
-    "Payment reminder",
-    "Ödeme hatırlatması",
-    "Напоминание об оплате",
-    "Нагадування про оплату",
-    "Przypomnienie o płatności",
-    "تذكير بالدفع",
-    "Memento de plată",
+    "Kommt der Betrag auf dein Konto, zeige ich dir die Zahlung – du bestätigst mit einem Tipp.",
+    "When the money reaches your account, I’ll show you the payment – confirm it with one tap.",
+    "Tutar hesabına geldiğinde ödemeyi gösteririm – tek dokunuşla onaylarsın.",
+    "Когда деньги поступят, я покажу платёж – подтверди одним нажатием.",
+    "Коли гроші надійдуть, я покажу платіж – підтвердь одним дотиком.",
+    "Gdy kwota wpłynie na konto, pokażę ci płatność – potwierdzisz jednym stuknięciem.",
+    "عندما يصل المبلغ إلى حسابك سأعرض لك الدفعة – أكّدها بلمسة واحدة.",
+    "Când suma ajunge în cont îți arăt plata – o confirmi cu o atingere.",
   ],
   rch_rem_s: [
     "Freundlich, aber klar – auf Deutsch, damit dein Kunde es versteht. Du kannst alles ändern.",
@@ -85412,6 +85587,198 @@ const TEXTS = {
     "Po wyciągu pokażę ci, które płatności pasują do faktur – także częściowe i ze skontem. Wystarczy stuknąć „Pasuje”.",
     "بعد كشف الحساب أريك أي الدفعات تطابق فواتيرك – بما فيها الجزئية والخصم. فقط اضغط «مطابقة».",
     "După extras îți arăt ce plăți se potrivesc cu facturile – inclusiv parțiale și cu scont. Doar apeși „Corect”.",
+  ],
+  dn_l0: ["Erinnern", "Remind", "Hatırlat", "Напомнить", "Нагадати", "Przypomnij", "تذكير", "Amintește"],
+  dn_l1: [
+    "1. Mahnung",
+    "1st reminder",
+    "1. ihtar",
+    "1-е напоминание",
+    "1-ше нагадування",
+    "1. wezwanie",
+    "الإنذار الأول",
+    "Somația 1",
+  ],
+  dn_l2: [
+    "Letzte Mahnung",
+    "Final reminder",
+    "Son ihtar",
+    "Последнее напоминание",
+    "Останнє нагадування",
+    "Ostatnie wezwanie",
+    "الإنذار الأخير",
+    "Ultima somație",
+  ],
+  dn_l0_h: [
+    "Zahlungserinnerung",
+    "Payment reminder",
+    "Ödeme hatırlatması",
+    "Напоминание об оплате",
+    "Нагадування про оплату",
+    "Przypomnienie o płatności",
+    "تذكير بالدفع",
+    "Memento de plată",
+  ],
+  dn_l1_h: [
+    "1. Mahnung",
+    "1st payment reminder",
+    "1. ödeme ihtarı",
+    "1-е напоминание об оплате",
+    "1-ше нагадування про оплату",
+    "1. wezwanie do zapłaty",
+    "الإنذار الأول بالدفع",
+    "Somația 1 de plată",
+  ],
+  dn_l2_h: [
+    "Letzte Mahnung",
+    "Final payment reminder",
+    "Son ödeme ihtarı",
+    "Последнее напоминание об оплате",
+    "Останнє нагадування про оплату",
+    "Ostateczne wezwanie do zapłaty",
+    "الإنذار الأخير بالدفع",
+    "Ultima somație de plată",
+  ],
+  dn_again: [
+    "Mahnung ansehen",
+    "View reminder",
+    "İhtarı gör",
+    "Смотреть напоминание",
+    "Переглянути нагадування",
+    "Pokaż wezwanie",
+    "عرض الإنذار",
+    "Vezi somația",
+  ],
+  dn_firm: [
+    "Kunde ist eine Firma",
+    "Customer is a business",
+    "Müşteri bir şirket",
+    "Клиент – фирма",
+    "Клієнт – фірма",
+    "Klient to firma",
+    "العميل شركة",
+    "Clientul e o firmă",
+  ],
+  dn_firm_y: [
+    "Zinsen: Basiszins + 9 %, Pauschale möglich",
+    "Interest: base rate + 9 %, flat fee possible",
+    "Faiz: temel faiz + %9, sabit ücret mümkün",
+    "Проценты: базовая ставка + 9 %, возможна фикс. сумма",
+    "Відсотки: базова ставка + 9 %, можлива фікс. сума",
+    "Odsetki: stopa bazowa + 9 %, możliwa ryczałtowa opłata",
+    "الفائدة: السعر الأساسي + 9 %، رسم ثابت ممكن",
+    "Dobândă: rata de bază + 9 %, taxă fixă posibilă",
+  ],
+  dn_firm_n: [
+    "Privatkunde: Basiszins + 5 %",
+    "Private customer: base rate + 5 %",
+    "Bireysel müşteri: temel faiz + %5",
+    "Частный клиент: базовая ставка + 5 %",
+    "Приватний клієнт: базова ставка + 5 %",
+    "Klient prywatny: stopa bazowa + 5 %",
+    "عميل فرد: السعر الأساسي + 5 %",
+    "Client privat: rata de bază + 5 %",
+  ],
+  dn_fee: [
+    "Mahngebühr",
+    "Reminder fee",
+    "İhtar ücreti",
+    "Плата за напоминание",
+    "Плата за нагадування",
+    "Opłata za wezwanie",
+    "رسوم الإنذار",
+    "Taxă de somație",
+  ],
+  dn_int: [
+    "Verzugszinsen",
+    "Late interest",
+    "Gecikme faizi",
+    "Пени за просрочку",
+    "Пеня за прострочення",
+    "Odsetki za zwłokę",
+    "فوائد التأخير",
+    "Dobânzi de întârziere",
+  ],
+  dn_int_s: [
+    "{r} % für {n} Tage = {a}",
+    "{r} % for {n} days = {a}",
+    "{n} gün için %{r} = {a}",
+    "{r} % за {n} дн. = {a}",
+    "{r} % за {n} дн. = {a}",
+    "{r} % za {n} dni = {a}",
+    "{r} % لمدة {n} يومًا = {a}",
+    "{r} % pentru {n} zile = {a}",
+  ],
+  dn_flat: [
+    "Verzugspauschale",
+    "Late payment flat fee",
+    "Gecikme sabit ücreti",
+    "Фиксированная плата за просрочку",
+    "Фіксована плата за прострочення",
+    "Ryczałt za zwłokę",
+    "رسم التأخير الثابت",
+    "Taxă fixă de întârziere",
+  ],
+  dn_total: [
+    "Jetzt zu zahlen",
+    "Now due",
+    "Şimdi ödenecek",
+    "К оплате сейчас",
+    "До сплати зараз",
+    "Do zapłaty teraz",
+    "المستحق الآن",
+    "De plată acum",
+  ],
+  dn_note: [
+    "Verzugszinsen mit dem Basiszinssatz der Bundesbank ({r} %, gültig seit {d}). Keine Rechtsberatung – bei Streit hilft ein Anwalt.",
+    "Late interest uses the Bundesbank base rate ({r} %, valid since {d}). Not legal advice – ask a lawyer if there’s a dispute.",
+    "Gecikme faizi Bundesbank temel faizi ile ({r} %, {d} tarihinden beri). Hukuki tavsiye değildir.",
+    "Пени по базовой ставке Бундесбанка ({r} %, с {d}). Это не юридическая консультация.",
+    "Пеня за базовою ставкою Бундесбанку ({r} %, з {d}). Це не юридична консультація.",
+    "Odsetki według stopy bazowej Bundesbanku ({r} %, od {d}). To nie porada prawna.",
+    "فوائد التأخير وفق السعر الأساسي للبنك الاتحادي ({r} %، منذ {d}). ليست استشارة قانونية.",
+    "Dobânzi după rata de bază Bundesbank ({r} %, din {d}). Nu este consultanță juridică.",
+  ],
+  nw_dn_t: [
+    "Mahnungen in Stufen",
+    "Reminders in steps",
+    "Kademeli ihtarlar",
+    "Напоминания по шагам",
+    "Нагадування по кроках",
+    "Wezwania etapami",
+    "إنذارات على مراحل",
+    "Somații în trepte",
+  ],
+  nw_dn_p: [
+    "Bleibt eine Rechnung offen, wächst der Knopf mit: Erinnerung, 1. Mahnung, letzte Mahnung. Mahngebühr, Verzugszinsen und die 40-€-Pauschale rechne ich dir auf Wunsch aus.",
+    "If an invoice stays unpaid, the button grows with it: reminder, 1st reminder, final reminder. I’ll calculate fees, late interest and the €40 flat fee for you if you like.",
+    "Bir fatura ödenmezse buton büyür: hatırlatma, 1. ihtar, son ihtar. İstersen ücret, gecikme faizi ve 40 € sabit ücreti hesaplarım.",
+    "Если счёт не оплачен, кнопка растёт: напоминание, 1-е, последнее. По желанию посчитаю плату, пени и 40 €.",
+    "Якщо рахунок не сплачено, кнопка росте: нагадування, 1-ше, останнє. За бажанням порахую плату, пеню і 40 €.",
+    "Gdy faktura jest niezapłacona, przycisk rośnie: przypomnienie, 1. wezwanie, ostatnie. Na życzenie policzę opłatę, odsetki i ryczałt 40 €.",
+    "إذا بقيت الفاتورة غير مدفوعة يكبر الزر: تذكير، إنذار أول، إنذار أخير. وأحسب لك الرسوم والفوائد والرسم الثابت 40 € عند الطلب.",
+    "Dacă factura rămâne neplătită, butonul crește: memento, somația 1, ultima somație. La cerere calculez taxa, dobânzile și taxa fixă de 40 €.",
+  ],
+  dn_d0: ["Erinnert", "Reminded", "Hatırlatıldı", "Напомнено", "Нагадано", "Przypomniano", "تم التذكير", "Amintit"],
+  dn_d1: [
+    "1. Mahnung",
+    "1st reminder",
+    "1. ihtar",
+    "1-е напоминание",
+    "1-ше нагадування",
+    "1. wezwanie",
+    "الإنذار الأول",
+    "Somația 1",
+  ],
+  dn_d2: [
+    "Letzte Mahnung",
+    "Final reminder",
+    "Son ihtar",
+    "Последнее",
+    "Останнє",
+    "Ostatnie wezwanie",
+    "الإنذار الأخير",
+    "Ultima somație",
   ],
 };
 
@@ -93873,7 +94240,7 @@ function rchOpen2(focus) {
               )}</small>`
             : ""
         }</div><b class="amt">${escHtml(fmtEur(part ? rest : i.amt))}</b>
-      <div class="rchb">${!i.paid && !st ? `${od ? `<button class="btn sm primary" data-rchrem="${escHtml(i.id)}">${escHtml(uiText("rch_rem"))}</button>` : ""}<button class="btn sm" data-rchpaid="${escHtml(i.id)}">✓ ${escHtml(uiText("rch_mark"))}</button><button class="btn sm" data-rchpart="${escHtml(i.id)}">${escHtml(uiText("rch_part"))}</button>` : ""}${i.doc ? `<button class="btn sm" data-rvpdfid="${escHtml(i.id)}" aria-label="PDF">${svgIcon("dl", 14)}</button><button class="btn sm" data-rvcopy="${escHtml(i.id)}">${escHtml(uiText("rv_copy"))}</button>${!lk && !i.paid ? `<button class="btn sm" data-rvedit="${escHtml(i.id)}" aria-label="${escHtml(uiText("rv_edit"))}">${svgIcon("pen", 14)}</button>` : ""}${lk && !st && i.typ !== "s" && i.typ !== "g" ? `<button class="btn sm ghost" data-rvstorno="${escHtml(i.id)}">${escHtml(uiText("rch_storno"))}</button>` : ""}` : ""}${i.img ? `<button class="btn sm" data-rchview="${escHtml(i.id)}" aria-label="${escHtml(uiText("scan_view"))}">${svgIcon("doc", 14)}</button>` : ""}${lk ? "" : `<button class="btn sm ghost" data-rchdel="${escHtml(i.id)}" aria-label="${escHtml(uiText("tm_del"))}">${svgIcon("ban", 14)}</button>`}</div></div>`;
+      <div class="rchb">${!i.paid && !st ? `${od || dnHist(i).length ? dnRowBtn(i) : ""}<button class="btn sm" data-rchpaid="${escHtml(i.id)}">✓ ${escHtml(uiText("rch_mark"))}</button><button class="btn sm" data-rchpart="${escHtml(i.id)}">${escHtml(uiText("rch_part"))}</button>` : ""}${i.doc ? `<button class="btn sm" data-rvpdfid="${escHtml(i.id)}" aria-label="PDF">${svgIcon("dl", 14)}</button><button class="btn sm" data-rvcopy="${escHtml(i.id)}">${escHtml(uiText("rv_copy"))}</button>${!lk && !i.paid ? `<button class="btn sm" data-rvedit="${escHtml(i.id)}" aria-label="${escHtml(uiText("rv_edit"))}">${svgIcon("pen", 14)}</button>` : ""}${lk && !st && i.typ !== "s" && i.typ !== "g" ? `<button class="btn sm ghost" data-rvstorno="${escHtml(i.id)}">${escHtml(uiText("rch_storno"))}</button>` : ""}` : ""}${i.img ? `<button class="btn sm" data-rchview="${escHtml(i.id)}" aria-label="${escHtml(uiText("scan_view"))}">${svgIcon("doc", 14)}</button>` : ""}${lk ? "" : `<button class="btn sm ghost" data-rchdel="${escHtml(i.id)}" aria-label="${escHtml(uiText("tm_del"))}">${svgIcon("ban", 14)}</button>`}</div></div>`;
       }).join("") ||
       `<p class="small muted" style="text-align:center;margin:16px 0">${escHtml(uiText("rch_empty"))}</p>`
     }</div>
@@ -93933,15 +94300,6 @@ function rchForm() {
   <div class="hlr"><label class="hlf grow"><span>${escHtml(uiText("rch_amt"))}${ok("amt")}</span><input class="in" id="rchA" inputmode="decimal" value="${e.amt ? escHtml(numStr(e.amt)) : ""}" placeholder="0,00"></label><label class="hlf grow"><span>${escHtml(uiText("rch_nr"))}${ok("nr")}</span><input class="in" id="rchN" value="${escHtml(e.nr || rchNextNr())}"></label></div>
   <div class="hlr"><label class="hlf grow"><span>${escHtml(uiText("rch_date"))}${ok("date")}</span><input class="in" type="date" id="rchD" value="${escHtml(e.date || isoToday())}"></label><label class="hlf grow"><span>${escHtml(uiText("rch_days"))}${ok("z")}</span><select class="in" id="rchZ">${zs.map((n) => `<option value="${n}" ${(e.z || 14) === n ? "selected" : ""}>${n} ${escHtml(uiText("rch_tage"))}</option>`).join("")}</select></label></div>
   <div class="vabtns"><button class="btn" data-rchcancel>${escHtml(uiText("tm_cancel"))}</button><button class="btn primary" data-rchsave>${escHtml(uiText("rch_save"))}</button></div></div>`;
-}
-function rchRemind(id) {
-  const i = rchList().find((x) => x.id === id);
-  if (!i) return;
-  const nm = String(store.settings.name || "").trim() || "[Dein Name]";
-  const txt = `Hallo ${i.kunde || ""},\n\nich hoffe, es geht Ihnen gut! Mir ist aufgefallen, dass meine Rechnung Nr. ${i.nr || ""} vom ${new Date(i.date + "T12:00").toLocaleDateString("de-DE")} über ${fmtEur(i.amt)} noch offen ist (fällig am ${new Date(i.due + "T12:00").toLocaleDateString("de-DE")}).\n\nVielleicht ist sie einfach untergegangen – das passiert. Ich wäre Ihnen dankbar, wenn Sie den Betrag in den nächsten 7 Tagen überweisen. Falls Sie schon bezahlt haben, betrachten Sie diese Nachricht bitte als gegenstandslos.\n\nViele Grüße\n${nm}`;
-  const b = hbSheet("rchRBg", uiText("rch_rem_h"));
-  b.innerHTML = `<p class="hosub">${escHtml(uiText("rch_rem_s"))}</p><textarea class="in valt" id="rchTxt" rows="14" spellcheck="false">${escHtml(txt)}</textarea>
-    <div class="vabtns" style="margin-top:12px"><button class="btn" data-rchcopy>${escHtml(uiText("va_copy"))}</button><button class="btn primary" data-rchshare="${escHtml(id)}">${escHtml(uiText("va_send"))}</button></div>`;
 }
 /* Rechnung fotografieren / importieren */
 function rchParse(L) {
@@ -97277,9 +97635,9 @@ function rvMail(d, f) {
   const txt = `${d.k.person ? "Hallo " + d.k.person : "Sehr geehrte Damen und Herren"},\n\nanbei erhalten Sie meine Rechnung Nr. ${d.nr} über ${rvEuro(sum.gross)}.\nBitte überweisen Sie den Betrag bis zum ${rvDate(due)}.\n\nVielen Dank für die gute Zusammenarbeit!\n\nViele Grüße\n${nm}`;
   rvMailGo(d, txt, f);
 }
-async function rvMailGo(d, txt, f) {
+async function rvMailGo(d, txt, f, subject) {
   const { blob, name, mime } = f || rvOutFile(d, "pdf"),
-    subj = "Rechnung " + d.nr,
+    subj = subject || "Rechnung " + d.nr,
     to = d.k.email || "",
     br = window.AndroidBridge;
   const b64 = await new Promise((r) => {
@@ -98939,6 +99297,192 @@ document.addEventListener("click", (e) => {
   else if (t.closest("[data-pmall]")) pmAll();
 });
 
+/* Zahlungserinnerung und Mahnungen in Stufen, mit Gebühr, Verzugszinsen und Pauschale */
+const DN_BASE = [
+  ["2026-07-01", 1.52],
+  ["2026-01-01", 1.27],
+  ["2025-07-01", 1.27],
+  ["2025-01-01", 2.27],
+];
+const DN_FIRM =
+  /\b(gmbh|ag|ug|kg|ohg|gbr|e\.\s?k\.?|e\.\s?v\.?|ltd|inc|se|mbh)\b|stadt|gemeinde|kreis|amt|verein|agentur|studio|werke|verlag|schule|klinik/i;
+const DN = {
+  id: null,
+  lvl: 0,
+  fee: true,
+  int: false,
+  flat: false,
+  firm: true,
+};
+function dnBaseRate(iso) {
+  return (DN_BASE.find(([d]) => d <= iso) || DN_BASE[DN_BASE.length - 1])[1];
+}
+function dnHist(i) {
+  const h = (i.dun || []).slice();
+  if (i.remind && !h.some((x) => x.lvl === 0)) h.unshift({ lvl: 0, d: i.remind });
+  return h;
+}
+function dnNext(i) {
+  const h = dnHist(i);
+  return Math.min(2, h.length ? Math.max(...h.map((x) => x.lvl)) + 1 : 0);
+}
+function dnLast(i) {
+  const h = dnHist(i);
+  return h.length ? h[h.length - 1] : null;
+}
+function dnCalc(i) {
+  const rest = rchRest(i),
+    days = Math.max(0, -daysTo(i.due)),
+    rate = round2(dnBaseRate(isoToday()) + (DN.firm ? 9 : 5)),
+    fee = DN.lvl > 0 && DN.fee ? Number(rvBiz().dunFee) || 5 : 0,
+    int = DN.lvl > 0 && DN.int ? round2((rest * rate * days) / 36500) : 0,
+    flat = DN.lvl > 0 && DN.flat && DN.firm ? 40 : 0;
+  return { rest, days, rate, fee, int, flat, total: round2(rest + fee + int + flat) };
+}
+function dnText(i) {
+  const c = dnCalc(i),
+    b = rvBiz(),
+    k = (i.doc && i.doc.k) || {},
+    nm = b.owner || b.name || String(store.settings.name || "").trim() || "[Dein Name]",
+    de = (iso) =>
+      new Date(iso + "T12:00").toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }),
+    hi = k.person ? `Guten Tag ${k.person},` : "Sehr geehrte Damen und Herren,",
+    until = de(addDays(isoToday(), DN.lvl === 2 ? 7 : 10)),
+    prev = dnHist(i).filter((x) => x.lvl > 0),
+    rows = [
+      `Offener Rechnungsbetrag: ${fmtEur(c.rest)}`,
+      c.fee ? `Mahngebühr: ${fmtEur(c.fee)}` : "",
+      c.int ? `Verzugszinsen (${String(c.rate).replace(".", ",")} % p. a. für ${c.days} Tage): ${fmtEur(c.int)}` : "",
+      c.flat ? `Verzugspauschale nach § 288 Abs. 5 BGB: ${fmtEur(c.flat)}` : "",
+    ].filter(Boolean),
+    table = rows.length > 1 ? `\n\n${rows.join("\n")}\nGesamt: ${fmtEur(c.total)}` : "",
+    bank = b.iban
+      ? `\n\nBankverbindung: ${String(b.iban)
+          .replace(/\s/g, "")
+          .replace(/(.{4})/g, "$1 ")
+          .trim()}`
+      : "",
+    ref = `Rechnung Nr. ${i.nr || ""} vom ${de(i.date)} über ${fmtEur(i.amt)}`;
+  if (DN.lvl === 0)
+    return `Hallo ${k.person || i.kunde || ""},\n\nich hoffe, es geht Ihnen gut! Mir ist aufgefallen, dass meine ${ref} noch offen ist (fällig am ${de(i.due)}).\n\nVielleicht ist sie einfach untergegangen – das passiert. Ich wäre Ihnen dankbar, wenn Sie den Betrag bis zum ${until} überweisen.${bank}\n\nFalls Sie schon bezahlt haben, betrachten Sie diese Nachricht bitte als gegenstandslos.\n\nViele Grüße\n${nm}`;
+  if (DN.lvl === 1)
+    return `${hi}\n\nleider konnte ich zu meiner ${ref} trotz meiner Zahlungserinnerung noch keinen Zahlungseingang feststellen.\n\nBitte überweisen Sie den offenen Betrag bis zum ${until}.${table}${bank}\n\nSollten Sie die Zahlung inzwischen veranlasst haben, betrachten Sie dieses Schreiben bitte als gegenstandslos.\n\nMit freundlichen Grüßen\n${nm}`;
+  return `${hi}\n\ntrotz Zahlungserinnerung${prev.length ? " und Mahnung vom " + de(prev[prev.length - 1].d) : ""} ist meine ${ref} weiterhin offen.\n\nIch fordere Sie hiermit letztmalig auf, den Gesamtbetrag bis zum ${until} zu begleichen.${table}${bank}\n\nNach Ablauf dieser Frist werde ich ohne weitere Ankündigung ein gerichtliches Mahnverfahren einleiten oder ein Inkassobüro beauftragen. Die dadurch entstehenden Kosten gehen zu Ihren Lasten.\n\nMit freundlichen Grüßen\n${nm}`;
+}
+const DN_KEYS = ["dn_l0", "dn_l1", "dn_l2"];
+function dnOpen(id) {
+  const i = rchList().find((x) => x.id === id);
+  if (!i) return;
+  DN.id = id;
+  DN.lvl = dnNext(i);
+  DN.firm = DN_FIRM.test(i.kunde || "");
+  DN.fee = true;
+  DN.int = DN.lvl === 2;
+  DN.flat = false;
+  dnRender(true);
+}
+function dnRender(first) {
+  const i = rchList().find((x) => x.id === DN.id);
+  if (!i) return;
+  const b = hbSheet("dnBg", uiText(DN_KEYS[DN.lvl] + "_h")),
+    c = dnCalc(i),
+    sw = (k, label, sub, on, dis) =>
+      `<button type="button" class="dnsw ${on ? "on" : ""}" data-dnsw="${k}" role="switch" aria-checked="${on}" ${dis ? "disabled" : ""}><span><b>${escHtml(label)}</b><small>${escHtml(sub)}</small></span><i></i></button>`;
+  b.innerHTML = `<div class="dnsteps">${DN_KEYS.map((key, n) => {
+    const h = dnHist(i)
+      .filter((x) => x.lvl === n)
+      .pop();
+    return `<button type="button" class="dnst ${n === DN.lvl ? "on" : ""} ${h ? "done" : ""}" data-dnlvl="${n}"><i>${h ? svgIcon("check", 13) : n + 1}</i><span>${escHtml(uiText(key))}</span>${h ? `<small>${escHtml(fxDate(h.d, { day: "numeric", month: "short" }))}</small>` : ""}</button>`;
+  }).join("")}</div>
+    ${
+      DN.lvl > 0
+        ? `<div class="dnopts">${sw("firm", uiText("dn_firm"), uiText(DN.firm ? "dn_firm_y" : "dn_firm_n"), DN.firm)}${sw("fee", uiText("dn_fee"), fmtEur(Number(rvBiz().dunFee) || 5), DN.fee)}${sw(
+            "int",
+            uiText("dn_int"),
+            uiText("dn_int_s", {
+              r: String(c.rate).replace(".", ","),
+              n: String(c.days),
+              a: fmtEur(round2((c.rest * c.rate * c.days) / 36500)),
+            }),
+            DN.int
+          )}${DN.firm ? sw("flat", uiText("dn_flat"), "40,00 € · § 288 Abs. 5 BGB", DN.flat) : ""}</div>
+          <div class="dntot"><span>${escHtml(uiText("dn_total"))}</span><b>${escHtml(fmtEur(c.total))}</b></div>`
+        : ""
+    }
+    <p class="hosub dnsub">${escHtml(uiText("rch_rem_s"))}</p>
+    <textarea class="in valt" id="dnTxt" rows="12" spellcheck="false" data-noi18n>${escHtml(dnText(i))}</textarea>
+    <p class="small muted dnnote">${escHtml(uiText("dn_note", { d: fxDate(DN_BASE[0][0], { day: "numeric", month: "long", year: "numeric" }), r: String(DN_BASE[0][1]).replace(".", ",") }))}</p>
+    <div class="vabtns"><button type="button" class="btn" data-dncopy>${escHtml(uiText("va_copy"))}</button><button type="button" class="btn primary" data-dnsend>${svgIcon("mail", 16)} ${escHtml(uiText("va_send"))}</button></div>`;
+  if (first && !reducedMotion()) stbAnim(b, ".dnsteps,.dnsw,.dntot,.valt,.vabtns");
+}
+async function dnMark(i) {
+  const c = dnCalc(i);
+  i.dun = dnHist(i).filter((x) => x.lvl !== DN.lvl);
+  i.dun.push({ lvl: DN.lvl, d: isoToday(), fee: c.fee, int: c.int, flat: c.flat });
+  i.dun.sort((a, c2) => a.lvl - c2.lvl);
+  delete i.remind;
+  rvLog("dun", i.nr, String(DN.lvl));
+  await saveSettings();
+}
+async function dnSend(i) {
+  const txt = $("dnTxt").value,
+    subj = `${uiTextDe(DN_KEYS[DN.lvl] + "_h")} – Rechnung ${i.nr || ""}`;
+  await dnMark(i);
+  hbSheetClose("dnBg");
+  if (i.doc) {
+    rvMailGo(i.doc, txt, rvOutFile(i.doc, "pdf"), subj);
+  } else {
+    try {
+      if (navigator.share) await navigator.share({ title: subj, text: txt });
+      else location.href = "mailto:?subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(txt);
+    } catch (_) {}
+  }
+  setTimeout(() => rchOpen2(i.id), 400);
+}
+function uiTextDe(k) {
+  const a = TEXTS[k];
+  return a ? a[0] : k;
+}
+function dnRowBtn(i) {
+  const n = dnNext(i),
+    last = dnLast(i);
+  return `${last ? `<span class="dnchip">${svgIcon("check", 12)} ${escHtml(uiText("dn_d" + last.lvl))} ${escHtml(fxDate(last.d, { day: "numeric", month: "short" }))}</span>` : ""}<button class="btn sm primary ${n > 0 ? "dnhot" : ""}" data-dnopen="${escHtml(i.id)}">${escHtml(uiText(last && last.lvl === 2 ? "dn_again" : DN_KEYS[n]))}</button>`;
+}
+document.addEventListener("click", async (e) => {
+  const t = e.target,
+    o = t.closest("[data-dnopen]");
+  if (o) {
+    dnOpen(o.dataset.dnopen);
+    return;
+  }
+  if (!t.closest("#dnBg")) return;
+  const i = rchList().find((x) => x.id === DN.id);
+  if (!i) return;
+  const lv = t.closest("[data-dnlvl]"),
+    sw = t.closest("[data-dnsw]");
+  if (lv) {
+    DN.lvl = Number(lv.dataset.dnlvl);
+    DN.int = DN.lvl === 2;
+    dnRender();
+    SND.play("tick");
+  } else if (sw) {
+    const k = sw.dataset.dnsw;
+    DN[k] = !DN[k];
+    if (k === "firm" && !DN.firm) DN.flat = false;
+    dnRender();
+    SND.play(DN[k] ? "tick" : "untick");
+  } else if (t.closest("[data-dncopy]")) {
+    try {
+      await navigator.clipboard.writeText($("dnTxt").value);
+      toast(uiText("va_copied"));
+    } catch (_) {
+      $("dnTxt").select();
+    }
+    await dnMark(i);
+    if ($("rchBg") && !$("rchBg").hidden) rchOpen2(i.id);
+  } else if (t.closest("[data-dnsend]")) dnSend(i);
+});
+
 /* --- Kinderzuschlag-Check --- */
 const KIZ = {
   a: {},
@@ -99166,44 +99710,6 @@ document.addEventListener("click", async (e) => {
     store.settings.rchs = rchList().filter((x) => x.id !== dl.dataset.rchdel);
     await saveSettings();
     rchOpen2();
-    return;
-  }
-  const rm = e.target.closest("[data-rchrem]");
-  if (rm) {
-    rchRemind(rm.dataset.rchrem);
-    return;
-  }
-  if (e.target.closest("[data-rchcopy]")) {
-    const t = $("rchTxt");
-    try {
-      await navigator.clipboard.writeText(t.value);
-      toast(uiText("va_copied"));
-    } catch (_) {
-      t.select();
-    }
-    return;
-  }
-  const sh = e.target.closest("[data-rchshare]");
-  if (sh) {
-    const t = $("rchTxt").value,
-      i = rchList().find((x) => x.id === sh.dataset.rchshare);
-    try {
-      if (navigator.share)
-        await navigator.share({
-          title: "Zahlungserinnerung " + (i ? i.nr : ""),
-          text: t,
-        });
-      else
-        location.href =
-          "mailto:?subject=" +
-          encodeURIComponent("Zahlungserinnerung " + (i ? i.nr : "")) +
-          "&body=" +
-          encodeURIComponent(t);
-    } catch (_) {}
-    if (i) {
-      i.remind = isoToday();
-      saveSettings();
-    }
     return;
   }
   const ks = e.target.closest("[data-kizs]");

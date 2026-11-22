@@ -227,44 +227,6 @@ document.addEventListener("click", async (e) => {
     rchOpen2();
     return;
   }
-  const rm = e.target.closest("[data-rchrem]");
-  if (rm) {
-    rchRemind(rm.dataset.rchrem);
-    return;
-  }
-  if (e.target.closest("[data-rchcopy]")) {
-    const t = $("rchTxt");
-    try {
-      await navigator.clipboard.writeText(t.value);
-      toast(uiText("va_copied"));
-    } catch (_) {
-      t.select();
-    }
-    return;
-  }
-  const sh = e.target.closest("[data-rchshare]");
-  if (sh) {
-    const t = $("rchTxt").value,
-      i = rchList().find((x) => x.id === sh.dataset.rchshare);
-    try {
-      if (navigator.share)
-        await navigator.share({
-          title: "Zahlungserinnerung " + (i ? i.nr : ""),
-          text: t,
-        });
-      else
-        location.href =
-          "mailto:?subject=" +
-          encodeURIComponent("Zahlungserinnerung " + (i ? i.nr : "")) +
-          "&body=" +
-          encodeURIComponent(t);
-    } catch (_) {}
-    if (i) {
-      i.remind = isoToday();
-      saveSettings();
-    }
-    return;
-  }
   const ks = e.target.closest("[data-kizs]");
   if (ks) {
     kizSync();

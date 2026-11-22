@@ -1744,9 +1744,9 @@ function rvMail(d, f) {
   const txt = `${d.k.person ? "Hallo " + d.k.person : "Sehr geehrte Damen und Herren"},\n\nanbei erhalten Sie meine Rechnung Nr. ${d.nr} über ${rvEuro(sum.gross)}.\nBitte überweisen Sie den Betrag bis zum ${rvDate(due)}.\n\nVielen Dank für die gute Zusammenarbeit!\n\nViele Grüße\n${nm}`;
   rvMailGo(d, txt, f);
 }
-async function rvMailGo(d, txt, f) {
+async function rvMailGo(d, txt, f, subject) {
   const { blob, name, mime } = f || rvOutFile(d, "pdf"),
-    subj = "Rechnung " + d.nr,
+    subj = subject || "Rechnung " + d.nr,
     to = d.k.email || "",
     br = window.AndroidBridge;
   const b64 = await new Promise((r) => {
