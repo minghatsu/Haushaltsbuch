@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.46.7",
+    "22. November 2026",
+    [
+      "Leiste: Absturz der Anzeige auf manchen Android-Geräten beim Zurückwischen behoben.",
+    ],
+  ],
+  [
     "0.46.6",
     "22. November 2026",
     [

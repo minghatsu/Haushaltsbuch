@@ -98,4 +98,7 @@ const shot=n=>{ try{ fs.writeFileSync(`${SHOT}/${DEV}-${n}.png`, adb('exec-out',
   shot('ende'); await b.close().catch(()=>{});
   console.log(`\n${checks-fails.length}/${checks} Prüfungen ok`);
   if (fails.length){ console.log('FEHLER:\n- '+fails.join('\n- ')); process.exit(1); }
-})().catch(e=>{ console.error(e); process.exit(2); });
+})().catch(e=>{ console.error(e);
+  /* Absturz der Seite: Spuren aus dem Gerätelog zeigen, was die WebView gekillt hat */
+  try { const log=adb('logcat','-d','-t','600').toString().split('\n').filter(l=>/chromium|cr_|libc|DEBUG|Fatal|signal|GPU|gralloc|Abort|lowmemory|OOM|renderer/i.test(l)); console.log('DIAG Gerätelog:\n'+log.slice(-80).join('\n')); } catch(_) { console.log('DIAG Gerätelog nicht erreichbar'); }
+  process.exit(2); });

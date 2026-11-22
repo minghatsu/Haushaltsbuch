@@ -411,8 +411,9 @@ const navFlow = (() => {
     svg.innerHTML =
       /* Farbwechsel nur in der Mitte zwischen den beiden Symbolen – die Kreise selbst bleiben in ihrer Farbe */
       '<defs><linearGradient id="nfFill" gradientUnits="userSpaceOnUse"><stop offset=".42"/><stop offset=".58"/></linearGradient></defs>' +
-      /* unsichtbare Fläche über die ganze Leiste: hält den Schatten-Bereich fest, auch wenn die Formen klein werden */
-      '<rect width="100%" height="100%" fill="none"/><g><path/><path/><path/></g>';
+      /* fast unsichtbare Fläche über die ganze Leiste: so bleibt die Größe der Schatten-Ebene bei jedem Bild gleich.
+         Ändert sie sich ständig, stürzt die Grafik mancher Android-Geräte ab */
+      '<rect width="100%" height="100%" fill="#000" fill-opacity=".003"/><g><path/><path/><path/></g>';
     n.insertBefore(svg, n.firstChild);
     return svg;
   }
