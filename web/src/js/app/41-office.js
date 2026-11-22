@@ -404,11 +404,9 @@ const navFlow = (() => {
     svg.setAttribute("class", "navflow");
     svg.setAttribute("aria-hidden", "true");
     svg.innerHTML =
-      '<defs><linearGradient id="nfFill" gradientUnits="userSpaceOnUse"><stop offset="0"/><stop offset="1"/></linearGradient>' +
-      '<linearGradient id="nfGloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/>' +
-      '<stop offset=".45" stop-color="#fff" stop-opacity=".05"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>' +
-      '<clipPath id="nfClip"><path/><path/><path/></clipPath></defs>' +
-      '<g fill="url(#nfFill)"><path/><path/><path/></g><rect width="100%" height="100%" fill="url(#nfGloss)" clip-path="url(#nfClip)"/>';
+      /* Farbwechsel nur in der Mitte zwischen den beiden Symbolen – die Kreise selbst bleiben in ihrer Farbe */
+      '<defs><linearGradient id="nfFill" gradientUnits="userSpaceOnUse"><stop offset=".42"/><stop offset=".58"/></linearGradient></defs>' +
+      "<g><path/><path/><path/></g>";
     n.insertBefore(svg, n.firstChild);
     return svg;
   }
@@ -544,12 +542,12 @@ const navFlow = (() => {
     const ra = k1 < 1 ? 24 : r1,
       neck = Math.max(1.8, Math.min(ra, r2) * 0.42 - Math.abs(nX - oc) * 0.07) * (1 - smooth(clamp((q - 0.78) / 0.2)));
     if (r2 > 1 && ra > 1 && neck > 0.4) D[2] = bridge(k1 < 1 ? oX + side * (oW / 2 - 24) : oc, ra, nX, r2, y, neck, dip);
-    const shapes = svg.querySelectorAll("g path"),
-      clips = svg.querySelectorAll("clipPath path");
-    D.forEach((d, i) => {
-      shapes[i].setAttribute("d", d);
-      clips[i].setAttribute("d", d);
-    });
+    const shapes = svg.querySelectorAll("g path");
+    D.forEach((d, i) => shapes[i].setAttribute("d", d));
+    /* alte Form in ihrer Farbe, neue Pille in ihrer – nur Verbindung und wandernde Spitze tragen den Übergang */
+    shapes[0].setAttribute("fill", S.ca);
+    shapes[1].setAttribute("fill", k2 > 0 ? S.cb : "url(#nfFill)");
+    shapes[2].setAttribute("fill", "url(#nfFill)");
     const grad = svg.querySelector("#nfFill");
     grad.setAttribute("x1", oc.toFixed(1));
     grad.setAttribute("x2", (Math.abs(tc - oc) < 1 ? oc + 1 : tc).toFixed(1));

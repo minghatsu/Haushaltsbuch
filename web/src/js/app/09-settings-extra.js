@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.46.4",
+    "22. November 2026",
+    [
+      "Leiste beim Wischen: Die Farbe wechselt jetzt genau in der Mitte zwischen den Symbolen – die Kreise selbst bleiben in ihrer Farbe.",
+      "Der weiße Glanz auf der Markierung ist weg.",
+    ],
+  ],
+  [
     "0.46.3",
     "22. November 2026",
     [
