@@ -223,7 +223,7 @@ function actGate() {
     <span class="lgic">${svgIcon("user", 26)}</span>
     <h2 id="actT">Willkommen bei Finanz MAMI</h2>
     <p class="small muted" style="margin:0 0 14px">Die App ist gerade nur auf Einladung nutzbar. Gib den Code ein, den du bekommen hast – er steht auch auf der Download-Seite.</p>
-    <input id="actCode" class="actin" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="z. B. K7P2QX" value="${escHtml(A.c)}" data-noi18n>
+    <div class="otp${A.err ? " bad" : ""}" id="actOtp" aria-hidden="false"><input id="actCode" class="otpin" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" aria-label="Einladungscode, 6 Zeichen" value="${escHtml(A.c)}" data-noi18n>${"<i><b></b></i>".repeat(6)}</div>
     ${canQrLive() ? `<button class="btn block" style="justify-content:center;gap:8px;margin-top:10px" data-actscan>${svgIcon("camera", 18)} QR-Code der Einladung scannen</button>` : ""}
     ${A.found && A.c ? `<p class="small actfound">${svgIcon("check", 14)} ${uiText("act_found")}</p>` : ""}
     <p class="small" id="actErr" style="color:var(--bad);min-height:1.2em;margin:10px 0 6px">${escHtml(A.err)}</p>
@@ -233,6 +233,7 @@ function actGate() {
     <p class="small muted" style="margin:8px 2px 0;text-align:center">Für dein eigenes zweites Gerät brauchst du keinen Code.</p>
   </div>`;
   A.seen = true;
+  otpPaint(false);
   if (!A.waited) {
     A.waited = true;
     pairCall("actwait", "", {
@@ -281,6 +282,16 @@ async function actTry() {
     });
     ui.act = null;
     notifyPlanSoon();
+    const w = $("actOtp"),
+      okb = $("actOk");
+    if (w && !reducedMotion()) {
+      w.classList.add("ok");
+      if (okb) {
+        okb.disabled = false;
+        okb.innerHTML = `${svgIcon("check", 18)} Freigeschaltet`;
+      }
+      await new Promise((r) => setTimeout(r, 900));
+    }
     const el = $("actBg");
     if (el) el.hidden = true;
     document.body.classList.remove("locked");
@@ -293,11 +304,48 @@ async function actTry() {
     actGate();
   }
 }
+/* Code-Kästchen: jedes füllt sich von unten mit Farbe, sobald sein Zeichen landet */
+function otpPaint(anim) {
+  const w = $("actOtp"),
+    inp = $("actCode");
+  if (!w || !inp) return;
+  const v = inp.value,
+    on = document.activeElement === inp;
+  [...w.querySelectorAll("i")].forEach((box, k) => {
+    const ch = v[k] || "",
+      was = box.firstChild.textContent;
+    box.firstChild.textContent = ch;
+    box.classList.toggle("on", !!ch);
+    box.classList.toggle("cur", on && k === Math.min(v.length, 5) && v.length < 6);
+    if (anim && ch && ch !== was && !reducedMotion()) {
+      box.classList.remove("rise");
+      void box.offsetWidth;
+      box.classList.add("rise");
+    }
+  });
+  w.classList.toggle("full", v.length === 6);
+  const ok = $("actOk");
+  if (ok) ok.classList.toggle("ready", v.length === 6);
+}
 document.addEventListener("input", (e) => {
   if (e.target.id === "actCode" && ui.act) {
-    ui.act.c = e.target.value;
+    const raw = e.target.value,
+      v = invCode(raw) || raw.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+    if (v !== raw) e.target.value = v;
+    ui.act.c = v;
+    if (ui.act.err) {
+      ui.act.err = "";
+      const er = $("actErr");
+      if (er) er.textContent = "";
+      $("actOtp").classList.remove("bad");
+    }
+    otpPaint(true);
   }
 });
+for (const t of ["focusin", "focusout"])
+  document.addEventListener(t, (e) => {
+    if (e.target.id === "actCode") otpPaint(false);
+  });
 document.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && e.target.id === "actCode") actTry();
 });

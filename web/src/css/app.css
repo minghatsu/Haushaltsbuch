@@ -3362,6 +3362,180 @@ html.touch .kpad {
   outline: none;
   border-color: var(--accent);
 }
+/* Einladungscode: sechs Kästchen, die sich beim Tippen von unten mit Farbe füllen */
+.otp {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+.otp .otpin {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  opacity: 0;
+  font-size: 16px;
+  border: 0;
+  caret-color: transparent;
+}
+.otp i {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 0.82;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: var(--bg);
+  overflow: hidden;
+  font-style: normal;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+.otp i::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: 50% 100%;
+  transition: transform 0.2s;
+}
+.otp i b {
+  position: relative;
+  font:
+    800 24px ui-monospace,
+    Consolas,
+    monospace;
+  color: var(--fg);
+}
+.otp i.on {
+  border-color: var(--accent);
+}
+.otp i.on::before {
+  transform: none;
+}
+.otp i.on b {
+  color: #fff;
+}
+.otp i.rise::before {
+  animation: otpRise 0.42s cubic-bezier(0.3, 1.1, 0.4, 1) both;
+}
+.otp i.rise b {
+  animation: otpLand 0.42s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+@keyframes otpRise {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes otpLand {
+  from {
+    transform: translateY(-14px) scale(0.7);
+    opacity: 0;
+    color: var(--fg);
+  }
+  55% {
+    opacity: 1;
+  }
+}
+.otp i.cur {
+  border-color: var(--accent);
+}
+.otp i.cur::after {
+  content: "";
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  bottom: 22%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  animation: otpBlink 1s steps(1) infinite;
+}
+@keyframes otpBlink {
+  50% {
+    opacity: 0;
+  }
+}
+.otp.ok i {
+  border-color: var(--good);
+  animation: otpPop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+@keyframes otpPop {
+  45% {
+    transform: translateY(-5px) scale(1.08);
+  }
+}
+.otp.ok i::before {
+  background: var(--good);
+  transition: background 0.25s;
+}
+.otp.ok i:nth-of-type(2),
+.otp.ok i:nth-of-type(2)::before {
+  animation-delay: 0.06s;
+  transition-delay: 0.06s;
+}
+.otp.ok i:nth-of-type(3),
+.otp.ok i:nth-of-type(3)::before {
+  animation-delay: 0.12s;
+  transition-delay: 0.12s;
+}
+.otp.ok i:nth-of-type(4),
+.otp.ok i:nth-of-type(4)::before {
+  animation-delay: 0.18s;
+  transition-delay: 0.18s;
+}
+.otp.ok i:nth-of-type(5),
+.otp.ok i:nth-of-type(5)::before {
+  animation-delay: 0.24s;
+  transition-delay: 0.24s;
+}
+.otp.ok i:nth-of-type(6),
+.otp.ok i:nth-of-type(6)::before {
+  animation-delay: 0.30s;
+  transition-delay: 0.30s;
+}
+.otp.bad i {
+  border-color: var(--bad);
+}
+.otp.bad {
+  animation: otpShake 0.4s;
+}
+@keyframes otpShake {
+  25% {
+    transform: translateX(-6px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+}
+.actbox #actOk {
+  background-size: 200% 100%;
+  transition:
+    filter 0.2s,
+    background-position 0.5s;
+}
+.actbox #actOk:not(.ready) {
+  filter: saturate(0.35) opacity(0.75);
+}
+.actbox #actOk.ready {
+  animation: otpReady 0.5s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+@keyframes otpReady {
+  40% {
+    transform: scale(1.04);
+  }
+}
+.otp.ok ~ #actOk {
+  background: var(--good);
+  filter: none;
+  animation: otpReady 0.5s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
 .actor {
   display: flex;
   align-items: center;

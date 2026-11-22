@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.47.1",
+    "22. November 2026",
+    [
+      "Einladungscode: sechs Kästchen, die sich beim Tippen von unten mit Farbe füllen. Ein falscher Code lässt sie rot wackeln, ein richtiger hüpft als Welle durch.",
+    ],
+  ],
+  [
     "0.47.0",
     "22. November 2026",
     [
