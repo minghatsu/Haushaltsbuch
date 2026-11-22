@@ -406,7 +406,8 @@ const navFlow = (() => {
     svg.innerHTML =
       /* Farbwechsel nur in der Mitte zwischen den beiden Symbolen – die Kreise selbst bleiben in ihrer Farbe */
       '<defs><linearGradient id="nfFill" gradientUnits="userSpaceOnUse"><stop offset=".42"/><stop offset=".58"/></linearGradient></defs>' +
-      "<g><path/><path/><path/></g>";
+      /* unsichtbare Fläche über die ganze Leiste: hält den Schatten-Bereich fest, auch wenn die Formen klein werden */
+      '<rect width="100%" height="100%" fill="none"/><g><path/><path/><path/></g>';
     n.insertBefore(svg, n.firstChild);
     return svg;
   }
@@ -545,9 +546,10 @@ const navFlow = (() => {
     const shapes = svg.querySelectorAll("g path");
     D.forEach((d, i) => shapes[i].setAttribute("d", d));
     /* alte Form in ihrer Farbe, neue Pille in ihrer – nur Verbindung und wandernde Spitze tragen den Übergang */
-    shapes[0].setAttribute("fill", S.ca);
-    shapes[1].setAttribute("fill", k2 > 0 ? S.cb : "url(#nfFill)");
-    shapes[2].setAttribute("fill", "url(#nfFill)");
+    const fills = [S.ca, k2 > 0 ? S.cb : "url(#nfFill)", "url(#nfFill)"];
+    fills.forEach((f, i) => {
+      if (shapes[i].getAttribute("fill") !== f) shapes[i].setAttribute("fill", f);
+    });
     const grad = svg.querySelector("#nfFill");
     grad.setAttribute("x1", oc.toFixed(1));
     grad.setAttribute("x2", (Math.abs(tc - oc) < 1 ? oc + 1 : tc).toFixed(1));

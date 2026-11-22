@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.46.5",
+    "22. November 2026",
+    [
+      "Leiste beim Wischen läuft auf älteren Android-Geräten wieder stabil.",
+    ],
+  ],
+  [
     "0.46.4",
     "22. November 2026",
     [
