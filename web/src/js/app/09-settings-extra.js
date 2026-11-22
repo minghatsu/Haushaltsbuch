@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.46.8",
+    "22. November 2026",
+    [
+      "Leiste: weitere Absicherung gegen den Grafikabsturz auf manchen Android-Geräten.",
+    ],
+  ],
+  [
     "0.46.7",
     "22. November 2026",
     [

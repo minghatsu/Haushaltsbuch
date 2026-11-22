@@ -50961,6 +50961,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.46.8",
+    "22. November 2026",
+    [
+      "Leiste: weitere Absicherung gegen den Grafikabsturz auf manchen Android-Geräten.",
+    ],
+  ],
+  [
     "0.46.7",
     "22. November 2026",
     [
@@ -89873,7 +89880,7 @@ const navFlow = (() => {
       '<defs><linearGradient id="nfFill" gradientUnits="userSpaceOnUse"><stop offset=".42"/><stop offset=".58"/></linearGradient></defs>' +
       /* fast unsichtbare Fläche über die ganze Leiste: so bleibt die Größe der Schatten-Ebene bei jedem Bild gleich.
          Ändert sie sich ständig, stürzt die Grafik mancher Android-Geräte ab */
-      '<rect width="100%" height="100%" fill="#000" fill-opacity=".003"/><g><path/><path/><path/></g>';
+      '<rect width="100%" height="100%" fill="#000" fill-opacity=".003"/><g fill="url(#nfFill)"><path/><path/><path/></g>';
     n.insertBefore(svg, n.firstChild);
     return svg;
   }
@@ -90012,10 +90019,7 @@ const navFlow = (() => {
     const shapes = svg.querySelectorAll("g path");
     D.forEach((d, i) => shapes[i].setAttribute("d", d));
     /* alte Form in ihrer Farbe, neue Pille in ihrer – nur Verbindung und wandernde Spitze tragen den Übergang */
-    const fills = [S.ca, k2 > 0 ? S.cb : "url(#nfFill)", "url(#nfFill)"];
-    fills.forEach((f, i) => {
-      if (shapes[i].getAttribute("fill") !== f) shapes[i].setAttribute("fill", f);
-    });
+
     const grad = svg.querySelector("#nfFill");
     grad.setAttribute("x1", oc.toFixed(1));
     grad.setAttribute("x2", (Math.abs(tc - oc) < 1 ? oc + 1 : tc).toFixed(1));
