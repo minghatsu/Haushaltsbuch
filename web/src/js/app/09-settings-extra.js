@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.47.4",
+    "22. November 2026",
+    [
+      "Aufgeräumt: rund 3.000 Zeilen ungenutzter Code und Gestaltung entfernt, große Programmteile in übersichtliche Dateien aufgeteilt. An der App selbst ändert sich nichts.",
+    ],
+  ],
+  [
     "0.47.3",
     "22. November 2026",
     [
@@ -249,9 +256,7 @@ const CHANGELOG = [
   [
     "0.47.2",
     "22. November 2026",
-    [
-      "Leiste: neu gezeichnet, damit die Wisch-Animation auch auf älteren Android-Geräten stabil läuft.",
-    ],
+    ["Leiste: neu gezeichnet, damit die Wisch-Animation auch auf älteren Android-Geräten stabil läuft."],
   ],
   [
     "0.47.1",
@@ -267,19 +272,11 @@ const CHANGELOG = [
       "Leiste: Die Kreise bleiben wieder in ihrer eigenen Farbe, der Wechsel liegt in der Mitte – jetzt ohne Absturzgefahr auf Android.",
     ],
   ],
-  [
-    "0.46.8",
-    "22. November 2026",
-    [
-      "Leiste: weitere Absicherung gegen den Grafikabsturz auf manchen Android-Geräten.",
-    ],
-  ],
+  ["0.46.8", "22. November 2026", ["Leiste: weitere Absicherung gegen den Grafikabsturz auf manchen Android-Geräten."]],
   [
     "0.46.7",
     "22. November 2026",
-    [
-      "Leiste: Absturz der Anzeige auf manchen Android-Geräten beim Zurückwischen behoben.",
-    ],
+    ["Leiste: Absturz der Anzeige auf manchen Android-Geräten beim Zurückwischen behoben."],
   ],
   [
     "0.46.6",
@@ -288,13 +285,7 @@ const CHANGELOG = [
       "Auch beim Antippen der Leiste fließt die Markierung jetzt als Kreis mit Verbindung zum neuen Bereich – egal wie weit entfernt.",
     ],
   ],
-  [
-    "0.46.5",
-    "22. November 2026",
-    [
-      "Leiste beim Wischen läuft auf älteren Android-Geräten wieder stabil.",
-    ],
-  ],
+  ["0.46.5", "22. November 2026", ["Leiste beim Wischen läuft auf älteren Android-Geräten wieder stabil."]],
   [
     "0.46.4",
     "22. November 2026",
@@ -306,9 +297,7 @@ const CHANGELOG = [
   [
     "0.46.3",
     "22. November 2026",
-    [
-      "Kurzes, schnelles Wischen wechselt die Seite jetzt zuverlässig – auch auf langsameren Handys.",
-    ],
+    ["Kurzes, schnelles Wischen wechselt die Seite jetzt zuverlässig – auch auf langsameren Handys."],
   ],
   [
     "0.46.2",
@@ -411,7 +400,9 @@ const CHANGELOG = [
   [
     "0.44.9",
     "21. November 2026",
-    ["Konten & Spaces: Wählst du unten ein früheres Jahr, zeigen die Kacheln oben die Stände am 31.12. dieses Jahres – nur mit den Konten, die es damals gab."],
+    [
+      "Konten & Spaces: Wählst du unten ein früheres Jahr, zeigen die Kacheln oben die Stände am 31.12. dieses Jahres – nur mit den Konten, die es damals gab.",
+    ],
   ],
   [
     "0.44.8",
@@ -446,7 +437,9 @@ const CHANGELOG = [
   [
     "0.44.4",
     "21. November 2026",
-    ["Unter der Haube aufgeräumt: der Programmcode ist neu sortiert und lesbarer. An der Bedienung ändert sich nichts."],
+    [
+      "Unter der Haube aufgeräumt: der Programmcode ist neu sortiert und lesbarer. An der Bedienung ändert sich nichts.",
+    ],
   ],
   [
     "0.44.3",

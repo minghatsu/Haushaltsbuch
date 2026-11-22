@@ -1,0 +1,752 @@
+/* Einladungs-Pinnwand */
+.invboardbox {
+  max-width: 760px;
+}
+.invhd .invrl {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+}
+.invnext {
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: 22px;
+  padding: 14px;
+  margin: 14px 0 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow);
+}
+.invnext.anim {
+  animation: invPop 0.45s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+@keyframes invPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.invnl {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.invnl small {
+  color: var(--muted);
+}
+.invnc {
+  font:
+    800 24px ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  margin: 2px 0 8px;
+}
+.invname {
+  width: 100%;
+}
+.invnb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.invnb .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.invqrs {
+  flex-basis: 100%;
+  display: flex;
+  justify-content: center;
+  animation: invPop 0.35s both;
+}
+.invqrs svg {
+  width: 200px;
+}
+.invcols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+}
+@media (max-width: 340px) {
+  .invcols {
+    grid-template-columns: repeat(3, minmax(130px, 1fr));
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 6px;
+  }
+  .invcol {
+    scroll-snap-align: start;
+  }
+}
+.invcol {
+  background: var(--cb);
+  border-radius: 18px;
+  padding: 8px 6px;
+  min-height: 240px;
+  overflow: auto;
+  animation: devIn 0.4s both;
+  animation-delay: calc(var(--i) * 70ms);
+}
+.invcol h4 {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 2px 4px 8px;
+  font-size: 12px;
+}
+.invmini {
+  background: var(--surface);
+  border-radius: 13px;
+  padding: 9px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: devIn 0.35s both;
+  animation-delay: calc(var(--i) * 45ms + 120ms);
+}
+.invmini b {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.invmini small {
+  color: var(--muted);
+}
+.invmc {
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.06em;
+}
+.invmini .link {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 0;
+}
+.invrem {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+.invempty {
+  color: var(--faint);
+  font-size: 12px;
+  text-align: center;
+  margin: 18px 0;
+}
+.invcols .chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.chip.no {
+  background: var(--surface);
+  color: var(--muted);
+}
+.chip.wa {
+  background: var(--surface);
+  color: var(--warn);
+}
+.chip.ok {
+  background: var(--surface);
+  color: var(--accent);
+}
+.invmini .chip.wa {
+  background: var(--warn-soft);
+}
+.invfoot {
+  margin: 12px 4px 0;
+  text-align: center;
+}
+.invside {
+  display: contents;
+}
+.invside > * {
+  flex-shrink: 0;
+}
+.invpub {
+  position: relative;
+  background: var(--surface);
+  border: 2px dashed color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 20px;
+  padding: 14px 16px;
+  margin: 0 0 12px;
+  animation: invPop 0.45s 0.04s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+  transition: opacity 0.2s;
+}
+.invpub > b {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+}
+.invpub > b svg.i {
+  stroke: var(--accent);
+}
+.invpst {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.invpub.off .invpst {
+  background: var(--sunk);
+  color: var(--muted);
+}
+.invpdot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: invPulse 1.6s ease-in-out infinite;
+}
+@keyframes invPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+  60% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+.invpub p {
+  margin: 4px 0 10px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.invpurl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--sunk);
+  border-radius: 14px;
+  padding: 6px 6px 6px 12px;
+  font:
+    600 12px ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  min-width: 0;
+  transition: opacity 0.2s;
+}
+.invpurl em {
+  font: inherit;
+  font-style: normal;
+  color: var(--accent);
+}
+.invpurl span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: ltr;
+}
+.invpcp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 11px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: 800 12px var(--f-body);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.invpcp svg.i {
+  stroke: currentColor;
+}
+.invpcp:hover svg.i {
+  animation: invRing 0.5s ease;
+}
+.invpcp:active {
+  transform: scale(0.93);
+}
+.invpub.off .invpurl {
+  opacity: 0.5;
+}
+.invpbar {
+  height: 6px;
+  border-radius: 99px;
+  background: var(--sunk);
+  margin: 12px 0 5px;
+  overflow: hidden;
+}
+.invpbar i {
+  display: block;
+  height: 100%;
+  width: var(--w);
+  min-width: 2px;
+  border-radius: inherit;
+  background: var(--accent);
+  transform-origin: left;
+  animation: invGrow 0.8s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes invGrow {
+  from {
+    transform: scaleX(0);
+  }
+}
+.invpstat {
+  display: block;
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.invpbtn {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  margin-top: 8px;
+}
+.invpbtn .link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+}
+.invpbtn .link svg.i {
+  stroke: currentColor;
+}
+.invpask {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--warn);
+  flex-basis: 100%;
+  animation: invPop 0.3s both;
+}
+.invpub.busy {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.invpub.new .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.invpub.new .btn svg.i {
+  stroke: currentColor;
+}
+.invlnk {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 1px 7px;
+  border-radius: 99px;
+  margin: 2px 0;
+}
+.invlnk svg.i {
+  stroke: currentColor;
+}
+.invpg {
+  position: relative;
+  border: 1.5px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.invpgi {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  opacity: 0.7;
+}
+.invpgi svg.i {
+  stroke: var(--accent);
+}
+.invpg b {
+  padding-right: 22px;
+}
+.invpgc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 5px;
+}
+.invpgc i {
+  font:
+    600 10px ui-monospace,
+    monospace;
+  letter-spacing: 0.04em;
+  background: var(--sunk);
+  border-radius: 6px;
+  padding: 1px 5px;
+  font-style: normal;
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .invpub,
+  .invpbar i,
+  .invpdot,
+  .invpask {
+    animation: none;
+  }
+}
+.invupd {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--warn-soft) 70%, var(--surface)), var(--warn-soft));
+  border-radius: 20px;
+  padding: 14px 16px;
+  margin: 0 0 12px;
+  animation: invPop 0.45s 0.08s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+.invupd b {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+}
+.invupd b svg.i {
+  stroke: var(--warn);
+}
+.invupd p {
+  margin: 4px 0 10px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.invupd.ok {
+  background: var(--accent-soft);
+}
+.invupd.ok b svg.i {
+  stroke: var(--accent);
+}
+.invupr {
+  position: absolute;
+  right: -24px;
+  top: -24px;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 14px solid color-mix(in srgb, var(--warn) 22%, transparent);
+  pointer-events: none;
+}
+.invbell {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  border: 0;
+  border-radius: 99px;
+  padding: 6px 10px;
+  font: 800 11.5px var(--f-body);
+  background: var(--fg);
+  color: var(--bg);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.invbell svg.i {
+  stroke: currentColor;
+}
+.invbell:hover svg.i {
+  animation: invRing 0.6s ease;
+}
+.invbell:active {
+  transform: scale(0.94);
+}
+.invbell.busy {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.invbell.big {
+  padding: 10px 16px;
+  font-size: 13px;
+}
+@keyframes invRing {
+  20% {
+    transform: rotate(-18deg);
+  }
+  45% {
+    transform: rotate(14deg);
+  }
+  70% {
+    transform: rotate(-8deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+.invvc {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 99px;
+  margin-top: 4px;
+}
+.invvc.ok {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.invvc.ok svg.i {
+  stroke: currentColor;
+}
+.invvc.old {
+  background: var(--warn-soft);
+  color: color-mix(in srgb, var(--warn) 70%, var(--fg));
+}
+.invvr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 2px;
+}
+.invok {
+  color: var(--accent);
+  font-weight: 900;
+}
+.invvdone {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.invvdone svg.i {
+  stroke: var(--accent);
+}
+.nudgebg {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
+  background: color-mix(in srgb, #0c1611 46%, transparent);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.nudgebg.show {
+  opacity: 1;
+}
+.nudgesh {
+  position: relative;
+  width: min(440px, 100%);
+  background: var(--surface);
+  border-radius: 30px;
+  padding: 54px 22px 18px;
+  text-align: center;
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5);
+  transform: translateY(40px) scale(0.97);
+  transition: transform 0.45s cubic-bezier(0.2, 1.25, 0.35, 1);
+}
+.nudgebg.show .nudgesh {
+  transform: none;
+}
+.nudgemami {
+  position: absolute;
+  left: 50%;
+  top: -38px;
+  width: 80px;
+  height: 80px;
+  margin-left: -40px;
+  border-radius: 50%;
+  border: 5px solid var(--surface);
+  background: var(--sunk);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  animation: nudgeHop 1.1s 0.35s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+@keyframes nudgeHop {
+  0% {
+    transform: translateY(16px) scale(0.6);
+    opacity: 0;
+  }
+  55% {
+    transform: translateY(-6px) scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+  }
+}
+.nudgesh h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+.nudgesh p {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.nudgev {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.nudgev span {
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-weight: 800;
+  font-size: 12.5px;
+}
+.nudgev .old {
+  background: var(--warn-soft);
+  color: color-mix(in srgb, var(--warn) 70%, var(--fg));
+}
+.nudgev .new {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.nudgev .arr {
+  padding: 0;
+  color: var(--muted);
+}
+.nudgesh ul {
+  text-align: start;
+  margin: 0 0 16px;
+  padding: 12px 14px 12px 30px;
+  background: var(--sunk);
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.nudgelater {
+  display: block;
+  margin: 8px auto 0;
+  color: var(--muted);
+}
+@media (min-width: 700px) {
+  .nudgebg {
+    align-items: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nudgesh,
+  .nudgemami,
+  .invupd {
+    transition: none;
+    animation: none;
+  }
+}
+/* Pinnwand am PC: breit, links Code und Update, rechts drei Spalten */
+html.pc:not(.istab) .invboardbox {
+  max-width: 1260px;
+  width: calc(100vw - 120px);
+  display: grid;
+  grid-template-columns: 330px 1fr;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 0 22px;
+  max-height: calc(100vh - 80px);
+}
+html.pc:not(.istab) .invboardbox > .invhd,
+html.pc:not(.istab) .invboardbox > .invcapx,
+html.pc:not(.istab) .invboardbox > .invfoot {
+  grid-column: 1/3;
+}
+html.pc:not(.istab) .invboardbox > .invside {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  grid-column: 1;
+  grid-row: 2/4;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px 3px 4px;
+  margin: 0 -3px;
+  scrollbar-width: thin;
+}
+html.pc:not(.istab) .invside > * {
+  margin: 0;
+  flex: none;
+}
+html.pc:not(.istab) .invside > .invnext {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
+/* in der schmalen Spalte unter den Knöpfen, nicht als zweite Spalte daneben */
+html.pc:not(.istab) .invside > .invnext .invqrs {
+  flex: none;
+  align-self: center;
+}
+html.pc:not(.istab) .invside > .invnext .invnb {
+  flex-direction: row;
+  justify-content: flex-start;
+}
+html.pc:not(.istab) .invside > .invnext .invnl {
+  flex: 0 0 auto;
+}
+html.pc:not(.istab) .invboardbox > .invcols {
+  grid-column: 2;
+  grid-row: 2/4;
+  margin-top: 14px;
+  gap: 14px;
+  min-height: 0;
+}
+html.pc:not(.istab) .invboardbox .invcol {
+  border-radius: 22px;
+  padding: 12px 10px;
+  min-height: 0;
+  max-height: calc(100vh - 260px);
+}
+html.pc:not(.istab) .invboardbox .invcol h4 {
+  font-size: 14px;
+  margin: 2px 6px 12px;
+}
+html.pc:not(.istab) .invboardbox .invmini {
+  border-radius: 16px;
+  padding: 11px 12px;
+  margin-bottom: 9px;
+  font-size: 12.5px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+html.pc:not(.istab) .invboardbox .invmini b {
+  font-size: 14px;
+}
+.actfound {
+  color: var(--accent);
+  margin: 10px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  animation: invPop 0.4s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .invnext.anim,
+  .invcol,
+  .invmini,
+  .invqrs,
+  .actfound {
+    animation: none;
+  }
+}

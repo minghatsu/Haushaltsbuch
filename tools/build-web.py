@@ -5,7 +5,7 @@
 
 Aufbau von web/src:
     index.html      HTML-Gerüst mit Platzhaltern
-    css/            fonts.css und app.css (Handy), pc.css (PC und Tablet)
+    css/            fonts.css, app/ (Handy, nach Themen in Dateien), pc.css (PC und Tablet)
     js/vendor/      fremde Bibliotheken, unverändert
     js/theme.js     setzt Hell/Dunkel, bevor die Seite gezeichnet wird
     js/app/         die App; alle Dateien teilen sich einen Gültigkeitsbereich
@@ -25,8 +25,8 @@ def read(path):
     return path.read_text(encoding="utf-8")
 
 
-def concat(folder):
-    files = sorted((SRC / folder).glob("*.js"))
+def concat(folder, ext="js"):
+    files = sorted((SRC / folder).glob("*." + ext))
     if not files:
         sys.exit(f"Keine Dateien in {folder}")
     return "\n".join(read(f).rstrip("\n") + "\n" for f in files)
@@ -35,11 +35,13 @@ def concat(folder):
 def build_index():
     out = []
     for line in read(SRC / "index.html").split("\n"):
-        m = re.fullmatch(r"<!-- (include|app): (\S+) -->", line.strip())
+        m = re.fullmatch(r"<!-- (include|app|css): (\S+) -->", line.strip())
         if not m:
             out.append(line)
         elif m.group(1) == "include":
             out.append(read(SRC / m.group(2)).rstrip("\n"))
+        elif m.group(1) == "css":
+            out.append(concat(m.group(2), "css").rstrip("\n"))
         else:
             out.append('(() => {\n"use strict";\n\n' + concat(m.group(2)) + "/*PC-JS*/\n})();")
     return "\n".join(out)

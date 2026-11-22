@@ -1,0 +1,537 @@
+/* Kacheln, Rechnungs- und Kundenansichten */
+.ictile {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.ictile.bavatar {
+  position: relative;
+  overflow: hidden;
+  background: var(--bb);
+  color: var(--bi);
+  font-family: var(--f-display);
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.ictile.bavatar.haslogo {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.ictile.bavatar.haslogo b {
+  visibility: hidden;
+}
+.legal h3 {
+  font-size: 14.5px;
+  margin: 16px 0 4px;
+}
+.legal p {
+  margin: 0 0 8px;
+  line-height: 1.55;
+  font-size: 13.5px;
+}
+.raviz {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.rabox {
+  flex: 1;
+  min-width: 0;
+  background: var(--sunk);
+  border-radius: 18px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rabox i {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.rabox small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.rabox b {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+.rabox.away {
+  background: var(--good-soft);
+}
+.rabox.away i {
+  color: var(--good);
+}
+.raar {
+  flex: none;
+  width: 30px;
+  height: 20px;
+  fill: none;
+  stroke: var(--faint);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rawl {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font: 700 12.5px var(--f-body);
+  cursor: pointer;
+  text-align: start;
+}
+[dir="rtl"] .raar {
+  transform: scaleX(-1);
+}
+.rvnry {
+  grid-column: 1/-1;
+  margin: 2px 0 0;
+}
+.rvks {
+  padding: 6px;
+  gap: 2px;
+}
+.rvks .rvk {
+  border-radius: 14px;
+  padding: 8px 10px;
+  background: transparent;
+}
+.rvks .rvk.on {
+  background: var(--accent-soft, color-mix(in srgb, var(--accent) 14%, var(--surface)));
+  border-color: transparent;
+}
+.rvknr {
+  font:
+    700 11.5px ui-monospace,
+    Menlo,
+    Consolas,
+    monospace;
+  background: var(--sunk);
+  color: var(--muted);
+  padding: 3px 8px;
+  border-radius: 8px;
+  flex: none;
+}
+.rvav.rvin {
+  color: #fff;
+  font-size: 13.5px;
+  letter-spacing: 0.02em;
+}
+.rvav.rvplus {
+  background: var(--sunk);
+  color: var(--accent);
+}
+.rvav.rvlg {
+  background: #fff;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent);
+}
+.rvav.rvlg img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+}
+.rvav.big {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 16px;
+}
+.rvkhd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rvkls {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.rvkls.ok {
+  color: var(--good);
+}
+.rvkls.busy::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-inline-end: 6px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: rvkspin 0.8s linear infinite;
+  vertical-align: -1px;
+}
+@keyframes rvkspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.rvklw {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.rvklx {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: 700 12px var(--f-body);
+  cursor: pointer;
+  padding: 0;
+}
+.rvkoff {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--sunk);
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.rvkoff .btn {
+  width: auto;
+  flex: none;
+}
+.rvbad {
+  color: var(--bad) !important;
+  font-weight: 700;
+}
+.rvkhd .grow {
+  flex: 1;
+}
+.rvkdel {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: color-mix(in srgb, var(--bad) 10%, var(--surface));
+  color: var(--bad);
+  font: 700 12.5px var(--f-body);
+  padding: 7px 11px;
+  border-radius: 10px;
+  cursor: pointer;
+  flex: none;
+  transition: transform 0.15s;
+}
+.rvkdel:active {
+  transform: scale(0.95);
+}
+.rvits {
+  margin-bottom: 10px;
+}
+.kdtop {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.kdtop .in {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+}
+.kdtop .btn {
+  width: auto;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.kdl {
+  padding: 6px;
+}
+.kdr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  background: none;
+  text-align: start;
+  color: var(--fg);
+  padding: 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-family: var(--f-body);
+  transition: background 0.2s;
+}
+.kdr:hover {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+.kdr.on {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+.kdr b {
+  display: block;
+  font-size: 14.5px;
+}
+.kdr small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kdr .grow {
+  min-width: 0;
+}
+.kdr > svg {
+  flex: none;
+  color: var(--faint);
+}
+.kdf {
+  padding: 10px 8px 14px;
+  border-bottom: 1px solid var(--sunk);
+  margin-bottom: 6px;
+}
+.kdnew {
+  padding: 12px;
+}
+.kdnew .kdf {
+  border: 0;
+  padding: 8px 0 0;
+}
+.kdbtns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.kdbtns .btn {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.kdbtns .grow {
+  flex: 1;
+}
+@media (max-width: 520px) {
+  .kdtop {
+    flex-wrap: wrap;
+  }
+  .kdtop .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+.rvlearn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  border-radius: 16px;
+  padding: 10px 12px;
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.rvlearn .btn {
+  width: auto;
+  flex: none;
+}
+.rvlearn .grow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.rvitb {
+  padding: 12px;
+}
+.rvithd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.rvitb #rvItQ2 {
+  width: 100%;
+  max-width: none;
+  margin-bottom: 4px;
+}
+.rvitr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  background: none;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--sunk);
+  text-align: start;
+  color: var(--fg);
+  cursor: pointer;
+  font-family: var(--f-body);
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+.rvitr:last-of-type {
+  border-bottom: 0;
+}
+.rvitr:hover {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+.rvitr:active .rvitad {
+  transform: scale(0.9);
+}
+.rvitr b {
+  display: block;
+  font-size: 14px;
+}
+.rvitr small {
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.rvitpr {
+  flex: none;
+  text-align: end;
+  font-weight: 800;
+  font-size: 14px;
+}
+.rvitpr small {
+  display: block;
+}
+.rvitr .rvitad {
+  transition: transform 0.15s;
+}
+.rvitmore {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: 700 13px var(--f-body);
+  padding: 10px 4px 2px;
+  cursor: pointer;
+}
+.rvitl {
+  padding: 4px 10px;
+}
+.rvit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--sunk);
+}
+.rvit:last-child {
+  border: 0;
+}
+.rvit b {
+  display: block;
+  font-size: 14px;
+}
+.rvit small {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.rvitp {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  flex: none;
+}
+.rvitp .in {
+  width: 78px;
+  height: 36px;
+  padding: 0 8px;
+  text-align: end;
+}
+.rvitx,
+.rvitad {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex: none;
+}
+.rvitx {
+  background: none;
+  color: var(--faint);
+}
+.rvitad {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  color: var(--accent);
+}
+@media (max-width: 520px) {
+  .rvitp .in {
+    width: 66px;
+  }
+}
+.legal ul {
+  margin: 0 0 8px;
+  padding-inline-start: 20px;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.legal li {
+  margin: 0 0 4px;
+}
+.lgsec {
+  border-bottom: 1px solid var(--line);
+}
+.lghd {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 2px;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.lgsec .legal {
+  padding: 0 2px 12px;
+  max-height: 46vh;
+  overflow: auto;
+}
+.legalbg {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: color-mix(in srgb, var(--bg) 70%, #000);
+  display: grid;
+  place-items: end center;
+  overflow: auto;
+  padding: 16px;
+}
+.legalbox {
+  background: var(--surface);
+  border-radius: 26px;
+  padding: 22px 18px 18px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.5);
+  margin: auto 0 0;
+}

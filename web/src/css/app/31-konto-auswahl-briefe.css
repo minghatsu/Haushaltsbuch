@@ -1,0 +1,155 @@
+/* Konto/Space-Auswahl */
+.acctrow {
+  margin: 10px 0 0;
+}
+.acctrow[hidden] {
+  display: none;
+}
+.karow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  border-radius: 18px;
+  padding: 10px 12px;
+  cursor: pointer;
+  color: var(--fg);
+  text-align: start;
+  font-family: var(--f-body);
+}
+.karow i,
+.kaopt i {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-style: normal;
+  color: #fff;
+  font-size: 18px;
+}
+.kaopt i svg,
+.karow i svg,
+.potf i svg {
+  color: #fff;
+  stroke: #fff;
+}
+.karow i {
+  color: #fff;
+}
+.kat {
+  flex: 1;
+  min-width: 0;
+}
+.kat b {
+  display: block;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kat small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.kat .neg {
+  color: var(--bad);
+}
+.kach {
+  color: var(--accent);
+  font: 800 13px var(--f-body);
+  white-space: nowrap;
+}
+.kach em {
+  font-style: normal;
+  display: inline-block;
+  transition: transform 0.3s;
+}
+.karow[aria-expanded="true"] .kach em {
+  transform: rotate(90deg);
+}
+.kalist {
+  margin-top: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  border-radius: 18px;
+  padding: 6px;
+}
+.kalist[hidden] {
+  display: none;
+}
+.kalh {
+  font: 800 11.5px var(--f-body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 8px 4px;
+}
+.kaopt {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  background: none;
+  border-radius: 14px;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--fg);
+  font: 700 14px var(--f-body);
+  text-align: start;
+}
+.kaopt i {
+  width: 34px;
+  height: 34px;
+  font-size: 16px;
+  border-radius: 10px;
+}
+.kaon {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kaopt small {
+  margin-left: auto;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 12.5px;
+}
+.kaopt b {
+  color: var(--accent);
+  margin-left: 6px;
+}
+.kaopt.on {
+  background: var(--accent-soft);
+}
+.kaopt:hover {
+  background: var(--sunk);
+}
+/* Briefe vom Amt */
+.brsum {
+  padding: 12px 14px;
+}
+.brsum p {
+  margin: 0;
+  padding: 3px 0;
+  font: 600 14.5px/1.45 var(--f-body);
+}
+.brsum p:first-child {
+  font-weight: 800;
+}
+.brhero.neg {
+  background: linear-gradient(135deg, var(--bad), color-mix(in srgb, var(--bad) 65%, #f0a050));
+}
+.brdocs {
+  min-height: 80px;
+  resize: vertical;
+  font: 600 14px var(--f-body);
+}

@@ -1,0 +1,93 @@
+/* Plus-Rad */
+.fan.wheel .fanb {
+  transition: none !important;
+  margin: -32px 0 0 -32px;
+  width: 64px;
+  height: 64px;
+  transform-origin: center;
+  will-change: transform, opacity, left, top;
+}
+.fan.wheel .fanb.peek span {
+  opacity: 0;
+}
+.fan.wheel .fanb span {
+  transition: opacity 0.2s;
+}
+.fan:not(.wheel) .fanb.fanx,
+.fan:not(.wheel) .fanhint,
+.fan:not(.wheel) .fandots {
+  display: none;
+}
+.fanhint {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(150px, 40vw);
+  line-height: 1.25;
+  padding: 4px 12px;
+  border-radius: 14px;
+  background: color-mix(in srgb, #0b1a14 72%, transparent);
+  bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+  text-align: center;
+  color: #fff;
+  font: 800 12.5px var(--f-body);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.fan.show .fanhint.on {
+  opacity: 1;
+}
+.fandots {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.fan.show .fandots {
+  opacity: 1;
+}
+.fandots #fanDw {
+  display: flex;
+  gap: 6px;
+}
+.fandots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.5);
+  transition: all 0.25s;
+}
+.fandots i.on {
+  width: 16px;
+  background: #fff;
+}
+.fandots b {
+  color: #fff;
+  font-size: 18px;
+  opacity: 0.85;
+  animation: fannud 1.6s ease-in-out infinite;
+}
+.fandots b:last-child {
+  animation-direction: reverse;
+}
+@keyframes fannud {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translateX(-4px);
+  }
+}
+.fan.wheel {
+  touch-action: none;
+}

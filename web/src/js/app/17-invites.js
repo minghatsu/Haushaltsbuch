@@ -330,7 +330,12 @@ function otpPaint(anim) {
 document.addEventListener("input", (e) => {
   if (e.target.id === "actCode" && ui.act) {
     const raw = e.target.value,
-      v = invCode(raw) || raw.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+      v =
+        invCode(raw) ||
+        raw
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, "")
+          .slice(0, 6);
     if (v !== raw) e.target.value = v;
     ui.act.c = v;
     if (ui.act.err) {

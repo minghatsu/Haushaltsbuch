@@ -1,0 +1,257 @@
+/* Steuerbescheide */
+.stbbars {
+  padding: 14px 14px 10px;
+  margin-bottom: 10px;
+}
+.stbb {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  height: 160px;
+}
+.stbb button {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--muted);
+  font: 700 11.5px var(--f-body);
+  padding: 0;
+}
+.stbb em {
+  font-style: normal;
+  font-weight: 800;
+  color: var(--fg);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.stbb i {
+  display: block;
+  width: 100%;
+  max-width: 64px;
+  height: calc(var(--h) * 0.72);
+  min-height: 8px;
+  border-radius: 12px 12px 5px 5px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent));
+  transform-origin: bottom;
+  transition: filter 0.2s;
+}
+.stbb i.neg {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bad) 75%, #fff), var(--bad));
+}
+.stbb button:hover i {
+  filter: brightness(1.08);
+}
+.stbpot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.stbpot b {
+  display: block;
+  font-size: 15px;
+}
+.stbpot small {
+  display: block;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-top: 3px;
+}
+.stbring {
+  --p: 0;
+  flex: none;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent) calc(var(--p) * 1%), var(--sunk) 0);
+  display: grid;
+  place-items: center;
+}
+.stbring b {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: grid !important;
+  place-items: center;
+  font: 900 15px var(--f-body) !important;
+  margin: 0;
+}
+.fcr > .grow,
+.tmbi > .grow,
+.srrow > .grow,
+.zvrow > .grow,
+.stbact > span:last-child,
+.vacard .grow {
+  flex: 1;
+  min-width: 0;
+}
+.stbneg {
+  color: var(--bad);
+}
+.stbpos {
+  color: var(--good);
+}
+.b-grn {
+  background: var(--good-soft);
+  color: var(--good);
+}
+.stbpdf {
+  height: 260px;
+  display: grid;
+  place-items: center;
+  font-size: 70px;
+  background: #fff;
+}
+.stbhero.neg {
+  background: linear-gradient(135deg, var(--bad), color-mix(in srgb, var(--bad) 65%, #f0a050));
+}
+.stbtl {
+  padding: 12px 14px 4px 34px;
+  position: relative;
+}
+.stbtl::before {
+  content: "";
+  position: absolute;
+  left: 19px;
+  top: 20px;
+  bottom: 20px;
+  width: 2px;
+  background: var(--line);
+}
+.stbp {
+  position: relative;
+  padding: 4px 0 12px;
+}
+.stbp::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.stbp.w::before {
+  background: var(--warn);
+  box-shadow: 0 0 0 4px var(--warn-soft);
+}
+.stbp.r::before {
+  background: var(--bad);
+  box-shadow: 0 0 0 4px var(--bad-soft);
+  animation: vaPul 1.6s ease-in-out infinite;
+}
+.stbp.g::before {
+  background: var(--good);
+  box-shadow: 0 0 0 4px var(--good-soft);
+}
+.stbp b {
+  display: block;
+  font-size: 14.5px;
+}
+.stbp small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.stbab .grow b {
+  font-size: 13.5px;
+  font-weight: 650;
+}
+.stbab .vab {
+  border: 0;
+  cursor: pointer;
+  animation: none;
+}
+.stbma {
+  margin: 4px 0 4px;
+}
+.stbacts {
+  padding: 4px 0;
+}
+.stbact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-top: 1px solid var(--line);
+  font: 600 14px var(--f-body);
+  cursor: pointer;
+}
+.stbact:first-child {
+  border-top: 0;
+}
+.stbact input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.stbck {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 2px solid var(--line);
+  display: grid;
+  place-items: center;
+  color: transparent;
+  font-weight: 900;
+  transition: all 0.3s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.stbact.on .stbck {
+  background: var(--good);
+  border-color: var(--good);
+  color: #fff;
+}
+.stbact:not(.on) {
+  color: var(--muted);
+}
+.stbseg {
+  display: flex;
+  gap: 6px;
+  background: var(--sunk);
+  border-radius: 14px;
+  padding: 4px;
+}
+.stbseg button {
+  flex: 1;
+  border: 0;
+  background: none;
+  border-radius: 10px;
+  padding: 9px 4px;
+  font: 700 13px var(--f-body);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.stbseg button.on {
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: var(--shadow);
+}
+.stbgo {
+  position: relative;
+  overflow: hidden;
+}
+.stbgo::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  left: -70%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: vaShn 2.8s ease-in-out infinite;
+}

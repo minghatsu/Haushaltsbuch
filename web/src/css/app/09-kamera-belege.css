@@ -1,0 +1,629 @@
+/* Kamera, Belege, Zahlarten */
+.camlive {
+  position: fixed;
+  inset: 0;
+  z-index: 330;
+  background: #000;
+  color: #fff;
+}
+.camlive video,
+.camlive canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.camx,
+.camx2 {
+  position: absolute;
+  left: 14px;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 0;
+  background: #0007;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 2;
+}
+.camtop {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: calc(64px + env(safe-area-inset-top, 0px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.camchip {
+  background: #0e4d35ee;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 15px;
+  box-shadow: 0 6px 16px #0006;
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.camchip small {
+  opacity: 0.85;
+  font-weight: 600;
+  font-size: 12px;
+}
+.camtypes {
+  display: flex;
+  gap: 6px;
+  pointer-events: auto;
+}
+.camtypes button {
+  border: 0;
+  background: #000a;
+  color: #fffd;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.camtypes button.on {
+  background: #6ee7b7;
+  color: #0e3d2c;
+}
+.cambot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 40px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(transparent, #000c);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.camhint {
+  font-size: 13px;
+  font-weight: 600;
+  background: #0008;
+  padding: 5px 12px;
+  border-radius: 99px;
+}
+.camrow {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.camshut {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  background: #6ee7b7;
+  box-shadow: 0 0 0 4px #6ee7b755;
+  cursor: pointer;
+}
+.camshut:active {
+  transform: scale(0.94);
+}
+.camside {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 0;
+  background: #ffffff26;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.camwork {
+  position: fixed;
+  inset: 0;
+  z-index: 340;
+  background: #000a;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.camspin {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 4px solid #ffffff44;
+  border-top-color: #6ee7b7;
+  animation: spin 0.9s linear infinite;
+}
+.camrev {
+  position: fixed;
+  inset: 0;
+  z-index: 335;
+  background: var(--bg);
+  overflow-y: auto;
+}
+.crin {
+  max-width: 560px;
+  margin: 0 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 14px calc(14px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+}
+.crh {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 2px 8px;
+}
+.crh b {
+  font-family: var(--f-display);
+  font-size: 20px;
+}
+.crh .camx2 {
+  position: static;
+  background: var(--sunk);
+  color: var(--fg);
+}
+.crtypes {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.crtypes button {
+  border: 0;
+  background: var(--sunk);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.crtypes button.on {
+  background: var(--accent);
+  color: #fff;
+}
+.crshot {
+  max-height: 36vh;
+  overflow: auto;
+  border-radius: 18px;
+  background: #1d1a17;
+  padding: 8px;
+  flex: none;
+}
+.crpic {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+}
+.crpic img,
+.crpic svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.crpic img {
+  border-radius: 6px;
+}
+.crlbl {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 14px 4px 6px;
+}
+.crf {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 4px 12px;
+  box-shadow: var(--shadow);
+}
+.crrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 2px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.crrow:last-child {
+  border: 0;
+}
+.crrow i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+.crrow small {
+  width: 86px;
+  flex: none;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.crrow input,
+.crrow select {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--fg);
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+.crrow input:focus,
+.crrow select:focus {
+  border-color: var(--accent);
+  background: var(--surface);
+  outline: none;
+}
+.crrow em {
+  font-style: normal;
+  color: var(--muted);
+}
+.crrow.act {
+  background: color-mix(in srgb, #f59e0b 12%, transparent);
+  margin: 0 -12px;
+  padding: 8px 14px;
+  border-radius: 12px;
+}
+.crrow.warn small::after {
+  content: " !";
+  color: #b45309;
+  font-weight: 800;
+}
+.crtx {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 2px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.crtx:last-child {
+  border: 0;
+}
+.crtx input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  flex: none;
+}
+.crtx .d {
+  color: var(--muted);
+  width: 40px;
+  flex: none;
+}
+.crtx .n {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.crtx .warnt {
+  display: block;
+  color: #b45309;
+  font-size: 11px;
+  font-weight: 700;
+}
+.crtx .a {
+  width: 96px;
+  text-align: right;
+  border: 1px solid transparent;
+  background: transparent;
+  font: inherit;
+  font-weight: 800;
+  padding: 5px 6px;
+  border-radius: 9px;
+}
+.crtx .a:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+.crtx .a.neg {
+  color: var(--bad, #b42318);
+}
+.crtx .a.pos {
+  color: var(--good, #1b7a55);
+}
+.crtx.off {
+  opacity: 0.5;
+}
+.crtx.act {
+  background: color-mix(in srgb, #f59e0b 12%, transparent);
+  margin: 0 -12px;
+  padding: 8px 14px;
+  border-radius: 12px;
+}
+.crchk {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 10px 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.crchk input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+.crbtns {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  gap: 10px;
+}
+.crbtns .btn {
+  flex: 1;
+  justify-content: center;
+}
+.bkhd {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 14px 2px 8px;
+}
+.bkgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.bkt {
+  background: var(--surface);
+  border: 2px solid transparent;
+  border-radius: 16px;
+  padding: 12px 4px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  box-shadow: var(--shadow);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fg);
+  text-align: center;
+  cursor: pointer;
+  line-height: 1.2;
+  min-width: 0;
+}
+.bkt.on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+.bklg {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 12.5px;
+  letter-spacing: -0.02em;
+  flex: none;
+}
+.bksi svg {
+  width: 62%;
+  height: 62%;
+}
+.bkimg {
+  background: #fff;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.bkimg img {
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+}
+.bklogos {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 14px 2px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.bklogos input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+.bkother {
+  width: 100%;
+  margin-top: 10px;
+  box-sizing: border-box;
+}
+.bkgh {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bkgh .bklg {
+  border-radius: 9px;
+  font-size: 10px;
+}
+#bankBg .wiz {
+  padding-bottom: 90px;
+}
+.payseg {
+  display: flex;
+  gap: 8px;
+  margin: 2px 0 10px;
+}
+.payseg button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 8px;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  background: var(--sunk);
+  color: var(--fg);
+  font: inherit;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+}
+.payseg button i {
+  font-style: normal;
+  font-size: 18px;
+}
+.payseg button.on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  color: var(--accent);
+}
+.payseg.need {
+  animation: payneed 0.5s;
+}
+@keyframes payneed {
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+.acard.cashc {
+  background: linear-gradient(150deg, #d4a017, color-mix(in srgb, #d4a017 55%, #000)) !important;
+}
+.cashbal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cashbal .coin {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: color-mix(in srgb, #d4a017 22%, var(--surface));
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  flex: none;
+}
+.cashbal b {
+  display: block;
+  font-family: var(--f-display);
+  font-size: 26px;
+}
+.cashbal b.neg {
+  color: var(--bad, #b42318);
+}
+.cashbal small {
+  font-size: 12.5px;
+}
+.cashmv {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+}
+.cmv {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 2px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: 14px;
+  text-align: start;
+  cursor: pointer;
+}
+.cmv small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.cmv b.pos {
+  color: var(--good, #1b7a55);
+}
+.cmv b.neg {
+  color: var(--bad, #b42318);
+}
+.cashbtns {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.cashbtns .btn {
+  flex: 1;
+  justify-content: center;
+}
+.cashset {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cashset .in {
+  flex: 1;
+  font-size: 20px;
+  font-weight: 700;
+}
+.cashset span {
+  color: var(--muted);
+  font-weight: 700;
+}
+.atabs {
+  display: flex;
+  background: var(--sunk);
+  border-radius: 14px;
+  padding: 4px;
+  gap: 4px;
+  margin: 0 0 10px;
+}
+.atabs button {
+  flex: 1;
+  border: 0;
+  background: none;
+  font: 700 13.5px var(--f-body);
+  color: var(--muted);
+  padding: 9px 2px;
+  border-radius: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.atabs button.on {
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: 0 1px 4px #0000001f;
+}

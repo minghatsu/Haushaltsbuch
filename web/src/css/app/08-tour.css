@@ -1,0 +1,342 @@
+/* Tour mit Mami */
+.tourbg {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+}
+.tourbg.card {
+  background: linear-gradient(170deg, #1f8a5f, #0e4d35);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  animation: tfade 0.25s;
+}
+.tw {
+  background: #fff;
+  color: #0e4d35;
+  border: 0;
+  border-radius: 16px;
+  padding: 15px;
+  font: inherit;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+}
+.tring {
+  position: fixed;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--accent) 55%, #fff),
+    0 0 0 200vmax rgba(8, 25, 18, 0.72);
+  pointer-events: none;
+  transition:
+    left 0.35s,
+    top 0.35s,
+    width 0.35s,
+    height 0.35s,
+    border-radius 0.35s;
+}
+.tbub {
+  position: fixed;
+  background: var(--surface);
+  color: var(--fg);
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px #0006;
+  animation: tfade 0.25s;
+}
+.tico {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 14px;
+  background: #ffffff26;
+  display: grid;
+  place-items: center;
+}
+.tin {
+  padding: 13px 16px 14px;
+}
+.tin p {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.trow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  gap: 8px;
+}
+.tskip {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 6px 2px;
+}
+.tnav {
+  display: flex;
+  gap: 6px;
+}
+.tnext {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 0;
+  border-radius: 12px;
+  padding: 9px 16px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+.tback {
+  background: var(--sunk);
+  color: var(--fg);
+  border: 0;
+  border-radius: 12px;
+  width: 38px;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tourstart {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: start;
+  border: 0;
+  border-radius: 18px;
+  padding: 14px;
+  margin: 0 0 12px;
+  background: linear-gradient(160deg, #1f8a5f, #0e4d35);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.tourstart b {
+  display: block;
+  font-size: 16px;
+}
+.tourstart small {
+  display: block;
+  opacity: 0.85;
+  font-size: 13px;
+}
+@keyframes tfade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.tourbg.mt .tring {
+  left: 0;
+  top: 0;
+  transition:
+    transform 0.62s cubic-bezier(0.45, 0.05, 0.25, 1),
+    width 0.62s cubic-bezier(0.45, 0.05, 0.25, 1),
+    height 0.62s cubic-bezier(0.45, 0.05, 0.25, 1),
+    border-radius 0.62s,
+    box-shadow 0.3s;
+  will-change: transform;
+}
+.tourbg.mt .tring::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 2px solid color-mix(in srgb, var(--accent) 55%, #fff);
+  animation: tmpul 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.tourbg.mt .tring.none {
+  box-shadow: 0 0 0 200vmax rgba(8, 25, 18, 0.72);
+}
+.tourbg.mt .tring.none::after {
+  display: none;
+}
+@keyframes tmpul {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0;
+  }
+}
+.tmami {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: 58px;
+  height: 58px;
+  will-change: transform;
+  pointer-events: none;
+  backface-visibility: hidden;
+}
+.tmbob {
+  display: block;
+  width: 58px;
+  height: 58px;
+  animation: tmbob 2.6s ease-in-out infinite;
+}
+@keyframes tmbob {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+.tmami .mav {
+  width: 58px;
+  height: 58px;
+  border: 3px solid #fff;
+  box-sizing: border-box;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+  transform-origin: 50% 100%;
+}
+.tbub.tmb {
+  left: 0;
+  top: 0;
+  overflow: visible;
+  animation: none;
+  opacity: 0;
+  scale: 0.88;
+  pointer-events: none;
+  padding: 11px 14px 12px;
+  border-radius: 20px;
+  transition:
+    opacity 0.16s ease,
+    scale 0.26s cubic-bezier(0.3, 1.45, 0.5, 1);
+  will-change: transform, opacity;
+  z-index: 2;
+}
+.tbub.tmb.on {
+  opacity: 1;
+  scale: 1;
+  pointer-events: auto;
+}
+.tmb.tl {
+  transform-origin: 0 var(--ty, 30px);
+}
+.tmb.tr {
+  transform-origin: 100% var(--ty, 30px);
+}
+.tmb::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--ty, 30px) - 8px);
+  width: 16px;
+  height: 16px;
+  background: var(--surface);
+  transform: rotate(45deg);
+  border-radius: 3px;
+}
+.tmb.tl::before {
+  left: -6px;
+}
+.tmb.tr::before {
+  right: -6px;
+}
+.tmhd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.tmhd small {
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.tmt {
+  display: block;
+  font-size: 16.5px;
+  line-height: 1.3;
+  margin: 3px 0 5px;
+  color: var(--fg);
+}
+.tmb .tin {
+  padding: 0;
+}
+.tmb .tin p {
+  margin: 0 0 6px;
+}
+.tmb .trow {
+  margin-top: 10px;
+}
+.tmb .tmt,
+.tmb .tin {
+  transition: opacity 0.22s ease;
+}
+.tmb.typing .tmt,
+.tmb.typing .tin {
+  opacity: 0;
+}
+.tmb.typing::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -16px;
+  border-radius: 50%;
+  background: var(--muted);
+  box-shadow:
+    12px 0 0 var(--muted),
+    24px 0 0 var(--muted);
+  animation: tmdots 0.8s ease-in-out infinite;
+}
+@keyframes tmdots {
+  50% {
+    opacity: 0.35;
+  }
+}
+html[data-theme="dark"] .tmami .mav,
+html.dark .tmami .mav {
+  border-color: #2a3530;
+}
+
+.appfoot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+  margin: 22px 0 6px;
+}
+.appfoot b {
+  font-size: 16px;
+  font-weight: 800;
+}
+.appfoot span {
+  font-size: 14px;
+  color: var(--muted);
+}
+.appfoot small {
+  font-size: 12px;
+  color: var(--muted);
+  opacity: 0.75;
+  margin-top: 3px;
+}
