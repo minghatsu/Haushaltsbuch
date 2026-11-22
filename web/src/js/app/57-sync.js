@@ -1622,6 +1622,9 @@ $("loginGo").onclick = doLogin;
     shC.style.opacity = String(a * 0.6);
     fN.style.transform = `translateZ(${-h}px) rotateY(${th - s * 90}deg) translateZ(${h}px)`;
     shN.style.opacity = String((1 - a) * 0.6);
+    /* Ganz am Anfang zeigt die Nachbarseite nur ihre Kante – ausblenden statt backface-visibility, das auf
+       Android-WebViews alte Würfelbilder auf dem Bildschirm stehen ließ */
+    fN.style.visibility = !busy && a < 0.03 ? "hidden" : "";
     if (!busy) {
       waveAll(a);
       navFlow.move(a);
@@ -1629,7 +1632,12 @@ $("loginGo").onclick = doLogin;
   }
   function reset() {
     if (!busy) navFlow.stop();
-    if (stage) stage.remove();
+    if (stage) {
+      /* erst unsichtbar machen, dann entfernen – sonst bleibt auf manchen Android-Geräten das letzte Bild stehen */
+      stage.style.display = "none";
+      void stage.offsetHeight;
+      stage.remove();
+    }
     if (cur) {
       cur.style.opacity = "";
       if (Math.abs(scrollY - sY) > 1)

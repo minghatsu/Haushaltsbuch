@@ -240,6 +240,13 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.47.3",
+    "22. November 2026",
+    [
+      "Nach dem Wischen blieb auf manchen Android-Handys ein altes Bild der vorigen Seite stehen, obwohl oben schon die neue Seite stand – behoben.",
+    ],
+  ],
+  [
     "0.47.2",
     "22. November 2026",
     [
