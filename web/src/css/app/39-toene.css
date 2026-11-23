@@ -137,7 +137,7 @@ html[data-theme="dark"] .sndic {
 .sndhd small {
   display: block;
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 .sndic {
   width: 44px;
@@ -201,7 +201,7 @@ html[data-theme="dark"] .sndic {
   font-size: 14px;
 }
 .sndst button small {
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--muted);
   line-height: 1.3;
 }
@@ -282,7 +282,7 @@ html[data-theme="dark"] .sndic {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
   margin-top: 2px;

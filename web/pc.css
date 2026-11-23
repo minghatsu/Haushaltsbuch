@@ -63,7 +63,7 @@ html.pc .tab {
   min-width: 58px;
   padding: 9px 16px;
   border-radius: 999px;
-  font: 700 12px var(--f-body);
+  font: 700 13px var(--f-body);
   color: var(--muted);
   background: none;
   gap: 0;
@@ -323,7 +323,7 @@ html.pc .pcminis button:hover {
 html.pc .pcminis span {
   display: block;
   color: #bfe6d4;
-  font-size: 12px;
+  font-size: 13px;
 }
 html.pc .pcminis b {
   font-size: 19px;
@@ -591,7 +591,7 @@ html.pc .pcaccs button.main {
 html.pc .pcaccs span {
   display: block;
   color: #bfe6d4;
-  font-size: 12px;
+  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -789,7 +789,7 @@ html.pc .pcfbk {
   border-radius: 8px;
   padding: 3px 9px;
   font-weight: 800;
-  font-size: 12px;
+  font-size: 13px;
 }
 html.pc .pcfbimgs {
   display: flex;
@@ -920,7 +920,7 @@ html.pc .pcdw {
 }
 .pcdw small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 html.pc .pcdnet {
   margin-left: auto;
@@ -969,7 +969,7 @@ html.pc .pcbr .grow {
   white-space: nowrap;
 }
 html.pc .pcbr small {
-  font-size: 12px;
+  font-size: 13px;
   opacity: 0.65;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1194,7 +1194,7 @@ html.pc .pcdbadge {
   border-radius: 99px;
   background: var(--accent);
   color: #fff;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   line-height: 18px;
   font-style: normal;
@@ -1272,7 +1272,7 @@ html.pc .pcfcalc .wd {
   padding: 0 4px 8px;
   color: var(--muted);
   font-weight: 700;
-  font-size: 12px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -1321,7 +1321,7 @@ html.pc .pcfd .dh b {
   letter-spacing: -0.02em;
 }
 html.pc .pcfd .dh span {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 700;
 }
@@ -1335,7 +1335,7 @@ html.pc .pcfc {
   background: var(--surface);
   border-radius: 11px;
   padding: 6px 8px 6px 7px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.25;
   box-shadow:
@@ -1373,7 +1373,7 @@ html.pc .pcfc .a {
   grid-column: 2;
   justify-self: start;
   border: 0;
-  font-size: 12px;
+  font-size: 13px;
   background: none;
   padding: 0;
   font: inherit;
@@ -1390,7 +1390,7 @@ html.pc .pcfc .fxamt-in {
   width: 84px;
   padding: 2px 6px;
   height: 24px;
-  font-size: 12px;
+  font-size: 13px;
 }
 html.pc .pcfc .ck {
   grid-column: 4;
@@ -1589,7 +1589,7 @@ html.pc .pcfhint {
     grid-template-columns: minmax(0, 1fr) auto auto;
     padding: 5px 6px 5px 8px;
     column-gap: 4px;
-    font-size: 12px;
+    font-size: 13px;
   }
   html.pc .pcfc > :first-child {
     display: none;
@@ -1803,7 +1803,7 @@ html.pc .pcfpop .pf {
   min-width: 0;
 }
 html.pc .pcfpop .pf > span {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 600;
 }
@@ -1918,7 +1918,7 @@ html.pc .pcscats button {
   background: color-mix(in srgb, var(--fg) 7%, transparent);
   color: var(--fg);
   font: inherit;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   padding: 6px 11px;
   border-radius: 11px;
@@ -1980,7 +1980,7 @@ html.pc .pcsli .pcstx b {
   text-overflow: ellipsis;
 }
 html.pc .pcsli .pcstx small {
-  font-size: 11.5px;
+  font-size: 13px;
   opacity: 0.6;
 }
 html.pc .pcsli .bar {
@@ -2005,7 +2005,7 @@ html.pc .pcsli .r {
   white-space: nowrap;
 }
 html.pc .pcsli .r small {
-  font-size: 11.5px;
+  font-size: 13px;
   opacity: 0.7;
 }
 html.pc .pcsadd {
@@ -2135,7 +2135,7 @@ html.pc .pcpr {
 }
 html.pc .pcpr small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 html.pc .pcpr .warn {
@@ -2171,11 +2171,11 @@ html.pc .pcbars i {
   transform-origin: 50% 100%;
 }
 html.pc .pcbars .v {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 html.pc .pcbars small {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   white-space: nowrap;
 }
@@ -2631,7 +2631,7 @@ html.pc.pcpageon .toast.show {
 html.pc .pcpbar .url .only {
   flex: none;
   font-style: normal;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   background: color-mix(in srgb, var(--accent) 14%, transparent);
   color: var(--accent);
@@ -2917,7 +2917,7 @@ html.pc .pcabig:hover {
 }
 html.pc .pcabig > small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -3052,7 +3052,7 @@ html.pc .pcacat > small {
   text-align: right;
   color: var(--muted);
   font-weight: 700;
-  font-size: 12.5px;
+  font-size: 13px;
 }
 html.pc .pcacat:hover .t b {
   color: var(--accent);
@@ -3074,7 +3074,7 @@ html.pc .pcabox > div {
 html.pc .pcabox small {
   display: block;
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 html.pc .pcabox b {
   font-size: 18px;
@@ -3246,7 +3246,7 @@ html.pc .pczi .zdaz {
   margin-left: 4px;
 }
 html.pc .pcachg {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   border-radius: 6px;
   padding: 2px 7px;
@@ -3273,13 +3273,13 @@ html.pc .pcacat .pcav {
 }
 html.pc .pcacat .an small {
   display: block;
-  font-size: 12.5px;
+  font-size: 13px;
   margin-top: 2px;
 }
 html.pc .pcalg {
   display: flex;
   gap: 14px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   margin-top: 8px;
 }
@@ -3442,7 +3442,7 @@ html.pc .pcshl {
   pointer-events: none;
 }
 html.pc .pcsg {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -3487,7 +3487,7 @@ html.pc .pcsi .sat b {
   font-size: 14px;
 }
 html.pc .pcsi .sat small {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
@@ -3608,7 +3608,7 @@ html.pc .pctt b {
 }
 html.pc .pctt small,
 html.pc .pctk > small {
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--muted);
 }
 html.pc .pctk small.bad {
@@ -3638,7 +3638,7 @@ html.pc .pctin {
   border-radius: 8px;
   padding: 2px 6px;
   width: 70px;
-  font: 700 12.5px var(--f-body);
+  font: 700 13px var(--f-body);
   color: var(--fg);
   text-align: right;
 }
@@ -3706,7 +3706,7 @@ html.pc .pctdel.arm {
   padding: 0 10px;
   background: var(--bad);
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
 }
 html.pc .pctnew {
   border: 2px dashed var(--line);
@@ -3730,7 +3730,7 @@ html.pc .pctform label {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -3748,7 +3748,7 @@ html.pc .pctab label {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -3765,7 +3765,7 @@ html.pc .pctbtns {
 html.pc .pcsr .sabody .field > label,
 html.pc .pcsr .sabody .section-title,
 html.pc .pcsr .sabody .colsec h3 {
-  font-size: 11.5px !important;
+  font-size: 13px !important;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -3861,7 +3861,7 @@ html.pc .ptq {
 }
 
 html.pc .pfsec {
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--muted);
   text-transform: uppercase;
@@ -4114,7 +4114,7 @@ html.pc.istab .tab:not(.plus) .tname {
   max-width: 140px !important;
   opacity: 1 !important;
   margin-top: 3px !important;
-  font-size: 11px !important;
+  font-size: 13px !important;
 }
 html.pc.istab .tab[aria-selected="true"] {
   background: none !important;
@@ -4264,7 +4264,7 @@ html.pc .tsprof b {
 html.pc .tsprof small {
   display: block;
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 13px;
   margin-top: 2px;
 }
 html.pc .tssw {
@@ -4361,7 +4361,7 @@ html.pc .tsg button small {
   margin-left: auto;
   color: var(--muted);
   font-weight: 500;
-  font-size: 12.5px;
+  font-size: 13px;
   max-width: 55%;
   text-align: right;
   white-space: nowrap;
@@ -4494,7 +4494,7 @@ html.pc .pcdevseg button {
   background: none;
   border-radius: 9px;
   padding: 7px;
-  font: 700 12.5px var(--f-body);
+  font: 700 13px var(--f-body);
   color: var(--muted);
   cursor: pointer;
 }
@@ -4505,7 +4505,7 @@ html.pc .pcdevseg button.on {
 }
 html.pc .pcds h4 {
   margin: 12px 0 6px;
-  font-size: 12px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--muted);
@@ -4516,7 +4516,7 @@ html.pc .tssw button.nav > span {
   text-align: left;
 }
 html.pc .tssw button.nav small {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--muted);
 }
@@ -4536,7 +4536,7 @@ html.pc .tssw button > span {
   text-align: left;
 }
 html.pc .tssw button small {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--muted);
 }
@@ -4647,7 +4647,7 @@ html.pc.istab:not(.tabp) .pcaccs button {
   border-radius: 14px;
 }
 html.pc.istab:not(.tabp) .pcaccs span {
-  font-size: 11px;
+  font-size: 13px;
 }
 html.pc.istab:not(.tabp) .pcaccs b {
   font-size: 15px;
@@ -4664,7 +4664,7 @@ html.pc.istab:not(.tabp) .pcring b {
   font-size: 22px !important;
 }
 html.pc.istab:not(.tabp) .pcring small {
-  font-size: 11px;
+  font-size: 13px;
 }
 html.pc.istab:not(.tabp) .pcminis {
   gap: 6px;
@@ -4675,7 +4675,7 @@ html.pc.istab:not(.tabp) .pcminis button {
   border-radius: 14px;
 }
 html.pc.istab:not(.tabp) .pcminis span {
-  font-size: 11px;
+  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4764,7 +4764,7 @@ html.pc.istab:not(.tabp) .pchero {
     font-size: clamp(28px, 3vw, 34px) !important;
   }
   html.pc.istab:not(.tabp) .pcsub {
-    font-size: 12px;
+    font-size: 13px;
   }
   html.pc.istab:not(.tabp) .pcaccs {
     margin-top: 8px;
@@ -4783,7 +4783,7 @@ html.pc.istab:not(.tabp) .pchero {
     padding: 6px 10px;
   }
   html.pc.istab:not(.tabp) .pcaccs span {
-    font-size: 11px;
+    font-size: 13px;
   }
   html.pc.istab:not(.tabp) .pcaccs b {
     font-size: 13px;
@@ -4860,7 +4860,7 @@ html.pc[data-theme="dark"] .pcz {
 
 html.pc .pcfbpg {
   flex: none;
-  font: 700 11.5px var(--f-body);
+  font: 700 13px var(--f-body);
   padding: 3px 8px;
   border-radius: 999px;
   background: var(--accent-soft);
@@ -4947,7 +4947,7 @@ html.pc .pcfbih {
 }
 .pcfbih small {
   color: var(--muted);
-  font-size: 11.5px;
+  font-size: 13px;
 }
 html.pc .pcfbpgs {
   display: flex;
@@ -4960,7 +4960,7 @@ html.pc .pcfbk {
   border-radius: 999px;
   padding: 2px 9px;
   font-weight: 800;
-  font-size: 11.5px;
+  font-size: 13px;
   white-space: nowrap;
 }
 html.pc .pcfbk.big,
@@ -4993,7 +4993,7 @@ html.pc .pcfbdh {
 .pcfbdh small {
   margin-left: auto;
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 html.pc .pcfbtx {
   white-space: pre-wrap;
@@ -5021,7 +5021,7 @@ html.pc .pcfbkv div {
 .pcfbkv small {
   display: block;
   color: var(--muted);
-  font-size: 11.5px;
+  font-size: 13px;
 }
 .pcfbkv b {
   font-size: 13.5px;
@@ -5116,7 +5116,7 @@ html.pc .pcdtop2 b {
 html.pc .pcdtop2 small {
   display: block;
   opacity: 0.85;
-  font-size: 12px;
+  font-size: 13px;
   margin-top: 2px;
 }
 html.pc .pcrdev {
@@ -5154,7 +5154,7 @@ html.pc .pcrdev .tx b {
 html.pc .pcrdev .tx small {
   display: block;
   font:
-    600 12px ui-monospace,
+    600 13px ui-monospace,
     monospace;
   color: var(--muted);
 }
@@ -5162,7 +5162,7 @@ html.pc .pcrdev .tx s {
   opacity: 0.6;
 }
 html.pc .pcbadge {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 99px;
@@ -5236,7 +5236,7 @@ html.pc .pcstack i {
 html.pc .pcstl {
   display: flex;
   gap: 12px;
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--muted);
   margin-bottom: 9px;
 }
@@ -5254,7 +5254,7 @@ html.pc .pcdsf {
 }
 html.pc .pcdsf button {
   border: 0;
-  font: 700 12px var(--f-body);
+  font: 700 13px var(--f-body);
   border-radius: 99px;
   padding: 5px 10px;
   background: var(--sunk);
@@ -5295,11 +5295,11 @@ html.pc .pcdtr {
   gap: 9px;
   padding: 7px 12px;
   border-top: 1px solid var(--line);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 html.pc .pcdtr tt {
   font:
-    700 12.5px ui-monospace,
+    700 13px ui-monospace,
     monospace;
   letter-spacing: 0.06em;
   width: 64px;
@@ -5310,13 +5310,13 @@ html.pc .pcdtr .dv {
 html.pc .pcdtr .ag {
   margin-left: auto;
   color: var(--muted);
-  font-size: 11.5px;
+  font-size: 13px;
 }
 html.pc .pcdmore {
   border: 0;
   background: none;
   color: var(--accent);
-  font: 700 12px var(--f-body);
+  font: 700 13px var(--f-body);
   padding: 8px 12px;
   cursor: pointer;
 }
@@ -5350,7 +5350,7 @@ html.pc .pccp {
   border: 0;
   background: var(--accent-soft);
   color: var(--accent);
-  font: 700 11.5px var(--f-body);
+  font: 700 13px var(--f-body);
   border-radius: 8px;
   padding: 5px 9px;
   cursor: pointer;
@@ -5359,7 +5359,7 @@ html.pc .pcdel {
   border: 0;
   background: none;
   cursor: pointer;
-  font: 700 11.5px var(--f-body);
+  font: 700 13px var(--f-body);
   color: var(--muted);
   border-radius: 8px;
   padding: 5px 7px;
@@ -5392,13 +5392,13 @@ html.pc .pcdkh {
   margin: 2px 2px 10px;
 }
 html.pc .pcdkh b {
-  font: 800 12px var(--f-body);
+  font: 800 13px var(--f-body);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
 }
 html.pc .pcdkh small {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
 }
 html.pc .pcdkg {
@@ -5437,7 +5437,7 @@ html.pc .pcdi span {
   place-items: center;
 }
 html.pc .pcdi em {
-  font: 700 11.5px/1.2 var(--f-body);
+  font: 700 13px/1.2 var(--f-body);
   font-style: normal;
   color: var(--fg);
   text-align: center;
@@ -5467,7 +5467,7 @@ html.pc .kibig span {
   font-weight: 600;
 }
 html.pc .kiexact {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
   margin: 2px 0 8px;
@@ -5500,7 +5500,7 @@ html.pc .kigrid b {
 }
 html.pc .kigrid small {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13px;
 }
 html.pc .kidays {
   display: flex;
@@ -5523,7 +5523,7 @@ html.pc .kidays i:hover {
 html.pc .kidl {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   margin-top: 3px;
 }
@@ -5548,7 +5548,7 @@ html.pc .kibud .in {
   width: 90px;
 }
 html.pc .kih {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -5563,7 +5563,7 @@ html.pc .kirow {
 }
 html.pc .kirow .kiu {
   flex: 1;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
 }
 html.pc .kirow.on tt {
@@ -5852,7 +5852,7 @@ html.pc .pcaccs.mvpulse button.mvd {
 .mvpcghost span {
   display: block;
   color: #bfe6d4;
-  font-size: 12px;
+  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -6049,7 +6049,7 @@ html.pc .fan.pcw .fanb .fsub {
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  font: 600 11px var(--f-body);
+  font: 600 13px var(--f-body);
   color: var(--fg);
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   padding: 3px 9px;
@@ -6079,10 +6079,10 @@ html.pc .fan.pcw .fanhint {
   padding: 7px 13px;
   border-radius: 99px;
   background: var(--fan-chip);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 html.pc .fan.pcw .fanhint kbd {
-  font: 700 11px var(--f-body);
+  font: 700 13px var(--f-body);
   background: rgba(255, 255, 255, 0.18);
   border-radius: 6px;
   padding: 2px 6px;
@@ -6185,12 +6185,12 @@ html.pc .pcdvh {
 }
 html.pc .pcdvh small {
   display: block;
-  font: 500 12px var(--f-body);
+  font: 500 13px var(--f-body);
   color: var(--muted);
   margin-top: 1px;
 }
 html.pc .pcdvg {
-  font: 700 11px var(--f-body);
+  font: 700 13px var(--f-body);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
@@ -6264,7 +6264,7 @@ html.pc .pcdvt b {
 }
 html.pc .pcdvt small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   margin-top: 1px;
 }
@@ -6290,7 +6290,7 @@ html.pc .pcdvr .badge {
   border-radius: 99px;
   background: var(--warn);
   color: #1a1306;
-  font: 800 11px var(--f-body);
+  font: 800 13px var(--f-body);
   font-style: normal;
 }
 html.pc .fan .fpcx {
@@ -6401,7 +6401,7 @@ html.pc .pcscol .sagrid b {
   border: 0;
   background: var(--sunk);
   color: var(--fg);
-  font: 700 12px var(--f-body);
+  font: 700 13px var(--f-body);
   padding: 6px 10px;
   border-radius: 999px;
   cursor: pointer;
@@ -6514,7 +6514,7 @@ html.pc .pcbal.mvd {
   background: none;
   border-radius: 8px;
   padding: 6px 12px;
-  font: 600 12.5px var(--f-body, inherit);
+  font: 600 13px var(--f-body, inherit);
   color: var(--muted);
   cursor: pointer;
 }
@@ -6529,7 +6529,7 @@ html.pc .pcbal.mvd {
   gap: 6px;
   border-radius: 20px;
   padding: 5px 11px;
-  font-size: 12.5px;
+  font-size: 13px;
   background: var(--surface);
   box-shadow: 0 1px 3px #0001;
 }

@@ -106,7 +106,7 @@ html[data-theme="dark"] .gwel {
   border: 1px solid rgba(255, 255, 255, 0.24);
   padding: 6px 11px;
   border-radius: 99px;
-  font: 700 12.5px var(--f-body);
+  font: 700 13px var(--f-body);
   animation: gwPop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) 0.66s backwards;
 }
 .gwch span:nth-child(2) {
@@ -244,7 +244,7 @@ html[data-theme="dark"] .gwel {
 }
 .invslots p {
   margin: 0;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--muted);
 }
 .invslots.full i em {
@@ -308,7 +308,7 @@ html[data-theme="dark"] .gwel {
 }
 .invvia {
   display: block;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--accent);
   margin-top: 2px;

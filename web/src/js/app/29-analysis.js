@@ -643,7 +643,7 @@ function renderYear() {
   for (let k = 0; k <= 4; k++) {
     const v = (nice * k) / 4,
       yy = sy(v);
-    svg += `<line x1="${pl}" x2="${W - 6}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="1"/><text x="${pl - 8}" y="${yy + 4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="Inter, sans-serif">${escHtml(shortK(v))}</text>`;
+    svg += `<line x1="${pl}" x2="${W - 6}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="1"/><text x="${pl - 8}" y="${yy + 4}" text-anchor="end" font-size="12.5" fill="var(--muted)" font-family="Inter, sans-serif">${escHtml(shortK(v))}</text>`;
   }
   rows.forEach((r, idx) => {
     const x = pl + idx * cw,
@@ -653,7 +653,7 @@ function renderYear() {
       svg += `<rect x="${x + 2}" y="${pt}" width="${cw - 4}" height="${H - pt - pb}" fill="var(--accent-soft)" rx="8"/>`;
     svg += `<rect x="${cx - bw - 1.5}" y="${sy(r.c.income)}" width="${bw}" height="${Math.max(0, H - pb - sy(r.c.income))}" fill="var(--good)" rx="3"/>`;
     svg += `<rect x="${cx + 1.5}" y="${sy(r.c.expenses)}" width="${bw}" height="${Math.max(0, H - pb - sy(r.c.expenses))}" fill="var(--c6)" rx="3"/>`;
-    svg += `<text x="${cx}" y="${H - 6}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--muted)" font-family="Inter, sans-serif">${MSHORT[idx]}</text>`;
+    svg += `<text x="${cx}" y="${H - 6}" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--muted)" font-family="Inter, sans-serif">${MSHORT[idx]}</text>`;
   });
   svg += `</svg>`;
   const kuOver = self > (Number(st.kuLimit) || 0),
@@ -694,7 +694,7 @@ function renderYear() {
   for (let g = 0; g <= 4; g++) {
     const v = (nice2 * g) / 4,
       yy = sy2(v);
-    svg2 += `<line x1="${pl}" x2="${W - 4}" y1="${yy}" y2="${yy}" stroke="var(--line)"/><text x="${pl - 8}" y="${yy + 4}" text-anchor="end" font-size="11" fill="var(--faint)">${
+    svg2 += `<line x1="${pl}" x2="${W - 4}" y1="${yy}" y2="${yy}" stroke="var(--line)"/><text x="${pl - 8}" y="${yy + 4}" text-anchor="end" font-size="12.5" fill="var(--faint)">${
       v >= 1000
         ? (v / 1000).toLocaleString("de-DE", {
             maximumFractionDigits: 1,
@@ -706,7 +706,7 @@ function renderYear() {
     const x = pl + (r.i - 1) * cw,
       bw = Math.min(28, cw * 0.6),
       on = r.ym === ym;
-    svg2 += `<rect x="${x + (cw - bw) / 2}" y="${sy2(r.c.expenses)}" width="${bw}" height="${Math.max(0, H - pb - sy2(r.c.expenses))}" rx="5" fill="${on ? "var(--accent)" : "var(--c5)"}" data-open="${r.ym}" style="cursor:pointer"/><text x="${x + cw / 2}" y="${H - 6}" text-anchor="middle" font-size="11" font-weight="${on ? 800 : 500}" fill="${on ? "var(--fg)" : "var(--faint)"}">${MSHORT[r.i - 1].slice(0, 1)}</text>`;
+    svg2 += `<rect x="${x + (cw - bw) / 2}" y="${sy2(r.c.expenses)}" width="${bw}" height="${Math.max(0, H - pb - sy2(r.c.expenses))}" rx="5" fill="${on ? "var(--accent)" : "var(--c5)"}" data-open="${r.ym}" style="cursor:pointer"/><text x="${x + cw / 2}" y="${H - 6}" text-anchor="middle" font-size="12.5" font-weight="${on ? 800 : 500}" fill="${on ? "var(--fg)" : "var(--faint)"}">${MSHORT[r.i - 1].slice(0, 1)}</text>`;
   });
   svg2 += `</svg>`;
   const ins = insightLine(ym);

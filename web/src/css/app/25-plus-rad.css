@@ -31,7 +31,7 @@
   bottom: calc(140px + env(safe-area-inset-bottom, 0px));
   text-align: center;
   color: #fff;
-  font: 800 12.5px var(--f-body);
+  font: 800 13px var(--f-body);
   opacity: 0;
   transition: opacity 0.3s;
   pointer-events: none;

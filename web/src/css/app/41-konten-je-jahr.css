@@ -81,7 +81,7 @@
   white-space: nowrap;
 }
 .ayn small {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
 }
 .ayrow.off > i,

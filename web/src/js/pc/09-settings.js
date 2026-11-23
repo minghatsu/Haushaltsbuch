@@ -182,7 +182,7 @@ if (IS_PC) {
   const trash = `<svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M4.5 7h15M9.5 7V4.8h5V7M6.5 7l.9 12.2h9.2l.9-12.2M10.2 10.5v5.5M13.8 10.5v5.5"/></svg>`;
   const ring = (p, c) => {
     const q = Math.max(0, Math.min(1, p));
-    return `<svg class="pctring" viewBox="0 0 48 48"><circle cx="24" cy="24" r="19" fill="none" stroke="var(--sunk)" stroke-width="6"/><circle class="pcta" cx="24" cy="24" r="19" fill="none" stroke="${p > 1 ? "var(--bad)" : c}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(q * 119.4).toFixed(1)} 200" transform="rotate(-90 24 24)"/><text x="24" y="28" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--fg)">${Math.round(p * 100)}%</text></svg>`;
+    return `<svg class="pctring" viewBox="0 0 48 48"><circle cx="24" cy="24" r="19" fill="none" stroke="var(--sunk)" stroke-width="6"/><circle class="pcta" cx="24" cy="24" r="19" fill="none" stroke="${p > 1 ? "var(--bad)" : c}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(q * 119.4).toFixed(1)} 200" transform="rotate(-90 24 24)"/><text x="24" y="28" text-anchor="middle" font-size="12.5" font-weight="800" fill="var(--fg)">${Math.round(p * 100)}%</text></svg>`;
   };
   const delBtn = (attr, v) =>
     `<button class="pctdel" ${attr}="${escHtml(v)}" aria-label="Löschen" title="Löschen">${trash}</button>`;

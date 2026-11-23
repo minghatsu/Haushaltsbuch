@@ -16,7 +16,7 @@
   white-space: nowrap;
 }
 .imp .ref {
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -40,7 +40,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 600;
 }
@@ -221,7 +221,7 @@
   font-weight: 700;
 }
 .art small {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   line-height: 1.35;
 }
@@ -289,7 +289,7 @@
 }
 .shhead small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 .shci {
@@ -331,7 +331,7 @@
 }
 .shrow em {
   font-style: normal;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--accent);
   background: var(--accent-soft);
@@ -390,7 +390,7 @@
 }
 .shmaster small {
   font-weight: 700;
-  font-size: 12px;
+  font-size: 13px;
 }
 .stabs {
   display: flex;
@@ -408,7 +408,7 @@
   border-radius: 999px;
   padding: 7px 12px;
   font-weight: 700;
-  font-size: 12.5px;
+  font-size: 13px;
   white-space: nowrap;
   background: var(--sunk);
   color: var(--fg);
@@ -563,7 +563,7 @@
   border: 0;
   background: var(--accent-soft);
   color: var(--accent);
-  font: 800 12px var(--f-body);
+  font: 800 13px var(--f-body);
   padding: 5px 10px;
   border-radius: 999px;
   letter-spacing: 0.02em;
@@ -711,7 +711,7 @@
   box-shadow: 0 14px 30px -18px color-mix(in srgb, var(--accent) 80%, #000);
 }
 .jlpay small {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   opacity: 0.9;
 }
@@ -737,11 +737,11 @@
   line-height: 1.15;
 }
 .jlcd span {
-  font-size: 11.5px;
+  font-size: 13px;
   opacity: 0.85;
 }
 .jlsub {
-  font-size: 12.5px;
+  font-size: 13px;
   opacity: 0.92;
 }
 .jlpots .bpr + .bpr {
@@ -767,7 +767,7 @@
   font-size: 14px;
 }
 .jlt .n small {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
 }
 .jlt.past {
@@ -801,12 +801,12 @@
   font-size: 14px;
 }
 .jltiles small {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   line-height: 1.35;
 }
 .jltiles small b {
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--fg);
 }
 .jlpe {

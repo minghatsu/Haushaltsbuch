@@ -7191,11 +7191,11 @@ if (IS_PC) {
         d += (on ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1) + " ";
         on = true;
       });
-      return `<svg class="pcab" viewBox="0 0 ${W} ${H + 22}" role="img" aria-label="Ausgaben der letzten 12 Monate">${avg ? `<line x1="0" x2="${W}" y1="${Y(avg).toFixed(1)}" y2="${Y(avg).toFixed(1)}" stroke="var(--faint)" stroke-dasharray="4 5"/><text x="2" y="${(Y(avg) - 6).toFixed(1)}" text-anchor="start" font-size="11" font-weight="700" fill="var(--muted)" paint-order="stroke" stroke="var(--surface)" stroke-width="4" stroke-linejoin="round">Ø ${escHtml(fmtEur0(avg))}</text>` : ""}
+      return `<svg class="pcab" viewBox="0 0 ${W} ${H + 22}" role="img" aria-label="Ausgaben der letzten 12 Monate">${avg ? `<line x1="0" x2="${W}" y1="${Y(avg).toFixed(1)}" y2="${Y(avg).toFixed(1)}" stroke="var(--faint)" stroke-dasharray="4 5"/><text x="2" y="${(Y(avg) - 6).toFixed(1)}" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--muted)" paint-order="stroke" stroke="var(--surface)" stroke-width="4" stroke-linejoin="round">Ø ${escHtml(fmtEur0(avg))}</text>` : ""}
         <path d="${d}" fill="none" stroke="var(--bad)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" class="pcaln"/>
         ${hist
           .map((h, i) =>
-            `<g class="pcabg" data-pcaym="${h.ym}"><rect x="${(X(i) - (W - 20) / (n - 1) / 2).toFixed(1)}" y="0" width="${((W - 20) / (n - 1)).toFixed(1)}" height="${H + 22}" fill="transparent"/>${h.has ? `<circle cx="${X(i).toFixed(1)}" cy="${Y(h.v).toFixed(1)}" r="${h.ym === ym ? 6 : 3.5}" fill="var(--bad)"/>` : ""}<text x="${X(i).toFixed(1)}" y="${H + 17}" text-anchor="middle" font-size="11" font-weight="${h.ym === ym ? 800 : 500}" fill="${h.ym === ym ? "var(--fg)" : "var(--muted)"}">${escHtml(MSHORT[h.i - 1].slice(0, 1))}</text></g>`.replace(
+            `<g class="pcabg" data-pcaym="${h.ym}"><rect x="${(X(i) - (W - 20) / (n - 1) / 2).toFixed(1)}" y="0" width="${((W - 20) / (n - 1)).toFixed(1)}" height="${H + 22}" fill="transparent"/>${h.has ? `<circle cx="${X(i).toFixed(1)}" cy="${Y(h.v).toFixed(1)}" r="${h.ym === ym ? 6 : 3.5}" fill="var(--bad)"/>` : ""}<text x="${X(i).toFixed(1)}" y="${H + 17}" text-anchor="middle" font-size="12.5" font-weight="${h.ym === ym ? 800 : 500}" fill="${h.ym === ym ? "var(--fg)" : "var(--muted)"}">${escHtml(MSHORT[h.i - 1].slice(0, 1))}</text></g>`.replace(
               '<g class="pcabg"',
               `<g class="pcabg"${(() => {
                 const pp = avg && h.has ? Math.round(((h.v - avg) / avg) * 100) : null;
@@ -7311,7 +7311,7 @@ if (IS_PC) {
             hb = (lastY[i] / mx) * (H - 4),
             ha = r.ym > cur ? 0 : (r.c.expenses / mx) * (H - 4);
           return `<g class="pcabg" data-pcaym="${r.ym}" style="--i:${i}"><rect x="${x}" y="0" width="${cw}" height="${H + 22}" fill="transparent"/><rect class="b" x="${(x + cw / 2 - 10).toFixed(1)}" y="${(H - hb).toFixed(1)}" width="9" height="${hb.toFixed(1)}" rx="3" fill="var(--faint)" opacity=".55"/>${ha ? `<rect class="b" x="${(x + cw / 2 + 1).toFixed(1)}" y="${(H - ha).toFixed(1)}" width="9" height="${ha.toFixed(1)}" rx="3" fill="var(--bad)"/>` : ""}
-          <text x="${(x + cw / 2).toFixed(1)}" y="${H + 17}" text-anchor="middle" font-size="11" font-weight="${r.ym === ym ? 800 : 500}" fill="${r.ym === ym ? "var(--fg)" : "var(--muted)"}">${escHtml(MSHORT[i].slice(0, 1))}</text></g>`.replace(
+          <text x="${(x + cw / 2).toFixed(1)}" y="${H + 17}" text-anchor="middle" font-size="12.5" font-weight="${r.ym === ym ? 800 : 500}" fill="${r.ym === ym ? "var(--fg)" : "var(--muted)"}">${escHtml(MSHORT[i].slice(0, 1))}</text></g>`.replace(
             '<g class="pcabg"',
             `<g class="pcabg"${(() => {
               const fut = r.ym > cur,
@@ -7611,7 +7611,7 @@ if (IS_PC) {
   const trash = `<svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M4.5 7h15M9.5 7V4.8h5V7M6.5 7l.9 12.2h9.2l.9-12.2M10.2 10.5v5.5M13.8 10.5v5.5"/></svg>`;
   const ring = (p, c) => {
     const q = Math.max(0, Math.min(1, p));
-    return `<svg class="pctring" viewBox="0 0 48 48"><circle cx="24" cy="24" r="19" fill="none" stroke="var(--sunk)" stroke-width="6"/><circle class="pcta" cx="24" cy="24" r="19" fill="none" stroke="${p > 1 ? "var(--bad)" : c}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(q * 119.4).toFixed(1)} 200" transform="rotate(-90 24 24)"/><text x="24" y="28" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--fg)">${Math.round(p * 100)}%</text></svg>`;
+    return `<svg class="pctring" viewBox="0 0 48 48"><circle cx="24" cy="24" r="19" fill="none" stroke="var(--sunk)" stroke-width="6"/><circle class="pcta" cx="24" cy="24" r="19" fill="none" stroke="${p > 1 ? "var(--bad)" : c}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(q * 119.4).toFixed(1)} 200" transform="rotate(-90 24 24)"/><text x="24" y="28" text-anchor="middle" font-size="12.5" font-weight="800" fill="var(--fg)">${Math.round(p * 100)}%</text></svg>`;
   };
   const delBtn = (attr, v) =>
     `<button class="pctdel" ${attr}="${escHtml(v)}" aria-label="Löschen" title="Löschen">${trash}</button>`;

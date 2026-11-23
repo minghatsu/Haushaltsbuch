@@ -388,7 +388,7 @@
 }
 .sgl {
   font-weight: 700;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -516,7 +516,7 @@
   gap: 2px;
 }
 .pc-sect span {
-  font: 500 12.5px var(--f-body, inherit);
+  font: 500 13px var(--f-body, inherit);
   color: var(--muted);
 }
 .pc-hero {
@@ -548,7 +548,7 @@
   white-space: nowrap;
 }
 .pc-hn small {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 13px;
 }
 .pc-act {
@@ -566,7 +566,7 @@
   align-items: center;
   gap: 6px;
   font-weight: 700;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--fg);
   cursor: pointer;
   box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
@@ -627,7 +627,7 @@
   top: -5px;
   left: calc(50% + 14px);
   font-style: normal;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   background: var(--accent);
   color: #fff;
@@ -639,7 +639,7 @@
   border: 2px solid var(--surface);
 }
 .bub small {
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   max-width: 100%;
   overflow: hidden;
@@ -648,7 +648,7 @@
 }
 .bub i {
   font-style: normal;
-  font-size: 10.5px;
+  font-size: 13px;
   color: var(--muted);
   margin-top: -5px;
 }
@@ -769,7 +769,7 @@
   fill: var(--fg);
 }
 .hxds {
-  font-size: 8px;
+  font-size: 13px;
   fill: var(--muted);
 }
 .hxleg {
@@ -814,7 +814,7 @@
   font-variant-numeric: tabular-nums;
 }
 .hxchip {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   padding: 3px 9px;
   border-radius: 99px;
@@ -886,7 +886,7 @@
 .hkpi small {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .hkpi b {
   display: block;
@@ -928,7 +928,7 @@
 .sagrid small {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 .sagrid b {
@@ -1175,7 +1175,7 @@
 }
 .zbon .zbt small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .zamt {
   width: 92px;
@@ -1201,7 +1201,7 @@
   background: #fde8e3;
   color: #a3341f;
   border-radius: 5px;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 900;
   padding: 1px 5px;
   vertical-align: 1px;
@@ -1241,7 +1241,7 @@
   background: #ffe9a8;
   color: #8a5a00;
   border-radius: 5px;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 900;
   padding: 1px 5px;
   vertical-align: 2px;
@@ -1251,7 +1251,7 @@
   background: #ffe0a3;
   color: #8a5a00;
   border-radius: 5px;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 900;
   padding: 1px 5px;
   vertical-align: 2px;
@@ -1264,7 +1264,7 @@
 }
 .zfor {
   margin-left: 6px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--accent);
 }
@@ -1308,7 +1308,7 @@
   line-height: 1.2;
 }
 .zpko small {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   line-height: 1.25;
 }
@@ -1432,14 +1432,14 @@
   flex: none;
   background: none;
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 .zex {
   background: #fff4d6;
   border-radius: 10px;
   padding: 8px 10px;
   margin-top: 8px;
-  font-size: 12.5px;
+  font-size: 13px;
 }
 .ctd {
   max-width: 320px;
@@ -1518,7 +1518,7 @@
 }
 .zdn small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 .zdo {
@@ -1548,7 +1548,7 @@
   border-top: 1px solid var(--line);
 }
 .zds .muted {
-  font-size: 12.5px;
+  font-size: 13px;
 }
 .zds select {
   margin-left: auto;
@@ -1727,7 +1727,7 @@ main.wrap {
   color: #fff;
 }
 .bt3 b {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.2;
 }
 .bt3 .bchk {
@@ -1813,7 +1813,7 @@ main.wrap {
 .crow select.in {
   max-width: 128px;
   padding: 8px 8px;
-  font-size: 12.5px;
+  font-size: 13px;
   flex: none;
 }
 .cadd {
@@ -1893,7 +1893,7 @@ main.wrap {
 .pqh small {
   grid-column: 1/-1;
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 .pqs {
   font-weight: 800;
@@ -1937,7 +1937,7 @@ main.wrap {
 .pqm small {
   grid-column: 1/-1;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .pqm.cur {
   box-shadow: inset 0 0 0 2px var(--accent);
@@ -1995,7 +1995,7 @@ main.wrap {
   white-space: nowrap;
 }
 .kpis.k3 .kpi span {
-  font-size: 11.5px;
+  font-size: 13px;
 }
 .slipg {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
@@ -2021,7 +2021,7 @@ main.wrap {
   border: 0;
   border-radius: 10px;
   padding: 8px 0;
-  font: 700 12px var(--f-body);
+  font: 700 13px var(--f-body);
   cursor: pointer;
   background: var(--accent-soft);
   color: var(--accent);
@@ -2034,7 +2034,7 @@ main.wrap {
 .smgrid .sm.est small {
   display: block;
   font-weight: 600;
-  font-size: 10px;
+  font-size: 13px;
   color: var(--muted);
 }
 .mper {
@@ -2100,7 +2100,7 @@ main.wrap {
 .wkr .n small,
 .ckr .n small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .stp {
   display: flex;
@@ -2253,7 +2253,7 @@ main.wrap {
 }
 .wk {
   font-weight: 700;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;

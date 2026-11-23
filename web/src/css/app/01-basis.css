@@ -5,8 +5,8 @@
   --sunk: #eaefec;
   --line: #e1e7e3;
   --fg: #14201b;
-  --muted: #66746e;
-  --faint: #9aa6a0;
+  --muted: #56635d;
+  --faint: #7d8983;
   --accent: #147a5b;
   --accent-2: #0e5c44;
   --accent-ink: #ffffff;
@@ -179,7 +179,7 @@ html[dir="rtl"] .hello {
 }
 .hello small {
   display: block;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 600;
   white-space: nowrap;
@@ -209,8 +209,8 @@ html[dir="rtl"] .hello {
 .monthpill button {
   border: 0;
   background: none;
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -239,6 +239,10 @@ html[dir="rtl"] .hello {
   }
   .monthpill .msel {
     flex: 1;
+  }
+  .monthpill button {
+    width: 44px;
+    height: 44px;
   }
 }
 .msel {
@@ -381,7 +385,7 @@ html[dir="rtl"] .hello {
 }
 .ftile b {
   font-weight: 700;
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.25;
   overflow: hidden;
   display: -webkit-box;
@@ -414,14 +418,14 @@ html[dir="rtl"] .hello {
   place-items: center;
 }
 .ftile .fsub {
-  font-size: 10.5px;
+  font-size: 13px;
   color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .ftile .fbdg {
-  font-size: 10.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--warn);
 }
@@ -471,7 +475,7 @@ html[dir="rtl"] .hello {
   display: block;
   color: var(--muted);
   font-weight: 600;
-  font-size: 12px;
+  font-size: 13px;
 }
 .kpi b {
   display: block;
@@ -483,7 +487,7 @@ html[dir="rtl"] .hello {
   white-space: nowrap;
 }
 .kpi span {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
 }
 .kpi .pos {
@@ -617,7 +621,7 @@ html[dir="rtl"] .hello {
   background: var(--warn);
   color: #1a1306;
   font-weight: 800;
-  font-size: 11px;
+  font-size: 13px;
   display: grid;
   place-items: center;
   border: 2px solid var(--bg);
@@ -698,7 +702,7 @@ html[dir="rtl"] .hello {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--faint);
   border-radius: 18px;
@@ -832,10 +836,10 @@ main {
   color: var(--muted);
 }
 .small {
-  font-size: 12.5px;
+  font-size: 13px;
 }
 .eyebrow {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
   letter-spacing: 0.04em;
@@ -983,7 +987,7 @@ main {
 }
 .aback small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   margin-top: -4px;
 }
 .acin {
@@ -1054,7 +1058,7 @@ main {
   border-radius: 99px;
   background: var(--accent);
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   display: grid;
   place-items: center;
 }
@@ -1068,7 +1072,7 @@ main {
 }
 .inpdf small {
   font-weight: 800;
-  font-size: 11px;
+  font-size: 13px;
 }
 .inrm {
   position: absolute;
@@ -1154,7 +1158,7 @@ main {
   border: 0;
   background: var(--line);
   font-weight: 600;
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.2;
   font-family: inherit;
   color: var(--fg);
@@ -1218,7 +1222,7 @@ main {
 .inbl small {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .inbl .grow {
   flex: 1;
@@ -1312,4 +1316,9 @@ main {
 .btn svg.i,
 .vadone svg.i {
   vertical-align: -3px;
+}
+small,
+.small {
+  hyphens: auto;
+  overflow-wrap: break-word;
 }

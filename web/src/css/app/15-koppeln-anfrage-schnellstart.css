@@ -156,7 +156,7 @@
 }
 .proles small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.3;
 }
 .parr {
@@ -180,13 +180,13 @@
   transform: scale(0.94);
 }
 .parr span {
-  font: 800 10px var(--f-body);
+  font: 800 13px var(--f-body);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
 }
 .parr small {
-  font: 700 10.5px var(--f-body);
+  font: 700 13px var(--f-body);
   color: var(--accent);
   white-space: nowrap;
 }
@@ -249,7 +249,7 @@
   color: var(--accent-ink);
   display: grid;
   place-items: center;
-  font: 800 12px var(--f-body);
+  font: 800 13px var(--f-body);
 }
 .pq {
   margin: 0 0 10px;
@@ -289,7 +289,7 @@
 }
 .relsel small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .relsel .same small {
   color: var(--good);
@@ -349,7 +349,7 @@
 }
 .phprof .sat small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .phqs {
   display: grid;
@@ -408,7 +408,7 @@
   font-size: 14.5px;
 }
 .phr .sat small {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
@@ -483,7 +483,7 @@
   font-size: 14px;
 }
 .qtx small {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
 }
 .qs.on .qtx small {
@@ -537,7 +537,7 @@
   color: var(--accent);
 }
 .qtg .x {
-  color: #999;
+  color: var(--muted);
 }
 .qs.on .qtg .x,
 .qs:not(.on) .qtg .v {
@@ -669,7 +669,7 @@
   position: absolute;
   left: 28px;
   top: 4px;
-  font-size: 11px;
+  font-size: 13px;
   color: #c27c0e;
   opacity: 0;
   pointer-events: none;
@@ -761,7 +761,7 @@
   fill: #cfd6d2;
 }
 .qi-logos .aw {
-  fill: #9aa6a0;
+  fill: var(--faint);
   transition: fill 0.4s;
 }
 .qs.on .qi-logos .aw {
@@ -791,7 +791,7 @@
   border-radius: 4px;
   background: #e30613;
   color: #fff;
-  font: 800 8px var(--f-body);
+  font: 800 13px var(--f-body);
   display: grid;
   place-items: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
@@ -896,7 +896,7 @@
   font-size: 14px;
 }
 .pkhex {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   width: 62px;
   text-align: right;
@@ -905,6 +905,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font: 700 12.5px var(--f-body);
+  font: 700 13px var(--f-body);
   color: var(--muted);
 }

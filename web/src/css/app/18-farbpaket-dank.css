@@ -352,7 +352,7 @@ html:not(.pc) .ptq.ptqph {
   display: flex;
   align-items: center;
   gap: 6px;
-  font: 800 11px var(--f-body);
+  font: 800 13px var(--f-body);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   box-shadow: -4px 6px 18px rgba(0, 0, 0, 0.22);

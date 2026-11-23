@@ -21,7 +21,7 @@
 .fcmini small {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 .fcmini b {
@@ -32,7 +32,7 @@
 }
 .fcmini em {
   font-style: normal;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--bad);
 }
@@ -67,7 +67,7 @@ html.pc .hlcard {
 }
 .fccard > small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 .fcbig {
@@ -100,7 +100,7 @@ html.pc .hlcard {
   position: absolute;
   left: 6px;
   transform: translateY(4px);
-  font-size: 10.5px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--bad);
 }
@@ -123,7 +123,7 @@ html.pc .hlcard {
 .fcchip {
   position: absolute;
   transform: translate(-50%, -110%) scale(0);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   padding: 4px 8px;
   border-radius: 8px;
@@ -213,7 +213,7 @@ html.pc .hlcard {
 .fcpr small {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 .fcpr .grow {
@@ -290,7 +290,7 @@ html.pc .hlcard {
   transform: translateX(-50%);
   background: var(--fg);
   color: var(--bg);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   padding: 5px 9px;
   border-radius: 9px;
@@ -307,14 +307,14 @@ html.pc .hlcard {
 .fcax {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
   margin-top: 4px;
 }
 .fchint {
   margin: 8px 0 0;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   text-align: center;
 }
@@ -432,7 +432,7 @@ html.pc .hlcard {
 .fcd {
   flex: none;
   width: 52px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--muted);
 }

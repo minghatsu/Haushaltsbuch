@@ -55,7 +55,7 @@
 .camchip small {
   opacity: 0.85;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 13px;
 }
 .camtypes {
   display: flex;
@@ -69,7 +69,7 @@
   border-radius: 999px;
   padding: 6px 12px;
   font: inherit;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -227,7 +227,7 @@
   border-radius: 6px;
 }
 .crlbl {
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--muted);
   text-transform: uppercase;
@@ -261,7 +261,7 @@
   width: 86px;
   flex: none;
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 .crrow input,
 .crrow select {
@@ -330,7 +330,7 @@
 .crtx .warnt {
   display: block;
   color: #b45309;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 .crtx .a {
@@ -386,7 +386,7 @@
   justify-content: center;
 }
 .bkhd {
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--muted);
   text-transform: uppercase;
@@ -409,7 +409,7 @@
   gap: 7px;
   box-shadow: var(--shadow);
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--fg);
   text-align: center;
@@ -428,7 +428,7 @@
   display: grid;
   place-items: center;
   font-weight: 900;
-  font-size: 12.5px;
+  font-size: 13px;
   letter-spacing: -0.02em;
   flex: none;
 }
@@ -471,7 +471,7 @@
 }
 .bkgh .bklg {
   border-radius: 9px;
-  font-size: 10px;
+  font-size: 13px;
 }
 #bankBg .wiz {
   padding-bottom: 90px;
@@ -546,7 +546,7 @@
   color: var(--bad, #b42318);
 }
 .cashbal small {
-  font-size: 12.5px;
+  font-size: 13px;
 }
 .cashmv {
   margin-top: 10px;
@@ -570,7 +570,7 @@
 }
 .cmv small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .cmv b.pos {
   color: var(--good, #1b7a55);

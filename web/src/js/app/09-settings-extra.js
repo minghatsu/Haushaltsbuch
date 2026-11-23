@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.4",
+    "23. November 2026",
+    [
+      "Besser lesbar: Kleine Texte sind jetzt mindestens 13 Punkt groß, graue Schrift ist dunkler und hat überall genug Kontrast – auch in Diagrammen.",
+      "Die Pfeile zum Monatswechsel sind größer und leichter zu treffen.",
+    ],
+  ],
+  [
     "0.48.3",
     "23. November 2026",
     [

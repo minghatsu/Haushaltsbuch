@@ -9,7 +9,7 @@
   height: 26px;
   border-radius: 50%;
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   flex: none;
 }
@@ -69,7 +69,7 @@
   align-items: center;
   gap: 6px;
   margin-top: 6px;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--muted);
 }
 .gmby span {
@@ -249,7 +249,7 @@ textarea.in {
   fill: var(--fg);
 }
 .dn-l {
-  font-size: 10.5px;
+  font-size: 13px;
   font-weight: 600;
   fill: var(--muted);
 }
@@ -292,7 +292,7 @@ textarea.in {
   border-radius: 99px;
 }
 .pct {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 700;
   width: 36px;
@@ -348,7 +348,7 @@ textarea.in {
   white-space: nowrap;
 }
 .tx .s {
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -365,7 +365,7 @@ textarea.in {
 .dayhead {
   display: flex;
   justify-content: space-between;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
   padding: 14px 0 4px;
@@ -520,7 +520,7 @@ textarea.in {
   font-weight: 700;
 }
 .fx .s {
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--muted);
 }
 .check {

@@ -55,7 +55,7 @@
   font-size: 15.5px;
 }
 .hlcard small {
-  font-size: 12.5px;
+  font-size: 13px;
   opacity: 0.9;
   font-weight: 600;
 }
@@ -436,7 +436,7 @@ html.pc .hllet {
   margin-top: 22px;
 }
 .hlhm b {
-  font-size: 11px;
+  font-size: 13px;
   text-align: center;
   opacity: 0.7;
 }
@@ -444,13 +444,13 @@ html.pc .hllet {
   height: clamp(30px, 8vw, 40px);
   border-radius: 9px;
   font-style: normal;
-  font-size: 10.5px;
+  font-size: 13px;
   font-weight: 700;
   display: grid;
   place-items: center;
   transform: scale(0);
   background: rgba(255, 255, 255, calc(0.1 + var(--v) * 0.75));
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
 }
 .hlhm i[style*="--v:0."],
 .hlhm i.hot {
@@ -584,7 +584,7 @@ html.pc .hllet {
   border-radius: 999px;
   background: #5a3200;
   color: #ffe9c2;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 800;
   transform: scale(0);
 }
@@ -722,7 +722,7 @@ html.pc .hllet {
   font-weight: 900;
 }
 .hlcoll .t small {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   opacity: 0.85;
   display: block;

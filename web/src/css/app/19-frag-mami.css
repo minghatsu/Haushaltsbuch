@@ -139,7 +139,7 @@ html:not(.pc) .ptq.mamibtn.mcomp.ptqph {
 }
 .mpn small {
   color: var(--good, #1d9a6c);
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
 }
 .mpe,
@@ -199,7 +199,7 @@ html:not(.pc) .ptq.mamibtn.mcomp.ptqph {
   border: 1.5px solid var(--accent-soft);
   background: var(--surface);
   color: var(--accent);
-  font: 700 12.5px var(--f-body);
+  font: 700 13px var(--f-body);
   padding: 6px 11px;
   border-radius: 999px;
   cursor: pointer;
@@ -260,7 +260,7 @@ html:not(.pc) .ptq.mamibtn.mcomp.ptqph {
 }
 .msk {
   margin: 12px 16px 6px;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -281,7 +281,7 @@ html:not(.pc) .ptq.mamibtn.mcomp.ptqph {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  font: 700 11.5px var(--f-body);
+  font: 700 13px var(--f-body);
   color: var(--fg);
   cursor: pointer;
 }
@@ -343,7 +343,7 @@ html:not(.pc) .ptq.mamibtn.mcomp.ptqph {
   color: var(--fg);
   border-radius: 12px;
   padding: 9px 4px;
-  font: 700 12.5px var(--f-body);
+  font: 700 13px var(--f-body);
   cursor: pointer;
 }
 .manr button.on {

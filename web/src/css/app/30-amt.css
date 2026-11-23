@@ -54,7 +54,7 @@
   line-height: 1;
 }
 .tmn small {
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 800;
   opacity: 0.9;
 }
@@ -63,7 +63,7 @@
   min-width: 0;
 }
 .tmht small {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   opacity: 0.85;
 }
@@ -196,7 +196,7 @@
 }
 .tmrow .grow small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 .tmdn .grow b {
@@ -205,7 +205,7 @@
 }
 .tmdn .grow small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .tmph {
   flex: none;
@@ -274,7 +274,7 @@
 }
 .jlbs small {
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 .zvc {
   padding: 14px;
@@ -282,7 +282,7 @@
 }
 .zvc > small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 .zvbig {
@@ -342,7 +342,7 @@
 .zvax {
   position: relative;
   height: 16px;
-  font-size: 10.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -371,7 +371,7 @@
   border-radius: 14px;
   overflow: hidden;
   font-weight: 800;
-  font-size: 12.5px;
+  font-size: 13px;
   color: #fff;
   margin-bottom: 6px;
   background: var(--sunk);
@@ -404,7 +404,7 @@
 }
 .zvrow .grow small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 .zvhero .srbig {
@@ -527,7 +527,7 @@
 .aioffer small {
   display: block;
   opacity: 0.85;
-  font-size: 12px;
+  font-size: 13px;
 }
 .aioffer .dsgo {
   color: #fff;
@@ -569,7 +569,7 @@
   margin-left: 6px;
   padding: 1px 8px;
   border-radius: 99px;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0;
   background: color-mix(in srgb, var(--accent) 15%, transparent);
   color: var(--accent);
@@ -671,7 +671,7 @@
   background: var(--surface);
   box-shadow: 0 0 0 1px var(--line);
   font:
-    500 12.5px/1.75 ui-monospace,
+    500 13px/1.75 ui-monospace,
     SFMono-Regular,
     Menlo,
     monospace;
@@ -732,7 +732,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   margin: 4px 0 0;
 }
@@ -786,7 +786,7 @@
 .hlpv small {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 .hlpv b {
@@ -862,7 +862,7 @@
 .rchr small {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .rchr .amt {
   font-variant-numeric: tabular-nums;
@@ -893,7 +893,7 @@
 }
 .rchb .btn {
   padding: 6px 11px;
-  font-size: 12.5px;
+  font-size: 13px;
   min-height: 0;
 }
 .rchb .btn.danger {
@@ -1112,7 +1112,7 @@ a.btn:not(.primary) {
 .docscan small {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .docscan .dsgo {
   font-size: 22px;
@@ -1154,7 +1154,7 @@ a.btn:not(.primary) {
   border-radius: 12px;
   padding: 10px;
   margin-top: 6px;
-  font-size: 12px;
+  font-size: 13px;
   animation: ocrIn 0.35s ease;
 }
 @keyframes ocrIn {
@@ -1298,7 +1298,7 @@ html.pc .bsbtns .vadone {
   color: var(--good);
   border-radius: 999px;
   padding: 7px 11px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
 }
 .bschip b {
@@ -1356,7 +1356,7 @@ html.pc .bsbtns .vadone {
 }
 .bsck small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 .bsck.bad b {

@@ -116,7 +116,7 @@
   margin-top: 10px;
   font-family: var(--f-body, system-ui);
   color: #7b8079;
-  font-size: 11.5px;
+  font-size: 13px;
   text-align: center;
 }
 .zbact {
@@ -151,7 +151,7 @@
 }
 .zbbub small {
   opacity: 0.8;
-  font-size: 12px;
+  font-size: 13px;
 }
 .zbbub .in {
   width: 100%;
@@ -320,7 +320,7 @@
   pointer-events: none;
 }
 .plantbl th {
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 700;
   text-align: right;
@@ -348,7 +348,7 @@
   border-radius: 999px;
   padding: 6px 11px;
   font-weight: 700;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--muted);
 }
 .mchip[aria-pressed="true"] {
@@ -560,7 +560,7 @@ html.touch body {
   white-space: nowrap;
 }
 #kindSeg:has(button:nth-child(5):not([hidden])) button {
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: -0.01em;
 }
 .seg button {
@@ -648,7 +648,7 @@ html.touch body {
 }
 .hint {
   text-align: center;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--muted);
   margin-top: -8px;
 }
@@ -667,7 +667,7 @@ html.touch body {
   align-items: center;
   gap: 7px;
   font-weight: 700;
-  font-size: 12.5px;
+  font-size: 13px;
   text-align: center;
   line-height: 1.2;
 }
@@ -700,7 +700,7 @@ html.touch body {
   color: var(--bg);
 }
 .lbl {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
   margin-bottom: 8px;
@@ -725,7 +725,7 @@ td {
   white-space: nowrap;
 }
 th {
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -764,7 +764,7 @@ tfoot td {
   padding-top: 9px;
 }
 .pill {
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 800;
   padding: 4px 10px;
   border-radius: 99px;
@@ -787,7 +787,7 @@ tfoot td {
 .legend {
   display: flex;
   gap: 12px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 700;
 }
@@ -818,7 +818,7 @@ tfoot td {
   gap: 6px;
 }
 .field label {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
 }

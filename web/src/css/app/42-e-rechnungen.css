@@ -12,7 +12,7 @@
 }
 .ersum small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -104,7 +104,7 @@
 .ern small,
 .era small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--muted);
   margin-top: 2px;
@@ -172,7 +172,7 @@
   color: var(--accent-ink);
   border-radius: 99px;
   padding: 5px 11px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
 }
 .erbox {
@@ -193,7 +193,7 @@
 }
 .erbox small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -205,7 +205,7 @@
 }
 .erbox span {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   margin-top: 2px;
 }
@@ -230,7 +230,7 @@
 .erpos .h {
   border-top: 0;
   background: var(--sunk);
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -254,7 +254,7 @@
 }
 .eriban small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -348,7 +348,7 @@
 }
 .eot em {
   font-style: normal;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--accent);
   background: var(--accent-soft);
@@ -359,7 +359,7 @@
 }
 .eot small {
   display: block;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--muted);
   margin-top: 2px;
 }
@@ -458,13 +458,13 @@
 }
 .pmn small {
   display: block;
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--muted);
   margin-top: 2px;
   font-variant-numeric: tabular-nums;
 }
 .pmn .pmref {
-  font-size: 11.5px;
+  font-size: 13px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -473,7 +473,7 @@
   display: inline-block;
   margin-top: 6px;
   font-style: normal;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 800;
   border-radius: 99px;
   padding: 3px 9px;
@@ -538,12 +538,12 @@
   background: var(--surface);
 }
 .dnst span {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 800;
   text-align: center;
 }
 .dnst small {
-  font-size: 11px;
+  font-size: 13px;
 }
 .dnst.done i {
   background: var(--good-soft);
@@ -589,7 +589,7 @@
 }
 .dnsw small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   margin-top: 1px;
 }
@@ -653,7 +653,7 @@
   gap: 4px;
   border-radius: 99px;
   padding: 4px 9px;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   background: var(--good-soft);
   color: var(--good);
@@ -721,7 +721,7 @@
   gap: 2px;
 }
 .rvrecs .rsh small {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
@@ -797,7 +797,7 @@
   font-variant-numeric: tabular-nums;
 }
 .rshero small {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--muted);
 }
@@ -817,7 +817,7 @@
 }
 .rsf > span {
   display: block;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
   margin-bottom: 6px;
@@ -914,14 +914,14 @@
 .rqpos small,
 .rqnote {
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
 }
 .rqmeta {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 14px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--muted);
 }
@@ -941,7 +941,7 @@
 }
 .rqto small {
   display: block;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -1103,13 +1103,13 @@
 }
 .kffrom small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--muted);
 }
 .kfprog {
   display: inline-block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
   background: var(--sunk);

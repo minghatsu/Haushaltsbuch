@@ -184,7 +184,7 @@ function donut(items, total) {
       },
     });
   }
-  return `<div class="donutwrap"><svg class="donut" viewBox="0 0 136 136" role="img" aria-label="Ausgaben nach Kategorie"><circle r="${R}" cx="68" cy="68" fill="none" stroke="var(--sunk)" stroke-width="20"/>${segs.map((s) => s.el).join("")}<text x="68" y="66" text-anchor="middle" font-size="17" font-weight="800" fill="var(--fg)" font-family="Inter, sans-serif">${escHtml(fmtEur0(total))}</text><text x="68" y="84" text-anchor="middle" font-size="10.5" fill="var(--muted)" font-family="Inter, sans-serif">ausgegeben</text></svg>
+  return `<div class="donutwrap"><svg class="donut" viewBox="0 0 136 136" role="img" aria-label="Ausgaben nach Kategorie"><circle r="${R}" cx="68" cy="68" fill="none" stroke="var(--sunk)" stroke-width="20"/>${segs.map((s) => s.el).join("")}<text x="68" y="66" text-anchor="middle" font-size="17" font-weight="800" fill="var(--fg)" font-family="Inter, sans-serif">${escHtml(fmtEur0(total))}</text><text x="68" y="84" text-anchor="middle" font-size="12.5" fill="var(--muted)" font-family="Inter, sans-serif">ausgegeben</text></svg>
     <div class="dleg">${segs.map((s) => `<div><i style="background:${s.col}"></i><span>${escHtml(s.x.label || s.x.cat)}</span><b>${escHtml(fmtEur0(s.x.v))}</b></div>`).join("")}</div></div>`;
 }
 function monthGroups(ym) {

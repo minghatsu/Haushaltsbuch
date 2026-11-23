@@ -22,7 +22,7 @@
   backdrop-filter: blur(8px);
   box-shadow: var(--shadow);
   font:
-    600 12px system-ui,
+    600 13px system-ui,
     sans-serif;
   color: var(--good);
   transition:
@@ -73,7 +73,7 @@
   align-items: center;
   justify-content: space-between;
   margin-top: 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -99,7 +99,7 @@
 .devkv small {
   display: block;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13px;
 }
 .devkv b {
   display: block;
@@ -126,7 +126,7 @@
 .devswt small {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   margin-top: 2px;
 }
 .devsw input {
@@ -209,7 +209,7 @@
 .devlk {
   flex: none;
   font:
-    600 10px system-ui,
+    600 13px system-ui,
     sans-serif;
   padding: 2px 7px;
   border-radius: 99px;
@@ -250,7 +250,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   padding-left: 30px;
   animation: devIn 0.35s both;

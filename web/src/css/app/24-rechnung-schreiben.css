@@ -37,7 +37,7 @@
 }
 .rvhd small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -107,7 +107,7 @@
   padding-bottom: 16px;
 }
 .rvcount {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -162,7 +162,7 @@
 }
 .rvtog small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 600;
 }
@@ -252,7 +252,7 @@
 }
 .rvk small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 600;
 }
@@ -308,7 +308,7 @@
   min-width: 0;
 }
 .rvpm span {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 700;
   white-space: nowrap;
@@ -415,7 +415,7 @@
 .rvhint {
   display: block;
   margin-top: 6px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 600;
 }
@@ -431,7 +431,7 @@
   padding: 18px;
 }
 .rvtot small {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted);
 }
@@ -532,7 +532,7 @@
   display: flex;
   gap: 6px;
   align-items: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--muted);
 }
@@ -627,7 +627,7 @@ html.pc:not(.tabp) .rvst .rvstt small {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 800;
   background: var(--sunk);
   flex: none;
@@ -681,7 +681,7 @@ html.pc:not(.tabp) .rvhd {
   }
   html.pc:not(.tabp):not(.istab) .rvst .rvstt small {
     display: block;
-    font-size: 11.5px;
+    font-size: 13px;
     color: var(--muted);
     font-weight: 600;
     max-width: 170px;
@@ -761,7 +761,7 @@ html.pc:not(.tabp) .rvhd {
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--muted);
   padding: 2px 4px;
@@ -771,7 +771,7 @@ html.pc:not(.tabp) .rvhd {
   margin-top: 1px;
 }
 .rchtag {
-  font-size: 10.5px;
+  font-size: 13px;
   font-weight: 800;
   padding: 2px 7px;
   border-radius: 99px;
@@ -836,7 +836,7 @@ html.pc:not(.tabp) .rvhd {
   display: grid;
   grid-template-columns: auto auto 1fr;
   gap: 10px;
-  font-size: 12px;
+  font-size: 13px;
   padding: 5px 0;
   border-bottom: 1px dashed var(--line);
 }
@@ -999,7 +999,7 @@ html.pc:not(.tabp) .rvhd {
   display: grid;
   place-items: center;
   font-weight: 800;
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
   padding: 0 6px;
 }
@@ -1062,7 +1062,7 @@ html.pc:not(.tabp) .rvhd {
 }
 .rvrecr small {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 600;
 }
@@ -1120,7 +1120,7 @@ html.pc:not(.tabp) .rvhd {
 }
 .rvwrite .rwt small {
   display: block;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   opacity: 0.88;
   margin-top: 2px;
@@ -1149,6 +1149,7 @@ html.pc .rchacts {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .rcha {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -1188,14 +1189,14 @@ html.pc .rchacts {
   font-weight: 800;
 }
 .rcha small {
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--muted);
   font-weight: 600;
   line-height: 1.3;
 }
 .rchsec {
   margin: 18px 2px 8px;
-  font: 800 12px var(--f-body);
+  font: 800 13px var(--f-body);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--muted);
