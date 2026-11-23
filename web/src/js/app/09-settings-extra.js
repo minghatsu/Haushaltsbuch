@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.3",
+    "23. November 2026",
+    [
+      "Neu unter „Kunden“: „Aus alter Rechnung übernehmen“. PDF oder Foto alter Rechnungen wählen – auch mehrere auf einmal. Name, Ansprechpartner, Adresse, E-Mail und Kundennummer werden erkannt, du prüfst nur noch.",
+      "Gibt es den Kunden schon, werden nur leere Felder ergänzt.",
+    ],
+  ],
+  [
     "0.48.2",
     "23. November 2026",
     [

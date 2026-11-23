@@ -1076,3 +1076,72 @@
 .dvinfo {
   margin: 0 2px 12px;
 }
+
+/* Kunde aus alter Rechnung */
+.kffrom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 1px dashed var(--line);
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  font: inherit;
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+}
+.kffrom > svg:first-child {
+  color: var(--accent);
+  flex: none;
+}
+.kffrom b {
+  display: block;
+  font-size: 14.5px;
+}
+.kffrom small {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.kfprog {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--sunk);
+  border-radius: 99px;
+  padding: 3px 10px;
+  margin-bottom: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.kfscan {
+  max-height: 46vh;
+}
+.kfhead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.kfthumb {
+  width: 54px;
+  height: 72px;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  flex: none;
+  background: #fff;
+}
+.kfhead .rvhint {
+  margin-top: 2px;
+}
+.kff {
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  overflow: visible;
+}

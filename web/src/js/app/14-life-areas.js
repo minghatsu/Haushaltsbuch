@@ -143,8 +143,8 @@ function kdTile() {
   const n = rvKunden().length;
   return areaTile(
     svgIcon("user", 22),
-    "Kunden",
-    escHtml(n ? (n === 1 ? "1 Kunde" : n + " Kunden") : uiText("kd_tile_none")),
+    escHtml(uiText("kd_h")),
+    escHtml(n ? uiText(n === 1 ? "kd_n1" : "kd_n", { n: String(n) }) : uiText("kd_tile_none")),
     `data-kdopen`
   );
 }

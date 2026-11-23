@@ -588,7 +588,7 @@ function kdRender(first) {
     name: "",
     nr: rvKnrNext(),
   };
-  b.innerHTML = `${rvLearnUi()}<div class="kdtop"><input class="in" id="kdQ" type="search" value="${escHtml(KD.q)}" placeholder="${escHtml(uiText("kd_search"))}" aria-label="${escHtml(uiText("kd_search"))}"><button type="button" class="btn primary" data-kdnew>${svgIcon("plus", 16)} ${escHtml(uiText("rv_k_newrow"))}</button></div>
+  b.innerHTML = `${rvLearnUi()}<div class="kdtop"><input class="in" id="kdQ" type="search" value="${escHtml(KD.q)}" placeholder="${escHtml(uiText("kd_search"))}" aria-label="${escHtml(uiText("kd_search"))}"><button type="button" class="btn primary" data-kdnew>${svgIcon("plus", 16)} ${escHtml(uiText("rv_k_newrow"))}</button></div><button type="button" class="kffrom" data-kfopen>${svgIcon("camera", 18)}<span class="grow"><b>${escHtml(uiText("kf_btn"))}</b><small>${escHtml(uiText("kf_btn_s"))}</small></span>${svgIcon("right", 16)}</button>
     ${KD.nw ? `<div class="vacard kdnew"><b class="rvsub">${escHtml(uiText("rv_k_new"))}</b>${kdForm(nw)}</div>` : ""}
     <div class="vacard kdl" id="kdL">${F.map((c) => kdRow(c) + (KD.id === c.id ? kdForm(c) : "")).join("") || `<p class="rvempty">${escHtml(uiText(L.length ? "rv_it_nohit" : "kd_empty"))}</p>`}</div>`;
   if (first && !reducedMotion())

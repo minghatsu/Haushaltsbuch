@@ -25438,6 +25438,75 @@ html.pc .pctpane .ayblk {
 .dvinfo {
   margin: 0 2px 12px;
 }
+
+/* Kunde aus alter Rechnung */
+.kffrom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 1px dashed var(--line);
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  font: inherit;
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+}
+.kffrom > svg:first-child {
+  color: var(--accent);
+  flex: none;
+}
+.kffrom b {
+  display: block;
+  font-size: 14.5px;
+}
+.kffrom small {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.kfprog {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--sunk);
+  border-radius: 99px;
+  padding: 3px 10px;
+  margin-bottom: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.kfscan {
+  max-height: 46vh;
+}
+.kfhead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.kfthumb {
+  width: 54px;
+  height: 72px;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  flex: none;
+  background: #fff;
+}
+.kfhead .rvhint {
+  margin-top: 2px;
+}
+.kff {
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  overflow: visible;
+}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -50880,6 +50949,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.3",
+    "23. November 2026",
+    [
+      "Neu unter „Kunden“: „Aus alter Rechnung übernehmen“. PDF oder Foto alter Rechnungen wählen – auch mehrere auf einmal. Name, Ansprechpartner, Adresse, E-Mail und Kundennummer werden erkannt, du prüfst nur noch.",
+      "Gibt es den Kunden schon, werden nur leere Felder ergänzt.",
+    ],
+  ],
+  [
     "0.48.2",
     "23. November 2026",
     [
@@ -53350,6 +53427,20 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.48.3",
+    s: () =>
+      hasSelf()
+        ? [
+            {
+              sel: '[data-view="beruf"] [data-kdopen].atile',
+              ic: "user",
+              t: uiText("nw_kf_t"),
+              p: [uiText("nw_kf_p")],
+            },
+          ]
+        : [],
+  },
   {
     v: "0.48.2",
     s: () =>
@@ -57264,8 +57355,8 @@ function kdTile() {
   const n = rvKunden().length;
   return areaTile(
     svgIcon("user", 22),
-    "Kunden",
-    escHtml(n ? (n === 1 ? "1 Kunde" : n + " Kunden") : uiText("kd_tile_none")),
+    escHtml(uiText("kd_h")),
+    escHtml(n ? uiText(n === 1 ? "kd_n1" : "kd_n", { n: String(n) }) : uiText("kd_tile_none")),
     `data-kdopen`
   );
 }
@@ -87992,6 +88083,226 @@ const TEXTS = {
     "لمستشارك الضريبي: اختر شهرًا أو ربعًا أو سنة واحفظ ملف DATEV – أو ملف ZIP بكل المستندات. إن نقص مستند تراه مسبقًا.",
     "Pentru consultant: alege luna, trimestrul sau anul și salvează fișierul DATEV – sau un ZIP cu toate documentele. Dacă lipsește un document, vezi dinainte.",
   ],
+  kd_n1: [
+    "1 Kunde",
+    "1 customer",
+    "1 müşteri",
+    "1 клиент",
+    "1 клієнт",
+    "1 klient",
+    "عميل واحد",
+    "1 client",
+  ],
+  kd_n: [
+    "{n} Kunden",
+    "{n} customers",
+    "{n} müşteri",
+    "{n} клиентов",
+    "{n} клієнтів",
+    "{n} klientów",
+    "{n} عملاء",
+    "{n} clienți",
+  ],
+  kf_btn: [
+    "Aus alter Rechnung übernehmen",
+    "Import from an old invoice",
+    "Eski faturadan al",
+    "Взять из старого счёта",
+    "Взяти зі старого рахунку",
+    "Przejmij ze starej faktury",
+    "استيراد من فاتورة قديمة",
+    "Preia din factură veche",
+  ],
+  kf_btn_s: [
+    "PDF oder Foto – auch mehrere auf einmal",
+    "PDF or photo – several at once is fine",
+    "PDF veya fotoğraf – birden fazla da olur",
+    "PDF или фото – можно сразу несколько",
+    "PDF або фото – можна одразу кілька",
+    "PDF lub zdjęcie – także kilka naraz",
+    "PDF أو صورة – ويمكن عدة ملفات معًا",
+    "PDF sau poză – și mai multe deodată",
+  ],
+  kf_h: [
+    "Kunde aus Rechnung",
+    "Customer from invoice",
+    "Faturadan müşteri",
+    "Клиент из счёта",
+    "Клієнт із рахунку",
+    "Klient z faktury",
+    "عميل من فاتورة",
+    "Client din factură",
+  ],
+  kf_pick_t: [
+    "PDF oder Foto einer alten Rechnung",
+    "PDF or photo of an old invoice",
+    "Eski bir faturanın PDF'i veya fotoğrafı",
+    "PDF или фото старого счёта",
+    "PDF або фото старого рахунку",
+    "PDF lub zdjęcie starej faktury",
+    "PDF أو صورة لفاتورة قديمة",
+    "PDF sau poză a unei facturi vechi",
+  ],
+  kf_pick_s: [
+    "Name, Adresse und Kundennummer werden erkannt – du prüfst nur noch.",
+    "Name, address and customer number are recognised – you just check.",
+    "Ad, adres ve müşteri numarası tanınır – sen sadece kontrol edersin.",
+    "Имя, адрес и номер клиента распознаются – ты только проверяешь.",
+    "Ім'я, адресу й номер клієнта буде розпізнано – ти лише перевіряєш.",
+    "Nazwa, adres i numer klienta zostaną rozpoznane – ty tylko sprawdzasz.",
+    "يتم التعرف على الاسم والعنوان ورقم العميل – أنت تراجع فقط.",
+    "Numele, adresa și numărul de client sunt recunoscute – tu doar verifici.",
+  ],
+  kf_reading: [
+    "Ich lese die Rechnung …",
+    "Reading the invoice …",
+    "Fatura okunuyor …",
+    "Читаю счёт …",
+    "Читаю рахунок …",
+    "Czytam fakturę …",
+    "جارٍ قراءة الفاتورة …",
+    "Citesc factura …",
+  ],
+  kf_prog: [
+    "Rechnung {a} von {b}",
+    "Invoice {a} of {b}",
+    "Fatura {a} / {b}",
+    "Счёт {a} из {b}",
+    "Рахунок {a} з {b}",
+    "Faktura {a} z {b}",
+    "الفاتورة {a} من {b}",
+    "Factura {a} din {b}",
+  ],
+  kf_found: [
+    "Erkannt",
+    "Recognised",
+    "Tanındı",
+    "Распознано",
+    "Розпізнано",
+    "Rozpoznano",
+    "تم التعرف",
+    "Recunoscut",
+  ],
+  kf_check: [
+    "Kurz prüfen und speichern.",
+    "Check quickly and save.",
+    "Kısaca kontrol et ve kaydet.",
+    "Быстро проверь и сохрани.",
+    "Швидко перевір і збережи.",
+    "Sprawdź i zapisz.",
+    "راجع سريعًا واحفظ.",
+    "Verifică rapid și salvează.",
+  ],
+  kf_none_h: [
+    "Nichts erkannt",
+    "Nothing recognised",
+    "Hiçbir şey tanınmadı",
+    "Ничего не распознано",
+    "Нічого не розпізнано",
+    "Nic nie rozpoznano",
+    "لم يتم التعرف على شيء",
+    "Nimic recunoscut",
+  ],
+  kf_none: [
+    "Hier habe ich keinen Kunden gefunden – trag ihn kurz selbst ein.",
+    "I couldn't find a customer here – just type it in.",
+    "Burada müşteri bulamadım – kendin kısaca gir.",
+    "Клиента не нашла – введи сам.",
+    "Клієнта не знайшла – введи сам.",
+    "Nie znalazłam klienta – wpisz go sam.",
+    "لم أجد عميلًا هنا – أدخله بنفسك.",
+    "N-am găsit niciun client – introdu-l tu.",
+  ],
+  kf_dup: [
+    "{n} gibt es schon – leere Felder werden ergänzt.",
+    "{n} already exists – empty fields will be filled in.",
+    "{n} zaten var – boş alanlar doldurulur.",
+    "{n} уже есть – пустые поля будут дополнены.",
+    "{n} вже є – порожні поля буде доповнено.",
+    "{n} już istnieje – puste pola zostaną uzupełnione.",
+    "{n} موجود مسبقًا – ستُكمَل الحقول الفارغة.",
+    "{n} există deja – câmpurile goale vor fi completate.",
+  ],
+  kf_skip: [
+    "Überspringen",
+    "Skip",
+    "Atla",
+    "Пропустить",
+    "Пропустити",
+    "Pomiń",
+    "تخطٍّ",
+    "Sari peste",
+  ],
+  kf_next: [
+    "Speichern & weiter",
+    "Save & next",
+    "Kaydet ve devam",
+    "Сохранить и дальше",
+    "Зберегти й далі",
+    "Zapisz i dalej",
+    "احفظ وتابع",
+    "Salvează și continuă",
+  ],
+  kf_save: [
+    "Kunde speichern",
+    "Save customer",
+    "Müşteriyi kaydet",
+    "Сохранить клиента",
+    "Зберегти клієнта",
+    "Zapisz klienta",
+    "احفظ العميل",
+    "Salvează clientul",
+  ],
+  kf_more: [
+    "Weitere Rechnung",
+    "Another invoice",
+    "Başka fatura",
+    "Ещё счёт",
+    "Ще рахунок",
+    "Kolejna faktura",
+    "فاتورة أخرى",
+    "Altă factură",
+  ],
+  kf_one: [
+    "Kunde gespeichert",
+    "Customer saved",
+    "Müşteri kaydedildi",
+    "Клиент сохранён",
+    "Клієнта збережено",
+    "Klient zapisany",
+    "تم حفظ العميل",
+    "Client salvat",
+  ],
+  kf_done: [
+    "{n} Kunden übernommen",
+    "{n} customers imported",
+    "{n} müşteri alındı",
+    "Добавлено клиентов: {n}",
+    "Додано клієнтів: {n}",
+    "Przejęto klientów: {n}",
+    "تم استيراد {n} عملاء",
+    "{n} clienți preluați",
+  ],
+  nw_kf_t: [
+    "Kunden aus alten Rechnungen",
+    "Customers from old invoices",
+    "Eski faturalardan müşteriler",
+    "Клиенты из старых счетов",
+    "Клієнти зі старих рахунків",
+    "Klienci ze starych faktur",
+    "عملاء من فواتير قديمة",
+    "Clienți din facturi vechi",
+  ],
+  nw_kf_p: [
+    "Unter „Kunden“: alte Rechnungen als PDF oder Foto wählen – auch mehrere auf einmal. Name, Adresse und Kundennummer trage ich ein, du prüfst nur noch.",
+    "Under “Customers”: pick old invoices as PDF or photo – several at once. I fill in name, address and customer number, you just check.",
+    "“Müşteriler” altında: eski faturaları PDF veya fotoğraf olarak seç – birden fazla da olur. Ad, adres ve numarayı ben girerim, sen kontrol edersin.",
+    "В «Клиентах»: выбери старые счета как PDF или фото – можно сразу несколько. Имя, адрес и номер я впишу, ты проверишь.",
+    "У «Клієнтах»: обери старі рахунки як PDF або фото – можна кілька. Ім'я, адресу й номер я впишу, ти перевіриш.",
+    "W „Klientach”: wybierz stare faktury jako PDF lub zdjęcie – także kilka. Nazwę, adres i numer wpiszę ja, ty sprawdzasz.",
+    "في «العملاء»: اختر فواتير قديمة كملف PDF أو صورة – حتى عدة معًا. أملأ الاسم والعنوان والرقم، وأنت تراجع.",
+    "La „Clienți”: alege facturi vechi ca PDF sau poză – și mai multe deodată. Eu completez numele, adresa și numărul, tu verifici.",
+  ],
 };
 
 /* Texte aus TEXTS in der aktuellen Sprache, Monatsnamen und das Zählwerk für Beträge */
@@ -98688,7 +98999,7 @@ function kdRender(first) {
     name: "",
     nr: rvKnrNext(),
   };
-  b.innerHTML = `${rvLearnUi()}<div class="kdtop"><input class="in" id="kdQ" type="search" value="${escHtml(KD.q)}" placeholder="${escHtml(uiText("kd_search"))}" aria-label="${escHtml(uiText("kd_search"))}"><button type="button" class="btn primary" data-kdnew>${svgIcon("plus", 16)} ${escHtml(uiText("rv_k_newrow"))}</button></div>
+  b.innerHTML = `${rvLearnUi()}<div class="kdtop"><input class="in" id="kdQ" type="search" value="${escHtml(KD.q)}" placeholder="${escHtml(uiText("kd_search"))}" aria-label="${escHtml(uiText("kd_search"))}"><button type="button" class="btn primary" data-kdnew>${svgIcon("plus", 16)} ${escHtml(uiText("rv_k_newrow"))}</button></div><button type="button" class="kffrom" data-kfopen>${svgIcon("camera", 18)}<span class="grow"><b>${escHtml(uiText("kf_btn"))}</b><small>${escHtml(uiText("kf_btn_s"))}</small></span>${svgIcon("right", 16)}</button>
     ${KD.nw ? `<div class="vacard kdnew"><b class="rvsub">${escHtml(uiText("rv_k_new"))}</b>${kdForm(nw)}</div>` : ""}
     <div class="vacard kdl" id="kdL">${F.map((c) => kdRow(c) + (KD.id === c.id ? kdForm(c) : "")).join("") || `<p class="rvempty">${escHtml(uiText(L.length ? "rv_it_nohit" : "kd_empty"))}</p>`}</div>`;
   if (first && !reducedMotion())
@@ -102672,6 +102983,225 @@ document.addEventListener("click", async (e) => {
     await saveSettings();
     hbSheetClose("dvBg");
     setTimeout(() => openSheet(x.kind, x), 240);
+  }
+});
+
+/* Kunden aus alten Rechnungen übernehmen: PDF oder Foto wählen, Empfänger wird erkannt, du prüfst nur noch */
+const KF = { q: [], i: 0, n: 0, d: null, img: null, busy: false, saved: 0, dup: null };
+
+const kfNorm = (s) =>
+  String(s || "")
+    .toLowerCase()
+    .replace(/\b(gmbh|mbh|ag|ug|kg|ohg|gbr|e\.?\s?k\.?|haftungsbeschränkt)\b/g, "")
+    .replace(/[^a-z0-9äöüß]+/g, "");
+
+/* Textstücke spaltenweise ordnen: erst die linke Hälfte (Anschriftfeld), dann die rechte */
+function kfSegs(lines) {
+  const L = [],
+    R = [],
+    pw = Math.max(1, ...(lines || []).map((l) => (l && (l.w || (l.x || 0) + (l.w || 0))) || 0)),
+    put = (s, right) => {
+      s = String(s || "").replace(/\s+/g, " ").trim();
+      if (s) (right ? R : L).push(s);
+    };
+  for (const l of lines || []) {
+    if (!l) continue;
+    if (typeof l === "string") {
+      for (const s of l.split(/\s{2,}|\t/)) put(s, false);
+    } else if (l.cells) {
+      for (const c of l.cells) put(c.s, c.x > (l.w || pw) * 0.5);
+    } else {
+      const t = l.text || l.t || "",
+        right = typeof l.x === "number" && l.x > pw * 0.5;
+      for (const s of t.split(/\s{2,}|\t/)) put(s, right);
+    }
+  }
+  return L.concat(R);
+}
+
+/* Empfänger aus den Zeilen einer Rechnung lesen */
+function kfParse(lines) {
+  const b = rvBiz(),
+    mine = [b.name, b.owner, store.settings.name].map(kfNorm).filter((x) => x.length > 2),
+    myStreet = kfNorm(b.street),
+    myCity = kfNorm(b.city),
+    S = kfSegs(lines);
+  const isMine = (s) => {
+    const n = kfNorm(s);
+    return (mine.some((m) => n.includes(m)) || (myStreet && n.includes(myStreet)) || (myCity && n === myCity)) && n.length > 2;
+  };
+  const sender = (s) => /[·|•]/.test(s) || (/,/.test(s) && /\d{5}/.test(s) && /\d/.test(s.split(",")[0]));
+  const STREET = /(stra(ß|ss)e|str\.|weg|allee|platz|gasse|ring|damm|ufer|chaussee|markt|hof|pfad|steig|berg)\s*\d/i,
+    CITY = /^(?:D-\s?)?\d{5}\s+[A-ZÄÖÜ][\wäöüß .()/-]{1,40}$/,
+    PERS = /^(?:z\.?\s?hd\.?|zu händen|attn\.?|ansprechpartner(?:in)?:?)\s+(.{3,50})$/i,
+    SAL = /^(herrn?|frau)\s+(.{3,50})$/i,
+    o = {};
+  for (let i = 1; i < Math.min(S.length, 60); i++) {
+    if (!CITY.test(S[i]) || isMine(S[i]) || sender(S[i])) continue;
+    if (!STREET.test(S[i - 1]) || isMine(S[i - 1])) continue;
+    const up = [];
+    for (let k = i - 2; k >= 0 && up.length < 3; k--) {
+      const s = S[k];
+      if (isMine(s) || sender(s) || /rechnung|invoice|seite|datum|@|www\.|tel\.?|fax/i.test(s) || s.length > 60) break;
+      up.unshift(s);
+    }
+    if (up.length > 1 && /^(herrn?|frau|firma)$/i.test(up[0])) up.shift();
+    if (!up.length) continue;
+    o.city = S[i].replace(/^D-\s?/, "");
+    o.street = S[i - 1];
+    let pi = up.findIndex((s) => PERS.test(s) || SAL.test(s));
+    if (pi === 0 && up.length > 1 && SAL.test(up[0])) {
+      o.name = up[0].replace(SAL, "$2");
+      o.person = up.slice(1).join(" ").replace(PERS, "$1");
+    } else if (pi > 0) {
+      o.name = up.slice(0, pi).join(" ");
+      o.person = up[pi].replace(PERS, "$1").replace(SAL, "$2");
+    } else o.name = up.join(" ");
+    if (pi === 0 && !o.person) o.name = up[0].replace(PERS, "$1").replace(SAL, "$2");
+    break;
+  }
+  if (!o.name) {
+    const { d } = rchParse(S);
+    if (d.kunde && !isMine(d.kunde)) Object.assign(o, { name: d.kunde }, rvAddrParse(S, d.kunde));
+  }
+  const all = S.join("\n"),
+    myMail = String(b.email || "").toLowerCase(),
+    mails = [...all.matchAll(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g)].map((m) => m[0]).filter((m) => m.toLowerCase() !== myMail);
+  if (!o.email && mails.length) {
+    const key = kfNorm(o.name).slice(0, 6);
+    o.email = mails.find((m) => key.length > 3 && kfNorm(m).includes(key)) || (mails.length === 1 && !mine.some((x) => kfNorm(mails[0]).includes(x.slice(0, 6))) ? mails[0] : "");
+  }
+  const nr = all.match(/kunden[\s-]*(?:nr|nummer|no)\.?\s*:?\s*([A-Z0-9][\w\-\/]{0,15})/i);
+  if (nr && /\d/.test(nr[1])) o.nr = nr[1];
+  for (const k of Object.keys(o)) o[k] = String(o[k] || "").trim();
+  return o;
+}
+
+function kfFind(o) {
+  const n = kfNorm(o.name);
+  return n.length > 2 ? rvKunden().find((c) => kfNorm(c.name) === n) || null : null;
+}
+
+function kfPick(more) {
+  const inp = document.createElement("input");
+  inp.type = "file";
+  inp.accept = "application/pdf,image/*";
+  inp.multiple = true;
+  inp.onchange = () => {
+    const fs = [...(inp.files || [])];
+    if (!fs.length) return;
+    if (more && KF.n) {
+      KF.q.push(...fs);
+      KF.n += fs.length;
+      kfNext();
+    } else kfStart(fs);
+  };
+  inp.click();
+}
+function kfStart(files) {
+  Object.assign(KF, { q: [...files], i: 0, n: files.length, d: null, img: null, saved: 0 });
+  kfNext();
+}
+async function kfNext() {
+  const f = KF.q.shift();
+  if (!f) return kfFinish();
+  KF.i++;
+  KF.busy = true;
+  KF.img = null;
+  KF.d = null;
+  kfRender();
+  let lines = [];
+  try {
+    if (isPdfF(f)) {
+      lines = await pdfLines(await f.arrayBuffer());
+      KF.img = (await stbPdf(f)).img;
+    } else {
+      const R = await readPages([f], (im) => {
+        KF.img = im;
+        kfRender();
+      });
+      lines = R.lines || [];
+      KF.img = R.img || KF.img;
+    }
+  } catch (_) {}
+  KF.d = kfParse(lines);
+  KF.dup = kfFind(KF.d);
+  if (!KF.d.nr && !KF.dup) KF.d.nr = rvKnrNext();
+  KF.busy = false;
+  kfRender(true);
+}
+function kfFinish() {
+  hbSheetClose("kfBg");
+  if (KF.saved) {
+    toast(KF.saved === 1 ? uiText("kf_one") : uiText("kf_done", { n: String(KF.saved) }));
+    SND.play("done");
+  }
+  KF.n = 0;
+  try {
+    if ($("kdBg") && !$("kdBg").hidden) kdRender(true);
+    render();
+  } catch (_) {}
+}
+
+function kfRender(fresh) {
+  const b = hbSheet("kfBg", uiText("kf_h")),
+    prog = KF.n > 1 ? `<span class="kfprog">${escHtml(uiText("kf_prog", { a: String(KF.i), b: String(KF.n) }))}</span>` : "";
+  if (!KF.n) {
+    b.innerHTML = `<button type="button" class="rvwrite kfpick" data-kfpick><span class="rwi">${svgIcon("camera", 24)}</span><span class="rwt"><b>${escHtml(uiText("kf_pick_t"))}</b><small>${escHtml(uiText("kf_pick_s"))}</small></span><span class="rwgo">${svgIcon("right", 18)}</span></button>`;
+    return;
+  }
+  if (KF.busy) {
+    b.innerHTML = `${prog}<div class="bsscan kfscan">${KF.img ? `<img src="${KF.img}" alt="">` : `<div class="stbpdf">${svgIcon("docout", 70)}</div>`}<i class="bsbeam"></i><span class="bscorner"></span></div><p class="bsstat"><span class="dots3"><i></i><i></i><i></i></span> ${escHtml(uiText("kf_reading"))}</p>`;
+    return;
+  }
+  const d = KF.d || {},
+    F = (id, l, v, o) => rvField(id, l, v, o),
+    last = !KF.q.length;
+  b.innerHTML = `${prog}<div class="kfhead">${KF.img ? `<img class="kfthumb" src="${KF.img}" alt="">` : ""}<div class="grow"><b class="rvsub">${escHtml(uiText(d.name ? "kf_found" : "kf_none_h"))}</b><small class="rvhint">${escHtml(
+    KF.dup ? uiText("kf_dup", { n: KF.dup.name }) : d.name ? uiText("kf_check") : uiText("kf_none")
+  )}</small></div></div>
+    <div class="vacard rvgrid kff">${F("kfN", uiText("rv_k_name"), d.name, { cls: "w2" })}${F("kfNr", uiText("rv_k_nr"), KF.dup ? KF.dup.nr || d.nr : d.nr)}${F("kfP", uiText("rv_k_person"), d.person)}${F("kfS", uiText("rv_b_street"), d.street, { cls: "w2" })}${F("kfC", uiText("rv_b_city"), d.city, { cls: "w2" })}${F("kfE", uiText("rv_b_mail"), d.email, { cls: "w2", type: "email" })}</div>
+    <div class="rqbtn"><button type="button" class="btn" data-kfskip>${escHtml(uiText(last ? "kf_more" : "kf_skip"))}</button><button type="button" class="btn primary" data-kfsave>${escHtml(uiText(last ? "kf_save" : "kf_next"))}</button></div>`;
+  if (fresh && !reducedMotion()) stbAnim(b, ".kfhead,.kff .hlf,.rqbtn");
+}
+
+async function kfSave() {
+  const v = (id) => ($(id) ? $(id).value.trim() : ""),
+    o = { name: v("kfN"), nr: v("kfNr"), person: v("kfP"), street: v("kfS"), city: v("kfC"), email: v("kfE") };
+  if (!o.name) {
+    toast(uiText("kd_need_name"));
+    $("kfN") && $("kfN").focus();
+    return false;
+  }
+  let c = kfFind(o);
+  if (o.nr && rvKnrDup(o.nr, c ? c.id : "")) o.nr = c ? c.nr || "" : rvKnrNext();
+  if (c) {
+    for (const k of Object.keys(o)) if (o[k] && !c[k]) c[k] = o[k];
+  } else {
+    c = { id: "k" + Date.now().toString(36) + KF.i, ...o, nr: o.nr || rvKnrNext(), src: "kf" };
+    rvKunden().push(c);
+  }
+  await saveSettings();
+  if (KF.d && !KF.d._saved) KF.saved++;
+  if (KF.d) KF.d._saved = 1;
+  SND.play("tick");
+  return true;
+}
+
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  if (t.closest("[data-kfopen]")) {
+    KF.n = 0;
+    kfRender();
+    return;
+  }
+  if (!t.closest("#kfBg")) return;
+  if (t.closest("[data-kfpick]")) kfPick();
+  else if (t.closest("[data-kfsave]")) {
+    if (await kfSave()) kfNext();
+  } else if (t.closest("[data-kfskip]")) {
+    if (KF.q.length) kfNext();
+    else if (await kfSave()) kfPick(true);
   }
 });
 
