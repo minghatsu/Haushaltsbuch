@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.2",
+    "23. November 2026",
+    [
+      "Neu für Selbstständige: DATEV-Export. Monat, Quartal oder Jahr wählen – die App speichert einen Buchungsstapel im DATEV-Format mit Konto, Steuerschlüssel und Belegnummer (SKR 03 oder SKR 04).",
+      "Als ZIP kommen alle Belege dazu: Rechnungen als PDF, Eingangsrechnungen und Fotos. Jeder Beleg heißt wie seine Belegnummer. Fehlt einer, zeigt die App das vorher und du kannst ihn nachreichen.",
+    ],
+  ],
+  [
     "0.48.1",
     "23. November 2026",
     [

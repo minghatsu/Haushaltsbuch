@@ -959,3 +959,120 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* DATEV-Export */
+.dvper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.dvper b {
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+}
+.dvper .btn:first-child svg {
+  transform: scaleX(-1);
+}
+.dvrc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.dvrc.due {
+  background: color-mix(in srgb, var(--warn) 14%, var(--surface));
+  color: var(--fg);
+}
+.dvrc.due svg {
+  color: var(--warn);
+}
+.dvmiss {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.dvmr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 9px 12px;
+  font: 600 14px var(--f-body);
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+}
+.dvmr span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dvmr small {
+  flex: none;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.dvnr {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.dvnr .rsf {
+  margin-bottom: 4px;
+}
+.dvhint {
+  margin: 0 0 14px;
+}
+.dvaccs {
+  background: var(--sunk);
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+.dvaccs summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+.dvaccl {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+.dvacc {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.dvacc span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dvacc .in {
+  width: 96px;
+  background: var(--surface);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.dvinfo {
+  margin: 0 2px 12px;
+}

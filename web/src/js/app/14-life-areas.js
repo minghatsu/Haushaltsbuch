@@ -596,6 +596,9 @@ function renderBeruf() {
         )
       );
     }
+    (duo ? exB : extra).push(
+      areaTile(svgIcon("bank", 22), escHtml(uiText("dv_h")), escHtml(uiText("dv_tile_s")), "data-dvopen")
+    );
   }
   {
     const BL = brList().filter((x) => !x.done),
