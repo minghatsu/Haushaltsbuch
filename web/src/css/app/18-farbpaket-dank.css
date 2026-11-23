@@ -131,7 +131,7 @@ html[data-pack] .sp.pc .card {
   margin: -95px 0 0 -150px;
   transform: translateY(110vh) rotate(-12deg);
   animation:
-    dkEnvIn 0.75s 0.25s cubic-bezier(0.2, 1.3, 0.4, 1) forwards,
+    dkEnvIn 0.75s 0.25s var(--ease-pop, cubic-bezier(0.2, 1.3, 0.4, 1)) forwards,
     dkEnvOut 0.6s 1.75s ease-in forwards;
 }
 @keyframes dkEnvIn {
@@ -190,7 +190,7 @@ html[data-pack] .sp.pc .card {
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
   transform-origin: 50% 0;
   opacity: 0;
-  animation: dkCard 1s 1.3s cubic-bezier(0.2, 1.25, 0.4, 1) forwards;
+  animation: dkCard 1s 1.3s var(--ease-pop, cubic-bezier(0.2, 1.25, 0.4, 1)) forwards;
 }
 @keyframes dkCard {
   0% {
@@ -238,7 +238,7 @@ html[data-pack] .sp.pc .card {
   place-items: center;
   box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 45%, transparent);
   transform: scale(0);
-  animation: dkPop 0.5s 2s cubic-bezier(0.3, 1.8, 0.5, 1) forwards;
+  animation: dkPop 0.5s 2s var(--ease-pop, cubic-bezier(0.3, 1.8, 0.5, 1)) forwards;
 }
 .dkbadge svg {
   width: 36px;

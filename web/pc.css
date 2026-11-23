@@ -781,7 +781,7 @@ html.pc .pcfb {
   overflow: hidden;
 }
 html.pc .pcfb.new {
-  box-shadow: inset 4px 0 0 var(--kc);
+  background: color-mix(in srgb, var(--kc) 10%, var(--sunk));
 }
 html.pc .pcfbk {
   background: color-mix(in srgb, var(--kc) 16%, transparent);
@@ -831,7 +831,7 @@ html.pc .pcrefresh.ok {
   color: #fff !important;
 }
 html.pc .pcrefresh.ok svg.i {
-  animation: pcRefPop 0.45s cubic-bezier(0.3, 0.7, 0.3, 1.4);
+  animation: pcRefPop 0.45s var(--ease-pop, cubic-bezier(0.3, 0.7, 0.3, 1.4));
 }
 @keyframes pcRefSpin {
   to {
@@ -1028,7 +1028,7 @@ html.pc .pcdhand {
   place-items: center;
   color: var(--muted);
   margin-bottom: 6px;
-  animation: pcHand 2.4s ease-in-out infinite;
+  animation: pcHand 2.4s ease-in-out var(--loop, infinite);
 }
 @keyframes pcHand {
   50% {
@@ -1231,7 +1231,7 @@ html.pc .pcdchev {
   display: grid;
   place-items: center;
   flex: none;
-  transition: transform 0.45s cubic-bezier(0.3, 1.4, 0.5, 1);
+  transition: transform 0.45s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 html.pc .pcday.closed .pcdchev {
   transform: rotate(-90deg);
@@ -1332,15 +1332,13 @@ html.pc .pcfc {
   grid-template-rows: auto auto;
   column-gap: 6px;
   align-items: center;
-  background: var(--surface);
+  background: color-mix(in srgb, var(--c) 14%, var(--surface));
   border-radius: 11px;
   padding: 6px 8px 6px 7px;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.25;
-  box-shadow:
-    inset 3px 0 0 var(--c),
-    0 1px 0 #0000000a;
+  box-shadow: 0 1px 0 #0000000a;
   cursor: pointer;
   user-select: none;
   transition:
@@ -1350,9 +1348,7 @@ html.pc .pcfc {
 }
 html.pc .pcfc:hover {
   transform: translateY(-1px);
-  box-shadow:
-    inset 3px 0 0 var(--c),
-    0 4px 12px #13241b1a;
+  box-shadow: 0 4px 12px #13241b1a;
 }
 html.pc .pcfc:focus-visible {
   outline: 2px solid var(--c);
@@ -1425,9 +1421,7 @@ html.pc .pcfc.on .ck:after {
   transform: translateY(-1px) rotate(-45deg);
 }
 html.pc .pcfc.late {
-  box-shadow:
-    inset 3px 0 0 var(--c),
-    inset 0 0 0 1.5px #d9534f;
+  box-shadow: inset 0 0 0 1.5px #d9534f;
 }
 html.pc .pcfc.drag {
   opacity: 0.3;
@@ -1509,7 +1503,7 @@ html.pc .pcfgr .gi {
   flex: none;
   color: var(--c);
   background: color-mix(in srgb, var(--c) 15%, transparent);
-  transition: transform 0.25s cubic-bezier(0.3, 1.5, 0.5, 1);
+  transition: transform 0.25s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1));
 }
 html.pc .pcfgr .gl:hover .gi {
   transform: rotate(-8deg) scale(1.1);
@@ -1635,7 +1629,7 @@ html.pc .pcfc .pe {
   opacity: 0.35;
   transition:
     opacity 0.15s,
-    transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1),
+    transform 0.2s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)),
     background 0.15s;
 }
 html.pc .pcfc .pe svg {
@@ -1675,7 +1669,7 @@ html.pc .pcfadd {
   transform: scale(0.5);
   transition:
     opacity 0.15s,
-    transform 0.22s cubic-bezier(0.3, 1.5, 0.5, 1),
+    transform 0.22s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)),
     background 0.15s;
 }
 html.pc .pcfadd svg {
@@ -1726,7 +1720,7 @@ html.pc .pcfd.over,
 html.pc .pcfnone.over {
   transform: scale(1.03);
   transition:
-    transform 0.2s cubic-bezier(0.3, 1.5, 0.5, 1),
+    transform 0.2s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)),
     background 0.15s;
 }
 html.pc .pcfghost {
@@ -2350,12 +2344,11 @@ html.pc .pcstop {
   font: inherit;
   color: inherit;
   text-align: left;
-  background: var(--surface);
+  background: color-mix(in srgb, var(--c) 12%, var(--surface));
   border-radius: 14px;
   padding: 10px 12px;
   margin-bottom: 8px;
   cursor: pointer;
-  box-shadow: inset 4px 0 0 var(--c);
   transition: transform 0.2s;
 }
 html.pc .pcstop:hover {
@@ -2697,7 +2690,7 @@ html.pc .pcpbar .pick {
 html.pc .pcpage.picking .pick {
   background: var(--accent);
   color: #fff;
-  animation: pcpickglow 1.6s ease-in-out infinite;
+  animation: pcpickglow 1.6s ease-in-out var(--loop, infinite);
 }
 html.pc .pcpage.lassoing .pick {
   background: #c27c0e;
@@ -2729,7 +2722,7 @@ html.pc .pcwpick {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  animation: pcpkin 0.35s cubic-bezier(0.3, 1.5, 0.5, 1);
+  animation: pcpkin 0.35s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1));
 }
 html.pc .pcwpick .ssh {
   margin: 0;
@@ -2829,7 +2822,7 @@ html.pc .pcpbar .pick {
   box-shadow:
     0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent),
     0 8px 20px color-mix(in srgb, var(--accent) 33%, transparent);
-  animation: pcpickcall 2.4s ease-in-out infinite;
+  animation: pcpickcall 2.4s ease-in-out var(--loop, infinite);
 }
 html.pc .pcpbar .pick:hover {
   transform: translateY(-1px) scale(1.03) !important;
@@ -2852,7 +2845,7 @@ html.pc .pcpbar .pick:hover {
 }
 html.pc .pcpage.picking .pcpbar .pick {
   background: #0f5f46 !important;
-  animation: pcpickglow 1.6s ease-in-out infinite;
+  animation: pcpickglow 1.6s ease-in-out var(--loop, infinite);
 }
 @media (prefers-reduced-motion: reduce) {
   html.pc .pcpbar .pick {
@@ -3892,7 +3885,7 @@ html.pc #v-home .hblock > .card {
   overflow: hidden;
   box-shadow: 0 8px 24px -14px rgba(0, 0, 0, 0.3) !important;
   transition:
-    transform 0.25s cubic-bezier(0.3, 1.4, 0.5, 1),
+    transform 0.25s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1)),
     box-shadow 0.25s;
 }
 html.pc #v-home .hblock > .card::before {
@@ -4107,7 +4100,7 @@ html.pc.istab .tab:not(.plus) {
   z-index: 1;
   transition:
     color 0.25s,
-    transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+    transform 0.25s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 html.pc.istab .tab:not(.plus) .tname {
   max-height: 18px !important;
@@ -4131,8 +4124,8 @@ html.pc.istab .tabbub {
   border-radius: 18px;
   background: color-mix(in srgb, var(--bubc, #1a7a5c) 16%, transparent);
   transition:
-    left 0.45s cubic-bezier(0.3, 1.35, 0.45, 1),
-    width 0.45s cubic-bezier(0.3, 1.35, 0.45, 1),
+    left 0.45s var(--ease-pop, cubic-bezier(0.3, 1.35, 0.45, 1)),
+    width 0.45s var(--ease-pop, cubic-bezier(0.3, 1.35, 0.45, 1)),
     background 0.3s;
   pointer-events: none;
 }
@@ -4233,7 +4226,7 @@ html.pc.istab.tabp #v-list > #pcDet {
   box-shadow: 0 -10px 50px rgba(0, 0, 0, 0.28) !important;
   transform: translateY(0);
   transition:
-    transform 0.45s cubic-bezier(0.3, 1.25, 0.45, 1),
+    transform 0.45s var(--ease-pop, cubic-bezier(0.3, 1.25, 0.45, 1)),
     opacity 0.3s;
 }
 html.pc.istab.tabp #v-list > #pcDet.empty {
@@ -4308,7 +4301,7 @@ html.pc .tssw i::after {
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
-  transition: transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+  transition: transform 0.35s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 html.pc .tssw .on i {
   background: var(--accent);
@@ -4468,7 +4461,7 @@ html.pc .pcrelpop {
   border-radius: 20px;
   box-shadow: var(--shadow-lg);
   padding: 6px 14px 14px;
-  animation: pqpop 0.3s cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: pqpop 0.3s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 html.pc .pcrelpop .relbox {
   background: none;
@@ -4903,9 +4896,8 @@ html.pc .pcfbi {
   color: var(--fg);
   cursor: pointer;
   border-radius: 14px;
-  background: var(--sunk);
+  background: color-mix(in srgb, var(--kc) 10%, var(--sunk));
   padding: 10px 12px;
-  border-left: 4px solid var(--kc);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -5596,7 +5588,7 @@ html.pc .kisw i:after {
   height: 16px;
   border-radius: 50%;
   background: #fff;
-  transition: transform 0.3s cubic-bezier(0.3, 1.5, 0.5, 1);
+  transition: transform 0.3s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1));
 }
 html.pc .kisw input:checked + i {
   background: var(--accent);
@@ -5620,7 +5612,7 @@ html.pc #phHome > .phg {
   margin: 0;
 }
 html.pc #phHome > .phg {
-  animation: pcPhIn 0.45s cubic-bezier(0.3, 1.3, 0.5, 1) backwards;
+  animation: pcPhIn 0.45s var(--ease-pop, cubic-bezier(0.3, 1.3, 0.5, 1)) backwards;
 }
 html.pc #phHome > .phg:nth-of-type(2) {
   animation-delay: 0.05s;
@@ -5701,9 +5693,9 @@ html.pc:not(.istab) nav.tabs.navx .tab:not(.plus) .tname {
   overflow: hidden;
   white-space: nowrap;
   transition:
-    max-width 0.5s cubic-bezier(0.3, 1.15, 0.4, 1),
+    max-width 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1)),
     opacity 0.25s,
-    margin 0.5s cubic-bezier(0.3, 1.15, 0.4, 1);
+    margin 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1));
 }
 html.pc:not(.istab) nav.tabs.navx .tab[aria-selected="true"]:not(.plus) {
   color: #fff !important;
@@ -5735,8 +5727,8 @@ html.pc:not(.istab) nav.tabs.navx .tabind {
   background: var(--ic, var(--accent));
   box-shadow: 0 6px 14px -4px color-mix(in srgb, var(--ic, var(--accent)) 60%, transparent);
   transition:
-    left 0.5s cubic-bezier(0.3, 1.2, 0.4, 1),
-    width 0.5s cubic-bezier(0.3, 1.2, 0.4, 1),
+    left 0.5s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.4, 1)),
+    width 0.5s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.4, 1)),
     background-color 0.35s,
     opacity 0.25s;
 }
@@ -5787,7 +5779,7 @@ html.pc .pcaccs button.tgt {
   box-shadow: 0 0 0 4px #ffffff26;
 }
 html.pc .pcaccs button.got {
-  animation: pcMvGot 0.7s cubic-bezier(0.3, 1.6, 0.5, 1);
+  animation: pcMvGot 0.7s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 html.pc .pcaccs button.gave {
   animation: pcMvGave 0.5s ease;
@@ -5893,7 +5885,7 @@ body.mvdragging * {
   border-radius: 28px;
   padding: 22px 24px;
   transform: translateY(14px) scale(0.96);
-  transition: transform 0.32s cubic-bezier(0.2, 1.2, 0.3, 1);
+  transition: transform 0.32s var(--ease-pop, cubic-bezier(0.2, 1.2, 0.3, 1));
   box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.5);
 }
 .mvsheet.mvpcs.show .mvsh {
@@ -6115,7 +6107,7 @@ html.pc .pcdev svg.i {
   stroke: currentColor;
 }
 html.pc .pcdev:hover svg.i {
-  animation: pcdvSpin 0.6s cubic-bezier(0.3, 1.5, 0.5, 1);
+  animation: pcdvSpin 0.6s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1));
 }
 @keyframes pcdvSpin {
   40% {
@@ -6151,7 +6143,7 @@ html.pc .pcdevpop {
     0 24px 60px -16px rgba(0, 0, 0, 0.35);
   padding: 10px 12px 12px;
   transform-origin: var(--ax, 170px) -8px;
-  animation: pcdvIn 0.28s cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: pcdvIn 0.28s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 html.pc .pcdevpop:before {
   content: "";
@@ -6216,7 +6208,7 @@ html.pc .pcdvr {
   transition:
     transform 0.15s,
     background 0.15s;
-  animation: pcdvRow 0.35s cubic-bezier(0.2, 1.1, 0.3, 1) backwards;
+  animation: pcdvRow 0.35s var(--ease-pop, cubic-bezier(0.2, 1.1, 0.3, 1)) backwards;
 }
 html.pc .pcdvr:nth-of-type(2) {
   animation-delay: 0.04s;
@@ -6314,7 +6306,7 @@ html.pc .fan.pcw .fpcx svg.i {
   height: 32px;
   stroke: #fff;
   transform: rotate(0);
-  transition: transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+  transition: transform 0.45s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 html.pc .fan.pcw.show .fpcx svg.i {
   transform: rotate(135deg);

@@ -62,7 +62,7 @@ function pcTiles(sec, leaving) {
     .slice(0, 40);
 }
 function pcCalm() {
-  return matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return motionOff();
 }
 function pcGo(k, nav) {
   if (PC_ANIM.busy) {
@@ -8720,7 +8720,7 @@ if (IS_DESK) {
       { N, f } = steps(),
       { cx, cy, R } = geo(),
       el = performance.now() - PF.t0,
-      rm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      rm = motionOff();
     const closeK = FW.open ? 1 : eo(cl(FW.t));
     let anim = false;
     const bk = FW.open ? (rm ? 1 : back(cl((el - 40) / 520))) : closeK;

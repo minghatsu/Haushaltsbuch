@@ -40,7 +40,7 @@
   box-shadow:
     0 16px 40px rgba(0, 0, 0, 0.45),
     0 0 0 6px rgba(255, 255, 255, 0.16);
-  animation: moBob 3s 1.3s ease-in-out infinite;
+  animation: moBob 3s 1.3s ease-in-out var(--loop, infinite);
 }
 .mohalo {
   position: absolute;
@@ -54,7 +54,7 @@
   opacity: 0;
   animation:
     moHalo 0.6s 1s forwards,
-    moPul 2.6s 1.6s ease-in-out infinite;
+    moPul 2.6s 1.6s ease-in-out var(--loop, infinite);
   pointer-events: none;
 }
 @keyframes moHalo {
@@ -104,7 +104,7 @@
   display: grid;
   place-items: center;
   font-size: 32px;
-  animation: moPop 0.55s var(--d) cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  animation: moPop 0.55s var(--d) var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) both;
 }
 .monode.all .mob {
   width: 76px;
@@ -239,7 +239,7 @@
   bottom: calc(110px + env(safe-area-inset-bottom));
   width: 92px;
   height: 92px;
-  animation: mbIn 0.95s 0.35s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  animation: mbIn 0.95s 0.35s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) both;
 }
 .mbmami.fly {
   animation: none;
@@ -250,7 +250,7 @@
   display: grid;
   place-items: center;
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
-  animation: mbBob 2.6s 1.4s ease-in-out infinite;
+  animation: mbBob 2.6s 1.4s ease-in-out var(--loop, infinite);
 }
 .mbwave {
   position: absolute;
@@ -309,7 +309,7 @@
   padding: 16px;
   box-shadow: 0 22px 50px rgba(0, 0, 0, 0.35);
   transform-origin: 12% 100%;
-  animation: mbBub 0.6s 1.15s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+  animation: mbBub 0.6s 1.15s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)) both;
 }
 @keyframes mbBub {
   from {
@@ -343,7 +343,7 @@
 .mbw {
   display: inline-block;
   opacity: 0;
-  animation: mbWd 0.42s cubic-bezier(0.3, 1.6, 0.5, 1) forwards;
+  animation: mbWd 0.42s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) forwards;
 }
 @keyframes mbWd {
   from {
@@ -451,7 +451,7 @@
   width: 50%;
   left: -70%;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-  animation: vaShn 2.8s ease-in-out infinite 2s;
+  animation: vaShn 2.8s ease-in-out var(--loop, infinite) 2s;
 }
 .mbbg.quick .mbbub {
   animation-delay: 0.35s;
@@ -500,7 +500,7 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   cursor: pointer;
   opacity: 0;
-  animation: mbChip 0.45s calc(2.2s + var(--i) * 0.13s) cubic-bezier(0.3, 1.6, 0.5, 1) forwards;
+  animation: mbChip 0.45s calc(2.2s + var(--i) * 0.13s) var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) forwards;
   transition:
     transform 0.25s,
     box-shadow 0.25s;

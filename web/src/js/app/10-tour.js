@@ -261,7 +261,7 @@ const TOUR_MAMI = {
   tok: 0,
   M: 58,
 };
-const tmReduce = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const tmReduce = () => motionOff();
 function tmEls() {
   const el = $("tourBg");
   if (!el.querySelector(".tmami")) {
@@ -1677,6 +1677,17 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.48.9",
+    s: () => [
+      {
+        sel: "#topAv",
+        ic: "palette",
+        t: uiText("nw_mo_t"),
+        p: [uiText("nw_mo_p")],
+      },
+    ],
+  },
   {
     v: "0.48.8",
     s: () =>

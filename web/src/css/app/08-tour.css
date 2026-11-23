@@ -154,7 +154,7 @@
   inset: -3px;
   border-radius: inherit;
   border: 2px solid color-mix(in srgb, var(--accent) 55%, #fff);
-  animation: tmpul 1.8s ease-in-out infinite;
+  animation: tmpul 1.8s ease-in-out var(--loop, infinite);
   pointer-events: none;
 }
 .tourbg.mt .tring.none {
@@ -189,7 +189,7 @@
   display: block;
   width: 58px;
   height: 58px;
-  animation: tmbob 2.6s ease-in-out infinite;
+  animation: tmbob 2.6s ease-in-out var(--loop, infinite);
 }
 @keyframes tmbob {
   0%,
@@ -220,7 +220,7 @@
   border-radius: 20px;
   transition:
     opacity 0.16s ease,
-    scale 0.26s cubic-bezier(0.3, 1.45, 0.5, 1);
+    scale 0.26s var(--ease-pop, cubic-bezier(0.3, 1.45, 0.5, 1));
   will-change: transform, opacity;
   z-index: 2;
 }

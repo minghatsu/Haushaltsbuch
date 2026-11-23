@@ -63,7 +63,7 @@
      genauso ein – unscharf und etwas kleiner, solange sie im Übergang sind */
   const WAVE = new WeakMap(),
     WBAND = 0.35,
-    calm = matchMedia("(prefers-reduced-motion: reduce)");
+    calm = { get matches() { return motionOff(); } };
   function waveItems(f, c, top, H) {
     const pick = new Set(c.querySelectorAll(".atile,.hbodo"));
     c.querySelectorAll("*").forEach((e) => {

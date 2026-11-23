@@ -25,7 +25,7 @@
   left: 0;
   will-change: transform;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  animation: hlShn 3s ease-in-out infinite;
+  animation: hlShn 3s ease-in-out var(--loop, infinite);
 }
 .hlcard {
   isolation: isolate;
@@ -40,7 +40,7 @@
   height: 200%;
   background: linear-gradient(120deg, #3d63a8, #7a3b8f 45%, #e0577f 75%, #e8a200);
   will-change: transform;
-  animation: hlCardMv 6s ease-in-out infinite alternate;
+  animation: hlCardMv 6s ease-in-out var(--loop, infinite) alternate;
 }
 .hlcard.seen::before {
   display: none;
@@ -61,7 +61,7 @@
 }
 .hlsp {
   font-size: 26px;
-  animation: hlSp 2s ease-in-out infinite;
+  animation: hlSp 2s ease-in-out var(--loop, infinite);
 }
 @keyframes hlSp {
   50% {
@@ -132,7 +132,7 @@ html.pc .hlph {
   height: 62%;
   border-radius: 50%;
   transition: background 1.2s;
-  animation: hlBlob 6s ease-in-out infinite alternate;
+  animation: hlBlob 6s ease-in-out var(--loop, infinite) alternate;
 }
 .hlmesh i:nth-child(1) {
   left: 0;
@@ -169,7 +169,7 @@ html.pc .hlph {
   border-radius: 50%;
   background: #fff;
   opacity: 0.55;
-  animation: hlFl linear infinite;
+  animation: hlFl linear var(--loop, infinite);
 }
 @keyframes hlFl {
   to {
@@ -282,7 +282,7 @@ html.pc .hlph {
   filter: blur(8px);
 }
 .hlsl .hlw.on {
-  animation: hlWup 0.8s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+  animation: hlWup 0.8s var(--ease-pop, cubic-bezier(0.2, 1.4, 0.4, 1)) forwards;
 }
 @keyframes hlWup {
   to {
@@ -314,7 +314,7 @@ html.pc .hllet {
   transform-origin: 50% 100%;
 }
 .hllet span.on {
-  animation: hlDrop 0.9s cubic-bezier(0.2, 1.5, 0.4, 1) forwards;
+  animation: hlDrop 0.9s var(--ease-pop, cubic-bezier(0.2, 1.5, 0.4, 1)) forwards;
 }
 @keyframes hlDrop {
   to {
@@ -359,7 +359,7 @@ html.pc .hllet {
   color: #ffb3b3;
 }
 .hlstamp.on {
-  animation: hlStp 0.5s cubic-bezier(0.5, 0, 0.6, 1.6) forwards;
+  animation: hlStp 0.5s var(--ease-pop, cubic-bezier(0.5, 0, 0.6, 1.6)) forwards;
 }
 @keyframes hlStp {
   to {
@@ -388,7 +388,7 @@ html.pc .hllet {
   transform: translateY(-220px);
 }
 .hlpod .em.on {
-  animation: hlEm 0.8s cubic-bezier(0.3, 1.6, 0.5, 1) forwards;
+  animation: hlEm 0.8s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) forwards;
 }
 @keyframes hlEm {
   to {
@@ -400,7 +400,7 @@ html.pc .hllet {
   width: 100%;
   height: 0;
   border-radius: 16px 16px 6px 6px;
-  transition: height 1s cubic-bezier(0.25, 1.3, 0.4, 1);
+  transition: height 1s var(--ease-pop, cubic-bezier(0.25, 1.3, 0.4, 1));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -460,7 +460,7 @@ html.pc .hllet {
   visibility: hidden;
 }
 .hlhm i.on {
-  animation: hlPop 0.45s cubic-bezier(0.3, 1.7, 0.5, 1) forwards;
+  animation: hlPop 0.45s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1)) forwards;
 }
 @keyframes hlPop {
   to {
@@ -482,7 +482,7 @@ html.pc .hllet {
   font-size: 14px;
   font-weight: 800;
   white-space: nowrap;
-  transition: transform 0.5s cubic-bezier(0.3, 1.7, 0.5, 1);
+  transition: transform 0.5s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1));
   box-shadow: 0 14px 30px -10px rgba(0, 0, 0, 0.5);
 }
 .hlcall.on {
@@ -575,7 +575,7 @@ html.pc .hllet {
   width: 50%;
   left: -70%;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.8), transparent);
-  animation: vaShn 2.6s ease-in-out infinite 1.4s;
+  animation: vaShn 2.6s ease-in-out var(--loop, infinite) 1.4s;
 }
 .hlflip .tr {
   display: inline-block;
@@ -589,7 +589,7 @@ html.pc .hllet {
   transform: scale(0);
 }
 .hlflip .tr.on {
-  animation: hlPop 0.45s cubic-bezier(0.3, 1.7, 0.5, 1) forwards;
+  animation: hlPop 0.45s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1)) forwards;
 }
 .hlrays {
   position: absolute;
@@ -602,7 +602,7 @@ html.pc .hllet {
   border-radius: 50%;
   -webkit-mask: radial-gradient(circle, #000 15%, transparent 68%);
   mask: radial-gradient(circle, #000 15%, transparent 68%);
-  animation: hlSpin 18s linear infinite;
+  animation: hlSpin 18s linear var(--loop, infinite);
 }
 @keyframes hlSpin {
   to {
@@ -626,7 +626,7 @@ html.pc .hllet {
   width: 96px;
 }
 .md.on {
-  animation: hlMd 1.4s cubic-bezier(0.3, 1.3, 0.5, 1) forwards;
+  animation: hlMd 1.4s var(--ease-pop, cubic-bezier(0.3, 1.3, 0.5, 1)) forwards;
 }
 @keyframes hlMd {
   0% {
@@ -674,7 +674,7 @@ html.pc .hllet {
   width: 40%;
   left: -60%;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.7), transparent);
-  animation: vaShn 2.6s ease-in-out infinite;
+  animation: vaShn 2.6s ease-in-out var(--loop, infinite);
 }
 .md.gold .co {
   background: radial-gradient(circle at 35% 30%, #fff3c4, #f1b51c 60%, #b57d00);
@@ -753,7 +753,7 @@ html.pc .hllet {
   display: grid;
   place-items: center;
   cursor: pointer;
-  animation: hlPulse 1.6s ease-in-out infinite 1.5s;
+  animation: hlPulse 1.6s ease-in-out var(--loop, infinite) 1.5s;
 }
 @keyframes hlPulse {
   50% {
@@ -771,7 +771,7 @@ html.pc .hllet {
   z-index: 35;
   opacity: 0;
   transform: translateY(26px);
-  transition: all 0.55s cubic-bezier(0.2, 1.4, 0.4, 1);
+  transition: all 0.55s var(--ease-pop, cubic-bezier(0.2, 1.4, 0.4, 1));
   pointer-events: none;
 }
 .hlmami.on {

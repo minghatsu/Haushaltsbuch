@@ -32,7 +32,7 @@
   font: 800 38px var(--f-display, system-ui);
   color: var(--accent);
   transition:
-    transform 0.55s cubic-bezier(0.3, 1.3, 0.5, 1),
+    transform 0.55s var(--ease-pop, cubic-bezier(0.3, 1.3, 0.5, 1)),
     opacity 0.4s;
 }
 .lggr span.gi {
@@ -74,7 +74,7 @@
   transition:
     background 0.3s,
     color 0.3s,
-    transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1),
+    transform 0.35s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)),
     box-shadow 0.3s;
 }
 .lgtile i {
@@ -82,7 +82,7 @@
   font-size: 28px;
   font-style: normal;
   margin-bottom: 4px;
-  transition: transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+  transition: transform 0.45s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 .lgtile.hi {
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 40%, transparent);
@@ -870,7 +870,7 @@ tfoot td {
   transform: translateX(18px);
 }
 .switch input::after {
-  transition: transform 0.42s cubic-bezier(0.34, 1.7, 0.5, 1) !important;
+  transition: transform 0.42s var(--ease-pop, cubic-bezier(0.34, 1.7, 0.5, 1)) !important;
 }
 .switch input {
   transition: background 0.3s;

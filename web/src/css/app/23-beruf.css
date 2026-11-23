@@ -187,12 +187,11 @@ html[data-theme="dark"] {
   padding: 11px 12px 11px 14px;
   border-radius: 20px;
   background: color-mix(in srgb, var(--bfc) 12%, var(--surface));
-  border-left: 6px solid var(--bfc);
   box-shadow: 0 10px 24px -16px rgba(0, 0, 0, 0.45);
   transform-origin: 50% 0;
   transform: translateY(var(--bfdy, 0px));
   transition:
-    transform 0.45s cubic-bezier(0.3, 1.4, 0.5, 1),
+    transform 0.45s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1)),
     opacity 0.3s,
     filter 0.3s;
   cursor: pointer;
@@ -277,7 +276,7 @@ html[data-theme="dark"] {
 }
 .bfhint svg {
   transform: rotate(90deg);
-  animation: bfNudge 1.6s ease-in-out infinite;
+  animation: bfNudge 1.6s ease-in-out var(--loop, infinite);
 }
 @keyframes bfNudge {
   50% {

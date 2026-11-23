@@ -971,7 +971,7 @@ function renderColorEd() {
     const i = (ui.acctNames || []).indexOf(n);
     return i > 0 && isGreen() ? acgCol(i - 1) : i > 0 ? "#34413b" : "#1a7a5c";
   };
-  el.innerHTML = `<div class="colsec"><h3>Farbpaket</h3><div class="colpkg">${Object.entries(PACKS)
+  el.innerHTML = motionEdHtml() + `<div class="colsec"><h3>Farbpaket</h3><div class="colpkg">${Object.entries(PACKS)
     .map(([k, [n, P]]) => {
       const on = (store.settings.theme || "gruen") === k;
       const g = P ? P.slice(0, 4).join(",") : "#3d63a8,#d14d72,#c27c0e,#7a5bc2";
@@ -1009,6 +1009,26 @@ function renderColorEd() {
       .join("")}</div>
     <button class="btn" data-colresetall="1" style="margin-top:6px">Alle Farben zurücksetzen</button>`;
 }
+function motionEdHtml() {
+  const cur = motionMode();
+  return `<div class="colsec" data-noi18n><h3>${escHtml(uiText("mo_h"))}</h3><div class="erseg moseg">${[
+    ["live", "mo_live"],
+    ["soft", "mo_soft"],
+    ["off", "mo_off"],
+  ]
+    .map(
+      ([k, t]) =>
+        `<button type="button" class="${cur === k ? "on" : ""}" data-motion-set="${k}" aria-pressed="${cur === k}">${escHtml(uiText(t))}</button>`
+    )
+    .join("")}</div><span class="small muted">${escHtml(uiText("mo_s_" + cur))}</span></div>`;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-motion-set]");
+  if (!b) return;
+  motionSet(b.dataset.motionSet);
+  SND.play("tick");
+  renderColorEd();
+});
 function hexToHsl(hex) {
   let r = 0,
     g = 0,

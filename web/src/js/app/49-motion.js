@@ -272,7 +272,7 @@ function uxEnter() {
   /* nach dem Wisch-Würfel steht die Seite schon fertig da – sie federt nur noch an */
   const quiet = UX.quiet;
   UX.quiet = false;
-  if (!(quiet || first || vc || mc) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (!(quiet || first || vc || mc) || motionOff()) return;
   /* nach dem Würfel hat die Welle die Seite schon eingeblendet */
   if (quiet) return;
   if (vc && !first) {

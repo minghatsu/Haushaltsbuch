@@ -122,7 +122,7 @@ function langGate(next) {
     <div class="lggrid">${LANG_PICKER.map((l, k) => `<button class="lgtile" data-lg="${k}" lang="${l[0]}"><i>${l[1]}</i>${escHtml((LANGS.find((x) => x[0] === l[0]) || [])[1] || l[0])}</button>`).join("")}</div>
     <button class="btn primary lggo" id="lgGo" disabled>${LANG_PICKER[0][4]}</button></div>`;
   const gr = $("lgGr"),
-    calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    calm = motionOff();
   let cur = null,
     i = 0,
     sel = -1;

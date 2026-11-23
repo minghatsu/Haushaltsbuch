@@ -378,7 +378,7 @@
   }
 }
 .ain {
-  animation: ain 0.48s cubic-bezier(0.3, 1.15, 0.5, 1) both;
+  animation: ain 0.48s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.5, 1)) both;
   animation-delay: calc(var(--ai, 0) * 55ms);
 }
 @keyframes rnew {
@@ -392,7 +392,7 @@
   }
 }
 .rnew {
-  animation: rnew 0.6s cubic-bezier(0.3, 1.3, 0.5, 1) both;
+  animation: rnew 0.6s var(--ease-pop, cubic-bezier(0.3, 1.3, 0.5, 1)) both;
 }
 .rghost {
   transition:
@@ -421,7 +421,7 @@
   }
 }
 .tpop {
-  animation: tpop 0.42s cubic-bezier(0.3, 1.6, 0.5, 1);
+  animation: tpop 0.42s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 .track .fill,
 .bar > i {
@@ -454,7 +454,7 @@
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22);
   padding: 6px;
   min-width: 250px;
-  animation: hmin 0.18s cubic-bezier(0.3, 1.2, 0.5, 1);
+  animation: hmin 0.18s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.5, 1));
 }
 @keyframes hmin {
   from {

@@ -42,7 +42,7 @@
   place-items: center;
   font-size: 18px;
   transform: scale(0);
-  transition: transform 0.45s cubic-bezier(0.3, 1.8, 0.5, 1);
+  transition: transform 0.45s var(--ease-pop, cubic-bezier(0.3, 1.8, 0.5, 1));
 }
 @keyframes plflow {
   to {
@@ -65,7 +65,7 @@
   transform: scale(1);
 }
 .ok .plink .pav {
-  animation: plbump 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
+  animation: plbump 0.5s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 .ok .plink .pav:last-child {
   animation-delay: 0.08s;
@@ -97,7 +97,7 @@
   padding: 24px 22px 20px;
   text-align: center;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
-  animation: pqpop 0.4s cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: pqpop 0.4s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 @keyframes pqpop {
   from {
@@ -191,7 +191,7 @@
   white-space: nowrap;
 }
 .parr svg {
-  transition: transform 0.35s cubic-bezier(0.3, 1.4, 0.5, 1);
+  transition: transform 0.35s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 .proles.back .parr svg {
   transform: rotate(180deg);
@@ -210,7 +210,7 @@
   opacity: 0.4;
 }
 .proles.flipin > div {
-  animation: pflin 0.45s cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: pflin 0.45s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 @keyframes pflin {
   from {
@@ -527,7 +527,7 @@
   place-items: center;
   font-style: normal;
   transition:
-    left 0.5s cubic-bezier(0.3, 1.5, 0.5, 1),
+    left 0.5s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)),
     background 0.4s;
 }
 .qtg > i b {
@@ -579,7 +579,7 @@
   r: 5;
   fill: #f5a623;
   transition:
-    r 0.5s cubic-bezier(0.3, 1.5, 0.5, 1),
+    r 0.5s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)),
     fill 0.4s;
 }
 .qsm .rays {
@@ -596,7 +596,7 @@
   cx: 30;
   cy: -6;
   transition:
-    cx 0.5s cubic-bezier(0.3, 1.2, 0.5, 1),
+    cx 0.5s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.5, 1)),
     cy 0.5s;
 }
 .qs.on .qsm .core {
@@ -718,7 +718,7 @@
   fill: #b9c2bd;
   transform-origin: 12px 20px;
   transition:
-    transform 0.5s cubic-bezier(0.3, 1.5, 0.5, 1),
+    transform 0.5s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)),
     fill 0.4s;
 }
 .qs.on .qi-secure .l,
@@ -769,7 +769,7 @@
 }
 .qi-logos .shut {
   transform-origin: 12px 9px;
-  transition: transform 0.55s cubic-bezier(0.3, 1.2, 0.5, 1);
+  transition: transform 0.55s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.5, 1));
 }
 .qi-logos .shut rect {
   fill: #8b958f;
@@ -815,9 +815,9 @@
   transform: none;
   opacity: 1;
   transition:
-    transform 0.5s cubic-bezier(0.3, 1.8, 0.5, 1) 0.35s,
+    transform 0.5s var(--ease-pop, cubic-bezier(0.3, 1.8, 0.5, 1)) 0.35s,
     opacity 0.2s 0.35s;
-  animation: qsglow 2.4s ease-in-out 1s infinite;
+  animation: qsglow 2.4s ease-in-out 1s var(--loop, infinite);
 }
 @keyframes qsglow {
   0%,

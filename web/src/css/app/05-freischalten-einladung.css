@@ -57,10 +57,10 @@
   color: #fff;
 }
 .otp i.rise::before {
-  animation: otpRise 0.42s cubic-bezier(0.3, 1.1, 0.4, 1) both;
+  animation: otpRise 0.42s var(--ease-pop, cubic-bezier(0.3, 1.1, 0.4, 1)) both;
 }
 .otp i.rise b {
-  animation: otpLand 0.42s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  animation: otpLand 0.42s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1)) both;
 }
 @keyframes otpRise {
   from {
@@ -98,7 +98,7 @@
 }
 .otp.ok i {
   border-color: var(--good);
-  animation: otpPop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  animation: otpPop 0.45s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) both;
 }
 @keyframes otpPop {
   45% {
@@ -161,7 +161,7 @@
   filter: saturate(0.35) opacity(0.75);
 }
 .actbox #actOk.ready {
-  animation: otpReady 0.5s cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: otpReady 0.5s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 @keyframes otpReady {
   40% {
@@ -171,7 +171,7 @@
 .otp.ok ~ #actOk {
   background: var(--good);
   filter: none;
-  animation: otpReady 0.5s cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: otpReady 0.5s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 .actor {
   display: flex;
@@ -200,7 +200,7 @@
   overflow: auto;
   display: flex;
   justify-content: center;
-  animation: invin 0.32s cubic-bezier(0.3, 1.2, 0.5, 1);
+  animation: invin 0.32s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.5, 1));
 }
 @keyframes invin {
   from {

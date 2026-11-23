@@ -65,7 +65,7 @@ html.pc .fbsheet {
   min-height: 150px;
   font-size: 16px;
   line-height: 1.5;
-  border-left: 4px solid var(--kc) !important;
+  border-color: color-mix(in srgb, var(--kc) 45%, var(--line)) !important;
   margin-bottom: 12px;
   width: 100%;
   box-sizing: border-box;
@@ -341,7 +341,7 @@ html.pc .fbsheet {
   animation: hbob 1s ease-in-out infinite;
 }
 .shero.s-ok .hic svg {
-  animation: hpop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1);
+  animation: hpop 0.5s var(--ease-pop, cubic-bezier(0.2, 1.6, 0.4, 1));
 }
 @keyframes hspin {
   to {

@@ -560,10 +560,10 @@ html[dir="rtl"] .hello {
 }
 .roundbtn.bell.ring > svg {
   transform-origin: 50% 12%;
-  animation: bellRing 4s ease-in-out infinite;
+  animation: bellRing 4s ease-in-out var(--loop, infinite);
 }
 .roundbtn.bell.ring .badge {
-  animation: bellPop 4s ease-in-out infinite;
+  animation: bellPop 4s ease-in-out var(--loop, infinite);
 }
 @keyframes bellRing {
   0%,
@@ -1104,7 +1104,7 @@ main {
   cursor: pointer;
 }
 .inpg.inap {
-  animation: inPop 0.42s cubic-bezier(0.3, 1.5, 0.5, 1) var(--d, 0ms) backwards;
+  animation: inPop 0.42s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)) var(--d, 0ms) backwards;
 }
 .inpg.out {
   transform: scale(0.6);
@@ -1362,4 +1362,20 @@ html:not(.pc) .adots button i {
 }
 html:not(.pc) .adots button.on i {
   width: 26px;
+}
+/* Bewegung: „sanft“ (Standard) dämpft Überschwinger und lässt Schmuck-Schleifen
+   zweimal laufen, „lebhaft“ nimmt die ursprünglichen Kurven, „aus“ steht still. */
+:root:not([data-motion="live"]) {
+  --ease-pop: cubic-bezier(0.3, 1.12, 0.5, 1);
+  --loop: 2;
+}
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0s !important;
+  scroll-behavior: auto !important;
 }

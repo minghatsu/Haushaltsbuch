@@ -47,7 +47,7 @@ html[data-theme="dark"] .srhero,
   width: 50%;
   left: -70%;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-  animation: vaShn 3.2s ease-in-out infinite 1s;
+  animation: vaShn 3.2s ease-in-out var(--loop, infinite) 1s;
   pointer-events: none;
 }
 .srcard {
@@ -110,7 +110,7 @@ html[data-theme="dark"] .srhero,
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-  transition: transform 0.5s cubic-bezier(0.3, 1.8, 0.5, 1);
+  transition: transform 0.5s var(--ease-pop, cubic-bezier(0.3, 1.8, 0.5, 1));
 }
 .srtog.on {
   background: var(--accent);
@@ -199,7 +199,7 @@ html[data-theme="dark"] .srhero,
   padding: 12px 16px;
   z-index: 650;
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
-  transition: transform 0.6s cubic-bezier(0.2, 1.4, 0.4, 1);
+  transition: transform 0.6s var(--ease-pop, cubic-bezier(0.2, 1.4, 0.4, 1));
   pointer-events: none;
 }
 #srPill.on {
@@ -233,7 +233,7 @@ html.pc #srPill {
   bottom: 30px;
 }
 .tab.srbump {
-  animation: srBump 0.6s cubic-bezier(0.3, 1.7, 0.5, 1);
+  animation: srBump 0.6s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1));
 }
 @keyframes srBump {
   40% {

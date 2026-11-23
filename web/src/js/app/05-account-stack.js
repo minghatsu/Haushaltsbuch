@@ -96,7 +96,7 @@ function mvClose() {
 }
 function mvFxOk() {
   try {
-    return !!document.body.animate && !matchMedia("(prefers-reduced-motion: reduce)").matches && !IS_DESK;
+    return !!document.body.animate && !motionOff() && !IS_DESK;
   } catch (_) {
     return false;
   }

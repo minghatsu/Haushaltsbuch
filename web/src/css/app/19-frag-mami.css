@@ -93,7 +93,7 @@ html:not(.pc) .ptq.mamibtn.mcomp.ptqph {
   transform-origin: var(--ax, 50%) 0;
   transition:
     opacity 0.18s,
-    transform 0.22s cubic-bezier(0.3, 1.25, 0.5, 1);
+    transform 0.22s var(--ease-pop, cubic-bezier(0.3, 1.25, 0.5, 1));
 }
 .mamipop.on {
   opacity: 1;

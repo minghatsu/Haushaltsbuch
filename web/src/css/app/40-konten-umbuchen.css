@@ -127,7 +127,7 @@
   cursor: grab;
   box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.5);
   transition:
-    transform 0.25s cubic-bezier(0.3, 1.4, 0.5, 1),
+    transform 0.25s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1)),
     opacity 0.25s,
     outline-color 0.2s;
   outline: 3px dashed transparent;
@@ -145,7 +145,7 @@
   pointer-events: none;
 }
 .mvc.in {
-  animation: mvDrop 0.55s cubic-bezier(0.2, 1.1, 0.3, 1) calc(var(--i) * 70ms) backwards;
+  animation: mvDrop 0.55s var(--ease-pop, cubic-bezier(0.2, 1.1, 0.3, 1)) calc(var(--i) * 70ms) backwards;
 }
 @keyframes mvDrop {
   from {
@@ -204,7 +204,7 @@
   transform: scale(1.035);
 }
 .mvc.got {
-  animation: mvGot 0.7s cubic-bezier(0.3, 1.6, 0.5, 1);
+  animation: mvGot 0.7s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 .mvc.gave {
   animation: mvGave 0.5s ease;
@@ -307,7 +307,7 @@ body.mvdragging {
   background: var(--sunk);
   display: grid;
   place-items: center;
-  animation: mvArr 1.4s ease-in-out infinite;
+  animation: mvArr 1.4s ease-in-out var(--loop, infinite);
 }
 @keyframes mvArr {
   50% {

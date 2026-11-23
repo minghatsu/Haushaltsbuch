@@ -74,7 +74,7 @@
   color: #fff;
   font-size: 18px;
   opacity: 0.85;
-  animation: fannud 1.6s ease-in-out infinite;
+  animation: fannud 1.6s ease-in-out var(--loop, infinite);
 }
 .fandots b:last-child {
   animation-direction: reverse;

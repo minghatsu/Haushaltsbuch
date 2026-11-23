@@ -71,7 +71,7 @@ html[data-theme="dark"] .gwel {
   display: flex;
   align-items: center;
   gap: 12px;
-  animation: gwPop 0.55s cubic-bezier(0.3, 1.6, 0.5, 1) 0.25s backwards;
+  animation: gwPop 0.55s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) 0.25s backwards;
 }
 .gwlg img {
   width: 48px;
@@ -107,7 +107,7 @@ html[data-theme="dark"] .gwel {
   padding: 6px 11px;
   border-radius: 99px;
   font: 700 13px var(--f-body);
-  animation: gwPop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) 0.66s backwards;
+  animation: gwPop 0.45s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) 0.66s backwards;
 }
 .gwch span:nth-child(2) {
   animation-delay: 0.76s;
@@ -338,7 +338,7 @@ html[data-theme="dark"] .gwel {
 }
 .invfresh b {
   display: inline-block;
-  animation: invFr 0.6s cubic-bezier(0.3, 1.6, 0.5, 1);
+  animation: invFr 0.6s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 .invqr svg {
   transition: opacity 0.3s;

@@ -62,7 +62,7 @@ function pcTiles(sec, leaving) {
     .slice(0, 40);
 }
 function pcCalm() {
-  return matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return motionOff();
 }
 function pcGo(k, nav) {
   if (PC_ANIM.busy) {

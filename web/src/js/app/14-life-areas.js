@@ -289,7 +289,7 @@ function bfSwap(to, anim) {
     localStorage.setItem("hb-bfside", to);
   } catch (_) {}
   const duo = getComputedStyle(w).getPropertyValue("--bfduo").trim() === "1",
-    still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    still = motionOff();
   if (duo || still || !anim || !document.body.animate) {
     w.classList.toggle("sb", to === "b");
     w.classList.toggle("sj", to === "j");

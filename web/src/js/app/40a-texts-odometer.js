@@ -5,7 +5,7 @@ function uiText(k, v) {
   if (v) for (const [x, y] of Object.entries(v)) s = s.split("{" + x + "}").join(y);
   return s;
 }
-const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reducedMotion = () => motionOff();
 function fxDate(iso, o) {
   if (!iso) return "";
   const dt = new Date(String(iso).length === 7 ? iso + "-01T12:00" : iso + "T12:00");

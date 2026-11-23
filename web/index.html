@@ -563,10 +563,10 @@ html[dir="rtl"] .hello {
 }
 .roundbtn.bell.ring > svg {
   transform-origin: 50% 12%;
-  animation: bellRing 4s ease-in-out infinite;
+  animation: bellRing 4s ease-in-out var(--loop, infinite);
 }
 .roundbtn.bell.ring .badge {
-  animation: bellPop 4s ease-in-out infinite;
+  animation: bellPop 4s ease-in-out var(--loop, infinite);
 }
 @keyframes bellRing {
   0%,
@@ -1107,7 +1107,7 @@ main {
   cursor: pointer;
 }
 .inpg.inap {
-  animation: inPop 0.42s cubic-bezier(0.3, 1.5, 0.5, 1) var(--d, 0ms) backwards;
+  animation: inPop 0.42s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)) var(--d, 0ms) backwards;
 }
 .inpg.out {
   transform: scale(0.6);
@@ -1365,6 +1365,22 @@ html:not(.pc) .adots button i {
 }
 html:not(.pc) .adots button.on i {
   width: 26px;
+}
+/* Bewegung: „sanft“ (Standard) dämpft Überschwinger und lässt Schmuck-Schleifen
+   zweimal laufen, „lebhaft“ nimmt die ursprünglichen Kurven, „aus“ steht still. */
+:root:not([data-motion="live"]) {
+  --ease-pop: cubic-bezier(0.3, 1.12, 0.5, 1);
+  --loop: 2;
+}
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0s !important;
+  scroll-behavior: auto !important;
 }
 
 /* Kontokarten-Stapel, Zeitleiste, Spartöpfe */
@@ -3195,10 +3211,10 @@ html.touch .kpad {
   color: #fff;
 }
 .otp i.rise::before {
-  animation: otpRise 0.42s cubic-bezier(0.3, 1.1, 0.4, 1) both;
+  animation: otpRise 0.42s var(--ease-pop, cubic-bezier(0.3, 1.1, 0.4, 1)) both;
 }
 .otp i.rise b {
-  animation: otpLand 0.42s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  animation: otpLand 0.42s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1)) both;
 }
 @keyframes otpRise {
   from {
@@ -3236,7 +3252,7 @@ html.touch .kpad {
 }
 .otp.ok i {
   border-color: var(--good);
-  animation: otpPop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  animation: otpPop 0.45s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) both;
 }
 @keyframes otpPop {
   45% {
@@ -3299,7 +3315,7 @@ html.touch .kpad {
   filter: saturate(0.35) opacity(0.75);
 }
 .actbox #actOk.ready {
-  animation: otpReady 0.5s cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: otpReady 0.5s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 @keyframes otpReady {
   40% {
@@ -3309,7 +3325,7 @@ html.touch .kpad {
 .otp.ok ~ #actOk {
   background: var(--good);
   filter: none;
-  animation: otpReady 0.5s cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: otpReady 0.5s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 .actor {
   display: flex;
@@ -3338,7 +3354,7 @@ html.touch .kpad {
   overflow: auto;
   display: flex;
   justify-content: center;
-  animation: invin 0.32s cubic-bezier(0.3, 1.2, 0.5, 1);
+  animation: invin 0.32s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.5, 1));
 }
 @keyframes invin {
   from {
@@ -3951,7 +3967,7 @@ html.pc .invbox {
   transform: scale(0.94);
 }
 .ntgo svg {
-  animation: ntSpark 2.4s ease-in-out infinite;
+  animation: ntSpark 2.4s ease-in-out var(--loop, infinite);
 }
 @keyframes ntSpark {
   50% {
@@ -4173,7 +4189,7 @@ html.pc .fbsheet {
   min-height: 150px;
   font-size: 16px;
   line-height: 1.5;
-  border-left: 4px solid var(--kc) !important;
+  border-color: color-mix(in srgb, var(--kc) 45%, var(--line)) !important;
   margin-bottom: 12px;
   width: 100%;
   box-sizing: border-box;
@@ -4449,7 +4465,7 @@ html.pc .fbsheet {
   animation: hbob 1s ease-in-out infinite;
 }
 .shero.s-ok .hic svg {
-  animation: hpop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1);
+  animation: hpop 0.5s var(--ease-pop, cubic-bezier(0.2, 1.6, 0.4, 1));
 }
 @keyframes hspin {
   to {
@@ -5039,7 +5055,7 @@ html[dir="rtl"] .amount input {
   inset: -3px;
   border-radius: inherit;
   border: 2px solid color-mix(in srgb, var(--accent) 55%, #fff);
-  animation: tmpul 1.8s ease-in-out infinite;
+  animation: tmpul 1.8s ease-in-out var(--loop, infinite);
   pointer-events: none;
 }
 .tourbg.mt .tring.none {
@@ -5074,7 +5090,7 @@ html[dir="rtl"] .amount input {
   display: block;
   width: 58px;
   height: 58px;
-  animation: tmbob 2.6s ease-in-out infinite;
+  animation: tmbob 2.6s ease-in-out var(--loop, infinite);
 }
 @keyframes tmbob {
   0%,
@@ -5105,7 +5121,7 @@ html[dir="rtl"] .amount input {
   border-radius: 20px;
   transition:
     opacity 0.16s ease,
-    scale 0.26s cubic-bezier(0.3, 1.45, 0.5, 1);
+    scale 0.26s var(--ease-pop, cubic-bezier(0.3, 1.45, 0.5, 1));
   will-change: transform, opacity;
   z-index: 2;
 }
@@ -7280,7 +7296,7 @@ textarea.in {
   }
 }
 .ain {
-  animation: ain 0.48s cubic-bezier(0.3, 1.15, 0.5, 1) both;
+  animation: ain 0.48s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.5, 1)) both;
   animation-delay: calc(var(--ai, 0) * 55ms);
 }
 @keyframes rnew {
@@ -7294,7 +7310,7 @@ textarea.in {
   }
 }
 .rnew {
-  animation: rnew 0.6s cubic-bezier(0.3, 1.3, 0.5, 1) both;
+  animation: rnew 0.6s var(--ease-pop, cubic-bezier(0.3, 1.3, 0.5, 1)) both;
 }
 .rghost {
   transition:
@@ -7323,7 +7339,7 @@ textarea.in {
   }
 }
 .tpop {
-  animation: tpop 0.42s cubic-bezier(0.3, 1.6, 0.5, 1);
+  animation: tpop 0.42s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 .track .fill,
 .bar > i {
@@ -7356,7 +7372,7 @@ textarea.in {
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22);
   padding: 6px;
   min-width: 250px;
-  animation: hmin 0.18s cubic-bezier(0.3, 1.2, 0.5, 1);
+  animation: hmin 0.18s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.5, 1));
 }
 @keyframes hmin {
   from {
@@ -7670,7 +7686,7 @@ textarea.in {
   font: 800 38px var(--f-display, system-ui);
   color: var(--accent);
   transition:
-    transform 0.55s cubic-bezier(0.3, 1.3, 0.5, 1),
+    transform 0.55s var(--ease-pop, cubic-bezier(0.3, 1.3, 0.5, 1)),
     opacity 0.4s;
 }
 .lggr span.gi {
@@ -7712,7 +7728,7 @@ textarea.in {
   transition:
     background 0.3s,
     color 0.3s,
-    transform 0.35s cubic-bezier(0.3, 1.5, 0.5, 1),
+    transform 0.35s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)),
     box-shadow 0.3s;
 }
 .lgtile i {
@@ -7720,7 +7736,7 @@ textarea.in {
   font-size: 28px;
   font-style: normal;
   margin-bottom: 4px;
-  transition: transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+  transition: transform 0.45s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 .lgtile.hi {
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 40%, transparent);
@@ -8508,7 +8524,7 @@ tfoot td {
   transform: translateX(18px);
 }
 .switch input::after {
-  transition: transform 0.42s cubic-bezier(0.34, 1.7, 0.5, 1) !important;
+  transition: transform 0.42s var(--ease-pop, cubic-bezier(0.34, 1.7, 0.5, 1)) !important;
 }
 .switch input {
   transition: background 0.3s;
@@ -9613,7 +9629,7 @@ tfoot td {
   place-items: center;
   font-size: 18px;
   transform: scale(0);
-  transition: transform 0.45s cubic-bezier(0.3, 1.8, 0.5, 1);
+  transition: transform 0.45s var(--ease-pop, cubic-bezier(0.3, 1.8, 0.5, 1));
 }
 @keyframes plflow {
   to {
@@ -9636,7 +9652,7 @@ tfoot td {
   transform: scale(1);
 }
 .ok .plink .pav {
-  animation: plbump 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
+  animation: plbump 0.5s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 .ok .plink .pav:last-child {
   animation-delay: 0.08s;
@@ -9668,7 +9684,7 @@ tfoot td {
   padding: 24px 22px 20px;
   text-align: center;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
-  animation: pqpop 0.4s cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: pqpop 0.4s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 @keyframes pqpop {
   from {
@@ -9762,7 +9778,7 @@ tfoot td {
   white-space: nowrap;
 }
 .parr svg {
-  transition: transform 0.35s cubic-bezier(0.3, 1.4, 0.5, 1);
+  transition: transform 0.35s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 .proles.back .parr svg {
   transform: rotate(180deg);
@@ -9781,7 +9797,7 @@ tfoot td {
   opacity: 0.4;
 }
 .proles.flipin > div {
-  animation: pflin 0.45s cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: pflin 0.45s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 @keyframes pflin {
   from {
@@ -10098,7 +10114,7 @@ tfoot td {
   place-items: center;
   font-style: normal;
   transition:
-    left 0.5s cubic-bezier(0.3, 1.5, 0.5, 1),
+    left 0.5s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)),
     background 0.4s;
 }
 .qtg > i b {
@@ -10150,7 +10166,7 @@ tfoot td {
   r: 5;
   fill: #f5a623;
   transition:
-    r 0.5s cubic-bezier(0.3, 1.5, 0.5, 1),
+    r 0.5s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)),
     fill 0.4s;
 }
 .qsm .rays {
@@ -10167,7 +10183,7 @@ tfoot td {
   cx: 30;
   cy: -6;
   transition:
-    cx 0.5s cubic-bezier(0.3, 1.2, 0.5, 1),
+    cx 0.5s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.5, 1)),
     cy 0.5s;
 }
 .qs.on .qsm .core {
@@ -10289,7 +10305,7 @@ tfoot td {
   fill: #b9c2bd;
   transform-origin: 12px 20px;
   transition:
-    transform 0.5s cubic-bezier(0.3, 1.5, 0.5, 1),
+    transform 0.5s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)),
     fill 0.4s;
 }
 .qs.on .qi-secure .l,
@@ -10340,7 +10356,7 @@ tfoot td {
 }
 .qi-logos .shut {
   transform-origin: 12px 9px;
-  transition: transform 0.55s cubic-bezier(0.3, 1.2, 0.5, 1);
+  transition: transform 0.55s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.5, 1));
 }
 .qi-logos .shut rect {
   fill: #8b958f;
@@ -10386,9 +10402,9 @@ tfoot td {
   transform: none;
   opacity: 1;
   transition:
-    transform 0.5s cubic-bezier(0.3, 1.8, 0.5, 1) 0.35s,
+    transform 0.5s var(--ease-pop, cubic-bezier(0.3, 1.8, 0.5, 1)) 0.35s,
     opacity 0.2s 0.35s;
-  animation: qsglow 2.4s ease-in-out 1s infinite;
+  animation: qsglow 2.4s ease-in-out 1s var(--loop, infinite);
 }
 @keyframes qsglow {
   0%,
@@ -10812,7 +10828,7 @@ tfoot td {
   transform: translate(0, 0) scale(0.2) rotate(-90deg);
   opacity: 0;
   transition:
-    transform 0.5s cubic-bezier(0.34, 1.6, 0.5, 1) calc(var(--i) * 60ms),
+    transform 0.5s var(--ease-pop, cubic-bezier(0.34, 1.6, 0.5, 1)) calc(var(--i) * 60ms),
     opacity 0.2s calc(var(--i) * 60ms);
 }
 .fan.show .fanb {
@@ -10845,7 +10861,7 @@ tfoot td {
   filter: brightness(0.92);
 }
 .tab.plus svg.i {
-  transition: transform 0.35s cubic-bezier(0.34, 1.6, 0.5, 1);
+  transition: transform 0.35s var(--ease-pop, cubic-bezier(0.34, 1.6, 0.5, 1));
 }
 .tab.plus.open svg.i {
   transform: rotate(135deg);
@@ -11107,7 +11123,7 @@ tfoot td {
 @media (max-width: 999px) and (min-height: 521px), (max-width: 999px) and (orientation: portrait) {
   html:not(.pc) .tabs.navx {
     grid-template-columns: var(--nc, 1fr 1fr 64px 1fr 1fr);
-    transition: grid-template-columns 0.5s cubic-bezier(0.3, 1.15, 0.4, 1);
+    transition: grid-template-columns 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1));
   }
   html:not(.pc) .tabs.navx .tab:not(.plus) {
     flex-direction: row;
@@ -11138,9 +11154,9 @@ tfoot td {
     white-space: nowrap;
     text-overflow: ellipsis;
     transition:
-      max-width 0.5s cubic-bezier(0.3, 1.15, 0.4, 1),
+      max-width 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1)),
       opacity 0.25s,
-      margin 0.5s cubic-bezier(0.3, 1.15, 0.4, 1);
+      margin 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1));
   }
   html:not(.pc) .tabs.navx .tab[aria-selected="true"]:not(.plus) {
     color: #fff !important;
@@ -13831,7 +13847,7 @@ html[data-pack] .sp.pc .card {
   margin: -95px 0 0 -150px;
   transform: translateY(110vh) rotate(-12deg);
   animation:
-    dkEnvIn 0.75s 0.25s cubic-bezier(0.2, 1.3, 0.4, 1) forwards,
+    dkEnvIn 0.75s 0.25s var(--ease-pop, cubic-bezier(0.2, 1.3, 0.4, 1)) forwards,
     dkEnvOut 0.6s 1.75s ease-in forwards;
 }
 @keyframes dkEnvIn {
@@ -13890,7 +13906,7 @@ html[data-pack] .sp.pc .card {
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
   transform-origin: 50% 0;
   opacity: 0;
-  animation: dkCard 1s 1.3s cubic-bezier(0.2, 1.25, 0.4, 1) forwards;
+  animation: dkCard 1s 1.3s var(--ease-pop, cubic-bezier(0.2, 1.25, 0.4, 1)) forwards;
 }
 @keyframes dkCard {
   0% {
@@ -13938,7 +13954,7 @@ html[data-pack] .sp.pc .card {
   place-items: center;
   box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 45%, transparent);
   transform: scale(0);
-  animation: dkPop 0.5s 2s cubic-bezier(0.3, 1.8, 0.5, 1) forwards;
+  animation: dkPop 0.5s 2s var(--ease-pop, cubic-bezier(0.3, 1.8, 0.5, 1)) forwards;
 }
 .dkbadge svg {
   width: 36px;
@@ -14180,7 +14196,7 @@ html:not(.pc) .ptq.mamibtn.mcomp.ptqph {
   transform-origin: var(--ax, 50%) 0;
   transition:
     opacity 0.18s,
-    transform 0.22s cubic-bezier(0.3, 1.25, 0.5, 1);
+    transform 0.22s var(--ease-pop, cubic-bezier(0.3, 1.25, 0.5, 1));
 }
 .mamipop.on {
   opacity: 1;
@@ -15717,12 +15733,11 @@ html[data-theme="dark"] {
   padding: 11px 12px 11px 14px;
   border-radius: 20px;
   background: color-mix(in srgb, var(--bfc) 12%, var(--surface));
-  border-left: 6px solid var(--bfc);
   box-shadow: 0 10px 24px -16px rgba(0, 0, 0, 0.45);
   transform-origin: 50% 0;
   transform: translateY(var(--bfdy, 0px));
   transition:
-    transform 0.45s cubic-bezier(0.3, 1.4, 0.5, 1),
+    transform 0.45s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1)),
     opacity 0.3s,
     filter 0.3s;
   cursor: pointer;
@@ -15807,7 +15822,7 @@ html[data-theme="dark"] {
 }
 .bfhint svg {
   transform: rotate(90deg);
-  animation: bfNudge 1.6s ease-in-out infinite;
+  animation: bfNudge 1.6s ease-in-out var(--loop, infinite);
 }
 @keyframes bfNudge {
   50% {
@@ -16433,7 +16448,7 @@ html.pc #v-zukunft > .card {
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  transition: transform 0.28s cubic-bezier(0.3, 1.5, 0.5, 1);
+  transition: transform 0.28s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1));
 }
 .rvtog input:checked + .sw {
   background: var(--accent);
@@ -17528,7 +17543,7 @@ html.pc .rchacts {
   color: #fff;
   font-size: 18px;
   opacity: 0.85;
-  animation: fannud 1.6s ease-in-out infinite;
+  animation: fannud 1.6s ease-in-out var(--loop, infinite);
 }
 .fandots b:last-child {
   animation-direction: reverse;
@@ -17650,7 +17665,7 @@ body > .hbconf {
   font-weight: 600;
 }
 .vaalert.in {
-  animation: vaIn 0.7s cubic-bezier(0.2, 1.4, 0.4, 1);
+  animation: vaIn 0.7s var(--ease-pop, cubic-bezier(0.2, 1.4, 0.4, 1));
 }
 @keyframes vaIn {
   from {
@@ -17796,7 +17811,7 @@ body > .hbconf {
 .potar svg {
   width: 30px;
   height: 30px;
-  animation: potGo 1.4s ease-in-out infinite;
+  animation: potGo 1.4s ease-in-out var(--loop, infinite);
 }
 @keyframes potGo {
   0%,
@@ -17817,7 +17832,7 @@ body > .hbconf {
 .dupcard {
   border: 1.5px solid color-mix(in srgb, var(--warn, #c27c0e) 45%, transparent);
   background: color-mix(in srgb, var(--warn, #c27c0e) 8%, var(--surface));
-  animation: dupIn 0.45s cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: dupIn 0.45s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 .duph {
   display: flex;
@@ -17914,7 +17929,7 @@ body > .hbconf {
   font-family: inherit;
   color: var(--fg);
   cursor: pointer;
-  animation: abIn 0.45s cubic-bezier(0.3, 1.5, 0.5, 1) var(--d, 0ms) backwards;
+  animation: abIn 0.45s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)) var(--d, 0ms) backwards;
   transition: transform 0.15s;
 }
 .abochips button:active {
@@ -18070,11 +18085,11 @@ body > .hbconf {
 }
 .vab.pop {
   animation:
-    vaPop 0.5s cubic-bezier(0.3, 1.7, 0.5, 1),
-    vaPul 1.6s ease-in-out 0.5s infinite;
+    vaPop 0.5s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1)),
+    vaPul 1.6s ease-in-out 0.5s var(--loop, infinite);
 }
 .b-amb.pop {
-  animation: vaPop 0.5s cubic-bezier(0.3, 1.7, 0.5, 1);
+  animation: vaPop 0.5s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1));
 }
 @keyframes vaPop {
   0% {
@@ -18108,7 +18123,7 @@ body > .hbconf {
   border-radius: inherit;
   box-shadow: 0 0 0 2px var(--bad);
   pointer-events: none;
-  animation: vaPul 1.6s ease-out infinite;
+  animation: vaPul 1.6s ease-out var(--loop, infinite);
 }
 .vadet {
   padding: 4px 14px 14px;
@@ -18228,7 +18243,7 @@ body > .hbconf {
   left: 0;
   will-change: transform;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent);
-  animation: vaShn 2.6s ease-in-out infinite;
+  animation: vaShn 2.6s ease-in-out var(--loop, infinite);
 }
 @keyframes vaShn {
   0% {
@@ -18415,7 +18430,7 @@ html.pc .hlcard {
   padding: 4px 8px;
   border-radius: 8px;
   white-space: nowrap;
-  transition: transform 0.5s cubic-bezier(0.3, 1.7, 0.5, 1);
+  transition: transform 0.5s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1));
   pointer-events: none;
   z-index: 2;
 }
@@ -18466,7 +18481,7 @@ html.pc .hlcard {
   inset: 0;
   border-radius: 50%;
   background: var(--bad);
-  animation: fcRip 1.5s ease-out 0.7s infinite;
+  animation: fcRip 1.5s ease-out 0.7s var(--loop, infinite);
 }
 @keyframes fcRip {
   from {
@@ -18545,7 +18560,7 @@ html.pc .hlcard {
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-  transition: transform 0.28s cubic-bezier(0.3, 1.5, 0.5, 1);
+  transition: transform 0.28s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1));
 }
 .fcsw.on {
   background: var(--accent);
@@ -18614,7 +18629,7 @@ html.pc .hlcard {
   transform: translateY(14px);
   transition:
     opacity 0.5s,
-    transform 0.6s cubic-bezier(0.2, 1.3, 0.4, 1);
+    transform 0.6s var(--ease-pop, cubic-bezier(0.2, 1.3, 0.4, 1));
 }
 .fcwarn {
   background: linear-gradient(135deg, var(--bad-soft), color-mix(in srgb, var(--bad-soft) 70%, var(--bad) 12%));
@@ -18669,7 +18684,7 @@ html.pc .hlcard {
   margin-top: 12px;
   opacity: 0;
   transform: translateY(12px);
-  transition: all 0.5s cubic-bezier(0.2, 1.3, 0.4, 1);
+  transition: all 0.5s var(--ease-pop, cubic-bezier(0.2, 1.3, 0.4, 1));
 }
 .fcmami.on {
   opacity: 1;
@@ -18779,7 +18794,7 @@ html[data-theme="dark"] .srhero,
   width: 50%;
   left: -70%;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-  animation: vaShn 3.2s ease-in-out infinite 1s;
+  animation: vaShn 3.2s ease-in-out var(--loop, infinite) 1s;
   pointer-events: none;
 }
 .srcard {
@@ -18842,7 +18857,7 @@ html[data-theme="dark"] .srhero,
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-  transition: transform 0.5s cubic-bezier(0.3, 1.8, 0.5, 1);
+  transition: transform 0.5s var(--ease-pop, cubic-bezier(0.3, 1.8, 0.5, 1));
 }
 .srtog.on {
   background: var(--accent);
@@ -18931,7 +18946,7 @@ html[data-theme="dark"] .srhero,
   padding: 12px 16px;
   z-index: 650;
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
-  transition: transform 0.6s cubic-bezier(0.2, 1.4, 0.4, 1);
+  transition: transform 0.6s var(--ease-pop, cubic-bezier(0.2, 1.4, 0.4, 1));
   pointer-events: none;
 }
 #srPill.on {
@@ -18965,7 +18980,7 @@ html.pc #srPill {
   bottom: 30px;
 }
 .tab.srbump {
-  animation: srBump 0.6s cubic-bezier(0.3, 1.7, 0.5, 1);
+  animation: srBump 0.6s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1));
 }
 @keyframes srBump {
   40% {
@@ -19000,7 +19015,7 @@ html.pc #srPill {
   left: 0;
   will-change: transform;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  animation: hlShn 3s ease-in-out infinite;
+  animation: hlShn 3s ease-in-out var(--loop, infinite);
 }
 .hlcard {
   isolation: isolate;
@@ -19015,7 +19030,7 @@ html.pc #srPill {
   height: 200%;
   background: linear-gradient(120deg, #3d63a8, #7a3b8f 45%, #e0577f 75%, #e8a200);
   will-change: transform;
-  animation: hlCardMv 6s ease-in-out infinite alternate;
+  animation: hlCardMv 6s ease-in-out var(--loop, infinite) alternate;
 }
 .hlcard.seen::before {
   display: none;
@@ -19036,7 +19051,7 @@ html.pc #srPill {
 }
 .hlsp {
   font-size: 26px;
-  animation: hlSp 2s ease-in-out infinite;
+  animation: hlSp 2s ease-in-out var(--loop, infinite);
 }
 @keyframes hlSp {
   50% {
@@ -19107,7 +19122,7 @@ html.pc .hlph {
   height: 62%;
   border-radius: 50%;
   transition: background 1.2s;
-  animation: hlBlob 6s ease-in-out infinite alternate;
+  animation: hlBlob 6s ease-in-out var(--loop, infinite) alternate;
 }
 .hlmesh i:nth-child(1) {
   left: 0;
@@ -19144,7 +19159,7 @@ html.pc .hlph {
   border-radius: 50%;
   background: #fff;
   opacity: 0.55;
-  animation: hlFl linear infinite;
+  animation: hlFl linear var(--loop, infinite);
 }
 @keyframes hlFl {
   to {
@@ -19257,7 +19272,7 @@ html.pc .hlph {
   filter: blur(8px);
 }
 .hlsl .hlw.on {
-  animation: hlWup 0.8s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+  animation: hlWup 0.8s var(--ease-pop, cubic-bezier(0.2, 1.4, 0.4, 1)) forwards;
 }
 @keyframes hlWup {
   to {
@@ -19289,7 +19304,7 @@ html.pc .hllet {
   transform-origin: 50% 100%;
 }
 .hllet span.on {
-  animation: hlDrop 0.9s cubic-bezier(0.2, 1.5, 0.4, 1) forwards;
+  animation: hlDrop 0.9s var(--ease-pop, cubic-bezier(0.2, 1.5, 0.4, 1)) forwards;
 }
 @keyframes hlDrop {
   to {
@@ -19334,7 +19349,7 @@ html.pc .hllet {
   color: #ffb3b3;
 }
 .hlstamp.on {
-  animation: hlStp 0.5s cubic-bezier(0.5, 0, 0.6, 1.6) forwards;
+  animation: hlStp 0.5s var(--ease-pop, cubic-bezier(0.5, 0, 0.6, 1.6)) forwards;
 }
 @keyframes hlStp {
   to {
@@ -19363,7 +19378,7 @@ html.pc .hllet {
   transform: translateY(-220px);
 }
 .hlpod .em.on {
-  animation: hlEm 0.8s cubic-bezier(0.3, 1.6, 0.5, 1) forwards;
+  animation: hlEm 0.8s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) forwards;
 }
 @keyframes hlEm {
   to {
@@ -19375,7 +19390,7 @@ html.pc .hllet {
   width: 100%;
   height: 0;
   border-radius: 16px 16px 6px 6px;
-  transition: height 1s cubic-bezier(0.25, 1.3, 0.4, 1);
+  transition: height 1s var(--ease-pop, cubic-bezier(0.25, 1.3, 0.4, 1));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -19435,7 +19450,7 @@ html.pc .hllet {
   visibility: hidden;
 }
 .hlhm i.on {
-  animation: hlPop 0.45s cubic-bezier(0.3, 1.7, 0.5, 1) forwards;
+  animation: hlPop 0.45s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1)) forwards;
 }
 @keyframes hlPop {
   to {
@@ -19457,7 +19472,7 @@ html.pc .hllet {
   font-size: 14px;
   font-weight: 800;
   white-space: nowrap;
-  transition: transform 0.5s cubic-bezier(0.3, 1.7, 0.5, 1);
+  transition: transform 0.5s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1));
   box-shadow: 0 14px 30px -10px rgba(0, 0, 0, 0.5);
 }
 .hlcall.on {
@@ -19550,7 +19565,7 @@ html.pc .hllet {
   width: 50%;
   left: -70%;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.8), transparent);
-  animation: vaShn 2.6s ease-in-out infinite 1.4s;
+  animation: vaShn 2.6s ease-in-out var(--loop, infinite) 1.4s;
 }
 .hlflip .tr {
   display: inline-block;
@@ -19564,7 +19579,7 @@ html.pc .hllet {
   transform: scale(0);
 }
 .hlflip .tr.on {
-  animation: hlPop 0.45s cubic-bezier(0.3, 1.7, 0.5, 1) forwards;
+  animation: hlPop 0.45s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1)) forwards;
 }
 .hlrays {
   position: absolute;
@@ -19577,7 +19592,7 @@ html.pc .hllet {
   border-radius: 50%;
   -webkit-mask: radial-gradient(circle, #000 15%, transparent 68%);
   mask: radial-gradient(circle, #000 15%, transparent 68%);
-  animation: hlSpin 18s linear infinite;
+  animation: hlSpin 18s linear var(--loop, infinite);
 }
 @keyframes hlSpin {
   to {
@@ -19601,7 +19616,7 @@ html.pc .hllet {
   width: 96px;
 }
 .md.on {
-  animation: hlMd 1.4s cubic-bezier(0.3, 1.3, 0.5, 1) forwards;
+  animation: hlMd 1.4s var(--ease-pop, cubic-bezier(0.3, 1.3, 0.5, 1)) forwards;
 }
 @keyframes hlMd {
   0% {
@@ -19649,7 +19664,7 @@ html.pc .hllet {
   width: 40%;
   left: -60%;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.7), transparent);
-  animation: vaShn 2.6s ease-in-out infinite;
+  animation: vaShn 2.6s ease-in-out var(--loop, infinite);
 }
 .md.gold .co {
   background: radial-gradient(circle at 35% 30%, #fff3c4, #f1b51c 60%, #b57d00);
@@ -19728,7 +19743,7 @@ html.pc .hllet {
   display: grid;
   place-items: center;
   cursor: pointer;
-  animation: hlPulse 1.6s ease-in-out infinite 1.5s;
+  animation: hlPulse 1.6s ease-in-out var(--loop, infinite) 1.5s;
 }
 @keyframes hlPulse {
   50% {
@@ -19746,7 +19761,7 @@ html.pc .hllet {
   z-index: 35;
   opacity: 0;
   transform: translateY(26px);
-  transition: all 0.55s cubic-bezier(0.2, 1.4, 0.4, 1);
+  transition: all 0.55s var(--ease-pop, cubic-bezier(0.2, 1.4, 0.4, 1));
   pointer-events: none;
 }
 .hlmami.on {
@@ -19917,7 +19932,7 @@ html.pc .hllet {
   place-items: center;
   font-weight: 900;
   color: #fff;
-  transition: all 0.3s cubic-bezier(0.3, 1.6, 0.5, 1);
+  transition: all 0.3s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 .tmbi.ok .tmck {
   background: var(--good);
@@ -19965,7 +19980,7 @@ html.pc .hllet {
   width: 50%;
   left: -70%;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  animation: vaShn 2.8s ease-in-out infinite;
+  animation: vaShn 2.8s ease-in-out var(--loop, infinite);
 }
 .tmnote {
   margin: 10px 4px 0;
@@ -20176,7 +20191,7 @@ html.pc .hllet {
   display: grid;
   place-items: center;
   height: 100%;
-  transition: width 0.7s cubic-bezier(0.3, 1.2, 0.4, 1);
+  transition: width 0.7s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.4, 1));
   overflow: hidden;
   white-space: nowrap;
   font-style: normal;
@@ -20310,7 +20325,7 @@ html.pc .hllet {
   box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 35%, transparent);
   position: relative;
   overflow: hidden;
-  animation: aiPulse 2.6s ease-in-out infinite;
+  animation: aiPulse 2.6s ease-in-out var(--loop, infinite);
 }
 .aioffer:after {
   content: "";
@@ -20318,7 +20333,7 @@ html.pc .hllet {
   inset: 0;
   background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
   transform: translateX(-100%);
-  animation: aiShine 3.2s ease-in-out infinite;
+  animation: aiShine 3.2s ease-in-out var(--loop, infinite);
 }
 .aioffer small {
   display: block;
@@ -20331,7 +20346,7 @@ html.pc .hllet {
 }
 .aistar {
   font-size: 24px;
-  animation: aiTw 1.8s ease-in-out infinite;
+  animation: aiTw 1.8s ease-in-out var(--loop, infinite);
 }
 @keyframes aiPulse {
   50% {
@@ -20497,7 +20512,7 @@ html.pc .hllet {
   background: var(--fg);
   transform-origin: left;
   transform: scaleX(0);
-  animation: trRed 4.2s cubic-bezier(0.5, 0, 0.2, 1) infinite;
+  animation: trRed 4.2s cubic-bezier(0.5, 0, 0.2, 1) var(--loop, infinite);
 }
 .trl:nth-child(2) .trx:after {
   animation-delay: 0.25s;
@@ -20649,7 +20664,6 @@ html.pc .hllet {
   border-radius: 16px;
   padding: 12px 14px;
   box-shadow: 0 0 0 1px var(--line);
-  border-left: 4px solid var(--accent);
 }
 .rchr .grow {
   flex: 1;
@@ -20705,7 +20719,7 @@ html.pc .hllet {
   color: var(--good);
   margin-left: 3px;
   display: inline-block;
-  animation: rchOk 0.5s cubic-bezier(0.3, 1.8, 0.5, 1) backwards;
+  animation: rchOk 0.5s var(--ease-pop, cubic-bezier(0.3, 1.8, 0.5, 1)) backwards;
 }
 @keyframes rchOk {
   from {
@@ -20733,7 +20747,7 @@ a.btn:not(.primary) {
   margin-top: 12px;
   border-radius: 16px;
   padding: 12px 14px;
-  animation: kizIn 0.5s cubic-bezier(0.3, 1.3, 0.5, 1);
+  animation: kizIn 0.5s var(--ease-pop, cubic-bezier(0.3, 1.3, 0.5, 1));
 }
 .kizres b {
   display: block;
@@ -20803,7 +20817,7 @@ a.btn:not(.primary) {
 .zgrid .acard {
   max-width: none;
   flex: none;
-  animation: zIn 0.5s cubic-bezier(0.3, 1.2, 0.5, 1) backwards;
+  animation: zIn 0.5s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.5, 1)) backwards;
 }
 .zgrid .acard:nth-child(2) {
   animation-delay: 0.08s;
@@ -20899,7 +20913,7 @@ a.btn:not(.primary) {
   transform: scale(1.15);
   transition:
     opacity 0.4s,
-    transform 0.6s cubic-bezier(0.2, 1.2, 0.35, 1);
+    transform 0.6s var(--ease-pop, cubic-bezier(0.2, 1.2, 0.35, 1));
 }
 .docscan.on img {
   opacity: 1;
@@ -21363,7 +21377,7 @@ html.pc .bsbtns .vadone {
   box-shadow:
     0 16px 40px rgba(0, 0, 0, 0.45),
     0 0 0 6px rgba(255, 255, 255, 0.16);
-  animation: moBob 3s 1.3s ease-in-out infinite;
+  animation: moBob 3s 1.3s ease-in-out var(--loop, infinite);
 }
 .mohalo {
   position: absolute;
@@ -21377,7 +21391,7 @@ html.pc .bsbtns .vadone {
   opacity: 0;
   animation:
     moHalo 0.6s 1s forwards,
-    moPul 2.6s 1.6s ease-in-out infinite;
+    moPul 2.6s 1.6s ease-in-out var(--loop, infinite);
   pointer-events: none;
 }
 @keyframes moHalo {
@@ -21427,7 +21441,7 @@ html.pc .bsbtns .vadone {
   display: grid;
   place-items: center;
   font-size: 32px;
-  animation: moPop 0.55s var(--d) cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  animation: moPop 0.55s var(--d) var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) both;
 }
 .monode.all .mob {
   width: 76px;
@@ -21562,7 +21576,7 @@ html.pc .bsbtns .vadone {
   bottom: calc(110px + env(safe-area-inset-bottom));
   width: 92px;
   height: 92px;
-  animation: mbIn 0.95s 0.35s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  animation: mbIn 0.95s 0.35s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) both;
 }
 .mbmami.fly {
   animation: none;
@@ -21573,7 +21587,7 @@ html.pc .bsbtns .vadone {
   display: grid;
   place-items: center;
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
-  animation: mbBob 2.6s 1.4s ease-in-out infinite;
+  animation: mbBob 2.6s 1.4s ease-in-out var(--loop, infinite);
 }
 .mbwave {
   position: absolute;
@@ -21632,7 +21646,7 @@ html.pc .bsbtns .vadone {
   padding: 16px;
   box-shadow: 0 22px 50px rgba(0, 0, 0, 0.35);
   transform-origin: 12% 100%;
-  animation: mbBub 0.6s 1.15s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+  animation: mbBub 0.6s 1.15s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)) both;
 }
 @keyframes mbBub {
   from {
@@ -21666,7 +21680,7 @@ html.pc .bsbtns .vadone {
 .mbw {
   display: inline-block;
   opacity: 0;
-  animation: mbWd 0.42s cubic-bezier(0.3, 1.6, 0.5, 1) forwards;
+  animation: mbWd 0.42s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) forwards;
 }
 @keyframes mbWd {
   from {
@@ -21774,7 +21788,7 @@ html.pc .bsbtns .vadone {
   width: 50%;
   left: -70%;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-  animation: vaShn 2.8s ease-in-out infinite 2s;
+  animation: vaShn 2.8s ease-in-out var(--loop, infinite) 2s;
 }
 .mbbg.quick .mbbub {
   animation-delay: 0.35s;
@@ -21823,7 +21837,7 @@ html.pc .bsbtns .vadone {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   cursor: pointer;
   opacity: 0;
-  animation: mbChip 0.45s calc(2.2s + var(--i) * 0.13s) cubic-bezier(0.3, 1.6, 0.5, 1) forwards;
+  animation: mbChip 0.45s calc(2.2s + var(--i) * 0.13s) var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) forwards;
   transition:
     transform 0.25s,
     box-shadow 0.25s;
@@ -22032,7 +22046,7 @@ html.pc .mbbub {
 .stbp.r::before {
   background: var(--bad);
   box-shadow: 0 0 0 4px var(--bad-soft);
-  animation: vaPul 1.6s ease-in-out infinite;
+  animation: vaPul 1.6s ease-in-out var(--loop, infinite);
 }
 .stbp.g::before {
   background: var(--good);
@@ -22090,7 +22104,7 @@ html.pc .mbbub {
   place-items: center;
   color: transparent;
   font-weight: 900;
-  transition: all 0.3s cubic-bezier(0.3, 1.6, 0.5, 1);
+  transition: all 0.3s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 .stbact.on .stbck {
   background: var(--good);
@@ -22135,7 +22149,7 @@ html.pc .mbbub {
   width: 50%;
   left: -70%;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  animation: vaShn 2.8s ease-in-out infinite;
+  animation: vaShn 2.8s ease-in-out var(--loop, infinite);
 }
 
 /* Lebensbereiche: Kopfzeile */
@@ -22146,7 +22160,7 @@ html.pc .mbbub {
   padding: 7px !important;
   border-radius: 50% !important;
   transition:
-    transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1),
+    transform 0.35s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)),
     background 0.2s;
 }
 .areagear:active {
@@ -22189,7 +22203,7 @@ html.pc [data-view="zukunft"] .agrid {
 }
 .atile {
   transition:
-    transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1),
+    transform 0.25s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)),
     background 0.2s,
     box-shadow 0.25s;
 }
@@ -22197,7 +22211,7 @@ html.pc [data-view="zukunft"] .agrid {
   transform: scale(0.93);
 }
 .atile.pop .aic {
-  animation: uxIc 0.5s cubic-bezier(0.3, 1.8, 0.5, 1);
+  animation: uxIc 0.5s var(--ease-pop, cubic-bezier(0.3, 1.8, 0.5, 1));
 }
 @keyframes uxIc {
   40% {
@@ -22448,7 +22462,7 @@ html.pc [data-view="zukunft"] .agrid {
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-  transition: transform 0.3s cubic-bezier(0.3, 1.5, 0.5, 1);
+  transition: transform 0.3s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1));
 }
 .devsw input:checked + .devtg {
   background: var(--accent);
@@ -22594,7 +22608,7 @@ html.pc [data-view="zukunft"] .agrid {
   box-shadow: var(--shadow);
 }
 .invnext.anim {
-  animation: invPop 0.45s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+  animation: invPop 0.45s var(--ease-pop, cubic-bezier(0.2, 1.3, 0.4, 1)) both;
 }
 @keyframes invPop {
   from {
@@ -22761,7 +22775,7 @@ html.pc [data-view="zukunft"] .agrid {
   border-radius: 20px;
   padding: 14px 16px;
   margin: 0 0 12px;
-  animation: invPop 0.45s 0.04s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+  animation: invPop 0.45s 0.04s var(--ease-pop, cubic-bezier(0.2, 1.3, 0.4, 1)) both;
   transition: opacity 0.2s;
 }
 .invpub > b {
@@ -22794,7 +22808,7 @@ html.pc [data-view="zukunft"] .agrid {
   height: 7px;
   border-radius: 50%;
   background: var(--accent);
-  animation: invPulse 1.6s ease-in-out infinite;
+  animation: invPulse 1.6s ease-in-out var(--loop, infinite);
 }
 @keyframes invPulse {
   0%,
@@ -22990,7 +23004,7 @@ html.pc [data-view="zukunft"] .agrid {
   border-radius: 20px;
   padding: 14px 16px;
   margin: 0 0 12px;
-  animation: invPop 0.45s 0.08s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+  animation: invPop 0.45s 0.08s var(--ease-pop, cubic-bezier(0.2, 1.3, 0.4, 1)) both;
 }
 .invupd b {
   display: flex;
@@ -23137,7 +23151,7 @@ html.pc [data-view="zukunft"] .agrid {
   text-align: center;
   box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5);
   transform: translateY(40px) scale(0.97);
-  transition: transform 0.45s cubic-bezier(0.2, 1.25, 0.35, 1);
+  transition: transform 0.45s var(--ease-pop, cubic-bezier(0.2, 1.25, 0.35, 1));
 }
 .nudgebg.show .nudgesh {
   transform: none;
@@ -23153,7 +23167,7 @@ html.pc [data-view="zukunft"] .agrid {
   border: 5px solid var(--surface);
   background: var(--sunk);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
-  animation: nudgeHop 1.1s 0.35s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  animation: nudgeHop 1.1s 0.35s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) both;
 }
 @keyframes nudgeHop {
   0% {
@@ -23471,7 +23485,7 @@ html[data-theme="dark"] .gwel {
   display: flex;
   align-items: center;
   gap: 12px;
-  animation: gwPop 0.55s cubic-bezier(0.3, 1.6, 0.5, 1) 0.25s backwards;
+  animation: gwPop 0.55s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) 0.25s backwards;
 }
 .gwlg img {
   width: 48px;
@@ -23507,7 +23521,7 @@ html[data-theme="dark"] .gwel {
   padding: 6px 11px;
   border-radius: 99px;
   font: 700 13px var(--f-body);
-  animation: gwPop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) 0.66s backwards;
+  animation: gwPop 0.45s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) 0.66s backwards;
 }
 .gwch span:nth-child(2) {
   animation-delay: 0.76s;
@@ -23738,7 +23752,7 @@ html[data-theme="dark"] .gwel {
 }
 .invfresh b {
   display: inline-block;
-  animation: invFr 0.6s cubic-bezier(0.3, 1.6, 0.5, 1);
+  animation: invFr 0.6s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 .invqr svg {
   transition: opacity 0.3s;
@@ -23814,7 +23828,7 @@ html[data-theme="dark"] .sndic {
   stroke-dashoffset: 14;
   opacity: 0;
   transition:
-    stroke-dashoffset 0.4s cubic-bezier(0.3, 1.2, 0.5, 1),
+    stroke-dashoffset 0.4s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.5, 1)),
     opacity 0.2s;
 }
 .qi-sound .w2,
@@ -23851,7 +23865,7 @@ html[data-theme="dark"] .sndic {
 }
 .qs.qring .qi-sound .spk,
 .sndic.ring .spk {
-  animation: sndBump 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) 2;
+  animation: sndBump 0.5s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) 2;
 }
 .qs.qring .qi-sound .w1,
 .sndic.ring .w1 {
@@ -24198,7 +24212,7 @@ html[data-theme="dark"] .sndic {
   cursor: grab;
   box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.5);
   transition:
-    transform 0.25s cubic-bezier(0.3, 1.4, 0.5, 1),
+    transform 0.25s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1)),
     opacity 0.25s,
     outline-color 0.2s;
   outline: 3px dashed transparent;
@@ -24216,7 +24230,7 @@ html[data-theme="dark"] .sndic {
   pointer-events: none;
 }
 .mvc.in {
-  animation: mvDrop 0.55s cubic-bezier(0.2, 1.1, 0.3, 1) calc(var(--i) * 70ms) backwards;
+  animation: mvDrop 0.55s var(--ease-pop, cubic-bezier(0.2, 1.1, 0.3, 1)) calc(var(--i) * 70ms) backwards;
 }
 @keyframes mvDrop {
   from {
@@ -24275,7 +24289,7 @@ html[data-theme="dark"] .sndic {
   transform: scale(1.035);
 }
 .mvc.got {
-  animation: mvGot 0.7s cubic-bezier(0.3, 1.6, 0.5, 1);
+  animation: mvGot 0.7s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1));
 }
 .mvc.gave {
   animation: mvGave 0.5s ease;
@@ -24378,7 +24392,7 @@ body.mvdragging {
   background: var(--sunk);
   display: grid;
   place-items: center;
-  animation: mvArr 1.4s ease-in-out infinite;
+  animation: mvArr 1.4s ease-in-out var(--loop, infinite);
 }
 @keyframes mvArr {
   50% {
@@ -25165,7 +25179,7 @@ html.pc .pctpane .ayblk {
   border-radius: 50%;
   background: var(--surface);
   box-shadow: var(--shadow);
-  transition: transform 0.25s cubic-bezier(0.3, 1.4, 0.5, 1);
+  transition: transform 0.25s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 .dnsw.on i {
   background: var(--accent);
@@ -47759,6 +47773,52 @@ function tile(kind, name, color) {
   return `<span class="ictile" style="background:color-mix(in srgb, ${c} 16%, transparent);color:${c}">${svgIcon(iconFor(kind, name))}</span>`;
 }
 
+/* ===== Bewegung: lebhaft, sanft (Standard) oder aus ===== */
+const MOTION_KEY = "hb-motion";
+function motionMode() {
+  let m = null;
+  try {
+    m = localStorage.getItem(MOTION_KEY);
+  } catch (_) {}
+  if (m === "live" || m === "soft" || m === "off") return m;
+  return matchMedia("(prefers-reduced-motion: reduce)").matches ? "off" : "soft";
+}
+const motionOff = () => motionMode() === "off";
+function motionApply() {
+  document.documentElement.dataset.motion = motionMode();
+}
+function motionSet(m) {
+  try {
+    localStorage.setItem(MOTION_KEY, m);
+  } catch (_) {}
+  motionApply();
+}
+motionApply();
+/* Federnde Kurven (Überschwinger) werden bei „sanft“ auf ein Fünftel gedämpft,
+   bei „aus“ laufen Animationen ohne Dauer – Ereignisse wie finish feuern trotzdem. */
+(() => {
+  const orig = Element.prototype.animate;
+  if (!orig) return;
+  const soften = (v) => (+v > 1 ? (1 + (+v - 1) * 0.2).toFixed(3) : v);
+  const calm = (e) =>
+    typeof e === "string"
+      ? e.replace(
+          /cubic-bezier\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)/g,
+          (_, a, b, c, d) => `cubic-bezier(${a},${soften(b)},${c},${soften(d)})`
+        )
+      : e;
+  Element.prototype.animate = function (kf, opt) {
+    const m = document.documentElement.dataset.motion;
+    if (m === "soft" || m === "off") {
+      if (opt && typeof opt === "object") {
+        opt = { ...opt, easing: calm(opt.easing) };
+        if (m === "off") Object.assign(opt, { duration: 0, delay: 0, endDelay: 0 });
+      } else if (m === "off" && typeof opt === "number") opt = 0;
+      if (Array.isArray(kf)) kf = kf.map((f) => (f && f.easing ? { ...f, easing: calm(f.easing) } : f));
+    }
+    return orig.call(this, kf, opt);
+  };
+})();
 /* State */
 const store = {
   settings: clone(DEFAULT_SETTINGS),
@@ -48332,7 +48392,7 @@ function mvClose() {
 }
 function mvFxOk() {
   try {
-    return !!document.body.animate && !matchMedia("(prefers-reduced-motion: reduce)").matches && !IS_DESK;
+    return !!document.body.animate && !motionOff() && !IS_DESK;
   } catch (_) {
     return false;
   }
@@ -51214,6 +51274,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.9",
+    "23. November 2026",
+    [
+      "Ruhigere Bewegung: Nichts federt mehr stark nach, Glanz und Wippen laufen nur noch kurz statt endlos.",
+      "Neu unter Einstellungen › Farben: „Bewegung“ mit Lebhaft, Sanft (Standard) oder Aus. Ist am Handy „Bewegung reduzieren“ an, steht die App von selbst still.",
+      "Die farbigen Seitenstreifen an Laschen und Karten sind weg – die Farbe sitzt jetzt sanft im Hintergrund.",
+    ],
+  ],
+  [
     "0.48.8",
     "23. November 2026",
     [
@@ -52331,7 +52400,7 @@ const TOUR_MAMI = {
   tok: 0,
   M: 58,
 };
-const tmReduce = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const tmReduce = () => motionOff();
 function tmEls() {
   const el = $("tourBg");
   if (!el.querySelector(".tmami")) {
@@ -53747,6 +53816,17 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.48.9",
+    s: () => [
+      {
+        sel: "#topAv",
+        ic: "palette",
+        t: uiText("nw_mo_t"),
+        p: [uiText("nw_mo_p")],
+      },
+    ],
+  },
   {
     v: "0.48.8",
     s: () =>
@@ -57857,7 +57937,7 @@ function bfSwap(to, anim) {
     localStorage.setItem("hb-bfside", to);
   } catch (_) {}
   const duo = getComputedStyle(w).getPropertyValue("--bfduo").trim() === "1",
-    still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    still = motionOff();
   if (duo || still || !anim || !document.body.animate) {
     w.classList.toggle("sb", to === "b");
     w.classList.toggle("sj", to === "j");
@@ -59829,7 +59909,7 @@ function langGate(next) {
     <div class="lggrid">${LANG_PICKER.map((l, k) => `<button class="lgtile" data-lg="${k}" lang="${l[0]}"><i>${l[1]}</i>${escHtml((LANGS.find((x) => x[0] === l[0]) || [])[1] || l[0])}</button>`).join("")}</div>
     <button class="btn primary lggo" id="lgGo" disabled>${LANG_PICKER[0][4]}</button></div>`;
   const gr = $("lgGr"),
-    calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    calm = motionOff();
   let cur = null,
     i = 0,
     sel = -1;
@@ -70931,7 +71011,7 @@ function anaStoryRun() {
     b.style.transition = "none";
     b.style.width = k < ASTORY.i ? "100%" : "0";
   });
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (motionOff()) return;
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
       const b = bs[ASTORY.i];
@@ -76072,7 +76152,7 @@ function renderColorEd() {
     const i = (ui.acctNames || []).indexOf(n);
     return i > 0 && isGreen() ? acgCol(i - 1) : i > 0 ? "#34413b" : "#1a7a5c";
   };
-  el.innerHTML = `<div class="colsec"><h3>Farbpaket</h3><div class="colpkg">${Object.entries(PACKS)
+  el.innerHTML = motionEdHtml() + `<div class="colsec"><h3>Farbpaket</h3><div class="colpkg">${Object.entries(PACKS)
     .map(([k, [n, P]]) => {
       const on = (store.settings.theme || "gruen") === k;
       const g = P ? P.slice(0, 4).join(",") : "#3d63a8,#d14d72,#c27c0e,#7a5bc2";
@@ -76110,6 +76190,26 @@ function renderColorEd() {
       .join("")}</div>
     <button class="btn" data-colresetall="1" style="margin-top:6px">Alle Farben zurücksetzen</button>`;
 }
+function motionEdHtml() {
+  const cur = motionMode();
+  return `<div class="colsec" data-noi18n><h3>${escHtml(uiText("mo_h"))}</h3><div class="erseg moseg">${[
+    ["live", "mo_live"],
+    ["soft", "mo_soft"],
+    ["off", "mo_off"],
+  ]
+    .map(
+      ([k, t]) =>
+        `<button type="button" class="${cur === k ? "on" : ""}" data-motion-set="${k}" aria-pressed="${cur === k}">${escHtml(uiText(t))}</button>`
+    )
+    .join("")}</div><span class="small muted">${escHtml(uiText("mo_s_" + cur))}</span></div>`;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-motion-set]");
+  if (!b) return;
+  motionSet(b.dataset.motionSet);
+  SND.play("tick");
+  renderColorEd();
+});
 function hexToHsl(hex) {
   let r = 0,
     g = 0,
@@ -89032,6 +89132,96 @@ const TEXTS = {
     "ضريبة القيمة المضافة وDATEV وحساب الربح والاحتياطي صارت الآن في هذه القائمة المختصرة.",
     "TVA, DATEV, calculul profitului și rezerva sunt acum în această listă scurtă.",
   ],
+  mo_h: [
+    "Bewegung",
+    "Motion",
+    "Hareket",
+    "Анимация",
+    "Анімація",
+    "Animacje",
+    "الحركة",
+    "Animații",
+  ],
+  mo_live: [
+    "Lebhaft",
+    "Lively",
+    "Canlı",
+    "Живая",
+    "Жвава",
+    "Żywe",
+    "حيوية",
+    "Vii",
+  ],
+  mo_soft: [
+    "Sanft",
+    "Gentle",
+    "Yumuşak",
+    "Мягкая",
+    "М’яка",
+    "Łagodne",
+    "هادئة",
+    "Blânde",
+  ],
+  mo_off: [
+    "Aus",
+    "Off",
+    "Kapalı",
+    "Выкл.",
+    "Вимк.",
+    "Wył.",
+    "إيقاف",
+    "Oprit",
+  ],
+  mo_s_live: [
+    "Alles federt und glänzt – so wie früher.",
+    "Everything bounces and shines – like before.",
+    "Her şey zıplar ve parlar – eskisi gibi.",
+    "Всё пружинит и блестит – как раньше.",
+    "Усе пружинить і сяє – як раніше.",
+    "Wszystko sprężynuje i błyszczy – jak dawniej.",
+    "كل شيء يرتد ويلمع – كما كان من قبل.",
+    "Totul sare și strălucește – ca înainte.",
+  ],
+  mo_s_soft: [
+    "Ruhige, weiche Übergänge. Glanz läuft nur kurz.",
+    "Calm, soft transitions. Shine plays only briefly.",
+    "Sakin, yumuşak geçişler. Parıltı kısa sürer.",
+    "Спокойные мягкие переходы. Блеск только ненадолго.",
+    "Спокійні м’які переходи. Блиск лише ненадовго.",
+    "Spokojne, miękkie przejścia. Połysk tylko na chwilę.",
+    "انتقالات هادئة وناعمة. اللمعان قصير فقط.",
+    "Tranziții calme și blânde. Strălucirea durează puțin.",
+  ],
+  mo_s_off: [
+    "Nichts bewegt sich – gut, wenn dir Bewegung zu viel ist.",
+    "Nothing moves – good if motion is too much for you.",
+    "Hiçbir şey hareket etmez – hareket sana fazla geliyorsa iyi.",
+    "Ничего не двигается – удобно, если движение мешает.",
+    "Нічого не рухається – зручно, якщо рух заважає.",
+    "Nic się nie rusza – dobre, gdy ruch to dla ciebie za dużo.",
+    "لا شيء يتحرك – مناسب إن كانت الحركة كثيرة عليك.",
+    "Nimic nu se mișcă – bine dacă mișcarea te deranjează.",
+  ],
+  nw_mo_t: [
+    "Ruhigere Bewegung",
+    "Calmer motion",
+    "Daha sakin hareket",
+    "Спокойнее движение",
+    "Спокійніший рух",
+    "Spokojniejszy ruch",
+    "حركة أهدأ",
+    "Mișcare mai calmă",
+  ],
+  nw_mo_p: [
+    "Die App bewegt sich jetzt sanfter. Unter „Farben“ kannst du „Lebhaft“, „Sanft“ oder „Aus“ wählen.",
+    "The app now moves more gently. Under “Colors” you can pick “Lively”, “Gentle” or “Off”.",
+    "Uygulama artık daha yumuşak hareket ediyor. „Renkler“ altında „Canlı“, „Yumuşak“ veya „Kapalı“ seçebilirsin.",
+    "Приложение теперь двигается мягче. В разделе «Цвета» можно выбрать «Живая», «Мягкая» или «Выкл.».",
+    "Застосунок тепер рухається м’якше. У розділі «Кольори» можна вибрати «Жвава», «М’яка» або «Вимк.».",
+    "Aplikacja porusza się teraz łagodniej. W „Kolory” wybierzesz „Żywe”, „Łagodne” albo „Wył.”.",
+    "يتحرك التطبيق الآن بهدوء أكبر. في «الألوان» يمكنك اختيار «حيوية» أو «هادئة» أو «إيقاف».",
+    "Aplicația se mișcă acum mai blând. La „Culori” poți alege „Vii”, „Blânde” sau „Oprit”.",
+  ],
 };
 
 /* Texte aus TEXTS in der aktuellen Sprache, Monatsnamen und das Zählwerk für Beträge */
@@ -89041,7 +89231,7 @@ function uiText(k, v) {
   if (v) for (const [x, y] of Object.entries(v)) s = s.split("{" + x + "}").join(y);
   return s;
 }
-const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reducedMotion = () => motionOff();
 function fxDate(iso, o) {
   if (!iso) return "";
   const dt = new Date(String(iso).length === 7 ? iso + "-01T12:00" : iso + "T12:00");
@@ -107034,7 +107224,7 @@ function uxEnter() {
   /* nach dem Wisch-Würfel steht die Seite schon fertig da – sie federt nur noch an */
   const quiet = UX.quiet;
   UX.quiet = false;
-  if (!(quiet || first || vc || mc) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (!(quiet || first || vc || mc) || motionOff()) return;
   /* nach dem Würfel hat die Welle die Seite schon eingeblendet */
   if (quiet) return;
   if (vc && !first) {
@@ -115968,7 +116158,7 @@ $("loginSkip").onclick = () => {
      genauso ein – unscharf und etwas kleiner, solange sie im Übergang sind */
   const WAVE = new WeakMap(),
     WBAND = 0.35,
-    calm = matchMedia("(prefers-reduced-motion: reduce)");
+    calm = { get matches() { return motionOff(); } };
   function waveItems(f, c, top, H) {
     const pick = new Set(c.querySelectorAll(".atile,.hbodo"));
     c.querySelectorAll("*").forEach((e) => {
@@ -119523,7 +119713,7 @@ langGate(() => {
 })();
 /* Bewegung */
 (function () {
-  const RM = matchMedia("(prefers-reduced-motion: reduce)");
+  const RM = { get matches() { return motionOff(); } };
   const A = {
     view: null,
     ym: null,

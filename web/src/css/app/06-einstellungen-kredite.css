@@ -304,7 +304,7 @@
   transform: scale(0.94);
 }
 .ntgo svg {
-  animation: ntSpark 2.4s ease-in-out infinite;
+  animation: ntSpark 2.4s ease-in-out var(--loop, infinite);
 }
 @keyframes ntSpark {
   50% {

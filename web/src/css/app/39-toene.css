@@ -57,7 +57,7 @@ html[data-theme="dark"] .sndic {
   stroke-dashoffset: 14;
   opacity: 0;
   transition:
-    stroke-dashoffset 0.4s cubic-bezier(0.3, 1.2, 0.5, 1),
+    stroke-dashoffset 0.4s var(--ease-pop, cubic-bezier(0.3, 1.2, 0.5, 1)),
     opacity 0.2s;
 }
 .qi-sound .w2,
@@ -94,7 +94,7 @@ html[data-theme="dark"] .sndic {
 }
 .qs.qring .qi-sound .spk,
 .sndic.ring .spk {
-  animation: sndBump 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) 2;
+  animation: sndBump 0.5s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)) 2;
 }
 .qs.qring .qi-sound .w1,
 .sndic.ring .w1 {

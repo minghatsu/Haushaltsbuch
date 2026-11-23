@@ -1071,7 +1071,7 @@ function anaStoryRun() {
     b.style.transition = "none";
     b.style.width = k < ASTORY.i ? "100%" : "0";
   });
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (motionOff()) return;
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
       const b = bs[ASTORY.i];

@@ -240,6 +240,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.9",
+    "23. November 2026",
+    [
+      "Ruhigere Bewegung: Nichts federt mehr stark nach, Glanz und Wippen laufen nur noch kurz statt endlos.",
+      "Neu unter Einstellungen › Farben: „Bewegung“ mit Lebhaft, Sanft (Standard) oder Aus. Ist am Handy „Bewegung reduzieren“ an, steht die App von selbst still.",
+      "Die farbigen Seitenstreifen an Laschen und Karten sind weg – die Farbe sitzt jetzt sanft im Hintergrund.",
+    ],
+  ],
+  [
     "0.48.8",
     "23. November 2026",
     [

@@ -99,7 +99,7 @@ langGate(() => {
 })();
 /* Bewegung */
 (function () {
-  const RM = matchMedia("(prefers-reduced-motion: reduce)");
+  const RM = { get matches() { return motionOff(); } };
   const A = {
     view: null,
     ym: null,

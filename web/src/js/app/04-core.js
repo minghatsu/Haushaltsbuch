@@ -1,3 +1,49 @@
+/* ===== Bewegung: lebhaft, sanft (Standard) oder aus ===== */
+const MOTION_KEY = "hb-motion";
+function motionMode() {
+  let m = null;
+  try {
+    m = localStorage.getItem(MOTION_KEY);
+  } catch (_) {}
+  if (m === "live" || m === "soft" || m === "off") return m;
+  return matchMedia("(prefers-reduced-motion: reduce)").matches ? "off" : "soft";
+}
+const motionOff = () => motionMode() === "off";
+function motionApply() {
+  document.documentElement.dataset.motion = motionMode();
+}
+function motionSet(m) {
+  try {
+    localStorage.setItem(MOTION_KEY, m);
+  } catch (_) {}
+  motionApply();
+}
+motionApply();
+/* Federnde Kurven (Überschwinger) werden bei „sanft“ auf ein Fünftel gedämpft,
+   bei „aus“ laufen Animationen ohne Dauer – Ereignisse wie finish feuern trotzdem. */
+(() => {
+  const orig = Element.prototype.animate;
+  if (!orig) return;
+  const soften = (v) => (+v > 1 ? (1 + (+v - 1) * 0.2).toFixed(3) : v);
+  const calm = (e) =>
+    typeof e === "string"
+      ? e.replace(
+          /cubic-bezier\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)/g,
+          (_, a, b, c, d) => `cubic-bezier(${a},${soften(b)},${c},${soften(d)})`
+        )
+      : e;
+  Element.prototype.animate = function (kf, opt) {
+    const m = document.documentElement.dataset.motion;
+    if (m === "soft" || m === "off") {
+      if (opt && typeof opt === "object") {
+        opt = { ...opt, easing: calm(opt.easing) };
+        if (m === "off") Object.assign(opt, { duration: 0, delay: 0, endDelay: 0 });
+      } else if (m === "off" && typeof opt === "number") opt = 0;
+      if (Array.isArray(kf)) kf = kf.map((f) => (f && f.easing ? { ...f, easing: calm(f.easing) } : f));
+    }
+    return orig.call(this, kf, opt);
+  };
+})();
 /* State */
 const store = {
   settings: clone(DEFAULT_SETTINGS),

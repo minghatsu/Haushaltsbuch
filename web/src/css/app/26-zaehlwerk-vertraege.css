@@ -102,7 +102,7 @@ body > .hbconf {
   font-weight: 600;
 }
 .vaalert.in {
-  animation: vaIn 0.7s cubic-bezier(0.2, 1.4, 0.4, 1);
+  animation: vaIn 0.7s var(--ease-pop, cubic-bezier(0.2, 1.4, 0.4, 1));
 }
 @keyframes vaIn {
   from {
@@ -248,7 +248,7 @@ body > .hbconf {
 .potar svg {
   width: 30px;
   height: 30px;
-  animation: potGo 1.4s ease-in-out infinite;
+  animation: potGo 1.4s ease-in-out var(--loop, infinite);
 }
 @keyframes potGo {
   0%,
@@ -269,7 +269,7 @@ body > .hbconf {
 .dupcard {
   border: 1.5px solid color-mix(in srgb, var(--warn, #c27c0e) 45%, transparent);
   background: color-mix(in srgb, var(--warn, #c27c0e) 8%, var(--surface));
-  animation: dupIn 0.45s cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: dupIn 0.45s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
 }
 .duph {
   display: flex;
@@ -366,7 +366,7 @@ body > .hbconf {
   font-family: inherit;
   color: var(--fg);
   cursor: pointer;
-  animation: abIn 0.45s cubic-bezier(0.3, 1.5, 0.5, 1) var(--d, 0ms) backwards;
+  animation: abIn 0.45s var(--ease-pop, cubic-bezier(0.3, 1.5, 0.5, 1)) var(--d, 0ms) backwards;
   transition: transform 0.15s;
 }
 .abochips button:active {
@@ -522,11 +522,11 @@ body > .hbconf {
 }
 .vab.pop {
   animation:
-    vaPop 0.5s cubic-bezier(0.3, 1.7, 0.5, 1),
-    vaPul 1.6s ease-in-out 0.5s infinite;
+    vaPop 0.5s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1)),
+    vaPul 1.6s ease-in-out 0.5s var(--loop, infinite);
 }
 .b-amb.pop {
-  animation: vaPop 0.5s cubic-bezier(0.3, 1.7, 0.5, 1);
+  animation: vaPop 0.5s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1));
 }
 @keyframes vaPop {
   0% {
@@ -560,7 +560,7 @@ body > .hbconf {
   border-radius: inherit;
   box-shadow: 0 0 0 2px var(--bad);
   pointer-events: none;
-  animation: vaPul 1.6s ease-out infinite;
+  animation: vaPul 1.6s ease-out var(--loop, infinite);
 }
 .vadet {
   padding: 4px 14px 14px;
@@ -680,7 +680,7 @@ body > .hbconf {
   left: 0;
   will-change: transform;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent);
-  animation: vaShn 2.6s ease-in-out infinite;
+  animation: vaShn 2.6s ease-in-out var(--loop, infinite);
 }
 @keyframes vaShn {
   0% {
