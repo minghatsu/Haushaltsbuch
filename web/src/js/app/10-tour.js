@@ -1495,6 +1495,20 @@ const PTOUR_FN = () => ({
             },
           ]),
       {
+        sel: '[data-view="beruf"] .bfnext',
+        raw: 1,
+        ic: "bell",
+        t: uiText("nw_bn_t"),
+        p: [uiText("nw_bn_p")],
+      },
+      {
+        sel: '[data-view="beruf"] .bflist',
+        raw: 1,
+        ic: "bank",
+        t: uiText("bn_tax"),
+        p: [uiText("nw_bn_p2")],
+      },
+      {
         sel: '[data-view="beruf"] [data-rchopen].atile',
         raw: 1,
         ic: "docout",
@@ -1664,6 +1678,20 @@ function ptourOpen(v) {
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
   {
+    v: "0.48.8",
+    s: () =>
+      hasSelf()
+        ? [
+            {
+              sel: '[data-view="beruf"] .bfnext, [data-view="beruf"] .bflist',
+              ic: "bell",
+              t: uiText("nw_bn_t"),
+              p: [uiText("nw_bn_p"), uiText("nw_bn_p2")],
+            },
+          ]
+        : [],
+  },
+  {
     v: "0.48.7",
     s: () => [
       {
@@ -1705,7 +1733,7 @@ const NEWTOUR = [
       hasSelf()
         ? [
             {
-              sel: '[data-view="beruf"] [data-dvopen].atile',
+              sel: '[data-view="beruf"] [data-dvopen]',
               ic: "bank",
               t: uiText("nw_dv_t"),
               p: [uiText("nw_dv_p")],
@@ -1747,7 +1775,7 @@ const NEWTOUR = [
       hasSelf() && !store.settings.kleinunternehmer
         ? [
             {
-              sel: '[data-view="beruf"] [data-ustopen].atile',
+              sel: '[data-view="beruf"] [data-ustopen]',
               ic: "doctax",
               t: uiText("nw_ust_t"),
               p: [uiText("nw_ust_p")],

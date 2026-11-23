@@ -327,6 +327,9 @@ html[data-theme="dark"] {
 html.tabp .bfg {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 }
+html.tabp .bfgb {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
 html.pc:not(.tabp) .bftop {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -372,7 +375,7 @@ html.pc:not(.tabp) .bfgb {
   grid-row: 2;
   visibility: visible !important;
   pointer-events: auto !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
 html.pc:not(.tabp) .bfgj {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -600,4 +603,115 @@ html.pc #v-zukunft > .areacard {
 }
 html.pc #v-zukunft > .card {
   order: 0 !important;
+}
+
+/* Geschäft: „Als Nächstes“ und kompakte Liste für Steuer-Themen */
+.bfnext,
+.bflist {
+  grid-column: 1 / -1;
+  background: var(--surface);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.bfnext {
+  padding: 12px 14px 4px;
+}
+.bfnh {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.bfnh b {
+  font-size: 15.5px;
+  font-weight: 800;
+}
+.bfnm {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bfc) 14%, var(--surface));
+}
+.bfnm > * {
+  width: 100%;
+  height: 100%;
+}
+.bfni {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.bfni .grow {
+  flex: 1;
+  min-width: 0;
+}
+.bfni b {
+  display: block;
+  font-size: 14.5px;
+}
+.bfni small {
+  display: block;
+  color: var(--muted);
+  font-weight: 600;
+}
+.bfni .btn {
+  flex: none;
+  min-height: 40px;
+}
+.bfrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 14px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  font: inherit;
+  color: var(--fg);
+  text-align: start;
+  cursor: pointer;
+}
+.bflh {
+  margin: 0;
+  padding: 12px 14px 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+.bfrow:hover {
+  background: color-mix(in srgb, var(--bfc) 6%, var(--surface));
+}
+.bfrow .aic {
+  flex: none;
+  color: var(--bfc);
+  display: grid;
+  place-items: center;
+}
+.bfrow b {
+  flex: 1;
+  min-width: 0;
+  font-size: 14.5px;
+}
+.bfrow small {
+  color: var(--muted);
+  font-weight: 600;
+  text-align: end;
+  max-width: 48%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bfrow > svg:last-child {
+  flex: none;
+  color: var(--faint);
 }

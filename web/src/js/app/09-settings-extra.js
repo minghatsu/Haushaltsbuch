@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.8",
+    "23. November 2026",
+    [
+      "Beruf › Mein Geschäft ist aufgeräumt: Oben sagt Mami „Als Nächstes“, was gerade dran ist – überfällige Rechnungen, fällige Serien-Rechnungen, Umsatzsteuer, offene Eingangsrechnungen und auslaufende Angebote, jeweils mit einem Knopf.",
+      "Groß bleiben nur Rechnungen, Angebote, Eingangsrechnungen und Kunden. Umsatzsteuer, DATEV, EÜR und Rücklage stehen kompakt unter „Steuer & Abgaben“.",
+    ],
+  ],
+  [
     "0.48.7",
     "23. November 2026",
     [

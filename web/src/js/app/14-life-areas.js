@@ -148,6 +148,64 @@ function kdTile() {
     `data-kdopen`
   );
 }
+/* Geschäft: die drei dringendsten Aufgaben, mit einem Tipp erledigt */
+function bizNext() {
+  const L = [],
+    E = (v) => fmtEur0(v),
+    D = (iso) => fxDate(iso, { day: "numeric", month: "short" });
+  const add = (prio, t, s, btn, attr) => L.push({ prio, t, s, btn, attr });
+  try {
+    const od = rchOver();
+    if (od.length)
+      add(
+        0,
+        uiText(od.length === 1 ? "bn_over1" : "bn_over", { n: String(od.length) }),
+        E(od.reduce((s, i) => s + rchRest(i), 0)),
+        uiText("bn_look"),
+        "data-rchopen"
+      );
+  } catch (_) {}
+  try {
+    for (const r of rvRecDue().slice(0, 2))
+      add(1, uiText("bn_rec", { n: r.kunde || "–" }), `${E(r.amt || 0)} · ${D(r.next)}`, uiText("bn_send"), `data-rvrec="${escHtml(r.id)}"`);
+  } catch (_) {}
+  try {
+    const n = pmFind().length;
+    if (n) add(1, uiText(n === 1 ? "pm_ban1" : "pm_ban", { n: String(n) }), "", uiText("bn_check"), "data-pmopen");
+  } catch (_) {}
+  try {
+    if (!store.settings.kleinunternehmer) {
+      const k = ustPeriods(2).find((x) => !ustCfg().done[x] && x !== ustPeriods(1)[0]),
+        d = k && ustDue(k);
+      if (d && daysTo(d) <= 14)
+        add(daysTo(d) <= 3 ? 0 : 2, uiText("bn_ust", { d: D(d) }), uiText("bn_ust_s", { a: E(Math.max(0, ustCalc(k).kz83)) }), uiText("bn_look"), "data-ustopen");
+    }
+  } catch (_) {}
+  try {
+    const eo = erOpenList().filter((i) => i.due && daysTo(i.due) <= 7);
+    if (eo.length)
+      add(
+        eo.some((i) => daysTo(i.due) < 0) ? 0 : 2,
+        uiText(eo.length === 1 ? "bn_er1" : "bn_er", { n: String(eo.length) }),
+        E(eo.reduce((s, i) => s + i.pay, 0)),
+        uiText("bn_look"),
+        "data-eropen"
+      );
+  } catch (_) {}
+  try {
+    const ao = anList().filter((o) => o.st === "open" && daysTo(o.valid) >= 0 && daysTo(o.valid) <= 3);
+    if (ao.length) add(3, uiText("bn_an", { n: ao[0].kunde || "–" }), D(ao[0].valid), uiText("bn_look"), "data-anopen");
+  } catch (_) {}
+  if (!L.length) return "";
+  const top = L.sort((a, b) => a.prio - b.prio).slice(0, 3);
+  return `<div class="bfnext" role="list"><div class="bfnh"><span class="bfnm">${mamiAvatar ? mamiAvatar(null) : ""}</span><b data-noi18n>${escHtml(uiText("bn_h"))}</b></div>${top
+    .map(
+      (x) =>
+        `<div class="bfni" role="listitem"><span class="grow"><b data-noi18n>${escHtml(x.t)}</b>${x.s ? `<small data-noi18n>${escHtml(x.s)}</small>` : ""}</span><button type="button" class="btn sm primary" ${x.attr}>${escHtml(x.btn)}</button></div>`
+    )
+    .join("")}</div>`;
+}
+const BF_MAIN = /data-(rchopen|anopen|eropen|kdopen)\b/;
 function berufDuo(el, tiles, T, exJ, exB, hints) {
   const tl = (t) =>
     t.k === "kunden"
@@ -167,8 +225,17 @@ function berufDuo(el, tiles, T, exJ, exB, hints) {
       .map((k) => T.find((t) => t.k === k))
       .filter(Boolean)
       .map(tl);
-  const B = exB.concat(Bk),
-    M = bfMonth(ui.ym),
+  const all = exB.concat(Bk),
+    rest = all.filter((h) => !BF_MAIN.test(h)),
+    B = [
+      bizNext(),
+      ...all.filter((h) => BF_MAIN.test(h)),
+      rest.length
+        ? `<div class="bflist"><h3 class="bflh">${uiText("bn_tax")}</h3>${rest.map((h) => h.replace('class="atile"', 'class="bfrow"').replace(/<\/button>$/, `${svgIcon("right", 16)}</button>`)).join("")}</div>`
+        : "",
+    ];
+  hints = hints.filter((h) => !/data-rvrec=/.test(h));
+  const M = bfMonth(ui.ym),
     mn = fxDate(ui.ym + "-01", {
       month: "long",
     }),

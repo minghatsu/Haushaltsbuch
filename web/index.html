@@ -15857,6 +15857,9 @@ html[data-theme="dark"] {
 html.tabp .bfg {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 }
+html.tabp .bfgb {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
 html.pc:not(.tabp) .bftop {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -15902,7 +15905,7 @@ html.pc:not(.tabp) .bfgb {
   grid-row: 2;
   visibility: visible !important;
   pointer-events: auto !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
 html.pc:not(.tabp) .bfgj {
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -16130,6 +16133,117 @@ html.pc #v-zukunft > .areacard {
 }
 html.pc #v-zukunft > .card {
   order: 0 !important;
+}
+
+/* Geschäft: „Als Nächstes“ und kompakte Liste für Steuer-Themen */
+.bfnext,
+.bflist {
+  grid-column: 1 / -1;
+  background: var(--surface);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.bfnext {
+  padding: 12px 14px 4px;
+}
+.bfnh {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.bfnh b {
+  font-size: 15.5px;
+  font-weight: 800;
+}
+.bfnm {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bfc) 14%, var(--surface));
+}
+.bfnm > * {
+  width: 100%;
+  height: 100%;
+}
+.bfni {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.bfni .grow {
+  flex: 1;
+  min-width: 0;
+}
+.bfni b {
+  display: block;
+  font-size: 14.5px;
+}
+.bfni small {
+  display: block;
+  color: var(--muted);
+  font-weight: 600;
+}
+.bfni .btn {
+  flex: none;
+  min-height: 40px;
+}
+.bfrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 14px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  font: inherit;
+  color: var(--fg);
+  text-align: start;
+  cursor: pointer;
+}
+.bflh {
+  margin: 0;
+  padding: 12px 14px 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+.bfrow:hover {
+  background: color-mix(in srgb, var(--bfc) 6%, var(--surface));
+}
+.bfrow .aic {
+  flex: none;
+  color: var(--bfc);
+  display: grid;
+  place-items: center;
+}
+.bfrow b {
+  flex: 1;
+  min-width: 0;
+  font-size: 14.5px;
+}
+.bfrow small {
+  color: var(--muted);
+  font-weight: 600;
+  text-align: end;
+  max-width: 48%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bfrow > svg:last-child {
+  flex: none;
+  color: var(--faint);
 }
 
 /* Rechnung schreiben */
@@ -51100,6 +51214,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.8",
+    "23. November 2026",
+    [
+      "Beruf › Mein Geschäft ist aufgeräumt: Oben sagt Mami „Als Nächstes“, was gerade dran ist – überfällige Rechnungen, fällige Serien-Rechnungen, Umsatzsteuer, offene Eingangsrechnungen und auslaufende Angebote, jeweils mit einem Knopf.",
+      "Groß bleiben nur Rechnungen, Angebote, Eingangsrechnungen und Kunden. Umsatzsteuer, DATEV, EÜR und Rücklage stehen kompakt unter „Steuer & Abgaben“.",
+    ],
+  ],
+  [
     "0.48.7",
     "23. November 2026",
     [
@@ -53443,6 +53565,20 @@ const PTOUR_FN = () => ({
             },
           ]),
       {
+        sel: '[data-view="beruf"] .bfnext',
+        raw: 1,
+        ic: "bell",
+        t: uiText("nw_bn_t"),
+        p: [uiText("nw_bn_p")],
+      },
+      {
+        sel: '[data-view="beruf"] .bflist',
+        raw: 1,
+        ic: "bank",
+        t: uiText("bn_tax"),
+        p: [uiText("nw_bn_p2")],
+      },
+      {
         sel: '[data-view="beruf"] [data-rchopen].atile',
         raw: 1,
         ic: "docout",
@@ -53612,6 +53748,20 @@ function ptourOpen(v) {
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
   {
+    v: "0.48.8",
+    s: () =>
+      hasSelf()
+        ? [
+            {
+              sel: '[data-view="beruf"] .bfnext, [data-view="beruf"] .bflist',
+              ic: "bell",
+              t: uiText("nw_bn_t"),
+              p: [uiText("nw_bn_p"), uiText("nw_bn_p2")],
+            },
+          ]
+        : [],
+  },
+  {
     v: "0.48.7",
     s: () => [
       {
@@ -53653,7 +53803,7 @@ const NEWTOUR = [
       hasSelf()
         ? [
             {
-              sel: '[data-view="beruf"] [data-dvopen].atile',
+              sel: '[data-view="beruf"] [data-dvopen]',
               ic: "bank",
               t: uiText("nw_dv_t"),
               p: [uiText("nw_dv_p")],
@@ -53695,7 +53845,7 @@ const NEWTOUR = [
       hasSelf() && !store.settings.kleinunternehmer
         ? [
             {
-              sel: '[data-view="beruf"] [data-ustopen].atile',
+              sel: '[data-view="beruf"] [data-ustopen]',
               ic: "doctax",
               t: uiText("nw_ust_t"),
               p: [uiText("nw_ust_p")],
@@ -57566,6 +57716,64 @@ function kdTile() {
     `data-kdopen`
   );
 }
+/* Geschäft: die drei dringendsten Aufgaben, mit einem Tipp erledigt */
+function bizNext() {
+  const L = [],
+    E = (v) => fmtEur0(v),
+    D = (iso) => fxDate(iso, { day: "numeric", month: "short" });
+  const add = (prio, t, s, btn, attr) => L.push({ prio, t, s, btn, attr });
+  try {
+    const od = rchOver();
+    if (od.length)
+      add(
+        0,
+        uiText(od.length === 1 ? "bn_over1" : "bn_over", { n: String(od.length) }),
+        E(od.reduce((s, i) => s + rchRest(i), 0)),
+        uiText("bn_look"),
+        "data-rchopen"
+      );
+  } catch (_) {}
+  try {
+    for (const r of rvRecDue().slice(0, 2))
+      add(1, uiText("bn_rec", { n: r.kunde || "–" }), `${E(r.amt || 0)} · ${D(r.next)}`, uiText("bn_send"), `data-rvrec="${escHtml(r.id)}"`);
+  } catch (_) {}
+  try {
+    const n = pmFind().length;
+    if (n) add(1, uiText(n === 1 ? "pm_ban1" : "pm_ban", { n: String(n) }), "", uiText("bn_check"), "data-pmopen");
+  } catch (_) {}
+  try {
+    if (!store.settings.kleinunternehmer) {
+      const k = ustPeriods(2).find((x) => !ustCfg().done[x] && x !== ustPeriods(1)[0]),
+        d = k && ustDue(k);
+      if (d && daysTo(d) <= 14)
+        add(daysTo(d) <= 3 ? 0 : 2, uiText("bn_ust", { d: D(d) }), uiText("bn_ust_s", { a: E(Math.max(0, ustCalc(k).kz83)) }), uiText("bn_look"), "data-ustopen");
+    }
+  } catch (_) {}
+  try {
+    const eo = erOpenList().filter((i) => i.due && daysTo(i.due) <= 7);
+    if (eo.length)
+      add(
+        eo.some((i) => daysTo(i.due) < 0) ? 0 : 2,
+        uiText(eo.length === 1 ? "bn_er1" : "bn_er", { n: String(eo.length) }),
+        E(eo.reduce((s, i) => s + i.pay, 0)),
+        uiText("bn_look"),
+        "data-eropen"
+      );
+  } catch (_) {}
+  try {
+    const ao = anList().filter((o) => o.st === "open" && daysTo(o.valid) >= 0 && daysTo(o.valid) <= 3);
+    if (ao.length) add(3, uiText("bn_an", { n: ao[0].kunde || "–" }), D(ao[0].valid), uiText("bn_look"), "data-anopen");
+  } catch (_) {}
+  if (!L.length) return "";
+  const top = L.sort((a, b) => a.prio - b.prio).slice(0, 3);
+  return `<div class="bfnext" role="list"><div class="bfnh"><span class="bfnm">${mamiAvatar ? mamiAvatar(null) : ""}</span><b data-noi18n>${escHtml(uiText("bn_h"))}</b></div>${top
+    .map(
+      (x) =>
+        `<div class="bfni" role="listitem"><span class="grow"><b data-noi18n>${escHtml(x.t)}</b>${x.s ? `<small data-noi18n>${escHtml(x.s)}</small>` : ""}</span><button type="button" class="btn sm primary" ${x.attr}>${escHtml(x.btn)}</button></div>`
+    )
+    .join("")}</div>`;
+}
+const BF_MAIN = /data-(rchopen|anopen|eropen|kdopen)\b/;
 function berufDuo(el, tiles, T, exJ, exB, hints) {
   const tl = (t) =>
     t.k === "kunden"
@@ -57585,8 +57793,17 @@ function berufDuo(el, tiles, T, exJ, exB, hints) {
       .map((k) => T.find((t) => t.k === k))
       .filter(Boolean)
       .map(tl);
-  const B = exB.concat(Bk),
-    M = bfMonth(ui.ym),
+  const all = exB.concat(Bk),
+    rest = all.filter((h) => !BF_MAIN.test(h)),
+    B = [
+      bizNext(),
+      ...all.filter((h) => BF_MAIN.test(h)),
+      rest.length
+        ? `<div class="bflist"><h3 class="bflh">${uiText("bn_tax")}</h3>${rest.map((h) => h.replace('class="atile"', 'class="bfrow"').replace(/<\/button>$/, `${svgIcon("right", 16)}</button>`)).join("")}</div>`
+        : "",
+    ];
+  hints = hints.filter((h) => !/data-rvrec=/.test(h));
+  const M = bfMonth(ui.ym),
     mn = fxDate(ui.ym + "-01", {
       month: "long",
     }),
@@ -88654,6 +88871,166 @@ const TEXTS = {
     "Mniej żargonu: wszystkie sekcje na dole są podpisane. Nazwę subkont wybierzesz w Ustawieniach › Konta.",
     "مصطلحات أقل: كل الأقسام في الأسفل عليها أسماء الآن. اسم الحسابات الفرعية تختاره من الإعدادات › الحسابات.",
     "Mai puțin jargon: toate secțiunile de jos au acum nume. Numele subconturilor îl alegi în Setări › Conturi.",
+  ],
+  bn_h: [
+    "Als Nächstes, mein Schatz",
+    "Up next, sweetheart",
+    "Sırada ne var, canım",
+    "Дальше по делу, солнышко",
+    "Далі на черзі, сонечко",
+    "Następne, kochanie",
+    "التالي يا عزيزي",
+    "Urmează, dragul meu",
+  ],
+  bn_over1: [
+    "1 Rechnung ist überfällig",
+    "1 invoice is overdue",
+    "1 fatura gecikti",
+    "1 счёт просрочен",
+    "1 рахунок прострочено",
+    "1 faktura jest po terminie",
+    "فاتورة واحدة متأخرة",
+    "1 factură e restantă",
+  ],
+  bn_over: [
+    "{n} Rechnungen sind überfällig",
+    "{n} invoices are overdue",
+    "{n} fatura gecikti",
+    "{n} счетов просрочено",
+    "{n} рахунків прострочено",
+    "{n} faktur jest po terminie",
+    "{n} فواتير متأخرة",
+    "{n} facturi sunt restante",
+  ],
+  bn_rec: [
+    "Rechnung für {n} ist fällig",
+    "Invoice for {n} is due",
+    "{n} faturası zamanı geldi",
+    "Пора выставить счёт для {n}",
+    "Час виставити рахунок для {n}",
+    "Czas na fakturę dla {n}",
+    "حان موعد فاتورة {n}",
+    "Factura pentru {n} e scadentă",
+  ],
+  bn_ust: [
+    "Umsatzsteuer bis {d}",
+    "VAT due by {d}",
+    "KDV son gün {d}",
+    "НДС до {d}",
+    "ПДВ до {d}",
+    "VAT do {d}",
+    "ضريبة القيمة المضافة حتى {d}",
+    "TVA până pe {d}",
+  ],
+  bn_ust_s: [
+    "{a} ans Finanzamt",
+    "{a} to the tax office",
+    "vergi dairesine {a}",
+    "{a} в налоговую",
+    "{a} до податкової",
+    "{a} do urzędu skarbowego",
+    "{a} لمصلحة الضرائب",
+    "{a} la fisc",
+  ],
+  bn_er1: [
+    "1 Eingangsrechnung bald zu zahlen",
+    "1 bill due soon",
+    "1 gelen fatura yakında ödenecek",
+    "1 входящий счёт скоро к оплате",
+    "1 вхідний рахунок скоро до сплати",
+    "1 faktura do zapłaty wkrótce",
+    "فاتورة واردة مستحقة قريبًا",
+    "1 factură primită scadentă curând",
+  ],
+  bn_er: [
+    "{n} Eingangsrechnungen bald zu zahlen",
+    "{n} bills due soon",
+    "{n} gelen fatura yakında ödenecek",
+    "{n} входящих счетов скоро к оплате",
+    "{n} вхідних рахунків скоро до сплати",
+    "{n} faktur do zapłaty wkrótce",
+    "{n} فواتير واردة مستحقة قريبًا",
+    "{n} facturi primite scadente curând",
+  ],
+  bn_an: [
+    "Angebot für {n} läuft bald ab",
+    "Quote for {n} expires soon",
+    "{n} teklifinin süresi doluyor",
+    "Предложение для {n} скоро истекает",
+    "Пропозиція для {n} скоро спливає",
+    "Oferta dla {n} wkrótce wygasa",
+    "عرض {n} ينتهي قريبًا",
+    "Oferta pentru {n} expiră curând",
+  ],
+  bn_send: [
+    "Senden",
+    "Send",
+    "Gönder",
+    "Отправить",
+    "Надіслати",
+    "Wyślij",
+    "إرسال",
+    "Trimite",
+  ],
+  bn_look: [
+    "Ansehen",
+    "View",
+    "Bak",
+    "Открыть",
+    "Відкрити",
+    "Zobacz",
+    "عرض",
+    "Vezi",
+  ],
+  bn_check: [
+    "Prüfen",
+    "Check",
+    "Kontrol et",
+    "Проверить",
+    "Перевірити",
+    "Sprawdź",
+    "تحقق",
+    "Verifică",
+  ],
+  bn_tax: [
+    "Steuer & Abgaben",
+    "Tax & dues",
+    "Vergi ve kesintiler",
+    "Налоги и взносы",
+    "Податки та внески",
+    "Podatki i opłaty",
+    "الضرائب والرسوم",
+    "Taxe și contribuții",
+  ],
+  nw_bn_t: [
+    "Als Nächstes",
+    "Up next",
+    "Sıradaki",
+    "Дальше по делу",
+    "Далі на черзі",
+    "Następne",
+    "التالي",
+    "Urmează",
+  ],
+  nw_bn_p: [
+    "Hier sage ich dir, was in deinem Geschäft gerade dran ist – mit einem Knopf zum Erledigen.",
+    "Here I tell you what needs doing in your business right now – with one button to get it done.",
+    "Burada işinde şu an neyin sırada olduğunu söylüyorum – halletmek için tek bir düğmeyle.",
+    "Здесь я подскажу, что сейчас пора сделать в твоём деле, – с кнопкой, чтобы сразу сделать.",
+    "Тут я підкажу, що зараз треба зробити у твоїй справі, – з кнопкою, щоб одразу зробити.",
+    "Tu mówię ci, co teraz trzeba zrobić w twojej firmie – z jednym przyciskiem do załatwienia.",
+    "هنا أخبرك بما يجب فعله الآن في عملك – مع زر واحد لإنجازه.",
+    "Aici îți spun ce e de făcut acum în afacerea ta – cu un singur buton ca să rezolvi.",
+  ],
+  nw_bn_p2: [
+    "Umsatzsteuer, DATEV, EÜR und Rücklage findest du jetzt kompakt in dieser Liste.",
+    "VAT, DATEV, profit statement and reserve are now in this compact list.",
+    "KDV, DATEV, kâr hesabı ve yedek artık bu kısa listede.",
+    "НДС, DATEV, доходы/расходы и резерв теперь в этом компактном списке.",
+    "ПДВ, DATEV, доходи/витрати і резерв тепер у цьому компактному списку.",
+    "VAT, DATEV, rachunek zysku i rezerwa są teraz na tej krótkiej liście.",
+    "ضريبة القيمة المضافة وDATEV وحساب الربح والاحتياطي صارت الآن في هذه القائمة المختصرة.",
+    "TVA, DATEV, calculul profitului și rezerva sunt acum în această listă scurtă.",
   ],
 };
 
