@@ -59,7 +59,7 @@ function tourSteps() {
       p: [uiText("trh_mvpc")],
     },
     {
-      sel: ".hkpi,.pcring",
+      sel: ".hkpi,.pcring,.hsay",
       ic: "cal",
       t: "Noch pro Tag",
       p: [
@@ -1060,7 +1060,7 @@ const PTOUR_FN = () => ({
     t: "Übersicht",
     s: [
       {
-        sel: "#astack,.pcbal,.cashcard,.hkpi",
+        sel: "#astack,.pcbal,.cashcard,.hkpi,.hsay",
         ic: "wallet",
         t: "Dein Geld auf einen Blick",
         p: [
@@ -1079,11 +1079,11 @@ const PTOUR_FN = () => ({
         p: [uiText("trh_hl_p")],
       },
       {
-        sel: "#v-home .fcmini",
+        sel: "#v-home .fcmini,#v-home .hsay",
         raw: 1,
         ic: "chart",
         t: uiText("trh_fc_t"),
-        p: [uiText("trh_fc_p")],
+        p: IS_PC ? [uiText("trh_fc_p")] : [uiText("hs_tour"), uiText("trh_fc_p")],
       },
       {
         sel: "#v-home .areacard .agrid",
@@ -1677,6 +1677,21 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.49.0",
+    s: () =>
+      IS_PC
+        ? []
+        : [
+            {
+              sel: "#v-home .hsay",
+              raw: 1,
+              ic: "home",
+              t: uiText("nw_hs_t"),
+              p: [uiText("nw_hs_p")],
+            },
+          ],
+  },
   {
     v: "0.48.9",
     s: () => [

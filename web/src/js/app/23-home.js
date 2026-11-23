@@ -32,8 +32,27 @@ function homeOrder() {
   for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k);
   return o;
 }
+/* Handy: Mami fasst „pro Tag“ und Prognose in einem Satz zusammen */
+function homeSay(ym, mainBal) {
+  const { left, v } = freePerDay(ym, mainBal);
+  let F = null;
+  try {
+    F = store.tx.length ? fcCalc() : null;
+  } catch (_) {}
+  const fc = F && F.pts && F.pts.length,
+    end = fc
+      ? F.warn
+        ? uiText("hs_tight", { d: fxDate(F.ym + "-" + pad(F.min.d)) })
+        : uiText("hs_end", { d: fxDate(lastDayOf(F.ym)), v: fmtEur0(F.end) })
+      : uiText(left === 1 ? "hs_left1" : "hs_left", { n: left });
+  return `<button type="button" class="hsay ${fc && F.warn ? "warn" : ""}" ${fc ? "data-fcopen" : 'data-go="year"'} data-noi18n><span class="hsm">${mamiAvatar(null)}</span><span class="hst"><b>${escHtml(uiText("hs_day", { v: fmtEur0(v) }))}</b><span>${escHtml(end)}</span></span>${svgIcon("right", 18)}</button>`;
+}
 function homeBlocks(html) {
   homeMig();
+  if (!IS_PC)
+    return store.settings.cashHide || !html.cash
+      ? ""
+      : `<div class="hlist"><div class="hblock" data-hb="cash">${html.cash}</div></div>`;
   const hid = new Set(store.settings.homeHidden || []),
     list = homeOrder()
       .filter(
@@ -51,6 +70,12 @@ function homeBlocks(html) {
 function renderHomeEd() {
   const el = $("homeEd");
   if (!el) return;
+  const hd = el.previousElementSibling;
+  if (hd && hd.classList.contains("pc-sect")) hd.hidden = !IS_PC;
+  if (!IS_PC) {
+    el.innerHTML = `<div class="card" data-noi18n><div class="switch"><label for="sCashHome"><b>${escHtml(uiText("hc_sw"))}</b><br><span class="small muted">${escHtml(uiText("hc_sw_s"))}</span></label><input type="checkbox" id="sCashHome" ${store.settings.cashHide ? "" : "checked"}></div></div>`;
+    return;
+  }
   homeMig();
   const hid = new Set(store.settings.homeHidden || []),
     o = homeOrder().filter((k) => !AREA_HOME_OUT.has(k));

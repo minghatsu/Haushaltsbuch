@@ -792,7 +792,7 @@ function renderHome() {
       <div class="astack ${accts.length > 1 ? "" : "one"}" id="astack" ${accts.length > 1 ? `tabindex="0" aria-label="Konten – wischen zum Blättern"` : ""}>${acardHtml}</div>
       ${accts.length > 1 ? `<div class="adots" id="adots">${accts.map((_, i) => `<button data-cdot="${i}" aria-label="Karte ${i + 1}"><i></i></button>`).join("")}</div>` : ""}
       ${ym === cur && (ui.acctEd || []).filter(Boolean).length > 1 ? `<button class="mvopen" data-mvopen aria-label="${escHtml(uiText("mv_open"))}">${svgIcon("down", 18)}<span>${escHtml(uiText("mv_open"))}</span></button>` : ""}
-      <div class="hkpi one">
+      ${ym === cur && !IS_PC ? homeSay(ym, mainBal) : `<div class="hkpi one">
         ${
           ym === cur
             ? (() => {
@@ -801,8 +801,7 @@ function renderHome() {
               })()
             : `<button data-go="year"><span class="hki" style="--tc:${themeCol("#c27c0e", 3)}">${svgIcon("chart", 18)}</span><span><small>Ø pro Tag im Alltag</small><b>${escHtml(fmtEur0(dayAvg(ym + "-01", lastDayOf(ym), daysIn(ym))))}</b></span></button>`
         }
-      </div>
-      ${ym === cur ? fcMini() : ""}
+      </div>${ym === cur ? fcMini() : ""}`}
     </div>
     ${homeHub(ym, c)}
     ${homeBlocks({
@@ -839,7 +838,7 @@ function renderHome() {
         asOf,
       }),
     })}
-    <div style="text-align:center;margin:4px 0 8px"><button class="link small" data-go="more" data-scroll="homeEd">${svgIcon("sliders", 15)} Startseite anpassen</button></div>`;
+    ${IS_PC ? `<div style="text-align:center;margin:4px 0 8px"><button class="link small" data-go="more" data-scroll="homeEd">${svgIcon("sliders", 15)} Startseite anpassen</button></div>` : ""}`;
   initStack();
   initShopRail();
   if (IS_PC && typeof pcHome === "function")

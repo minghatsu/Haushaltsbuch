@@ -240,6 +240,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.49.0",
+    "23. November 2026",
+    [
+      "Haushalt am Handy aufgeräumt: „Noch pro Tag“ und die Prognose sagt Mami jetzt in einem Satz – Antippen öffnet die Prognose.",
+      "Karten, die es schon auf anderen Seiten gibt (Letzte Buchungen, Top-Kategorien, Vergleich, Kontoverlauf, Größte Ausgaben, Abos, Zu erledigen …), sind von der Startseite verschwunden. Du findest alles über die Kacheln.",
+      "Bargeld bleibt – und wer es nicht nutzt, tippt „Nutze ich nicht“. Zurückholen geht unter Einstellungen › Startseite.",
+    ],
+  ],
+  [
     "0.48.9",
     "23. November 2026",
     [

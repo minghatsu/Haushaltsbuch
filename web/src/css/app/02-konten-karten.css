@@ -638,3 +638,60 @@
   font-size: clamp(28px, 13cqi, 44px);
   white-space: nowrap;
 }
+/* Mami-Satz statt „pro Tag“ + Prognose (Handy) */
+.hsay {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--line);
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.hsay .hsm {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.hsay .hsm > * {
+  width: 100%;
+  height: 100%;
+}
+.hsay .hst {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.35;
+}
+.hsay .hst b {
+  font-size: 16px;
+  font-weight: 800;
+}
+.hsay .hst span {
+  font-size: 14.5px;
+  color: var(--muted);
+}
+.hsay.warn .hst span {
+  color: var(--bad);
+  font-weight: 700;
+}
+.hsay > svg {
+  flex: none;
+  color: var(--muted);
+}
+.cashcard .cashno {
+  margin-top: 10px;
+}

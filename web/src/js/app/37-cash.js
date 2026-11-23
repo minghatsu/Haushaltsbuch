@@ -51,7 +51,7 @@ function cashBlock() {
   if (!cashOn())
     return `<div class="card cashcard"><div class="card-head"><h2>${headIcon("cash")}Bargeld</h2></div>
     <p class="small muted" style="margin:0 0 10px">Behalte dein Portemonnaie im Blick: Wie viel Bargeld hast du gerade?</p>
-    <div class="cashset"><input class="in" id="cashStart" inputmode="decimal" placeholder="0,00" aria-label="Bargeld"><span>€</span><button class="btn primary" id="cashGo">Los</button></div></div>`;
+    <div class="cashset"><input class="in" id="cashStart" inputmode="decimal" placeholder="0,00" aria-label="Bargeld"><span>€</span><button class="btn primary" id="cashGo">Los</button></div>${IS_PC ? "" : `<button class="link small cashno" data-cashno="1" data-noi18n>${escHtml(uiText("hc_no"))}</button>`}</div>`;
   const today = isoToday(),
     bal = cashBal(today),
     cs = store.settings.cash;
@@ -204,6 +204,13 @@ document.addEventListener("click", async (e) => {
     cashAskOk();
     return;
   }
+  if (t.closest("[data-cashno]")) {
+    store.settings.cashHide = true;
+    saveSettings();
+    render();
+    toast(uiText("hc_gone"));
+    return;
+  }
   if (t.closest("#cashGo")) {
     const v = parseAmt(($("cashStart") || {}).value || "");
     if (!(v >= 0)) {
@@ -223,4 +230,9 @@ document.addEventListener("click", async (e) => {
 });
 document.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && e.target.id === "cashAmt") cashAskOk();
+});
+document.addEventListener("change", (e) => {
+  if (e.target.id !== "sCashHome") return;
+  store.settings.cashHide = !e.target.checked;
+  saveSettings();
 });
