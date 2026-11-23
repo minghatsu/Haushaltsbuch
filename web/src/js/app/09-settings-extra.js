@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.0",
+    "23. November 2026",
+    [
+      "Neu für Selbstständige: Angebote. Im Rechnungs-Editor wählst du oben „Angebot“ – mit eigener Nummer (AN-…), Gültigkeit und eigenem PDF ohne Zahlungsaufforderung.",
+      "Die Kachel „Angebote“ zeigt offene, angenommene und abgelehnte Angebote mit Restlaufzeit. „Angenommen → Rechnung“ macht mit einem Tipp eine Rechnung mit allen Positionen daraus.",
+    ],
+  ],
+  [
     "0.47.9",
     "23. November 2026",
     [

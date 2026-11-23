@@ -555,6 +555,15 @@ function renderBeruf() {
         "data-rchopen"
       )
     );
+    const ao = anList().filter((o) => o.st === "open");
+    (duo ? exB : extra).push(
+      areaTile(
+        svgIcon("doc", 22),
+        escHtml(uiText("an_h")),
+        ao.length ? `${ao.length} · ${escHtml(fmtEur0(ao.reduce((s, o) => s + o.amt, 0)))}` : escHtml(uiText("an_new")),
+        "data-anopen"
+      )
+    );
     const eo = erOpenList(),
       eod = eo.filter((i) => i.due && daysTo(i.due) < 0).length;
     (duo ? exB : extra).push(

@@ -178,7 +178,9 @@ function rvXmp(d) {
 
 /* Datei im gewählten Format */
 function rvOutFile(d, fmt, lw) {
-  const base = ("Rechnung " + (d.nr || "") + " " + ((d.k && d.k.name) || "")).trim().replace(/[\\/:*?"<>|]+/g, "-");
+  const base = ((d.typ === "o" ? "Angebot " : "Rechnung ") + (d.nr || "") + " " + ((d.k && d.k.name) || ""))
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g, "-");
   if (fmt === "xr")
     return {
       blob: new Blob([rvCii(d, true, lw)], { type: "application/xml" }),
@@ -202,6 +204,12 @@ function rvKundeOf(d) {
 
 /* Auswahl vor dem Senden oder Speichern */
 function rvFmtAsk(d, act) {
+  if (d.typ === "o") {
+    const f = rvOutFile(d, "pdf");
+    if (act === "mail") rvMail(d, f);
+    else rvSavePdf(d, f);
+    return;
+  }
   const c = rvKundeOf(d);
   RVO.d = d;
   RVO.act = act;

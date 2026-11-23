@@ -66,6 +66,12 @@ function rvSum(d) {
 }
 const RV_TX = {
   de: {
+    o: "ANGEBOT",
+    to: "Angebot",
+    odate: "Angebotsdatum",
+    valid: "Gültig bis",
+    opay: (d) => `Dieses Angebot ist gültig bis zum ${d}.`,
+    oq: "Über Ihre Zusage freue ich mich – eine kurze Antwort per Mail genügt.",
     r: "RECHNUNG",
     a: "ABSCHLAGSRECHNUNG",
     g: "GUTSCHRIFT",
@@ -112,6 +118,12 @@ const RV_TX = {
     vatid: "USt-IdNr.",
   },
   en: {
+    o: "QUOTE",
+    to: "Quote",
+    odate: "Quote date",
+    valid: "Valid until",
+    opay: (d) => `This quote is valid until ${d}.`,
+    oq: "I look forward to your confirmation – a short reply by email is enough.",
     r: "INVOICE",
     a: "DEPOSIT INVOICE",
     g: "CREDIT NOTE",
@@ -319,12 +331,11 @@ function rvLayout(d) {
       b: i === 0,
     })
   );
-  const meta = [
-    [X.date, DD(d.date)],
-    [d.lz ? X.lz : X.ld, d.lz || DD(d.date)],
-  ];
+  const meta = [[typ === "o" ? X.odate : X.date, DD(d.date)]];
+  if (d.lz || typ !== "o") meta.push([d.lz ? X.lz : X.ld, d.lz || DD(d.date)]);
   if (d.k.nr) meta.push([X.kn, d.k.nr]);
   if (typ === "r" || typ === "a") meta.push([X.due, DD(due), 1]);
+  if (typ === "o") meta.push([X.valid, DD(anValid(d)), 1]);
   meta.forEach((m, i) => {
     T(349, 134 + i * 16, m[0], 8.5, {
       c: "#666666",
@@ -501,7 +512,7 @@ function rvLayout(d) {
   }
   y += 16;
   const epc =
-      typ === "g" || typ === "s" || !(sum.pay > 0)
+      typ === "g" || typ === "s" || typ === "o" || !(sum.pay > 0)
         ? ""
         : rvEpc(d, {
             ...sum,
@@ -523,7 +534,13 @@ function rvLayout(d) {
     px,
     y + (epc ? 26 : 20),
     rvFit(
-      typ === "g" ? X.gpay(E(sum.pay)) : typ === "s" ? X.spay(d.ref || "") : X.pay(E(sum.pay), DD(due)),
+      typ === "o"
+        ? X.opay(DD(anValid(d)))
+        : typ === "g"
+          ? X.gpay(E(sum.pay))
+          : typ === "s"
+            ? X.spay(d.ref || "")
+            : X.pay(E(sum.pay), DD(due)),
       9.5,
       1,
       R - px - 10
@@ -533,7 +550,12 @@ function rvLayout(d) {
       b: 1,
     }
   );
-  rvWrap(typ === "g" ? X.gq : typ === "s" ? X.sq : epc ? X.qr : X.noqr(d.nr || ""), 8.5, 0, R - px - 10)
+  rvWrap(
+    typ === "o" ? X.oq : typ === "g" ? X.gq : typ === "s" ? X.sq : epc ? X.qr : X.noqr(d.nr || ""),
+    8.5,
+    0,
+    R - px - 10
+  )
     .slice(0, 3)
     .forEach((t, i) =>
       T(px, y + (epc ? 41 : 34) + i * 11.5, t, 8.5, {

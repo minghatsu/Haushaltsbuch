@@ -247,7 +247,7 @@ function rvStepHtml(k) {
         .filter((i) => !i.gs && i.id !== d.id && (!d.k.name || i.kunde === d.k.name))
         .slice(-12)
         .reverse();
-    return `${rvTip("rv_tip_det")}<div class="vacard rvgrid"><div class="hlf w2"><span>${escHtml(uiText("rv_typ"))}</span><div class="seg rvseg">${["r", "a", "g"].map((t) => `<button type="button" class="${typ === t ? "on" : ""}" data-rvtyp="${t}">${escHtml(uiText("rv_typ_" + t))}</button>`).join("")}</div><small class="rvhint">${escHtml(uiText("rv_typ_" + typ + "_s"))}</small></div>
+    return `${rvTip(typ === "o" ? "an_tip_det" : "rv_tip_det")}<div class="vacard rvgrid"><div class="hlf w2"><span>${escHtml(uiText("rv_typ"))}</span><div class="seg rvseg">${(d.id ? (typ === "o" ? ["o"] : ["r", "a", "g"]) : ["o", "r", "a", "g"]).map((t) => `<button type="button" class="${typ === t ? "on" : ""}" data-rvtyp="${t}">${escHtml(uiText("rv_typ_" + t))}</button>`).join("")}</div><small class="rvhint">${escHtml(uiText("rv_typ_" + typ + "_s"))}</small></div>
       ${typ === "g" ? `<label class="hlf w2"><span>${escHtml(uiText("rv_ref"))}</span><select class="in" id="rvDr"><option value="">${escHtml(uiText("rv_ref_none"))}</option>${refs.map((i) => `<option value="${escHtml(i.nr)}" ${d.ref === i.nr ? "selected" : ""}>${escHtml(i.nr)} · ${escHtml(i.kunde || "")} · ${escHtml(rvEuro(i.amt))}</option>`).join("")}</select></label>` : ""}
       ${
         typ === "r" && abs.length
@@ -265,7 +265,7 @@ function rvStepHtml(k) {
               .join("")}</div>`
           : ""
       }</div>
-      <div class="vacard rvgrid">${rvField("rvDn", uiText("rch_nr"), d.nr)}${rvField(
+      <div class="vacard rvgrid">${rvField("rvDn", uiText(typ === "o" ? "an_nr" : "rch_nr"), d.nr)}${rvField(
         "rvDd",
         uiText("rch_date"),
         d.date,
@@ -277,16 +277,25 @@ function rvStepHtml(k) {
         ph: uiText("rv_d_lz_ph"),
       })}
       ${
-        typ === "g"
-          ? ""
-          : `<div class="hlf w2"><span>${escHtml(uiText("rch_days"))}</span><div class="seg rvseg">${zs.map((n) => `<button type="button" class="${Number(d.z) === n ? "on" : ""}" data-rvz="${n}">${n} ${escHtml(uiText("rch_tage"))}</button>`).join("")}</div><small class="rvhint">${escHtml(
-              uiText("rv_d_due", {
-                d: fxDate(addDays(d.date, Number(d.z) || 14), {
+        typ === "o"
+          ? `<div class="hlf w2"><span>${escHtml(uiText("an_valid"))}</span><div class="seg rvseg">${[14, 30, 60].map((n) => `<button type="button" class="${Number(d.gv || 30) === n ? "on" : ""}" data-rvgv="${n}">${n} ${escHtml(uiText("rch_tage"))}</button>`).join("")}</div><small class="rvhint">${escHtml(
+              uiText("an_valid_until", {
+                d: fxDate(anValid(d), {
                   day: "numeric",
                   month: "long",
                 }),
               })
             )}</small></div>`
+          : typ === "g"
+            ? ""
+            : `<div class="hlf w2"><span>${escHtml(uiText("rch_days"))}</span><div class="seg rvseg">${zs.map((n) => `<button type="button" class="${Number(d.z) === n ? "on" : ""}" data-rvz="${n}">${n} ${escHtml(uiText("rch_tage"))}</button>`).join("")}</div><small class="rvhint">${escHtml(
+                uiText("rv_d_due", {
+                  d: fxDate(addDays(d.date, Number(d.z) || 14), {
+                    day: "numeric",
+                    month: "long",
+                  }),
+                })
+              )}</small></div>`
       }
       ${b.klein ? `<div class="hlf w2"><span>${escHtml(uiText("rv_d_vat"))}</span><div class="rvinfo">${escHtml(uiText("rv_klein_s"))}</div></div>` : `<div class="hlf w2"><span>${escHtml(uiText("rv_d_vat"))}</span><div class="seg rvseg">${[19, 7, 0].map((n) => `<button type="button" class="${Number(d.vat) === n ? "on" : ""}" data-rvvat="${n}">${n} %</button>`).join("")}</div></div>`}</div>
       <div class="vacard rvgrid"><div class="hlf"><span>${escHtml(uiText("rv_d_lang"))}</span><div class="seg rvseg"><button type="button" class="${d.lang !== "en" ? "on" : ""}" data-rvlang="de">Deutsch</button><button type="button" class="${d.lang === "en" ? "on" : ""}" data-rvlang="en">English</button></div></div>${rvField(
@@ -364,12 +373,12 @@ function rvCheck() {
     },
     {
       k: "rv_c_nr",
-      ok: !!d.nr && !rchList().some((i) => i.nr === d.nr && i.id !== d.id),
+      ok: !!d.nr && !(d.typ === "o" ? anList() : rchList()).some((i) => i.nr === d.nr && i.id !== d.id),
       go: "det",
     },
     {
       k: "rv_c_iban",
-      ok: !!b.iban,
+      ok: !!b.iban || d.typ === "o",
       go: "me",
     },
     ...(rvSum(d).pay < 0
@@ -394,7 +403,8 @@ function rvRender() {
     body = $("rvBody");
   if (!body) return;
   const sum = rvSum(d);
-  $("rvSub").textContent = uiText("rch_nr") + " " + (d.nr || "");
+  $("rvSub").textContent = uiText(d.typ === "o" ? "an_nr" : "rch_nr") + " " + (d.nr || "");
+  $("rvTt").textContent = uiText(d.typ === "o" ? "an_title" : "rv_title");
   const lab = {
     me: ["rv_s_me", rvBiz().name || uiText("rv_s_me_s")],
     kunde: ["rv_s_k", d.k.name || uiText("rv_s_k_s")],
@@ -1188,7 +1198,7 @@ function rvSync() {
       const sb = $("rvSub");
       if (sb) sb.textContent = uiText("rch_nr") + " " + nrNow;
     }
-    if (!RV.d.id && !RV.d.recId && !RV.nrTouched) RV.d.nr = rchNextNr(b);
+    if (!RV.d.id && !RV.d.recId && !RV.nrTouched && RV.d.typ !== "o") RV.d.nr = rchNextNr(b);
   }
   if (k === "kunde" && $("rvKn")) {
     Object.assign(d.k, {
@@ -1292,6 +1302,7 @@ async function rvFinish() {
   d.kid = c.id;
   d.k.nr = c.nr;
   rvItemsSave(d, true);
+  if (d.typ === "o") return anFinish(d);
   const due = addDays(d.date, Number(d.z) || 14),
     typ = d.typ || "r",
     rec = {
@@ -1336,6 +1347,7 @@ async function rvFinish() {
   tgt.locked = new Date().toISOString();
   await rvSeal(tgt);
   rvLog("create", tgt.nr, (typ !== "r" ? typ + " · " : "") + fmtEur(tgt.amt) + " · " + (tgt.kunde || ""));
+  if (d.fromOffer) anAccepted(d.fromOffer, tgt);
   if (d.recId) {
     const r = rvRecs().find((x) => x.id === d.recId);
     if (r) {
@@ -1741,7 +1753,17 @@ function rvMail(d, f) {
   const sum = rvSum(d),
     nm = rvBiz().owner || rvBiz().name || "",
     due = addDays(d.date, Number(d.z) || 14);
-  const txt = `${d.k.person ? "Hallo " + d.k.person : "Sehr geehrte Damen und Herren"},\n\nanbei erhalten Sie meine Rechnung Nr. ${d.nr} über ${rvEuro(sum.gross)}.\nBitte überweisen Sie den Betrag bis zum ${rvDate(due)}.\n\nVielen Dank für die gute Zusammenarbeit!\n\nViele Grüße\n${nm}`;
+  const hi = d.k.person ? "Hallo " + d.k.person : "Sehr geehrte Damen und Herren";
+  if (d.typ === "o") {
+    rvMailGo(
+      d,
+      `${hi},\n\nanbei erhalten Sie mein Angebot Nr. ${d.nr} über ${rvEuro(sum.gross)}. Es ist gültig bis zum ${rvDate(anValid(d))}.\n\nÜber eine kurze Zusage per Mail freue ich mich – bei Fragen melden Sie sich gern.\n\nViele Grüße\n${nm}`,
+      f,
+      "Angebot " + d.nr
+    );
+    return;
+  }
+  const txt = `${hi},\n\nanbei erhalten Sie meine Rechnung Nr. ${d.nr} über ${rvEuro(sum.gross)}.\nBitte überweisen Sie den Betrag bis zum ${rvDate(due)}.\n\nVielen Dank für die gute Zusammenarbeit!\n\nViele Grüße\n${nm}`;
   rvMailGo(d, txt, f);
 }
 async function rvMailGo(d, txt, f, subject) {
@@ -2335,18 +2357,21 @@ document.addEventListener("click", (e) => {
       o = d.typ || "r";
     d.typ = ty.dataset.rvtyp;
     const df = {
+      o: "",
       r: "",
       a: "Abschlagsrechnung",
       g: "Gutschrift",
     };
     if (!d.title || Object.values(df).includes(d.title)) d.title = df[d.typ];
     const di = {
+      o: AN_INTRO.de,
       r: "Vielen Dank für Ihren Auftrag. Hiermit stelle ich Ihnen folgende Leistungen in Rechnung:",
       a: "Wie vereinbart berechne ich Ihnen folgende Abschlagszahlung:",
       g: "Hiermit schreibe ich Ihnen folgende Beträge gut:",
     };
     if (!d.intro || Object.values(di).includes(d.intro)) d.intro = di[d.typ];
     if (d.typ !== "r") d.abz = [];
+    if ((o === "o") !== (d.typ === "o") && !RV.nrTouched) d.nr = d.typ === "o" ? anNextNr() : rchNextNr();
     if (o !== d.typ) {
       rvRender();
       SND.play("tick");
@@ -2364,11 +2389,13 @@ document.addEventListener("click", (e) => {
         "Vielen Dank für Ihren Auftrag. Hiermit stelle ich Ihnen folgende Leistungen in Rechnung:",
         "Wie vereinbart berechne ich Ihnen folgende Abschlagszahlung:",
         "Hiermit schreibe ich Ihnen folgende Beträge gut:",
+        AN_INTRO.de,
       ],
       en: [
         "Thank you for your order. I hereby invoice you for the following services:",
         "As agreed, I am invoicing you for the following deposit:",
         "I hereby credit you with the following amounts:",
+        AN_INTRO.en,
       ],
     };
     const ix = DI[d.lang === "en" ? "en" : "de"].indexOf(d.intro);
@@ -2384,6 +2411,13 @@ document.addEventListener("click", (e) => {
     RV.d.rep = +rp2.dataset.rvrep;
     rvRender();
     SND.play("tick");
+    return;
+  }
+  const gv = t.closest("[data-rvgv]");
+  if (gv) {
+    rvSync();
+    RV.d.gv = +gv.dataset.rvgv;
+    rvRender();
     return;
   }
   const z = t.closest("[data-rvz]");

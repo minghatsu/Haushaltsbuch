@@ -25024,6 +25024,53 @@ html.pc .pctpane .ayblk {
   background: var(--bad);
   color: #fff;
 }
+
+/* Angebote */
+.anl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.anc {
+  background: var(--sunk);
+  border-radius: 18px;
+  padding: 12px;
+}
+.anc.no,
+.anc.ok {
+  opacity: 0.75;
+}
+.ant {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ant .ern small .due {
+  color: var(--warn);
+}
+.ant .ern small .od {
+  color: var(--bad);
+}
+.ant .ern small .ok {
+  color: var(--good);
+}
+.ana {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.btn.anno {
+  background: var(--bad);
+  color: #fff;
+}
+.anx {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -50466,6 +50513,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.0",
+    "23. November 2026",
+    [
+      "Neu für Selbstständige: Angebote. Im Rechnungs-Editor wählst du oben „Angebot“ – mit eigener Nummer (AN-…), Gültigkeit und eigenem PDF ohne Zahlungsaufforderung.",
+      "Die Kachel „Angebote“ zeigt offene, angenommene und abgelehnte Angebote mit Restlaufzeit. „Angenommen → Rechnung“ macht mit einem Tipp eine Rechnung mit allen Positionen daraus.",
+    ],
+  ],
+  [
     "0.47.9",
     "23. November 2026",
     [
@@ -52910,6 +52965,20 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.48.0",
+    s: () =>
+      hasSelf()
+        ? [
+            {
+              sel: '[data-view="beruf"] [data-anopen].atile',
+              ic: "doc",
+              t: uiText("nw_an_t"),
+              p: [uiText("nw_an_p")],
+            },
+          ]
+        : [],
+  },
   {
     v: "0.47.9",
     s: () =>
@@ -57192,6 +57261,15 @@ function renderBeruf() {
             ? `${io.length} · ${escHtml(fmtEur0(io.reduce((s, i) => s + i.amt, 0)))}`
             : escHtml(uiText("rch_new")),
         "data-rchopen"
+      )
+    );
+    const ao = anList().filter((o) => o.st === "open");
+    (duo ? exB : extra).push(
+      areaTile(
+        svgIcon("doc", 22),
+        escHtml(uiText("an_h")),
+        ao.length ? `${ao.length} · ${escHtml(fmtEur0(ao.reduce((s, o) => s + o.amt, 0)))}` : escHtml(uiText("an_new")),
+        "data-anopen"
       )
     );
     const eo = erOpenList(),
@@ -86618,6 +86696,206 @@ const TEXTS = {
     "تم تقديم الكل",
     "Totul depus",
   ],
+  an_h: ["Angebote", "Quotes", "Teklifler", "Предложения", "Пропозиції", "Oferty", "عروض الأسعار", "Oferte"],
+  an_new: [
+    "Angebot schreiben",
+    "Write a quote",
+    "Teklif yaz",
+    "Написать предложение",
+    "Написати пропозицію",
+    "Napisz ofertę",
+    "اكتب عرض سعر",
+    "Scrie o ofertă",
+  ],
+  an_new_s: [
+    "Im gewohnten Editor – später mit einem Tipp zur Rechnung",
+    "In the usual editor – later turned into an invoice with one tap",
+    "Alışık editörde – sonra tek dokunuşla faturaya",
+    "В привычном редакторе – потом в счёт одним нажатием",
+    "У звичному редакторі – потім у рахунок одним дотиком",
+    "W znanym edytorze – później jednym stuknięciem w fakturę",
+    "في المحرر المعتاد – ثم إلى فاتورة بلمسة",
+    "În editorul obișnuit – apoi factură cu o atingere",
+  ],
+  an_tab_ok: ["Angenommen", "Accepted", "Kabul edildi", "Принято", "Прийнято", "Przyjęte", "مقبولة", "Acceptate"],
+  an_tab_no: ["Abgelehnt", "Declined", "Reddedildi", "Отклонено", "Відхилено", "Odrzucone", "مرفوضة", "Respinse"],
+  an_ok_y: [
+    "Angenommen {y}",
+    "Accepted {y}",
+    "Kabul {y}",
+    "Принято {y}",
+    "Прийнято {y}",
+    "Przyjęte {y}",
+    "مقبولة {y}",
+    "Acceptate {y}",
+  ],
+  an_ok: [
+    "Angenommen → Rechnung",
+    "Accepted → invoice",
+    "Kabul → fatura",
+    "Принято → счёт",
+    "Прийнято → рахунок",
+    "Przyjęte → faktura",
+    "مقبول ← فاتورة",
+    "Acceptată → factură",
+  ],
+  an_no: ["Abgelehnt", "Declined", "Reddedildi", "Отклонено", "Відхилено", "Odrzucona", "مرفوض", "Respinsă"],
+  an_mail: ["Senden", "Send", "Gönder", "Отправить", "Надіслати", "Wyślij", "إرسال", "Trimite"],
+  an_reopen: [
+    "Wieder öffnen",
+    "Reopen",
+    "Yeniden aç",
+    "Открыть снова",
+    "Відкрити знову",
+    "Otwórz ponownie",
+    "إعادة فتح",
+    "Redeschide",
+  ],
+  an_empty: [
+    "Hier ist noch nichts.",
+    "Nothing here yet.",
+    "Henüz bir şey yok.",
+    "Пока пусто.",
+    "Поки порожньо.",
+    "Na razie pusto.",
+    "لا شيء هنا بعد.",
+    "Nimic încă.",
+  ],
+  an_st_left: [
+    "gültig noch {n} Tage",
+    "valid for {n} more days",
+    "{n} gün daha geçerli",
+    "действует ещё {n} дн.",
+    "діє ще {n} дн.",
+    "ważna jeszcze {n} dni",
+    "صالح لمدة {n} أيام أخرى",
+    "valabilă încă {n} zile",
+  ],
+  an_st_soon: [
+    "läuft in {n} Tagen ab",
+    "expires in {n} days",
+    "{n} gün içinde sona eriyor",
+    "истекает через {n} дн.",
+    "спливає через {n} дн.",
+    "wygasa za {n} dni",
+    "ينتهي خلال {n} أيام",
+    "expiră în {n} zile",
+  ],
+  an_st_today: [
+    "läuft heute ab",
+    "expires today",
+    "bugün sona eriyor",
+    "истекает сегодня",
+    "спливає сьогодні",
+    "wygasa dziś",
+    "ينتهي اليوم",
+    "expiră azi",
+  ],
+  an_st_exp: ["abgelaufen", "expired", "süresi doldu", "истекло", "спливло", "wygasła", "منتهي", "expirată"],
+  an_st_ok: [
+    "→ Rechnung {n}",
+    "→ invoice {n}",
+    "→ fatura {n}",
+    "→ счёт {n}",
+    "→ рахунок {n}",
+    "→ faktura {n}",
+    "← فاتورة {n}",
+    "→ factura {n}",
+  ],
+  an_st_no: ["abgelehnt", "declined", "reddedildi", "отклонено", "відхилено", "odrzucona", "مرفوض", "respinsă"],
+  an_saved: [
+    "Angebot {n} gespeichert",
+    "Quote {n} saved",
+    "Teklif {n} kaydedildi",
+    "Предложение {n} сохранено",
+    "Пропозицію {n} збережено",
+    "Oferta {n} zapisana",
+    "تم حفظ العرض {n}",
+    "Oferta {n} salvată",
+  ],
+  an_rejected: [
+    "Angebot {n} abgelehnt",
+    "Quote {n} declined",
+    "Teklif {n} reddedildi",
+    "Предложение {n} отклонено",
+    "Пропозицію {n} відхилено",
+    "Oferta {n} odrzucona",
+    "تم رفض العرض {n}",
+    "Oferta {n} respinsă",
+  ],
+  an_deleted: [
+    "Angebot gelöscht",
+    "Quote deleted",
+    "Teklif silindi",
+    "Предложение удалено",
+    "Пропозицію видалено",
+    "Oferta usunięta",
+    "تم حذف العرض",
+    "Oferta ștearsă",
+  ],
+  an_valid: ["Gültig", "Valid for", "Geçerlilik", "Действует", "Діє", "Ważna", "الصلاحية", "Valabilă"],
+  an_valid_until: [
+    "Gültig bis {d}",
+    "Valid until {d}",
+    "{d} tarihine kadar geçerli",
+    "Действует до {d}",
+    "Діє до {d}",
+    "Ważna do {d}",
+    "صالح حتى {d}",
+    "Valabilă până la {d}",
+  ],
+  rv_typ_o: ["Angebot", "Quote", "Teklif", "Предложение", "Пропозиція", "Oferta", "عرض سعر", "Ofertă"],
+  rv_typ_o_s: [
+    "Ein Angebot ist noch keine Rechnung – du kannst es später mit einem Tipp umwandeln.",
+    "A quote isn’t an invoice yet – you can turn it into one later with a tap.",
+    "Teklif henüz fatura değildir – sonra tek dokunuşla dönüştürebilirsin.",
+    "Предложение – ещё не счёт; позже превратишь его в счёт одним нажатием.",
+    "Пропозиція – ще не рахунок; згодом перетвориш її одним дотиком.",
+    "Oferta to jeszcze nie faktura – później zamienisz ją jednym stuknięciem.",
+    "عرض السعر ليس فاتورة بعد – يمكنك تحويله لاحقًا بلمسة.",
+    "Oferta nu e încă factură – o poți transforma mai târziu cu o atingere.",
+  ],
+  nw_an_t: ["Angebote", "Quotes", "Teklifler", "Предложения", "Пропозиції", "Oferty", "عروض الأسعار", "Oferte"],
+  nw_an_p: [
+    "Schreib Angebote im gewohnten Editor. Hier siehst du, was offen ist und wie lange es noch gilt. Sagt der Kunde zu, wird mit einem Tipp eine Rechnung daraus – mit allen Positionen.",
+    "Write quotes in the usual editor. Here you see what’s open and how long it’s valid. When the customer agrees, one tap turns it into an invoice – with all items.",
+    "Teklifleri alışık editörde yaz. Burada neyin açık olduğunu ve ne kadar geçerli olduğunu görürsün. Müşteri kabul edince tek dokunuşla faturaya dönüşür.",
+    "Пиши предложения в привычном редакторе. Здесь видно, что открыто и сколько ещё действует. Клиент согласился – одним нажатием получится счёт со всеми позициями.",
+    "Пиши пропозиції у звичному редакторі. Тут видно, що відкрито і скільки ще діє. Клієнт погодився – одним дотиком вийде рахунок з усіма позиціями.",
+    "Pisz oferty w znanym edytorze. Tu widzisz, co jest otwarte i jak długo ważne. Gdy klient się zgodzi, jednym stuknięciem powstaje faktura ze wszystkimi pozycjami.",
+    "اكتب العروض في المحرر المعتاد. هنا ترى ما هو مفتوح وكم بقي من صلاحيته. عندما يوافق العميل تتحول بلمسة إلى فاتورة بكل البنود.",
+    "Scrie oferte în editorul obișnuit. Aici vezi ce e deschis și cât mai e valabil. Când clientul acceptă, o atingere o transformă în factură cu toate pozițiile.",
+  ],
+  an_title: [
+    "Neues Angebot",
+    "New quote",
+    "Yeni teklif",
+    "Новое предложение",
+    "Нова пропозиція",
+    "Nowa oferta",
+    "عرض سعر جديد",
+    "Ofertă nouă",
+  ],
+  an_nr: [
+    "Angebots-Nr.",
+    "Quote no.",
+    "Teklif no.",
+    "№ предложения",
+    "№ пропозиції",
+    "Nr oferty",
+    "رقم العرض",
+    "Nr. ofertă",
+  ],
+  an_tip_det: [
+    "Gib dem Angebot eine Gültigkeit – meist 30 Tage. Danach siehst du in der Kachel „Angebote“, wie lange es noch läuft.",
+    "Give the quote a validity – usually 30 days. The “Quotes” tile then shows how long it’s still valid.",
+    "Teklife bir geçerlilik süresi ver – genelde 30 gün. “Teklifler” kutusunda ne kadar kaldığını görürsün.",
+    "Задай срок действия – обычно 30 дней. В плитке «Предложения» видно, сколько осталось.",
+    "Задай строк дії – зазвичай 30 днів. У плитці «Пропозиції» видно, скільки лишилось.",
+    "Nadaj ofercie ważność – zwykle 30 dni. Na kafelku „Oferty” zobaczysz, ile zostało.",
+    "حدّد صلاحية العرض – عادة 30 يومًا. ستعرض بطاقة «عروض الأسعار» كم بقي.",
+    "Dă ofertei o valabilitate – de obicei 30 de zile. Cardul „Oferte” arată cât mai e valabilă.",
+  ],
 };
 
 /* Texte aus TEXTS in der aktuellen Sprache, Monatsnamen und das Zählwerk für Beträge */
@@ -96106,6 +96384,12 @@ function rvSum(d) {
 }
 const RV_TX = {
   de: {
+    o: "ANGEBOT",
+    to: "Angebot",
+    odate: "Angebotsdatum",
+    valid: "Gültig bis",
+    opay: (d) => `Dieses Angebot ist gültig bis zum ${d}.`,
+    oq: "Über Ihre Zusage freue ich mich – eine kurze Antwort per Mail genügt.",
     r: "RECHNUNG",
     a: "ABSCHLAGSRECHNUNG",
     g: "GUTSCHRIFT",
@@ -96152,6 +96436,12 @@ const RV_TX = {
     vatid: "USt-IdNr.",
   },
   en: {
+    o: "QUOTE",
+    to: "Quote",
+    odate: "Quote date",
+    valid: "Valid until",
+    opay: (d) => `This quote is valid until ${d}.`,
+    oq: "I look forward to your confirmation – a short reply by email is enough.",
     r: "INVOICE",
     a: "DEPOSIT INVOICE",
     g: "CREDIT NOTE",
@@ -96359,12 +96649,11 @@ function rvLayout(d) {
       b: i === 0,
     })
   );
-  const meta = [
-    [X.date, DD(d.date)],
-    [d.lz ? X.lz : X.ld, d.lz || DD(d.date)],
-  ];
+  const meta = [[typ === "o" ? X.odate : X.date, DD(d.date)]];
+  if (d.lz || typ !== "o") meta.push([d.lz ? X.lz : X.ld, d.lz || DD(d.date)]);
   if (d.k.nr) meta.push([X.kn, d.k.nr]);
   if (typ === "r" || typ === "a") meta.push([X.due, DD(due), 1]);
+  if (typ === "o") meta.push([X.valid, DD(anValid(d)), 1]);
   meta.forEach((m, i) => {
     T(349, 134 + i * 16, m[0], 8.5, {
       c: "#666666",
@@ -96541,7 +96830,7 @@ function rvLayout(d) {
   }
   y += 16;
   const epc =
-      typ === "g" || typ === "s" || !(sum.pay > 0)
+      typ === "g" || typ === "s" || typ === "o" || !(sum.pay > 0)
         ? ""
         : rvEpc(d, {
             ...sum,
@@ -96563,7 +96852,13 @@ function rvLayout(d) {
     px,
     y + (epc ? 26 : 20),
     rvFit(
-      typ === "g" ? X.gpay(E(sum.pay)) : typ === "s" ? X.spay(d.ref || "") : X.pay(E(sum.pay), DD(due)),
+      typ === "o"
+        ? X.opay(DD(anValid(d)))
+        : typ === "g"
+          ? X.gpay(E(sum.pay))
+          : typ === "s"
+            ? X.spay(d.ref || "")
+            : X.pay(E(sum.pay), DD(due)),
       9.5,
       1,
       R - px - 10
@@ -96573,7 +96868,12 @@ function rvLayout(d) {
       b: 1,
     }
   );
-  rvWrap(typ === "g" ? X.gq : typ === "s" ? X.sq : epc ? X.qr : X.noqr(d.nr || ""), 8.5, 0, R - px - 10)
+  rvWrap(
+    typ === "o" ? X.oq : typ === "g" ? X.gq : typ === "s" ? X.sq : epc ? X.qr : X.noqr(d.nr || ""),
+    8.5,
+    0,
+    R - px - 10
+  )
     .slice(0, 3)
     .forEach((t, i) =>
       T(px, y + (epc ? 41 : 34) + i * 11.5, t, 8.5, {
@@ -96976,7 +97276,7 @@ function rvStepHtml(k) {
         .filter((i) => !i.gs && i.id !== d.id && (!d.k.name || i.kunde === d.k.name))
         .slice(-12)
         .reverse();
-    return `${rvTip("rv_tip_det")}<div class="vacard rvgrid"><div class="hlf w2"><span>${escHtml(uiText("rv_typ"))}</span><div class="seg rvseg">${["r", "a", "g"].map((t) => `<button type="button" class="${typ === t ? "on" : ""}" data-rvtyp="${t}">${escHtml(uiText("rv_typ_" + t))}</button>`).join("")}</div><small class="rvhint">${escHtml(uiText("rv_typ_" + typ + "_s"))}</small></div>
+    return `${rvTip(typ === "o" ? "an_tip_det" : "rv_tip_det")}<div class="vacard rvgrid"><div class="hlf w2"><span>${escHtml(uiText("rv_typ"))}</span><div class="seg rvseg">${(d.id ? (typ === "o" ? ["o"] : ["r", "a", "g"]) : ["o", "r", "a", "g"]).map((t) => `<button type="button" class="${typ === t ? "on" : ""}" data-rvtyp="${t}">${escHtml(uiText("rv_typ_" + t))}</button>`).join("")}</div><small class="rvhint">${escHtml(uiText("rv_typ_" + typ + "_s"))}</small></div>
       ${typ === "g" ? `<label class="hlf w2"><span>${escHtml(uiText("rv_ref"))}</span><select class="in" id="rvDr"><option value="">${escHtml(uiText("rv_ref_none"))}</option>${refs.map((i) => `<option value="${escHtml(i.nr)}" ${d.ref === i.nr ? "selected" : ""}>${escHtml(i.nr)} · ${escHtml(i.kunde || "")} · ${escHtml(rvEuro(i.amt))}</option>`).join("")}</select></label>` : ""}
       ${
         typ === "r" && abs.length
@@ -96994,7 +97294,7 @@ function rvStepHtml(k) {
               .join("")}</div>`
           : ""
       }</div>
-      <div class="vacard rvgrid">${rvField("rvDn", uiText("rch_nr"), d.nr)}${rvField(
+      <div class="vacard rvgrid">${rvField("rvDn", uiText(typ === "o" ? "an_nr" : "rch_nr"), d.nr)}${rvField(
         "rvDd",
         uiText("rch_date"),
         d.date,
@@ -97006,16 +97306,25 @@ function rvStepHtml(k) {
         ph: uiText("rv_d_lz_ph"),
       })}
       ${
-        typ === "g"
-          ? ""
-          : `<div class="hlf w2"><span>${escHtml(uiText("rch_days"))}</span><div class="seg rvseg">${zs.map((n) => `<button type="button" class="${Number(d.z) === n ? "on" : ""}" data-rvz="${n}">${n} ${escHtml(uiText("rch_tage"))}</button>`).join("")}</div><small class="rvhint">${escHtml(
-              uiText("rv_d_due", {
-                d: fxDate(addDays(d.date, Number(d.z) || 14), {
+        typ === "o"
+          ? `<div class="hlf w2"><span>${escHtml(uiText("an_valid"))}</span><div class="seg rvseg">${[14, 30, 60].map((n) => `<button type="button" class="${Number(d.gv || 30) === n ? "on" : ""}" data-rvgv="${n}">${n} ${escHtml(uiText("rch_tage"))}</button>`).join("")}</div><small class="rvhint">${escHtml(
+              uiText("an_valid_until", {
+                d: fxDate(anValid(d), {
                   day: "numeric",
                   month: "long",
                 }),
               })
             )}</small></div>`
+          : typ === "g"
+            ? ""
+            : `<div class="hlf w2"><span>${escHtml(uiText("rch_days"))}</span><div class="seg rvseg">${zs.map((n) => `<button type="button" class="${Number(d.z) === n ? "on" : ""}" data-rvz="${n}">${n} ${escHtml(uiText("rch_tage"))}</button>`).join("")}</div><small class="rvhint">${escHtml(
+                uiText("rv_d_due", {
+                  d: fxDate(addDays(d.date, Number(d.z) || 14), {
+                    day: "numeric",
+                    month: "long",
+                  }),
+                })
+              )}</small></div>`
       }
       ${b.klein ? `<div class="hlf w2"><span>${escHtml(uiText("rv_d_vat"))}</span><div class="rvinfo">${escHtml(uiText("rv_klein_s"))}</div></div>` : `<div class="hlf w2"><span>${escHtml(uiText("rv_d_vat"))}</span><div class="seg rvseg">${[19, 7, 0].map((n) => `<button type="button" class="${Number(d.vat) === n ? "on" : ""}" data-rvvat="${n}">${n} %</button>`).join("")}</div></div>`}</div>
       <div class="vacard rvgrid"><div class="hlf"><span>${escHtml(uiText("rv_d_lang"))}</span><div class="seg rvseg"><button type="button" class="${d.lang !== "en" ? "on" : ""}" data-rvlang="de">Deutsch</button><button type="button" class="${d.lang === "en" ? "on" : ""}" data-rvlang="en">English</button></div></div>${rvField(
@@ -97093,12 +97402,12 @@ function rvCheck() {
     },
     {
       k: "rv_c_nr",
-      ok: !!d.nr && !rchList().some((i) => i.nr === d.nr && i.id !== d.id),
+      ok: !!d.nr && !(d.typ === "o" ? anList() : rchList()).some((i) => i.nr === d.nr && i.id !== d.id),
       go: "det",
     },
     {
       k: "rv_c_iban",
-      ok: !!b.iban,
+      ok: !!b.iban || d.typ === "o",
       go: "me",
     },
     ...(rvSum(d).pay < 0
@@ -97123,7 +97432,8 @@ function rvRender() {
     body = $("rvBody");
   if (!body) return;
   const sum = rvSum(d);
-  $("rvSub").textContent = uiText("rch_nr") + " " + (d.nr || "");
+  $("rvSub").textContent = uiText(d.typ === "o" ? "an_nr" : "rch_nr") + " " + (d.nr || "");
+  $("rvTt").textContent = uiText(d.typ === "o" ? "an_title" : "rv_title");
   const lab = {
     me: ["rv_s_me", rvBiz().name || uiText("rv_s_me_s")],
     kunde: ["rv_s_k", d.k.name || uiText("rv_s_k_s")],
@@ -97917,7 +98227,7 @@ function rvSync() {
       const sb = $("rvSub");
       if (sb) sb.textContent = uiText("rch_nr") + " " + nrNow;
     }
-    if (!RV.d.id && !RV.d.recId && !RV.nrTouched) RV.d.nr = rchNextNr(b);
+    if (!RV.d.id && !RV.d.recId && !RV.nrTouched && RV.d.typ !== "o") RV.d.nr = rchNextNr(b);
   }
   if (k === "kunde" && $("rvKn")) {
     Object.assign(d.k, {
@@ -98021,6 +98331,7 @@ async function rvFinish() {
   d.kid = c.id;
   d.k.nr = c.nr;
   rvItemsSave(d, true);
+  if (d.typ === "o") return anFinish(d);
   const due = addDays(d.date, Number(d.z) || 14),
     typ = d.typ || "r",
     rec = {
@@ -98065,6 +98376,7 @@ async function rvFinish() {
   tgt.locked = new Date().toISOString();
   await rvSeal(tgt);
   rvLog("create", tgt.nr, (typ !== "r" ? typ + " · " : "") + fmtEur(tgt.amt) + " · " + (tgt.kunde || ""));
+  if (d.fromOffer) anAccepted(d.fromOffer, tgt);
   if (d.recId) {
     const r = rvRecs().find((x) => x.id === d.recId);
     if (r) {
@@ -98470,7 +98782,17 @@ function rvMail(d, f) {
   const sum = rvSum(d),
     nm = rvBiz().owner || rvBiz().name || "",
     due = addDays(d.date, Number(d.z) || 14);
-  const txt = `${d.k.person ? "Hallo " + d.k.person : "Sehr geehrte Damen und Herren"},\n\nanbei erhalten Sie meine Rechnung Nr. ${d.nr} über ${rvEuro(sum.gross)}.\nBitte überweisen Sie den Betrag bis zum ${rvDate(due)}.\n\nVielen Dank für die gute Zusammenarbeit!\n\nViele Grüße\n${nm}`;
+  const hi = d.k.person ? "Hallo " + d.k.person : "Sehr geehrte Damen und Herren";
+  if (d.typ === "o") {
+    rvMailGo(
+      d,
+      `${hi},\n\nanbei erhalten Sie mein Angebot Nr. ${d.nr} über ${rvEuro(sum.gross)}. Es ist gültig bis zum ${rvDate(anValid(d))}.\n\nÜber eine kurze Zusage per Mail freue ich mich – bei Fragen melden Sie sich gern.\n\nViele Grüße\n${nm}`,
+      f,
+      "Angebot " + d.nr
+    );
+    return;
+  }
+  const txt = `${hi},\n\nanbei erhalten Sie meine Rechnung Nr. ${d.nr} über ${rvEuro(sum.gross)}.\nBitte überweisen Sie den Betrag bis zum ${rvDate(due)}.\n\nVielen Dank für die gute Zusammenarbeit!\n\nViele Grüße\n${nm}`;
   rvMailGo(d, txt, f);
 }
 async function rvMailGo(d, txt, f, subject) {
@@ -99064,18 +99386,21 @@ document.addEventListener("click", (e) => {
       o = d.typ || "r";
     d.typ = ty.dataset.rvtyp;
     const df = {
+      o: "",
       r: "",
       a: "Abschlagsrechnung",
       g: "Gutschrift",
     };
     if (!d.title || Object.values(df).includes(d.title)) d.title = df[d.typ];
     const di = {
+      o: AN_INTRO.de,
       r: "Vielen Dank für Ihren Auftrag. Hiermit stelle ich Ihnen folgende Leistungen in Rechnung:",
       a: "Wie vereinbart berechne ich Ihnen folgende Abschlagszahlung:",
       g: "Hiermit schreibe ich Ihnen folgende Beträge gut:",
     };
     if (!d.intro || Object.values(di).includes(d.intro)) d.intro = di[d.typ];
     if (d.typ !== "r") d.abz = [];
+    if ((o === "o") !== (d.typ === "o") && !RV.nrTouched) d.nr = d.typ === "o" ? anNextNr() : rchNextNr();
     if (o !== d.typ) {
       rvRender();
       SND.play("tick");
@@ -99093,11 +99418,13 @@ document.addEventListener("click", (e) => {
         "Vielen Dank für Ihren Auftrag. Hiermit stelle ich Ihnen folgende Leistungen in Rechnung:",
         "Wie vereinbart berechne ich Ihnen folgende Abschlagszahlung:",
         "Hiermit schreibe ich Ihnen folgende Beträge gut:",
+        AN_INTRO.de,
       ],
       en: [
         "Thank you for your order. I hereby invoice you for the following services:",
         "As agreed, I am invoicing you for the following deposit:",
         "I hereby credit you with the following amounts:",
+        AN_INTRO.en,
       ],
     };
     const ix = DI[d.lang === "en" ? "en" : "de"].indexOf(d.intro);
@@ -99113,6 +99440,13 @@ document.addEventListener("click", (e) => {
     RV.d.rep = +rp2.dataset.rvrep;
     rvRender();
     SND.play("tick");
+    return;
+  }
+  const gv = t.closest("[data-rvgv]");
+  if (gv) {
+    rvSync();
+    RV.d.gv = +gv.dataset.rvgv;
+    rvRender();
     return;
   }
   const z = t.closest("[data-rvz]");
@@ -99866,7 +100200,9 @@ function rvXmp(d) {
 
 /* Datei im gewählten Format */
 function rvOutFile(d, fmt, lw) {
-  const base = ("Rechnung " + (d.nr || "") + " " + ((d.k && d.k.name) || "")).trim().replace(/[\\/:*?"<>|]+/g, "-");
+  const base = ((d.typ === "o" ? "Angebot " : "Rechnung ") + (d.nr || "") + " " + ((d.k && d.k.name) || ""))
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g, "-");
   if (fmt === "xr")
     return {
       blob: new Blob([rvCii(d, true, lw)], { type: "application/xml" }),
@@ -99890,6 +100226,12 @@ function rvKundeOf(d) {
 
 /* Auswahl vor dem Senden oder Speichern */
 function rvFmtAsk(d, act) {
+  if (d.typ === "o") {
+    const f = rvOutFile(d, "pdf");
+    if (act === "mail") rvMail(d, f);
+    else rvSavePdf(d, f);
+    return;
+  }
   const c = rvKundeOf(d);
   RVO.d = d;
   RVO.act = act;
@@ -100319,6 +100661,199 @@ document.addEventListener("click", async (e) => {
     await dnMark(i);
     if ($("rchBg") && !$("rchBg").hidden) rchOpen2(i.id);
   } else if (t.closest("[data-dnsend]")) dnSend(i);
+});
+
+/* Angebote: schreiben, nachhalten und mit einem Tipp in eine Rechnung umwandeln */
+const AN = { tab: "open" };
+const AN_INTRO = {
+  de: "Vielen Dank für Ihre Anfrage. Gerne biete ich Ihnen folgende Leistungen an:",
+  en: "Thank you for your enquiry. I am pleased to offer you the following services:",
+};
+function anList() {
+  return (store.settings.offers = store.settings.offers || []);
+}
+const anValid = (d) => addDays(d.date || isoToday(), Number(d.gv) || 30);
+function anNextNr() {
+  const y = new Date().getFullYear(),
+    re = new RegExp(`^AN-${y}-(\\d+)$`);
+  const mx = anList().reduce((m, o) => {
+    const h = String(o.nr || "").match(re);
+    return h ? Math.max(m, Number(h[1])) : m;
+  }, 0);
+  return `AN-${y}-${String(mx + 1).padStart(3, "0")}`;
+}
+function anNew() {
+  const d = rvNew();
+  return { ...d, typ: "o", nr: anNextNr(), gv: 30, rep: 0, intro: AN_INTRO.de };
+}
+
+/* Aus dem Editor */
+async function anFinish(d) {
+  const sum = rvSum(d),
+    rec = {
+      nr: d.nr,
+      kunde: d.k.name,
+      amt: sum.gross,
+      date: d.date,
+      valid: anValid(d),
+      doc: JSON.parse(JSON.stringify({ ...d, id: undefined })),
+    };
+  let o = d.id && anList().find((x) => x.id === d.id);
+  if (o) Object.assign(o, rec);
+  else {
+    o = { id: "o" + Date.now().toString(36), st: "open", ...rec };
+    anList().push(o);
+  }
+  try {
+    localStorage.removeItem("hb-rvdraft");
+  } catch (_) {}
+  await saveSettings();
+  SND.play("done");
+  $("rvBg").hidden = true;
+  $("rvBg").innerHTML = "";
+  document.body.classList.remove("locked");
+  AN.tab = "open";
+  anOpen();
+  toast(uiText("an_saved", { n: d.nr }));
+}
+function anAccepted(id, inv) {
+  const o = anList().find((x) => x.id === id);
+  if (!o) return;
+  o.st = "ok";
+  o.okd = isoToday();
+  o.inv = inv.nr;
+}
+function anToInvoice(o) {
+  const lg = o.doc.lang === "en" ? "en" : "de",
+    d = JSON.parse(JSON.stringify(o.doc));
+  delete d.gv;
+  Object.assign(d, {
+    id: undefined,
+    typ: "r",
+    nr: rchNextNr(),
+    date: isoToday(),
+    title: "",
+    intro:
+      lg === "en"
+        ? "Thank you for your order. I hereby invoice you for the following services:"
+        : rvBiz().intro || "Vielen Dank für Ihren Auftrag. Hiermit stelle ich Ihnen folgende Leistungen in Rechnung:",
+    note: d.note || rvBiz().outro || "",
+    fromOffer: o.id,
+  });
+  hbSheetClose("anBg");
+  setTimeout(() => rvOpen(d), 240);
+}
+
+/* Fenster mit allen Angeboten */
+function anState(o) {
+  if (o.st === "ok") return ["ok", uiText("an_st_ok", { n: o.inv || "" })];
+  if (o.st === "no") return ["", uiText("an_st_no")];
+  const n = daysTo(o.valid);
+  if (n < 0) return ["od", uiText("an_st_exp")];
+  if (n <= 3) return ["due", uiText(n === 0 ? "an_st_today" : "an_st_soon", { n: String(n) })];
+  return ["", uiText("an_st_left", { n: String(n) })];
+}
+function anOpen() {
+  const L = anList(),
+    y = String(new Date().getFullYear()),
+    open = L.filter((o) => o.st === "open"),
+    okY = L.filter((o) => o.st === "ok" && String(o.okd || "").startsWith(y)),
+    show = L.filter((o) => o.st === AN.tab).sort((a, c) => (c.date || "").localeCompare(a.date || "")),
+    b = hbSheet("anBg", uiText("an_h")),
+    tab = (k, t) =>
+      `<button type="button" class="${AN.tab === k ? "on" : ""}" data-antab="${k}">${escHtml(uiText(t))}</button>`;
+  b.innerHTML = `<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${open.length} · ${escHtml(fmtEur(open.reduce((s, o) => s + o.amt, 0)))}</b></div><div><small>${escHtml(uiText("an_ok_y", { y }))}</small><b>${okY.length} · ${escHtml(fmtEur0(okY.reduce((s, o) => s + o.amt, 0)))}</b></div></div>
+    <div class="erseg" role="tablist">${tab("open", "er_open")}${tab("ok", "an_tab_ok")}${tab("no", "an_tab_no")}</div>
+    <div class="anl">${
+      show
+        .map((o) => {
+          const [c, s] = anState(o),
+            id = escHtml(o.id);
+          return `<div class="anc ${o.st}" data-anid="${id}"><div class="ant"><span class="eric">${svgIcon("doc", 20)}</span><span class="ern"><b data-noi18n>${escHtml(o.kunde || "–")}</b><small><span data-noi18n>${escHtml(o.nr)}</span> · <span class="${c}">${escHtml(s)}</span></small></span><span class="era"><b>${escHtml(fmtEur(o.amt))}</b></span></div>
+          ${
+            o.st === "open"
+              ? `<div class="ana"><button type="button" class="btn anno" data-anno="${id}">${escHtml(uiText("an_no"))}</button><button type="button" class="btn primary" data-anok="${id}">${escHtml(uiText("an_ok"))}</button></div>`
+              : ""
+          }<div class="anx"><button type="button" class="btn sm" data-anpdf="${id}" aria-label="PDF">${svgIcon("dl", 14)}</button><button type="button" class="btn sm" data-anmail="${id}">${svgIcon("mail", 14)} ${escHtml(uiText("an_mail"))}</button>${o.st === "open" ? `<button type="button" class="btn sm" data-anedit="${id}" aria-label="${escHtml(uiText("rv_edit"))}">${svgIcon("pen", 14)}</button>` : ""}${o.st === "no" ? `<button type="button" class="btn sm" data-anre="${id}">${escHtml(uiText("an_reopen"))}</button>` : ""}${o.st !== "ok" ? `<button type="button" class="btn sm ghost" data-andel="${id}" aria-label="${escHtml(uiText("tm_del"))}">${svgIcon("trash", 14)}</button>` : ""}</div></div>`;
+        })
+        .join("") || `<p class="small muted erempty">${escHtml(uiText("an_empty"))}</p>`
+    }</div>
+    <button type="button" class="rvwrite" data-annew><span class="rwi">${svgIcon("doc", 24)}</span><span class="rwt"><b>${escHtml(uiText("an_new"))}</b><small>${escHtml(uiText("an_new_s"))}</small></span><span class="rwgo">${svgIcon("right", 18)}</span></button>`;
+  if (!reducedMotion()) stbAnim(b, ".ersum>div,.erseg,.anc,.rvwrite");
+}
+async function anSet(o, st) {
+  const prev = { st: o.st, nod: o.nod };
+  o.st = st;
+  if (st === "no") o.nod = isoToday();
+  await saveSettings();
+  anOpen();
+  render();
+  if (st === "no")
+    toast(uiText("an_rejected", { n: o.nr }), async () => {
+      Object.assign(o, prev);
+      await saveSettings();
+      anOpen();
+    });
+}
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  if (t.closest("[data-anopen]")) {
+    anOpen();
+    return;
+  }
+  if (!t.closest("#anBg")) return;
+  const pick = (k) => {
+    const el = t.closest(`[data-${k}]`);
+    return el ? anList().find((x) => x.id === el.dataset[k]) : null;
+  };
+  const tb = t.closest("[data-antab]");
+  if (tb) {
+    AN.tab = tb.dataset.antab;
+    anOpen();
+    SND.play("tick");
+    return;
+  }
+  if (t.closest("[data-annew]")) {
+    hbSheetClose("anBg");
+    setTimeout(() => rvOpen(anNew()), 240);
+    return;
+  }
+  let o;
+  if ((o = pick("anok"))) anToInvoice(o);
+  else if ((o = pick("anno"))) {
+    SND.play("untick");
+    const card = t.closest(".anc");
+    if (card && !reducedMotion())
+      await card
+        .animate(
+          [
+            { opacity: 1, transform: "none" },
+            { opacity: 0, transform: "translateX(-40px) scale(.96)" },
+          ],
+          { duration: 240, easing: "cubic-bezier(.4,0,.6,1)", fill: "forwards" }
+        )
+        .finished.catch(() => {});
+    anSet(o, "no");
+  } else if ((o = pick("anre"))) anSet(o, "open");
+  else if ((o = pick("anpdf"))) rvSavePdf(o.doc, rvOutFile(o.doc, "pdf"));
+  else if ((o = pick("anmail"))) rvMail(o.doc, rvOutFile(o.doc, "pdf"));
+  else if ((o = pick("anedit"))) {
+    hbSheetClose("anBg");
+    setTimeout(() => rvOpen({ ...JSON.parse(JSON.stringify(o.doc)), id: o.id }), 240);
+  } else if ((o = pick("andel"))) {
+    const L = anList(),
+      k = L.indexOf(o);
+    L.splice(k, 1);
+    await saveSettings();
+    anOpen();
+    render();
+    toast(uiText("an_deleted"), async () => {
+      L.splice(k, 0, o);
+      await saveSettings();
+      anOpen();
+      render();
+    });
+  }
 });
 
 /* --- Kinderzuschlag-Check --- */

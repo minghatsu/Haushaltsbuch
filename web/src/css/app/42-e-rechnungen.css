@@ -662,3 +662,50 @@
   background: var(--bad);
   color: #fff;
 }
+
+/* Angebote */
+.anl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.anc {
+  background: var(--sunk);
+  border-radius: 18px;
+  padding: 12px;
+}
+.anc.no,
+.anc.ok {
+  opacity: 0.75;
+}
+.ant {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ant .ern small .due {
+  color: var(--warn);
+}
+.ant .ern small .od {
+  color: var(--bad);
+}
+.ant .ern small .ok {
+  color: var(--good);
+}
+.ana {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.btn.anno {
+  background: var(--bad);
+  color: #fff;
+}
+.anx {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
