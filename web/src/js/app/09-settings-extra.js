@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.6",
+    "23. November 2026",
+    [
+      "Leichter zu treffen: Knöpfe, Reiter, Konto-Punkte und Kalendertage sind am Handy und Tablet jetzt mindestens 44 Pixel groß.",
+      "Feedback geben geht jetzt über den runden Knopf oben neben Mami – die Lasche am rechten Rand verdeckt nichts mehr.",
+    ],
+  ],
+  [
     "0.48.5",
     "23. November 2026",
     [

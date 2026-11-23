@@ -23,12 +23,6 @@ function fbQuickBtn() {
     b.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M12 8v4M12 15.5v.01"/></svg>`;
     b.onclick = () => fbQuickGo();
   }
-  if (!document.documentElement.classList.contains("pc")) {
-    b.className = "fbtab";
-    b.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M12 8v4M12 15.5v.01"/></svg><span>Feedback</span>`;
-    if (b.parentElement !== document.body) document.body.appendChild(b);
-    return;
-  }
   if (q.classList.contains("ptqph")) b.classList.add("ptqph");
   else b.classList.remove("ptqph");
   if (b.nextElementSibling !== q) q.before(b);

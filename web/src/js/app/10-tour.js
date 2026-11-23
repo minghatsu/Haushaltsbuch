@@ -1664,6 +1664,17 @@ function ptourOpen(v) {
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
   {
+    v: "0.48.6",
+    s: () => [
+      {
+        sel: "#fbQuick",
+        ic: "insight",
+        t: uiText("nw_fb_t"),
+        p: [uiText("nw_fb_p")],
+      },
+    ],
+  },
+  {
     v: "0.48.3",
     s: () =>
       hasSelf()
