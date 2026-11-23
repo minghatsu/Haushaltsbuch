@@ -1347,6 +1347,7 @@ small,
   }
 }
 .astack .acard {
+  container-type: inline-size;
   position: absolute;
   left: 11%;
   right: 11%;
@@ -1481,10 +1482,10 @@ small,
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 44px;
+  bottom: 4px;
   width: 100%;
-  height: 46px;
-  opacity: 0.9;
+  height: 18px;
+  opacity: 0.5;
   pointer-events: none;
 }
 .acard .m {
@@ -1960,6 +1961,10 @@ small,
   background: var(--sunk);
   border-radius: 18px;
   padding: 12px 14px;
+}
+.astack .acard .b {
+  font-size: clamp(28px, 13cqi, 44px);
+  white-space: nowrap;
 }
 
 /* Wochenansicht, Fixkosten, Kalender */
@@ -13546,8 +13551,8 @@ main.wrap {
     margin: 0;
   }
   .astack .acard {
-    left: 28%;
-    right: 28%;
+    left: max(7%, calc(50% - 230px));
+    right: max(7%, calc(50% - 230px));
   }
 }
 .pwform {
@@ -50958,6 +50963,14 @@ document.addEventListener("click", (e) => {
 
 /* Einstellungen extra */
 const CHANGELOG = [
+  [
+    "0.48.5",
+    "23. November 2026",
+    [
+      "Tablet: Die Kontokarte oben füllt jetzt die Spalte – der Kontostand wird nicht mehr abgeschnitten. Der Betrag passt sich automatisch der Breite an.",
+      "Die Verlaufslinie auf der Kontokarte läuft dezent am unteren Rand und liegt nicht mehr über dem Text.",
+    ],
+  ],
   [
     "0.48.4",
     "23. November 2026",

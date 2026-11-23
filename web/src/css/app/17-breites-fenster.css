@@ -2378,8 +2378,8 @@ main.wrap {
     margin: 0;
   }
   .astack .acard {
-    left: 28%;
-    right: 28%;
+    left: max(7%, calc(50% - 230px));
+    right: max(7%, calc(50% - 230px));
   }
 }
 .pwform {

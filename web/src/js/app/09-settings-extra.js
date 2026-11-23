@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.5",
+    "23. November 2026",
+    [
+      "Tablet: Die Kontokarte oben füllt jetzt die Spalte – der Kontostand wird nicht mehr abgeschnitten. Der Betrag passt sich automatisch der Breite an.",
+      "Die Verlaufslinie auf der Kontokarte läuft dezent am unteren Rand und liegt nicht mehr über dem Text.",
+    ],
+  ],
+  [
     "0.48.4",
     "23. November 2026",
     [
