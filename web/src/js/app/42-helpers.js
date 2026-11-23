@@ -429,7 +429,7 @@ function hlAct(x) {
   }
   if (x.k === "rch") return rchOpen2(h.id);
   if (x.k === "pm") return pmOpen();
-  if (x.k === "rvrec") return rvRecOpen(h.id);
+  if (x.k === "rvrec") return rvRecQuick(h.id);
   if (x.k === "kiz") return kizOpen();
 }
 
@@ -596,24 +596,7 @@ function rchOpen2(focus) {
       }).join("") ||
       `<p class="small muted" style="text-align:center;margin:16px 0">${escHtml(uiText("rch_empty"))}</p>`
     }</div>
-    ${
-      rvRecs().length
-        ? `<div class="rvrecs"><b class="rvsub">${svgIcon("repeat", 16)} ${escHtml(uiText("rv_rec_h"))}</b>${rvRecs()
-            .map(
-              (r) =>
-                `<div class="rvrecr"><span class="grow"><b data-noi18n>${escHtml(r.kunde || "–")}</b><small>${escHtml(uiText(RV_EV[r.every] || "rv_rep_1"))} · ${escHtml(
-                  uiText("rv_rec_next", {
-                    d: fxDate(r.next, {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    }),
-                  })
-                )}</small></span><button class="btn sm" data-rvrec="${escHtml(r.id)}">${escHtml(uiText("rv_rec_now"))}</button><button class="btn sm ghost" data-rvrecstop="${escHtml(r.id)}" aria-label="${escHtml(uiText("rv_rec_stop"))}">${svgIcon("pause", 14)}</button></div>`
-            )
-            .join("")}</div>`
-        : ""
-    }
+    ${rvRecList()}
     ${rchList().some((i) => i.locked) ? `<div class="rchsec">${escHtml(uiText("rch_gobd_h"))}</div><div class="rcharch"><div class="rcseal" id="rcSeal">${svgIcon("shield", 18)}<span>${escHtml(uiText("rch_seal_chk"))}</span></div><div class="rcab"><button type="button" class="btn" data-rvarch>${svgIcon("dl", 16)} ${escHtml(uiText("rch_arch"))}</button><button type="button" class="btn ghost" data-rvlogv>${svgIcon("list", 16)} ${escHtml(uiText("rch_log"))}</button></div><div class="rclog" id="rcLog" hidden></div><small class="rvhint">${escHtml(uiText("rch_gobd_s"))}</small></div>` : ""}
     <p class="small muted" style="margin-top:10px">${escHtml(uiText("rch_auto"))}</p>`;
   if (!reducedMotion()) stbAnim(b, ".ahero,.rvwrite,.rcha,.rchsec,.rchr,.rvrecr,.rcharch");

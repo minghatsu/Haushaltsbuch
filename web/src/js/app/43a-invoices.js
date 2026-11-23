@@ -606,30 +606,22 @@ function rvAddM(iso, m) {
 }
 function rvRecDue() {
   const lim = addDays(isoToday(), 3);
-  return rvRecs().filter((r) => r.next <= lim && rchList().some((i) => i.id === r.src && i.doc));
+  return rvRecs().filter((r) => rvRecLive(r) && r.next <= lim && rvRecDoc(r));
 }
 function rvRecOpen(id) {
   const r = rvRecs().find((x) => x.id === id),
-    i = r && rchList().find((x) => x.id === r.src);
-  if (!i || !i.doc) return;
-  const d = JSON.parse(JSON.stringify(i.doc));
-  Object.assign(d, {
-    nr: rchNextNr(),
-    date: isoToday(),
-    id: undefined,
-    recId: r.id,
-    rep: 0,
-    lz: "",
-    abz: [],
-  });
+    d = r && rvRecMake(r);
+  if (!d) return;
   try {
     hbSheetClose("rchBg");
   } catch (_) {}
   rvOpen(d);
 }
 const RV_EV = {
+  w: "rv_rep_w",
   1: "rv_rep_1",
   3: "rv_rep_3",
+  6: "rv_rep_6",
   12: "rv_rep_12",
 };
 function rvBizOk() {

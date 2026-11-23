@@ -324,10 +324,10 @@ function rvStepHtml(k) {
     <div class="vacard rvchk"><b class="rvsub">${escHtml(uiText("rv_chk_h"))}</b>${C.map((c) => `<button type="button" class="rvc ${c.ok ? "ok" : "no"}" ${c.ok ? "" : `data-rvgo="${c.go}"`}><i>${svgIcon(c.ok ? "check" : "alert", 14)}</i><span>${escHtml(uiText(c.k))}</span>${c.ok ? "" : svgIcon("right", 15)}</button>`).join("")}</div>
     ${
       (d.typ || "r") === "r" && !d.recId
-        ? `<div class="vacard rvgrid"><div class="hlf w2"><span>${escHtml(uiText("rv_rep"))}</span><div class="seg rvseg">${[0, 1, 3, 12].map((n) => `<button type="button" class="${Number(d.rep || 0) === n ? "on" : ""}" data-rvrep="${n}">${escHtml(uiText("rv_rep_" + n))}</button>`).join("")}</div><small class="rvhint">${escHtml(
-            Number(d.rep) > 0
+        ? `<div class="vacard rvgrid"><div class="hlf w2"><span>${escHtml(uiText("rv_rep"))}</span><div class="seg rvseg rvrepw">${[0, "w", 1, 3, 6, 12].map((n) => `<button type="button" class="${(rvEvery(d.rep) || 0) === n ? "on" : ""}" data-rvrep="${n}">${escHtml(uiText("rv_rep_" + n))}</button>`).join("")}</div><small class="rvhint">${escHtml(
+            rvEvery(d.rep)
               ? uiText("rv_rep_s", {
-                  d: fxDate(rvAddM(d.date, Number(d.rep)), {
+                  d: fxDate(rvStep(d.date, rvEvery(d.rep)), {
                     day: "numeric",
                     month: "long",
                   }),
@@ -1270,8 +1270,6 @@ async function rvFinish() {
     rvGo(rvSteps().indexOf(bad.go));
     return;
   }
-  const sum = rvSum(d),
-    b = rvBiz();
   let c =
     rvKunden().find((x) => x.id === d.kid) || rvKunden().find((x) => x.name.toLowerCase() === d.k.name.toLowerCase());
   if (rvKnrDup(d.k.nr, c ? c.id : "")) {
@@ -1303,70 +1301,8 @@ async function rvFinish() {
   d.k.nr = c.nr;
   rvItemsSave(d, true);
   if (d.typ === "o") return anFinish(d);
-  const due = addDays(d.date, Number(d.z) || 14),
-    typ = d.typ || "r",
-    rec = {
-      kunde: d.k.name,
-      amt: typ === "g" ? -sum.pay : sum.pay,
-      nr: d.nr,
-      date: d.date,
-      z: Number(d.z) || 14,
-      due,
-      made: 1,
-      typ,
-      doc: JSON.parse(
-        JSON.stringify({
-          ...d,
-          id: undefined,
-        })
-      ),
-    };
-  if (typ === "g") {
-    rec.paid = d.date;
-    rec.gs = 1;
-  }
-  let id = d.id,
-    tgt = null;
-  if (id) {
-    tgt = rchList().find((x) => x.id === id);
-    if (tgt && tgt.locked) {
-      toast(uiText("rch_locked"));
-      return;
-    }
-    if (tgt) Object.assign(tgt, rec);
-  }
-  if (!tgt) {
-    id = "i" + Date.now().toString(36);
-    tgt = {
-      id,
-      ...rec,
-    };
-    rchList().push(tgt);
-  }
-  b.z = Number(d.z) || 14;
-  tgt.locked = new Date().toISOString();
-  await rvSeal(tgt);
-  rvLog("create", tgt.nr, (typ !== "r" ? typ + " · " : "") + fmtEur(tgt.amt) + " · " + (tgt.kunde || ""));
-  if (d.fromOffer) anAccepted(d.fromOffer, tgt);
-  if (d.recId) {
-    const r = rvRecs().find((x) => x.id === d.recId);
-    if (r) {
-      r.next = rvAddM(r.next, r.every);
-      r.src = id;
-    }
-  } else if (!d.id && typ === "r" && Number(d.rep) > 0) {
-    rvRecs().push({
-      id: "r" + Date.now().toString(36),
-      src: id,
-      every: Number(d.rep),
-      next: rvAddM(d.date, Number(d.rep)),
-      kunde: d.k.name,
-    });
-  }
-  try {
-    localStorage.removeItem("hb-rvdraft");
-  } catch (_) {}
-  await saveSettings();
+  const id = await rvCommit(d);
+  if (!id) return;
   SND.play("done");
   try {
     navigator.vibrate && navigator.vibrate([10, 40, 14]);
@@ -1406,6 +1342,70 @@ async function rvFinish() {
       n: d.nr,
     })
   );
+}
+/* Speichert und versiegelt eine fertige Rechnung – vom Editor und vom Ein-Tipp-Versand genutzt */
+async function rvCommit(d) {
+  const sum = rvSum(d),
+    due = addDays(d.date, Number(d.z) || 14),
+    typ = d.typ || "r",
+    rec = {
+      kunde: d.k.name,
+      amt: typ === "g" ? -sum.pay : sum.pay,
+      nr: d.nr,
+      date: d.date,
+      z: Number(d.z) || 14,
+      due,
+      made: 1,
+      typ,
+      doc: JSON.parse(
+        JSON.stringify({
+          ...d,
+          id: undefined,
+        })
+      ),
+    };
+  if (typ === "g") {
+    rec.paid = d.date;
+    rec.gs = 1;
+  }
+  let id = d.id,
+    tgt = null;
+  if (id) {
+    tgt = rchList().find((x) => x.id === id);
+    if (tgt && tgt.locked) {
+      toast(uiText("rch_locked"));
+      return null;
+    }
+    if (tgt) Object.assign(tgt, rec);
+  }
+  if (!tgt) {
+    id = "i" + Date.now().toString(36);
+    tgt = {
+      id,
+      ...rec,
+    };
+    rchList().push(tgt);
+  }
+  rvBiz().z = Number(d.z) || 14;
+  tgt.locked = new Date().toISOString();
+  await rvSeal(tgt);
+  rvLog("create", tgt.nr, (typ !== "r" ? typ + " · " : "") + fmtEur(tgt.amt) + " · " + (tgt.kunde || ""));
+  if (d.fromOffer) anAccepted(d.fromOffer, tgt);
+  if (d.recId) rvRecAfter(rvRecs().find((x) => x.id === d.recId), id, tgt.amt);
+  else if (!d.id && typ === "r" && rvEvery(d.rep))
+    rvRecs().push({
+      id: "r" + Date.now().toString(36),
+      src: id,
+      every: rvEvery(d.rep),
+      next: rvStep(d.date, rvEvery(d.rep)),
+      kunde: d.k.name,
+      amt: tgt.amt,
+    });
+  try {
+    localStorage.removeItem("hb-rvdraft");
+  } catch (_) {}
+  await saveSettings();
+  return id;
 }
 async function rvStorno(id) {
   const o = rchList().find((x) => x.id === id);
@@ -1839,21 +1839,6 @@ document.addEventListener("click", (e) => {
       hbSheetClose("rchBg");
     } catch (_) {}
     rvOpen();
-    return;
-  }
-  const rr = t.closest("[data-rvrec]");
-  if (rr) {
-    rvRecOpen(rr.dataset.rvrec);
-    return;
-  }
-  const rs = t.closest("[data-rvrecstop]");
-  if (rs) {
-    store.settings.rvRec = rvRecs().filter((x) => x.id !== rs.dataset.rvrecstop);
-    saveSettings();
-    try {
-      rchOpen2();
-    } catch (_) {}
-    toast(uiText("rv_rec_stopped"));
     return;
   }
   const sto = t.closest("[data-rvstorno]");
@@ -2408,7 +2393,7 @@ document.addEventListener("click", (e) => {
   const rp2 = t.closest("[data-rvrep]");
   if (rp2) {
     rvSync();
-    RV.d.rep = +rp2.dataset.rvrep;
+    RV.d.rep = rvEvery(rp2.dataset.rvrep);
     rvRender();
     SND.play("tick");
     return;

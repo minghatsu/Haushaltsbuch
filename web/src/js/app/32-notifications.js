@@ -322,7 +322,7 @@ function notifyPlan() {
             })
           );
         }
-        for (const r of rvRecs()) {
+        for (const r of rvRecs().filter(rvRecLive)) {
           const [y, m, dd] = String(r.next).split("-").map(Number);
           if (y)
             add(

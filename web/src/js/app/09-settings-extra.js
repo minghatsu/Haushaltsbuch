@@ -240,6 +240,16 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.1",
+    "23. November 2026",
+    [
+      "Wiederkehrende Rechnungen überarbeitet: Jede Serie zeigt Betrag, Rhythmus und nächsten Termin. Du kannst sie pausieren und fortsetzen, Preise ändern und ein Ende festlegen – nach Anzahl oder Datum. Neu sind wöchentlich und halbjährlich.",
+      "Ist eine Rechnung fällig, liegt sie fertig bereit: neue Nummer, Datum und Leistungszeitraum (z. B. „Dezember 2026“) sind eingesetzt. Ein Tipp auf „Senden“ genügt.",
+      "Behoben: Der Pause-Knopf einer Serie hat sie gelöscht statt angehalten.",
+      "Behoben: „Zeig’s mir“ bei Mamis Hinweis auf eine fällige Rechnung oder eine erkannte Zahlung führte nur zur Startseite.",
+    ],
+  ],
+  [
     "0.48.0",
     "23. November 2026",
     [

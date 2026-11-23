@@ -567,7 +567,7 @@ function mbClose(later) {
 }
 function mbAct(x) {
   const k = x.k;
-  if (["price", "wb", "lohn", "rch", "kiz"].includes(k)) return hlAct(x);
+  if (["price", "wb", "lohn", "rch", "pm", "rvrec", "kiz"].includes(k)) return hlAct(x);
   if (k === "upd") {
     try {
       UPD.avail && UPD.avail.go();

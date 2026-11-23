@@ -25071,6 +25071,256 @@ html.pc .pctpane .ayblk {
   gap: 6px;
   margin-top: 8px;
 }
+
+/* Wiederkehrende Rechnungen: Serien und Ein-Tipp-Versand */
+.rvseg.rvrepw {
+  grid-auto-flow: row;
+  grid-template-columns: repeat(3, 1fr);
+}
+.rvrecs .rsh {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rvrecs .rsh small {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.rvrecr {
+  cursor: pointer;
+  transition:
+    transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.2s;
+}
+.rvrecr:active {
+  transform: scale(0.985);
+}
+.rvrecr:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.rvrecr.off {
+  opacity: 0.6;
+}
+.rvrecr {
+  flex-wrap: wrap;
+}
+.rvrecr > .btn {
+  flex: 1 0 calc(100% - 44px);
+  margin-left: 44px;
+}
+.rsic {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.rvrecr.off .rsic {
+  background: var(--sunk);
+  color: var(--muted);
+}
+.rsamt {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.rvrecr .due,
+.rshero .due {
+  color: var(--warn);
+}
+.rvrecr .od,
+.rshero .od {
+  color: var(--bad);
+}
+.rshero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--sunk);
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.rshero .rsic {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+}
+.rshero b {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.rshero small {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.rsact {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.rsact:empty {
+  display: none;
+}
+.rsf {
+  display: block;
+  margin-bottom: 14px;
+}
+.rsf > span {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.rsf .erseg {
+  margin-bottom: 0;
+}
+.rsev {
+  flex-wrap: wrap;
+}
+.rsev button {
+  flex: 1 1 30%;
+}
+.rsf .in {
+  width: 100%;
+}
+.rsin {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.rsin .in {
+  max-width: 180px;
+}
+.rsin small {
+  color: var(--muted);
+  font-weight: 600;
+}
+.rspos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rsp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--sunk);
+  border-radius: 14px;
+  padding: 6px 6px 6px 12px;
+}
+.rsp > span {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rsp > span small {
+  color: var(--muted);
+}
+.rsp .in {
+  width: 110px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.rsp em {
+  font-style: normal;
+  color: var(--muted);
+  font-weight: 700;
+  padding-right: 6px;
+}
+.btn.block.rsdel {
+  margin-top: 8px;
+  color: var(--bad);
+}
+.rqcard {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.rqtop {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 15px;
+}
+.rqamt {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.rqpos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+}
+.rqpos small,
+.rqnote {
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.rqmeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.rqmeta mark {
+  background: var(--accent-soft);
+  color: var(--fg);
+  border-radius: 7px;
+  padding: 1px 7px;
+  font-weight: 700;
+}
+.rqto {
+  background: var(--sunk);
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  overflow-wrap: anywhere;
+}
+.rqto small {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.rqbtn {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.rvrecr .grow {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.rvrecr .grow b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -50513,6 +50763,16 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.1",
+    "23. November 2026",
+    [
+      "Wiederkehrende Rechnungen überarbeitet: Jede Serie zeigt Betrag, Rhythmus und nächsten Termin. Du kannst sie pausieren und fortsetzen, Preise ändern und ein Ende festlegen – nach Anzahl oder Datum. Neu sind wöchentlich und halbjährlich.",
+      "Ist eine Rechnung fällig, liegt sie fertig bereit: neue Nummer, Datum und Leistungszeitraum (z. B. „Dezember 2026“) sind eingesetzt. Ein Tipp auf „Senden“ genügt.",
+      "Behoben: Der Pause-Knopf einer Serie hat sie gelöscht statt angehalten.",
+      "Behoben: „Zeig’s mir“ bei Mamis Hinweis auf eine fällige Rechnung oder eine erkannte Zahlung führte nur zur Startseite.",
+    ],
+  ],
+  [
     "0.48.0",
     "23. November 2026",
     [
@@ -52965,6 +53225,20 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.48.1",
+    s: () =>
+      hasSelf()
+        ? [
+            {
+              sel: '[data-view="beruf"] [data-rchopen].atile',
+              ic: "repeat",
+              t: uiText("nw_rs_t"),
+              p: [uiText("nw_rs_p")],
+            },
+          ]
+        : [],
+  },
   {
     v: "0.48.0",
     s: () =>
@@ -71156,7 +71430,7 @@ function notifyPlan() {
             })
           );
         }
-        for (const r of rvRecs()) {
+        for (const r of rvRecs().filter(rvRecLive)) {
           const [y, m, dd] = String(r.next).split("-").map(Number);
           if (y)
             add(
@@ -82359,26 +82633,6 @@ const TEXTS = {
     "اكتب الآن",
     "Emite acum",
   ],
-  rv_rec_stop: [
-    "Nicht mehr wiederholen",
-    "Stop repeating",
-    "Tekrarlamayı durdur",
-    "Больше не повторять",
-    "Більше не повторювати",
-    "Nie powtarzaj",
-    "أوقف التكرار",
-    "Nu mai repeta",
-  ],
-  rv_rec_stopped: [
-    "Wird nicht mehr wiederholt",
-    "No longer repeating",
-    "Artık tekrarlanmıyor",
-    "Больше не повторяется",
-    "Більше не повторюється",
-    "Już się nie powtarza",
-    "لم يعد يتكرر",
-    "Nu se mai repetă",
-  ],
   rv_rec_due: [
     "Rechnung für {n} ist wieder dran",
     "Invoice for {n} is due again",
@@ -86895,6 +87149,386 @@ const TEXTS = {
     "Nadaj ofercie ważność – zwykle 30 dni. Na kafelku „Oferty” zobaczysz, ile zostało.",
     "حدّد صلاحية العرض – عادة 30 يومًا. ستعرض بطاقة «عروض الأسعار» كم بقي.",
     "Dă ofertei o valabilitate – de obicei 30 de zile. Cardul „Oferte” arată cât mai e valabilă.",
+  ],
+  rv_rep_w: [
+    "Wöchentlich",
+    "Weekly",
+    "Haftalık",
+    "Еженедельно",
+    "Щотижня",
+    "Co tydzień",
+    "أسبوعيًا",
+    "Săptămânal",
+  ],
+  rv_rep_6: [
+    "Halbjährlich",
+    "Half-yearly",
+    "6 ayda bir",
+    "Раз в полгода",
+    "Раз на пів року",
+    "Co pół roku",
+    "كل ستة أشهر",
+    "Semestrial",
+  ],
+  rs_sum: [
+    "{n} aktiv · {b} / Monat",
+    "{n} active · {b} / month",
+    "{n} aktif · {b} / ay",
+    "{n} активн. · {b} / мес.",
+    "{n} активн. · {b} / міс.",
+    "{n} aktywne · {b} / mies.",
+    "{n} نشطة · {b} / شهر",
+    "{n} active · {b} / lună",
+  ],
+  rs_next_d: [
+    "nächste {d}",
+    "next {d}",
+    "sonraki {d}",
+    "следующая {d}",
+    "наступна {d}",
+    "następna {d}",
+    "التالية {d}",
+    "următoarea {d}",
+  ],
+  rs_late: [
+    "fällig seit {d}",
+    "due since {d}",
+    "{d} tarihinden beri vadesi geldi",
+    "к оплате с {d}",
+    "до сплати з {d}",
+    "termin od {d}",
+    "مستحقة منذ {d}",
+    "scadentă din {d}",
+  ],
+  rs_left: [
+    "noch {n}",
+    "{n} left",
+    "{n} kaldı",
+    "ещё {n}",
+    "ще {n}",
+    "jeszcze {n}",
+    "متبقٍ {n}",
+    "încă {n}",
+  ],
+  rs_until: [
+    "bis {d}",
+    "until {d}",
+    "{d} tarihine kadar",
+    "до {d}",
+    "до {d}",
+    "do {d}",
+    "حتى {d}",
+    "până la {d}",
+  ],
+  rs_paused: [
+    "pausiert seit {d}",
+    "paused since {d}",
+    "{d} tarihinden beri duraklatıldı",
+    "на паузе с {d}",
+    "на паузі з {d}",
+    "wstrzymana od {d}",
+    "متوقفة منذ {d}",
+    "în pauză din {d}",
+  ],
+  rs_done: [
+    "beendet am {d}",
+    "ended on {d}",
+    "{d} tarihinde bitti",
+    "завершена {d}",
+    "завершена {d}",
+    "zakończona {d}",
+    "انتهت في {d}",
+    "încheiată pe {d}",
+  ],
+  rq_go: [
+    "Fertig machen",
+    "Prepare",
+    "Hazırla",
+    "Подготовить",
+    "Підготувати",
+    "Przygotuj",
+    "جهّزها",
+    "Pregătește",
+  ],
+  rs_pause: [
+    "Pausieren",
+    "Pause",
+    "Duraklat",
+    "Пауза",
+    "Пауза",
+    "Wstrzymaj",
+    "إيقاف مؤقت",
+    "Pune pe pauză",
+  ],
+  rs_resume: [
+    "Fortsetzen",
+    "Resume",
+    "Devam et",
+    "Продолжить",
+    "Продовжити",
+    "Wznów",
+    "استئناف",
+    "Reia",
+  ],
+  rs_every: [
+    "Rhythmus",
+    "Interval",
+    "Sıklık",
+    "Периодичность",
+    "Періодичність",
+    "Częstotliwość",
+    "التكرار",
+    "Frecvență",
+  ],
+  rs_next_l: [
+    "Nächste Rechnung am",
+    "Next invoice on",
+    "Sonraki fatura",
+    "Следующий счёт",
+    "Наступний рахунок",
+    "Następna faktura",
+    "الفاتورة التالية في",
+    "Următoarea factură pe",
+  ],
+  rs_end: [
+    "Endet",
+    "Ends",
+    "Bitiş",
+    "Окончание",
+    "Закінчення",
+    "Koniec",
+    "تنتهي",
+    "Se termină",
+  ],
+  rs_end_0: [
+    "Nie",
+    "Never",
+    "Hiç",
+    "Никогда",
+    "Ніколи",
+    "Nigdy",
+    "أبدًا",
+    "Niciodată",
+  ],
+  rs_end_n: [
+    "Nach Anzahl",
+    "After count",
+    "Adet sonra",
+    "По количеству",
+    "За кількістю",
+    "Po liczbie",
+    "بعد عدد",
+    "După număr",
+  ],
+  rs_end_d: [
+    "Am Datum",
+    "On date",
+    "Tarihte",
+    "В дату",
+    "У дату",
+    "W dniu",
+    "في تاريخ",
+    "La dată",
+  ],
+  rs_cnt: [
+    "Rechnungen übrig",
+    "invoices left",
+    "fatura kaldı",
+    "счетов осталось",
+    "рахунків лишилось",
+    "faktur zostało",
+    "فواتير متبقية",
+    "facturi rămase",
+  ],
+  rs_price: [
+    "Preise (netto je Einheit)",
+    "Prices (net per unit)",
+    "Fiyatlar (birim başına net)",
+    "Цены (нетто за ед.)",
+    "Ціни (нетто за од.)",
+    "Ceny (netto za jedn.)",
+    "الأسعار (صافي لكل وحدة)",
+    "Prețuri (net pe unitate)",
+  ],
+  rs_price_s: [
+    "Gilt ab der nächsten Rechnung. Fertige Rechnungen bleiben unverändert.",
+    "Applies from the next invoice. Finished invoices stay unchanged.",
+    "Sonraki faturadan itibaren geçerli. Kesilmiş faturalar değişmez.",
+    "Действует со следующего счёта. Готовые счета не меняются.",
+    "Діє з наступного рахунку. Готові рахунки не змінюються.",
+    "Obowiązuje od następnej faktury. Wystawione faktury się nie zmieniają.",
+    "تسري من الفاتورة التالية. الفواتير الصادرة لا تتغير.",
+    "Se aplică de la următoarea factură. Facturile emise rămân neschimbate.",
+  ],
+  rs_save: [
+    "Speichern",
+    "Save",
+    "Kaydet",
+    "Сохранить",
+    "Зберегти",
+    "Zapisz",
+    "حفظ",
+    "Salvează",
+  ],
+  rs_saved: [
+    "Serie gespeichert",
+    "Series saved",
+    "Seri kaydedildi",
+    "Серия сохранена",
+    "Серію збережено",
+    "Seria zapisana",
+    "تم حفظ السلسلة",
+    "Serie salvată",
+  ],
+  rs_del: [
+    "Serie löschen",
+    "Delete series",
+    "Seriyi sil",
+    "Удалить серию",
+    "Видалити серію",
+    "Usuń serię",
+    "حذف السلسلة",
+    "Șterge seria",
+  ],
+  rs_deleted: [
+    "Serie gelöscht",
+    "Series deleted",
+    "Seri silindi",
+    "Серия удалена",
+    "Серію видалено",
+    "Seria usunięta",
+    "تم حذف السلسلة",
+    "Serie ștearsă",
+  ],
+  rs_paused_t: [
+    "Pausiert – bis du fortsetzt, kommt keine Erinnerung.",
+    "Paused – no reminders until you resume.",
+    "Duraklatıldı – devam edene kadar hatırlatma yok.",
+    "На паузе – напоминаний не будет, пока не продолжишь.",
+    "На паузі – нагадувань не буде, доки не продовжиш.",
+    "Wstrzymano – bez przypomnień, dopóki nie wznowisz.",
+    "متوقفة – لا تذكيرات حتى تستأنف.",
+    "Pe pauză – fără mementouri până reiei.",
+  ],
+  rs_resumed: [
+    "Läuft wieder – nächste Rechnung {d}",
+    "Running again – next invoice {d}",
+    "Yeniden çalışıyor – sonraki fatura {d}",
+    "Снова активна – следующий счёт {d}",
+    "Знову активна – наступний рахунок {d}",
+    "Znowu działa – następna faktura {d}",
+    "تعمل مجددًا – الفاتورة التالية {d}",
+    "Rulează din nou – următoarea factură {d}",
+  ],
+  rq_h: [
+    "Rechnung ist fällig",
+    "Invoice is due",
+    "Fatura zamanı geldi",
+    "Пора выставить счёт",
+    "Час виставити рахунок",
+    "Czas na fakturę",
+    "حان موعد الفاتورة",
+    "Factura e scadentă",
+  ],
+  rq_more: [
+    "+ {n} weitere",
+    "+ {n} more",
+    "+ {n} daha",
+    "+ ещё {n}",
+    "+ ще {n}",
+    "+ {n} więcej",
+    "+ {n} أخرى",
+    "+ încă {n}",
+  ],
+  rq_lz: [
+    "Leistungszeitraum",
+    "Service period",
+    "Hizmet dönemi",
+    "Период услуг",
+    "Період послуг",
+    "Okres usług",
+    "فترة الخدمة",
+    "Perioada serviciilor",
+  ],
+  rq_date: [
+    "Datum",
+    "Date",
+    "Tarih",
+    "Дата",
+    "Дата",
+    "Data",
+    "التاريخ",
+    "Data",
+  ],
+  rq_filled: [
+    "Nummer, Datum und Zeitraum sind schon neu eingesetzt.",
+    "Number, date and period are already filled in.",
+    "Numara, tarih ve dönem zaten yeni girildi.",
+    "Номер, дата и период уже подставлены.",
+    "Номер, дату й період уже підставлено.",
+    "Numer, data i okres są już uzupełnione.",
+    "تم إدخال الرقم والتاريخ والفترة مسبقًا.",
+    "Numărul, data și perioada sunt deja completate.",
+  ],
+  rq_to: [
+    "Senden an",
+    "Send to",
+    "Alıcı",
+    "Кому",
+    "Кому",
+    "Wyślij do",
+    "إرسال إلى",
+    "Trimite la",
+  ],
+  rq_noto: [
+    "Keine Adresse – du wählst beim Senden",
+    "No address – you choose when sending",
+    "Adres yok – gönderirken seçersin",
+    "Нет адреса – выберешь при отправке",
+    "Немає адреси – обереш під час надсилання",
+    "Brak adresu – wybierzesz przy wysyłce",
+    "لا عنوان – تختاره عند الإرسال",
+    "Fără adresă – alegi la trimitere",
+  ],
+  rq_view: [
+    "Erst ansehen",
+    "Review first",
+    "Önce bak",
+    "Сначала посмотреть",
+    "Спершу переглянути",
+    "Najpierw zobacz",
+    "راجع أولًا",
+    "Vezi întâi",
+  ],
+  rq_send: [
+    "Senden",
+    "Send",
+    "Gönder",
+    "Отправить",
+    "Надіслати",
+    "Wyślij",
+    "إرسال",
+    "Trimite",
+  ],
+  nw_rs_t: [
+    "Serien-Rechnungen",
+    "Recurring invoices",
+    "Tekrarlayan faturalar",
+    "Повторяющиеся счета",
+    "Регулярні рахунки",
+    "Faktury cykliczne",
+    "الفواتير المتكررة",
+    "Facturi recurente",
+  ],
+  nw_rs_p: [
+    "Unter „Rechnungen“ siehst du jetzt jede Serie mit Betrag und nächstem Termin. Pausieren, Preis ändern, Ende festlegen – und wenn eine fällig ist, liegt sie fertig bereit: ein Tipp auf „Senden“.",
+    "Under “Invoices” you now see every series with amount and next date. Pause, change the price, set an end – and when one is due, it’s ready: one tap on “Send”.",
+    "“Faturalar” altında artık her seriyi tutar ve sonraki tarihle görürsün. Duraklat, fiyatı değiştir, bitiş belirle – vadesi gelince hazırdır: “Gönder”e bir dokunuş.",
+    "В разделе «Счета» теперь видна каждая серия с суммой и следующей датой. Пауза, новая цена, дата окончания – а когда счёт пора выставить, он уже готов: одно нажатие «Отправить».",
+    "У «Рахунках» тепер видно кожну серію із сумою та наступною датою. Пауза, нова ціна, кінець – а коли час виставити, рахунок уже готовий: один дотик «Надіслати».",
+    "W „Fakturach” widzisz teraz każdą serię z kwotą i następnym terminem. Wstrzymaj, zmień cenę, ustaw koniec – a gdy przyjdzie termin, faktura czeka gotowa: jedno stuknięcie „Wyślij”.",
+    "في «الفواتير» ترى الآن كل سلسلة بمبلغها وموعدها التالي. أوقفها مؤقتًا، غيّر السعر، حدّد نهاية – وعند حلول الموعد تكون جاهزة: لمسة واحدة على «إرسال».",
+    "La „Facturi” vezi acum fiecare serie cu sumă și următoarea dată. Pauză, preț nou, dată de final – iar când e scadentă, factura e gata: o atingere pe „Trimite”.",
   ],
 };
 
@@ -95193,7 +95827,7 @@ function hlAct(x) {
   }
   if (x.k === "rch") return rchOpen2(h.id);
   if (x.k === "pm") return pmOpen();
-  if (x.k === "rvrec") return rvRecOpen(h.id);
+  if (x.k === "rvrec") return rvRecQuick(h.id);
   if (x.k === "kiz") return kizOpen();
 }
 
@@ -95360,24 +95994,7 @@ function rchOpen2(focus) {
       }).join("") ||
       `<p class="small muted" style="text-align:center;margin:16px 0">${escHtml(uiText("rch_empty"))}</p>`
     }</div>
-    ${
-      rvRecs().length
-        ? `<div class="rvrecs"><b class="rvsub">${svgIcon("repeat", 16)} ${escHtml(uiText("rv_rec_h"))}</b>${rvRecs()
-            .map(
-              (r) =>
-                `<div class="rvrecr"><span class="grow"><b data-noi18n>${escHtml(r.kunde || "–")}</b><small>${escHtml(uiText(RV_EV[r.every] || "rv_rep_1"))} · ${escHtml(
-                  uiText("rv_rec_next", {
-                    d: fxDate(r.next, {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    }),
-                  })
-                )}</small></span><button class="btn sm" data-rvrec="${escHtml(r.id)}">${escHtml(uiText("rv_rec_now"))}</button><button class="btn sm ghost" data-rvrecstop="${escHtml(r.id)}" aria-label="${escHtml(uiText("rv_rec_stop"))}">${svgIcon("pause", 14)}</button></div>`
-            )
-            .join("")}</div>`
-        : ""
-    }
+    ${rvRecList()}
     ${rchList().some((i) => i.locked) ? `<div class="rchsec">${escHtml(uiText("rch_gobd_h"))}</div><div class="rcharch"><div class="rcseal" id="rcSeal">${svgIcon("shield", 18)}<span>${escHtml(uiText("rch_seal_chk"))}</span></div><div class="rcab"><button type="button" class="btn" data-rvarch>${svgIcon("dl", 16)} ${escHtml(uiText("rch_arch"))}</button><button type="button" class="btn ghost" data-rvlogv>${svgIcon("list", 16)} ${escHtml(uiText("rch_log"))}</button></div><div class="rclog" id="rcLog" hidden></div><small class="rvhint">${escHtml(uiText("rch_gobd_s"))}</small></div>` : ""}
     <p class="small muted" style="margin-top:10px">${escHtml(uiText("rch_auto"))}</p>`;
   if (!reducedMotion()) stbAnim(b, ".ahero,.rvwrite,.rcha,.rchsec,.rchr,.rvrecr,.rcharch");
@@ -96172,30 +96789,22 @@ function rvAddM(iso, m) {
 }
 function rvRecDue() {
   const lim = addDays(isoToday(), 3);
-  return rvRecs().filter((r) => r.next <= lim && rchList().some((i) => i.id === r.src && i.doc));
+  return rvRecs().filter((r) => rvRecLive(r) && r.next <= lim && rvRecDoc(r));
 }
 function rvRecOpen(id) {
   const r = rvRecs().find((x) => x.id === id),
-    i = r && rchList().find((x) => x.id === r.src);
-  if (!i || !i.doc) return;
-  const d = JSON.parse(JSON.stringify(i.doc));
-  Object.assign(d, {
-    nr: rchNextNr(),
-    date: isoToday(),
-    id: undefined,
-    recId: r.id,
-    rep: 0,
-    lz: "",
-    abz: [],
-  });
+    d = r && rvRecMake(r);
+  if (!d) return;
   try {
     hbSheetClose("rchBg");
   } catch (_) {}
   rvOpen(d);
 }
 const RV_EV = {
+  w: "rv_rep_w",
   1: "rv_rep_1",
   3: "rv_rep_3",
+  6: "rv_rep_6",
   12: "rv_rep_12",
 };
 function rvBizOk() {
@@ -97353,10 +97962,10 @@ function rvStepHtml(k) {
     <div class="vacard rvchk"><b class="rvsub">${escHtml(uiText("rv_chk_h"))}</b>${C.map((c) => `<button type="button" class="rvc ${c.ok ? "ok" : "no"}" ${c.ok ? "" : `data-rvgo="${c.go}"`}><i>${svgIcon(c.ok ? "check" : "alert", 14)}</i><span>${escHtml(uiText(c.k))}</span>${c.ok ? "" : svgIcon("right", 15)}</button>`).join("")}</div>
     ${
       (d.typ || "r") === "r" && !d.recId
-        ? `<div class="vacard rvgrid"><div class="hlf w2"><span>${escHtml(uiText("rv_rep"))}</span><div class="seg rvseg">${[0, 1, 3, 12].map((n) => `<button type="button" class="${Number(d.rep || 0) === n ? "on" : ""}" data-rvrep="${n}">${escHtml(uiText("rv_rep_" + n))}</button>`).join("")}</div><small class="rvhint">${escHtml(
-            Number(d.rep) > 0
+        ? `<div class="vacard rvgrid"><div class="hlf w2"><span>${escHtml(uiText("rv_rep"))}</span><div class="seg rvseg rvrepw">${[0, "w", 1, 3, 6, 12].map((n) => `<button type="button" class="${(rvEvery(d.rep) || 0) === n ? "on" : ""}" data-rvrep="${n}">${escHtml(uiText("rv_rep_" + n))}</button>`).join("")}</div><small class="rvhint">${escHtml(
+            rvEvery(d.rep)
               ? uiText("rv_rep_s", {
-                  d: fxDate(rvAddM(d.date, Number(d.rep)), {
+                  d: fxDate(rvStep(d.date, rvEvery(d.rep)), {
                     day: "numeric",
                     month: "long",
                   }),
@@ -98299,8 +98908,6 @@ async function rvFinish() {
     rvGo(rvSteps().indexOf(bad.go));
     return;
   }
-  const sum = rvSum(d),
-    b = rvBiz();
   let c =
     rvKunden().find((x) => x.id === d.kid) || rvKunden().find((x) => x.name.toLowerCase() === d.k.name.toLowerCase());
   if (rvKnrDup(d.k.nr, c ? c.id : "")) {
@@ -98332,70 +98939,8 @@ async function rvFinish() {
   d.k.nr = c.nr;
   rvItemsSave(d, true);
   if (d.typ === "o") return anFinish(d);
-  const due = addDays(d.date, Number(d.z) || 14),
-    typ = d.typ || "r",
-    rec = {
-      kunde: d.k.name,
-      amt: typ === "g" ? -sum.pay : sum.pay,
-      nr: d.nr,
-      date: d.date,
-      z: Number(d.z) || 14,
-      due,
-      made: 1,
-      typ,
-      doc: JSON.parse(
-        JSON.stringify({
-          ...d,
-          id: undefined,
-        })
-      ),
-    };
-  if (typ === "g") {
-    rec.paid = d.date;
-    rec.gs = 1;
-  }
-  let id = d.id,
-    tgt = null;
-  if (id) {
-    tgt = rchList().find((x) => x.id === id);
-    if (tgt && tgt.locked) {
-      toast(uiText("rch_locked"));
-      return;
-    }
-    if (tgt) Object.assign(tgt, rec);
-  }
-  if (!tgt) {
-    id = "i" + Date.now().toString(36);
-    tgt = {
-      id,
-      ...rec,
-    };
-    rchList().push(tgt);
-  }
-  b.z = Number(d.z) || 14;
-  tgt.locked = new Date().toISOString();
-  await rvSeal(tgt);
-  rvLog("create", tgt.nr, (typ !== "r" ? typ + " · " : "") + fmtEur(tgt.amt) + " · " + (tgt.kunde || ""));
-  if (d.fromOffer) anAccepted(d.fromOffer, tgt);
-  if (d.recId) {
-    const r = rvRecs().find((x) => x.id === d.recId);
-    if (r) {
-      r.next = rvAddM(r.next, r.every);
-      r.src = id;
-    }
-  } else if (!d.id && typ === "r" && Number(d.rep) > 0) {
-    rvRecs().push({
-      id: "r" + Date.now().toString(36),
-      src: id,
-      every: Number(d.rep),
-      next: rvAddM(d.date, Number(d.rep)),
-      kunde: d.k.name,
-    });
-  }
-  try {
-    localStorage.removeItem("hb-rvdraft");
-  } catch (_) {}
-  await saveSettings();
+  const id = await rvCommit(d);
+  if (!id) return;
   SND.play("done");
   try {
     navigator.vibrate && navigator.vibrate([10, 40, 14]);
@@ -98435,6 +98980,70 @@ async function rvFinish() {
       n: d.nr,
     })
   );
+}
+/* Speichert und versiegelt eine fertige Rechnung – vom Editor und vom Ein-Tipp-Versand genutzt */
+async function rvCommit(d) {
+  const sum = rvSum(d),
+    due = addDays(d.date, Number(d.z) || 14),
+    typ = d.typ || "r",
+    rec = {
+      kunde: d.k.name,
+      amt: typ === "g" ? -sum.pay : sum.pay,
+      nr: d.nr,
+      date: d.date,
+      z: Number(d.z) || 14,
+      due,
+      made: 1,
+      typ,
+      doc: JSON.parse(
+        JSON.stringify({
+          ...d,
+          id: undefined,
+        })
+      ),
+    };
+  if (typ === "g") {
+    rec.paid = d.date;
+    rec.gs = 1;
+  }
+  let id = d.id,
+    tgt = null;
+  if (id) {
+    tgt = rchList().find((x) => x.id === id);
+    if (tgt && tgt.locked) {
+      toast(uiText("rch_locked"));
+      return null;
+    }
+    if (tgt) Object.assign(tgt, rec);
+  }
+  if (!tgt) {
+    id = "i" + Date.now().toString(36);
+    tgt = {
+      id,
+      ...rec,
+    };
+    rchList().push(tgt);
+  }
+  rvBiz().z = Number(d.z) || 14;
+  tgt.locked = new Date().toISOString();
+  await rvSeal(tgt);
+  rvLog("create", tgt.nr, (typ !== "r" ? typ + " · " : "") + fmtEur(tgt.amt) + " · " + (tgt.kunde || ""));
+  if (d.fromOffer) anAccepted(d.fromOffer, tgt);
+  if (d.recId) rvRecAfter(rvRecs().find((x) => x.id === d.recId), id, tgt.amt);
+  else if (!d.id && typ === "r" && rvEvery(d.rep))
+    rvRecs().push({
+      id: "r" + Date.now().toString(36),
+      src: id,
+      every: rvEvery(d.rep),
+      next: rvStep(d.date, rvEvery(d.rep)),
+      kunde: d.k.name,
+      amt: tgt.amt,
+    });
+  try {
+    localStorage.removeItem("hb-rvdraft");
+  } catch (_) {}
+  await saveSettings();
+  return id;
 }
 async function rvStorno(id) {
   const o = rchList().find((x) => x.id === id);
@@ -98868,21 +99477,6 @@ document.addEventListener("click", (e) => {
       hbSheetClose("rchBg");
     } catch (_) {}
     rvOpen();
-    return;
-  }
-  const rr = t.closest("[data-rvrec]");
-  if (rr) {
-    rvRecOpen(rr.dataset.rvrec);
-    return;
-  }
-  const rs = t.closest("[data-rvrecstop]");
-  if (rs) {
-    store.settings.rvRec = rvRecs().filter((x) => x.id !== rs.dataset.rvrecstop);
-    saveSettings();
-    try {
-      rchOpen2();
-    } catch (_) {}
-    toast(uiText("rv_rec_stopped"));
     return;
   }
   const sto = t.closest("[data-rvstorno]");
@@ -99437,7 +100031,7 @@ document.addEventListener("click", (e) => {
   const rp2 = t.closest("[data-rvrep]");
   if (rp2) {
     rvSync();
-    RV.d.rep = +rp2.dataset.rvrep;
+    RV.d.rep = rvEvery(rp2.dataset.rvrep);
     rvRender();
     SND.play("tick");
     return;
@@ -100853,6 +101447,328 @@ document.addEventListener("click", async (e) => {
       anOpen();
       render();
     });
+  }
+});
+
+/* Wiederkehrende Rechnungen: Serien verwalten (Pause, Ende, Preise) und fällige Rechnungen mit einem Tipp senden */
+const RS = { id: "", end: "0" };
+
+const rvEvery = (v) => (v === "w" ? "w" : [1, 3, 6, 12].includes(Number(v)) ? Number(v) : 0);
+const rvStep = (iso, e) => (e === "w" ? addDays(iso, 7) : rvAddM(iso, Number(e) || 1));
+const rvRecLive = (r) => !r.paused && !r.done;
+const rvRecPerM = (r) => (Number(r.amt) || 0) * (r.every === "w" ? 52 / 12 : 1 / (Number(r.every) || 1));
+
+function rvRecDoc(r) {
+  if (r.tpl) return r.tpl;
+  const i = rchList().find((x) => x.id === r.src);
+  return i && i.doc && !i.storno ? i.doc : null;
+}
+
+/* Leistungszeitraum der nächsten Rechnung, z. B. „Dezember 2026“ oder „Januar – März 2027“ */
+function rvRecLz(r, lg) {
+  const loc = lg === "en" ? "en-GB" : "de-DE",
+    D = (iso) => new Date(iso + "T12:00"),
+    num = (iso, y) =>
+      D(iso).toLocaleDateString(loc, y ? { day: "2-digit", month: "2-digit", year: "numeric" } : { day: "2-digit", month: "2-digit" }),
+    mon = (dt) => dt.toLocaleDateString(loc, { month: "long" }),
+    s = D(r.next),
+    endIso = addDays(rvStep(r.next, r.every), -1),
+    e = D(endIso);
+  if (r.every === "w") return `${num(r.next)} – ${num(endIso, 1)}`;
+  if (s.getDate() !== 1) return `${num(r.next, 1)} – ${num(endIso, 1)}`;
+  if (r.every === 1) return `${mon(s)} ${s.getFullYear()}`;
+  if (r.every === 12 && s.getMonth() === 0) return String(s.getFullYear());
+  return `${mon(s)}${s.getFullYear() !== e.getFullYear() ? " " + s.getFullYear() : ""} – ${mon(e)} ${e.getFullYear()}`;
+}
+
+function rvRecMake(r) {
+  const src = r && rvRecDoc(r);
+  if (!src) return null;
+  const d = JSON.parse(JSON.stringify(src));
+  delete d.fromOffer;
+  delete d.ref;
+  Object.assign(d, {
+    typ: "r",
+    nr: rchNextNr(),
+    date: isoToday(),
+    id: undefined,
+    recId: r.id,
+    rep: 0,
+    lz: rvRecLz(r, d.lang === "en" ? "en" : "de"),
+    abz: [],
+  });
+  return d;
+}
+
+/* Nach dem Versiegeln: Serie weiterschalten und ggf. beenden */
+function rvRecAfter(r, id, amt) {
+  if (!r) return;
+  r.src = id;
+  r.amt = amt;
+  delete r.tpl;
+  r.next = rvStep(r.next, r.every);
+  if (r.left !== undefined) r.left = Math.max(0, r.left - 1);
+  if (r.left === 0 || (r.until && r.next > r.until)) r.done = isoToday();
+}
+
+function rsRefresh() {
+  if ($("rchBg") && !$("rchBg").hidden) rchOpen2();
+  render();
+}
+const rsDay = (iso) => fxDate(iso, { day: "numeric", month: "short" });
+function rvRecState(r) {
+  if (r.done) return ["", uiText("rs_done", { d: rsDay(r.done) })];
+  if (r.paused) return ["", uiText("rs_paused", { d: rsDay(r.paused) })];
+  const n = daysTo(r.next),
+    bits = [uiText(n < 0 ? "rs_late" : "rs_next_d", { d: rsDay(r.next) })];
+  if (r.left !== undefined) bits.push(uiText("rs_left", { n: String(r.left) }));
+  else if (r.until) bits.push(uiText("rs_until", { d: rsDay(r.until) }));
+  return [n <= 3 ? (n < 0 ? "od" : "due") : "", bits.join(" · ")];
+}
+
+/* Abschnitt im Rechnungsfenster */
+function rvRecList() {
+  const L = rvRecs();
+  if (!L.length) return "";
+  const live = L.filter(rvRecLive),
+    perM = live.reduce((s, r) => s + rvRecPerM(r), 0),
+    ord = (r) => (r.done ? 2 : r.paused ? 1 : 0);
+  return `<div class="rvrecs"><div class="rsh"><b class="rvsub">${svgIcon("repeat", 16)} ${escHtml(uiText("rv_rec_h"))}</b><small>${escHtml(uiText("rs_sum", { n: String(live.length), b: fmtEur0(perM) }))}</small></div>${L.slice()
+    .sort((a, b) => ord(a) - ord(b) || String(a.next).localeCompare(String(b.next)))
+    .map((r) => {
+      const [c, s] = rvRecState(r),
+        id = escHtml(r.id),
+        due = rvRecLive(r) && daysTo(r.next) <= 3 && rvRecDoc(r);
+      return `<div class="rvrecr${rvRecLive(r) ? "" : " off"}" data-rvser="${id}" role="button" tabindex="0"><span class="rsic">${svgIcon(r.paused ? "pause" : r.done ? "check" : "repeat", 17)}</span><span class="grow"><b data-noi18n>${escHtml(r.kunde || "–")}</b><small>${escHtml(uiText(RV_EV[r.every] || "rv_rep_1"))} · <span class="${c}">${escHtml(s)}</span></small></span><span class="rsamt">${r.amt ? escHtml(fmtEur(r.amt)) : ""}</span>${due ? `<button type="button" class="btn sm primary" data-rvrec="${id}">${escHtml(uiText("rq_go"))}</button>` : ""}</div>`;
+    })
+    .join("")}</div>`;
+}
+
+/* Fenster einer Serie */
+function rvSerOpen(id, keep) {
+  const r = rvRecs().find((x) => x.id === id);
+  if (!r) return;
+  if (!keep) {
+    RS.id = id;
+    RS.end = r.left !== undefined ? "n" : r.until ? "d" : "0";
+    RS.every = r.every;
+  }
+  const doc = rvRecDoc(r),
+    [c, s] = rvRecState(r),
+    b = hbSheet("rsBg", r.kunde || uiText("rv_rec_h")),
+    chip = (k) =>
+      `<button type="button" class="${RS.every === k ? "on" : ""}" data-rsev="${k}">${escHtml(uiText(RV_EV[k]))}</button>`,
+    endB = (k, t) => `<button type="button" class="${RS.end === k ? "on" : ""}" data-rsend="${k}">${escHtml(uiText(t))}</button>`;
+  b.innerHTML = `<div class="rshero"><span class="rsic">${svgIcon("repeat", 22)}</span><span class="grow"><b>${r.amt ? escHtml(fmtEur(r.amt)) : "–"}</b><small><span class="${c}">${escHtml(s)}</span></small></span></div>
+    <div class="rsact">${
+      r.done
+        ? ""
+        : `<button type="button" class="btn" data-rspause>${svgIcon(r.paused ? "play" : "pause", 16)} ${escHtml(uiText(r.paused ? "rs_resume" : "rs_pause"))}</button>`
+    }${rvRecLive(r) && doc ? `<button type="button" class="btn primary" data-rvrec="${escHtml(r.id)}">${escHtml(uiText("rv_rec_now"))}</button>` : ""}</div>
+    <div class="rsf"><span>${escHtml(uiText("rs_every"))}</span><div class="erseg rsev">${["w", 1, 3, 6, 12].map(chip).join("")}</div></div>
+    <label class="rsf"><span>${escHtml(uiText("rs_next_l"))}</span><input class="in" type="date" id="rsNext" value="${escHtml(r.next)}"></label>
+    <div class="rsf"><span>${escHtml(uiText("rs_end"))}</span><div class="erseg">${endB("0", "rs_end_0")}${endB("n", "rs_end_n")}${endB("d", "rs_end_d")}</div>${
+      RS.end === "n"
+        ? `<label class="rsin"><input class="in" type="number" inputmode="numeric" min="1" max="999" id="rsCnt" value="${escHtml(String(r.left || 12))}"><small>${escHtml(uiText("rs_cnt"))}</small></label>`
+        : RS.end === "d"
+          ? `<label class="rsin"><input class="in" type="date" id="rsUntil" value="${escHtml(r.until || addDays(r.next, 365))}"></label>`
+          : ""
+    }</div>
+    ${
+      doc && doc.pos && doc.pos.length
+        ? `<div class="rsf"><span>${escHtml(uiText("rs_price"))}</span><div class="rspos">${doc.pos
+            .map(
+              (p, k) =>
+                `<label class="rsp"><span data-noi18n>${escHtml(p.n || "–")}${Number(p.q) !== 1 ? ` <small>× ${escHtml(String(p.q))}</small>` : ""}</span><input class="in" type="number" inputmode="decimal" step="0.01" data-rsp="${k}" value="${escHtml(String(round2(Number(p.p) || 0)))}" aria-label="${escHtml(p.n || "")}"><em>€</em></label>`
+            )
+            .join("")}</div><small class="rvhint">${escHtml(uiText("rs_price_s"))}</small></div>`
+        : ""
+    }
+    <button type="button" class="btn primary block" data-rssave>${escHtml(uiText("rs_save"))}</button>
+    <button type="button" class="btn ghost block rsdel" data-rsdel>${svgIcon("trash", 15)} ${escHtml(uiText("rs_del"))}</button>`;
+  if (!keep && !reducedMotion()) stbAnim(b, ".rshero,.rsact,.rsf,.btn.block");
+}
+
+async function rvSerSave(r) {
+  const b = $("rsBg");
+  if (!b) return;
+  const nx = (b.querySelector("#rsNext") || {}).value;
+  if (nx) r.next = nx;
+  r.every = RS.every;
+  delete r.left;
+  delete r.until;
+  if (RS.end === "n") r.left = Math.max(1, Math.round(Number((b.querySelector("#rsCnt") || {}).value) || 1));
+  if (RS.end === "d") r.until = (b.querySelector("#rsUntil") || {}).value || addDays(r.next, 365);
+  const doc = rvRecDoc(r),
+    inp = [...b.querySelectorAll("[data-rsp]")];
+  if (doc && inp.length) {
+    const t = JSON.parse(JSON.stringify(doc));
+    let ch = 0;
+    for (const e of inp) {
+      const p = t.pos[Number(e.dataset.rsp)],
+        v = round2(Number(String(e.value).replace(",", ".")));
+      if (p && isFinite(v) && v >= 0 && v !== round2(Number(p.p) || 0)) {
+        p.p = v;
+        ch = 1;
+      }
+    }
+    if (ch) {
+      r.tpl = t;
+      r.amt = rvSum(t).pay;
+    }
+  }
+  if (r.done && (!r.until || r.next <= r.until) && r.left !== 0) delete r.done;
+  else if (!r.done && r.until && r.next > r.until) r.done = isoToday();
+  await saveSettings();
+  SND.play("done");
+  hbSheetClose("rsBg");
+  rsRefresh();
+  toast(uiText("rs_saved"));
+}
+
+async function rvSerPause(r) {
+  if (r.paused) {
+    delete r.paused;
+    const t = isoToday();
+    while (r.next < t) r.next = rvStep(r.next, r.every);
+    toast(uiText("rs_resumed", { d: rsDay(r.next) }));
+  } else {
+    r.paused = isoToday();
+    toast(uiText("rs_paused_t"));
+  }
+  await saveSettings();
+  SND.play(r.paused ? "untick" : "tick");
+  rvSerOpen(r.id, 1);
+  rsRefresh();
+}
+
+/* Fällige Rechnung: fertig vorbereitet, ein Tipp zum Senden */
+const RQ = { d: null };
+function rvRecQuick(id) {
+  const r = rvRecs().find((x) => x.id === id),
+    d = r && rvRecMake(r);
+  if (!d) return;
+  RQ.d = d;
+  const sum = rvSum(d),
+    pos = d.pos || [],
+    b = hbSheet("rqBg", uiText("rq_h"));
+  b.innerHTML = `<div class="rqcard"><div class="rqtop"><b data-noi18n>${escHtml(d.nr)} · ${escHtml(d.k.name || "–")}</b><b class="rqamt">${escHtml(fmtEur(sum.pay))}</b></div>
+    <div class="rqpos" data-noi18n>${pos
+      .slice(0, 3)
+      .map((p) => `<span>${escHtml(p.n || "–")}</span>`)
+      .join("")}${pos.length > 3 ? `<small>${escHtml(uiText("rq_more", { n: String(pos.length - 3) }))}</small>` : ""}</div>
+    <div class="rqmeta"><span>${escHtml(uiText("rq_lz"))} <mark data-noi18n>${escHtml(d.lz)}</mark></span><span>${escHtml(uiText("rq_date"))} <mark>${escHtml(fxDate(d.date, { day: "2-digit", month: "2-digit", year: "numeric" }))}</mark></span></div>
+    <small class="rqnote">${escHtml(uiText("rq_filled"))}</small></div>
+    <div class="rqto"><small>${escHtml(uiText("rq_to"))}</small><span data-noi18n>${escHtml(d.k.email || uiText("rq_noto"))}</span></div>
+    <div class="rqbtn"><button type="button" class="btn" data-rqview>${escHtml(uiText("rq_view"))}</button><button type="button" class="btn primary" data-rqsend>${svgIcon("send", 16)} ${escHtml(uiText("rq_send"))}</button></div>`;
+  if (!reducedMotion()) stbAnim(b, ".rqcard,.rqto,.rqbtn");
+}
+
+async function rvRecSend(btn) {
+  const d = RQ.d;
+  if (!d) return;
+  RV.d = d;
+  const bad = rvCheck().find((c) => !c.ok);
+  if (bad) {
+    hbSheetClose("rqBg");
+    toast(uiText(bad.k) + " – " + uiText("rv_fix"));
+    setTimeout(() => rvOpen(d), 240);
+    return;
+  }
+  btn.disabled = true;
+  const id = await rvCommit(d);
+  if (!id) {
+    btn.disabled = false;
+    return;
+  }
+  RQ.d = null;
+  SND.play("done");
+  const card = $("rqBg") && $("rqBg").querySelector(".rqcard");
+  if (card && !reducedMotion())
+    await card
+      .animate(
+        [
+          { transform: "none", opacity: 1 },
+          { transform: "translateY(-18px) scale(.97)", opacity: 0 },
+        ],
+        { duration: 300, easing: "cubic-bezier(.5,0,.8,.3)", fill: "forwards" }
+      )
+      .finished.catch(() => {});
+  hbSheetClose("rqBg");
+  rchOpen2(id);
+  render();
+  toast(uiText("rv_saved", { n: d.nr }));
+  const c = rvKundeOf(d),
+    fmt = c && c.fmt;
+  if (fmt && !rvEinvMissing(d, fmt, c.lw || "").length) rvMail(d, rvOutFile(d, fmt, c.lw || ""));
+  else rvFmtAsk(d, "mail");
+}
+
+document.addEventListener("click", async (e) => {
+  const t = e.target,
+    rq = t.closest("[data-rvrec]");
+  if (rq) {
+    e.stopPropagation();
+    hbSheetClose("rsBg");
+    rvRecQuick(rq.dataset.rvrec);
+    return;
+  }
+  if (t.closest("[data-rqview]")) {
+    const d = RQ.d;
+    hbSheetClose("rqBg");
+    hbSheetClose("rchBg");
+    if (d) setTimeout(() => rvOpen(d), 240);
+    return;
+  }
+  const qs = t.closest("[data-rqsend]");
+  if (qs) {
+    rvRecSend(qs);
+    return;
+  }
+  const sr = t.closest("[data-rvser]");
+  if (sr) {
+    rvSerOpen(sr.dataset.rvser);
+    SND.play("tick");
+    return;
+  }
+  if (!t.closest("#rsBg")) return;
+  const r = rvRecs().find((x) => x.id === RS.id);
+  if (!r) return;
+  const ev = t.closest("[data-rsev]"),
+    en = t.closest("[data-rsend]");
+  if (ev || en) {
+    if (ev) RS.every = rvEvery(ev.dataset.rsev);
+    if (en) RS.end = en.dataset.rsend;
+    const b = $("rsBg"),
+      keep = {};
+    b.querySelectorAll("input[id],input[data-rsp]").forEach((i) => (keep[i.id || "p" + i.dataset.rsp] = i.value));
+    rvSerOpen(r.id, 1);
+    b.querySelectorAll("input[id],input[data-rsp]").forEach((i) => {
+      const k = i.id || "p" + i.dataset.rsp;
+      if (keep[k] !== undefined) i.value = keep[k];
+    });
+    SND.play("tick");
+  } else if (t.closest("[data-rspause]")) rvSerPause(r);
+  else if (t.closest("[data-rssave]")) rvSerSave(r);
+  else if (t.closest("[data-rsdel]")) {
+    const L = rvRecs(),
+      k = L.indexOf(r);
+    L.splice(k, 1);
+    await saveSettings();
+    hbSheetClose("rsBg");
+    rsRefresh();
+    toast(uiText("rs_deleted"), async () => {
+      L.splice(k, 0, r);
+      await saveSettings();
+      rsRefresh();
+    });
+  }
+});
+document.addEventListener("keydown", (e) => {
+  const sr = (e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest("[data-rvser]");
+  if (sr && e.target === sr) {
+    e.preventDefault();
+    rvSerOpen(sr.dataset.rvser);
   }
 });
 
@@ -102996,7 +103912,7 @@ function mbClose(later) {
 }
 function mbAct(x) {
   const k = x.k;
-  if (["price", "wb", "lohn", "rch", "kiz"].includes(k)) return hlAct(x);
+  if (["price", "wb", "lohn", "rch", "pm", "rvrec", "kiz"].includes(k)) return hlAct(x);
   if (k === "upd") {
     try {
       UPD.avail && UPD.avail.go();
