@@ -629,7 +629,6 @@ function renderYear() {
     self = T("selfInc");
   const tax = taxCalc(y),
     st = store.settings,
-    vat = (Number(st.vatRate) || 0) / 100,
     TS = taxStatus(y, tax);
   const endBal = yearCum(y + "-12").balance;
   const W = 680,
@@ -801,7 +800,7 @@ function renderYear() {
           ? ""
           : accRow("wk", "doc", "Steuererklärung", "Was du angeben kannst", wkSection(y), "Angaben")
     }
-    ${accRow("tax", "receipt", hasSelf() ? "Steuer &amp; Selbstständig" : "Steuer", `${hasSelf() ? `Gewinn ${escHtml(fmtEur0(tax.gewinn))} · ` : ""}${tax.due >= 0 ? `Nachzahlung ca. ${escHtml(fmtEur0(tax.due))}` : `Erstattung ca. ${escHtml(fmtEur0(-tax.due))}`}`, taxView(y, tax, st, self, vat, kuOver, resCover), Math.abs(tax.due) < 1 ? "± 0 €" : tax.due < 0 ? `+ ${fmtEur0(-tax.due)}` : `− ${fmtEur0(tax.due)}`)}
+    ${accRow("tax", "receipt", hasSelf() ? "Steuer &amp; Selbstständig" : "Steuer", `${hasSelf() ? `Gewinn ${escHtml(fmtEur0(tax.gewinn))} · ` : ""}${tax.due >= 0 ? `Nachzahlung ca. ${escHtml(fmtEur0(tax.due))}` : `Erstattung ca. ${escHtml(fmtEur0(-tax.due))}`}`, taxView(y, tax, st, self, kuOver, resCover), Math.abs(tax.due) < 1 ? "± 0 €" : tax.due < 0 ? `+ ${fmtEur0(-tax.due)}` : `− ${fmtEur0(tax.due)}`)}
     ${
       !hasSelf()
         ? ""

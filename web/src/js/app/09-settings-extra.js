@@ -240,6 +240,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.47.9",
+    "23. November 2026",
+    [
+      "Umsatzsteuer-Voranmeldung: Pro Monat oder Quartal zeigt die App Umsatzsteuer minus Vorsteuer und was ans Finanzamt geht – mit Abgabetermin, Dauerfristverlängerung und den Kennzahlen für ELSTER zum Kopieren.",
+      "Vorsteuer kommt aus Geschäftsausgaben, geschäftlichen Fixkosten und Eingangsrechnungen; den Steuersatz jeder Ausgabe kannst du mit einem Tipp ändern. Abgegebene Voranmeldungen hakst du ab, dann erinnert die App nicht mehr.",
+      "Der Umsatzsteuer-Bereich ist jetzt in allen Sprachen übersetzt.",
+    ],
+  ],
+  [
     "0.47.8",
     "22. November 2026",
     [

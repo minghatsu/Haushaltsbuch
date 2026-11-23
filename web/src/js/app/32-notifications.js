@@ -220,18 +220,30 @@ function notifyPlan() {
     if (c.tax && hasSelf() && incCats().some((x) => x.art === "selbst")) {
       for (const ym of [cur, nxt, shiftYm(cur, 2)]) {
         const [y, m] = ymParts(ym);
-        const vz = [3, 6, 9, 12].includes(m),
-          ust = !store.settings.kleinunternehmer;
-        if (vz || ust)
+        if ([3, 6, 9, 12].includes(m))
           add(
             "tax:" + ym,
             at(new Date(y, m - 1, 8), H),
             "Steuertermin am 10.",
-            [ust ? "Umsatzsteuer-Voranmeldung" : "", vz ? "Einkommensteuer-Vorauszahlung" : ""]
-              .filter(Boolean)
-              .join(" und ") + ` fällig am 10. ${MONTHS[m - 1]}.`
+            `Einkommensteuer-Vorauszahlung fällig am 10. ${MONTHS[m - 1]}.`
           );
       }
+      if (!store.settings.kleinunternehmer)
+        for (const k of ustPeriods(3)) {
+          if (ustCfg().done[k]) continue;
+          const due = ustDue(k),
+            [y, m, d] = due.split("-").map(Number);
+          add(
+            "ust:" + k,
+            at(new Date(y, m - 1, d - 2), H),
+            uiText("nf_ust_t"),
+            uiText("nf_ust_s", {
+              p: ustLabel(k, true),
+              a: fmtEur(Math.max(0, ustCalc(k).kz83)),
+              d: fxDate(due, { day: "numeric", month: "long" }),
+            })
+          );
+        }
     }
     if (c.br) {
       try {

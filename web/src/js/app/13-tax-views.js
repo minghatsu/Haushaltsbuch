@@ -1,5 +1,5 @@
 /* Steuer-Ansicht: Reiter + Kassenzettel */
-function taxView(y, tax, st, self, vat, kuOver, resCover) {
+function taxView(y, tax, st, self, kuOver, resCover) {
   const E = (v) => escHtml(fmtEur0(v)),
     KL = ["", "I", "II", "III", "IV", "V", "VI"][tax.kl] || "";
   const row = (l, v, info, sub, cls) =>
@@ -63,24 +63,17 @@ function taxView(y, tax, st, self, vat, kuOver, resCover) {
   ].join("");
   const ust = !hasSelf()
     ? ""
-    : `<div class="txr">${
-        st.kleinunternehmer
-          ? `
-      <p class="small muted" style="margin:0 0 10px">Als Kleinunternehmer schreibst du keine Umsatzsteuer auf deine Rechnungen – solange du unter der Umsatzgrenze bleibst.</p>
-      ${row("Einnahmen", E(self))}
-      <div class="meta-row" style="margin-top:8px"><span>Umsatzgrenze</span><span><b>${E(self)}</b> von ${E(st.kuLimit)}</span></div><div class="progress-big"><div class="fill" style="width:${Math.min(100, (self / (st.kuLimit || 1)) * 100)}%;background:${kuOver ? "var(--bad)" : self / (st.kuLimit || 1) > 0.8 ? "var(--warn)" : "var(--accent)"}"></div></div>
-      ${kuOver ? `<div class="notice bad" style="margin-top:10px">Grenze überschritten. Klär mit deinem Steuerbüro, ab wann du Umsatzsteuer berechnen musst.</div>` : ""}`
-          : `<p class="small muted" style="margin:0 0 10px">Die Umsatzsteuer schlägst du auf deine Rechnungen drauf und gibst sie ans Finanzamt weiter – sie gehört nicht dir.</p>
-      ${row("Einnahmen ohne Umsatzsteuer", E(self))}
-      ${row(`Umsatzsteuer ${escHtml(st.vatRate)} %`, E(self * vat), "Diesen Teil haben deine Kunden zusätzlich bezahlt – er geht ans Finanzamt.")}
-      <div class="txrow sum"><div class="txl"><span>Rechnungsbeträge gesamt</span><b>${E(self * (1 + vat))}</b></div></div>
-      <div class="txres due" style="margin-top:12px"><span class="e">${svgIcon("bank", 22)}</span><span><b>${E(self * vat)} ans Finanzamt</b><small>Ohne Vorsteuer gerechnet – die Umsatzsteuer auf deine eigenen Einkäufe darfst du abziehen.</small></span></div>`
-      }</div>`;
+    : st.kleinunternehmer
+      ? `<div class="txr">
+      <p class="small muted" style="margin:0 0 10px">${escHtml(uiText("ust_ku_p"))}</p>
+      ${row(escHtml(uiText("ust_ku_inc")), E(self))}
+      <div class="meta-row" style="margin-top:8px"><span>${escHtml(uiText("ust_ku_lim"))}</span><span>${escHtml(uiText("ust_ku_of", { a: fmtEur0(self), b: fmtEur0(st.kuLimit) }))}</span></div><div class="progress-big"><div class="fill" style="width:${Math.min(100, (self / (st.kuLimit || 1)) * 100)}%;background:${kuOver ? "var(--bad)" : self / (st.kuLimit || 1) > 0.8 ? "var(--warn)" : "var(--accent)"}"></div></div>
+      ${kuOver ? `<div class="notice bad" style="margin-top:10px">${escHtml(uiText("ust_ku_over"))}</div>` : ""}</div>`
+      : ustPanel();
   const tab = ui.txTab === "ust" && hasSelf() ? "ust" : "est";
-  return `<div class="txc" data-txt="${tab}">${hasSelf() ? `<div class="txtabs"><button type="button" data-txtab="est" class="${tab === "est" ? "on" : ""}">Einkommensteuer</button><button type="button" data-txtab="ust" class="${tab === "ust" ? "on" : ""}">${st.kleinunternehmer ? "Kleinunternehmer" : "Umsatzsteuer"}</button></div>` : ""}
-    <div class="txp" data-txp="est">${est}${steuer + paid >= 1 ? bar : ""}${res}<div class="txnotes">${notes}</div></div>
-    ${hasSelf() ? `<div class="txp" data-txp="ust">${ust}</div>` : ""}
-    <p class="small muted txfoot">Schätzung ${y} nach §32a EStG mit Soli, Kirchensteuer, Kinderfreibetrag und Gewerbesteuer-Anrechnung. Ohne Vorsteuer und Sonderfälle – ersetzt keine Steuerberatung.</p></div>`;
+  return `<div class="txc" data-txt="${tab}">${hasSelf() ? `<div class="txtabs"><button type="button" data-txtab="est" class="${tab === "est" ? "on" : ""}">${escHtml(uiText("tx_tab_est"))}</button><button type="button" data-txtab="ust" class="${tab === "ust" ? "on" : ""}">${escHtml(uiText(st.kleinunternehmer ? "tx_tab_ku" : "tx_tab_ust"))}</button></div>` : ""}
+    <div class="txp" data-txp="est">${est}${steuer + paid >= 1 ? bar : ""}${res}<div class="txnotes">${notes}</div><p class="small muted txfoot">Schätzung ${y} nach §32a EStG mit Soli, Kirchensteuer, Kinderfreibetrag und Gewerbesteuer-Anrechnung. Ohne Vorsteuer und Sonderfälle – ersetzt keine Steuerberatung.</p></div>
+    ${hasSelf() ? `<div class="txp" data-txp="ust">${ust}</div>` : ""}</div>`;
 }
 document.addEventListener("click", (e) => {
   const t = e.target.closest("[data-txtab]");

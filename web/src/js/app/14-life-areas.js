@@ -569,6 +569,24 @@ function renderBeruf() {
         "data-eropen"
       )
     );
+    if (!store.settings.kleinunternehmer) {
+      const uk = ustPeriods(2).find((k) => !ustCfg().done[k] && k !== ustPeriods(1)[0]);
+      (duo ? exB : extra).push(
+        areaTile(
+          svgIcon("doctax", 22),
+          escHtml(uiText("tx_tab_ust")),
+          uk
+            ? escHtml(
+                uiText("ust_tile", {
+                  a: fmtEur0(Math.max(0, ustCalc(uk).kz83)),
+                  d: fxDate(ustDue(uk), { day: "numeric", month: "short" }),
+                })
+              )
+            : escHtml(uiText("ust_tile_ok")),
+          "data-ustopen"
+        )
+      );
+    }
   }
   {
     const BL = brList().filter((x) => !x.done),

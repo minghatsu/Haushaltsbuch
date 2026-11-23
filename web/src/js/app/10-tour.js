@@ -1664,6 +1664,20 @@ function ptourOpen(v) {
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
   {
+    v: "0.47.9",
+    s: () =>
+      hasSelf() && !store.settings.kleinunternehmer
+        ? [
+            {
+              sel: '[data-view="beruf"] [data-ustopen].atile',
+              ic: "doctax",
+              t: uiText("nw_ust_t"),
+              p: [uiText("nw_ust_p")],
+            },
+          ]
+        : [],
+  },
+  {
     v: "0.47.8",
     s: () =>
       hasSelf()

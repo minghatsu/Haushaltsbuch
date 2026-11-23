@@ -14784,6 +14784,164 @@ html[lang="ar"] body *:not(#langBg):not(#langBg *) {
   margin: 12px 2px 0;
 }
 
+/* Umsatzsteuer-Voranmeldung */
+.ustbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.ustbar .ustseg {
+  flex: 1;
+  margin: 0;
+}
+.ustsum {
+  margin-bottom: 10px;
+}
+.ustdue {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--sunk);
+  margin-bottom: 14px;
+}
+.ustdue.due .eric {
+  color: var(--warn);
+}
+.ustdue.od .eric {
+  color: var(--bad);
+}
+.ustdue.ok .eric {
+  color: var(--good);
+}
+.ustp {
+  margin: 2px 0 10px;
+}
+.ustkz {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px 10px 14px;
+  border-radius: 14px;
+  background: var(--sunk);
+  margin-bottom: 6px;
+}
+.ustkz small {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.ustkz b {
+  display: block;
+  font-size: 17px;
+  font-weight: 800;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.ustkz .btn {
+  flex: none;
+}
+.ustmore {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  width: 100%;
+  margin: 10px 0 6px;
+  padding: 10px 2px;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.ustmore b {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 800;
+}
+.ustmore small {
+  order: 3;
+  width: 100%;
+  font-size: 12px;
+  color: var(--warn);
+  font-weight: 700;
+}
+.ustvl {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.ustv {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px 9px 12px;
+  border-radius: 14px;
+  background: var(--sunk);
+}
+.ustv > span:first-child {
+  min-width: 0;
+}
+.ustv b {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ustv small {
+  display: block;
+  font-size: 11.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.ustv em {
+  flex: none;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent);
+}
+.ustr {
+  display: flex;
+  flex: none;
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 2px;
+}
+.ustr.guess {
+  box-shadow: 0 0 0 1.5px var(--warn) inset;
+}
+.ustr button {
+  border: 0;
+  background: none;
+  font: 700 12px var(--f-body);
+  color: var(--muted);
+  padding: 5px 7px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.ustr button.on {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.ustdfv {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  margin: 6px 0 12px;
+}
+
 /* Homeoffice */
 .hobg {
   position: fixed;
@@ -50308,6 +50466,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.47.9",
+    "23. November 2026",
+    [
+      "Umsatzsteuer-Voranmeldung: Pro Monat oder Quartal zeigt die App Umsatzsteuer minus Vorsteuer und was ans Finanzamt geht – mit Abgabetermin, Dauerfristverlängerung und den Kennzahlen für ELSTER zum Kopieren.",
+      "Vorsteuer kommt aus Geschäftsausgaben, geschäftlichen Fixkosten und Eingangsrechnungen; den Steuersatz jeder Ausgabe kannst du mit einem Tipp ändern. Abgegebene Voranmeldungen hakst du ab, dann erinnert die App nicht mehr.",
+      "Der Umsatzsteuer-Bereich ist jetzt in allen Sprachen übersetzt.",
+    ],
+  ],
+  [
     "0.47.8",
     "22. November 2026",
     [
@@ -52743,6 +52910,20 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.47.9",
+    s: () =>
+      hasSelf() && !store.settings.kleinunternehmer
+        ? [
+            {
+              sel: '[data-view="beruf"] [data-ustopen].atile',
+              ic: "doctax",
+              t: uiText("nw_ust_t"),
+              p: [uiText("nw_ust_p")],
+            },
+          ]
+        : [],
+  },
   {
     v: "0.47.8",
     s: () =>
@@ -55500,7 +55681,7 @@ addEventListener("resize", () => {
 });
 
 /* Steuer-Ansicht: Reiter + Kassenzettel */
-function taxView(y, tax, st, self, vat, kuOver, resCover) {
+function taxView(y, tax, st, self, kuOver, resCover) {
   const E = (v) => escHtml(fmtEur0(v)),
     KL = ["", "I", "II", "III", "IV", "V", "VI"][tax.kl] || "";
   const row = (l, v, info, sub, cls) =>
@@ -55564,24 +55745,17 @@ function taxView(y, tax, st, self, vat, kuOver, resCover) {
   ].join("");
   const ust = !hasSelf()
     ? ""
-    : `<div class="txr">${
-        st.kleinunternehmer
-          ? `
-      <p class="small muted" style="margin:0 0 10px">Als Kleinunternehmer schreibst du keine Umsatzsteuer auf deine Rechnungen – solange du unter der Umsatzgrenze bleibst.</p>
-      ${row("Einnahmen", E(self))}
-      <div class="meta-row" style="margin-top:8px"><span>Umsatzgrenze</span><span><b>${E(self)}</b> von ${E(st.kuLimit)}</span></div><div class="progress-big"><div class="fill" style="width:${Math.min(100, (self / (st.kuLimit || 1)) * 100)}%;background:${kuOver ? "var(--bad)" : self / (st.kuLimit || 1) > 0.8 ? "var(--warn)" : "var(--accent)"}"></div></div>
-      ${kuOver ? `<div class="notice bad" style="margin-top:10px">Grenze überschritten. Klär mit deinem Steuerbüro, ab wann du Umsatzsteuer berechnen musst.</div>` : ""}`
-          : `<p class="small muted" style="margin:0 0 10px">Die Umsatzsteuer schlägst du auf deine Rechnungen drauf und gibst sie ans Finanzamt weiter – sie gehört nicht dir.</p>
-      ${row("Einnahmen ohne Umsatzsteuer", E(self))}
-      ${row(`Umsatzsteuer ${escHtml(st.vatRate)} %`, E(self * vat), "Diesen Teil haben deine Kunden zusätzlich bezahlt – er geht ans Finanzamt.")}
-      <div class="txrow sum"><div class="txl"><span>Rechnungsbeträge gesamt</span><b>${E(self * (1 + vat))}</b></div></div>
-      <div class="txres due" style="margin-top:12px"><span class="e">${svgIcon("bank", 22)}</span><span><b>${E(self * vat)} ans Finanzamt</b><small>Ohne Vorsteuer gerechnet – die Umsatzsteuer auf deine eigenen Einkäufe darfst du abziehen.</small></span></div>`
-      }</div>`;
+    : st.kleinunternehmer
+      ? `<div class="txr">
+      <p class="small muted" style="margin:0 0 10px">${escHtml(uiText("ust_ku_p"))}</p>
+      ${row(escHtml(uiText("ust_ku_inc")), E(self))}
+      <div class="meta-row" style="margin-top:8px"><span>${escHtml(uiText("ust_ku_lim"))}</span><span>${escHtml(uiText("ust_ku_of", { a: fmtEur0(self), b: fmtEur0(st.kuLimit) }))}</span></div><div class="progress-big"><div class="fill" style="width:${Math.min(100, (self / (st.kuLimit || 1)) * 100)}%;background:${kuOver ? "var(--bad)" : self / (st.kuLimit || 1) > 0.8 ? "var(--warn)" : "var(--accent)"}"></div></div>
+      ${kuOver ? `<div class="notice bad" style="margin-top:10px">${escHtml(uiText("ust_ku_over"))}</div>` : ""}</div>`
+      : ustPanel();
   const tab = ui.txTab === "ust" && hasSelf() ? "ust" : "est";
-  return `<div class="txc" data-txt="${tab}">${hasSelf() ? `<div class="txtabs"><button type="button" data-txtab="est" class="${tab === "est" ? "on" : ""}">Einkommensteuer</button><button type="button" data-txtab="ust" class="${tab === "ust" ? "on" : ""}">${st.kleinunternehmer ? "Kleinunternehmer" : "Umsatzsteuer"}</button></div>` : ""}
-    <div class="txp" data-txp="est">${est}${steuer + paid >= 1 ? bar : ""}${res}<div class="txnotes">${notes}</div></div>
-    ${hasSelf() ? `<div class="txp" data-txp="ust">${ust}</div>` : ""}
-    <p class="small muted txfoot">Schätzung ${y} nach §32a EStG mit Soli, Kirchensteuer, Kinderfreibetrag und Gewerbesteuer-Anrechnung. Ohne Vorsteuer und Sonderfälle – ersetzt keine Steuerberatung.</p></div>`;
+  return `<div class="txc" data-txt="${tab}">${hasSelf() ? `<div class="txtabs"><button type="button" data-txtab="est" class="${tab === "est" ? "on" : ""}">${escHtml(uiText("tx_tab_est"))}</button><button type="button" data-txtab="ust" class="${tab === "ust" ? "on" : ""}">${escHtml(uiText(st.kleinunternehmer ? "tx_tab_ku" : "tx_tab_ust"))}</button></div>` : ""}
+    <div class="txp" data-txp="est">${est}${steuer + paid >= 1 ? bar : ""}${res}<div class="txnotes">${notes}</div><p class="small muted txfoot">Schätzung ${y} nach §32a EStG mit Soli, Kirchensteuer, Kinderfreibetrag und Gewerbesteuer-Anrechnung. Ohne Vorsteuer und Sonderfälle – ersetzt keine Steuerberatung.</p></div>
+    ${hasSelf() ? `<div class="txp" data-txp="ust">${ust}</div>` : ""}</div>`;
 }
 document.addEventListener("click", (e) => {
   const t = e.target.closest("[data-txtab]");
@@ -56211,6 +56385,258 @@ function kundenView(y) {
     <p class="small muted" style="margin:10px 2px 0">Gesamt ${E(tot)} ohne Umsatzsteuer · Kunden werden am Namen in deinen Einnahmen erkannt.</p>`;
 }
 
+/* Umsatzsteuer-Voranmeldung: Zahllast pro Monat oder Quartal und die ELSTER-Kennzahlen */
+const UST = {
+  key: null,
+  more: false,
+};
+const UST_ZERO = /versicherung|gebühr|gebuehr|bank|konto|zins|porto|steuer|beitrag|miete|kammer|rundfunk/i,
+  UST_LOW = /buch|bücher|zeitung|zeitschrift|fachliteratur|lebensmittel/i;
+function ustCfg() {
+  const s = store.settings;
+  return { q: s.ustPeriod === "q", dfv: !!s.ustDfv, done: s.ustDone || {} };
+}
+function ustKeyOf(ym, q) {
+  const [y, m] = ymParts(ym);
+  return q ? `${y}-Q${Math.ceil(m / 3)}` : ym;
+}
+function ustMonths(key) {
+  const m = key.match(/^(\d{4})-Q(\d)$/);
+  if (!m) return [key];
+  return [1, 2, 3].map((i) => `${m[1]}-${pad((Number(m[2]) - 1) * 3 + i)}`);
+}
+function ustPeriods(n) {
+  const q = ustCfg().q,
+    out = [];
+  let ym = isoToday().slice(0, 7);
+  while (out.length < n) {
+    const k = ustKeyOf(ym, q);
+    if (!out.includes(k)) out.push(k);
+    ym = shiftYm(ym, -1);
+  }
+  return out.reverse();
+}
+function ustDue(key) {
+  const last = ustMonths(key).pop(),
+    [y, m] = ymParts(shiftYm(last, ustCfg().dfv ? 2 : 1));
+  return `${y}-${pad(m)}-10`;
+}
+function ustLabel(key, long) {
+  const M = ustMonths(key),
+    [y, m] = ymParts(M[0]);
+  if (M.length === 3) return `Q${Math.ceil(m / 3)}${long ? " " + y : ""}`;
+  return fxDate(M[0] + "-15", long ? { month: "long", year: "numeric" } : { month: "short" });
+}
+function ustGuessRate(name) {
+  const def = Number(store.settings.vatRate) || 19;
+  if (UST_ZERO.test(name || "")) return 0;
+  if (UST_LOW.test(name || "")) return 7;
+  return def;
+}
+const ustVat = (gross, r) => round2(gross - gross / (1 + r / 100));
+
+/* Ausgangs- und Vorsteuer eines Zeitraums */
+function ustCalc(key) {
+  const M = ustMonths(key),
+    inP = (d) => M.includes(String(d || "").slice(0, 7)),
+    def = Number(store.settings.vatRate) || 19,
+    out = {},
+    vst = [];
+  const addOut = (r, net, vat) => {
+    const o = (out[r] = out[r] || { net: 0, vat: 0 });
+    o.net = round2(o.net + net);
+    o.vat = round2(o.vat + vat);
+  };
+  const inv = new Map();
+  for (const i of rchList()) {
+    if (!i.doc) continue;
+    if (i.paidTx) inv.set(i.paidTx, i);
+    for (const p of i.parts || []) if (p.tx) inv.set(p.tx, i);
+  }
+  for (const t of store.tx) {
+    if (!inP(t.date)) continue;
+    if (t.kind === "einnahme" && incArt(t.cat) === "selbst") {
+      const net = t.net != null ? Number(t.net) || 0 : round2(t.amount / (1 + def / 100)),
+        vat = round2(t.amount - net),
+        i = inv.get(t.id),
+        G = i ? rvSum(i.doc).groups.filter((g) => g.net) : [];
+      const tot = G.reduce((s, g) => s + Math.abs(g.net), 0);
+      if (G.length > 1 && tot) {
+        let restN = net,
+          restV = vat;
+        G.forEach((g, k) => {
+          const share = Math.abs(g.net) / tot,
+            last = k === G.length - 1,
+            n = last ? restN : round2(net * share),
+            v = last ? restV : round2(vat * share);
+          restN = round2(restN - n);
+          restV = round2(restV - v);
+          addOut(g.rate, n, v);
+        });
+      } else addOut(G.length ? G[0].rate : def, net, vat);
+    }
+  }
+  const erTx = new Set();
+  for (const i of erList()) {
+    if (i.tx) erTx.add(i.tx);
+    if (!i.paid || !inP(i.paid) || i.typ === "g") continue;
+    vst.push({ k: "er:" + i.id, name: i.from || i.nr, gross: i.pay, vat: round2(i.vat), fixed: true });
+  }
+  for (const t of store.tx) {
+    if (!inP(t.date) || t.kind !== "betrieb" || erTx.has(t.id)) continue;
+    const r = t.vr != null ? Number(t.vr) : ustGuessRate(t.cat + " " + (t.note || ""));
+    vst.push({
+      k: "t:" + t.id,
+      name: t.note || t.cat,
+      gross: t.amount,
+      r,
+      vat: ustVat(t.amount, r),
+      guess: t.vr == null,
+    });
+  }
+  for (const ym of M) {
+    const paid = (store.months[ym] && store.months[ym].paid) || {};
+    for (const [fid, amt] of Object.entries(paid)) {
+      const f = store.fixed.find((x) => x.id === fid);
+      if (!f || f.kind !== "betrieb") continue;
+      const r = f.vr != null ? Number(f.vr) : ustGuessRate(f.name + " " + (f.cat || ""));
+      vst.push({
+        k: "f:" + fid,
+        name: f.name,
+        gross: Number(amt) || 0,
+        r,
+        vat: ustVat(Number(amt) || 0, r),
+        guess: f.vr == null,
+      });
+    }
+  }
+  const n19 = Math.floor((out[19] && out[19].net) || 0),
+    n7 = Math.floor((out[7] && out[7].net) || 0),
+    v66 = round2(vst.reduce((s, x) => s + x.vat, 0)),
+    other = Object.keys(out)
+      .map(Number)
+      .filter((r) => r !== 19 && r !== 7 && out[r].vat);
+  return {
+    out,
+    vst,
+    v66,
+    kz81: n19,
+    kz86: n7,
+    kz83: round2(n19 * 0.19 + n7 * 0.07 - v66),
+    other,
+    outVat: round2(Object.values(out).reduce((s, o) => s + o.vat, 0)),
+  };
+}
+
+/* Ansicht im Steuer-Reiter */
+function ustPanel() {
+  const st = store.settings,
+    cfg = ustCfg(),
+    P = ustPeriods(cfg.q ? 4 : 4);
+  if (!UST.key || !P.includes(UST.key)) UST.key = P[P.length - 2] || P[0];
+  const key = UST.key,
+    c = ustCalc(key),
+    due = ustDue(key),
+    done = cfg.done[key],
+    days = daysTo(due),
+    E = (v) => escHtml(fmtEur(v)),
+    open = key === P[P.length - 1],
+    kz = (n, label, v, cents) =>
+      `<div class="ustkz"><span><small>Kz ${n} · ${escHtml(uiText(label))}</small><b data-noi18n>${escHtml(cents ? v.toFixed(2).replace(".", ",") : String(v))}</b></span><button type="button" class="btn sm" data-ustcopy="${escHtml(cents ? v.toFixed(2).replace(".", ",") : String(v))}">${svgIcon("copy", 13)} ${escHtml(uiText("er_copy"))}</button></div>`;
+  return `<div class="txr">
+    <div class="ustbar"><div class="erseg ustseg">${P.map((k) => `<button type="button" class="${k === key ? "on" : ""}" data-ustk="${k}">${escHtml(ustLabel(k))}${cfg.done[k] ? " ✓" : ""}</button>`).join("")}</div>
+    <button type="button" class="btn sm ghost" data-ustq>${escHtml(uiText(cfg.q ? "ust_q" : "ust_m"))}</button></div>
+    <div class="erpos ustsum"><div class="h"><span>${escHtml(ustLabel(key, true))}${open ? " · " + escHtml(uiText("ust_running")) : ""}</span><span></span></div>
+      <div><span>${escHtml(uiText("ust_out"))}</span><span>+ ${E(c.outVat)}</span></div>
+      <div><span>${escHtml(uiText("ust_in"))}</span><span>− ${E(c.v66)}</span></div>
+      <div class="t"><b>${escHtml(uiText(c.kz83 < 0 ? "ust_back" : "ust_pay"))}</b><b>${E(Math.abs(c.kz83))}</b></div></div>
+    <div class="ustdue ${done ? "ok" : days < 0 ? "od" : days <= 5 ? "due" : ""}"><span class="eric">${svgIcon(done ? "check" : "cal", 20)}</span><span class="ern"><b>${escHtml(done ? uiText("ust_done_on", { d: fxDate(done, { day: "numeric", month: "long" }) }) : uiText("ust_due", { d: fxDate(due, { day: "numeric", month: "long" }) }))}</b><small>${escHtml(uiText(done ? "ust_done_s" : open ? "ust_open_s" : "ust_due_s"))}</small></span></div>
+    <div class="sec-mini">${escHtml(uiText("ust_elster"))}</div>
+    <p class="small muted ustp">${escHtml(uiText("ust_elster_s"))}</p>
+    ${kz(81, "ust_k81", c.kz81)}${c.kz86 || (c.out[7] && c.out[7].net) ? kz(86, "ust_k86", c.kz86) : ""}${kz(66, "ust_k66", c.v66, 1)}${kz(83, "ust_k83", c.kz83, 1)}
+    ${c.other.length ? `<div class="notice warn"><span>${escHtml(uiText("ust_other", { r: c.other.join(" %, ") + " %" }))}</span></div>` : ""}
+    <button type="button" class="ustmore" data-ustmore aria-expanded="${UST.more}"><b>${escHtml(uiText("ust_vst_h", { n: String(c.vst.length) }))}</b>${c.vst.some((x) => x.guess) ? `<small>${escHtml(uiText("ust_vst_guess"))}</small>` : ""}${svgIcon(UST.more ? "up" : "down", 16)}</button>
+    ${
+      UST.more
+        ? `<div class="ustvl">${
+            c.vst
+              .map(
+                (x) =>
+                  `<div class="ustv"><span><b data-noi18n>${escHtml(x.name || "–")}</b><small>${E(x.gross)} → ${escHtml(uiText("ust_vst"))} ${E(x.vat)}</small></span>${
+                    x.fixed
+                      ? `<em>${escHtml(uiText("er_fmt_xr"))}</em>`
+                      : `<span class="ustr ${x.guess ? "guess" : ""}">${[19, 7, 0].map((r) => `<button type="button" class="${x.r === r ? "on" : ""}" data-ustr="${escHtml(x.k)}" data-r="${r}">${r} %</button>`).join("")}</span>`
+                  }</div>`
+              )
+              .join("") || `<p class="small muted">${escHtml(uiText("ust_vst_none"))}</p>`
+          }</div>`
+        : ""
+    }
+    <label class="ustdfv"><input type="checkbox" data-ustdfv ${cfg.dfv ? "checked" : ""}> <span>${escHtml(uiText("ust_dfv"))}</span></label>
+    ${open ? "" : `<button type="button" class="btn ${done ? "" : "primary"} block" data-ustdone>${escHtml(uiText(done ? "ust_undo" : "ust_mark"))}</button>`}
+    <p class="small muted ustp">${escHtml(uiText("ust_foot"))}</p></div>`;
+}
+function ustRefresh() {
+  const p = document.querySelector('.txp[data-txp="ust"]');
+  if (p) p.innerHTML = ustPanel();
+}
+async function ustSetRate(k, r) {
+  const [kind, id] = k.split(":");
+  if (kind === "t") {
+    const t = store.tx.find((x) => x.id === id);
+    if (t) await safe(() => saveTxDoc(t.id, { ...plainTx(t), vr: r }, t));
+  } else if (kind === "f") {
+    const f = store.fixed.find((x) => x.id === id);
+    if (f) {
+      const d = { ...f, vr: r };
+      delete d.id;
+      await safe(() => saveDoc("fixed", id, d));
+    }
+  }
+}
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  if (t.closest("[data-ustopen]")) {
+    ui.txTab = "ust";
+    anaOpen("tax");
+    return;
+  }
+  if (!t.closest('.txp[data-txp="ust"]')) return;
+  const k = t.closest("[data-ustk]"),
+    r = t.closest("[data-ustr]"),
+    cp = t.closest("[data-ustcopy]");
+  if (k) {
+    UST.key = k.dataset.ustk;
+    SND.play("tick");
+  } else if (t.closest("[data-ustq]")) {
+    store.settings.ustPeriod = ustCfg().q ? "m" : "q";
+    UST.key = null;
+    await saveSettings();
+  } else if (t.closest("[data-ustmore]")) UST.more = !UST.more;
+  else if (r) await ustSetRate(r.dataset.ustr, Number(r.dataset.r));
+  else if (cp) {
+    try {
+      await navigator.clipboard.writeText(cp.dataset.ustcopy);
+      toast(uiText("va_copied"));
+    } catch (_) {}
+    return;
+  } else if (t.closest("[data-ustdone]")) {
+    const d = { ...(store.settings.ustDone || {}) };
+    if (d[UST.key]) delete d[UST.key];
+    else d[UST.key] = isoToday();
+    store.settings.ustDone = d;
+    await saveSettings();
+    SND.play(d[UST.key] ? "done" : "untick");
+  } else return;
+  ustRefresh();
+});
+document.addEventListener("change", async (e) => {
+  if (!e.target.matches("[data-ustdfv]")) return;
+  store.settings.ustDfv = e.target.checked;
+  await saveSettings();
+  ustRefresh();
+});
+
 /* Lebensbereiche: Haushalt · Beruf · Sparen · Einkauf */
 const AREA_PARENT = {
   home: "home",
@@ -56782,6 +57208,24 @@ function renderBeruf() {
         "data-eropen"
       )
     );
+    if (!store.settings.kleinunternehmer) {
+      const uk = ustPeriods(2).find((k) => !ustCfg().done[k] && k !== ustPeriods(1)[0]);
+      (duo ? exB : extra).push(
+        areaTile(
+          svgIcon("doctax", 22),
+          escHtml(uiText("tx_tab_ust")),
+          uk
+            ? escHtml(
+                uiText("ust_tile", {
+                  a: fmtEur0(Math.max(0, ustCalc(uk).kz83)),
+                  d: fxDate(ustDue(uk), { day: "numeric", month: "short" }),
+                })
+              )
+            : escHtml(uiText("ust_tile_ok")),
+          "data-ustopen"
+        )
+      );
+    }
   }
   {
     const BL = brList().filter((x) => !x.done),
@@ -69043,7 +69487,6 @@ function renderYear() {
     self = T("selfInc");
   const tax = taxCalc(y),
     st = store.settings,
-    vat = (Number(st.vatRate) || 0) / 100,
     TS = taxStatus(y, tax);
   const endBal = yearCum(y + "-12").balance;
   const W = 680,
@@ -69215,7 +69658,7 @@ function renderYear() {
           ? ""
           : accRow("wk", "doc", "Steuererklärung", "Was du angeben kannst", wkSection(y), "Angaben")
     }
-    ${accRow("tax", "receipt", hasSelf() ? "Steuer &amp; Selbstständig" : "Steuer", `${hasSelf() ? `Gewinn ${escHtml(fmtEur0(tax.gewinn))} · ` : ""}${tax.due >= 0 ? `Nachzahlung ca. ${escHtml(fmtEur0(tax.due))}` : `Erstattung ca. ${escHtml(fmtEur0(-tax.due))}`}`, taxView(y, tax, st, self, vat, kuOver, resCover), Math.abs(tax.due) < 1 ? "± 0 €" : tax.due < 0 ? `+ ${fmtEur0(-tax.due)}` : `− ${fmtEur0(tax.due)}`)}
+    ${accRow("tax", "receipt", hasSelf() ? "Steuer &amp; Selbstständig" : "Steuer", `${hasSelf() ? `Gewinn ${escHtml(fmtEur0(tax.gewinn))} · ` : ""}${tax.due >= 0 ? `Nachzahlung ca. ${escHtml(fmtEur0(tax.due))}` : `Erstattung ca. ${escHtml(fmtEur0(-tax.due))}`}`, taxView(y, tax, st, self, kuOver, resCover), Math.abs(tax.due) < 1 ? "± 0 €" : tax.due < 0 ? `+ ${fmtEur0(-tax.due)}` : `− ${fmtEur0(tax.due)}`)}
     ${
       !hasSelf()
         ? ""
@@ -70533,18 +70976,30 @@ function notifyPlan() {
     if (c.tax && hasSelf() && incCats().some((x) => x.art === "selbst")) {
       for (const ym of [cur, nxt, shiftYm(cur, 2)]) {
         const [y, m] = ymParts(ym);
-        const vz = [3, 6, 9, 12].includes(m),
-          ust = !store.settings.kleinunternehmer;
-        if (vz || ust)
+        if ([3, 6, 9, 12].includes(m))
           add(
             "tax:" + ym,
             at(new Date(y, m - 1, 8), H),
             "Steuertermin am 10.",
-            [ust ? "Umsatzsteuer-Voranmeldung" : "", vz ? "Einkommensteuer-Vorauszahlung" : ""]
-              .filter(Boolean)
-              .join(" und ") + ` fällig am 10. ${MONTHS[m - 1]}.`
+            `Einkommensteuer-Vorauszahlung fällig am 10. ${MONTHS[m - 1]}.`
           );
       }
+      if (!store.settings.kleinunternehmer)
+        for (const k of ustPeriods(3)) {
+          if (ustCfg().done[k]) continue;
+          const due = ustDue(k),
+            [y, m, d] = due.split("-").map(Number);
+          add(
+            "ust:" + k,
+            at(new Date(y, m - 1, d - 2), H),
+            uiText("nf_ust_t"),
+            uiText("nf_ust_s", {
+              p: ustLabel(k, true),
+              a: fmtEur(Math.max(0, ustCalc(k).kz83)),
+              d: fxDate(due, { day: "numeric", month: "long" }),
+            })
+          );
+        }
     }
     if (c.br) {
       try {
@@ -85779,6 +86234,389 @@ const TEXTS = {
     "Ostatnie wezwanie",
     "الإنذار الأخير",
     "Ultima somație",
+  ],
+  tx_tab_est: [
+    "Einkommensteuer",
+    "Income tax",
+    "Gelir vergisi",
+    "Подоходный налог",
+    "Податок на доходи",
+    "Podatek dochodowy",
+    "ضريبة الدخل",
+    "Impozit pe venit",
+  ],
+  tx_tab_ust: ["Umsatzsteuer", "VAT", "KDV", "НДС", "ПДВ", "VAT", "ضريبة القيمة المضافة", "TVA"],
+  tx_tab_ku: [
+    "Kleinunternehmer",
+    "Small business",
+    "Küçük işletme",
+    "Малый бизнес",
+    "Малий бізнес",
+    "Mały przedsiębiorca",
+    "مشروع صغير",
+    "Mic întreprinzător",
+  ],
+  ust_ku_p: [
+    "Als Kleinunternehmer schreibst du keine Umsatzsteuer auf deine Rechnungen – solange du unter der Umsatzgrenze bleibst.",
+    "As a small business you don’t charge VAT on your invoices – as long as you stay below the turnover limit.",
+    "Küçük işletme olarak faturalarına KDV yazmazsın – ciro sınırının altında kaldığın sürece.",
+    "Как малый предприниматель ты не указываешь НДС в счетах – пока не превышен лимит оборота.",
+    "Як малий підприємець ти не вказуєш ПДВ у рахунках – доки не перевищено ліміт обороту.",
+    "Jako mały przedsiębiorca nie doliczasz VAT do faktur – dopóki nie przekroczysz limitu obrotu.",
+    "بصفتك مشروعًا صغيرًا لا تضيف الضريبة إلى فواتيرك – طالما بقيت تحت حد المبيعات.",
+    "Ca mic întreprinzător nu pui TVA pe facturi – cât timp rămâi sub plafonul de cifră de afaceri.",
+  ],
+  ust_ku_inc: ["Einnahmen", "Income", "Gelir", "Доходы", "Доходи", "Przychody", "الإيرادات", "Venituri"],
+  ust_ku_lim: [
+    "Umsatzgrenze",
+    "Turnover limit",
+    "Ciro sınırı",
+    "Лимит оборота",
+    "Ліміт обороту",
+    "Limit obrotu",
+    "حد المبيعات",
+    "Plafon",
+  ],
+  ust_ku_of: [
+    "{a} von {b}",
+    "{a} of {b}",
+    "{b} içinden {a}",
+    "{a} из {b}",
+    "{a} з {b}",
+    "{a} z {b}",
+    "{a} من {b}",
+    "{a} din {b}",
+  ],
+  ust_ku_over: [
+    "Grenze überschritten. Klär mit deinem Steuerbüro, ab wann du Umsatzsteuer berechnen musst.",
+    "Limit exceeded. Ask your tax adviser from when you must charge VAT.",
+    "Sınır aşıldı. KDV’yi ne zamandan itibaren hesaplaman gerektiğini vergi danışmanına sor.",
+    "Лимит превышен. Уточни у налогового консультанта, с какого момента начислять НДС.",
+    "Ліміт перевищено. Уточни в податкового консультанта, з якого моменту нараховувати ПДВ.",
+    "Limit przekroczony. Zapytaj doradcę podatkowego, od kiedy musisz naliczać VAT.",
+    "تم تجاوز الحد. اسأل مستشارك الضريبي متى يجب أن تحتسب الضريبة.",
+    "Plafon depășit. Întreabă consultantul fiscal de când trebuie să aplici TVA.",
+  ],
+  ust_m: ["Monatlich", "Monthly", "Aylık", "Ежемесячно", "Щомісяця", "Miesięcznie", "شهريًا", "Lunar"],
+  ust_q: [
+    "Vierteljährlich",
+    "Quarterly",
+    "Üç aylık",
+    "Ежеквартально",
+    "Щокварталу",
+    "Kwartalnie",
+    "ربع سنوي",
+    "Trimestrial",
+  ],
+  ust_running: [
+    "läuft noch",
+    "still running",
+    "devam ediyor",
+    "ещё идёт",
+    "ще триває",
+    "jeszcze trwa",
+    "ما زال جاريًا",
+    "în curs",
+  ],
+  ust_out: [
+    "Umsatzsteuer aus deinen Einnahmen",
+    "VAT on your income",
+    "Gelirlerindeki KDV",
+    "НДС с твоих доходов",
+    "ПДВ з твоїх доходів",
+    "VAT z twoich przychodów",
+    "الضريبة على إيراداتك",
+    "TVA din veniturile tale",
+  ],
+  ust_in: [
+    "Vorsteuer aus Einkäufen",
+    "Input VAT on purchases",
+    "Alışlardaki indirilecek KDV",
+    "Входной НДС с покупок",
+    "Вхідний ПДВ з покупок",
+    "VAT naliczony z zakupów",
+    "ضريبة المدخلات على المشتريات",
+    "TVA deductibilă din achiziții",
+  ],
+  ust_pay: [
+    "Ans Finanzamt",
+    "To the tax office",
+    "Vergi dairesine",
+    "В налоговую",
+    "До податкової",
+    "Do urzędu skarbowego",
+    "إلى مصلحة الضرائب",
+    "Către fisc",
+  ],
+  ust_back: [
+    "Erstattung vom Finanzamt",
+    "Refund from the tax office",
+    "Vergi dairesinden iade",
+    "Возврат из налоговой",
+    "Повернення з податкової",
+    "Zwrot z urzędu skarbowego",
+    "استرداد من مصلحة الضرائب",
+    "Rambursare de la fisc",
+  ],
+  ust_due: [
+    "Abgeben bis {d}",
+    "Submit by {d}",
+    "{d} tarihine kadar ver",
+    "Подать до {d}",
+    "Подати до {d}",
+    "Złóż do {d}",
+    "قدّمها قبل {d}",
+    "Depune până la {d}",
+  ],
+  ust_due_s: [
+    "Voranmeldung in ELSTER abgeben und Betrag überweisen",
+    "Submit the return in ELSTER and transfer the amount",
+    "Beyannameyi ELSTER’de ver ve tutarı havale et",
+    "Подай декларацию в ELSTER и переведи сумму",
+    "Подай декларацію в ELSTER і переказуй суму",
+    "Złóż deklarację w ELSTER i przelej kwotę",
+    "قدّم الإقرار في ELSTER وحوّل المبلغ",
+    "Depune declarația în ELSTER și transferă suma",
+  ],
+  ust_open_s: [
+    "Der Zeitraum läuft noch – die Zahlen können sich ändern",
+    "This period is still running – figures may change",
+    "Dönem devam ediyor – rakamlar değişebilir",
+    "Период ещё идёт – цифры могут измениться",
+    "Період ще триває – цифри можуть змінитися",
+    "Okres jeszcze trwa – liczby mogą się zmienić",
+    "الفترة ما زالت جارية – قد تتغير الأرقام",
+    "Perioada e în curs – cifrele se pot schimba",
+  ],
+  ust_done_on: [
+    "Abgegeben am {d}",
+    "Submitted on {d}",
+    "{d} tarihinde verildi",
+    "Подано {d}",
+    "Подано {d}",
+    "Złożono {d}",
+    "قُدّمت في {d}",
+    "Depusă pe {d}",
+  ],
+  ust_done_s: [
+    "Erledigt – ich erinnere dich nicht mehr daran",
+    "Done – I won’t remind you again",
+    "Tamam – artık hatırlatmayacağım",
+    "Готово – больше не напомню",
+    "Готово – більше не нагадаю",
+    "Załatwione – nie będę już przypominać",
+    "تم – لن أذكّرك مجددًا",
+    "Gata – nu îți mai amintesc",
+  ],
+  ust_elster: [
+    "Für ELSTER",
+    "For ELSTER",
+    "ELSTER için",
+    "Для ELSTER",
+    "Для ELSTER",
+    "Do ELSTER",
+    "لـ ELSTER",
+    "Pentru ELSTER",
+  ],
+  ust_elster_s: [
+    "Tippe diese Zahlen in die Umsatzsteuer-Voranmeldung ab – Feld für Feld. Umsätze in vollen Euro, die Steuer darauf rechnet ELSTER selbst aus.",
+    "Type these numbers into the VAT return field by field. Turnover in whole euros – ELSTER calculates the tax itself.",
+    "Bu rakamları KDV beyannamesine alan alan gir. Ciro tam avro olarak – vergiyi ELSTER kendisi hesaplar.",
+    "Перенеси эти числа в декларацию по НДС поле за полем. Обороты в целых евро – налог ELSTER посчитает сам.",
+    "Перенеси ці числа в декларацію з ПДВ поле за полем. Обороти в цілих євро – податок ELSTER порахує сам.",
+    "Przepisz te liczby do deklaracji VAT pole po polu. Obroty w pełnych euro – podatek ELSTER policzy sam.",
+    "انقل هذه الأرقام إلى إقرار الضريبة حقلًا حقلًا. المبيعات باليورو الكامل – يحسب ELSTER الضريبة بنفسه.",
+    "Copiază aceste cifre în declarația de TVA câmp cu câmp. Cifra de afaceri în euro întregi – ELSTER calculează singur taxa.",
+  ],
+  ust_k81: [
+    "Umsätze 19 % (netto)",
+    "Turnover 19 % (net)",
+    "Ciro %19 (net)",
+    "Обороты 19 % (нетто)",
+    "Обороти 19 % (нетто)",
+    "Obroty 19 % (netto)",
+    "مبيعات 19 % (صافي)",
+    "Cifră de afaceri 19 % (net)",
+  ],
+  ust_k86: [
+    "Umsätze 7 % (netto)",
+    "Turnover 7 % (net)",
+    "Ciro %7 (net)",
+    "Обороты 7 % (нетто)",
+    "Обороти 7 % (нетто)",
+    "Obroty 7 % (netto)",
+    "مبيعات 7 % (صافي)",
+    "Cifră de afaceri 7 % (net)",
+  ],
+  ust_k66: [
+    "Vorsteuer",
+    "Input VAT",
+    "İndirilecek KDV",
+    "Входной НДС",
+    "Вхідний ПДВ",
+    "VAT naliczony",
+    "ضريبة المدخلات",
+    "TVA deductibilă",
+  ],
+  ust_k83: [
+    "Verbleibende Vorauszahlung",
+    "Remaining advance payment",
+    "Kalan ön ödeme",
+    "Остаток авансового платежа",
+    "Залишок авансового платежу",
+    "Pozostała zaliczka",
+    "الدفعة المقدمة المتبقية",
+    "Plată anticipată rămasă",
+  ],
+  ust_other: [
+    "Es gibt Einnahmen mit {r} Umsatzsteuer – die gehören in andere Felder. Frag im Zweifel dein Steuerbüro.",
+    "Some income has {r} VAT – that belongs in other fields. Ask your tax adviser if unsure.",
+    "{r} KDV’li gelirler var – bunlar başka alanlara girer. Emin değilsen danışmanına sor.",
+    "Есть доходы с НДС {r} – они идут в другие поля. Если сомневаешься, спроси консультанта.",
+    "Є доходи з ПДВ {r} – вони йдуть в інші поля. Якщо сумніваєшся, запитай консультанта.",
+    "Są przychody z VAT {r} – należą do innych pól. W razie wątpliwości zapytaj doradcę.",
+    "هناك إيرادات بضريبة {r} – تنتمي إلى حقول أخرى. اسأل مستشارك إن لم تكن متأكدًا.",
+    "Există venituri cu TVA {r} – acestea merg în alte câmpuri. Întreabă consultantul dacă nu ești sigur.",
+  ],
+  ust_vst_h: [
+    "Vorsteuer aus {n} Ausgaben",
+    "Input VAT from {n} expenses",
+    "{n} giderden indirilecek KDV",
+    "Входной НДС из {n} расходов",
+    "Вхідний ПДВ з {n} витрат",
+    "VAT naliczony z {n} wydatków",
+    "ضريبة المدخلات من {n} مصروفات",
+    "TVA deductibilă din {n} cheltuieli",
+  ],
+  ust_vst_guess: [
+    "Steuersatz bei manchen geschätzt – bitte kurz prüfen",
+    "Rate estimated for some – please check",
+    "Bazılarında oran tahmini – lütfen kontrol et",
+    "Ставка у некоторых оценена – проверь",
+    "Ставку в деяких оцінено – перевір",
+    "Stawka częściowo szacowana – sprawdź",
+    "النسبة تقديرية لبعضها – يرجى التحقق",
+    "Cota e estimată la unele – verifică",
+  ],
+  ust_vst: [
+    "Vorsteuer",
+    "input VAT",
+    "indirilecek KDV",
+    "вх. НДС",
+    "вх. ПДВ",
+    "VAT nal.",
+    "ضريبة المدخلات",
+    "TVA ded.",
+  ],
+  ust_vst_none: [
+    "Keine Geschäftsausgaben in diesem Zeitraum.",
+    "No business expenses in this period.",
+    "Bu dönemde iş gideri yok.",
+    "В этом периоде нет деловых расходов.",
+    "У цьому періоді немає ділових витрат.",
+    "Brak wydatków firmowych w tym okresie.",
+    "لا توجد مصروفات عمل في هذه الفترة.",
+    "Nicio cheltuială de afaceri în această perioadă.",
+  ],
+  ust_dfv: [
+    "Dauerfristverlängerung (einen Monat später abgeben)",
+    "Permanent extension (submit one month later)",
+    "Süre uzatımı (bir ay sonra ver)",
+    "Продление срока (подать на месяц позже)",
+    "Подовження строку (подати на місяць пізніше)",
+    "Przedłużenie terminu (złóż miesiąc później)",
+    "تمديد دائم للمهلة (التقديم بعد شهر)",
+    "Prelungire permanentă (depui cu o lună mai târziu)",
+  ],
+  ust_mark: [
+    "Als abgegeben markieren",
+    "Mark as submitted",
+    "Verildi olarak işaretle",
+    "Отметить как поданное",
+    "Позначити як подане",
+    "Oznacz jako złożone",
+    "وضع علامة كمقدَّم",
+    "Marchează ca depusă",
+  ],
+  ust_undo: [
+    "Doch nicht abgegeben",
+    "Not submitted after all",
+    "Aslında verilmedi",
+    "Всё-таки не подано",
+    "Все-таки не подано",
+    "Jednak nie złożone",
+    "لم تُقدَّم بعد",
+    "Totuși nedepusă",
+  ],
+  ust_foot: [
+    "Gerechnet nach Zahlungseingang (Ist-Versteuerung). Keine Steuerberatung – im Zweifel hilft dein Steuerbüro.",
+    "Calculated by payments received (cash accounting). Not tax advice – ask your tax adviser if unsure.",
+    "Tahsilat esasına göre hesaplandı. Vergi danışmanlığı değildir.",
+    "Рассчитано по поступлениям оплаты. Не налоговая консультация.",
+    "Розраховано за надходженнями оплати. Не податкова консультація.",
+    "Liczone według wpływów (metoda kasowa). To nie porada podatkowa.",
+    "محسوبة وفق المقبوضات الفعلية. ليست استشارة ضريبية.",
+    "Calculat după încasări (TVA la încasare). Nu este consultanță fiscală.",
+  ],
+  nw_ust_t: [
+    "Umsatzsteuer-Voranmeldung",
+    "VAT return",
+    "KDV beyannamesi",
+    "Декларация по НДС",
+    "Декларація з ПДВ",
+    "Deklaracja VAT",
+    "إقرار ضريبة القيمة المضافة",
+    "Declarația de TVA",
+  ],
+  nw_ust_p: [
+    "Im Steuer-Bereich rechne ich dir jetzt pro Monat oder Quartal aus, was ans Finanzamt geht – Umsatzsteuer minus Vorsteuer. Darunter stehen die Zahlen für ELSTER zum Abtippen.",
+    "In the tax area I now work out per month or quarter what goes to the tax office – VAT minus input VAT. Below are the numbers for ELSTER.",
+    "Vergi bölümünde artık her ay veya çeyrek için vergi dairesine ne gideceğini hesaplıyorum – KDV eksi indirilecek KDV. Altında ELSTER rakamları var.",
+    "В разделе налогов я теперь считаю за месяц или квартал, что идёт в налоговую – НДС минус входной НДС. Ниже числа для ELSTER.",
+    "У розділі податків я тепер рахую за місяць чи квартал, що йде до податкової – ПДВ мінус вхідний ПДВ. Нижче числа для ELSTER.",
+    "W dziale podatków liczę teraz za miesiąc lub kwartał, co idzie do urzędu – VAT minus VAT naliczony. Poniżej liczby do ELSTER.",
+    "في قسم الضرائب أحسب الآن لكل شهر أو ربع ما يذهب إلى مصلحة الضرائب – الضريبة ناقص ضريبة المدخلات. وتحتها أرقام ELSTER.",
+    "În zona de taxe calculez acum pe lună sau trimestru ce merge la fisc – TVA minus TVA deductibilă. Dedesubt sunt cifrele pentru ELSTER.",
+  ],
+  nf_ust_t: [
+    "Umsatzsteuer-Voranmeldung",
+    "VAT return",
+    "KDV beyannamesi",
+    "Декларация по НДС",
+    "Декларація з ПДВ",
+    "Deklaracja VAT",
+    "إقرار الضريبة",
+    "Declarația de TVA",
+  ],
+  nf_ust_s: [
+    "{p}: {a} bis zum {d} abgeben",
+    "{p}: submit {a} by {d}",
+    "{p}: {a} – {d} tarihine kadar ver",
+    "{p}: {a} подать до {d}",
+    "{p}: {a} подати до {d}",
+    "{p}: {a} złóż do {d}",
+    "{p}: قدّم {a} قبل {d}",
+    "{p}: {a} de depus până la {d}",
+  ],
+  ust_tile: [
+    "{a} bis {d}",
+    "{a} by {d}",
+    "{d} tarihine kadar {a}",
+    "{a} до {d}",
+    "{a} до {d}",
+    "{a} do {d}",
+    "{a} قبل {d}",
+    "{a} până la {d}",
+  ],
+  ust_tile_ok: [
+    "Alles abgegeben",
+    "All submitted",
+    "Hepsi verildi",
+    "Всё подано",
+    "Усе подано",
+    "Wszystko złożone",
+    "تم تقديم الكل",
+    "Totul depus",
   ],
 };
 
