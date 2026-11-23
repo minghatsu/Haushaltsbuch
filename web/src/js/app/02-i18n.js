@@ -33,6 +33,40 @@ function mamiName(v) {
   if (!n || typeof v !== "string") return v;
   return v.replace(/\bMami\b(?!-Studio)/g, n).replace(/Мами|Мамі/g, n);
 }
+/* Eigener Name für Unterkonten (Spaces) – nur Anzeige, in Deutsch und Englisch */
+const SPN_OPT = {
+  de: [
+    ["", "Spaces"],
+    ["spartopf", "Spartöpfe"],
+    ["topf", "Töpfe"],
+  ],
+  en: [
+    ["", "Spaces"],
+    ["pot", "Pots"],
+    ["jar", "Jars"],
+  ],
+};
+const SPN_FORMS = {
+  spartopf: ["Spartopf", "Spartöpfe", "Spartöpfen"],
+  topf: ["Topf", "Töpfe", "Töpfen"],
+  pot: ["Pot", "Pots", "Pots"],
+  jar: ["Jar", "Jars", "Jars"],
+};
+let SPN = "";
+try {
+  SPN = localStorage.getItem("hb-spname") || "";
+} catch (e) {}
+function spaceActive() {
+  return !!(SPN_FORMS[SPN] && (SPN_OPT[LANG] || []).some((o) => o[0] === SPN));
+}
+function spaceWord(v) {
+  if (!spaceActive() || typeof v !== "string" || !/Space/.test(v)) return v;
+  const [one, many, dat] = SPN_FORMS[SPN];
+  return v
+    .replace(/\b(mit|von|aus|zu|bei|nach|in|auf|den|allen|deinen|meinen|seinen|beiden|\d+)(\s+)Spaces\b/gi, `$1$2${dat}`)
+    .replace(/\bSpaces\b/g, many)
+    .replace(/\bSpace\b/g, one);
+}
 const I18N = (() => {
   const NUM = /\d[\d.,]*/g,
     MRE = new RegExp("\\b(" + MONTHS.join("|") + ")\\b", "g");
@@ -63,6 +97,9 @@ const I18N = (() => {
     );
   }
   function tr(s) {
+    return spaceWord(trLang(s));
+  }
+  function trLang(s) {
     if (LANG === "de" || !s) return s;
     if (!D) load();
     const m = /^(\s*)([\s\S]*?)(\s*)$/.exec(s),
@@ -202,7 +239,7 @@ const I18N = (() => {
   let obs = null,
     busy = false;
   function onMut(list) {
-    if (busy || LANG === "de") return;
+    if (busy || (LANG === "de" && !spaceActive())) return;
     busy = true;
     try {
       for (const m of list) {
@@ -223,7 +260,7 @@ const I18N = (() => {
   }
   function start() {
     applyDoc();
-    if (LANG !== "de") {
+    if (LANG !== "de" || spaceActive()) {
       walk(document.body);
     }
     if (!obs) {
@@ -254,10 +291,26 @@ const I18N = (() => {
       busy = false;
     }
   }
+  function setSpace(k) {
+    SPN = k || "";
+    try {
+      if (SPN) localStorage.setItem("hb-spname", SPN);
+      else localStorage.removeItem("hb-spname");
+    } catch (e) {}
+    cache.clear();
+    busy = true;
+    try {
+      walk(document.body);
+    } finally {
+      if (obs) obs.takeRecords();
+      busy = false;
+    }
+  }
   return {
     tr,
     start,
     set,
+    setSpace,
     walk,
   };
 })();

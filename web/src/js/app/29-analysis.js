@@ -726,7 +726,7 @@ function renderYear() {
     calc: ["Berechnung", "#2f6fd0"],
     plan: ["Jahresplan", "#c27c0e"],
     lohn: ["Gehalt", "#0f8a8a"],
-    wk: ["Werbungsk.", "#7a5bc2"],
+    wk: ["Arbeitskosten", "#7a5bc2"],
     tax: ["Steuer", "#c2410c"],
     euer: ["EÜR", "#4b5563"],
     kunden: ["Kunden", "#2f7fb8"],
@@ -825,11 +825,11 @@ function renderYear() {
             "euer",
             "arrowDown",
             "EÜR exportieren",
-            "Für Steuerbüro oder ELSTER (Anlage EÜR)",
+            "Gewinn fürs Finanzamt (Anlage EÜR)",
             `<div class="card flat"><div class="card-head"><h2>Für die Steuer</h2></div>
       <p class="small muted" style="margin:-6px 0 12px">Alle Einnahmen und Ausgaben deiner Selbstständigkeit ${y} als Liste für Steuerbüro oder ELSTER (Anlage EÜR) – mit Brutto, Umsatzsteuer und Netto, betrieblichen Fixkosten und Summen. Öffnet sich in Excel.</p>
       <button class="btn primary" id="euerBtn" data-year="${y}">EÜR ${y} exportieren</button></div>`,
-            "Export"
+            "Gewinn fürs Finanzamt"
           )
     }`;
   for (const [k, [n, c]] of Object.entries(ATL)) TL[k] = [n, c];

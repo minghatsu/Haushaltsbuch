@@ -218,6 +218,10 @@ async function rvVerify() {
   };
 }
 /* Rechnungsnummer: [Text vorne][Jahr-][laufende Nummer][Text hinten] – ohne Jahr zählt sie durchgehend weiter */
+/* „3 Rechnungen“, „1 Buchung“ … */
+function cntTxt(n, k) {
+  return uiText(n === 1 ? `cnt_${k}1` : `cnt_${k}`, { n: String(n) });
+}
 function rchNextNr(o) {
   const y = new Date().getFullYear(),
     b = o || store.settings.biz || {},

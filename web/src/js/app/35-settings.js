@@ -131,7 +131,29 @@ const liveSp = (k) =>
   [...document.querySelectorAll(k ? `#v-more [data-sp="${k}"]` : "#v-more [data-sp]")].filter(
     (el) => !el.closest(".cubestage")
   );
+function renderSpName() {
+  const el = $("spNameEd"),
+    opts = SPN_OPT[LANG];
+  if (!el) return;
+  el.hidden = !opts;
+  if (!opts) return;
+  el.innerHTML = `<label>${escHtml(uiText("spn_h"))}</label><div class="erseg spnseg">${opts
+    .map(
+      ([k, t]) =>
+        `<button type="button" class="${(SPN || "") === k ? "on" : ""}" data-spname="${k}" aria-pressed="${(SPN || "") === k}">${escHtml(t)}</button>`
+    )
+    .join("")}</div><span class="small muted">${escHtml(uiText("spn_s"))}</span>`;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-spname]");
+  if (!b) return;
+  I18N.setSpace(b.dataset.spname);
+  SND.play("tick");
+  renderSpName();
+  render();
+});
 function accPrep(k) {
+  if (k === "konten") renderSpName();
   if (k === "sync") renderUpd();
   if (k === "farben") renderColorEd();
   if (k === "amt") renderAmtEd();

@@ -1145,3 +1145,7 @@
   padding: 14px 16px;
   overflow: visible;
 }
+.ersum small.ercnt {
+  margin-top: 2px;
+  font-weight: 600;
+}

@@ -194,7 +194,7 @@ const I18N_K = [
   "Gemeinsam",
   "{n} € frei",
   "Betrieb",
-  "Werbungsk.",
+  "Arbeitskosten",
   "{n} Quartal",
   "Im {m} fest verplant",
   "Sparen & Vorsorge",
@@ -2586,6 +2586,8 @@ const I18N_K = [
   "Geld-Animation beim Umbuchen",
   "Ziehst du Geld von einem Konto auf ein anderes, fliegen Scheine mit und verlieren unterwegs ein paar Münzen. Aus: Es wird wie bisher die Karte gezogen.",
   "Umbuchen: Beim Ziehen fliegen jetzt Geldscheine von Konto zu Konto und verlieren unterwegs ein paar Münzen – mit leisen Tönen. Abschalten kannst du das in den Einstellungen unter „Startseite“.",
+  "Gewinn fürs Finanzamt",
+  "Gewinn fürs Finanzamt (Anlage EÜR)",
 ];
 const I18N_T = {
   en: [
@@ -5176,6 +5178,8 @@ const I18N_T = {
     "Money animation when moving money",
     "When you drag money from one account onto another, banknotes fly along and lose a few coins on the way. Off: the card itself is dragged, as before.",
     "Moving money: banknotes now fly from account to account as you drag and lose a few coins on the way – with soft sounds. You can switch this off in the settings under “Home page”.",
+    "Profit for the tax office",
+    "Profit for the tax office (Anlage EÜR)",
   ],
   tr: [
     "{n} {m}: {n} € harcandı",
@@ -7765,6 +7769,8 @@ const I18N_T = {
     "Para aktarırken para animasyonu",
     "Parayı bir hesaptan diğerine sürüklediğinde banknotlar da uçar ve yolda birkaç madeni para düşürür. Kapalı: eskisi gibi kartın kendisi sürüklenir.",
     "Aktarma: Sürüklerken artık banknotlar hesaptan hesaba uçuyor ve yolda birkaç madeni para düşürüyor – hafif seslerle. Bunu ayarlarda “Ana sayfa” altında kapatabilirsin.",
+    "Vergi dairesi için kâr",
+    "Vergi dairesi için kâr (Anlage EÜR)",
   ],
   ru: [
     "{n} {m}: потрачено {n} €",
@@ -10354,6 +10360,8 @@ const I18N_T = {
     "Анимация денег при переводе",
     "Когда ты перетаскиваешь деньги с одного счёта на другой, купюры летят следом и теряют по пути несколько монет. Выкл.: как раньше, перетаскивается сама карточка.",
     "Перевод: при перетаскивании купюры теперь летят со счёта на счёт и теряют по пути несколько монет – с тихими звуками. Отключить это можно в настройках в разделе «Главная».",
+    "Прибыль для налоговой",
+    "Прибыль для налоговой (Anlage EÜR)",
   ],
   uk: [
     "{n} {m}: витрачено {n} €",
@@ -12943,6 +12951,8 @@ const I18N_T = {
     "Анімація грошей під час переказу",
     "Коли ти перетягуєш гроші з одного рахунку на інший, купюри летять слідом і гублять дорогою кілька монет. Вимк.: як раніше, перетягується сама картка.",
     "Переказ: під час перетягування купюри тепер летять з рахунку на рахунок і гублять дорогою кілька монет – із тихими звуками. Вимкнути це можна в налаштуваннях у розділі «Головна».",
+    "Прибуток для податкової",
+    "Прибуток для податкової (Anlage EÜR)",
   ],
   pl: [
     "{n} {m}: wydano {n} €",
@@ -15532,6 +15542,8 @@ const I18N_T = {
     "Animacja pieniędzy przy przelewie",
     "Gdy przeciągasz pieniądze z jednego konta na drugie, banknoty lecą razem z palcem i gubią po drodze kilka monet. Wył.: jak dotąd przeciągana jest sama karta.",
     "Przelew: przy przeciąganiu banknoty lecą teraz z konta na konto i gubią po drodze kilka monet – z cichymi dźwiękami. Wyłączysz to w ustawieniach w sekcji „Strona główna”.",
+    "Zysk dla urzędu skarbowego",
+    "Zysk dla urzędu skarbowego (Anlage EÜR)",
   ],
   ar: [
     "{n} {m}: تم إنفاق {n} €",
@@ -18121,6 +18133,8 @@ const I18N_T = {
     "حركة النقود عند التحويل",
     "عندما تسحب المال من حساب إلى آخر تطير الأوراق النقدية معك وتسقط منها بعض العملات في الطريق. إيقاف: تُسحب البطاقة نفسها كما في السابق.",
     "التحويل: عند السحب تطير الأوراق النقدية الآن من حساب إلى آخر وتسقط منها بعض العملات في الطريق – مع أصوات هادئة. يمكنك إيقاف ذلك من الإعدادات ضمن «الصفحة الرئيسية».",
+    "الربح لمصلحة الضرائب",
+    "الربح لمصلحة الضرائب (Anlage EÜR)",
   ],
   ro: [
     "{n} {m}: {n} € cheltuiți",
@@ -20710,6 +20724,8 @@ const I18N_T = {
     "Animație cu bani la mutarea banilor",
     "Când tragi bani dintr-un cont în altul, bancnotele zboară odată cu degetul și pierd câteva monede pe drum. Oprit: se trage cardul, ca până acum.",
     "Mutarea banilor: când tragi, bancnotele zboară acum din cont în cont și pierd câteva monede pe drum – cu sunete discrete. Poți opri asta în setări, la „Pagina principală”.",
+    "Profit pentru fisc",
+    "Profit pentru fisc (Anlage EÜR)",
   ],
 };
 const MONTHS = [

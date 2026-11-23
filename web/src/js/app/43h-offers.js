@@ -97,7 +97,7 @@ function anOpen() {
     b = hbSheet("anBg", uiText("an_h")),
     tab = (k, t) =>
       `<button type="button" class="${AN.tab === k ? "on" : ""}" data-antab="${k}">${escHtml(uiText(t))}</button>`;
-  b.innerHTML = `<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${open.length} · ${escHtml(fmtEur(open.reduce((s, o) => s + o.amt, 0)))}</b></div><div><small>${escHtml(uiText("an_ok_y", { y }))}</small><b>${okY.length} · ${escHtml(fmtEur0(okY.reduce((s, o) => s + o.amt, 0)))}</b></div></div>
+  b.innerHTML = `<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${escHtml(fmtEur(open.reduce((s, o) => s + o.amt, 0)))}</b><small class="ercnt">${escHtml(cntTxt(open.length, "an"))}</small></div><div><small>${escHtml(uiText("an_ok_y", { y }))}</small><b>${escHtml(fmtEur0(okY.reduce((s, o) => s + o.amt, 0)))}</b><small class="ercnt">${escHtml(cntTxt(okY.length, "an"))}</small></div></div>
     <div class="erseg" role="tablist">${tab("open", "er_open")}${tab("ok", "an_tab_ok")}${tab("no", "an_tab_no")}</div>
     <div class="anl">${
       show

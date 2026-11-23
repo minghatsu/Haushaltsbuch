@@ -240,6 +240,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.7",
+    "23. November 2026",
+    [
+      "Weniger Fachchinesisch: „Geld verschieben“ statt „umbuchen“, „Arbeitskosten“ statt „Werbungsk.“, die EÜR heißt dazu „Gewinn fürs Finanzamt“. Zahlen wie „3 · 1.200 €“ stehen jetzt als „1.200 €“ mit „3 Rechnungen“ darunter.",
+      "Unten in der Leiste stehen jetzt alle Bereiche mit Namen, nicht nur der offene.",
+      "Neu unter Einstellungen › Konten: Unterkonten heißen wie du willst – Spaces (wie bei N26), Spartöpfe oder Töpfe.",
+    ],
+  ],
+  [
     "0.48.6",
     "23. November 2026",
     [

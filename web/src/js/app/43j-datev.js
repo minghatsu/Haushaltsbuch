@@ -373,7 +373,7 @@ function dvOpen() {
       `<label class="dvacc"><span data-noi18n>${escHtml(label)}</span><input class="in" inputmode="numeric" maxlength="8" data-dvacc="${escHtml(k)}" value="${escHtml(String(dvAcc(k)))}"></label>`;
   b.innerHTML = `<div class="erseg">${seg("m", "dv_m")}${seg("q", "dv_q")}${seg("y", "dv_y")}</div>
     <div class="dvper"><button type="button" class="btn sm ghost" data-dvsh="-1" aria-label="${escHtml(uiText("dv_prev"))}">${svgIcon("right", 16)}</button><b>${escHtml(dvLabel())}</b><button type="button" class="btn sm ghost" data-dvsh="1" aria-label="${escHtml(uiText("dv_next"))}">${svgIcon("right", 16)}</button></div>
-    <div class="ersum"><div><small>${escHtml(uiText("dv_in"))}</small><b>${inc.length} · ${escHtml(fmtEur0(sum(inc)))}</b></div><div><small>${escHtml(uiText("dv_out"))}</small><b>${exp.length} · ${escHtml(fmtEur0(sum(exp)))}</b></div></div>
+    <div class="ersum"><div><small>${escHtml(uiText("dv_in"))}</small><b>${escHtml(fmtEur0(sum(inc)))}</b><small class="ercnt">${escHtml(cntTxt(inc.length, "bk"))}</small></div><div><small>${escHtml(uiText("dv_out"))}</small><b>${escHtml(fmtEur0(sum(exp)))}</b><small class="ercnt">${escHtml(cntTxt(exp.length, "bk"))}</small></div></div>
     ${
       need
         ? `<div class="dvrc ${miss.length ? "due" : "ok"}">${svgIcon(miss.length ? "alert" : "check", 16)}<span>${escHtml(miss.length ? uiText("dv_rc", { a: String(withF), b: String(need) }) : uiText("dv_rc_all"))}</span></div>${
@@ -389,7 +389,7 @@ function dvOpen() {
           }`
         : `<p class="small muted erempty">${escHtml(uiText("dv_empty"))}</p>`
     }
-    <div class="rsf"><span>${escHtml(uiText("dv_skr"))}</span><div class="erseg">${skr("03")}${skr("04")}</div></div>
+    <div class="rsf"><span>${escHtml(uiText("dv_skr"))}</span><div class="erseg">${skr("03")}${skr("04")}</div><small class="rvhint">${escHtml(uiText("dv_skr_s"))}</small></div>
     <div class="dvnr"><label class="rsf"><span>${escHtml(uiText("dv_ber"))}</span><input class="in" id="dvBer" inputmode="numeric" maxlength="7" value="${escHtml(c.berater || "")}" placeholder="1234567"></label><label class="rsf"><span>${escHtml(uiText("dv_man"))}</span><input class="in" id="dvMan" inputmode="numeric" maxlength="5" value="${escHtml(c.mandant || "")}" placeholder="10001"></label></div>
     <small class="rvhint dvhint">${escHtml(uiText("dv_nr_s"))}</small>
     <details class="dvaccs"><summary>${escHtml(uiText("dv_acc"))}</summary><div class="dvaccl">${accRow("#bank", uiText("dv_bank"))}${

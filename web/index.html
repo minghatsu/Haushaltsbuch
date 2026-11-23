@@ -11212,6 +11212,27 @@ tfoot td {
   display: none;
 }
 
+/* Untere Leiste: jeder Bereich trägt seinen Namen – Symbol oben, Name darunter */
+@media (max-width: 899px) {
+  html:not(.pc) .tabs.navx .tab:not(.plus) {
+    flex-direction: column;
+    gap: 2px;
+    padding: 0 4px;
+    min-width: 0;
+  }
+  html:not(.pc) .tabs.navx .tab:not(.plus) .tname,
+  html:not(.pc) .tabs.navx .tab[aria-selected="true"]:not(.plus) .tname {
+    max-width: 100%;
+    opacity: 1;
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  html:not(.pc) .tabs.navx .tab:not(.plus):not([aria-selected="true"]) .tname {
+    color: var(--muted) !important;
+  }
+}
+
 /* Breites Fenster und weitere Ansichten */
 /* Breites Fenster */
 @media (min-width: 1000px) {
@@ -25563,6 +25584,10 @@ html.pc .pctpane .ayblk {
   padding: 14px 16px;
   overflow: visible;
 }
+.ersum small.ercnt {
+  margin-top: 2px;
+  font-weight: 600;
+}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -25651,6 +25676,7 @@ html.pc .pctpane .ayblk {
       <div class="field"><span class="small muted" style="margin-top:-2px">Trag einmal ein, was heute auf einem Konto ist. Die App rechnet den Stand für jeden Monat aus deinen importierten Kontoauszügen aus.</span><div id="acctEd"></div></div>
       <div class="field"><label for="sStart">Kontostand Jahresanfang <span id="sStartYear"></span></label><input class="in" id="sStart" inputmode="decimal" placeholder="0,00"></div>
       <div class="field"><label>Meine Spaces und eigenen Konten</label><span class="small muted" style="margin-top:-2px">Geld zwischen diesen Konten ist eine Umbuchung, keine Einnahme oder Ausgabe.</span><div class="chips" id="spaceEd"></div><div id="spaceClean"></div></div>
+      <div class="field" id="spNameEd" data-noi18n></div>
     </div>
     <div class="card sp" data-sp="budgets" hidden>
       <div class="field"><div id="budgetEd"></div><span class="small muted">Leer lassen = kein Budget.</span></div>
@@ -26083,7 +26109,7 @@ const I18N_K = [
   "Gemeinsam",
   "{n} € frei",
   "Betrieb",
-  "Werbungsk.",
+  "Arbeitskosten",
   "{n} Quartal",
   "Im {m} fest verplant",
   "Sparen & Vorsorge",
@@ -28475,6 +28501,8 @@ const I18N_K = [
   "Geld-Animation beim Umbuchen",
   "Ziehst du Geld von einem Konto auf ein anderes, fliegen Scheine mit und verlieren unterwegs ein paar Münzen. Aus: Es wird wie bisher die Karte gezogen.",
   "Umbuchen: Beim Ziehen fliegen jetzt Geldscheine von Konto zu Konto und verlieren unterwegs ein paar Münzen – mit leisen Tönen. Abschalten kannst du das in den Einstellungen unter „Startseite“.",
+  "Gewinn fürs Finanzamt",
+  "Gewinn fürs Finanzamt (Anlage EÜR)",
 ];
 const I18N_T = {
   en: [
@@ -31065,6 +31093,8 @@ const I18N_T = {
     "Money animation when moving money",
     "When you drag money from one account onto another, banknotes fly along and lose a few coins on the way. Off: the card itself is dragged, as before.",
     "Moving money: banknotes now fly from account to account as you drag and lose a few coins on the way – with soft sounds. You can switch this off in the settings under “Home page”.",
+    "Profit for the tax office",
+    "Profit for the tax office (Anlage EÜR)",
   ],
   tr: [
     "{n} {m}: {n} € harcandı",
@@ -33654,6 +33684,8 @@ const I18N_T = {
     "Para aktarırken para animasyonu",
     "Parayı bir hesaptan diğerine sürüklediğinde banknotlar da uçar ve yolda birkaç madeni para düşürür. Kapalı: eskisi gibi kartın kendisi sürüklenir.",
     "Aktarma: Sürüklerken artık banknotlar hesaptan hesaba uçuyor ve yolda birkaç madeni para düşürüyor – hafif seslerle. Bunu ayarlarda “Ana sayfa” altında kapatabilirsin.",
+    "Vergi dairesi için kâr",
+    "Vergi dairesi için kâr (Anlage EÜR)",
   ],
   ru: [
     "{n} {m}: потрачено {n} €",
@@ -36243,6 +36275,8 @@ const I18N_T = {
     "Анимация денег при переводе",
     "Когда ты перетаскиваешь деньги с одного счёта на другой, купюры летят следом и теряют по пути несколько монет. Выкл.: как раньше, перетаскивается сама карточка.",
     "Перевод: при перетаскивании купюры теперь летят со счёта на счёт и теряют по пути несколько монет – с тихими звуками. Отключить это можно в настройках в разделе «Главная».",
+    "Прибыль для налоговой",
+    "Прибыль для налоговой (Anlage EÜR)",
   ],
   uk: [
     "{n} {m}: витрачено {n} €",
@@ -38832,6 +38866,8 @@ const I18N_T = {
     "Анімація грошей під час переказу",
     "Коли ти перетягуєш гроші з одного рахунку на інший, купюри летять слідом і гублять дорогою кілька монет. Вимк.: як раніше, перетягується сама картка.",
     "Переказ: під час перетягування купюри тепер летять з рахунку на рахунок і гублять дорогою кілька монет – із тихими звуками. Вимкнути це можна в налаштуваннях у розділі «Головна».",
+    "Прибуток для податкової",
+    "Прибуток для податкової (Anlage EÜR)",
   ],
   pl: [
     "{n} {m}: wydano {n} €",
@@ -41421,6 +41457,8 @@ const I18N_T = {
     "Animacja pieniędzy przy przelewie",
     "Gdy przeciągasz pieniądze z jednego konta na drugie, banknoty lecą razem z palcem i gubią po drodze kilka monet. Wył.: jak dotąd przeciągana jest sama karta.",
     "Przelew: przy przeciąganiu banknoty lecą teraz z konta na konto i gubią po drodze kilka monet – z cichymi dźwiękami. Wyłączysz to w ustawieniach w sekcji „Strona główna”.",
+    "Zysk dla urzędu skarbowego",
+    "Zysk dla urzędu skarbowego (Anlage EÜR)",
   ],
   ar: [
     "{n} {m}: تم إنفاق {n} €",
@@ -44010,6 +44048,8 @@ const I18N_T = {
     "حركة النقود عند التحويل",
     "عندما تسحب المال من حساب إلى آخر تطير الأوراق النقدية معك وتسقط منها بعض العملات في الطريق. إيقاف: تُسحب البطاقة نفسها كما في السابق.",
     "التحويل: عند السحب تطير الأوراق النقدية الآن من حساب إلى آخر وتسقط منها بعض العملات في الطريق – مع أصوات هادئة. يمكنك إيقاف ذلك من الإعدادات ضمن «الصفحة الرئيسية».",
+    "الربح لمصلحة الضرائب",
+    "الربح لمصلحة الضرائب (Anlage EÜR)",
   ],
   ro: [
     "{n} {m}: {n} € cheltuiți",
@@ -46599,6 +46639,8 @@ const I18N_T = {
     "Animație cu bani la mutarea banilor",
     "Când tragi bani dintr-un cont în altul, bancnotele zboară odată cu degetul și pierd câteva monede pe drum. Oprit: se trage cardul, ca până acum.",
     "Mutarea banilor: când tragi, bancnotele zboară acum din cont în cont și pierd câteva monede pe drum – cu sunete discrete. Poți opri asta în setări, la „Pagina principală”.",
+    "Profit pentru fisc",
+    "Profit pentru fisc (Anlage EÜR)",
   ],
 };
 const MONTHS = [
@@ -46652,6 +46694,40 @@ function mamiName(v) {
   if (!n || typeof v !== "string") return v;
   return v.replace(/\bMami\b(?!-Studio)/g, n).replace(/Мами|Мамі/g, n);
 }
+/* Eigener Name für Unterkonten (Spaces) – nur Anzeige, in Deutsch und Englisch */
+const SPN_OPT = {
+  de: [
+    ["", "Spaces"],
+    ["spartopf", "Spartöpfe"],
+    ["topf", "Töpfe"],
+  ],
+  en: [
+    ["", "Spaces"],
+    ["pot", "Pots"],
+    ["jar", "Jars"],
+  ],
+};
+const SPN_FORMS = {
+  spartopf: ["Spartopf", "Spartöpfe", "Spartöpfen"],
+  topf: ["Topf", "Töpfe", "Töpfen"],
+  pot: ["Pot", "Pots", "Pots"],
+  jar: ["Jar", "Jars", "Jars"],
+};
+let SPN = "";
+try {
+  SPN = localStorage.getItem("hb-spname") || "";
+} catch (e) {}
+function spaceActive() {
+  return !!(SPN_FORMS[SPN] && (SPN_OPT[LANG] || []).some((o) => o[0] === SPN));
+}
+function spaceWord(v) {
+  if (!spaceActive() || typeof v !== "string" || !/Space/.test(v)) return v;
+  const [one, many, dat] = SPN_FORMS[SPN];
+  return v
+    .replace(/\b(mit|von|aus|zu|bei|nach|in|auf|den|allen|deinen|meinen|seinen|beiden|\d+)(\s+)Spaces\b/gi, `$1$2${dat}`)
+    .replace(/\bSpaces\b/g, many)
+    .replace(/\bSpace\b/g, one);
+}
 const I18N = (() => {
   const NUM = /\d[\d.,]*/g,
     MRE = new RegExp("\\b(" + MONTHS.join("|") + ")\\b", "g");
@@ -46682,6 +46758,9 @@ const I18N = (() => {
     );
   }
   function tr(s) {
+    return spaceWord(trLang(s));
+  }
+  function trLang(s) {
     if (LANG === "de" || !s) return s;
     if (!D) load();
     const m = /^(\s*)([\s\S]*?)(\s*)$/.exec(s),
@@ -46821,7 +46900,7 @@ const I18N = (() => {
   let obs = null,
     busy = false;
   function onMut(list) {
-    if (busy || LANG === "de") return;
+    if (busy || (LANG === "de" && !spaceActive())) return;
     busy = true;
     try {
       for (const m of list) {
@@ -46842,7 +46921,7 @@ const I18N = (() => {
   }
   function start() {
     applyDoc();
-    if (LANG !== "de") {
+    if (LANG !== "de" || spaceActive()) {
       walk(document.body);
     }
     if (!obs) {
@@ -46873,10 +46952,26 @@ const I18N = (() => {
       busy = false;
     }
   }
+  function setSpace(k) {
+    SPN = k || "";
+    try {
+      if (SPN) localStorage.setItem("hb-spname", SPN);
+      else localStorage.removeItem("hb-spname");
+    } catch (e) {}
+    cache.clear();
+    busy = true;
+    try {
+      walk(document.body);
+    } finally {
+      if (obs) obs.takeRecords();
+      busy = false;
+    }
+  }
   return {
     tr,
     start,
     set,
+    setSpace,
     walk,
   };
 })();
@@ -51005,6 +51100,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.48.7",
+    "23. November 2026",
+    [
+      "Weniger Fachchinesisch: „Geld verschieben“ statt „umbuchen“, „Arbeitskosten“ statt „Werbungsk.“, die EÜR heißt dazu „Gewinn fürs Finanzamt“. Zahlen wie „3 · 1.200 €“ stehen jetzt als „1.200 €“ mit „3 Rechnungen“ darunter.",
+      "Unten in der Leiste stehen jetzt alle Bereiche mit Namen, nicht nur der offene.",
+      "Neu unter Einstellungen › Konten: Unterkonten heißen wie du willst – Spaces (wie bei N26), Spartöpfe oder Töpfe.",
+    ],
+  ],
+  [
     "0.48.6",
     "23. November 2026",
     [
@@ -53507,6 +53611,17 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.48.7",
+    s: () => [
+      {
+        sel: "#astack",
+        ic: "wallet",
+        t: uiText("nw_spn_t"),
+        p: [uiText("nw_spn_p")],
+      },
+    ],
+  },
   {
     v: "0.48.6",
     s: () => [
@@ -70254,7 +70369,7 @@ function renderYear() {
     calc: ["Berechnung", "#2f6fd0"],
     plan: ["Jahresplan", "#c27c0e"],
     lohn: ["Gehalt", "#0f8a8a"],
-    wk: ["Werbungsk.", "#7a5bc2"],
+    wk: ["Arbeitskosten", "#7a5bc2"],
     tax: ["Steuer", "#c2410c"],
     euer: ["EÜR", "#4b5563"],
     kunden: ["Kunden", "#2f7fb8"],
@@ -70353,11 +70468,11 @@ function renderYear() {
             "euer",
             "arrowDown",
             "EÜR exportieren",
-            "Für Steuerbüro oder ELSTER (Anlage EÜR)",
+            "Gewinn fürs Finanzamt (Anlage EÜR)",
             `<div class="card flat"><div class="card-head"><h2>Für die Steuer</h2></div>
       <p class="small muted" style="margin:-6px 0 12px">Alle Einnahmen und Ausgaben deiner Selbstständigkeit ${y} als Liste für Steuerbüro oder ELSTER (Anlage EÜR) – mit Brutto, Umsatzsteuer und Netto, betrieblichen Fixkosten und Summen. Öffnet sich in Excel.</p>
       <button class="btn primary" id="euerBtn" data-year="${y}">EÜR ${y} exportieren</button></div>`,
-            "Export"
+            "Gewinn fürs Finanzamt"
           )
     }`;
   for (const [k, [n, c]] of Object.entries(ATL)) TL[k] = [n, c];
@@ -74900,7 +75015,29 @@ const liveSp = (k) =>
   [...document.querySelectorAll(k ? `#v-more [data-sp="${k}"]` : "#v-more [data-sp]")].filter(
     (el) => !el.closest(".cubestage")
   );
+function renderSpName() {
+  const el = $("spNameEd"),
+    opts = SPN_OPT[LANG];
+  if (!el) return;
+  el.hidden = !opts;
+  if (!opts) return;
+  el.innerHTML = `<label>${escHtml(uiText("spn_h"))}</label><div class="erseg spnseg">${opts
+    .map(
+      ([k, t]) =>
+        `<button type="button" class="${(SPN || "") === k ? "on" : ""}" data-spname="${k}" aria-pressed="${(SPN || "") === k}">${escHtml(t)}</button>`
+    )
+    .join("")}</div><span class="small muted">${escHtml(uiText("spn_s"))}</span>`;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-spname]");
+  if (!b) return;
+  I18N.setSpace(b.dataset.spname);
+  SND.play("tick");
+  renderSpName();
+  render();
+});
 function accPrep(k) {
+  if (k === "konten") renderSpName();
   if (k === "sync") renderUpd();
   if (k === "farben") renderColorEd();
   if (k === "amt") renderAmtEd();
@@ -81090,7 +81227,7 @@ const TEXTS = {
     "{n} așteaptă aplicația pentru iPhone",
   ],
   mv_open: [
-    "Alle Konten · umbuchen",
+    "Alle Konten · Geld verschieben",
     "All accounts · move money",
     "Tüm hesaplar · aktar",
     "Все счета · перевести",
@@ -81141,7 +81278,7 @@ const TEXTS = {
     "Introdu întâi soldul acestui cont (creionul de pe card).",
   ],
   mv_sheet: [
-    "Geld umbuchen",
+    "Geld verschieben",
     "Move money",
     "Para aktar",
     "Перевести деньги",
@@ -84428,7 +84565,7 @@ const TEXTS = {
     "În „{a}” sunt {b} – lipsesc {m} până când, din {d}, se debitează costurile fixe.",
   ],
   fxa_move: [
-    "Jetzt umbuchen",
+    "Jetzt verschieben",
     "Transfer now",
     "Şimdi aktar",
     "Перевести сейчас",
@@ -88408,6 +88545,116 @@ const TEXTS = {
     "أزلنا الشريط الجانبي حتى لا يغطي شيئًا. أرسل الأخطاء والأفكار والأسئلة من الآن عبر هذا الزر.",
     "Fila de pe margine a dispărut, ca să nu mai acopere nimic. Trimite-mi erori, idei sau întrebări de acum cu acest buton.",
   ],
+  spn_h: [
+    "So heißen deine Unterkonten",
+    "What your sub-accounts are called",
+    "Alt hesaplarının adı",
+    "Как называются подсчета",
+    "Як називаються підрахунки",
+    "Jak nazywają się subkonta",
+    "اسم حساباتك الفرعية",
+    "Cum se numesc subconturile",
+  ],
+  spn_s: [
+    "Bei N26 heißen sie Spaces. Wähl das Wort, das dir am vertrautesten ist – es ändert nur die Anzeige.",
+    "N26 calls them Spaces. Pick the word you know best – it only changes what you see.",
+    "N26'da Spaces denir. En tanıdık kelimeyi seç – sadece görünümü değiştirir.",
+    "В N26 они называются Spaces. Выбери привычное слово – меняется только отображение.",
+    "У N26 вони називаються Spaces. Обери звичне слово – змінюється лише відображення.",
+    "W N26 to Spaces. Wybierz najbardziej znajome słowo – zmienia się tylko wyświetlanie.",
+    "تسميها N26 باسم Spaces. اختر الكلمة الأقرب إليك – يتغير العرض فقط.",
+    "La N26 se numesc Spaces. Alege cuvântul cel mai familiar – se schimbă doar afișarea.",
+  ],
+  cnt_bk1: [
+    "1 Buchung",
+    "1 entry",
+    "1 kayıt",
+    "1 проводка",
+    "1 проводка",
+    "1 księgowanie",
+    "قيد واحد",
+    "1 înregistrare",
+  ],
+  cnt_bk: [
+    "{n} Buchungen",
+    "{n} entries",
+    "{n} kayıt",
+    "{n} проводок",
+    "{n} проводок",
+    "{n} księgowań",
+    "{n} قيود",
+    "{n} înregistrări",
+  ],
+  cnt_an1: [
+    "1 Angebot",
+    "1 quote",
+    "1 teklif",
+    "1 предложение",
+    "1 пропозиція",
+    "1 oferta",
+    "عرض واحد",
+    "1 ofertă",
+  ],
+  cnt_an: [
+    "{n} Angebote",
+    "{n} quotes",
+    "{n} teklif",
+    "{n} предложений",
+    "{n} пропозицій",
+    "{n} ofert",
+    "{n} عروض",
+    "{n} oferte",
+  ],
+  cnt_re1: [
+    "1 Rechnung",
+    "1 invoice",
+    "1 fatura",
+    "1 счёт",
+    "1 рахунок",
+    "1 faktura",
+    "فاتورة واحدة",
+    "1 factură",
+  ],
+  cnt_re: [
+    "{n} Rechnungen",
+    "{n} invoices",
+    "{n} fatura",
+    "{n} счетов",
+    "{n} рахунків",
+    "{n} faktur",
+    "{n} فواتير",
+    "{n} facturi",
+  ],
+  dv_skr_s: [
+    "Frag deinen Steuerberater – meistens ist es SKR 03.",
+    "Ask your tax advisor – it's usually SKR 03.",
+    "Mali müşavirine sor – genelde SKR 03'tür.",
+    "Спроси консультанта – обычно это SKR 03.",
+    "Запитай консультанта – зазвичай це SKR 03.",
+    "Zapytaj doradcę – zwykle to SKR 03.",
+    "اسأل مستشارك – غالبًا SKR 03.",
+    "Întreabă consultantul – de obicei e SKR 03.",
+  ],
+  nw_spn_t: [
+    "Deine Wörter",
+    "Your words",
+    "Senin kelimelerin",
+    "Твои слова",
+    "Твої слова",
+    "Twoje słowa",
+    "كلماتك",
+    "Cuvintele tale",
+  ],
+  nw_spn_p: [
+    "Weniger Fachchinesisch: „Geld verschieben“ statt „umbuchen“, unten stehen alle Bereiche beschriftet. Ob deine Unterkonten Spaces, Spartöpfe oder Töpfe heißen, stellst du unter Einstellungen › Konten ein.",
+    "Less jargon: every section at the bottom is labelled now. Whether your sub-accounts are called Spaces, Pots or Jars, you choose under Settings › Accounts.",
+    "Daha az teknik dil: alttaki tüm bölümler artık yazılı. Alt hesap adını Ayarlar › Hesaplar'dan seçebilirsin.",
+    "Меньше жаргона: все разделы внизу подписаны. Название подсчетов выбираешь в Настройках › Счета.",
+    "Менше жаргону: усі розділи внизу підписано. Назву підрахунків обираєш у Налаштуваннях › Рахунки.",
+    "Mniej żargonu: wszystkie sekcje na dole są podpisane. Nazwę subkont wybierzesz w Ustawieniach › Konta.",
+    "مصطلحات أقل: كل الأقسام في الأسفل عليها أسماء الآن. اسم الحسابات الفرعية تختاره من الإعدادات › الحسابات.",
+    "Mai puțin jargon: toate secțiunile de jos au acum nume. Numele subconturilor îl alegi în Setări › Conturi.",
+  ],
 };
 
 /* Texte aus TEXTS in der aktuellen Sprache, Monatsnamen und das Zählwerk für Beträge */
@@ -92353,13 +92600,16 @@ function navLayout(nav, act) {
     inner = nav.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight),
     PW = pi < 0 ? 0 : 64,
     H = (inner - PW) / 2;
+  /* Symbol über dem Namen: alle Spalten gleich breit, die Pille umschließt nur den gewählten Reiter */
+  const stacked = !!act && getComputedStyle(act).flexDirection === "column";
   const tw = (t) => {
     const n = t.querySelector(".tname");
+    if (stacked) return Math.max(24, n ? Math.min(96, n.scrollWidth) : 0) + 20;
     return 26 + 24 + (n ? Math.min(112, n.scrollWidth) + 7 : 0);
   };
   const cols = (g) => {
     if (!g.length) return [];
-    if (!act || !g.includes(act)) return g.map(() => H / g.length);
+    if (!act || stacked || !g.includes(act)) return g.map(() => H / g.length);
     const w = Math.min(H - 34 * (g.length - 1), tw(act)),
       r = (H - w) / Math.max(1, g.length - 1);
     return g.map((t) => (t === act ? w : r));
@@ -92631,12 +92881,14 @@ const navFlow = (() => {
     /* Namen und Symbolfarben: weiß nur, solange Farbe dahinter ist */
     const na = S.ta.querySelector(".tname"),
       nb = S.tb.querySelector(".tname");
-    na.style.maxWidth = lerp(S.nA, 0, clamp(q / 0.3)).toFixed(1) + "px";
-    na.style.marginLeft = lerp(7, 0, clamp(q / 0.3)).toFixed(1) + "px";
-    na.style.opacity = String(clamp(1 - q / 0.2));
-    nb.style.maxWidth = lerp(0, S.nB, clamp((q - 0.8) / 0.2)).toFixed(1) + "px";
-    nb.style.marginLeft = lerp(0, 7, clamp((q - 0.8) / 0.2)).toFixed(1) + "px";
-    nb.style.opacity = String(clamp((q - 0.86) / 0.14));
+    if (!S.stk) {
+      na.style.maxWidth = lerp(S.nA, 0, clamp(q / 0.3)).toFixed(1) + "px";
+      na.style.marginLeft = lerp(7, 0, clamp(q / 0.3)).toFixed(1) + "px";
+      na.style.opacity = String(clamp(1 - q / 0.2));
+      nb.style.maxWidth = lerp(0, S.nB, clamp((q - 0.8) / 0.2)).toFixed(1) + "px";
+      nb.style.marginLeft = lerp(0, 7, clamp((q - 0.8) / 0.2)).toFixed(1) + "px";
+      nb.style.opacity = String(clamp((q - 0.86) / 0.14));
+    }
     const white = (t, v) =>
       t.style.setProperty("color", `color-mix(in srgb, #fff ${Math.round(100 * v)}%, var(--muted))`, "important");
     white(S.ta, k1 < 1 ? 1 : clamp((r1 - 8) / 12));
@@ -92691,6 +92943,7 @@ const navFlow = (() => {
         pr: pr.width / 2,
         nA: Math.min(112, ta.querySelector(".tname").scrollWidth),
         nB: Math.min(112, tb.querySelector(".tname").scrollWidth),
+        stk: getComputedStyle(ta).flexDirection === "column",
       };
       layer(n).style.display = "";
       ind.style.opacity = "0";
@@ -96494,6 +96747,10 @@ async function rvVerify() {
   };
 }
 /* Rechnungsnummer: [Text vorne][Jahr-][laufende Nummer][Text hinten] – ohne Jahr zählt sie durchgehend weiter */
+/* „3 Rechnungen“, „1 Buchung“ … */
+function cntTxt(n, k) {
+  return uiText(n === 1 ? `cnt_${k}1` : `cnt_${k}`, { n: String(n) });
+}
 function rchNextNr(o) {
   const y = new Date().getFullYear(),
     b = o || store.settings.biz || {},
@@ -101341,7 +101598,7 @@ function erListHtml() {
       ),
     tab = (k, t) =>
       `<button type="button" class="${ER.tab === k ? "on" : ""}" data-ertab="${k}">${escHtml(uiText(t))}</button>`;
-  return `${pmBanner()}<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${open.length} · ${escHtml(fmtEur(open.reduce((s, i) => s + i.pay, 0)))}</b></div><div><small>${escHtml(uiText("er_sum_paid"))}</small><b>${paidM.length} · ${escHtml(fmtEur(paidM.reduce((s, i) => s + i.pay, 0)))}</b></div></div>
+  return `${pmBanner()}<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${escHtml(fmtEur(open.reduce((s, i) => s + i.pay, 0)))}</b><small class="ercnt">${escHtml(cntTxt(open.length, "re"))}</small></div><div><small>${escHtml(uiText("er_sum_paid"))}</small><b>${escHtml(fmtEur(paidM.reduce((s, i) => s + i.pay, 0)))}</b><small class="ercnt">${escHtml(cntTxt(paidM.length, "re"))}</small></div></div>
     <div class="erseg" role="tablist">${tab("open", "er_open")}${tab("paid", "er_paid")}${tab("all", "er_all")}</div>
     <div class="erl">${
       L.map((i) => {
@@ -102234,7 +102491,7 @@ function anOpen() {
     b = hbSheet("anBg", uiText("an_h")),
     tab = (k, t) =>
       `<button type="button" class="${AN.tab === k ? "on" : ""}" data-antab="${k}">${escHtml(uiText(t))}</button>`;
-  b.innerHTML = `<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${open.length} · ${escHtml(fmtEur(open.reduce((s, o) => s + o.amt, 0)))}</b></div><div><small>${escHtml(uiText("an_ok_y", { y }))}</small><b>${okY.length} · ${escHtml(fmtEur0(okY.reduce((s, o) => s + o.amt, 0)))}</b></div></div>
+  b.innerHTML = `<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${escHtml(fmtEur(open.reduce((s, o) => s + o.amt, 0)))}</b><small class="ercnt">${escHtml(cntTxt(open.length, "an"))}</small></div><div><small>${escHtml(uiText("an_ok_y", { y }))}</small><b>${escHtml(fmtEur0(okY.reduce((s, o) => s + o.amt, 0)))}</b><small class="ercnt">${escHtml(cntTxt(okY.length, "an"))}</small></div></div>
     <div class="erseg" role="tablist">${tab("open", "er_open")}${tab("ok", "an_tab_ok")}${tab("no", "an_tab_no")}</div>
     <div class="anl">${
       show
@@ -103025,7 +103282,7 @@ function dvOpen() {
       `<label class="dvacc"><span data-noi18n>${escHtml(label)}</span><input class="in" inputmode="numeric" maxlength="8" data-dvacc="${escHtml(k)}" value="${escHtml(String(dvAcc(k)))}"></label>`;
   b.innerHTML = `<div class="erseg">${seg("m", "dv_m")}${seg("q", "dv_q")}${seg("y", "dv_y")}</div>
     <div class="dvper"><button type="button" class="btn sm ghost" data-dvsh="-1" aria-label="${escHtml(uiText("dv_prev"))}">${svgIcon("right", 16)}</button><b>${escHtml(dvLabel())}</b><button type="button" class="btn sm ghost" data-dvsh="1" aria-label="${escHtml(uiText("dv_next"))}">${svgIcon("right", 16)}</button></div>
-    <div class="ersum"><div><small>${escHtml(uiText("dv_in"))}</small><b>${inc.length} · ${escHtml(fmtEur0(sum(inc)))}</b></div><div><small>${escHtml(uiText("dv_out"))}</small><b>${exp.length} · ${escHtml(fmtEur0(sum(exp)))}</b></div></div>
+    <div class="ersum"><div><small>${escHtml(uiText("dv_in"))}</small><b>${escHtml(fmtEur0(sum(inc)))}</b><small class="ercnt">${escHtml(cntTxt(inc.length, "bk"))}</small></div><div><small>${escHtml(uiText("dv_out"))}</small><b>${escHtml(fmtEur0(sum(exp)))}</b><small class="ercnt">${escHtml(cntTxt(exp.length, "bk"))}</small></div></div>
     ${
       need
         ? `<div class="dvrc ${miss.length ? "due" : "ok"}">${svgIcon(miss.length ? "alert" : "check", 16)}<span>${escHtml(miss.length ? uiText("dv_rc", { a: String(withF), b: String(need) }) : uiText("dv_rc_all"))}</span></div>${
@@ -103041,7 +103298,7 @@ function dvOpen() {
           }`
         : `<p class="small muted erempty">${escHtml(uiText("dv_empty"))}</p>`
     }
-    <div class="rsf"><span>${escHtml(uiText("dv_skr"))}</span><div class="erseg">${skr("03")}${skr("04")}</div></div>
+    <div class="rsf"><span>${escHtml(uiText("dv_skr"))}</span><div class="erseg">${skr("03")}${skr("04")}</div><small class="rvhint">${escHtml(uiText("dv_skr_s"))}</small></div>
     <div class="dvnr"><label class="rsf"><span>${escHtml(uiText("dv_ber"))}</span><input class="in" id="dvBer" inputmode="numeric" maxlength="7" value="${escHtml(c.berater || "")}" placeholder="1234567"></label><label class="rsf"><span>${escHtml(uiText("dv_man"))}</span><input class="in" id="dvMan" inputmode="numeric" maxlength="5" value="${escHtml(c.mandant || "")}" placeholder="10001"></label></div>
     <small class="rvhint dvhint">${escHtml(uiText("dv_nr_s"))}</small>
     <details class="dvaccs"><summary>${escHtml(uiText("dv_acc"))}</summary><div class="dvaccl">${accRow("#bank", uiText("dv_bank"))}${

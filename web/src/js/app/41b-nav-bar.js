@@ -14,13 +14,16 @@ function navLayout(nav, act) {
     inner = nav.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight),
     PW = pi < 0 ? 0 : 64,
     H = (inner - PW) / 2;
+  /* Symbol über dem Namen: alle Spalten gleich breit, die Pille umschließt nur den gewählten Reiter */
+  const stacked = !!act && getComputedStyle(act).flexDirection === "column";
   const tw = (t) => {
     const n = t.querySelector(".tname");
+    if (stacked) return Math.max(24, n ? Math.min(96, n.scrollWidth) : 0) + 20;
     return 26 + 24 + (n ? Math.min(112, n.scrollWidth) + 7 : 0);
   };
   const cols = (g) => {
     if (!g.length) return [];
-    if (!act || !g.includes(act)) return g.map(() => H / g.length);
+    if (!act || stacked || !g.includes(act)) return g.map(() => H / g.length);
     const w = Math.min(H - 34 * (g.length - 1), tw(act)),
       r = (H - w) / Math.max(1, g.length - 1);
     return g.map((t) => (t === act ? w : r));
@@ -292,12 +295,14 @@ const navFlow = (() => {
     /* Namen und Symbolfarben: weiß nur, solange Farbe dahinter ist */
     const na = S.ta.querySelector(".tname"),
       nb = S.tb.querySelector(".tname");
-    na.style.maxWidth = lerp(S.nA, 0, clamp(q / 0.3)).toFixed(1) + "px";
-    na.style.marginLeft = lerp(7, 0, clamp(q / 0.3)).toFixed(1) + "px";
-    na.style.opacity = String(clamp(1 - q / 0.2));
-    nb.style.maxWidth = lerp(0, S.nB, clamp((q - 0.8) / 0.2)).toFixed(1) + "px";
-    nb.style.marginLeft = lerp(0, 7, clamp((q - 0.8) / 0.2)).toFixed(1) + "px";
-    nb.style.opacity = String(clamp((q - 0.86) / 0.14));
+    if (!S.stk) {
+      na.style.maxWidth = lerp(S.nA, 0, clamp(q / 0.3)).toFixed(1) + "px";
+      na.style.marginLeft = lerp(7, 0, clamp(q / 0.3)).toFixed(1) + "px";
+      na.style.opacity = String(clamp(1 - q / 0.2));
+      nb.style.maxWidth = lerp(0, S.nB, clamp((q - 0.8) / 0.2)).toFixed(1) + "px";
+      nb.style.marginLeft = lerp(0, 7, clamp((q - 0.8) / 0.2)).toFixed(1) + "px";
+      nb.style.opacity = String(clamp((q - 0.86) / 0.14));
+    }
     const white = (t, v) =>
       t.style.setProperty("color", `color-mix(in srgb, #fff ${Math.round(100 * v)}%, var(--muted))`, "important");
     white(S.ta, k1 < 1 ? 1 : clamp((r1 - 8) / 12));
@@ -352,6 +357,7 @@ const navFlow = (() => {
         pr: pr.width / 2,
         nA: Math.min(112, ta.querySelector(".tname").scrollWidth),
         nB: Math.min(112, tb.querySelector(".tname").scrollWidth),
+        stk: getComputedStyle(ta).flexDirection === "column",
       };
       layer(n).style.display = "";
       ind.style.opacity = "0";

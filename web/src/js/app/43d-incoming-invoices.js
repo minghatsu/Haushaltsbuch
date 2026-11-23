@@ -244,7 +244,7 @@ function erListHtml() {
       ),
     tab = (k, t) =>
       `<button type="button" class="${ER.tab === k ? "on" : ""}" data-ertab="${k}">${escHtml(uiText(t))}</button>`;
-  return `${pmBanner()}<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${open.length} · ${escHtml(fmtEur(open.reduce((s, i) => s + i.pay, 0)))}</b></div><div><small>${escHtml(uiText("er_sum_paid"))}</small><b>${paidM.length} · ${escHtml(fmtEur(paidM.reduce((s, i) => s + i.pay, 0)))}</b></div></div>
+  return `${pmBanner()}<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${escHtml(fmtEur(open.reduce((s, i) => s + i.pay, 0)))}</b><small class="ercnt">${escHtml(cntTxt(open.length, "re"))}</small></div><div><small>${escHtml(uiText("er_sum_paid"))}</small><b>${escHtml(fmtEur(paidM.reduce((s, i) => s + i.pay, 0)))}</b><small class="ercnt">${escHtml(cntTxt(paidM.length, "re"))}</small></div></div>
     <div class="erseg" role="tablist">${tab("open", "er_open")}${tab("paid", "er_paid")}${tab("all", "er_all")}</div>
     <div class="erl">${
       L.map((i) => {
