@@ -1,0 +1,8 @@
+/* 34-lebensbereiche-layout: nur PC */
+html.pc [data-view="zukunft"] .agrid {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+html.pc [data-view="zukunft"] .agrid {
+  grid-template-columns: repeat(4, 1fr) !important;
+}

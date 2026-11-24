@@ -1,3 +1,27 @@
+/* PC (und Tablet, solange js/tablet nichts Eigenes anmeldet): eigene Fassungen an den Geräte-Haken */
+/* Sparen: alle Karten nebeneinander */
+geraetHaken("pc", "sparenKarten", (cards) => ({ cls: "pc", html: `<div class="zgrid">${cards.join("")}</div>` }));
+/* Anlegen: Zinseszins, Vergleich und Ziele gleichzeitig statt Reiter */
+geraetHaken("pc", "anlegenAllesZeigen", () => true);
+/* Haushalt: Kopfbereich mit Konten und Kennzahlen links (01-shell.js) */
+geraetHaken("pc", "haushaltGezeichnet", (o) => pcHome(o));
+/* Seitenwechsel: die PC-Ansichten bringen ihre eigene Bewegung mit */
+geraetHaken("pc", "eigenerSeitenwechsel", (view, prev) => view !== prev && !["list", "fix", "shop"].includes(view));
+/* Vorschau-Kurve: Hinweis „mit der Maus darüberfahren“ */
+geraetHaken("pc", "vorschauTipp", () => "fc_scrub_pc");
+/* Konten: am PC kein Falt-Effekt beim Aufklappen */
+geraetHaken("pc", "ohneKontoFalten", () => true);
+/* Plus-Menü: als Liste statt als Rad (Maus statt Daumen) */
+geraetHaken("pc", "plusAlsListe", () => true);
+
+/* Tablet: weicht hier vom PC ab (Haken, siehe gemeinsam/00-geraet.js) */
+/* Konten falten sich wie am Handy */
+geraetHaken("tablet", "ohneKontoFalten", () => false);
+/* Hell/Dunkel sitzt oben im Kopf, kein zweiter Schalter in den Einstellungen */
+geraetHaken("tablet", "ohneHellDunkelSchalter", () => true);
+/* Plus-Menü: als Rad wie am Handy */
+geraetHaken("tablet", "plusAlsListe", () => false);
+
 /* PC-Ansicht */
 function pcOn() {
   if (pcOn.done || !IS_PC) return;
@@ -7708,6 +7732,7 @@ if (IS_TAB) {
     );
   }
 }
+
 /* Einstellungen am PC und Tablet: Übersicht in vier Spalten, die Einstellung öffnet als Seitenfenster rechts */
 if (IS_PC) {
   const calm = () => pcCalm();

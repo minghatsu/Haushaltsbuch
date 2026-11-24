@@ -1,0 +1,10 @@
+/* 18-farbpaket-dank: nur Handy */
+html:not(.pc) .ptq.ptqph,
+html:not(.pc) .top #bellBtn {
+  width: 46px !important;
+  height: 46px !important;
+}
+
+html:not(.pc) .ptq.ptqph {
+  font-size: 18px;
+}

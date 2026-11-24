@@ -1,0 +1,11 @@
+/* 43-profil-vorschau: nur PC */
+html.pc .pvfab {
+  right: 46px;
+  bottom: 156px;
+}
+
+html.pc .pcdptool.pvtool {
+  justify-content: flex-start;
+  background: var(--pv);
+  color: #fff;
+}

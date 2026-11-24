@@ -1,0 +1,181 @@
+/* Entwickler: Profil-Vorschau („Ansehen als …“) */
+:root {
+  --pv: #b35c00;
+  --pv-soft: #fbe6cf;
+  --pv-ink: #7a3e00;
+}
+:root[data-theme="dark"] {
+  --pv: #d9822b;
+  --pv-soft: #3b2614;
+  --pv-ink: #ffd2a3;
+}
+#pvBg .pvs {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+#pvBg .pvg {
+  margin: 14px 2px 6px;
+  font: 700 11.5px var(--f-body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+#pvBg .pvgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+#pvBg .pvgrid button {
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--sunk);
+  color: var(--fg);
+  font: 700 14px var(--f-body);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s;
+}
+#pvBg .pvgrid button.on {
+  background: var(--pv-soft);
+  color: var(--pv-ink);
+  box-shadow: inset 0 0 0 2px var(--pv);
+}
+#pvBg .pvex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#pvBg .pvex button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 38px;
+  padding: 7px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--sunk);
+  color: var(--fg);
+  font: 600 13.5px var(--f-body);
+  cursor: pointer;
+}
+#pvBg .pvex button.on {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+#pvBg .pvbtns {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+}
+#pvBg .pvbtns .btn {
+  flex: 1;
+  justify-content: center;
+}
+#pvBg .pvgo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  font-weight: 800;
+}
+#pvBg .pvgo svg,
+.pvdevbtn .pvwr svg,
+.pvtool svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#pvBg button:focus-visible,
+.pvdevbtn:focus-visible {
+  outline: 2px solid var(--pv);
+  outline-offset: 2px;
+}
+/* Runder Knopf, solange die Vorschau läuft */
+#pvBg .pvgo {
+  background: var(--pv);
+  color: #fff;
+}
+.pvfab {
+  position: fixed;
+  z-index: 950;
+  right: 16px;
+  bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--pv);
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(80, 40, 0, 0.32);
+  cursor: pointer;
+  animation: pvin 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.pvfab svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pvfab:focus-visible {
+  outline: 2px solid var(--pv);
+  outline-offset: 3px;
+}
+@keyframes pvin {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+/* Knopf in den Entwickler-Werkzeugen */
+.pvdevbtn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 12px 0 4px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--pv);
+  color: #fff;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.pvdevbtn .pvwr {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+.pvdevbtn b {
+  display: block;
+  font-size: 15px;
+}
+.pvdevbtn small {
+  display: block;
+  font-size: 12.5px;
+  opacity: 0.9;
+}
+/* solange ein Fenster offen ist, verdeckt der Knopf nichts */
+body.locked .pvfab {
+  opacity: 0;
+  pointer-events: none;
+}

@@ -1,0 +1,4 @@
+/* 41-konten-je-jahr: nur PC */
+html.pc .pctpane .ayblk {
+  grid-column: 1 / -1;
+}

@@ -1,0 +1,48 @@
+/* 01-basis: nur Handy */
+/* Tippflächen: am Handy und Tablet mindestens 44 px */
+html:not(.pc) .roundbtn,
+html:not(.pc) .areagear {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+html:not(.pc) .msel,
+html:not(.pc) .atabs button,
+html:not(.pc) .anaseg button,
+html:not(.pc) .calg button,
+html:not(.pc) .card > button.fgh,
+html:not(.pc) .arl > button.arw,
+html:not(.pc) .card > button.btn.small,
+html:not(.pc) #cashGo {
+  min-height: 44px;
+}
+
+html:not(.pc) .ftile button.famt,
+html:not(.pc) .card-head button.link,
+html:not(.pc) .homeTop .mvopen,
+html:not(.pc) .tlchips .fchip {
+  padding-block: 12px;
+  margin-block: -12px;
+}
+
+html:not(.pc) .row-btns button {
+  min-height: 44px;
+}
+
+html:not(.pc) .adots {
+  gap: 6px !important;
+}
+
+html:not(.pc) .adots button {
+  min-width: 24px;
+  min-height: 44px;
+}
+
+html:not(.pc) .adots button i {
+  width: 9px;
+  height: 9px;
+}
+
+html:not(.pc) .adots button.on i {
+  width: 26px;
+}

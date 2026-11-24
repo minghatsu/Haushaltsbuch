@@ -1,0 +1,15 @@
+/* 07-feedback-start-koppeln: nur PC */
+/* Feedback, Startkarte, Koppeln per QR */
+html.pc .fbsheet {
+  max-width: min(1000px, 95vw);
+  width: min(1000px, 95vw);
+  border-radius: 28px;
+}
+
+@media (min-width: 1000px) {
+html.pc .fbwrap {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    align-items: start;
+  }
+
+}

@@ -1,0 +1,11 @@
+/* 30-amt: nur PC */
+html.pc .bsbtns .vakb[data-brpick="cam"],
+html.pc .bsbtns .vakb[data-stbpick="cam"],
+html.pc .bsbtns .vakb[data-bspick="cam"],
+html.pc .bsbtns .vakb[data-rchpick="cam"] {
+  display: none;
+}
+
+html.pc .bsbtns .vadone {
+  flex: 1;
+}

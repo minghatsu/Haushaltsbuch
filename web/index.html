@@ -1326,46 +1326,6 @@ small,
   overflow-wrap: break-word;
 }
 
-/* Tippflächen: am Handy und Tablet mindestens 44 px */
-html:not(.pc) .roundbtn,
-html:not(.pc) .areagear {
-  min-width: 44px;
-  min-height: 44px;
-}
-html:not(.pc) .msel,
-html:not(.pc) .atabs button,
-html:not(.pc) .anaseg button,
-html:not(.pc) .calg button,
-html:not(.pc) .card > button.fgh,
-html:not(.pc) .arl > button.arw,
-html:not(.pc) .card > button.btn.small,
-html:not(.pc) #cashGo {
-  min-height: 44px;
-}
-html:not(.pc) .ftile button.famt,
-html:not(.pc) .card-head button.link,
-html:not(.pc) .homeTop .mvopen,
-html:not(.pc) .tlchips .fchip {
-  padding-block: 12px;
-  margin-block: -12px;
-}
-html:not(.pc) .row-btns button {
-  min-height: 44px;
-}
-html:not(.pc) .adots {
-  gap: 6px !important;
-}
-html:not(.pc) .adots button {
-  min-width: 24px;
-  min-height: 44px;
-}
-html:not(.pc) .adots button i {
-  width: 9px;
-  height: 9px;
-}
-html:not(.pc) .adots button.on i {
-  width: 26px;
-}
 /* Bewegung: „sanft“ (Standard) dämpft Überschwinger und lässt Schmuck-Schleifen
    zweimal laufen, „lebhaft“ nimmt die ursprünglichen Kurven, „aus“ steht still. */
 :root:not([data-motion="live"]) {
@@ -1381,6 +1341,55 @@ html[data-motion="off"] *::after {
   transition-duration: 0.01ms !important;
   transition-delay: 0s !important;
   scroll-behavior: auto !important;
+}
+
+/* 01-basis: nur Handy */
+/* Tippflächen: am Handy und Tablet mindestens 44 px */
+html:not(.pc) .roundbtn,
+html:not(.pc) .areagear {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+html:not(.pc) .msel,
+html:not(.pc) .atabs button,
+html:not(.pc) .anaseg button,
+html:not(.pc) .calg button,
+html:not(.pc) .card > button.fgh,
+html:not(.pc) .arl > button.arw,
+html:not(.pc) .card > button.btn.small,
+html:not(.pc) #cashGo {
+  min-height: 44px;
+}
+
+html:not(.pc) .ftile button.famt,
+html:not(.pc) .card-head button.link,
+html:not(.pc) .homeTop .mvopen,
+html:not(.pc) .tlchips .fchip {
+  padding-block: 12px;
+  margin-block: -12px;
+}
+
+html:not(.pc) .row-btns button {
+  min-height: 44px;
+}
+
+html:not(.pc) .adots {
+  gap: 6px !important;
+}
+
+html:not(.pc) .adots button {
+  min-width: 24px;
+  min-height: 44px;
+}
+
+html:not(.pc) .adots button i {
+  width: 9px;
+  height: 9px;
+}
+
+html:not(.pc) .adots button.on i {
+  width: 26px;
 }
 
 /* Kontokarten-Stapel, Zeitleiste, Spartöpfe */
@@ -3556,16 +3565,6 @@ html.touch .kpad {
   color: var(--fg);
   margin-left: 4px;
 }
-html.pc .invbg {
-  background: color-mix(in srgb, var(--bg) 70%, #000a);
-  align-items: center;
-}
-html.pc .invbox {
-  background: var(--bg);
-  border-radius: 28px;
-  max-height: 92vh;
-  box-shadow: 0 30px 80px -20px #000a;
-}
 .legalbox h2 {
   margin: 10px 0 4px;
   font-family: var(--f-display);
@@ -4179,12 +4178,6 @@ html[data-theme="dark"] .rfnote {
   max-width: 620px;
 }
 
-/* Feedback, Startkarte, Koppeln per QR */
-html.pc .fbsheet {
-  max-width: min(1000px, 95vw);
-  width: min(1000px, 95vw);
-  border-radius: 28px;
-}
 #fbFloatBg #fbEd {
   padding: 4px 0 6px;
 }
@@ -4288,12 +4281,6 @@ html.pc .fbsheet {
 }
 .fbbtns {
   justify-content: flex-start;
-}
-@media (min-width: 1000px) {
-  html.pc .fbwrap {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
-    align-items: start;
-  }
 }
 .fbpgh {
   font-weight: 700;
@@ -11241,94 +11228,6 @@ tfoot td {
 .tabind {
   display: none;
 }
-@media (max-width: 999px) and (min-height: 521px), (max-width: 999px) and (orientation: portrait) {
-  html:not(.pc) .tabs.navx {
-    grid-template-columns: var(--nc, 1fr 1fr 64px 1fr 1fr);
-    transition: grid-template-columns 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1));
-  }
-  html:not(.pc) .tabs.navx .tab:not(.plus) {
-    flex-direction: row;
-    gap: 0;
-    height: 48px;
-    padding: 0 13px;
-    justify-self: center;
-    border-radius: 24px;
-    z-index: 1;
-    color: var(--muted) !important;
-    transition: color 0.3s;
-  }
-  html:not(.pc) .tabs.navx .tab:not(.plus) svg.i {
-    padding: 0 !important;
-    background: none !important;
-    flex: none;
-  }
-  html:not(.pc) .tabs.navx .tab:not(.plus) .tname {
-    display: block;
-    max-width: 0;
-    opacity: 0;
-    margin: 0;
-    font-size: 13.5px;
-    font-weight: 800;
-    line-height: 1;
-    color: #fff !important;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    transition:
-      max-width 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1)),
-      opacity 0.25s,
-      margin 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1));
-  }
-  html:not(.pc) .tabs.navx .tab[aria-selected="true"]:not(.plus) {
-    color: #fff !important;
-  }
-  html:not(.pc) .tabs.navx .tab[aria-selected="true"]:not(.plus) .tname {
-    max-width: 112px;
-    opacity: 1;
-    margin-left: 7px;
-    transition-delay: 0s, 0.12s, 0s;
-  }
-  html:not(.pc) .tabs.navx .tab:not(.plus) .tname.sm {
-    font-size: 13px;
-    letter-spacing: -0.015em;
-  }
-  html:not(.pc) .tabs.navx .tab.plus {
-    z-index: 2;
-  }
-  html:not(.pc) .tabs.navx .tabind {
-    display: block;
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 48px;
-    border-radius: 24px;
-    z-index: 0;
-    pointer-events: none;
-    background: var(--ic, var(--accent));
-    box-shadow: 0 6px 14px -4px color-mix(in srgb, var(--ic, var(--accent)) 60%, transparent);
-    transition:
-      background-color 0.35s,
-      opacity 0.15s;
-  }
-  html:not(.pc) .tabs.navx .navflow {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-    pointer-events: none;
-    z-index: 0;
-    filter: drop-shadow(0 6px 7px rgba(0, 0, 0, 0.16));
-  }
-  html:not(.pc) .tabs.navx.nosel .tabind {
-    opacity: 0;
-  }
-  /* in die Einstellungen: Knopf und Name gehen zügig und gemeinsam weg, kein halber Name bleibt stehen */
-  html:not(.pc) .tabs.navx.nosel .tab:not(.plus) .tname {
-    transition: none;
-  }
-}
 .tset {
   position: relative;
 }
@@ -11352,6 +11251,108 @@ tfoot td {
 .brand,
 .tab .tlabel {
   display: none;
+}
+
+/* 16-farben-leiste: nur Handy */
+@media (max-width: 999px) and (min-height: 521px), (max-width: 999px) and (orientation: portrait) {
+html:not(.pc) .tabs.navx {
+    grid-template-columns: var(--nc, 1fr 1fr 64px 1fr 1fr);
+    transition: grid-template-columns 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1));
+  }
+
+html:not(.pc) .tabs.navx .tab:not(.plus) {
+    flex-direction: row;
+    gap: 0;
+    height: 48px;
+    padding: 0 13px;
+    justify-self: center;
+    border-radius: 24px;
+    z-index: 1;
+    color: var(--muted) !important;
+    transition: color 0.3s;
+  }
+
+html:not(.pc) .tabs.navx .tab:not(.plus) svg.i {
+    padding: 0 !important;
+    background: none !important;
+    flex: none;
+  }
+
+html:not(.pc) .tabs.navx .tab:not(.plus) .tname {
+    display: block;
+    max-width: 0;
+    opacity: 0;
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 800;
+    line-height: 1;
+    color: #fff !important;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    transition:
+      max-width 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1)),
+      opacity 0.25s,
+      margin 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1));
+  }
+
+html:not(.pc) .tabs.navx .tab[aria-selected="true"]:not(.plus) {
+    color: #fff !important;
+  }
+
+html:not(.pc) .tabs.navx .tab[aria-selected="true"]:not(.plus) .tname {
+    max-width: 112px;
+    opacity: 1;
+    margin-left: 7px;
+    transition-delay: 0s, 0.12s, 0s;
+  }
+
+html:not(.pc) .tabs.navx .tab:not(.plus) .tname.sm {
+    font-size: 13px;
+    letter-spacing: -0.015em;
+  }
+
+html:not(.pc) .tabs.navx .tab.plus {
+    z-index: 2;
+  }
+
+html:not(.pc) .tabs.navx .tabind {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 48px;
+    border-radius: 24px;
+    z-index: 0;
+    pointer-events: none;
+    background: var(--ic, var(--accent));
+    box-shadow: 0 6px 14px -4px color-mix(in srgb, var(--ic, var(--accent)) 60%, transparent);
+    transition:
+      background-color 0.35s,
+      opacity 0.15s;
+  }
+
+html:not(.pc) .tabs.navx .navflow {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 0;
+    filter: drop-shadow(0 6px 7px rgba(0, 0, 0, 0.16));
+  }
+
+html:not(.pc) .tabs.navx.nosel .tabind {
+    opacity: 0;
+  }
+
+/* in die Einstellungen: Knopf und Name gehen zügig und gemeinsam weg, kein halber Name bleibt stehen */
+html:not(.pc) .tabs.navx.nosel .tab:not(.plus) .tname {
+    transition: none;
+  }
+
 }
 
 /* Breites Fenster und weitere Ansichten */
@@ -14150,14 +14151,6 @@ html[data-pack] .sp.pc .card {
     display: none;
   }
 }
-html:not(.pc) .ptq.ptqph,
-html:not(.pc) .top #bellBtn {
-  width: 46px !important;
-  height: 46px !important;
-}
-html:not(.pc) .ptq.ptqph {
-  font-size: 18px;
-}
 .fbtab {
   position: fixed;
   right: 0;
@@ -14201,9 +14194,16 @@ html:not(.pc) .ptq.ptqph {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-html.pc .pcacts .ptq.fbq svg {
-  width: 20px;
-  height: 20px;
+
+/* 18-farbpaket-dank: nur Handy */
+html:not(.pc) .ptq.ptqph,
+html:not(.pc) .top #bellBtn {
+  width: 46px !important;
+  height: 46px !important;
+}
+
+html:not(.pc) .ptq.ptqph {
+  font-size: 18px;
 }
 
 /* Frag Mami */
@@ -14249,42 +14249,12 @@ html:not(.pc) .ptq.mamibtn.ptqph {
   box-shadow: none !important;
   margin-left: 8px;
 }
-html.pc .pcacts .ptq.mamibtn.roundbtn {
-  margin: 0 4px !important;
-}
 .ptq.mamibtn:hover {
   transform: translateY(-1px);
 }
 .ptq.mamibtn .mav {
   width: 32px;
   height: 32px;
-}
-html:not(.pc) .ptq.mamibtn.ptqph {
-  min-height: 46px;
-  padding: 4px 12px 4px 4px !important;
-  font-size: 13px;
-  background: var(--surface) !important;
-  box-shadow: var(--shadow) !important;
-}
-html:not(.pc) .ptq.mamibtn.ptqph .mav {
-  width: 38px;
-  height: 38px;
-}
-html:not(.pc) .top .wrap > .hello #viewTitle {
-  display: block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-html:not(.pc) .ptq.mamibtn {
-  flex: none;
-  margin-left: 0 !important;
-}
-html:not(.pc) .ptq.mamibtn.mcomp .mbl {
-  display: none;
-}
-html:not(.pc) .ptq.mamibtn.mcomp.ptqph {
-  padding: 4px !important;
 }
 .mamipop {
   position: fixed;
@@ -14566,6 +14536,40 @@ html:not(.pc) .ptq.mamibtn.mcomp.ptqph {
   padding: 13px;
   border-radius: 14px;
   font-weight: 800;
+}
+
+/* 19-frag-mami: nur Handy */
+html:not(.pc) .ptq.mamibtn.ptqph {
+  min-height: 46px;
+  padding: 4px 12px 4px 4px !important;
+  font-size: 13px;
+  background: var(--surface) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+html:not(.pc) .ptq.mamibtn.ptqph .mav {
+  width: 38px;
+  height: 38px;
+}
+
+html:not(.pc) .top .wrap > .hello #viewTitle {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html:not(.pc) .ptq.mamibtn {
+  flex: none;
+  margin-left: 0 !important;
+}
+
+html:not(.pc) .ptq.mamibtn.mcomp .mbl {
+  display: none;
+}
+
+html:not(.pc) .ptq.mamibtn.mcomp.ptqph {
+  padding: 4px !important;
 }
 
 /* Kalender */
@@ -15167,13 +15171,6 @@ html[lang="ar"] body *:not(#langBg):not(#langBg *) {
 }
 .hobg.show .hosh {
   transform: none;
-}
-html.pc .hobg {
-  align-items: center;
-}
-html.pc .hosh {
-  border-radius: 24px;
-  max-height: 88vh;
 }
 .hohd {
   display: flex;
@@ -15980,59 +15977,6 @@ html.tabp .bfg {
 html.tabp .bfgb {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
-html.pc:not(.tabp) .bftop {
-  grid-template-columns: minmax(0, 1fr);
-}
-html.pc:not(.tabp) .bfsw {
-  --bfduo: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px 16px;
-  align-items: start;
-}
-html.pc:not(.tabp) .bfbands,
-html.pc:not(.tabp) .bfgrids {
-  display: contents;
-}
-html.pc:not(.tabp) .bfhint {
-  display: none;
-}
-html.pc:not(.tabp) .bfband {
-  transform: none !important;
-  opacity: 1 !important;
-  filter: none !important;
-  cursor: default;
-}
-html.pc:not(.tabp) .bfband .bfbtn {
-  visibility: visible !important;
-}
-html.pc:not(.tabp) .bfj {
-  grid-column: 1;
-  grid-row: 1;
-}
-html.pc:not(.tabp) .bfb {
-  grid-column: 2;
-  grid-row: 1;
-}
-html.pc:not(.tabp) .bfgj {
-  grid-column: 1;
-  grid-row: 2;
-  visibility: visible !important;
-  pointer-events: auto !important;
-}
-html.pc:not(.tabp) .bfgb {
-  grid-column: 2;
-  grid-row: 2;
-  visibility: visible !important;
-  pointer-events: auto !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-}
-html.pc:not(.tabp) .bfgj {
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-}
-html.pc:not(.tabp) #v-beruf {
-  max-width: min(2240px, 100%);
-}
 html.istab:not(.tabp) .bfgb,
 html.istab:not(.tabp) .bfgj {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -16230,29 +16174,6 @@ html.istab:not(.tabp) .bfsw {
 }
 body.subview .top #topAv {
   display: none;
-}
-html.pc .agrid {
-  grid-template-columns: repeat(6, 1fr);
-}
-html.pc #v-beruf,
-html.pc #v-zukunft {
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-}
-html.pc #v-zukunft {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  align-items: start;
-}
-html.pc #v-zukunft > .ahero,
-html.pc #v-zukunft > .zhero,
-html.pc #v-zukunft > .areacard {
-  grid-column: 1/-1;
-}
-html.pc #v-zukunft > .card {
-  order: 0 !important;
 }
 
 /* Geschäft: „Als Nächstes“ und kompakte Liste für Steuer-Themen */
@@ -16953,42 +16874,7 @@ html.tabp .rvfoot {
   width: 100%;
   margin: auto auto 0;
 }
-/* Tablet quer + PC: Schritte, Formular, Live-Vorschau nebeneinander */
-html.pc:not(.tabp) .rvpvb,
-html.pc:not(.tabp) .rvpaperm {
-  display: none;
-}
-html.pc:not(.tabp) .rvprev {
-  display: block;
-}
-html.pc:not(.tabp) .rvwin {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-rows: auto auto minmax(0, 1fr);
-}
-html.pc:not(.tabp) .rvnav {
-  grid-column: 1;
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-html.pc:not(.tabp) .rvbar {
-  display: none;
-}
-html.pc:not(.tabp) .rvst {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 0;
-  background: transparent;
-  color: var(--fg);
-  padding: 6px 10px 6px 6px;
-  border-radius: 99px;
-  cursor: pointer;
-  font-size: 13px;
-}
-html.pc:not(.tabp) .rvst .rvstt small {
-  display: none;
-}
+
 .rvsn {
   width: 26px;
   height: 26px;
@@ -17010,17 +16896,6 @@ html.pc:not(.tabp) .rvst .rvstt small {
 }
 .rvst.on {
   background: color-mix(in srgb, var(--accent) 12%, transparent);
-}
-html.pc:not(.tabp) .rvbody {
-  grid-column: 1;
-  grid-row: 3;
-}
-html.pc:not(.tabp) .rvprev {
-  grid-column: 2;
-  grid-row: 1/4;
-}
-html.pc:not(.tabp) .rvhd {
-  grid-column: 1;
 }
 @media (min-width: 1180px) {
   html.pc:not(.tabp):not(.istab) .rvwin {
@@ -17510,12 +17385,6 @@ html.pc:not(.tabp) .rvhd {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
-html.pc .rchacts .cam {
-  display: none;
-}
-html.pc .rchacts {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
 .rcha {
   min-width: 0;
   display: flex;
@@ -17568,8 +17437,6 @@ html.pc .rchacts {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--muted);
-}
-@media (prefers-reduced-motion: no-preference) {
 }
 
 /* Plus-Rad */
@@ -17679,9 +17546,6 @@ html.pc .rchacts {
   display: flex;
   width: max-content;
   max-width: 100%;
-}
-html:not(.pc) body {
-  overflow-x: clip;
 }
 .hbodo span {
   font-size: inherit !important;
@@ -18405,6 +18269,11 @@ body > .hbconf {
   flex: 1;
 }
 
+/* 26-zaehlwerk-vertraege: nur Handy */
+html:not(.pc) body {
+  overflow-x: clip;
+}
+
 /* Vorschau */
 .fcmini {
   display: flex;
@@ -18456,9 +18325,6 @@ body > .hbconf {
   margin: 8px 0 2px;
 }
 .fcpcw {
-  margin-bottom: 12px;
-}
-html.pc .hlcard {
   margin-bottom: 12px;
 }
 .fcchev {
@@ -19081,9 +18947,6 @@ html[data-theme="dark"] .srhero,
   opacity: 1;
   transform: none;
 }
-html.pc #srPill {
-  bottom: 30px;
-}
 .tab.srbump {
   animation: srBump 0.6s var(--ease-pop, cubic-bezier(0.3, 1.7, 0.5, 1));
 }
@@ -19202,16 +19065,6 @@ html.pc #srPill {
 }
 #hlBg.on .hlph {
   transform: none;
-}
-html.pc #hlBg {
-  background: rgba(5, 15, 11, 0.82);
-  backdrop-filter: blur(8px);
-}
-html.pc .hlph {
-  width: 420px;
-  height: min(860px, 92vh);
-  border-radius: 28px;
-  box-shadow: 0 40px 90px -20px rgba(0, 0, 0, 0.7);
 }
 .hlph.shake {
   animation: fcShk 0.45s;
@@ -19398,9 +19251,6 @@ html.pc .hlph {
   font-weight: 900;
   letter-spacing: -0.03em;
   margin: 8px 0 22px;
-}
-html.pc .hllet {
-  font-size: 58px;
 }
 .hllet span {
   display: inline-block;
@@ -21082,15 +20932,6 @@ a.btn:not(.primary) {
   display: flex;
   gap: 8px;
 }
-html.pc .bsbtns .vakb[data-brpick="cam"],
-html.pc .bsbtns .vakb[data-stbpick="cam"],
-html.pc .bsbtns .vakb[data-bspick="cam"],
-html.pc .bsbtns .vakb[data-rchpick="cam"] {
-  display: none;
-}
-html.pc .bsbtns .vadone {
-  flex: 1;
-}
 .bsbtns .vakb {
   flex: 1.3;
 }
@@ -21972,21 +21813,6 @@ html.pc .bsbtns .vadone {
 .mbchips:has(.mbchip:only-child) {
   display: none;
 }
-html.pc .mbstack {
-  left: auto;
-  right: 120px;
-  bottom: 120px;
-  width: 420px;
-}
-html.pc .mbmami {
-  left: auto;
-  right: 28px;
-  bottom: 40px;
-}
-html.pc .mbbub {
-  border-radius: 24px 24px 6px 24px;
-  transform-origin: 92% 100%;
-}
 [dir="rtl"] .mbbub {
   border-radius: 24px 24px 6px 24px;
   transform-origin: 88% 100%;
@@ -22303,9 +22129,6 @@ html.pc .mbbub {
 [data-view="zukunft"] .agrid {
   grid-template-columns: repeat(4, 1fr);
 }
-html.pc [data-view="zukunft"] .agrid {
-  grid-template-columns: repeat(6, 1fr);
-}
 .atile {
   transition:
     transform 0.25s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)),
@@ -22335,81 +22158,97 @@ body.scrolled .top {
     transition: none;
   }
 }
-/* Handy: genau vier Kacheln in eine Reihe statt drei plus eine einzelne darunter */
+
+/* 34-lebensbereiche-layout: nur Handy */
 @media (max-width: 639px) {
-  html:not(.pc) .agrid:has(> :nth-child(4):last-child) {
+html:not(.pc) .agrid:has(> :nth-child(4):last-child) {
     grid-template-columns: repeat(4, 1fr);
   }
+
 }
-/* Tablet/PC Layout */
+
 @media (min-width: 640px) {
-  html:not(.pc) [data-view="home"] .agrid {
+html:not(.pc) [data-view="home"] .agrid {
     grid-template-columns: repeat(6, 1fr);
   }
-  html:not(.pc) .hlist {
+
+html:not(.pc) .hlist {
     display: grid !important;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     align-items: start;
   }
-  html:not(.pc) .hlist > * {
+
+html:not(.pc) .hlist > * {
     margin: 0 !important;
   }
-  html:not(.pc) .hlist > :not(.card) {
+
+html:not(.pc) .hlist > :not(.card) {
     grid-column: 1/-1;
   }
-  html:not(.pc) .homeTop .hkpi,
+
+html:not(.pc) .homeTop .hkpi,
   html:not(.pc) .homeTop .fcmini {
     width: auto;
   }
-  html:not(.pc) [data-view="beruf"] .agrid {
+
+html:not(.pc) [data-view="beruf"] .agrid {
     grid-template-columns: repeat(6, 1fr);
   }
-  html:not(.pc) [data-view="zukunft"] {
+
+html:not(.pc) [data-view="zukunft"] {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     align-items: start;
   }
-  html:not(.pc) [data-view="zukunft"] > * {
+
+html:not(.pc) [data-view="zukunft"] > * {
     margin: 0 !important;
   }
-  html:not(.pc) [data-view="zukunft"] > .ahero,
+
+html:not(.pc) [data-view="zukunft"] > .ahero,
   html:not(.pc) [data-view="zukunft"] > .zhero,
   html:not(.pc) [data-view="zukunft"] > .areacard {
     grid-column: 1/-1;
   }
+
 }
+
 @media (min-width: 1000px) {
-  html:not(.pc) [data-view="home"] {
+html:not(.pc) [data-view="home"] {
     display: grid;
     grid-template-columns: minmax(420px, 1fr) minmax(0, 1fr);
     gap: 14px;
     align-items: start;
   }
-  html:not(.pc) [data-view="home"] > * {
+
+html:not(.pc) [data-view="home"] > * {
     margin: 0 !important;
     min-width: 0;
   }
-  html:not(.pc) [data-view="home"] > .hlcard {
+
+html:not(.pc) [data-view="home"] > .hlcard {
     grid-column: 1/-1;
   }
-  html:not(.pc) [data-view="home"] > .homeTop {
+
+html:not(.pc) [data-view="home"] > .homeTop {
     grid-row: span 3;
   }
-  html:not(.pc) [data-view="home"] .agrid {
+
+html:not(.pc) [data-view="home"] .agrid {
     grid-template-columns: repeat(3, 1fr);
   }
-  html:not(.pc) [data-view="home"] .hcols {
+
+html:not(.pc) [data-view="home"] .hcols {
     grid-template-columns: 1fr;
     gap: 14px;
   }
-  html:not(.pc) [data-view="beruf"] .agrid {
+
+html:not(.pc) [data-view="beruf"] .agrid {
     grid-template-columns: repeat(6, 1fr);
   }
-}
-html.pc [data-view="zukunft"] .agrid {
-  grid-template-columns: repeat(4, 1fr) !important;
+
 }
 
 /* Entwickler-Werkzeuge */
@@ -24658,9 +24497,6 @@ html.pc:not(.istab) .mvopen {
 .ayrow.off .ayn b {
   opacity: 0.45;
 }
-html.pc .pctpane .ayblk {
-  grid-column: 1 / -1;
-}
 .ayval {
   font: 800 18px var(--f-display);
   font-variant-numeric: tabular-nums;
@@ -25964,10 +25800,6 @@ html.pc .pctpane .ayblk {
     transform: scale(0.6);
   }
 }
-html.pc .pvfab {
-  right: 46px;
-  bottom: 156px;
-}
 /* Knopf in den Entwickler-Werkzeugen */
 .pvdevbtn {
   display: flex;
@@ -26001,11 +25833,6 @@ html.pc .pvfab {
   display: block;
   font-size: 12.5px;
   opacity: 0.9;
-}
-html.pc .pcdptool.pvtool {
-  justify-content: flex-start;
-  background: var(--pv);
-  color: #fff;
 }
 /* solange ein Fenster offen ist, verdeckt der Knopf nichts */
 body.locked .pvfab {
@@ -26339,6 +26166,58 @@ body.locked .pvfab {
 })();
 (() => {
 "use strict";
+
+/* Welches Gerät? – einmal hier entschieden, überall gleich.
+     handy   Android-Handy oder Browser
+     tablet  Android mit kurzer Bildschirmseite ab 600 px (oder hb-forcetab=1 zum Testen)
+     pc      Windows/Mac/Linux-App
+   IS_PC heißt „breite Ansicht“ und gilt für PC und Tablet; der Tablet-Ordner baut auf dem PC-Ordner auf.
+
+   Geräte-Haken: Wo sich Aufbau oder Verhalten je Gerät unterscheiden, fragt der gemeinsame Code an einer
+   festen Stelle nach, statt selbst „wenn PC …“ zu entscheiden:
+     geraetHaken("handy" | "pc" | "tablet", "name", fn)   im Geräte-Ordner: eigene Fassung anmelden
+     geraetRuf("name", ...args)                           im gemeinsamen Code: aufrufen (sonst undefined)
+   Eine Anmeldung gilt nur auf ihrem Gerät. „pc“ gilt auch fürs Tablet, solange js/tablet für denselben
+   Haken nichts Eigenes anmeldet. So trifft eine Änderung im Geräte-Ordner nur dieses Gerät.
+   Beschriftungen und Fähigkeiten (Gerätename, Teilen, SMS, Datei-Namen beim Update) fragen GERAET direkt. */
+const IS_DESK = !!(window.AndroidBridge && window.AndroidBridge.desktop);
+const IS_TAB =
+  !IS_DESK &&
+  (() => {
+    try {
+      if (localStorage.getItem("hb-forcetab") === "1") return true;
+    } catch (_) {}
+    return !!window.AndroidBridge && Math.min(screen.width || 0, screen.height || 0) >= 600;
+  })();
+const IS_PC = IS_DESK || IS_TAB;
+const GERAET = IS_DESK ? "pc" : IS_TAB ? "tablet" : "handy";
+const GERAET_NAME = { handy: "Android", tablet: "Tablet", pc: "PC" }[GERAET];
+const GERAET_HAKEN = {};
+function geraetHaken(geraet, name, fn) {
+  const rang = { handy: !IS_PC ? 1 : 0, pc: IS_PC ? 1 : 0, tablet: IS_TAB ? 2 : 0 }[geraet];
+  if (!rang) return;
+  const alt = GERAET_HAKEN[name];
+  if (alt && alt.rang > rang) return;
+  GERAET_HAKEN[name] = { fn, rang };
+}
+function geraetRuf(name, ...args) {
+  const h = GERAET_HAKEN[name];
+  return h ? h.fn(...args) : undefined;
+}
+
+/* Handy: eigene Fassungen an den Geräte-Haken (siehe gemeinsam/00-geraet.js) */
+/* Sparen: Karten als Stapel zum Wischen, darunter Punkte */
+geraetHaken("handy", "sparenKarten", (cards) => ({
+  cls: "",
+  html: `<div class="astack" id="zstack" tabindex="0" aria-label="${escHtml(uiText("zk_swipe"))}">${cards.join("")}</div><div class="adots" id="zdots">${cards.map((_, i) => `<button data-cdot="${i}" aria-label="${i + 1}"><i></i></button>`).join("")}</div>`,
+}));
+geraetHaken("handy", "sparenGezeichnet", () => initStack("zstack", "zkIdx", "zdots"));
+/* Haushalt: Mami fasst „pro Tag“ und Prognose in einem Satz zusammen */
+geraetHaken("handy", "haushaltSatz", (ym, mainBal) => homeSay(ym, mainBal));
+/* Einkauf: Hinweis, wenn jemand anderes gerade einkaufen ist */
+geraetHaken("handy", "einkaufTourHinweis", () => true);
+/* Währungsauswahl mit Flagge */
+geraetHaken("handy", "waehrungFlagge", (c) => CUR_FLAG[c] || "");
 
 const I18N_K = [
   "{n} {m}: {n} € ausgegeben",
@@ -48690,7 +48569,7 @@ function mvClose() {
 }
 function mvFxOk() {
   try {
-    return !!document.body.animate && !motionOff() && !IS_DESK;
+    return !!document.body.animate && !motionOff() && !geraetRuf("ohneKontoFalten");
   } catch (_) {
     return false;
   }
@@ -51571,6 +51450,14 @@ document.addEventListener("click", (e) => {
 
 /* Einstellungen extra */
 const CHANGELOG = [
+  [
+    "0.49.6",
+    "24. November 2026",
+    [
+      "Aufgeräumt hinter den Kulissen: Der Code ist jetzt nach Handy, Tablet und PC getrennt. Was nur ein Gerät betrifft, liegt in dessen eigenem Ordner – eine Änderung am Tablet kann so den PC nicht mehr versehentlich treffen. Am Aussehen ändert sich dadurch nichts.",
+      "Behoben: Auf dem Tablet stand die Vorschau „Am 30. … voraussichtlich“ in der grünen Spalte Wort für Wort untereinander. Die Kurve sitzt jetzt unter dem Text.",
+    ],
+  ],
   [
     "0.49.5",
     "24. November 2026",
@@ -58861,7 +58748,8 @@ function renderZukunft() {
     V === "B" && debts > 0
       ? `<div class="znetbar"><span>${escHtml(uiText("zk_net"))}</span><b class="${net >= 0 ? "pos" : "neg"}">${net >= 0 ? "+" : "−"}${E(Math.abs(net))}</b><i><em style="width:${Math.max(4, Math.min(100, (sv.tot / Math.max(1, sv.tot + debts)) * 100)).toFixed(1)}%"></em></i></div>`
       : "";
-  el.innerHTML = `<div class="zhero ${IS_PC ? "pc" : ""} v${V}">${IS_PC ? `<div class="zgrid">${cards.join("")}</div>` : `<div class="astack" id="zstack" tabindex="0" aria-label="${escHtml(uiText("zk_swipe"))}">${cards.join("")}</div><div class="adots" id="zdots">${cards.map((_, i) => `<button data-cdot="${i}" aria-label="${i + 1}"><i></i></button>`).join("")}</div>`}${netBar}</div>
+  const zk = geraetRuf("sparenKarten", cards) || { cls: "", html: cards.join("") };
+  el.innerHTML = `<div class="zhero ${zk.cls} v${V}">${zk.html}${netBar}</div>
 <div class="card areacard">${areaHead("Sparen &amp; Schulden", "invest", "Einstellungen Sparen")}<div class="agrid">
       ${areaTile(svgIcon("piggy", 22), "Ziele", goals.length ? `${goals.length}` : "anlegen", 'data-go="ziele"')}
       ${areaTile(svgIcon("chart", 22), uiText("zk_invest_t"), "Zinseszins & Vergleich", 'data-spopen="invest"')}
@@ -59440,7 +59328,7 @@ function fbText() {
     (t.trim() ? "📍 " + (pg.length ? pg.join(", ") : "allgemein") + "\n" : "") +
     t.trim() +
     (info
-      ? `\n\n---\nFinanz MAMI ${verFull()} · ${window.AndroidBridge ? (IS_DESK ? "PC" : IS_TAB ? "Tablet" : "Android") : "Browser"} · ${(WORK.find((x) => x[0] === store.settings.work) || [, "–"])[1]}`
+      ? `\n\n---\nFinanz MAMI ${verFull()} · ${window.AndroidBridge ? GERAET_NAME : "Browser"} · ${(WORK.find((x) => x[0] === store.settings.work) || [, "–"])[1]}`
       : "")
   );
 }
@@ -59468,7 +59356,7 @@ function renderFeedback() {
       ["lob", "Lob", "💚", "#1a7a5c"],
     ],
     kc = (KD.find((x) => x[0] === kind) || KD[1])[3];
-  const dev = window.AndroidBridge ? (IS_DESK ? "PC" : IS_TAB ? "Tablet" : "Android") : "Browser",
+  const dev = window.AndroidBridge ? GERAET_NAME : "Browser",
     grp = (WORK.find((x) => x[0] === store.settings.work) || [, "–"])[1],
     info = ui.fbInfo !== false;
   el.innerHTML = `<div class="fbwrap" style="--kc:${kc}"><div class="fbcol">
@@ -59937,7 +59825,7 @@ function devOpen() {
 }
 /* Inhalt der Fehlersuche – im Fenster und auf der Entwickler-Seite am PC */
 function devHtml() {
-  const dev = window.AndroidBridge ? (IS_DESK ? "PC" : IS_TAB ? "Tablet" : "Android") : "Browser";
+  const dev = window.AndroidBridge ? GERAET_NAME : "Browser";
   const kv = [
     [uiText("dev_ver"), "v" + curVerShort()],
     [uiText("dev_dev"), `${dev} · ${devModel()}`],
@@ -60132,7 +60020,7 @@ setTimeout(() => {
       try {
         localStorage.setItem("hb-crash", JSON.stringify(st));
       } catch (_) {}
-      const info = `Finanz MAMI ${verFull()} · ${IS_DESK ? "PC" : IS_TAB ? "Tablet" : "Android"} · ${devModel()} · Ansicht: ${(typeof ui !== "undefined" && ui.view) || "?"}`;
+      const info = `Finanz MAMI ${verFull()} · ${GERAET_NAME} · ${devModel()} · Ansicht: ${(typeof ui !== "undefined" && ui.view) || "?"}`;
       const steps = typeof dbgSince === "function" ? dbgSince(30000) : "";
       setTimeout(
         () =>
@@ -62151,7 +62039,7 @@ function renderSprache() {
     });
   const opts = (sel) =>
     ["EUR", ...FX_CODES]
-      .map((c) => `<option value="${c}" ${c === sel ? "selected" : ""}>${IS_PC ? "" : CUR_FLAG[c] || ""} ${c}</option>`)
+      .map((c) => `<option value="${c}" ${c === sel ? "selected" : ""}>${geraetRuf("waehrungFlagge", c) || ""} ${c}</option>`)
       .join("");
   const all = ui.fxAll,
     list = all ? FX_CODES : FX_CODES.slice(0, 5);
@@ -63931,7 +63819,7 @@ function render() {
       beruf: renderBeruf,
       zukunft: () => {
         renderZukunft();
-        if (!IS_PC) initStack("zstack", "zkIdx", "zdots");
+        geraetRuf("sparenGezeichnet");
       },
       home: renderHome,
       list: renderList,
@@ -64991,7 +64879,7 @@ function renderHome() {
       <div class="astack ${accts.length > 1 ? "" : "one"}" id="astack" ${accts.length > 1 ? `tabindex="0" aria-label="Konten – wischen zum Blättern"` : ""}>${acardHtml}</div>
       ${accts.length > 1 ? `<div class="adots" id="adots">${accts.map((_, i) => `<button data-cdot="${i}" aria-label="Karte ${i + 1}"><i></i></button>`).join("")}</div>` : ""}
       ${ym === cur && (ui.acctEd || []).filter(Boolean).length > 1 ? `<button class="mvopen" data-mvopen aria-label="${escHtml(uiText("mv_open"))}">${svgIcon("down", 18)}<span>${escHtml(uiText("mv_open"))}</span></button>` : ""}
-      ${ym === cur && !IS_PC ? homeSay(ym, mainBal) : `<div class="hkpi one">
+      ${(ym === cur && geraetRuf("haushaltSatz", ym, mainBal)) || `<div class="hkpi one">
         ${
           ym === cur
             ? (() => {
@@ -65040,9 +64928,9 @@ function renderHome() {
 `;
   initStack();
   initShopRail();
-  if (IS_PC && typeof pcHome === "function")
+  if (GERAET_HAKEN.haushaltGezeichnet)
     try {
-      pcHome({
+      geraetRuf("haushaltGezeichnet", {
         ym,
         cur,
         c,
@@ -65183,7 +65071,7 @@ const FW = {
   drag: false,
   moved: false,
 };
-const fanWheel = () => !(typeof IS_DESK !== "undefined" && IS_DESK);
+const fanWheel = () => !geraetRuf("plusAlsListe");
 function fanItems() {
   return [...$("fanBg").querySelectorAll(".fanb:not([hidden])")];
 }
@@ -65784,7 +65672,8 @@ function renderInvest() {
   const v = investState(),
     t = ui.invTab || "calc",
     sub = ui.invSub || "calc";
-  el.innerHTML = `<div class="invtabs" role="tablist" ${IS_PC ? "hidden" : ""}>${[
+  const alles = geraetRuf("anlegenAllesZeigen");
+  el.innerHTML = `<div class="invtabs" role="tablist" ${alles ? "hidden" : ""}>${[
     ["calc", "Zinseszins"],
     ["cmp", "Vergleich"],
     ["goals", "Anlage-Ziele"],
@@ -65804,7 +65693,7 @@ function renderInvest() {
       ${sub === "calc" ? `<div class="invgrid"><div class="invout" id="invOutA">${invCalcOut(v.calc)}</div><div class="invin">${invRange("calc.P", v.calc.P, 0, 100000, 500, "€", "Startbetrag")}${invRange("calc.m", v.calc.m, 0, 2000, 10, "€", "Pro Monat")}${invRange("calc.r", v.calc.r, 0, 12, 0.1, "%", "Zins pro Jahr")}${invRange("calc.y", v.calc.y, 1, 50, 1, "J.", "Jahre")}</div></div>` : `<div class="invgrid"><div class="invout" id="invOutA">${invPlanOut(v.plan)}</div><div class="invin">${invRange("plan.T", v.plan.T, 1000, 500000, 500, "€", "Ich möchte")}${invRange("plan.y", v.plan.y, 1, 40, 1, "J.", "in Jahren")}${invRange("plan.r", v.plan.r, 0, 12, 0.1, "%", "Zins pro Jahr")}${invRange("plan.P", v.plan.P, 0, 100000, 500, "€", "Schon vorhanden")}</div></div>`}`;
       const secCmp = `<div class="invgrid"><div class="invout" id="invOutB">${invCmpOut(v.cmp)}</div><div class="invin">${invRange("cmp.m", v.cmp.m, 10, 2000, 10, "€", "Pro Monat")}${invRange("cmp.y", v.cmp.y, 1, 40, 1, "J.", "Jahre")}
           <label class="invck"><input type="checkbox" data-invck="cost" ${v.cmp.cost ? "checked" : ""}> ETF-Kosten 0,2 % pro Jahr abziehen</label><label class="invck"><input type="checkbox" data-invck="tax" ${v.cmp.tax ? "checked" : ""}> Steuer beim Verkauf abziehen (vereinfacht)</label></div></div>`;
-      if (IS_PC)
+      if (alles)
         return `<div class="invpc"><section><h3>Zinseszins</h3>${secCalc}</section><section><h3>Anlagen im Vergleich</h3>${secCmp}</section><section><h3>Anlage-Ziele</h3>${invGoalsHtml(v)}</section></div>`;
       return t === "calc" ? secCalc : t === "cmp" ? secCmp : invGoalsHtml(v);
     })()}</div>
@@ -66064,21 +65953,6 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* Start */
-/* Mami fasst „pro Tag“ und Prognose in einem Satz zusammen */
-function homeSay(ym, mainBal) {
-  const { left, v } = freePerDay(ym, mainBal);
-  let F = null;
-  try {
-    F = store.tx.length ? fcCalc() : null;
-  } catch (_) {}
-  const fc = F && F.pts && F.pts.length,
-    end = fc
-      ? F.warn
-        ? uiText("hs_tight", { d: fxDate(F.ym + "-" + pad(F.min.d)) })
-        : uiText("hs_end", { d: fxDate(lastDayOf(F.ym)), v: fmtEur0(F.end) })
-      : uiText(left === 1 ? "hs_left1" : "hs_left", { n: left });
-  return `<button type="button" class="hsay ${fc && F.warn ? "warn" : ""}" ${fc ? "data-fcopen" : 'data-go="year"'} data-noi18n><span class="hsm">${mamiAvatar(null)}</span><span class="hst"><b>${escHtml(uiText("hs_day", { v: fmtEur0(v) }))}</b><span>${escHtml(end)}</span></span>${svgIcon("right", 18)}</button>`;
-}
 /* Auf der Startseite bleibt nur, was es sonst nirgends gibt: Bargeld */
 function homeBlocks(html) {
   return store.settings.cashHide || !html.cash
@@ -66790,6 +66664,22 @@ function goalsRings() {
     </div>${ui.goalNew ? `<div class="goalnew"><button class="btn" id="${goals.length ? "goalAddRing" : "goalFirst"}">${svgIcon("piggy", 16)} Sparziel<small>Geld zur Seite legen</small></button><button class="btn" data-anlopen="goals">${svgIcon("chart", 16)} Mit Zinsen<small>Anlage, z. B. ETF</small></button></div>` : ""}</div>`;
 }
 
+/* Mami fasst „pro Tag“ und Prognose in einem Satz zusammen */
+function homeSay(ym, mainBal) {
+  const { left, v } = freePerDay(ym, mainBal);
+  let F = null;
+  try {
+    F = store.tx.length ? fcCalc() : null;
+  } catch (_) {}
+  const fc = F && F.pts && F.pts.length,
+    end = fc
+      ? F.warn
+        ? uiText("hs_tight", { d: fxDate(F.ym + "-" + pad(F.min.d)) })
+        : uiText("hs_end", { d: fxDate(lastDayOf(F.ym)), v: fmtEur0(F.end) })
+      : uiText(left === 1 ? "hs_left1" : "hs_left", { n: left });
+  return `<button type="button" class="hsay ${fc && F.warn ? "warn" : ""}" ${fc ? "data-fcopen" : 'data-go="year"'} data-noi18n><span class="hsm">${mamiAvatar(null)}</span><span class="hst"><b>${escHtml(uiText("hs_day", { v: fmtEur0(v) }))}</b><span>${escHtml(end)}</span></span>${svgIcon("right", 18)}</button>`;
+}
+
 /* Sparen */
 /* Einkauf */
 function renderShop() {
@@ -67355,7 +67245,7 @@ document.addEventListener("click", (e) => {
   }
 });
 function zTripCheck() {
-  if (IS_PC) return;
+  if (!geraetRuf("einkaufTourHinweis")) return;
   const t = zMyTrip();
   if (!t || t.by === devId()) return;
   let seen = "";
@@ -72187,16 +72077,6 @@ function pdHold(el) {
   document.addEventListener("pointerup", end, true);
   document.addEventListener("pointercancel", end, true);
 })();
-const IS_DESK = !!(window.AndroidBridge && window.AndroidBridge.desktop);
-const IS_TAB =
-  !IS_DESK &&
-  (() => {
-    try {
-      if (localStorage.getItem("hb-forcetab") === "1") return true;
-    } catch (_) {}
-    return !!window.AndroidBridge && Math.min(screen.width || 0, screen.height || 0) >= 600;
-  })();
-const IS_PC = IS_DESK || IS_TAB;
 document.addEventListener("change", (e) => {
   if ((e.target.id === "pcTray" || e.target.id === "pcAuto") && IS_PC) {
     try {
@@ -75757,18 +75637,13 @@ const phPageKeys = (k) => (k === "geraete" && PH_SYNC() ? ["sync", "geraete"] : 
 const phTitle = (k) =>
   k === "geraete" && PH_SYNC() ? "Geräte & Abgleich" : k === "sicherheit" ? "App-Sperre & Sicherheit" : accTitle(k);
 const CHEV = '<svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="m9 6 6 6-6 6"/></svg>';
-function phRow(k) {
-  const act = k === "wiz" ? `data-qwiz="1"` : k === "weiter" ? `data-invopen="1"` : `data-accgo="${k}"`,
-    sb = setSub(k);
-  return `<button class="phr" ${act}><span class="saic phic">${svgIcon(accIcon(k), 18)}</span><b class="phrt">${escHtml(phTitle(k))}</b><small class="phrs" data-accsub="${k}">${escHtml(sb)}</small><span class="phch">${CHEV}</span></button>`;
-}
 function quickSw() {
   const dark = document.documentElement.dataset.theme === "dark",
     sec = lsGet("hb-scrsec") !== "0",
     nf = CAN_NOTIFY && !!notifyCfg().on,
     lg = store.settings.logos === true;
   return [
-    ...(IS_TAB ? [] : [["dark", "Dunkel", dark, dark ? "an" : "aus"]]),
+    ...(geraetRuf("ohneHellDunkelSchalter") ? [] : [["dark", "Dunkel", dark, dark ? "an" : "aus"]]),
     ...(CAN_NOTIFY ? [["notify", "Erinnerungen", nf, nf ? "an" : "aus"]] : []),
     ...(window.AndroidBridge && typeof window.AndroidBridge.setSecure === "function"
       ? [["secure", "Bildschirmschutz", sec, sec ? "keine Screenshots" : "aus"]]
@@ -76011,142 +75886,6 @@ document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-phsw]");
   if (b) quickToggle(b.dataset.phsw, b);
 });
-function phHomeHtml() {
-  const n = String(store.settings.name || "").trim(),
-    p = store.settings.photo,
-    f = devForm();
-  const av = p ? `<img src="${escHtml(p)}" alt="">` : n ? `<b>${escHtml(n[0].toUpperCase())}</b>` : devIc(f, 24);
-  return `<button class="card phprof" data-spgo="profil"><span class="phav">${av}<span class="avdev">${devIc(f, 11)}</span></span><span class="sat"><b>${escHtml(n || devModel())}</b><small>${escHtml(uiText("st_prof"))}</small></span><span class="phch">${CHEV}</span></button>
-    <div class="qpills">${quickSw().map(qsTile).join("")}</div>
-    ${setGroups(false)
-      .map(([t, ks]) => `<h3 class="phgl">${escHtml(tabLabel(t))}</h3><div class="card phg">${ks.map(phRow).join("")}</div>`)
-      .join("")}
-    <div class="appfoot"><b>Finanz MAMI</b><span>Die App, die sich um dich kümmert</span><small>${escHtml(verFull())}</small></div>`;
-}
-function phSetRender(el) {
-  if (ACC.page) {
-    const k = ACC.page;
-    if (el.dataset.page !== k) {
-      accRestoreAll();
-      el.dataset.page = k;
-      const col = themeCol(ACC_COL[k] || "#1a7a5c");
-      el.innerHTML = `<button class="phback" data-phback="1"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="m15 6-6 6 6 6"/></svg> Einstellungen</button>
-        <div class="phph"><span class="saic" style="background:${col}">${svgIcon(accIcon(k), 20)}</span><h2>${escHtml(phTitle(k))}</h2></div>${phPageKeys(
-          k
-        )
-          .map((x) => `<div class="sabody phbody" id="sab-${x}"></div>`)
-          .join("")}`;
-      ACC.nodes = {};
-      phPageKeys(k).forEach((x) => accMount(x));
-      window.scrollTo({
-        top: 0,
-      });
-    }
-    return;
-  }
-  if (el.dataset.page !== "home" || !$("setQ")) {
-    accRestoreAll();
-    el.dataset.page = "home";
-    el.innerHTML = `<div class="settop"><label class="setsrch"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="setQ" type="search" placeholder="Einstellung suchen …" autocomplete="off" aria-label="Einstellung suchen"></label></div><div id="phHome"></div><div id="setList"></div>`;
-    ACC.built = "";
-  }
-  const q = ACC.q.trim();
-  $("phHome").hidden = !!q;
-  $("setList").hidden = !q;
-  if (q) {
-    if (ACC.built !== "q:" + q.toLowerCase()) accBuild();
-    return;
-  }
-  $("phHome").innerHTML = phHomeHtml();
-}
-function phPageClose() {
-  accRestoreAll();
-  ACC.page = null;
-  const el = $("setHome");
-  if (el) el.dataset.page = "";
-  renderSetHome();
-  window.scrollTo({
-    top: 0,
-  });
-}
-document.addEventListener("click", (e) => {
-  if (e.target.closest("[data-phback]")) phPageClose();
-});
-var PH_SET = true; /* Einstellungen am PC wie am Handy */
-function renderSetHome() {
-  const el = $("setHome");
-  if (!el) return;
-  if (!IS_PC || PH_SET) return phSetRender(el);
-  if (!$("setList")) {
-    el.innerHTML = `<div class="settop"><label class="setsrch"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="setQ" type="search" placeholder="Einstellung suchen …" autocomplete="off" aria-label="Einstellung suchen"></label><button class="setav" data-spgo="profil" aria-label="Profil" id="setAv"></button></div>
-      <div class="settabs" role="tablist" id="setTabs"></div><div id="setList"></div>`;
-    ACC.built = "";
-  }
-  const name = store.settings.name || "",
-    av = $("setAv");
-  if (av)
-    av.innerHTML = store.settings.photo
-      ? `<img src="${escHtml(store.settings.photo)}" alt="">`
-      : name.trim()
-        ? escHtml(name.trim()[0].toUpperCase())
-        : svgIcon("user", 20);
-  $("setTabs").innerHTML = ACC_TABS.map(
-    ([t, l]) =>
-      `<button role="tab" data-acctab="${t}" aria-selected="${!ACC.q && ACC.tab === t}" class="${!ACC.q && ACC.tab === t ? "on" : ""}">${l}</button>`
-  ).join("");
-  const want = ACC.q.trim() ? "q:" + ACC.q.trim().toLowerCase() : ACC.tab;
-  if (ACC.built !== want || !$("setList").children.length) accBuild();
-  else
-    document.querySelectorAll("#setList [data-accsub]").forEach((s) => {
-      const t = accSub(s.dataset.accsub);
-      if (s.textContent !== t) s.textContent = t;
-    });
-}
-function accGo(k) {
-  if (k === "start") k = "konten";
-  if (k === "feedback") {
-    fbQuickGo();
-    return;
-  }
-  if (k === "profil") {
-    spSheetOpen("profil");
-    return;
-  }
-  if (k === "weiter") {
-    invOpen();
-    return;
-  }
-  if (!SP_PAGES[k] && !["dark", "wiz"].includes(k)) return;
-  if (!IS_PC || PH_SET) {
-    if (k === "dark" || k === "wiz") return;
-    ACC.q = "";
-    ACC.page = k === "sync" ? "geraete" : k;
-    if (ui.view !== "more") {
-      ui.view = "more";
-      render();
-    } else renderSetHome();
-    return;
-  }
-  ACC.q = "";
-  const q = $("setQ");
-  if (q) q.value = "";
-  ACC.tab = accTabOf(k);
-  if (accHasBody(k)) ACC.open.add(k);
-  if (ui.view !== "more") {
-    ui.view = "more";
-    render();
-  }
-  ACC.built = "";
-  renderSetHome();
-  setTimeout(() => {
-    const a = document.querySelector(`[data-acc="${k}"]`);
-    if (a)
-      a.scrollIntoView({
-        block: "start",
-        behavior: "smooth",
-      });
-  }, 60);
-}
 document.addEventListener("click", (e) => {
   const tb = e.target.closest("[data-acctab]");
   if (tb) {
@@ -76202,12 +75941,7 @@ function renderSpPages() {
       return;
     }
     if (SP_PAGES[k]) {
-      if (!IS_PC || PH_SET) ACC.page = k === "sync" ? "geraete" : k;
-      else {
-        ACC.tab = accTabOf(k);
-        if (accHasBody(k)) ACC.open.add(k);
-        ACC.built = "";
-      }
+      ACC.page = k === "sync" ? "geraete" : k;
     }
   }
   $("spHead").hidden = true;
@@ -76233,7 +75967,7 @@ document.addEventListener("click", (e) => {
   try {
     localStorage.setItem("hb-theme", t);
   } catch (_) {}
-  if ((!IS_PC || PH_SET) && ui.view === "more" && !ACC.page)
+  if (ui.view === "more" && !ACC.page)
     try {
       renderSetHome();
     } catch (_) {}
@@ -76968,6 +76702,102 @@ function rulesInfoText() {
 function setVal(id, v) {
   const el = $(id);
   if (document.activeElement !== el) el.value = v;
+}
+
+/* Einstellungen am Handy: ruhige Liste in vier Gruppen, jede Einstellung als eigene Seite.
+   PC und Tablet ersetzen renderSetHome und accGo durch ihre Übersicht mit Seitenfenster (js/pc). */
+function phRow(k) {
+  const act = k === "wiz" ? `data-qwiz="1"` : k === "weiter" ? `data-invopen="1"` : `data-accgo="${k}"`,
+    sb = setSub(k);
+  return `<button class="phr" ${act}><span class="saic phic">${svgIcon(accIcon(k), 18)}</span><b class="phrt">${escHtml(phTitle(k))}</b><small class="phrs" data-accsub="${k}">${escHtml(sb)}</small><span class="phch">${CHEV}</span></button>`;
+}
+function phHomeHtml() {
+  const n = String(store.settings.name || "").trim(),
+    p = store.settings.photo,
+    f = devForm();
+  const av = p ? `<img src="${escHtml(p)}" alt="">` : n ? `<b>${escHtml(n[0].toUpperCase())}</b>` : devIc(f, 24);
+  return `<button class="card phprof" data-spgo="profil"><span class="phav">${av}<span class="avdev">${devIc(f, 11)}</span></span><span class="sat"><b>${escHtml(n || devModel())}</b><small>${escHtml(uiText("st_prof"))}</small></span><span class="phch">${CHEV}</span></button>
+    <div class="qpills">${quickSw().map(qsTile).join("")}</div>
+    ${setGroups(false)
+      .map(([t, ks]) => `<h3 class="phgl">${escHtml(tabLabel(t))}</h3><div class="card phg">${ks.map(phRow).join("")}</div>`)
+      .join("")}
+    <div class="appfoot"><b>Finanz MAMI</b><span>Die App, die sich um dich kümmert</span><small>${escHtml(verFull())}</small></div>`;
+}
+function phSetRender(el) {
+  if (ACC.page) {
+    const k = ACC.page;
+    if (el.dataset.page !== k) {
+      accRestoreAll();
+      el.dataset.page = k;
+      const col = themeCol(ACC_COL[k] || "#1a7a5c");
+      el.innerHTML = `<button class="phback" data-phback="1"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="m15 6-6 6 6 6"/></svg> Einstellungen</button>
+        <div class="phph"><span class="saic" style="background:${col}">${svgIcon(accIcon(k), 20)}</span><h2>${escHtml(phTitle(k))}</h2></div>${phPageKeys(
+          k
+        )
+          .map((x) => `<div class="sabody phbody" id="sab-${x}"></div>`)
+          .join("")}`;
+      ACC.nodes = {};
+      phPageKeys(k).forEach((x) => accMount(x));
+      window.scrollTo({
+        top: 0,
+      });
+    }
+    return;
+  }
+  if (el.dataset.page !== "home" || !$("setQ")) {
+    accRestoreAll();
+    el.dataset.page = "home";
+    el.innerHTML = `<div class="settop"><label class="setsrch"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="setQ" type="search" placeholder="Einstellung suchen …" autocomplete="off" aria-label="Einstellung suchen"></label></div><div id="phHome"></div><div id="setList"></div>`;
+    ACC.built = "";
+  }
+  const q = ACC.q.trim();
+  $("phHome").hidden = !!q;
+  $("setList").hidden = !q;
+  if (q) {
+    if (ACC.built !== "q:" + q.toLowerCase()) accBuild();
+    return;
+  }
+  $("phHome").innerHTML = phHomeHtml();
+}
+function phPageClose() {
+  accRestoreAll();
+  ACC.page = null;
+  const el = $("setHome");
+  if (el) el.dataset.page = "";
+  renderSetHome();
+  window.scrollTo({
+    top: 0,
+  });
+}
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-phback]")) phPageClose();
+});
+function renderSetHome() {
+  const el = $("setHome");
+  if (el) phSetRender(el);
+}
+function accGo(k) {
+  if (k === "start") k = "konten";
+  if (k === "feedback") {
+    fbQuickGo();
+    return;
+  }
+  if (k === "profil") {
+    spSheetOpen("profil");
+    return;
+  }
+  if (k === "weiter") {
+    invOpen();
+    return;
+  }
+  if (!SP_PAGES[k] && !["dark", "wiz"].includes(k)) return;
+  if (k === "dark" || k === "wiz") return;
+  ACC.q = "";
+  ACC.page = k === "sync" ? "geraete" : k;
+  if (ui.view !== "more") {
+    ui.view = "more";
+    render();
+  } else renderSetHome();
 }
 
 /* Monat / Datum */
@@ -91244,7 +91074,7 @@ function fcOpen(quick) {
       ${F.warn ? `<span class="fcmin" id="fcM" style="left:${pc(X(F.min.d))};top:${pv(Y(F.min.v))}"><i></i></span>` : ""}
       <div class="fcscr" id="fcS"><span class="fctip" id="fcTip"></span></div></div>
     <div class="fcax"><span>${escHtml(fxDate(F.ym + "-01"))}</span><span>${escHtml(uiText("fc_today"))}</span><span>${escHtml(fxDate(lastDayOf(F.ym)))}</span></div>
-    <p class="fchint"><svg class="i" viewBox="0 0 24 24" style="width:15px;height:15px;vertical-align:-3px"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10m0-1.5a1.5 1.5 0 0 1 3 0V11m0-1a1.5 1.5 0 0 1 3 0v4.5a6 6 0 0 1-6 6h-.6a5 5 0 0 1-4-2L4.6 14.6a1.5 1.5 0 0 1 2.2-2L9 14.5"/></svg> ${escHtml(uiText(IS_PC ? "fc_scrub_pc" : "fc_scrub"))}</p></div>
+    <p class="fchint"><svg class="i" viewBox="0 0 24 24" style="width:15px;height:15px;vertical-align:-3px"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10m0-1.5a1.5 1.5 0 0 1 3 0V11m0-1a1.5 1.5 0 0 1 3 0v4.5a6 6 0 0 1-6 6h-.6a5 5 0 0 1-4-2L4.6 14.6a1.5 1.5 0 0 1 2.2-2L9 14.5"/></svg> ${escHtml(uiText(geraetRuf("vorschauTipp") || "fc_scrub"))}</p></div>
     ${
       F.warn
         ? `<div class="fcwarn" id="fcWarn"><b>${svgIcon("alert", 15)} ${escHtml(
@@ -115634,7 +115464,7 @@ window.hbBack = () => {
     return true;
   }
   if (ui.view === "import" && ui.importing) return true;
-  if ((!IS_PC || PH_SET) && ui.view === "more" && ACC.page) {
+  if (ui.view === "more" && ACC.page) {
     phPageClose();
     return true;
   }
@@ -116091,10 +115921,10 @@ async function ghCheck(manual, auto) {
     const desk = !!window.AndroidBridge.desktop,
       mine = +(window.AndroidBridge.nativeRev() || 0),
       theirs = num(desk ? "exe" : "apk");
-    const wk = IS_DESK ? "webp" : IS_TAB ? "webt" : "web",
+    const wk = { pc: "webp", tablet: "webt", handy: "web" }[GERAET],
       web = () => num(wk) || num("web");
     const page = () =>
-      (rel.assets || []).find((a) => a.name === (IS_DESK ? "app-pc.html" : IS_TAB ? "app-tab.html" : "app.html")) ||
+      (rel.assets || []).find((a) => a.name === { pc: "app-pc.html", tablet: "app-tab.html", handy: "app.html" }[GERAET]) ||
       asset("app.html");
     const rv = () => verName(web());
     UPD.relName = rv();
@@ -116963,7 +116793,7 @@ $("loginSkip").onclick = () => {
       beruf: () => renderBeruf(),
       zukunft: () => {
         renderZukunft();
-        if (!IS_PC) initStack("zstack", "zkIdx", "zdots");
+        geraetRuf("sparenGezeichnet");
       },
       shop: () => renderShop(),
       home: () => renderHome(),
@@ -120640,7 +120470,7 @@ langGate(() => {
       A.view = ui.view;
       A.ym = ui.ym;
       A.rows = {};
-      const own = IS_PC && ui.view !== A.prevView && !["list", "fix", "shop"].includes(ui.view);
+      const own = !!geraetRuf("eigenerSeitenwechsel", ui.view, A.prevView);
       if (!skip && !first && !own && vis(v))
         requestAnimationFrame(() => stagger(v, ui.view !== A.prevView ? dx : dx * 0.5));
       A.prevView = ui.view;

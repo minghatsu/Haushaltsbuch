@@ -1,0 +1,18 @@
+/* 32-mami-orbit-briefing: nur PC */
+html.pc .mbstack {
+  left: auto;
+  right: 120px;
+  bottom: 120px;
+  width: 420px;
+}
+
+html.pc .mbmami {
+  left: auto;
+  right: 28px;
+  bottom: 40px;
+}
+
+html.pc .mbbub {
+  border-radius: 24px 24px 6px 24px;
+  transform-origin: 92% 100%;
+}

@@ -1,0 +1,12 @@
+/* 05-freischalten-einladung: nur PC */
+html.pc .invbg {
+  background: color-mix(in srgb, var(--bg) 70%, #000a);
+  align-items: center;
+}
+
+html.pc .invbox {
+  background: var(--bg);
+  border-radius: 28px;
+  max-height: 92vh;
+  box-shadow: 0 30px 80px -20px #000a;
+}

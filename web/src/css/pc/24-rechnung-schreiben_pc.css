@@ -1,0 +1,65 @@
+/* 24-rechnung-schreiben: nur PC */
+/* Tablet quer + PC: Schritte, Formular, Live-Vorschau nebeneinander */
+html.pc:not(.tabp) .rvpvb,
+html.pc:not(.tabp) .rvpaperm {
+  display: none;
+}
+
+html.pc:not(.tabp) .rvprev {
+  display: block;
+}
+
+html.pc:not(.tabp) .rvwin {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+html.pc:not(.tabp) .rvnav {
+  grid-column: 1;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+html.pc:not(.tabp) .rvbar {
+  display: none;
+}
+
+html.pc:not(.tabp) .rvst {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+  padding: 6px 10px 6px 6px;
+  border-radius: 99px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+html.pc:not(.tabp) .rvst .rvstt small {
+  display: none;
+}
+
+html.pc:not(.tabp) .rvbody {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+html.pc:not(.tabp) .rvprev {
+  grid-column: 2;
+  grid-row: 1/4;
+}
+
+html.pc:not(.tabp) .rvhd {
+  grid-column: 1;
+}
+
+html.pc .rchacts .cam {
+  display: none;
+}
+
+html.pc .rchacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}

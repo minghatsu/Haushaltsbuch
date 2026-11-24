@@ -1,0 +1,98 @@
+/* Konten je Jahr */
+.ayblk {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--sunk);
+}
+.ayt {
+  display: block;
+  font-size: 15px;
+}
+.ayblk > p {
+  margin: 4px 0 10px;
+}
+.ayyrs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.ayy {
+  flex: 1 0 auto;
+  min-width: 58px;
+  border: 0;
+  border-radius: 11px;
+  padding: 9px 10px;
+  font: 700 13px var(--f-body);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    transform 0.15s;
+}
+.ayy.on {
+  background: var(--accent);
+  color: #fff;
+}
+.ayy:active {
+  transform: scale(0.95);
+}
+.aylist {
+  margin-top: 10px;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 2px 10px;
+}
+.ayrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  transition: opacity 0.25s;
+}
+.ayrow + .ayrow {
+  border-top: 1px solid var(--line);
+}
+.ayrow > i {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  flex: none;
+}
+.ayrow > i .i {
+  stroke: #fff;
+}
+.ayn {
+  flex: 1;
+  min-width: 0;
+}
+.ayn b {
+  display: block;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ayn small {
+  font-size: 13px;
+  color: var(--muted);
+}
+.ayrow.off > i,
+.ayrow.off .ayn b {
+  opacity: 0.45;
+}
+.ayval {
+  font: 800 18px var(--f-display);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.acct-row.ayold {
+  animation: invPop 0.35s both;
+}

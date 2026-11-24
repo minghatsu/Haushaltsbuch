@@ -1,0 +1,101 @@
+/* 16-farben-leiste: nur Handy */
+@media (max-width: 999px) and (min-height: 521px), (max-width: 999px) and (orientation: portrait) {
+html:not(.pc) .tabs.navx {
+    grid-template-columns: var(--nc, 1fr 1fr 64px 1fr 1fr);
+    transition: grid-template-columns 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1));
+  }
+
+html:not(.pc) .tabs.navx .tab:not(.plus) {
+    flex-direction: row;
+    gap: 0;
+    height: 48px;
+    padding: 0 13px;
+    justify-self: center;
+    border-radius: 24px;
+    z-index: 1;
+    color: var(--muted) !important;
+    transition: color 0.3s;
+  }
+
+html:not(.pc) .tabs.navx .tab:not(.plus) svg.i {
+    padding: 0 !important;
+    background: none !important;
+    flex: none;
+  }
+
+html:not(.pc) .tabs.navx .tab:not(.plus) .tname {
+    display: block;
+    max-width: 0;
+    opacity: 0;
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 800;
+    line-height: 1;
+    color: #fff !important;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    transition:
+      max-width 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1)),
+      opacity 0.25s,
+      margin 0.5s var(--ease-pop, cubic-bezier(0.3, 1.15, 0.4, 1));
+  }
+
+html:not(.pc) .tabs.navx .tab[aria-selected="true"]:not(.plus) {
+    color: #fff !important;
+  }
+
+html:not(.pc) .tabs.navx .tab[aria-selected="true"]:not(.plus) .tname {
+    max-width: 112px;
+    opacity: 1;
+    margin-left: 7px;
+    transition-delay: 0s, 0.12s, 0s;
+  }
+
+html:not(.pc) .tabs.navx .tab:not(.plus) .tname.sm {
+    font-size: 13px;
+    letter-spacing: -0.015em;
+  }
+
+html:not(.pc) .tabs.navx .tab.plus {
+    z-index: 2;
+  }
+
+html:not(.pc) .tabs.navx .tabind {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 48px;
+    border-radius: 24px;
+    z-index: 0;
+    pointer-events: none;
+    background: var(--ic, var(--accent));
+    box-shadow: 0 6px 14px -4px color-mix(in srgb, var(--ic, var(--accent)) 60%, transparent);
+    transition:
+      background-color 0.35s,
+      opacity 0.15s;
+  }
+
+html:not(.pc) .tabs.navx .navflow {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 0;
+    filter: drop-shadow(0 6px 7px rgba(0, 0, 0, 0.16));
+  }
+
+html:not(.pc) .tabs.navx.nosel .tabind {
+    opacity: 0;
+  }
+
+/* in die Einstellungen: Knopf und Name gehen zügig und gemeinsam weg, kein halber Name bleibt stehen */
+html:not(.pc) .tabs.navx.nosel .tab:not(.plus) .tname {
+    transition: none;
+  }
+
+}

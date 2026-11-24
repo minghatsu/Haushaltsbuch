@@ -1,0 +1,4 @@
+/* 26-zaehlwerk-vertraege: nur Handy */
+html:not(.pc) body {
+  overflow-x: clip;
+}

@@ -1,0 +1,16 @@
+/* 29-monats-highlights: nur PC */
+html.pc #hlBg {
+  background: rgba(5, 15, 11, 0.82);
+  backdrop-filter: blur(8px);
+}
+
+html.pc .hlph {
+  width: 420px;
+  height: min(860px, 92vh);
+  border-radius: 28px;
+  box-shadow: 0 40px 90px -20px rgba(0, 0, 0, 0.7);
+}
+
+html.pc .hllet {
+  font-size: 58px;
+}

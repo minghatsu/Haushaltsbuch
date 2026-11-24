@@ -1,0 +1,33 @@
+/* 19-frag-mami: nur Handy */
+html:not(.pc) .ptq.mamibtn.ptqph {
+  min-height: 46px;
+  padding: 4px 12px 4px 4px !important;
+  font-size: 13px;
+  background: var(--surface) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+html:not(.pc) .ptq.mamibtn.ptqph .mav {
+  width: 38px;
+  height: 38px;
+}
+
+html:not(.pc) .top .wrap > .hello #viewTitle {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html:not(.pc) .ptq.mamibtn {
+  flex: none;
+  margin-left: 0 !important;
+}
+
+html:not(.pc) .ptq.mamibtn.mcomp .mbl {
+  display: none;
+}
+
+html:not(.pc) .ptq.mamibtn.mcomp.ptqph {
+  padding: 4px !important;
+}
