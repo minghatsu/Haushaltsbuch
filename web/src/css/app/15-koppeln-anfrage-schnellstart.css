@@ -307,8 +307,21 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
   padding: 12px 14px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  border: 0;
+  text-align: left;
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+}
+.phprof .phav {
+  width: 46px;
+  height: 46px;
+}
+.phprof .phch {
+  color: var(--faint);
 }
 .phav {
   position: relative;
@@ -351,68 +364,11 @@
   color: var(--muted);
   font-size: 13px;
 }
-.phqs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 12px;
-}
 .phr .phch {
   color: var(--faint);
   display: grid;
   place-items: center;
   flex: none;
-}
-.phg {
-  padding: 4px 0 6px;
-  margin-bottom: 12px;
-  border-top: 4px solid var(--gc);
-  overflow: hidden;
-}
-.phg h3 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 10px 14px 4px;
-  font: 800 15px var(--f-display);
-}
-.phg h3 .saic {
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
-}
-.phr {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 10px 14px;
-  border: 0;
-  background: none;
-  text-align: left;
-  color: var(--fg);
-  font: inherit;
-  cursor: pointer;
-  border-top: 1px solid var(--line);
-}
-.phr:first-of-type {
-  border-top: 0;
-}
-.phr .sat {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-.phr .sat b {
-  font-size: 14.5px;
-}
-.phr .sat small {
-  font-size: 13px;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .phr:active {
   background: var(--sunk);
@@ -907,4 +863,118 @@
   gap: 6px;
   font: 700 13px var(--f-body);
   color: var(--muted);
+}
+
+/* Einstellungen am Handy: ruhige Liste */
+.qpills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+.qpills .qs {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px 5px 5px;
+  border-radius: 999px;
+  background: var(--sunk);
+  box-shadow: none;
+  min-height: 40px;
+}
+.qpills .qs .qtg,
+.qpills .qs .qtx small {
+  display: none;
+}
+.qpills .qs .qtop {
+  display: contents;
+}
+.qpills .qs .qic {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--surface);
+  overflow: hidden;
+}
+.qpills .qs .qic svg {
+  width: 18px;
+  height: 18px;
+}
+.qpills .qs .qtx b {
+  font-size: 13.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.qpills .qs.on:not([data-phsw="dark"]) {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.qpills .qs:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.phgl {
+  margin: 22px 8px 8px;
+  font: 700 12px var(--f-body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.phg {
+  padding: 2px 0;
+  overflow: hidden;
+}
+.phr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 12px 8px 14px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  text-align: left;
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.phr:first-child {
+  border-top: 0;
+}
+.phr .phic {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.phr .phrt {
+  flex: none;
+  max-width: 62%;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.phr .phrs {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-size: 13.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.phfoot {
+  margin: 24px 0 8px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--faint);
 }

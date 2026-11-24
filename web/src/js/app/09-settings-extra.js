@@ -240,6 +240,17 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.49.2",
+    "24. November 2026",
+    [
+      "Einstellungen aufgeräumt: Alles steckt jetzt in vier Gruppen – Geld, Aussehen & Bedienung, Daten & Sicherheit und Hilfe.",
+      "Am Handy eine ruhige Liste: einheitliche Symbole, der Stand steht rechts daneben, die Schalter für Hell/Dunkel, Töne und Läden-Logos sind kleine Knöpfe oben.",
+      "Am PC alle Einstellungen auf einen Blick in vier Spalten. Ein Klick öffnet die Einstellung rechts als Seitenfenster, Esc oder das X schließt es. Die Suche filtert die Übersicht direkt.",
+      "„Startseite“ gibt es nicht mehr als eigenen Punkt: Bargeld steht jetzt unter Konten & Spaces, die Geld-Animation unter Farben & Bewegung und die Läden-Logos unter Deine Läden. Export ist zu Backup gewandert.",
+      "Behoben: Am PC hat die Fußleiste unten die letzten Einstellungen verdeckt, und der Plus-Knopf lag über „Was ist neu“.",
+    ],
+  ],
+  [
     "0.49.1",
     "23. November 2026",
     [
@@ -255,7 +266,7 @@ const CHANGELOG = [
     [
       "Haushalt am Handy aufgeräumt: „Noch pro Tag“ und die Prognose sagt Mami jetzt in einem Satz – Antippen öffnet die Prognose.",
       "Karten, die es schon auf anderen Seiten gibt (Letzte Buchungen, Top-Kategorien, Vergleich, Kontoverlauf, Größte Ausgaben, Abos, Zu erledigen …), sind von der Startseite verschwunden. Du findest alles über die Kacheln.",
-      "Bargeld bleibt – und wer es nicht nutzt, tippt „Nutze ich nicht“. Zurückholen geht unter Einstellungen › Startseite.",
+      "Bargeld bleibt – und wer es nicht nutzt, tippt „Nutze ich nicht“. Zurückholen geht unter Einstellungen › Konten & Spaces.",
     ],
   ],
   [

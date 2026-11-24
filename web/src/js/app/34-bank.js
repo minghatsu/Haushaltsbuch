@@ -971,7 +971,7 @@ document.addEventListener("click", async (e) => {
       localStorage.setItem("hb-wiz-skip", "1");
     } catch (_) {}
     wizClose();
-    toast("Die Einrichtung findest du unter Einstellungen › Startseite");
+    toast(uiText("st_wizhint"));
     return;
   }
   if (t.closest("#wzNext")) {

@@ -7043,35 +7043,14 @@ if (IS_PC) {
 
 /* Einstellungen am PC */
 if (IS_PC) {
-  const PCSET = [
-    [
-      "Geld",
-      () => [
-        "konten",
-        "budgets",
-        ...(isJobless() ? ["amt"] : hasProfile() ? ["amt", "steuer"] : ["steuer"]),
-        "invest",
-        "export",
-      ],
-    ],
-    ["Anpassen", () => ["toene", "farben", "sprache", "kategorien", "laeden"]],
-    [
-      "Sicherheit",
-      () => [
-        "sicherheit",
-        ...(SYNCABLE || window.AndroidBridge ? ["geraete"] : []),
-        "backup",
-        ...(CAN_NOTIFY ? ["notify"] : []),
-        "speicher",
-      ],
-    ],
-  ];
+  const PCSET = () => setGroups(true).filter(([t]) => t !== "hilfe");
   const syncOn = () => !!(SYNCABLE || window.AndroidBridge),
-    parts = (k) => (k === "geraete" && syncOn() ? ["sync", "geraete"] : [k]),
+    parts = (k) => (k === "geraete" && syncOn() ? ["sync", "geraete"] : k === "konten" ? ["konten", "start"] : [k]),
     alias = {
       sync: "geraete",
+      start: "konten",
     };
-  const title = (k) => (k === "geraete" && syncOn() ? "Geräte & Abgleich" : accTitle(k)),
+  const title = (k) => phTitle(k),
     sub = (k) => accSub(k);
   const col = (k) => themeCol(ACC_COL[k] || "#1a7a5c");
   let shown = "";
@@ -7081,9 +7060,8 @@ if (IS_PC) {
     accRestoreAll();
     const ks = parts(k);
     const tp = window.pcTilePane && window.pcTilePane(k);
-    r.innerHTML = `<div class="pcsp${anim ? " pcsanim" : ""}"><div class="pcsph"><span class="saic" style="background:${col(k)}">${svgIcon(accIcon(k), 20)}</span><h2>${escHtml(title(k))}</h2></div>${tp || ks.map((x) => `<div class="sabody" id="sab-${x}"></div>`).join("")}</div>`;
-    if (!tp)
-      ks.forEach((x) => {
+    r.innerHTML = `<div class="pcsp${anim ? " pcsanim" : ""}"><div class="pcsph"><span class="saic" style="background:${col(k)}">${svgIcon(accIcon(k), 20)}</span><h2>${escHtml(title(k))}</h2></div>${(tp || "") + (tp ? ks.filter((x) => x !== k) : ks).map((x) => `<div class="sabody" id="sab-${x}"></div>`).join("")}</div>`;
+    (tp ? ks.filter((x) => x !== k) : ks).forEach((x) => {
         try {
           accMount(x);
         } catch (e) {
@@ -7115,7 +7093,7 @@ if (IS_PC) {
     }
     const q = (ACC.q || "").trim().toLowerCase(),
       its = $("pcsItems"),
-      groups = PCSET.map(([g, f]) => [g, f()]);
+      groups = PCSET();
     const want = JSON.stringify([q, groups]);
     if (its.dataset.w !== want) {
       its.dataset.w = want;
@@ -7140,7 +7118,7 @@ if (IS_PC) {
         .map(([g, ks]) => {
           ks = ks.filter(hit);
           return ks.length
-            ? `<div class="pcsg">${escHtml(I18N.tr ? I18N.tr(g) : g)}</div>` +
+            ? `<div class="pcsg">${escHtml(tabLabel(g))}</div>` +
                 ks
                   .map(
                     (k) =>
@@ -7728,38 +7706,17 @@ if (IS_TAB) {
     );
   }
 }
-/* Einstellungen-Übersicht wie am Handy (PC und Tablet) */
+/* Einstellungen am PC und Tablet: Übersicht in vier Spalten, die Einstellung öffnet als Seitenfenster rechts */
 if (IS_PC) {
   const calm = () => pcCalm();
-  /* Einstellungen */
-  const GROUPS = () => [
-    [
-      "Geld",
-      "#6b8e23",
-      [
-        "konten",
-        "budgets",
-        "schulden",
-        ...(isJobless() ? ["amt"] : hasProfile() ? ["amt", "steuer"] : ["steuer"]),
-        "invest",
-        "export",
-      ],
-    ],
-    ["Anpassen", "#1a7a5c", ["toene", "farben", "sprache", "kategorien", "start", "laeden"]],
-    [
-      "Sicherheit",
-      "#3d63a8",
-      [
-        "sicherheit",
-        ...(SYNCABLE || window.AndroidBridge ? ["geraete"] : []),
-        "backup",
-        ...(CAN_NOTIFY ? ["notify"] : []),
-        "speicher",
-      ],
-    ],
-    ["Hilfe", "#c27c0e", ["neu", "hilfe", ...(canShare() ? ["weiter"] : []), "recht"]],
-  ];
-  const tTitle = (k) => (k === "geraete" && (SYNCABLE || window.AndroidBridge) ? "Geräte & Abgleich" : accTitle(k));
+  const tTitle = (k) => phTitle(k);
+  let tsQ = "";
+  const tsRow = (k) => {
+    const act = k === "wiz" ? `data-qwiz="1"` : `data-tsgo="${k}"`,
+      sb = setSub(k),
+      on = ui.tabOpen && (ui.pcset === k || (k === "geraete" && ui.pcset === "sync"));
+    return `<button class="tsr${on ? " on" : ""}" ${act} data-tsk="${k}"><span class="saic tsic">${svgIcon(accIcon(k), 17)}</span><span class="sat"><b>${escHtml(tTitle(k))}</b>${sb ? `<small>${escHtml(sb)}</small>` : ""}</span></button>`;
+  };
   function tabSetHTML() {
     const n = String(store.settings.name || "").trim(),
       p = store.settings.photo,
@@ -7769,22 +7726,59 @@ if (IS_PC) {
       ? `<img src="${escHtml(p)}" alt="">${badge}`
       : n
         ? `<span class="avl">${escHtml(n[0].toUpperCase())}</span>${badge}`
-        : devIc(f, 24);
-    return `<div class="card tsprof"><button class="topav ${!p && !n ? "devav" : ""}" data-tsprof="1" aria-label="Profil">${av}</button><div style="min-width:0"><b>${escHtml(n || devModel())}</b><small>${escHtml([n ? devModel() : "", SYNC.token ? "Abgleich an" : "Abgleich aus", verFull()].filter(Boolean).join(" · "))}</small></div><span style="flex:1"></span><button class="btn" data-tsprof="1">Profil bearbeiten</button></div>
-      <div class="tsqs">${quickSw().map(qsTile).join("")}</div>
-      <div class="tsgr">${GROUPS()
+        : devIc(f, 22);
+    const qs = quickSw().filter(([k]) => !(IS_DESK && k === "dark"));
+    return `<div class="card tsprof"><button class="topav ${!p && !n ? "devav" : ""}" data-tsprof="1" aria-label="Profil">${av}</button><div class="tspn"><b>${escHtml(n || devModel())}</b><small>${escHtml([n ? devModel() : "", verFull()].filter(Boolean).join(" · "))}</small></div><label class="tsq"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="tsQ" type="search" placeholder="Einstellung suchen …" autocomplete="off" aria-label="Einstellung suchen"></label><div class="qpills">${qs.map(qsTile).join("")}</div><button class="btn" data-tsprof="1">Profil</button></div>
+      <div class="tsgr">${setGroups(true)
         .map(
-          ([g, c, ks]) =>
-            `<div class="card tsg" style="--gc:${c}"><h3><span class="saic" style="background:${c}">${svgIcon(accIcon(ks[0]), 16)}</span>${escHtml(I18N.tr ? I18N.tr(g) : g)}</h3>${ks
-              .filter((k) => SP_PAGES[k] || k === "weiter")
-              .map(
-                (k) =>
-                  `<button data-tsgo="${k}"><span class="saic" style="background:${themeCol(ACC_COL[k] || c)};width:28px;height:28px;border-radius:9px">${svgIcon(accIcon(k), 14)}</span>${escHtml(tTitle(k))}<small>${escHtml(accSub(k) || "")} ›</small></button>`
-              )
-              .join("")}</div>`
+          ([t, ks]) =>
+            `<section class="card tsg"><h3>${escHtml(tabLabel(t))}</h3>${ks
+              .filter((k) => SP_PAGES[k] || k === "weiter" || k === "wiz")
+              .map(tsRow)
+              .join("")}</section>`
         )
-        .join("")}</div>`;
+        .join("")}</div><p class="tsnone small muted" hidden></p>`;
   }
+  /* Suche filtert die Übersicht direkt */
+  const tsFilter = () => {
+    const m = $("tabSet");
+    if (!m) return;
+    const q = tsQ.trim().toLowerCase();
+    let hits = 0;
+    m.querySelectorAll(".tsg").forEach((g) => {
+      let n = 0;
+      g.querySelectorAll(".tsr").forEach((r) => {
+        const k = r.dataset.tsk,
+          txt = q
+            ? (
+                r.textContent +
+                " " +
+                (k === "geraete" ? ["sync", "geraete"] : k === "konten" ? ["konten", "start"] : [k])
+                  .map((x) =>
+                    liveSp(x)
+                      .map((e) => e.textContent)
+                      .join(" ")
+                  )
+                  .join(" ")
+              ).toLowerCase()
+            : "";
+        const ok = !q || txt.includes(q);
+        r.hidden = !ok;
+        if (ok) n++;
+      });
+      g.hidden = !n;
+      hits += n;
+    });
+    const no = m.querySelector(".tsnone");
+    if (no) {
+      no.hidden = !!hits;
+      no.textContent = hits ? "" : `Nichts gefunden für „${tsQ.trim()}“.`;
+    }
+  };
+  const ensureScrim = (ps) => {
+    if (!document.querySelector(".tsscrim"))
+      ps.insertAdjacentHTML("beforebegin", `<div class="tsscrim" data-tsback="1" aria-hidden="true"></div>`);
+  };
   const _rsh = renderSetHome;
   renderSetHome = function (...a) {
     const r = _rsh.apply(this, a),
@@ -7797,29 +7791,69 @@ if (IS_PC) {
       ps.insertAdjacentHTML("beforebegin", `<div id="tabSet"></div>`);
       mix = $("tabSet");
     }
+    ensureScrim(ps);
     const open = !!ui.tabOpen;
-    mix.hidden = open;
+    mix.hidden = false;
     ps.hidden = !open;
-    if (!open) {
-      const h = tabSetHTML();
-      if (mix.dataset.h !== h) {
-        mix.dataset.h = h;
-        mix.innerHTML = h;
+    document.documentElement.classList.toggle("tsdrawer", open);
+    const h = tabSetHTML();
+    if (mix.dataset.h !== h) {
+      const foc = document.activeElement && document.activeElement.id === "tsQ";
+      mix.dataset.h = h;
+      mix.innerHTML = h;
+      const q = $("tsQ");
+      if (q) {
+        q.value = tsQ;
+        if (foc) q.focus();
       }
-    } else {
+      tsFilter();
+    }
+    if (open) {
       const ph = ps.querySelector(".pcsph");
-      if (ph && !ps.querySelector("[data-tsback]"))
+      if (ph && !ph.querySelector("[data-tsback]"))
         ph.insertAdjacentHTML(
-          "beforebegin",
-          `<button class="tsback" data-tsback="1"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m15 6-6 6 6 6"/></svg> Einstellungen</button>`
+          "beforeend",
+          `<button class="tsx" data-tsback="1" aria-label="Schließen" title="Schließen (Esc)"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`
         );
     }
     return r;
   };
   const _ag = accGo;
   accGo = function (k) {
-    if (k !== "profil") ui.tabOpen = 1;
+    if (k !== "profil" && k !== "weiter" && k !== "feedback") ui.tabOpen = 1;
     return _ag(k);
+  };
+  const slideIn = () => {
+    const pn = document.querySelector("#setHome .pcset");
+    if (pn && !calm())
+      pn.animate(
+        [
+          { opacity: 0, transform: "translateX(48px)" },
+          { opacity: 1, transform: "none" },
+        ],
+        { duration: 320, easing: "cubic-bezier(.2,.8,.2,1)" }
+      );
+  };
+  const tsClose = () => {
+    if (!ui.tabOpen) return;
+    const pn = document.querySelector("#setHome .pcset"),
+      done = () => {
+        ui.tabOpen = 0;
+        renderSetHome();
+      };
+    if (pn && !calm()) {
+      const a = pn.animate(
+        [
+          { opacity: 1, transform: "none" },
+          { opacity: 0, transform: "translateX(48px)" },
+        ],
+        { duration: 200, easing: "cubic-bezier(.4,0,1,1)", fill: "forwards" }
+      );
+      a.onfinish = () => {
+        done();
+        a.cancel();
+      };
+    } else done();
   };
   document.addEventListener("click", (e) => {
     const g = e.target.closest("[data-tsgo]");
@@ -7829,82 +7863,41 @@ if (IS_PC) {
         invOpen();
         return;
       }
+      const was = !!ui.tabOpen;
       ui.tabOpen = 1;
       ui.pcset = k;
       renderSetHome();
-      window.scrollTo({
-        top: 0,
-      });
-      const pn = document.querySelector("#setHome .pcsr");
-      if (pn && !calm())
-        pn.animate(
-          [
-            {
-              opacity: 0,
-              transform: "translateX(60px)",
-            },
-            {
-              opacity: 1,
-              transform: "none",
-            },
-          ],
-          {
-            duration: 420,
-            easing: "cubic-bezier(.2,.9,.3,1.2)",
-          }
-        );
+      if (!was) slideIn();
       return;
     }
     if (e.target.closest("[data-tsback]")) {
-      ui.tabOpen = 0;
-      renderSetHome();
-      window.scrollTo({
-        top: 0,
-      });
-      const m = $("tabSet");
-      if (m && !calm())
-        [...m.querySelectorAll(".card,.tssw>button")].forEach((x, i) =>
-          x.animate(
-            [
-              {
-                opacity: 0,
-                transform: "translateY(26px) scale(.97)",
-              },
-              {
-                opacity: 1,
-                transform: "none",
-              },
-            ],
-            {
-              duration: 480,
-              delay: i * 35,
-              easing: "cubic-bezier(.3,1.3,.5,1)",
-              fill: "backwards",
-            }
-          )
-        );
+      tsClose();
       return;
     }
     if (e.target.closest("[data-tsprof]")) {
       accGo("profil");
       return;
     }
-    const w = e.target.closest("[data-tssw]");
-    if (w) {
-      const k = w.dataset.tssw;
-      if (k === "dark") {
-        const t = $("pcTheme");
-        if (t) t.click();
-        setTimeout(renderSetHome, 50);
-        return;
-      }
-      ui.tabOpen = 1;
-      ui.pcset = k;
-      renderSetHome();
-      window.scrollTo({
-        top: 0,
-      });
+    /* wer oben eine andere Seite wählt, schließt das Seitenfenster */
+    if (ui.tabOpen && e.target.closest("[data-go],.tabs .tab,#pcNav button")) {
+      ui.tabOpen = 0;
+      document.documentElement.classList.remove("tsdrawer");
     }
+  });
+  document.addEventListener("input", (e) => {
+    if (e.target.id !== "tsQ") return;
+    tsQ = e.target.value;
+    tsFilter();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && e.target.id === "tsQ") {
+      const f = document.querySelector("#tabSet .tsr:not([hidden])");
+      if (f) f.click();
+      return;
+    }
+    if (e.key !== "Escape" || !ui.tabOpen || ui.view !== "more") return;
+    if (document.querySelector(".hobg.show,.backdrop:not([hidden]),#invBg,#pcDevPage")) return;
+    tsClose();
   });
 }
 

@@ -20,19 +20,32 @@ function accTabKeys(t) {
       "schulden",
       ...(isJobless() ? ["amt"] : hasProfile() ? ["amt", "steuer"] : ["steuer"]),
       "invest",
-      "export",
     ];
-  if (t === "anpassen") return ["dark", "toene", "farben", "sprache", "kategorien", "start", "laeden"];
+  if (t === "anpassen") return ["dark", "farben", "toene", "sprache", "kategorien", "laeden"];
   if (t === "sicherheit")
     return [
       "sicherheit",
       ...(SYNCABLE || window.AndroidBridge ? ["sync", "geraete"] : []),
       "backup",
+      "export",
       ...(CAN_NOTIFY ? ["notify"] : []),
       "speicher",
     ];
   return ["neu", "hilfe", "wiz", ...(canShare() ? ["weiter"] : []), "recht"];
 }
+/* Gruppen der Einstellungen – gleich auf Handy, Tablet und PC */
+const tabLabel = (t) =>
+  t === "anpassen" ? uiText("st_g_look") : t === "sicherheit" ? uiText("st_g_data") : t === "hilfe" ? "Hilfe" : "Geld";
+function setGroups(pc) {
+  return [
+    ["geld", accTabKeys("geld")],
+    ["anpassen", accTabKeys("anpassen").filter((k) => k !== "dark")],
+    ["sicherheit", accTabKeys("sicherheit").filter((k) => k !== "sync" && (pc || k !== "notify"))],
+    ["hilfe", accTabKeys("hilfe")],
+  ];
+}
+/* Hilfe-Zeilen brauchen keine zweite Zeile */
+const setSub = (k) => (["hilfe", "wiz", "weiter", "recht"].includes(k) ? "" : accSub(k));
 const accTabOf = (k) => (ACC_TABS.find(([t]) => accTabKeys(t).includes(k)) || ["geld"])[0];
 const ACC_COL = {
   toene: "#6d5bd0",
@@ -70,7 +83,7 @@ function accTitle(k) {
       : k === "wiz"
         ? "Einrichtung & Rundgang"
         : k === "farben"
-          ? "Farben"
+          ? uiText("st_farben")
           : (SP_PAGES[k] || [k])[0];
 }
 function accIcon(k) {
@@ -154,6 +167,7 @@ document.addEventListener("click", (e) => {
 });
 function accPrep(k) {
   if (k === "konten") renderSpName();
+  if (k === "start") renderHomeEd();
   if (k === "sync") renderUpd();
   if (k === "farben") renderColorEd();
   if (k === "amt") renderAmtEd();
@@ -233,7 +247,8 @@ function accBuild() {
           " " +
           accSub(k) +
           " " +
-          liveSp(k)
+          phPageKeys(k)
+            .flatMap((x) => liveSp(x))
             .map((el) => el.textContent)
             .join(" ")
         ).toLowerCase();
@@ -244,7 +259,7 @@ function accBuild() {
         hits
           .map(
             ([t, k]) =>
-              `<button class="sahit" data-accgo="${k}"><span class="saic" style="background:${themeCol(ACC_COL[k] || "#1a7a5c")}">${svgIcon(accIcon(k), 16)}</span><span class="sat"><b>${escHtml(accTitle(k))}</b><small>${escHtml((ACC_TABS.find((x) => x[0] === t) || [, ""])[1])}</small></span><span class="sach">${svgIcon("right", 16)}</span></button>`
+              `<button class="sahit" data-accgo="${k}"><span class="saic" style="background:${themeCol(ACC_COL[k] || "#1a7a5c")}">${svgIcon(accIcon(k), 16)}</span><span class="sat"><b>${escHtml(accTitle(k))}</b><small>${escHtml(tabLabel(t))}</small></span><span class="sach">${svgIcon("right", 16)}</span></button>`
           )
           .join("")
       : `<p class="small muted" style="text-align:center;margin:24px 0">Nichts gefunden für „${escHtml(ACC.q)}“.</p>`;
@@ -262,20 +277,14 @@ function accBuild() {
 }
 /* Handy */
 const PH_SYNC = () => accTabKeys("sicherheit").includes("sync");
-const phPageKeys = (k) => (k === "geraete" && PH_SYNC() ? ["sync", "geraete"] : [k]);
+const phPageKeys = (k) => (k === "geraete" && PH_SYNC() ? ["sync", "geraete"] : k === "konten" ? ["konten", "start"] : [k]);
 const phTitle = (k) =>
   k === "geraete" && PH_SYNC() ? "Geräte & Abgleich" : k === "sicherheit" ? "App-Sperre & Sicherheit" : accTitle(k);
-const PH_GROUPS = () => [
-  ["Geld", "#6b8e23", accTabKeys("geld")],
-  ["Anpassen", "#1a7a5c", accTabKeys("anpassen").filter((k) => k !== "dark")],
-  ["Sicherheit & Geräte", "#3d63a8", accTabKeys("sicherheit").filter((k) => k !== "sync" && k !== "notify")],
-  ["Hilfe", "#c27c0e", accTabKeys("hilfe")],
-];
 const CHEV = '<svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="m9 6 6 6-6 6"/></svg>';
-function phRow(k, c) {
-  const col = themeCol(ACC_COL[k] || c);
-  const act = k === "wiz" ? `data-qwiz="1"` : k === "weiter" ? `data-invopen="1"` : `data-accgo="${k}"`;
-  return `<button class="phr" ${act}><span class="saic" style="background:${col}">${svgIcon(accIcon(k), 18)}</span><span class="sat"><b>${escHtml(phTitle(k))}</b><small data-accsub="${k}">${escHtml(accSub(k))}</small></span><span class="phch">${CHEV}</span></button>`;
+function phRow(k) {
+  const act = k === "wiz" ? `data-qwiz="1"` : k === "weiter" ? `data-invopen="1"` : `data-accgo="${k}"`,
+    sb = setSub(k);
+  return `<button class="phr" ${act}><span class="saic phic">${svgIcon(accIcon(k), 18)}</span><b class="phrt">${escHtml(phTitle(k))}</b><small class="phrs" data-accsub="${k}">${escHtml(sb)}</small><span class="phch">${CHEV}</span></button>`;
 }
 function quickSw() {
   const dark = document.documentElement.dataset.theme === "dark",
@@ -466,7 +475,8 @@ function quickToggle(k, btn) {
       return;
     }
     if (k === "dark") {
-      const kn = btn.querySelector(".qtg i") || btn,
+      const k0 = btn.querySelector(".qtg i"),
+        kn = k0 && k0.offsetParent ? k0 : btn,
         r = kn.getBoundingClientRect();
       themeFlip(on ? "dark" : "light", r.left + r.width / 2, r.top + r.height / 2, kn);
       return;
@@ -528,19 +538,14 @@ document.addEventListener("click", (e) => {
 function phHomeHtml() {
   const n = String(store.settings.name || "").trim(),
     p = store.settings.photo,
-    f = devForm(),
-    dark = document.documentElement.dataset.theme === "dark";
-  const av = p ? `<img src="${escHtml(p)}" alt="">` : n ? `<b>${escHtml(n[0].toUpperCase())}</b>` : devIc(f, 26);
-  const q = quickSw().map(qsTile);
-  return `<div class="card phprof"><button class="phav" data-spgo="profil" aria-label="Profil">${av}<span class="avdev">${devIc(f, 11)}</span></button><div class="sat"><b>${escHtml(n || devModel())}</b><small>${escHtml([n ? devModel() : "", verFull()].filter(Boolean).join(" · "))}</small></div><button class="btn small" data-spgo="profil">Profil</button></div>
-    <div class="phqs">${q.join("")}</div>
-    ${PH_GROUPS()
-      .map(
-        ([g, c, ks]) =>
-          `<div class="card phg" style="--gc:${c}"><h3><span class="saic" style="background:${c}">${svgIcon(accIcon(ks[0]), 15)}</span>${escHtml(g)}</h3>${ks.map((k) => phRow(k, c)).join("")}</div>`
-      )
+    f = devForm();
+  const av = p ? `<img src="${escHtml(p)}" alt="">` : n ? `<b>${escHtml(n[0].toUpperCase())}</b>` : devIc(f, 24);
+  return `<button class="card phprof" data-spgo="profil"><span class="phav">${av}<span class="avdev">${devIc(f, 11)}</span></span><span class="sat"><b>${escHtml(n || devModel())}</b><small>${escHtml(uiText("st_prof"))}</small></span><span class="phch">${CHEV}</span></button>
+    <div class="qpills">${quickSw().map(qsTile).join("")}</div>
+    ${setGroups(false)
+      .map(([t, ks]) => `<h3 class="phgl">${escHtml(tabLabel(t))}</h3><div class="card phg">${ks.map(phRow).join("")}</div>`)
       .join("")}
-    <div class="appfoot"><b>Finanz MAMI</b><span>Die App, die sich um dich kümmert</span><small>${escHtml(verFull())}</small></div>`;
+    <p class="phfoot">Finanz MAMI · ${escHtml(verFull())}</p>`;
 }
 function phSetRender(el) {
   if (ACC.page) {
@@ -622,6 +627,7 @@ function renderSetHome() {
     });
 }
 function accGo(k) {
+  if (k === "start") k = "konten";
   if (k === "feedback") {
     fbQuickGo();
     return;

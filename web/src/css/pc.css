@@ -4154,27 +4154,6 @@ html.pc #tabSet {
   flex-direction: column;
   gap: 14px;
 }
-html.pc .tsprof {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 18px;
-}
-html.pc .tsprof .topav {
-  margin: 0;
-  width: 58px;
-  height: 58px;
-  font-size: 22px;
-}
-html.pc .tsprof b {
-  font-size: 17px;
-}
-html.pc .tsprof small {
-  display: block;
-  color: var(--muted);
-  font-size: 13px;
-  margin-top: 2px;
-}
 html.pc .tssw {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -4223,71 +4202,6 @@ html.pc .tssw .on i {
 }
 html.pc .tssw .on i::after {
   transform: translateX(18px);
-}
-html.pc .tsgr {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  align-items: start;
-}
-html.pc.istab.tabp .tsgr {
-  grid-template-columns: minmax(0, 1fr);
-}
-html.pc .tsg {
-  padding: 16px 18px 8px;
-  border-top: 5px solid var(--gc);
-}
-html.pc .tsg h3 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 6px;
-  font: 800 16px var(--f-body);
-}
-html.pc .tsg h3 .saic {
-  width: 30px;
-  height: 30px;
-  border-radius: 10px;
-}
-html.pc .tsg button {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 11px 2px;
-  border: 0;
-  border-top: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
-  background: none;
-  font: 700 14px var(--f-body);
-  color: var(--fg);
-  text-align: left;
-}
-html.pc .tsg button:first-of-type {
-  border-top: 0;
-}
-html.pc .tsg button small {
-  margin-left: auto;
-  color: var(--muted);
-  font-weight: 500;
-  font-size: 13px;
-  max-width: 55%;
-  text-align: right;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-html.pc .tsback {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 0;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  border-radius: 14px;
-  padding: 10px 14px;
-  font: 700 14px var(--f-body);
-  color: var(--fg);
-  margin-bottom: 12px;
 }
 html.pc.istab #setHome .pcset {
   grid-template-columns: minmax(0, 1fr) !important;
@@ -4455,14 +4369,6 @@ html.pc.istab #pcRel,
 html.pc.istab #pcInbox,
 html.pc.istab #pcRefresh {
   display: none !important;
-}
-html.pc .tsqs {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-html.pc.istab.tabp .tsqs {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 html.pc.istab.tabp #v-home:not([hidden]) {
   display: grid !important;
@@ -6572,4 +6478,204 @@ html.pc .pcdpfull .devwrap {
 }
 html.pc .pcdpfull #pcDevFb .pcfbgrid {
   min-height: 0;
+}
+
+/* Einstellungen am PC: Übersicht in vier Spalten, Einstellung als Seitenfenster */
+html.pc .tsprof {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+}
+html.pc .tsprof .topav {
+  margin: 0;
+  width: 46px;
+  height: 46px;
+  font-size: 18px;
+  flex: none;
+}
+html.pc .tspn {
+  min-width: 0;
+  flex: 0 1 auto;
+}
+html.pc .tspn b {
+  display: block;
+  font-size: 16px;
+}
+html.pc .tspn small {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+html.pc .tsq {
+  flex: 1 1 220px;
+  max-width: 360px;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  height: 42px;
+  border-radius: 999px;
+  background: var(--sunk);
+  color: var(--muted);
+}
+html.pc .tsq input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font: 500 14px var(--f-body);
+  color: var(--fg);
+  outline: none;
+}
+html.pc .tsq:focus-within {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+html.pc .tsprof .qpills {
+  margin: 0;
+  flex-wrap: nowrap;
+}
+html.pc .tsgr {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+html.pc.istab.tabp .tsgr {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+html.pc .tsg {
+  padding: 8px 6px 6px;
+}
+html.pc .tsg h3 {
+  margin: 8px 12px 6px;
+  font: 800 15px var(--f-body);
+}
+html.pc .tsr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  text-align: left;
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+html.pc .tsr:hover {
+  background: var(--sunk);
+}
+html.pc .tsr.on {
+  background: var(--accent-soft);
+}
+html.pc .tsr.on b {
+  color: var(--accent);
+}
+html.pc .tsr:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+html.pc .tsic {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+html.pc .tsr .sat {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+html.pc .tsr b {
+  font-size: 14px;
+  font-weight: 600;
+}
+html.pc .tsr small {
+  font-size: 12.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html.pc .tsnone {
+  text-align: center;
+  margin: 24px 0;
+}
+/* Seitenfenster */
+html.pc.tsdrawer #setHome .pcset {
+  position: fixed;
+  z-index: 60;
+  top: 96px;
+  right: 24px;
+  bottom: 56px;
+  width: min(760px, 56vw);
+  display: block;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 20px 22px 22px;
+  border-radius: var(--r);
+  background: var(--bg);
+  box-shadow: var(--shadow-lg);
+}
+html.pc.tsdrawer #setHome .pcsl {
+  display: none !important;
+}
+html.pc.istab.tabp.tsdrawer #setHome .pcset {
+  left: 24px;
+  width: auto;
+}
+html.pc .tsscrim {
+  display: none;
+}
+html.pc.tsdrawer #v-more:not([hidden]) .tsscrim {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+}
+html.pc.tsdrawer:has(#v-more:not([hidden])) .tabs .tab.plus {
+  display: none;
+}
+html.pc .pcsph .tsx {
+  margin-left: auto;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  color: var(--fg);
+  cursor: pointer;
+}
+html.pc .pcsph .tsx:hover {
+  background: var(--sunk);
+}
+html.pc .pcsph .tsx svg {
+  width: 18px;
+  height: 18px;
+}
+html.pc #v-more {
+  padding-bottom: 70px;
+}
+/* Schalter-Karten im Seitenfenster nicht doppelt einrahmen */
+html.pc .pcsr #homeEd > .card,
+html.pc .pcsr .sabody > .sp.pc > .card:has(> .switch) {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  border-top: 0;
 }

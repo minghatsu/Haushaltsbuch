@@ -1,34 +1,13 @@
 /* Einstellungen am PC */
 if (IS_PC) {
-  const PCSET = [
-    [
-      "Geld",
-      () => [
-        "konten",
-        "budgets",
-        ...(isJobless() ? ["amt"] : hasProfile() ? ["amt", "steuer"] : ["steuer"]),
-        "invest",
-        "export",
-      ],
-    ],
-    ["Anpassen", () => ["toene", "farben", "sprache", "kategorien", "laeden"]],
-    [
-      "Sicherheit",
-      () => [
-        "sicherheit",
-        ...(SYNCABLE || window.AndroidBridge ? ["geraete"] : []),
-        "backup",
-        ...(CAN_NOTIFY ? ["notify"] : []),
-        "speicher",
-      ],
-    ],
-  ];
+  const PCSET = () => setGroups(true).filter(([t]) => t !== "hilfe");
   const syncOn = () => !!(SYNCABLE || window.AndroidBridge),
-    parts = (k) => (k === "geraete" && syncOn() ? ["sync", "geraete"] : [k]),
+    parts = (k) => (k === "geraete" && syncOn() ? ["sync", "geraete"] : k === "konten" ? ["konten", "start"] : [k]),
     alias = {
       sync: "geraete",
+      start: "konten",
     };
-  const title = (k) => (k === "geraete" && syncOn() ? "Geräte & Abgleich" : accTitle(k)),
+  const title = (k) => phTitle(k),
     sub = (k) => accSub(k);
   const col = (k) => themeCol(ACC_COL[k] || "#1a7a5c");
   let shown = "";
@@ -38,9 +17,8 @@ if (IS_PC) {
     accRestoreAll();
     const ks = parts(k);
     const tp = window.pcTilePane && window.pcTilePane(k);
-    r.innerHTML = `<div class="pcsp${anim ? " pcsanim" : ""}"><div class="pcsph"><span class="saic" style="background:${col(k)}">${svgIcon(accIcon(k), 20)}</span><h2>${escHtml(title(k))}</h2></div>${tp || ks.map((x) => `<div class="sabody" id="sab-${x}"></div>`).join("")}</div>`;
-    if (!tp)
-      ks.forEach((x) => {
+    r.innerHTML = `<div class="pcsp${anim ? " pcsanim" : ""}"><div class="pcsph"><span class="saic" style="background:${col(k)}">${svgIcon(accIcon(k), 20)}</span><h2>${escHtml(title(k))}</h2></div>${(tp || "") + (tp ? ks.filter((x) => x !== k) : ks).map((x) => `<div class="sabody" id="sab-${x}"></div>`).join("")}</div>`;
+    (tp ? ks.filter((x) => x !== k) : ks).forEach((x) => {
         try {
           accMount(x);
         } catch (e) {
@@ -72,7 +50,7 @@ if (IS_PC) {
     }
     const q = (ACC.q || "").trim().toLowerCase(),
       its = $("pcsItems"),
-      groups = PCSET.map(([g, f]) => [g, f()]);
+      groups = PCSET();
     const want = JSON.stringify([q, groups]);
     if (its.dataset.w !== want) {
       its.dataset.w = want;
@@ -97,7 +75,7 @@ if (IS_PC) {
         .map(([g, ks]) => {
           ks = ks.filter(hit);
           return ks.length
-            ? `<div class="pcsg">${escHtml(I18N.tr ? I18N.tr(g) : g)}</div>` +
+            ? `<div class="pcsg">${escHtml(tabLabel(g))}</div>` +
                 ks
                   .map(
                     (k) =>

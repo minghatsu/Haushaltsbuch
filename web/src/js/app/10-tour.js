@@ -1531,24 +1531,19 @@ const PTOUR_FN = () => ({
     t: "Einstellungen",
     s: [
       {
-        sel: "#setQ",
+        sel: IS_PC ? "#tsQ" : "#setQ",
         ic: "insight",
         t: "Suchen",
         p: ["Schneller als blättern: eintippen, was du suchst – z. B. „Backup“ oder „Budget“."],
       },
       {
-        sel: "#pcsL,#setTabs",
+        sel: IS_PC ? ".tsgr" : ".phgl",
         ic: "sliders",
         t: "Bereiche",
-        p: [
-          IS_PC
-            ? "Links wählen, rechts erscheint der Inhalt."
-            : "Geld, Anpassen, Sicherheit und Hilfe – darunter klappen die Punkte auf.",
-          "Geld: Konten, Budgets, Abos, Sparen & Anlegen. Anpassen: Farben, Sprache, Kategorien.",
-        ],
+        p: [uiText("nw_st_p"), ...(IS_PC ? [uiText("nw_st_p2")] : [])],
       },
       {
-        sel: '[data-pcset="konten"],[data-accgo="konten"],[data-acc="konten"]',
+        sel: IS_PC ? '[data-tsgo="konten"]' : '.phr[data-accgo="konten"]',
         raw: 1,
         ic: "bank",
         t: uiText("ay_t"),
@@ -1564,7 +1559,7 @@ const PTOUR_FN = () => ({
       ...(canShare()
         ? [
             {
-              sel: '[data-invopen="1"],[data-accgo="weiter"]',
+              sel: IS_PC ? '[data-tsgo="weiter"]' : '.phr[data-invopen="1"]',
               raw: 1,
               ic: "user",
               t: canInvite() ? uiText("inv_t") : uiText("inv_share_t"),
@@ -1573,13 +1568,13 @@ const PTOUR_FN = () => ({
           ]
         : []),
       {
-        sel: '[data-pcset="geraete"],[data-acctab="sicherheit"]',
+        sel: IS_PC ? '[data-tsgo="geraete"]' : '.phr[data-accgo="geraete"]',
         ic: "phone",
         t: "Geräte & Sicherheit",
         p: ["Handy und PC koppeln (bis zu 5 Geräte), App-Sperre und Backup findest du hier."],
       },
       {
-        sel: IS_PC ? "#ptourQ" : '[data-acctab="hilfe"]',
+        sel: IS_PC ? "#ptourQ" : '.phr[data-accgo="neu"]',
         ic: "insight",
         t: "Hilfe",
         p: [
@@ -1652,6 +1647,17 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.49.2",
+    s: () => [
+      {
+        sel: "#topAv",
+        ic: "sliders",
+        t: uiText("nw_st_t"),
+        p: [uiText("nw_st_p"), ...(IS_PC ? [uiText("nw_st_p2")] : [])],
+      },
+    ],
+  },
   {
     v: "0.49.1",
     s: () =>
