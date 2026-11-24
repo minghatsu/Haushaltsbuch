@@ -240,6 +240,11 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.49.3",
+    "24. November 2026",
+    ["Die untere Leiste am Handy ist wieder wie früher: nur Symbole, die offene Seite steht als grüner Knopf mit Namen da."],
+  ],
+  [
     "0.49.2",
     "24. November 2026",
     [
