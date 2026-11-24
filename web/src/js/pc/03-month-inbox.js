@@ -30,7 +30,7 @@ if (IS_PC) {
     const out = new Map(),
       cnt = {};
     root.querySelectorAll("b,span,strong,div,em,small,text,td").forEach((e) => {
-      if (e.closest(".cubestage,.pctl")) return;
+      if (e.closest(".cubestage")) return;
       if (e.children.length) return;
       const s = (e.textContent || "").trim();
       if (s.length > 22 || !/€/.test(s) || !/\d/.test(s)) return;
@@ -258,6 +258,8 @@ if (IS_PC) {
       );
     });
   const unread = () => FB.items.filter((x) => !x.read).length;
+  /* Der Eingang ist offen – als Fenster oder auf der Entwickler-Seite */
+  const fbOn = () => !$("pcFbBg").hidden || !!($("pcDevPage") && $("pcDevPage").contains($("pcFbBody")));
   function fbBtn() {
     let b = $("pcInbox");
     const show = !!updKey();
@@ -355,7 +357,7 @@ if (IS_PC) {
     } finally {
       FB.busy = false;
       fbBtn();
-      if (!$("pcFbBg").hidden) fbRender();
+      if (fbOn()) fbRender();
     }
   }
   document.body.insertAdjacentHTML(
@@ -850,7 +852,7 @@ if (IS_PC) {
     }
   });
   document.addEventListener("keydown", (e) => {
-    if ($("pcFbBg").hidden) return;
+    if (!fbOn()) return;
     if (e.key === "Escape") {
       if (FB.sel && FB.sel.size) {
         FB.sel.clear();
@@ -1477,9 +1479,30 @@ if (IS_PC) {
   window.pcRelPaint = () => {
     try {
       relBtn();
-      const pop = $("pcRelPop");
+      const pop = $("pcRelPop") || $("pcDevRel");
       if (pop) pop.innerHTML = devPanelHtml();
     } catch (_) {}
+  };
+  /* für die Entwickler-Seite */
+  window.pcDevHooks = {
+    state: () => ({ DS, FB, REL, unread: unread() }),
+    fbParse,
+    kind: (k) => KIND[k] || KIND.idee,
+    ago,
+    dsLoad,
+    fbLoad,
+    fbShow,
+    fbMount(el) {
+      const b = $("pcFbBody");
+      if (b && el) el.appendChild(b);
+      fbRender();
+      fbLoad(true);
+    },
+    fbUnmount() {
+      const b = $("pcFbBody"),
+        sh = document.querySelector("#pcFbBg .pcfbsheet");
+      if (b && sh && b.parentElement !== sh) sh.appendChild(b);
+    },
   };
   document.addEventListener("click", (e) => {
     const pop = $("pcRelPop");

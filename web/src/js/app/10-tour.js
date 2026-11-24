@@ -1109,35 +1109,10 @@ const PTOUR_FN = () => ({
         ],
       },
       {
-        sel: '#v-home .hblock[data-hb="budgets"]',
-        ic: "target",
-        t: "Budgets",
-        p: [
-          "Zeigt, wie viel von deinem Monatsbudget noch frei ist.",
-          "Budgets legst du unter Einstellungen › Monatsbudgets fest.",
-        ],
-      },
-      {
-        sel: '#v-home .hblock[data-hb="fix"]',
-        ic: "list",
-        t: "Fixkosten",
-        p: ["Was diesen Monat fest abgeht – Miete, Abos, Raten.", "Antippen führt zur Fixkosten-Seite zum Abhaken."],
-      },
-      {
-        sel: '#v-home .hblock[data-hb="invest"]',
-        ic: "piggy",
-        t: "Sparen & Anlegen",
-        p: [
-          "Zinseszins-Rechner, Vergleich und deine Anlage-Ziele.",
-          "Oben in der Kachel umschalten, „Öffnen“ für alle Einstellungen.",
-        ],
-      },
-      {
-        sel: IS_PC ? "#v-home .pctl,#pcDock" : '[data-scroll="homeEd"]',
-        ic: "sliders",
-        t: "Startseite anpassen",
-        raw: IS_PC ? 1 : 0,
-        p: IS_PC ? [uiText("trh_dock_p")] : ["Hier blendest du Kacheln ein oder aus und sortierst sie, wie du willst."],
+        sel: '#v-home .hblock[data-hb="cash"]',
+        ic: "cash",
+        t: uiText("hc_sw"),
+        p: [uiText("hc_sw_s"), uiText("hc_gone")],
       },
       {
         sel: ".tabs .tab.plus,.pcfab,[data-addmenu]",
@@ -1677,6 +1652,31 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.49.1",
+    s: () =>
+      IS_PC
+        ? [
+            ...(IS_DESK && updKey()
+              ? [
+                  {
+                    sel: "#pcDev",
+                    ic: "sliders",
+                    t: uiText("nw_dp_t"),
+                    p: [uiText("nw_dp_p")],
+                  },
+                ]
+              : []),
+            {
+              sel: "#pcHero .fcmini",
+              raw: 1,
+              ic: "home",
+              t: uiText("nw_hs_t"),
+              p: [uiText("nw_pc_p")],
+            },
+          ]
+        : [],
+  },
   {
     v: "0.49.0",
     s: () =>

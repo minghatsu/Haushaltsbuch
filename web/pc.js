@@ -369,11 +369,11 @@ function pcHome(o) {
         ""
       )}<button class="add" data-spgo="konten"><span>+ Space</span><b>anlegen</b></button></div>${IS_TAB && isCur && (ui.acctEd || []).filter(Boolean).length > 1 ? `<button class="mvopen pcmvo" data-mvopen aria-label="${escHtml(uiText("mv_open"))}">${svgIcon("down", 18)}<span>${escHtml(uiText("mv_open"))}</span></button>` : ""}
     <button class="pcring" data-go="year" style="--p:${Math.round(pct * 100)}" aria-label="Analyse öffnen"><span>${isCur ? `<small>noch pro Tag</small><b data-cv="${perDay}">${escHtml(fmtEur0(perDay))}</b><small>${left} ${left === 1 ? "Tag" : "Tage"} übrig</small>` : `<small>${c.net >= 0 ? "übrig" : "mehr ausgegeben"}</small><b data-cv="${Math.abs(c.net)}">${escHtml(fmtEur0(Math.abs(c.net)))}</b><small>im ${escHtml(MONTHS[m - 1])}</small>`}</span></button>
-    <div class="pcminis">
+    ${isCur && fcMini() ? fcMini() : `<div class="pcminis">
       <button data-go="list"><span>Einnahmen</span><b data-cv="${c.income}">${escHtml(fmtEur0(c.income))}</b></button>
       <button data-go="list"><span>Ausgaben</span><b data-cv="${c.expenses}">${escHtml(fmtEur0(c.expenses))}</b></button>
       <button data-go="fix"><span>Fixkosten offen</span><b data-cv="${c.fixOpen}">${escHtml(fmtEur0(c.fixOpen))}</b></button>
-    </div>
+    </div>`}
   </aside>`;
   const v = $("v-home");
   if (!v) return;
@@ -1223,430 +1223,21 @@ if (IS_PC) {
       I18N.set(LANG);
     } catch (e) {}
 }
-
-/* Start */
+/* Die Bereichs-Leiste sitzt mittig oben – wird es rechts eng (Monat, Knöpfe), rückt sie nach links */
 if (IS_PC) {
-  const PCH = () => {
-    const h = store.settings.pcHome || (store.settings.pcHome = {});
-    h.order = Array.isArray(h.order) ? h.order : [];
-    h.min = Array.isArray(h.min) ? h.min : [];
-    return h;
+  const fit = () => {
+    const t = document.querySelector(".tabs"),
+      m = $("monthpill");
+    if (!t || !m) return;
+    t.style.translate = "";
+    const over = t.getBoundingClientRect().right + 12 - m.getBoundingClientRect().left;
+    if (over > 0) t.style.translate = `-${Math.ceil(over)}px 0`;
   };
-  const BIC = {
-    cash: "cash",
-    budgets: "target",
-    fix: "list",
-    tax: "shield",
-    goals: "piggy",
-    debts: "bank",
-    recent: "receipt",
-    gemeinsam: "heart",
-    offers: "cart",
-    ...HX_IC,
-  };
-  const name = (k) => (HOME_BLOCKS.find((b) => b[0] === k) || [k, k])[1];
-  const _k2 = accTabKeys;
-  accTabKeys = (t) => _k2(t).filter((k) => k !== "start");
-  homeOrder = () => {
-    const o = [...new Set(PCH().order)].filter((k) => HOME_BLOCKS.some((b) => b[0] === k));
-    for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k);
-    return o;
-  };
-  const _hb = homeBlocks;
-  homeBlocks = (html) => {
-    const keep = store.settings.homeHidden;
-    store.settings.homeHidden = [...PCH().min];
-    try {
-      return _hb(html);
-    } finally {
-      store.settings.homeHidden = keep;
-    }
-  };
-  const save = () => {
-    try {
-      saveSettings();
-    } catch (e) {}
-  };
-  function dock() {
-    let d = $("pcDock");
-    const on = ui.view === "home",
-      m = PCH().min.filter((k) => HOME_BLOCKS.some((b) => b[0] === k));
-    document.documentElement.classList.remove("pcdocked");
-    const hv = document.querySelector("#v-home");
-    if (!hv) return;
-    if (!d) {
-      d = document.createElement("div");
-      d.className = "pcdock";
-      d.id = "pcDock";
-    }
-    const ag = hv.querySelector(".agrid"),
-      anc = ag && ag.closest(".areacard");
-    if (anc) {
-      if (anc.nextElementSibling !== d) anc.after(d);
-    } else if (d.parentElement !== hv) hv.appendChild(d);
-    d.hidden = !on || !m.length;
-    const g = d.querySelector(".pcdkg"),
-      have = g ? [...g.children].map((x) => x.dataset.pcrest).join(",") : null;
-    if (have === m.join(",")) return;
-    d.innerHTML =
-      `<div class="pcdkh"><b>Ausgeblendet</b><small>Antippen zum Einblenden</small></div><div class="pcdkg">` +
-      m
-        .map(
-          (k) =>
-            `<button class="pcdi" data-pcrest="${k}" aria-label="${escHtml(name(k))} wieder anzeigen"><span>${svgIcon(BIC[k] || "tag", 18)}</span><em>${escHtml(name(k))}</em></button>`
-        )
-        .join("") +
-      `</div>`;
-  }
-  function decorate() {
-    dock();
-    if (ui.view !== "home") return;
-    document.querySelectorAll("#v-home .hblock").forEach((b) => {
-      if (b.closest(".cubestage") || b.querySelector(":scope > .pctl")) return;
-      b.insertAdjacentHTML(
-        "afterbegin",
-        `<div class="pctl"><button class="pcgrip" data-pcgrip="1" aria-label="Kachel verschieben" title="Ziehen zum Verschieben"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/></svg></button><button class="pcmin" data-pcmin="${b.dataset.hb}" aria-label="Kachel minimieren" title="Minimieren">${svgIcon("minus", 16)}</button></div>`
-      );
-    });
-  }
-  const _ph = pcHome;
-  pcHome = (o) => {
-    _ph(o);
-    decorate();
-  };
-  setInterval(dock, 1000);
-  const _render = render;
-  render = (...a) => {
-    const x = _render(...a);
-    try {
-      dock();
-    } catch (e) {}
-    return x;
-  };
-  window.pcDockEls = () =>
-    ui.view === "home" && $("pcDock") && !$("pcDock").hidden ? [...$("pcDock").querySelectorAll(".pcdi")] : [];
-  const dockSpot = (k) => {
-    const el = document.querySelector(`#pcDock [data-pcrest="${k}"]`);
-    if (el) {
-      const r = el.getBoundingClientRect();
-      return {
-        x: r.left + r.width / 2,
-        y: r.top + r.height / 2,
-      };
-    }
-    return {
-      x: innerWidth - 50,
-      y: innerHeight / 2,
-    };
-  };
-  const snap = () =>
-    new Map([...document.querySelectorAll("#v-home .hblock")].map((t) => [t.dataset.hb, t.getBoundingClientRect()]));
-  function glide(before, skip) {
-    document.querySelectorAll("#v-home .hblock").forEach((t) => {
-      if (t.dataset.hb === skip) return;
-      const a = before.get(t.dataset.hb);
-      if (!a) return;
-      const r = t.getBoundingClientRect(),
-        dx = a.left - r.left,
-        dy = a.top - r.top;
-      if (Math.abs(dx) > 1 || Math.abs(dy) > 1)
-        t.animate(
-          [
-            {
-              transform: `translate(${dx}px,${dy}px)`,
-            },
-            {
-              transform: "none",
-            },
-          ],
-          {
-            duration: 420,
-            easing: "cubic-bezier(.2,.8,.2,1)",
-          }
-        );
-    });
-  }
-  document.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-pcmin]");
-    if (!b) return;
-    const k = b.dataset.pcmin,
-      tile = b.closest(".hblock");
-    if (!tile || PC_ANIM.busy) return;
-    const r = tile.getBoundingClientRect(),
-      h = PCH(),
-      before = snap();
-    if (!h.min.includes(k)) h.min.push(k);
-    const fly = tile.cloneNode(true);
-    fly.classList.add("pcfly");
-    Object.assign(fly.style, {
-      left: r.left + "px",
-      top: r.top + "px",
-      width: r.width + "px",
-      height: r.height + "px",
-    });
-    document.body.appendChild(fly);
-    tile.remove();
-    save();
-    glide(before, k);
-    const di = document.querySelector(`#pcDock [data-pcrest="${k}"]`);
-    if (di) di.style.opacity = "0";
-    const t = dockSpot(k),
-      dx = t.x - (r.left + r.width / 2),
-      dy = t.y - (r.top + r.height / 2),
-      sc = Math.max(0.06, 52 / Math.max(r.width, r.height));
-    fly
-      .animate(
-        [
-          {
-            transform: "none",
-            opacity: 1,
-            borderRadius: "24px",
-          },
-          {
-            transform: "translateY(-18px) scale(1.04) rotate(-3deg)",
-            opacity: 1,
-            offset: 0.18,
-          },
-          {
-            transform: `translate(${dx * 0.4}px,${dy * 0.4 - 40}px) scale(.55) rotate(-8deg)`,
-            opacity: 1,
-            offset: 0.55,
-          },
-          {
-            transform: `translate(${dx}px,${dy}px) scale(${sc}) rotate(10deg)`,
-            opacity: 0.15,
-            borderRadius: "50%",
-          },
-        ],
-        {
-          duration: 680,
-          easing: "cubic-bezier(.45,0,.2,1)",
-          fill: "forwards",
-        }
-      )
-      .finished.then(() => {
-        fly.remove();
-        const d2 = document.querySelector(`#pcDock [data-pcrest="${k}"]`);
-        if (d2) {
-          d2.style.opacity = "";
-          d2.animate(
-            [
-              {
-                transform: "scale(.3)",
-              },
-              {
-                transform: "scale(1.25)",
-                offset: 0.6,
-              },
-              {
-                transform: "none",
-              },
-            ],
-            {
-              duration: 420,
-              easing: "cubic-bezier(.3,.7,.3,1)",
-            }
-          );
-        }
-      });
-  });
-  document.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-pcrest]");
-    if (!b || PC_ANIM.busy) return;
-    const k = b.dataset.pcrest,
-      from = b.getBoundingClientRect(),
-      h = PCH(),
-      before = snap();
-    h.min = h.min.filter((x) => x !== k);
-    save();
-    glide(before, k);
-    const tile = document.querySelector(`#v-home .hblock[data-hb="${k}"]`);
-    if (!tile) return;
-    const r = tile.getBoundingClientRect();
-    if (r.bottom > innerHeight - 50 || r.top < 120) {
-      tile.scrollIntoView({
-        block: "center",
-      });
-    }
-    const r2 = tile.getBoundingClientRect(),
-      dx = from.left + from.width / 2 - (r2.left + r2.width / 2),
-      dy = from.top + from.height / 2 - (r2.top + r2.height / 2),
-      sc = Math.max(0.06, 52 / Math.max(r2.width, r2.height));
-    tile.animate(
-      [
-        {
-          transform: `translate(${dx}px,${dy}px) scale(${sc}) rotate(10deg)`,
-          opacity: 0.3,
-          borderRadius: "50%",
-        },
-        {
-          transform: "translate(0,-14px) scale(1.03) rotate(-1.5deg)",
-          opacity: 1,
-          offset: 0.7,
-        },
-        {
-          transform: "none",
-          opacity: 1,
-        },
-      ],
-      {
-        duration: 700,
-        easing: "cubic-bezier(.3,.7,.3,1)",
-      }
-    );
-  });
-  let D = null;
-  const tiles = () => [...document.querySelectorAll("#v-home .hcol > .hblock, #v-home .hlist > .hblock")];
-  function flip(move) {
-    const els = tiles().filter((t) => t !== D.ph),
-      before = new Map(els.map((t) => [t, t.getBoundingClientRect()]));
-    move();
-    for (const t of els) {
-      const a = before.get(t),
-        b = t.getBoundingClientRect();
-      const dx = a.left - b.left,
-        dy = a.top - b.top;
-      if (dx || dy)
-        t.animate(
-          [
-            {
-              transform: `translate(${dx}px,${dy}px)`,
-            },
-            {
-              transform: "none",
-            },
-          ],
-          {
-            duration: 260,
-            easing: "cubic-bezier(.2,.8,.2,1)",
-          }
-        );
-    }
-  }
-  document.addEventListener("pointerdown", (e) => {
-    const g = e.target.closest("[data-pcgrip]");
-    if (!g || e.button > 0) return;
-    const tile = g.closest(".hblock");
-    if (!tile) return;
-    e.preventDefault();
-    const r = tile.getBoundingClientRect();
-    const ph = document.createElement("div");
-    ph.className = "hblock pcph";
-    ph.style.height = r.height + "px";
-    const fly = tile.cloneNode(true);
-    fly.classList.add("pcfly", "pclift");
-    Object.assign(fly.style, {
-      left: r.left + "px",
-      top: r.top + "px",
-      width: r.width + "px",
-      height: r.height + "px",
-    });
-    document.body.appendChild(fly);
-    tile.replaceWith(ph);
-    D = {
-      tile,
-      ph,
-      fly,
-      ox: e.clientX - r.left,
-      oy: e.clientY - r.top,
-      id: e.pointerId,
-      last: 0,
-    };
-    fly.animate(
-      [
-        {
-          transform: "none",
-        },
-        {
-          transform: "rotate(-2deg) scale(1.03)",
-        },
-      ],
-      {
-        duration: 180,
-        fill: "forwards",
-        easing: "ease-out",
-      }
-    );
-    document.documentElement.classList.add("pcdragging");
-  });
-  document.addEventListener("pointermove", (e) => {
-    if (!D || e.pointerId !== D.id) return;
-    D.fly.style.left = e.clientX - D.ox + "px";
-    D.fly.style.top = e.clientY - D.oy + "px";
-    if (e.clientY > innerHeight - 70) scrollBy(0, 14);
-    else if (e.clientY < 130) scrollBy(0, -14);
-    const now = Date.now();
-    if (now - D.last < 60) return;
-    D.last = now;
-    const over = document
-      .elementsFromPoint(e.clientX, e.clientY)
-      .find((x) => x.matches && x.matches("#v-home .hcol > .hblock, #v-home .hlist > .hblock") && x !== D.ph);
-    if (!over) return;
-    const ro = over.getBoundingClientRect(),
-      after = e.clientY > ro.top + ro.height / 2;
-    if ((after && over.nextElementSibling === D.ph) || (!after && over.previousElementSibling === D.ph)) return;
-    flip(() => over.insertAdjacentElement(after ? "afterend" : "beforebegin", D.ph));
-  });
-  const drop = (e) => {
-    if (!D || (e && e.pointerId !== D.id)) return;
-    const { tile, ph, fly } = D;
-    D = null;
-    document.documentElement.classList.remove("pcdragging");
-    const r = ph.getBoundingClientRect(),
-      f = fly.getBoundingClientRect();
-    fly.getAnimations().forEach((a) => a.cancel());
-    fly
-      .animate(
-        [
-          {
-            transform: "rotate(-2deg) scale(1.03)",
-          },
-          {
-            transform: `translate(${r.left - f.left}px,${r.top - f.top}px) rotate(1deg) scale(.99)`,
-            offset: 0.8,
-          },
-          {
-            transform: `translate(${r.left - f.left}px,${r.top - f.top}px)`,
-          },
-        ],
-        {
-          duration: 280,
-          easing: "cubic-bezier(.2,.8,.2,1)",
-          fill: "forwards",
-        }
-      )
-      .finished.then(() => {
-        ph.replaceWith(tile);
-        fly.remove();
-        tile.animate(
-          [
-            {
-              transform: "scale(.98)",
-            },
-            {
-              transform: "scale(1.01)",
-              offset: 0.5,
-            },
-            {
-              transform: "none",
-            },
-          ],
-          {
-            duration: 260,
-          }
-        );
-        const dom = tiles().map((t) => t.dataset.hb),
-          min = PCH().min,
-          it = dom[Symbol.iterator]();
-        PCH().order = homeOrder().map((k) => (min.includes(k) || !dom.includes(k) ? k : it.next().value));
-        save();
-      });
-  };
-  document.addEventListener("pointerup", drop);
-  document.addEventListener("pointercancel", drop);
-  addEventListener("blur", () => drop());
-  decorate();
+  addEventListener("resize", fit);
+  setInterval(fit, 1500);
+  setTimeout(fit, 300);
 }
+
 /* Hell / Dunkel */
 if (IS_PC) {
   const _k3 = accTabKeys;
@@ -1944,7 +1535,7 @@ if (IS_PC) {
     const out = new Map(),
       cnt = {};
     root.querySelectorAll("b,span,strong,div,em,small,text,td").forEach((e) => {
-      if (e.closest(".cubestage,.pctl")) return;
+      if (e.closest(".cubestage")) return;
       if (e.children.length) return;
       const s = (e.textContent || "").trim();
       if (s.length > 22 || !/€/.test(s) || !/\d/.test(s)) return;
@@ -2172,6 +1763,8 @@ if (IS_PC) {
       );
     });
   const unread = () => FB.items.filter((x) => !x.read).length;
+  /* Der Eingang ist offen – als Fenster oder auf der Entwickler-Seite */
+  const fbOn = () => !$("pcFbBg").hidden || !!($("pcDevPage") && $("pcDevPage").contains($("pcFbBody")));
   function fbBtn() {
     let b = $("pcInbox");
     const show = !!updKey();
@@ -2269,7 +1862,7 @@ if (IS_PC) {
     } finally {
       FB.busy = false;
       fbBtn();
-      if (!$("pcFbBg").hidden) fbRender();
+      if (fbOn()) fbRender();
     }
   }
   document.body.insertAdjacentHTML(
@@ -2764,7 +2357,7 @@ if (IS_PC) {
     }
   });
   document.addEventListener("keydown", (e) => {
-    if ($("pcFbBg").hidden) return;
+    if (!fbOn()) return;
     if (e.key === "Escape") {
       if (FB.sel && FB.sel.size) {
         FB.sel.clear();
@@ -3391,9 +2984,30 @@ if (IS_PC) {
   window.pcRelPaint = () => {
     try {
       relBtn();
-      const pop = $("pcRelPop");
+      const pop = $("pcRelPop") || $("pcDevRel");
       if (pop) pop.innerHTML = devPanelHtml();
     } catch (_) {}
+  };
+  /* für die Entwickler-Seite */
+  window.pcDevHooks = {
+    state: () => ({ DS, FB, REL, unread: unread() }),
+    fbParse,
+    kind: (k) => KIND[k] || KIND.idee,
+    ago,
+    dsLoad,
+    fbLoad,
+    fbShow,
+    fbMount(el) {
+      const b = $("pcFbBody");
+      if (b && el) el.appendChild(b);
+      fbRender();
+      fbLoad(true);
+    },
+    fbUnmount() {
+      const b = $("pcFbBody"),
+        sh = document.querySelector("#pcFbBg .pcfbsheet");
+      if (b && sh && b.parentElement !== sh) sh.appendChild(b);
+    },
   };
   document.addEventListener("click", (e) => {
     const pop = $("pcRelPop");
@@ -8922,7 +8536,7 @@ if (IS_DESK) {
   );
 }
 
-/* Entwickler-Knopf in der Kopfzeile: Freigabe & Tester, Feedback-Eingang, Werkzeuge */
+/* Entwickler-Knopf in der Kopfzeile – öffnet die Entwickler-Seite */
 if (IS_DESK) {
   const WR = `<svg class="i" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L4 16.7 7.3 20l5.3-5.3a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.4-.6-.6-2.4z"/></svg>`;
   function devW() {
@@ -8942,7 +8556,7 @@ if (IS_DESK) {
     if (!w) {
       ref.insertAdjacentHTML(
         "beforebegin",
-        `<span class="pcdevw" id="pcDevW"><button class="roundbtn pcdev" id="pcDev" aria-haspopup="menu" aria-expanded="false" aria-label="${escHtml(uiText("dv_t"))}" title="${escHtml(uiText("dv_t") + " – " + uiText("dv_note"))}">${WR}<i class="badge" hidden></i><i class="dot" hidden></i></button></span>`
+        `<span class="pcdevw" id="pcDevW"><button class="roundbtn pcdev" id="pcDev" aria-expanded="false" aria-label="${escHtml(uiText("dv_t"))}" title="${escHtml(uiText("dv_t") + " – " + uiText("dv_note"))}">${WR}<i class="badge" hidden></i><i class="dot" hidden></i></button></span>`
       );
       w = $("pcDevW");
     }
@@ -8990,151 +8604,11 @@ if (IS_DESK) {
     const rd = $("pcRel") && $("pcRel").querySelector(".dot"),
       md = w.querySelector(".pcdev .dot");
     if (md) md.hidden = !(rd && !rd.hidden) || !!n;
-    const p = $("pcDevPop");
-    if (p) paint(p);
   }
-  const row = (k, svg, t, sub, badge) =>
-    `<button class="pcdvr" data-pcdv="${k}" role="menuitem"><span class="pcdvi">${svg}</span><span class="pcdvt"><b>${escHtml(t)}</b><small>${escHtml(sub)}</small></span>${badge ? `<i class="badge">${escHtml(badge)}</i>` : `<span class="pcdva" aria-hidden="true">›</span>`}</button>`;
-  const UP = `<svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>`,
-    INBOX = `<svg class="i" viewBox="0 0 24 24"><path d="M4 13.5 6.5 5h11l2.5 8.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 13.5h4.5l1 2h5l1-2H20"/></svg>`,
-    PEOPLE = `<svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><path d="M16 4.6a3 3 0 0 1 0 6.3M17.5 14c2 .5 3.2 2.1 3.5 5"/></svg>`;
-  /* Tester, die noch eine ältere Version haben – bekannt, sobald die Einladungen einmal geladen wurden */
-  function oldTesters() {
-    try {
-      const L = ui.invL || [];
-      if (!L.length) return 0;
-      const N = invNewest(L);
-      return L.filter((x) => invStage(x) === 2 && invOld(x, N)).length;
-    } catch (_) {
-      return 0;
-    }
-  }
-  const group = (k) => `<div class="pcdvg">${escHtml(uiText(k))}</div>`;
-  function paint(p) {
-    const ib = $("pcInbox"),
-      bd = ib && ib.querySelector(".badge"),
-      n = bd && !bd.hidden ? bd.textContent : "",
-      old = oldTesters();
-    p.innerHTML =
-      `<div class="pcdvh">${escHtml(uiText("dv_t"))}<small>${escHtml(uiText("dv_note"))}</small></div>` +
-      group("dv_g_rel") +
-      row("rel", UP, uiText("dv_rel"), uiText("dv_rel_s"), "") +
-      group("dv_g_test") +
-      row(
-        "inv",
-        PEOPLE,
-        uiText("dv_inv"),
-        old ? uiText("dv_inv_old", { n: old }) : uiText("dv_inv_s"),
-        old ? String(old) : ""
-      ) +
-      row("fb", INBOX, uiText("dv_fb"), uiText("dv_fb_s"), n) +
-      group("dv_g_dbg") +
-      row("tools", WR, uiText("dv_tools"), uiText("dv_tools_s"), "");
-    p.setAttribute("data-noi18n", "");
-  }
-  function popClose() {
-    const p = $("pcDevPop");
-    if (!p) return;
-    p.classList.add("out");
-    const b = $("pcDev");
-    if (b) b.setAttribute("aria-expanded", "false");
-    setTimeout(() => p.remove(), 160);
-  }
-  function popOpen() {
-    const b = $("pcDev");
-    if (!b) return;
-    const r = b.getBoundingClientRect();
-    const p = document.createElement("div");
-    p.id = "pcDevPop";
-    p.className = "pcdevpop";
-    p.setAttribute("role", "menu");
-    p.style.top = r.bottom + 10 + "px";
-    p.style.left = Math.max(12, Math.min(innerWidth - 352, r.left + r.width / 2 - 170)) + "px";
-    p.style.setProperty(
-      "--ax",
-      Math.round(r.left + r.width / 2 - Math.max(12, Math.min(innerWidth - 352, r.left + r.width / 2 - 170))) + "px"
-    );
-    paint(p);
-    document.body.appendChild(p);
-    /* frischen Stand der Tester holen und nur die Tester-Zeile nachziehen */
-    if (typeof canInvite === "function" && canInvite()) {
-      const before = oldTesters();
-      invLoad().then(() => {
-        const q = $("pcDevPop"),
-          now = oldTesters();
-        if (!q || now === before) return;
-        const r = q.querySelector('[data-pcdv="inv"]');
-        if (r)
-          r.outerHTML = row(
-            "inv",
-            PEOPLE,
-            uiText("dv_inv"),
-            now ? uiText("dv_inv_old", { n: now }) : uiText("dv_inv_s"),
-            now ? String(now) : ""
-          );
-      });
-    }
-    b.setAttribute("aria-expanded", "true");
-    SND.play("pop");
-    const f = p.querySelector(".pcdvr");
-    if (f)
-      f.focus({
-        preventScroll: true,
-      });
-  }
-  document.addEventListener(
-    "click",
-    (e) => {
-      if (e.target.closest("#pcDev")) {
-        e.stopPropagation();
-        if ($("pcDevPop")) popClose();
-        else {
-          const rp = $("pcRelPop");
-          if (rp) rp.remove();
-          popOpen();
-        }
-        return;
-      }
-      const r = e.target.closest("[data-pcdv]");
-      if (r) {
-        const k = r.dataset.pcdv;
-        popClose();
-        if (k === "rel") {
-          const b = $("pcRel");
-          if (b) setTimeout(() => b.click(), 20);
-        } else if (k === "fb") {
-          const b = $("pcInbox");
-          if (b) setTimeout(() => b.click(), 20);
-        } else if (k === "inv") {
-          setTimeout(() => invOpen(), 20);
-        } else if (k === "tools") {
-          setTimeout(() => {
-            try {
-              devOpen();
-            } catch (_) {}
-          }, 60);
-        }
-        return;
-      }
-      if ($("pcDevPop") && !e.target.closest("#pcDevPop")) popClose();
-    },
-    true
-  );
-  document.addEventListener("keydown", (e) => {
-    const p = $("pcDevPop");
-    if (!p) return;
-    if (e.key === "Escape") {
-      popClose();
-      const b = $("pcDev");
-      if (b) b.focus();
-      return;
-    }
-    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-      e.preventDefault();
-      const L = [...p.querySelectorAll(".pcdvr")],
-        i = L.indexOf(document.activeElement);
-      L[(i + (e.key === "ArrowDown" ? 1 : -1) + L.length) % L.length].focus();
-    }
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#pcDev")) return;
+    e.stopPropagation();
+    pcDevPage.toggle();
   });
   const _rd = render;
   render = (...a) => {
@@ -9171,3 +8645,229 @@ document.addEventListener("change", (e) => {
     if (!i.hidden) i.focus();
   }
 });
+
+/* Entwickler-Seite am PC: Übersicht, Freigabe, Tester, Codes, KI, Testdaten, Nachrichten, Fehlersuche */
+const pcDevPage = (() => {
+  const S = { sec: "home" };
+  const ic = (p) => `<svg class="i" viewBox="0 0 24 24">${p}</svg>`;
+  const IC = {
+    home: ic('<path d="M3 11 12 4l9 7"/><path d="M5 10v9h14v-9"/>'),
+    rel: ic('<path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/>'),
+    stat: ic(
+      '<circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><path d="M16 4.6a3 3 0 0 1 0 6.3M17.5 14c2 .5 3.2 2.1 3.5 5"/>'
+    ),
+    fb: ic('<path d="M4 13.5 6.5 5h11l2.5 8.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 13.5h4.5l1 2h5l1-2H20"/>'),
+    codes: ic('<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3"/>'),
+    ki: ic('<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>'),
+    test: ic(
+      '<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/>'
+    ),
+    dbg: ic(
+      '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L4 16.7 7.3 20l5.3-5.3a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.4-.6-.6-2.4z"/>'
+    ),
+  };
+  const NAV = ["home", "rel", "stat", "fb", "codes", "ki", "test", "dbg"];
+  const T = (k, v) => escHtml(uiText(k, v));
+  const H = () => window.pcDevHooks;
+  const vnum = (v) => {
+    const m = String(v || "").match(/(\d+)\.(\d+)\.(\d+)/);
+    return m ? +m[1] * 1e6 + +m[2] * 1e3 + +m[3] : 0;
+  };
+  /* Tester-Stand aus den Server-Zahlen: aktuell, veraltet, länger nicht da */
+  function testers() {
+    const d = H() && H().state().DS.d;
+    if (!d) return null;
+    const L = d.testers || [],
+      newest = Math.max(0, ...L.map((t) => vnum(t.ver)), ...(d.versions || []).map((v) => vnum(v.ver))),
+      now = Date.now() / 1000,
+      st = (t) => (!t.seen || now - t.seen > 14 * 86400 ? "in" : vnum(t.ver) >= newest ? "ok" : "old");
+    return L.map((t) => ({ ...t, st: st(t) }));
+  }
+  function stats() {
+    const mine = relNum(REL.mineBody, "web"),
+      ow = relNum(REL.allBody, "web"),
+      plat = [ow, relNum(REL.allBody, "webt") || ow, relNum(REL.allBody, "webp") || ow].filter(Boolean),
+      low = plat.length ? Math.min(...plat) : 0,
+      L = testers(),
+      h = H();
+    return {
+      mine,
+      low,
+      ahead: mine && low && low !== mine,
+      L,
+      ok: L ? L.filter((t) => t.st === "ok").length : 0,
+      old: L ? L.filter((t) => t.st === "old").length : 0,
+      unread: h ? h.state().unread : 0,
+    };
+  }
+  const FORM = { phone: "📱", tablet: "📲", pc: "💻", laptop: "💻" };
+  function homeHtml() {
+    const s = stats(),
+      h = H(),
+      FB = h ? h.state().FB : { items: [] };
+    const k = (l, v) => `<div class="pcdpk"><small>${l}</small><b>${v}</b></div>`;
+    const band = `<div class="pcdpband">${k(T("dp_newest"), s.mine ? escHtml(verName(s.mine)) : "…")}${k(T("dp_testers"), s.low ? escHtml(verName(s.low)) : "…")}${k(T("dp_cur"), s.L ? T("dp_of", { a: s.ok, b: s.L.length }) : "…")}${k(T("dp_msgs"), String(s.unread))}<button class="btn pcdpgo" data-pcdpsec="rel">${T("dp_give")}</button></div>`;
+    const order = { old: 0, ok: 1, in: 2 },
+      tl = s.L
+        ? s.L.length
+          ? [...s.L]
+              .sort((a, b) => order[a.st] - order[b.st] || (b.seen || 0) - (a.seen || 0))
+              .slice(0, 6)
+              .map(
+                (t) =>
+                  `<div class="pcdprow"><span class="pcdpav">${FORM[t.form] || "❔"}</span><tt>${escHtml(t.code)}</tt><span class="pcdpchip ${t.st === "ok" ? "" : t.st === "old" ? "w" : "n"}">${t.ver ? escHtml("v" + String(t.ver).replace(/^v/, "")) : "–"}</span></div>`
+              )
+              .join("")
+          : `<p class="pcdpempty">${T("dp_none_t")}</p>`
+        : `<p class="pcdpempty">${T("dp_load")}</p>`;
+    const msgs = (FB.items || [])
+      .slice()
+      .sort((a, b) => (b.ts || 0) - (a.ts || 0))
+      .slice(0, 3);
+    const ml = msgs.length
+      ? msgs
+          .map((x) => {
+            const [kl, kc] = h.kind(x.kind);
+            return `<button class="pcdpmsg ${x.read ? "" : "new"}" data-pcdpmsg="${escHtml(x.id)}" style="--kc:${kc}"><small>${escHtml(kl)} · ${escHtml(h.ago(x.ts))}</small><b>${escHtml(h.fbParse(x).title)}</b></button>`;
+          })
+          .join("")
+      : `<p class="pcdpempty">${FB.err ? escHtml(FB.err) : T("dp_none_m")}</p>`;
+    const sw = (key, on, t) =>
+      `<label class="pcdptool"><span>${t}</span><input type="checkbox" class="pcsw" data-devsw="${key}" ${on ? "checked" : ""}></label>`;
+    const card = (sec, title, body, more) =>
+      `<section class="pcdpcard"><h3><span class="pcdpic">${IC[sec]}</span>${title}${more ? `<button class="link small" data-pcdpsec="${sec}">${T("dp_all")} ›</button>` : ""}</h3>${body}</section>`;
+    return `${band}<div class="pcdpgrid">${card("stat", T("dp_stat"), tl + `<button class="pcdprow add" data-invopen="1"><span class="pcdpav">+</span>${T("dp_invite")}</button>`, true)}<div class="pcdpcol">${card("fb", T("dp_fb"), ml, true)}${card(
+      "dbg",
+      T("dp_dbg"),
+      `<div class="pcdptools">${sw("touch", DBG.touch, T("dev_touch"))}${sw("fps", DBG.fps, T("dev_fps"))}<button class="pcdptool" data-devact="tours">${T("dev_tours")}</button><button class="pcdptool" data-devact="test">${T("dev_test")}</button></div>`,
+      true
+    )}</div></div>`;
+  }
+  function navHtml() {
+    const s = stats();
+    const badge = (k) =>
+      k === "fb" && s.unread
+        ? `<i class="badge">${s.unread}</i>`
+        : k === "stat" && s.old
+          ? `<i class="pcdpchip w">${T("dp_old", { n: s.old })}</i>`
+          : k === "rel" && s.ahead
+            ? `<i class="pcdpdot"></i>`
+            : "";
+    return NAV.map(
+      (k) =>
+        `<button class="pcdpnav ${S.sec === k ? "on" : ""}" data-pcdpsec="${k}" aria-current="${S.sec === k ? "page" : "false"}"><span class="pcdpic">${IC[k]}</span><span>${T("dp_" + k)}</span>${badge(k)}</button>`
+    ).join("");
+  }
+  function leaveSec() {
+    if (S.sec === "fb" && H()) H().fbUnmount();
+  }
+  function paintMain() {
+    const m = $("pcDevMain");
+    if (!m) return;
+    const sec = S.sec;
+    if (sec === "home") {
+      m.innerHTML = homeHtml();
+      return;
+    }
+    if (sec === "fb") {
+      m.innerHTML = `<section class="pcdpcard pcdpfull"><h3><span class="pcdpic">${IC.fb}</span>${T("dp_fb")}</h3><div id="pcDevFb"></div></section>`;
+      if (H()) H().fbMount($("pcDevFb"));
+      return;
+    }
+    if (sec === "dbg") {
+      m.innerHTML = `<section class="pcdpcard pcdpfull"><h3><span class="pcdpic">${IC.dbg}</span>${T("dp_dbg")}</h3>${devHtml()}</section>`;
+      devLogRender();
+      return;
+    }
+    /* Freigabe, Tester, Codes, KI und Testdaten kommen aus dem bisherigen Entwickler-Panel */
+    ui.devTab = sec;
+    m.innerHTML = `<section class="pcdpcard pcdpfull"><h3><span class="pcdpic">${IC[sec]}</span>${T("dp_" + sec)}${sec === "stat" ? `<button class="btn pcdpinv" data-invopen="1">${T("dp_invite")}</button>` : ""}</h3><div id="pcDevRel" class="pcdprel"></div></section>`;
+    window.pcRelPaint();
+    if (sec === "rel") relLoad(true);
+    if ((sec === "stat" || sec === "codes") && H()) H().dsLoad(true);
+  }
+  function paint() {
+    const n = $("pcDevNav");
+    if (n) n.innerHTML = navHtml();
+    paintMain();
+  }
+  function go(sec) {
+    if (sec === S.sec && $("pcDevPage")) return;
+    leaveSec();
+    S.sec = sec;
+    paint();
+    const m = $("pcDevMain");
+    if (m) m.scrollTop = 0;
+  }
+  function open(sec) {
+    let p = $("pcDevPage");
+    if (!p) {
+      p = document.createElement("div");
+      p.id = "pcDevPage";
+      p.className = "pcdevpage";
+      p.setAttribute("role", "region");
+      p.setAttribute("aria-label", uiText("dv_t"));
+      p.setAttribute("data-noi18n", "");
+      p.innerHTML = `<nav class="pcdpside"><div class="pcdph"><b>${T("dv_t")}</b><button class="pcdpx" data-pcdpclose="1" aria-label="${T("dp_close")}" title="${T("dp_close")}">${svgIcon("x", 18)}</button></div><small class="pcdpnote">${T("dv_note")}</small><div id="pcDevNav"></div></nav><div class="pcdpmain" id="pcDevMain"></div>`;
+      document.body.appendChild(p);
+      const t = document.querySelector(".top");
+      if (t) p.style.top = Math.round(t.getBoundingClientRect().bottom + 14) + "px";
+      document.documentElement.classList.add("pcdevon");
+      requestAnimationFrame(() => p.classList.add("show"));
+    }
+    S.sec = sec || S.sec || "home";
+    const b = $("pcDev");
+    if (b) b.setAttribute("aria-expanded", "true");
+    paint();
+    relLoad();
+    if (H()) {
+      H().dsLoad();
+      H().fbLoad();
+    }
+    SND.play("pop");
+  }
+  function close() {
+    const p = $("pcDevPage");
+    if (!p) return;
+    leaveSec();
+    p.remove();
+    document.documentElement.classList.remove("pcdevon");
+    const b = $("pcDev");
+    if (b) b.setAttribute("aria-expanded", "false");
+  }
+  const toggle = () => ($("pcDevPage") ? close() : open("home"));
+  /* frische Zahlen in Übersicht und Navigation nachziehen, ohne offene Eingaben zu stören */
+  function refresh() {
+    if (!$("pcDevPage")) return;
+    const n = $("pcDevNav");
+    if (n) n.innerHTML = navHtml();
+    if (S.sec === "home") paintMain();
+  }
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-pcdpclose]")) {
+      close();
+      return;
+    }
+    const s = e.target.closest("[data-pcdpsec]");
+    if (s) {
+      go(s.dataset.pcdpsec);
+      return;
+    }
+    const m = e.target.closest("[data-pcdpmsg]");
+    if (m) {
+      go("fb");
+      if (H()) H().fbShow(m.dataset.pcdpmsg);
+      return;
+    }
+    /* wer oben eine andere Seite wählt, verlässt den Entwicklerbereich */
+    if ($("pcDevPage") && e.target.closest("[data-go],.tabs .tab,#pcNav button") && !e.target.closest("#pcDevPage"))
+      close();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || !$("pcDevPage")) return;
+    if (document.querySelector(".hobg.show,.backdrop:not([hidden]),#invBg")) return;
+    close();
+  });
+  setInterval(refresh, 5000);
+  return { open, close, toggle, refresh };
+})();

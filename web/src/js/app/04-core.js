@@ -287,7 +287,6 @@ async function wipeAll() {
   store.settings = {
     ...clone(DEFAULT_SETTINGS),
     ...(keep.updKey ? keep : {}),
-    homeHidden: HOME_BLOCKS.map((b) => b[0]),
   };
   if (SYNC.token) {
     SYNC.queue.push({

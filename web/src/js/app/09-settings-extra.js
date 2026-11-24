@@ -240,6 +240,16 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.49.1",
+    "23. November 2026",
+    [
+      "Haushalt am PC aufgeräumt: Die Prognose steht jetzt im grünen Kasten direkt unter „noch pro Tag“.",
+      "Weg sind die Leiste „Ausgeblendet“, die Letzten Buchungen und die kleinen Felder Einnahmen, Ausgaben und Fixkosten offen – das alles steckt schon in den Kacheln.",
+      "Die Kacheln sind größer, Bargeld lässt sich mit „Nutze ich nicht“ ausblenden. Der ganze Haushalt passt jetzt auf einen Bildschirm.",
+      "Entwickler am PC: Der Werkzeug-Knopf öffnet jetzt eine eigene Seite mit Übersicht, Freigabe, Testern, Nachrichten, Codes, KI-Kosten, Testdaten und Fehlersuche.",
+    ],
+  ],
+  [
     "0.49.0",
     "23. November 2026",
     [

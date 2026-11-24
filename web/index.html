@@ -25955,7 +25955,6 @@ html.pc .pctpane .ayblk {
       <div id="shopEd" class="shoped"></div>
     </div>
     <div class="sp pc" data-sp="start" hidden>
-      <div class="pc-sect">Startseite <span>Antippen blendet aus oder ein · gedrückt halten und ziehen zum Sortieren · Konten bleiben immer oben</span></div>
       <div id="homeEd"></div>
       <div class="card"><div class="switch"><label for="sLogos"><b>Fehlende Händler-Logos online laden</b><br><span class="small muted">Bekannte Läden haben ihr Logo schon eingebaut. Für alle anderen fragt die App bei Google und DuckDuckGo – die erfahren dabei, welche Läden du nutzt. Aus: farbiger Anfangsbuchstabe.</span></label><input type="checkbox" id="sLogos"></div></div>
       <div class="card"><div class="switch"><label for="sMoneyFx"><b>Geld-Animation beim Umbuchen</b><br><span class="small muted">Ziehst du Geld von einem Konto auf ein anderes, fliegen Scheine mit und verlieren unterwegs ein paar Münzen. Aus: Es wird wie bisher die Karte gezogen.</span></label><input type="checkbox" id="sMoneyFx"></div></div>
@@ -48119,7 +48118,6 @@ async function wipeAll() {
   store.settings = {
     ...clone(DEFAULT_SETTINGS),
     ...(keep.updKey ? keep : {}),
-    homeHidden: HOME_BLOCKS.map((b) => b[0]),
   };
   if (SYNC.token) {
     SYNC.queue.push({
@@ -51331,6 +51329,16 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.49.1",
+    "23. November 2026",
+    [
+      "Haushalt am PC aufgeräumt: Die Prognose steht jetzt im grünen Kasten direkt unter „noch pro Tag“.",
+      "Weg sind die Leiste „Ausgeblendet“, die Letzten Buchungen und die kleinen Felder Einnahmen, Ausgaben und Fixkosten offen – das alles steckt schon in den Kacheln.",
+      "Die Kacheln sind größer, Bargeld lässt sich mit „Nutze ich nicht“ ausblenden. Der ganze Haushalt passt jetzt auf einen Bildschirm.",
+      "Entwickler am PC: Der Werkzeug-Knopf öffnet jetzt eine eigene Seite mit Übersicht, Freigabe, Testern, Nachrichten, Codes, KI-Kosten, Testdaten und Fehlersuche.",
+    ],
+  ],
+  [
     "0.49.0",
     "23. November 2026",
     [
@@ -53314,35 +53322,10 @@ const PTOUR_FN = () => ({
         ],
       },
       {
-        sel: '#v-home .hblock[data-hb="budgets"]',
-        ic: "target",
-        t: "Budgets",
-        p: [
-          "Zeigt, wie viel von deinem Monatsbudget noch frei ist.",
-          "Budgets legst du unter Einstellungen › Monatsbudgets fest.",
-        ],
-      },
-      {
-        sel: '#v-home .hblock[data-hb="fix"]',
-        ic: "list",
-        t: "Fixkosten",
-        p: ["Was diesen Monat fest abgeht – Miete, Abos, Raten.", "Antippen führt zur Fixkosten-Seite zum Abhaken."],
-      },
-      {
-        sel: '#v-home .hblock[data-hb="invest"]',
-        ic: "piggy",
-        t: "Sparen & Anlegen",
-        p: [
-          "Zinseszins-Rechner, Vergleich und deine Anlage-Ziele.",
-          "Oben in der Kachel umschalten, „Öffnen“ für alle Einstellungen.",
-        ],
-      },
-      {
-        sel: IS_PC ? "#v-home .pctl,#pcDock" : '[data-scroll="homeEd"]',
-        ic: "sliders",
-        t: "Startseite anpassen",
-        raw: IS_PC ? 1 : 0,
-        p: IS_PC ? [uiText("trh_dock_p")] : ["Hier blendest du Kacheln ein oder aus und sortierst sie, wie du willst."],
+        sel: '#v-home .hblock[data-hb="cash"]',
+        ic: "cash",
+        t: uiText("hc_sw"),
+        p: [uiText("hc_sw_s"), uiText("hc_gone")],
       },
       {
         sel: ".tabs .tab.plus,.pcfab,[data-addmenu]",
@@ -53882,6 +53865,31 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.49.1",
+    s: () =>
+      IS_PC
+        ? [
+            ...(IS_DESK && updKey()
+              ? [
+                  {
+                    sel: "#pcDev",
+                    ic: "sliders",
+                    t: uiText("nw_dp_t"),
+                    p: [uiText("nw_dp_p")],
+                  },
+                ]
+              : []),
+            {
+              sel: "#pcHero .fcmini",
+              raw: 1,
+              ic: "home",
+              t: uiText("nw_hs_t"),
+              p: [uiText("nw_pc_p")],
+            },
+          ]
+        : [],
+  },
   {
     v: "0.49.0",
     s: () =>
@@ -59627,6 +59635,11 @@ function dbgStore() {
 }
 function devOpen() {
   const body = hbSheet("devBg", uiText("dev_t"));
+  body.innerHTML = devHtml();
+  devLogRender();
+}
+/* Inhalt der Fehlersuche – im Fenster und auf der Entwickler-Seite am PC */
+function devHtml() {
   const dev = window.AndroidBridge ? (IS_DESK ? "PC" : IS_TAB ? "Tablet" : "Android") : "Browser";
   const kv = [
     [uiText("dev_ver"), "v" + curVerShort()],
@@ -59637,7 +59650,7 @@ function devOpen() {
   ];
   const sw = (k, on, t, s, i) =>
     `<label class="devsw" style="--i:${i}"><span class="devswt"><b>${t}</b><small>${s}</small></span><input type="checkbox" data-devsw="${k}" ${on ? "checked" : ""}><span class="devtg" aria-hidden="true"></span></label>`;
-  body.innerHTML = `<div class="devwrap">
+  return `<div class="devwrap">
     <div class="devh" style="--i:0">${uiText("dev_info")}</div><div class="devkv" style="--i:1">${kv.map(([k, v]) => `<div><small>${escHtml(k)}</small><b>${escHtml(v)}</b></div>`).join("")}</div>
     <div class="devh" style="--i:2">${uiText("dev_show")}</div>
     ${sw("touch", DBG.touch, uiText("dev_touch"), uiText("dev_touch_s"), 3)}${sw("fps", DBG.fps, uiText("dev_fps"), uiText("dev_fps_s"), 4)}
@@ -59648,7 +59661,6 @@ function devOpen() {
     <div class="devh" style="--i:9">${uiText("dev_errs")}</div>
     <div class="devlog" id="devErrs" style="--i:10"></div>
     <button class="btn devoff" data-devact="off" style="--i:11">${svgIcon("x", 16)}${uiText("dev_off")}</button></div>`;
-  devLogRender();
 }
 function devLogRender() {
   const el = $("devLog");
@@ -64539,7 +64551,7 @@ function renderHome() {
   if (streak && !streak.best) streak = null;
   const openFx = [];
   $("v-home").innerHTML = `
-    ${ym === cur ? hlCard() : ""}${ym === cur && document.documentElement.classList.contains("pc") ? `<div class="fcpcw">${fcMini()}</div>` : ""}
+    ${ym === cur ? hlCard() : ""}
     ${store.settings.work === undefined ? `<div class="card workq"><b>Wie verdienst du dein Geld?</b><span class="small muted">Dann zeigt die App nur, was zu dir passt.</span>${workPicker("", ui.workGrp || "", "setwork")}</div>` : store.settings.extra === undefined && store.settings.work !== undefined && ui.askExtra ? `<div class="card workq"><b>Verdienst du noch etwas dazu?</b><span class="small muted">Du kannst mehreres anhaken.</span>${extraPicker(store.settings.work, ui.exSel || [], "homeextra")}<button class="btn primary" data-homeexok="1" style="margin-top:10px">Fertig</button></div>` : ""}
     ${
       needStart
@@ -64601,7 +64613,7 @@ function renderHome() {
         asOf,
       }),
     })}
-    ${IS_PC ? `<div style="text-align:center;margin:4px 0 8px"><button class="link small" data-go="more" data-scroll="homeEd">${svgIcon("sliders", 15)} Startseite anpassen</button></div>` : ""}`;
+`;
   initStack();
   initShopRail();
   if (IS_PC && typeof pcHome === "function")
@@ -65628,40 +65640,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* Start */
-const HOME_BLOCKS = [
-  ["cash", "Bargeld"],
-  ["budgets", "Budgets"],
-  ["fix", "Fixkosten"],
-  ["tax", "Steuer-Rücklage"],
-  ["goals", "Ziele"],
-  ["invest", "Sparen & Anlegen"],
-  ["debts", "Kredite & Schulden"],
-  ["gemeinsam", "Gemeinsam"],
-  ["recent", "Letzte Buchungen"],
-  ["topcat", "Top-Kategorien"],
-  ["compare", "Vergleich zum Vormonat"],
-  ["trend", "Kontoverlauf"],
-  ["biggest", "Größte Ausgaben"],
-  ["todo", "Zu erledigen"],
-];
-const HOME_LATER = ["perday", "week", "topcat", "compare", "trend", "abos", "biggest", "todo"];
-function homeMig() {
-  const st = store.settings;
-  if (!st) return;
-  const seen = new Set(st.homeSeen || []),
-    add = HOME_LATER.filter((k) => !seen.has(k));
-  if (!add.length) return;
-  st.homeHidden = [...new Set([...(st.homeHidden || []), ...add])];
-  const ph = (st.pcHome = st.pcHome || {});
-  ph.min = [...new Set([...(Array.isArray(ph.min) ? ph.min : []), ...add])];
-  st.homeSeen = [...seen, ...add];
-}
-function homeOrder() {
-  const o = [...new Set(store.settings.homeOrder || [])].filter((k) => HOME_BLOCKS.some((b) => b[0] === k));
-  for (const [k] of HOME_BLOCKS) if (!o.includes(k)) o.push(k);
-  return o;
-}
-/* Handy: Mami fasst „pro Tag“ und Prognose in einem Satz zusammen */
+/* Mami fasst „pro Tag“ und Prognose in einem Satz zusammen */
 function homeSay(ym, mainBal) {
   const { left, v } = freePerDay(ym, mainBal);
   let F = null;
@@ -65676,231 +65655,17 @@ function homeSay(ym, mainBal) {
       : uiText(left === 1 ? "hs_left1" : "hs_left", { n: left });
   return `<button type="button" class="hsay ${fc && F.warn ? "warn" : ""}" ${fc ? "data-fcopen" : 'data-go="year"'} data-noi18n><span class="hsm">${mamiAvatar(null)}</span><span class="hst"><b>${escHtml(uiText("hs_day", { v: fmtEur0(v) }))}</b><span>${escHtml(end)}</span></span>${svgIcon("right", 18)}</button>`;
 }
+/* Auf der Startseite bleibt nur, was es sonst nirgends gibt: Bargeld */
 function homeBlocks(html) {
-  homeMig();
-  if (!IS_PC)
-    return store.settings.cashHide || !html.cash
-      ? ""
-      : `<div class="hlist"><div class="hblock" data-hb="cash">${html.cash}</div></div>`;
-  const hid = new Set(store.settings.homeHidden || []),
-    list = homeOrder()
-      .filter(
-        (k) =>
-          !hid.has(k) &&
-          html[k] &&
-          !AREA_HOME_OUT.has(k) &&
-          !(k === "tax" && !hasSelf()) &&
-          !(k === "budgets" && isJobless())
-      )
-      .map((k) => `<div class="hblock" data-hb="${k}">${html[k]}</div>`);
-  if (!matchMedia("(min-width:1000px)").matches) return `<div class="hlist">${list.join("")}</div>`;
-  return `<div class="hcols"><div class="hcol">${list.filter((_, i) => i % 2 === 0).join("")}</div><div class="hcol">${list.filter((_, i) => i % 2 === 1).join("")}</div></div>`;
+  return store.settings.cashHide || !html.cash
+    ? ""
+    : `<div class="hlist"><div class="hblock" data-hb="cash">${html.cash}</div></div>`;
 }
 function renderHomeEd() {
   const el = $("homeEd");
   if (!el) return;
-  const hd = el.previousElementSibling;
-  if (hd && hd.classList.contains("pc-sect")) hd.hidden = !IS_PC;
-  if (!IS_PC) {
-    el.innerHTML = `<div class="card" data-noi18n><div class="switch"><label for="sCashHome"><b>${escHtml(uiText("hc_sw"))}</b><br><span class="small muted">${escHtml(uiText("hc_sw_s"))}</span></label><input type="checkbox" id="sCashHome" ${store.settings.cashHide ? "" : "checked"}></div></div>`;
-    return;
-  }
-  homeMig();
-  const hid = new Set(store.settings.homeHidden || []),
-    o = homeOrder().filter((k) => !AREA_HOME_OUT.has(k));
-  const BIC = {
-    cash: "cash",
-    quick: "bolt",
-    budgets: "target",
-    fix: "list",
-    tax: "shield",
-    goals: "piggy",
-    debts: "bank",
-    recent: "check",
-    offers: "cart",
-    gemeinsam: "heart",
-    ...HX_IC,
-  };
-  const vis = o.filter((k) => k !== "tax" || hasSelf());
-  el.innerHTML =
-    `<div class="bgrid3" id="homeGrid">${vis
-      .map((k) => {
-        const name = (HOME_BLOCKS.find((b) => b[0] === k) || [k, k])[1],
-          off = hid.has(k);
-        return `<div class="bt3${off ? " off" : ""}" data-hk="${k}" role="button" tabindex="0" aria-pressed="${!off}" aria-label="${escHtml(name)} ${off ? "ausgeblendet" : "angezeigt"}"><span class="bti">${svgIcon(BIC[k] || "dots", 20)}</span><b>${escHtml(name)}</b><i class="bchk">${svgIcon(off ? "plus" : "check", 12)}</i></div>`;
-      })
-      .join("")}</div>` +
-    `<button class="link small" data-hreset="1" style="margin-top:8px">Standard-Reihenfolge</button>`;
+  el.innerHTML = `<div class="card" data-noi18n><div class="switch"><label for="sCashHome"><b>${escHtml(uiText("hc_sw"))}</b><br><span class="small muted">${escHtml(uiText("hc_sw_s"))}</span></label><input type="checkbox" id="sCashHome" ${store.settings.cashHide ? "" : "checked"}></div></div>`;
 }
-document.addEventListener("click", (e) => {
-  const m = e.target.closest("[data-hmove]");
-  if (m) {
-    const [k, d] = m.dataset.hmove.split("|"),
-      o = homeOrder(),
-      i = o.indexOf(k),
-      j = i + Number(d);
-    if (j < 0 || j >= o.length) return;
-    [o[i], o[j]] = [o[j], o[i]];
-    store.settings.homeOrder = o;
-    saveSettings();
-    renderHomeEd();
-    return;
-  }
-  if (e.target.closest("[data-hreset]")) {
-    store.settings.homeOrder = [];
-    store.settings.homeHidden = [...HOME_LATER];
-    saveSettings();
-    renderHomeEd();
-    toast("Startseite zurückgesetzt");
-  }
-});
-document.addEventListener("change", (e) => {
-  const t = e.target.closest("[data-hshow]");
-  if (!t) return;
-  const h = new Set(store.settings.homeHidden || []);
-  if (t.checked) h.delete(t.dataset.hshow);
-  else h.add(t.dataset.hshow);
-  store.settings.homeHidden = [...h];
-  saveSettings();
-  renderHomeEd();
-});
-matchMedia("(min-width:1000px)").addEventListener("change", () => {
-  if (ui.view === "home" && !IS_PC) renderHome();
-});
-(function () {
-  let src = null,
-    ghost = null,
-    sx = 0,
-    sy = 0,
-    ox = 0,
-    oy = 0,
-    timer = 0,
-    dragging = false,
-    moved = false,
-    pid = null;
-  const grid = () => $("homeGrid");
-  const startDrag = (x, y) => {
-    dragging = true;
-    const r = src.getBoundingClientRect();
-    ox = x - r.left;
-    oy = y - r.top;
-    ghost = src.cloneNode(true);
-    ghost.classList.add("drag");
-    ghost.style.width = r.width + "px";
-    ghost.style.left = r.left + "px";
-    ghost.style.top = r.top + "px";
-    document.body.appendChild(ghost);
-    src.classList.add("ph");
-    try {
-      navigator.vibrate && navigator.vibrate(15);
-    } catch (e) {}
-  };
-  const moveTo = (x, y) => {
-    ghost.style.left = x - ox + "px";
-    ghost.style.top = y - oy + "px";
-    const t = document.elementFromPoint(x, y),
-      over = t && t.closest(".bt3");
-    if (!over || over === src || !grid().contains(over)) return;
-    const items = [...grid().children],
-      a = items.indexOf(src),
-      b = items.indexOf(over);
-    grid().insertBefore(src, a < b ? over.nextSibling : over);
-  };
-  const finish = () => {
-    clearTimeout(timer);
-    if (dragging) {
-      ghost.remove();
-      ghost = null;
-      src.classList.remove("ph");
-      const dom = [...new Set([...grid().children].map((e) => e.dataset.hk).filter(Boolean))],
-        all = homeOrder();
-      store.settings.homeOrder = [...dom, ...all.filter((k) => !dom.includes(k))];
-      saveSettings();
-      renderHomeEd();
-      try {
-        render();
-      } catch (e) {}
-    } else if (src && !moved) {
-      const k = src.dataset.hk,
-        h = new Set(store.settings.homeHidden || []);
-      if (h.has(k)) h.delete(k);
-      else h.add(k);
-      store.settings.homeHidden = [...h];
-      saveSettings();
-      renderHomeEd();
-    }
-    src = null;
-    dragging = false;
-    moved = false;
-    pid = null;
-  };
-  document.addEventListener("pointerdown", (e) => {
-    const t = e.target.closest(".bt3");
-    if (!t || !grid() || !grid().contains(t) || e.button > 0) return;
-    src = t;
-    sx = e.clientX;
-    sy = e.clientY;
-    moved = false;
-    dragging = false;
-    pid = e.pointerId;
-    if (e.pointerType !== "mouse")
-      timer = setTimeout(() => {
-        if (src && !moved) startDrag(sx, sy);
-      }, 320);
-  });
-  document.addEventListener("pointermove", (e) => {
-    if (!src || e.pointerId !== pid) return;
-    const d = Math.hypot(e.clientX - sx, e.clientY - sy);
-    if (!dragging) {
-      if (d > 8) {
-        moved = true;
-        clearTimeout(timer);
-        if (e.pointerType === "mouse") {
-          startDrag(sx, sy);
-          moveTo(e.clientX, e.clientY);
-        } else src = null;
-      }
-      return;
-    }
-    moveTo(e.clientX, e.clientY);
-  });
-  document.addEventListener(
-    "touchmove",
-    (e) => {
-      if (dragging) {
-        e.preventDefault();
-        const p = e.touches[0];
-        moveTo(p.clientX, p.clientY);
-      }
-    },
-    {
-      passive: false,
-    }
-  );
-  document.addEventListener("pointerup", (e) => {
-    if (src && e.pointerId === pid) finish();
-  });
-  document.addEventListener("pointercancel", (e) => {
-    if (dragging) return;
-    clearTimeout(timer);
-    src = null;
-  });
-  document.addEventListener("touchend", () => {
-    if (dragging) finish();
-  });
-  document.addEventListener("contextmenu", (e) => {
-    if (e.target.closest && e.target.closest(".bt3")) e.preventDefault();
-  });
-  document.addEventListener("keydown", (e) => {
-    const t = e.target.closest && e.target.closest(".bt3");
-    if (t && (e.key === "Enter" || e.key === " ")) {
-      e.preventDefault();
-      src = t;
-      moved = false;
-      finish();
-    }
-  });
-})();
 function renderAvatar() {
   const p = store.settings && store.settings.photo,
     n = String((store.settings && store.settings.name) || "").trim();
@@ -76993,7 +76758,7 @@ function cashBlock() {
   if (!cashOn())
     return `<div class="card cashcard"><div class="card-head"><h2>${headIcon("cash")}Bargeld</h2></div>
     <p class="small muted" style="margin:0 0 10px">Behalte dein Portemonnaie im Blick: Wie viel Bargeld hast du gerade?</p>
-    <div class="cashset"><input class="in" id="cashStart" inputmode="decimal" placeholder="0,00" aria-label="Bargeld"><span>€</span><button class="btn primary" id="cashGo">Los</button></div>${IS_PC ? "" : `<button class="link small cashno" data-cashno="1" data-noi18n>${escHtml(uiText("hc_no"))}</button>`}</div>`;
+    <div class="cashset"><input class="in" id="cashStart" inputmode="decimal" placeholder="0,00" aria-label="Bargeld"><span>€</span><button class="btn primary" id="cashGo">Los</button></div>${`<button class="link small cashno" data-cashno="1" data-noi18n>${escHtml(uiText("hc_no"))}</button>`}</div>`;
   const today = isoToday(),
     bal = cashBal(today),
     cs = store.settings.cash;
@@ -89458,6 +89223,246 @@ const TEXTS = {
     "Powtórki zniknęły: kwotę dzienną i prognozę mówię teraz w jednym zdaniu. Wpisy, analiza i reszta są w kafelkach.",
     "أزلنا التكرار: أخبرك الآن بالمبلغ اليومي والتوقع في جملة واحدة. الحجوزات والتحليل وغيرها في المربعات.",
     "Dublurile au dispărut: suma pe zi și prognoza ți le spun acum într-o propoziție. Înregistrările, analiza și restul sunt în plăci.",
+  ],
+  nw_pc_p: [
+    "Auch am PC ist der Haushalt aufgeräumt: Die Prognose steht jetzt direkt unter „noch pro Tag“, Doppeltes ist weg und alles passt auf einen Bildschirm.",
+    "The home page is tidier on PC too: the forecast now sits right under “left per day”, duplicates are gone and everything fits on one screen.",
+    "Bilgisayarda da ana sayfa düzenlendi: Tahmin artık „günlük kalan“ın hemen altında, tekrarlar kalktı ve her şey tek ekrana sığıyor.",
+    "На ПК главная тоже стала проще: прогноз теперь сразу под «осталось в день», повторы убраны, всё помещается на один экран.",
+    "На ПК головна теж стала простішою: прогноз тепер одразу під «лишилося на день», повтори прибрано, усе вміщається на один екран.",
+    "Na komputerze strona startowa też jest uporządkowana: prognoza jest teraz tuż pod „zostało dziennie”, powtórki zniknęły i wszystko mieści się na jednym ekranie.",
+    "الصفحة الرئيسية أصبحت أكثر ترتيبًا على الكمبيوتر أيضًا: التوقع الآن تحت «المتبقي يوميًا» مباشرة، وأزلنا التكرار وكل شيء يتسع في شاشة واحدة.",
+    "Și pe PC pagina de start e mai ordonată: prognoza stă acum chiar sub „rămas pe zi”, dublurile au dispărut și totul încape pe un ecran.",
+  ],
+  dp_home: [
+    "Übersicht",
+    "Overview",
+    "Genel bakış",
+    "Обзор",
+    "Огляд",
+    "Przegląd",
+    "نظرة عامة",
+    "Prezentare",
+  ],
+  dp_rel: [
+    "Freigabe",
+    "Release",
+    "Yayın",
+    "Выпуск",
+    "Випуск",
+    "Wydanie",
+    "الإصدار",
+    "Lansare",
+  ],
+  dp_stat: [
+    "Tester",
+    "Testers",
+    "Test edenler",
+    "Тестеры",
+    "Тестувальники",
+    "Testerzy",
+    "المختبِرون",
+    "Testeri",
+  ],
+  dp_fb: [
+    "Nachrichten",
+    "Messages",
+    "Mesajlar",
+    "Сообщения",
+    "Повідомлення",
+    "Wiadomości",
+    "الرسائل",
+    "Mesaje",
+  ],
+  dp_codes: [
+    "Codes",
+    "Codes",
+    "Kodlar",
+    "Коды",
+    "Коди",
+    "Kody",
+    "الرموز",
+    "Coduri",
+  ],
+  dp_ki: [
+    "KI-Kosten",
+    "AI costs",
+    "Yapay zekâ maliyeti",
+    "Расходы на ИИ",
+    "Витрати на ШІ",
+    "Koszty AI",
+    "تكاليف الذكاء الاصطناعي",
+    "Costuri AI",
+  ],
+  dp_test: [
+    "Testdaten",
+    "Test data",
+    "Test verileri",
+    "Тестовые данные",
+    "Тестові дані",
+    "Dane testowe",
+    "بيانات الاختبار",
+    "Date de test",
+  ],
+  dp_dbg: [
+    "Fehlersuche",
+    "Debugging",
+    "Hata arama",
+    "Поиск ошибок",
+    "Пошук помилок",
+    "Szukanie błędów",
+    "تتبّع الأخطاء",
+    "Depanare",
+  ],
+  dp_newest: [
+    "Neueste Version",
+    "Latest version",
+    "En yeni sürüm",
+    "Последняя версия",
+    "Найновіша версія",
+    "Najnowsza wersja",
+    "أحدث إصدار",
+    "Cea mai nouă versiune",
+  ],
+  dp_testers: [
+    "Bei Testern",
+    "With testers",
+    "Test edenlerde",
+    "У тестеров",
+    "У тестувальників",
+    "U testerów",
+    "لدى المختبِرين",
+    "La testeri",
+  ],
+  dp_cur: [
+    "Tester aktuell",
+    "Testers up to date",
+    "Güncel test edenler",
+    "Тестеры с актуальной",
+    "Тестувальники з актуальною",
+    "Testerzy aktualni",
+    "مختبِرون محدّثون",
+    "Testeri la zi",
+  ],
+  dp_msgs: [
+    "Neue Nachrichten",
+    "New messages",
+    "Yeni mesajlar",
+    "Новые сообщения",
+    "Нові повідомлення",
+    "Nowe wiadomości",
+    "رسائل جديدة",
+    "Mesaje noi",
+  ],
+  dp_give: [
+    "Update an Tester geben",
+    "Send update to testers",
+    "Güncellemeyi test edenlere ver",
+    "Отдать обновление тестерам",
+    "Передати оновлення тестувальникам",
+    "Wyślij aktualizację testerom",
+    "أرسل التحديث للمختبِرين",
+    "Trimite actualizarea testerilor",
+  ],
+  dp_all: [
+    "Alle",
+    "All",
+    "Tümü",
+    "Все",
+    "Усі",
+    "Wszystkie",
+    "الكل",
+    "Toate",
+  ],
+  dp_invite: [
+    "Neuen Tester einladen",
+    "Invite a new tester",
+    "Yeni test eden davet et",
+    "Пригласить тестера",
+    "Запросити тестувальника",
+    "Zaproś nowego testera",
+    "ادعُ مختبِرًا جديدًا",
+    "Invită un tester nou",
+  ],
+  dp_none_t: [
+    "Noch niemand freigeschaltet – lade jemanden ein.",
+    "Nobody unlocked yet – invite someone.",
+    "Henüz kimse açılmadı – birini davet et.",
+    "Пока никто не подключён – пригласи кого-нибудь.",
+    "Ще ніхто не підключений – запроси когось.",
+    "Nikt jeszcze nie odblokowany – zaproś kogoś.",
+    "لم يُفعَّل أحد بعد – ادعُ شخصًا.",
+    "Încă nimeni deblocat – invită pe cineva.",
+  ],
+  dp_none_m: [
+    "Noch keine Nachrichten.",
+    "No messages yet.",
+    "Henüz mesaj yok.",
+    "Сообщений пока нет.",
+    "Повідомлень поки немає.",
+    "Brak wiadomości.",
+    "لا رسائل بعد.",
+    "Încă niciun mesaj.",
+  ],
+  dp_load: [
+    "Wird geladen …",
+    "Loading …",
+    "Yükleniyor …",
+    "Загрузка …",
+    "Завантаження …",
+    "Wczytywanie …",
+    "جارٍ التحميل …",
+    "Se încarcă …",
+  ],
+  dp_close: [
+    "Schließen",
+    "Close",
+    "Kapat",
+    "Закрыть",
+    "Закрити",
+    "Zamknij",
+    "إغلاق",
+    "Închide",
+  ],
+  dp_of: [
+    "{a} von {b}",
+    "{a} of {b}",
+    "{b} içinden {a}",
+    "{a} из {b}",
+    "{a} з {b}",
+    "{a} z {b}",
+    "{a} من {b}",
+    "{a} din {b}",
+  ],
+  dp_old: [
+    "{n} alt",
+    "{n} old",
+    "{n} eski",
+    "{n} устар.",
+    "{n} застар.",
+    "{n} stare",
+    "{n} قديم",
+    "{n} vechi",
+  ],
+  nw_dp_t: [
+    "Entwickler-Seite",
+    "Developer page",
+    "Geliştirici sayfası",
+    "Страница разработчика",
+    "Сторінка розробника",
+    "Strona dewelopera",
+    "صفحة المطوّر",
+    "Pagina dezvoltatorului",
+  ],
+  nw_dp_p: [
+    "Der Werkzeug-Knopf öffnet jetzt eine eigene Seite: Übersicht, Freigabe, Tester, Nachrichten, Codes, KI-Kosten, Testdaten und Fehlersuche – alles an einem Ort.",
+    "The tool button now opens its own page: overview, release, testers, messages, codes, AI costs, test data and debugging – all in one place.",
+    "Araç düğmesi artık kendi sayfasını açıyor: genel bakış, yayın, test edenler, mesajlar, kodlar, yapay zekâ maliyeti, test verileri ve hata arama – hepsi tek yerde.",
+    "Кнопка с инструментом теперь открывает отдельную страницу: обзор, выпуск, тестеры, сообщения, коды, расходы на ИИ, тестовые данные и поиск ошибок – всё в одном месте.",
+    "Кнопка з інструментом тепер відкриває окрему сторінку: огляд, випуск, тестувальники, повідомлення, коди, витрати на ШІ, тестові дані й пошук помилок – усе в одному місці.",
+    "Przycisk z narzędziem otwiera teraz osobną stronę: przegląd, wydanie, testerzy, wiadomości, kody, koszty AI, dane testowe i szukanie błędów – wszystko w jednym miejscu.",
+    "زر الأداة يفتح الآن صفحة خاصة: نظرة عامة، الإصدار، المختبِرون، الرسائل، الرموز، تكاليف الذكاء الاصطناعي، بيانات الاختبار وتتبّع الأخطاء – كل شيء في مكان واحد.",
+    "Butonul cu unealtă deschide acum o pagină proprie: prezentare, lansare, testeri, mesaje, coduri, costuri AI, date de test și depanare – totul într-un loc.",
   ],
 };
 
@@ -119875,7 +119880,6 @@ langGate(() => {
       } catch (e) {}
     }
     if (!ok) {
-      store.settings.homeHidden = HOME_BLOCKS.map((b) => b[0]);
       persistLocal();
       rebuildMem();
     }

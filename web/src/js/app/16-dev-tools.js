@@ -388,6 +388,11 @@ function dbgStore() {
 }
 function devOpen() {
   const body = hbSheet("devBg", uiText("dev_t"));
+  body.innerHTML = devHtml();
+  devLogRender();
+}
+/* Inhalt der Fehlersuche – im Fenster und auf der Entwickler-Seite am PC */
+function devHtml() {
   const dev = window.AndroidBridge ? (IS_DESK ? "PC" : IS_TAB ? "Tablet" : "Android") : "Browser";
   const kv = [
     [uiText("dev_ver"), "v" + curVerShort()],
@@ -398,7 +403,7 @@ function devOpen() {
   ];
   const sw = (k, on, t, s, i) =>
     `<label class="devsw" style="--i:${i}"><span class="devswt"><b>${t}</b><small>${s}</small></span><input type="checkbox" data-devsw="${k}" ${on ? "checked" : ""}><span class="devtg" aria-hidden="true"></span></label>`;
-  body.innerHTML = `<div class="devwrap">
+  return `<div class="devwrap">
     <div class="devh" style="--i:0">${uiText("dev_info")}</div><div class="devkv" style="--i:1">${kv.map(([k, v]) => `<div><small>${escHtml(k)}</small><b>${escHtml(v)}</b></div>`).join("")}</div>
     <div class="devh" style="--i:2">${uiText("dev_show")}</div>
     ${sw("touch", DBG.touch, uiText("dev_touch"), uiText("dev_touch_s"), 3)}${sw("fps", DBG.fps, uiText("dev_fps"), uiText("dev_fps_s"), 4)}
@@ -409,7 +414,6 @@ function devOpen() {
     <div class="devh" style="--i:9">${uiText("dev_errs")}</div>
     <div class="devlog" id="devErrs" style="--i:10"></div>
     <button class="btn devoff" data-devact="off" style="--i:11">${svgIcon("x", 16)}${uiText("dev_off")}</button></div>`;
-  devLogRender();
 }
 function devLogRender() {
   const el = $("devLog");

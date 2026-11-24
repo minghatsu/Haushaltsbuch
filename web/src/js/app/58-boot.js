@@ -24,7 +24,6 @@ langGate(() => {
       } catch (e) {}
     }
     if (!ok) {
-      store.settings.homeHidden = HOME_BLOCKS.map((b) => b[0]);
       persistLocal();
       rebuildMem();
     }

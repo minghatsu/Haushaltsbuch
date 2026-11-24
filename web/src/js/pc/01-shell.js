@@ -369,11 +369,11 @@ function pcHome(o) {
         ""
       )}<button class="add" data-spgo="konten"><span>+ Space</span><b>anlegen</b></button></div>${IS_TAB && isCur && (ui.acctEd || []).filter(Boolean).length > 1 ? `<button class="mvopen pcmvo" data-mvopen aria-label="${escHtml(uiText("mv_open"))}">${svgIcon("down", 18)}<span>${escHtml(uiText("mv_open"))}</span></button>` : ""}
     <button class="pcring" data-go="year" style="--p:${Math.round(pct * 100)}" aria-label="Analyse öffnen"><span>${isCur ? `<small>noch pro Tag</small><b data-cv="${perDay}">${escHtml(fmtEur0(perDay))}</b><small>${left} ${left === 1 ? "Tag" : "Tage"} übrig</small>` : `<small>${c.net >= 0 ? "übrig" : "mehr ausgegeben"}</small><b data-cv="${Math.abs(c.net)}">${escHtml(fmtEur0(Math.abs(c.net)))}</b><small>im ${escHtml(MONTHS[m - 1])}</small>`}</span></button>
-    <div class="pcminis">
+    ${isCur && fcMini() ? fcMini() : `<div class="pcminis">
       <button data-go="list"><span>Einnahmen</span><b data-cv="${c.income}">${escHtml(fmtEur0(c.income))}</b></button>
       <button data-go="list"><span>Ausgaben</span><b data-cv="${c.expenses}">${escHtml(fmtEur0(c.expenses))}</b></button>
       <button data-go="fix"><span>Fixkosten offen</span><b data-cv="${c.fixOpen}">${escHtml(fmtEur0(c.fixOpen))}</b></button>
-    </div>
+    </div>`}
   </aside>`;
   const v = $("v-home");
   if (!v) return;
@@ -1222,4 +1222,18 @@ if (IS_PC) {
     try {
       I18N.set(LANG);
     } catch (e) {}
+}
+/* Die Bereichs-Leiste sitzt mittig oben – wird es rechts eng (Monat, Knöpfe), rückt sie nach links */
+if (IS_PC) {
+  const fit = () => {
+    const t = document.querySelector(".tabs"),
+      m = $("monthpill");
+    if (!t || !m) return;
+    t.style.translate = "";
+    const over = t.getBoundingClientRect().right + 12 - m.getBoundingClientRect().left;
+    if (over > 0) t.style.translate = `-${Math.ceil(over)}px 0`;
+  };
+  addEventListener("resize", fit);
+  setInterval(fit, 1500);
+  setTimeout(fit, 300);
 }

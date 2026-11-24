@@ -776,7 +776,7 @@ function renderHome() {
   if (streak && !streak.best) streak = null;
   const openFx = [];
   $("v-home").innerHTML = `
-    ${ym === cur ? hlCard() : ""}${ym === cur && document.documentElement.classList.contains("pc") ? `<div class="fcpcw">${fcMini()}</div>` : ""}
+    ${ym === cur ? hlCard() : ""}
     ${store.settings.work === undefined ? `<div class="card workq"><b>Wie verdienst du dein Geld?</b><span class="small muted">Dann zeigt die App nur, was zu dir passt.</span>${workPicker("", ui.workGrp || "", "setwork")}</div>` : store.settings.extra === undefined && store.settings.work !== undefined && ui.askExtra ? `<div class="card workq"><b>Verdienst du noch etwas dazu?</b><span class="small muted">Du kannst mehreres anhaken.</span>${extraPicker(store.settings.work, ui.exSel || [], "homeextra")}<button class="btn primary" data-homeexok="1" style="margin-top:10px">Fertig</button></div>` : ""}
     ${
       needStart
@@ -838,7 +838,7 @@ function renderHome() {
         asOf,
       }),
     })}
-    ${IS_PC ? `<div style="text-align:center;margin:4px 0 8px"><button class="link small" data-go="more" data-scroll="homeEd">${svgIcon("sliders", 15)} Startseite anpassen</button></div>` : ""}`;
+`;
   initStack();
   initShopRail();
   if (IS_PC && typeof pcHome === "function")

@@ -472,86 +472,6 @@ html.pc #v-home .hblock {
 html.pc #v-home .hcols {
   padding-top: 16px;
 }
-html.pc .pctl {
-  position: absolute;
-  top: -15px;
-  right: 18px;
-  z-index: 30;
-  display: flex;
-  gap: 2px;
-  padding: 3px;
-  border-radius: 12px;
-  background: var(--surface);
-  box-shadow: 0 4px 14px #13241b26;
-  opacity: 0;
-  transform: translateY(4px) scale(0.9);
-  transition:
-    opacity 0.18s,
-    transform 0.18s;
-  pointer-events: none;
-}
-html.pc #v-home .hblock:hover > .pctl,
-html.pc .pctl:focus-within {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
-}
-@media (hover: none) {
-  html.pc .pctl {
-    opacity: 1;
-    transform: none;
-    pointer-events: auto;
-  }
-}
-html.pc .pctl button {
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  border: 0;
-  display: grid;
-  place-items: center;
-  background: none;
-  color: var(--fg);
-  cursor: pointer;
-}
-html.pc .pctl button:hover {
-  background: var(--fg);
-  color: var(--bg);
-}
-html.pc .pcgrip {
-  cursor: grab !important;
-  touch-action: none;
-}
-html.pc .pcgrip svg circle {
-  fill: currentColor;
-  stroke: none;
-}
-html.pc.pcdragging,
-html.pc.pcdragging * {
-  cursor: grabbing !important;
-  user-select: none;
-}
-html.pc .pcph {
-  border: 2px dashed color-mix(in srgb, var(--accent) 55%, transparent);
-  border-radius: 24px;
-  background: color-mix(in srgb, var(--accent) 7%, transparent);
-  break-inside: avoid;
-  margin-bottom: 18px;
-}
-html.pc .pcfly {
-  position: fixed;
-  z-index: 60;
-  margin: 0;
-  pointer-events: none;
-  transform-origin: 50% 50%;
-}
-html.pc .pcfly.pclift {
-  box-shadow: 0 30px 60px #13241b38;
-  border-radius: 24px;
-}
-html.pc .pcfly .pctl {
-  display: none;
-}
 html.pc #v-home button[data-scroll="homeEd"] {
   display: none;
 }
@@ -4181,11 +4101,6 @@ html.pc.istab .pcz {
 html.pc.istab .pcsweb {
   height: calc(100vh - 230px);
 }
-html.pc.istab .pctl {
-  opacity: 1 !important;
-  transform: none !important;
-  pointer-events: auto !important;
-}
 html.pc.istab .card:not(.hero):active {
   transition: transform 0.12s;
 }
@@ -5367,73 +5282,6 @@ html.pc .pcdel.arm {
   color: #fff;
 }
 
-html.pc .pcdock {
-  margin: 14px 0 0;
-  padding: 12px 14px 14px;
-  border-radius: 22px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-html.pc .pcdock[hidden] {
-  display: none;
-}
-html.pc .pcdkh {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin: 2px 2px 10px;
-}
-html.pc .pcdkh b {
-  font: 800 13px var(--f-body);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-html.pc .pcdkh small {
-  font-size: 13px;
-  color: var(--muted);
-}
-html.pc .pcdkg {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-html.pc .pcdi {
-  width: 96px;
-  min-height: 74px;
-  border: 0;
-  border-radius: 14px;
-  background: var(--sunk);
-  color: var(--accent);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  padding: 9px 6px;
-  cursor: pointer;
-  transition:
-    transform 0.18s,
-    box-shadow 0.18s;
-}
-html.pc .pcdi:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow);
-}
-html.pc .pcdi span {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  background: var(--surface);
-  display: grid;
-  place-items: center;
-}
-html.pc .pcdi em {
-  font: 700 13px/1.2 var(--f-body);
-  font-style: normal;
-  color: var(--fg);
-  text-align: center;
-}
 html.pc .kicard {
   background: var(--surface);
   border-radius: 16px;
@@ -6132,159 +5980,6 @@ html.pc .pcdev .dot {
   background: var(--warn);
   box-shadow: 0 0 0 2px var(--surface);
 }
-html.pc .pcdevpop {
-  position: fixed;
-  z-index: 85;
-  width: 340px;
-  background: var(--surface);
-  border-radius: 20px;
-  box-shadow:
-    var(--shadow-lg),
-    0 24px 60px -16px rgba(0, 0, 0, 0.35);
-  padding: 10px 12px 12px;
-  transform-origin: var(--ax, 170px) -8px;
-  animation: pcdvIn 0.28s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1));
-}
-html.pc .pcdevpop:before {
-  content: "";
-  position: absolute;
-  top: -6px;
-  left: calc(var(--ax, 170px) - 7px);
-  width: 14px;
-  height: 14px;
-  background: var(--surface);
-  transform: rotate(45deg);
-  border-radius: 3px;
-}
-html.pc .pcdevpop.out {
-  animation: pcdvOut 0.16s ease-in forwards;
-}
-@keyframes pcdvIn {
-  from {
-    opacity: 0;
-    transform: translateY(-6px) scale(0.94);
-  }
-}
-@keyframes pcdvOut {
-  to {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.96);
-  }
-}
-html.pc .pcdvh {
-  font: 800 15px var(--f-body);
-  padding: 6px 6px 2px;
-}
-html.pc .pcdvh small {
-  display: block;
-  font: 500 13px var(--f-body);
-  color: var(--muted);
-  margin-top: 1px;
-}
-html.pc .pcdvg {
-  font: 700 13px var(--f-body);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 12px 8px 4px;
-}
-html.pc .pcdvr:nth-of-type(4) {
-  animation-delay: 0.12s;
-}
-html.pc .pcdvr {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  width: 100%;
-  text-align: start;
-  border: 0;
-  font: inherit;
-  color: var(--fg);
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: var(--sunk);
-  margin-top: 8px;
-  cursor: pointer;
-  transition:
-    transform 0.15s,
-    background 0.15s;
-  animation: pcdvRow 0.35s var(--ease-pop, cubic-bezier(0.2, 1.1, 0.3, 1)) backwards;
-}
-html.pc .pcdvr:nth-of-type(2) {
-  animation-delay: 0.04s;
-}
-html.pc .pcdvr:nth-of-type(3) {
-  animation-delay: 0.08s;
-}
-@keyframes pcdvRow {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-}
-html.pc .pcdvr:hover,
-html.pc .pcdvr:focus-visible {
-  background: color-mix(in srgb, var(--accent) 12%, var(--sunk));
-  transform: translateX(2px);
-  outline: none;
-}
-html.pc .pcdvr:active {
-  transform: scale(0.98);
-}
-html.pc .pcdvi {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  display: grid;
-  place-items: center;
-  flex: none;
-  color: var(--accent);
-}
-html.pc .pcdvi svg.i {
-  width: 20px;
-  height: 20px;
-  stroke: currentColor;
-}
-html.pc .pcdvt {
-  flex: 1;
-  min-width: 0;
-}
-html.pc .pcdvt b {
-  display: block;
-  font-size: 14px;
-}
-html.pc .pcdvt small {
-  display: block;
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 1px;
-}
-html.pc .pcdva {
-  color: var(--muted);
-  font-size: 18px;
-}
-html.pc .pcdvr .badge {
-  position: static;
-}
-@media (prefers-reduced-motion: reduce) {
-  html.pc .pcdevpop,
-  html.pc .pcdvr {
-    animation: none;
-  }
-}
-html.pc .pcdvr .badge {
-  display: grid;
-  place-items: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 99px;
-  background: var(--warn);
-  color: #1a1306;
-  font: 800 13px var(--f-body);
-  font-style: normal;
-}
 html.pc .fan .fpcx {
   display: none;
 }
@@ -6534,4 +6229,347 @@ html.pc .pcbal.mvd {
 html.pc #v-fix .pcfcalc .pcfc.acc {
   background: color-mix(in srgb, var(--c) 15%, var(--surface));
   box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 70%, transparent);
+}
+/* Haushalt: Kacheln groß in zwei Reihen, Prognose im grünen Kasten */
+html.pc #v-home .agrid {
+  grid-template-columns: repeat(3, 1fr);
+}
+html.pc #v-home .agrid .atile {
+  min-height: 132px;
+  justify-content: center;
+}
+html.pc #v-home .hlist {
+  margin-top: 16px;
+}
+html.pc .pchero .fcmini {
+  margin-top: auto;
+  background: #ffffff1f;
+  box-shadow: none;
+  color: #fff;
+  border-radius: 20px;
+  padding: 14px 16px;
+}
+html.pc .pchero .fcmini:hover {
+  background: #ffffff2e;
+}
+html.pc .pchero .fcmini small,
+html.pc .pchero .fcmini .fcchev {
+  color: #ffffffd9;
+}
+html.pc .pchero .fcmini em,
+html.pc .pchero .fcmini em.ok {
+  color: #fff;
+}
+html.pc .pchero .fcmini svg path {
+  stroke: #fff;
+}
+html.pc .pchero .fcmini svg circle {
+  fill: #ffd2d2;
+}
+/* Entwickler-Seite */
+html.pc .pcdevpage {
+  position: fixed;
+  z-index: 36;
+  top: 100px;
+  left: 20px;
+  right: 36px;
+  bottom: 56px;
+  display: grid;
+  grid-template-columns: 248px 1fr;
+  gap: 16px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.22s,
+    transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+html.pc .pcdevpage.show {
+  opacity: 1;
+  transform: none;
+}
+html.pc.pcdevon .tabs .tab.plus,
+html.pc.pcdevon .pchero,
+html.pc.pcdevon #v-home,
+html.pc.pcdevon main.wrap > .view {
+  visibility: hidden;
+}
+html.pc .pcdpside {
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 16px 12px;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+}
+html.pc .pcdph {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 6px 0 8px;
+}
+html.pc .pcdph b {
+  font: 800 20px var(--f-body);
+}
+html.pc .pcdpx {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sunk);
+  color: var(--fg);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+html.pc .pcdpx:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+html.pc .pcdpnote {
+  display: block;
+  margin: 2px 8px 14px;
+  color: var(--muted);
+  font-size: 13px;
+}
+html.pc .pcdpnav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  padding: 6px 10px 6px 6px;
+  margin-bottom: 2px;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  color: var(--fg);
+  font: 700 15px var(--f-body);
+  text-align: left;
+  cursor: pointer;
+}
+html.pc .pcdpnav > span:nth-child(2) {
+  flex: 1;
+}
+html.pc .pcdpnav:hover {
+  background: var(--sunk);
+}
+html.pc .pcdpnav.on {
+  background: color-mix(in srgb, var(--accent) 13%, var(--surface));
+  color: var(--accent);
+}
+html.pc .pcdpic {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  color: var(--accent);
+}
+html.pc .pcdpic svg.i {
+  width: 18px;
+  height: 18px;
+}
+html.pc .pcdpnav .badge {
+  position: static;
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 99px;
+  background: var(--bad);
+  color: #fff;
+  font: 800 12.5px var(--f-body);
+  font-style: normal;
+}
+html.pc .pcdpdot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--warn);
+}
+html.pc .pcdpchip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--good) 16%, var(--surface));
+  color: var(--good);
+  font: 800 12.5px var(--f-body);
+  font-style: normal;
+  white-space: nowrap;
+}
+html.pc .pcdpchip.w {
+  background: color-mix(in srgb, var(--warn) 18%, var(--surface));
+  color: color-mix(in srgb, var(--warn) 70%, var(--fg));
+}
+html.pc .pcdpchip.n {
+  background: var(--sunk);
+  color: var(--muted);
+}
+html.pc .pcdpmain {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding-right: 2px;
+}
+html.pc .pcdpband {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px 30px;
+  padding: 20px 24px;
+  border-radius: 24px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 66%, #000));
+}
+html.pc .pcdpk small {
+  display: block;
+  font-size: 13px;
+  opacity: 0.85;
+}
+html.pc .pcdpk b {
+  font: 800 26px var(--f-body);
+  letter-spacing: -0.01em;
+}
+html.pc .pcdpgo {
+  margin-left: auto;
+  background: #fff;
+  color: var(--accent);
+}
+html.pc .pcdpgrid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+html.pc .pcdpcol {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+html.pc .pcdpcard {
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+}
+html.pc .pcdpcard h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  font: 800 17px var(--f-body);
+}
+html.pc .pcdpcard h3 > .link,
+html.pc .pcdpcard h3 > .pcdpinv {
+  margin-left: auto;
+}
+html.pc .pcdprow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  color: var(--fg);
+  font: 700 14.5px var(--f-body);
+  text-align: left;
+}
+html.pc .pcdprow:first-of-type {
+  border-top: 0;
+}
+html.pc .pcdprow tt {
+  flex: 1;
+  font: 700 14px ui-monospace, monospace;
+  letter-spacing: 0.04em;
+}
+html.pc .pcdprow.add {
+  color: var(--accent);
+  cursor: pointer;
+}
+html.pc .pcdpav {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--sunk);
+  font-size: 16px;
+}
+html.pc .pcdpmsg {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--sunk);
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+html.pc .pcdpmsg small {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+html.pc .pcdpmsg b {
+  font: 700 14.5px var(--f-body);
+}
+html.pc .pcdpmsg.new small {
+  color: var(--kc);
+  font-weight: 800;
+}
+html.pc .pcdpmsg:hover {
+  background: color-mix(in srgb, var(--kc) 10%, var(--sunk));
+}
+html.pc .pcdptools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+html.pc .pcdptool {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--sunk);
+  color: var(--fg);
+  font: 700 14px var(--f-body);
+  text-align: left;
+  cursor: pointer;
+}
+html.pc .pcdpempty {
+  margin: 6px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+html.pc .pcdpfull {
+  flex: 1;
+}
+html.pc .pcdprel .pcdevseg {
+  display: none;
+}
+html.pc .pcdprel {
+  max-width: 640px;
+}
+html.pc .pcdpfull .devwrap {
+  max-width: 720px;
+}
+html.pc .pcdpfull #pcDevFb .pcfbgrid {
+  min-height: 0;
 }
