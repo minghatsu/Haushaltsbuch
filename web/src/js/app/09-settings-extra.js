@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.49.5",
+    "24. November 2026",
+    [
+      "Behoben: Wer aus den Einstellungen in einen Bereich tippt, sieht den grünen Knopf jetzt direkt dort aufgehen. Vorher floss er quer über die Leiste von dem Bereich herüber, in dem man vor den Einstellungen war.",
+      "Beim Wechsel in die Einstellungen verschwindet der grüne Knopf jetzt sauber, ohne dass kurz ein halber Name stehen bleibt.",
+    ],
+  ],
+  [
     "0.49.4",
     "24. November 2026",
     [

@@ -64,7 +64,13 @@ function navPill(anim) {
   const fr = (v) => `calc((100% - ${L.PW}px) * ${(v / (L.inner - L.PW)).toFixed(4)})`;
   nav.style.setProperty("--nc", [...L.cl.map(fr), ...(L.pi < 0 ? [] : [L.PW + "px"]), ...L.cr.map(fr)].join(" "));
   nav.classList.toggle("nosel", !act);
-  if (!act) return;
+  /* Keine Hauptseite offen (z. B. Einstellungen): die alte Stelle vergessen, damit der Knopf beim
+     nächsten Antippen direkt dort aufgeht und nicht vom vorigen Bereich herüberfließt */
+  if (!act) {
+    NAVX.k = null;
+    NAVX.L = null;
+    return;
+  }
   const { x, w } = L,
     y = (nav.clientHeight - 48) / 2,
     col =
@@ -74,8 +80,22 @@ function navPill(anim) {
   ind.style.top = y + "px";
   /* Beim Wischen übernimmt navFlow die Bewegung – hier nur den Endstand setzen */
   /* Antippen oder jeder andere Wechsel zwischen den Hauptseiten: dieselbe Flüssigkeit wie beim Wischen */
-  const key = act.dataset.go;
+  const key = act.dataset.go,
+    fresh = !NAVX.k;
   if (anim && NAVX.k && NAVX.k !== key && !navFlow.on() && navFlow.start(NAVX.k, key)) navFlow.finish(true);
+  if (anim && fresh && !reducedMotion() && !navFlow.on()) {
+    ind.animate(
+      [
+        { opacity: 0, transform: `translateX(${x}px) scale(.6)` },
+        { opacity: 1, transform: `translateX(${x}px)` },
+      ],
+      { duration: 320, easing: "cubic-bezier(.2,.8,.2,1)" }
+    );
+    act.querySelector("svg")?.animate([{ transform: "scale(.8)" }, { transform: "none" }], {
+      duration: 320,
+      easing: "cubic-bezier(.2,.8,.2,1)",
+    });
+  }
   NAVX.k = key;
   if (anim && NAVX.L != null && !reducedMotion() && !navFlow.on()) {
     ind.animate(

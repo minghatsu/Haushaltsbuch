@@ -687,7 +687,9 @@
     pointer-events: none;
     background: var(--ic, var(--accent));
     box-shadow: 0 6px 14px -4px color-mix(in srgb, var(--ic, var(--accent)) 60%, transparent);
-    transition: background-color 0.35s;
+    transition:
+      background-color 0.35s,
+      opacity 0.15s;
   }
   html:not(.pc) .tabs.navx .navflow {
     position: absolute;
@@ -702,7 +704,10 @@
   }
   html:not(.pc) .tabs.navx.nosel .tabind {
     opacity: 0;
-    transform: scale(0.6);
+  }
+  /* in die Einstellungen: Knopf und Name gehen zügig und gemeinsam weg, kein halber Name bleibt stehen */
+  html:not(.pc) .tabs.navx.nosel .tab:not(.plus) .tname {
+    transition: none;
   }
 }
 .tset {
