@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.49.7",
+    "24. November 2026",
+    [
+      "Kunden aus alten Rechnungen: Name und Anschrift werden jetzt auch erkannt, wenn die Straße keine typische Endung hat („Am Wehrhahn 12“, „Neuer Wall 10“, „Unter den Linden 1“) oder hinter dem Ort noch „, Deutschland“ steht.",
+      "PDFs, die ein Programm intern gespiegelt oder gedreht speichert, werden jetzt richtig herum gelesen – das hilft auch beim Einlesen von Kontoauszügen und Belegen.",
+    ],
+  ],
+  [
     "0.49.6",
     "24. November 2026",
     [

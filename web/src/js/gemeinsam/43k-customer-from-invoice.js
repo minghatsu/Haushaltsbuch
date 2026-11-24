@@ -43,14 +43,21 @@ function kfParse(lines) {
     return (mine.some((m) => n.includes(m)) || (myStreet && n.includes(myStreet)) || (myCity && n === myCity)) && n.length > 2;
   };
   const sender = (s) => /[·|•]/.test(s) || (/,/.test(s) && /\d{5}/.test(s) && /\d/.test(s.split(",")[0]));
-  const STREET = /(stra(ß|ss)e|str\.|weg|allee|platz|gasse|ring|damm|ufer|chaussee|markt|hof|pfad|steig|berg)\s*\d/i,
-    CITY = /^(?:D-\s?)?\d{5}\s+[A-ZÄÖÜ][\wäöüß .()/-]{1,40}$/,
+  /* Straße: mit typischer Endung – oder jede Zeile, die mit einer Hausnummer endet („Am Wehrhahn 12“,
+     „Neuer Wall 10“, „Rheinallee 22-24“). Sie muss direkt über dem Ort stehen, das hält Fehltreffer klein. */
+  const STREET_WORD = /(stra(ß|ss)e|str\.|weg|allee|platz|gasse|ring|damm|ufer|chaussee|markt|hof|pfad|steig|stieg|berg)\s*\d/i,
+    STREET_NR = /^[A-ZÄÖÜ][A-Za-zÄÖÜäöüß.' -]{1,40}\s\d{1,4}\s?[a-zA-Z]?(?:\s?[-–/]\s?\d{1,4}\s?[a-zA-Z]?)?$/,
+    isStreet = (s) =>
+      (STREET_WORD.test(s) || STREET_NR.test(s) || /^postfach\s+\d/i.test(s)) && !/rechnung|seite|datum|betrag|summe|nr\.|tel/i.test(s),
+    COUNTRY = /,?\s*(deutschland|germany|österreich|schweiz)$/i,
+    CITY = /^(?:DE?-\s?)?\d{5}\s+[A-ZÄÖÜ][\wäöüß .()/-]{1,40}$/,
     PERS = /^(?:z\.?\s?hd\.?|zu händen|attn\.?|ansprechpartner(?:in)?:?)\s+(.{3,50})$/i,
     SAL = /^(herrn?|frau)\s+(.{3,50})$/i,
     o = {};
   for (let i = 1; i < Math.min(S.length, 60); i++) {
-    if (!CITY.test(S[i]) || isMine(S[i]) || sender(S[i])) continue;
-    if (!STREET.test(S[i - 1]) || isMine(S[i - 1])) continue;
+    const city = S[i].replace(COUNTRY, "").trim();
+    if (!CITY.test(city) || isMine(S[i]) || sender(city)) continue;
+    if (!isStreet(S[i - 1]) || isMine(S[i - 1])) continue;
     const up = [];
     for (let k = i - 2; k >= 0 && up.length < 3; k--) {
       const s = S[k];
@@ -59,7 +66,7 @@ function kfParse(lines) {
     }
     if (up.length > 1 && /^(herrn?|frau|firma)$/i.test(up[0])) up.shift();
     if (!up.length) continue;
-    o.city = S[i].replace(/^D-\s?/, "");
+    o.city = city.replace(/^DE?-\s?/, "");
     o.street = S[i - 1];
     let pi = up.findIndex((s) => PERS.test(s) || SAL.test(s));
     if (pi === 0 && up.length > 1 && SAL.test(up[0])) {

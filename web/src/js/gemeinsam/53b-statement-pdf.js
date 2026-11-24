@@ -48,13 +48,18 @@ async function pdfLines(buf) {
       tc = await page.getTextContent();
     const its = tc.items
       .filter((i) => i.str && i.str.trim())
-      .map((i) => ({
-        x: i.transform[4],
-        y: i.transform[5],
-        w: i.width || 0,
-        h: Math.abs(i.transform[3]) || 8,
-        s: i.str,
-      }));
+      .map((i) => {
+        /* in Seitenkoordinaten umrechnen: so stimmen Zeilenfolge und Spalten auch bei Seiten, deren
+           Inhalt intern gespiegelt oder gedreht ist (manche Rechnungsprogramme schreiben PDFs so) */
+        const t = lib.Util.transform(vp.transform, i.transform);
+        return {
+          x: t[4],
+          y: vp.height - t[5],
+          w: i.width || 0,
+          h: Math.hypot(t[2], t[3]) || 8,
+          s: i.str,
+        };
+      });
     its.sort((a, b) => b.y - a.y || a.x - b.x);
     const lines = [];
     for (const it of its) {
