@@ -1229,9 +1229,11 @@ if (IS_PC) {
     const t = document.querySelector(".tabs"),
       m = $("monthpill");
     if (!t || !m) return;
-    t.style.translate = "";
+    /* nicht mit translate verschieben: das macht die Leiste zum Bezugsrahmen, und der +-Knopf (position: fixed) rutscht nach oben */
+    t.style.right = "";
     const over = t.getBoundingClientRect().right + 12 - m.getBoundingClientRect().left;
-    if (over > 0) t.style.translate = `-${Math.ceil(over)}px 0`;
+    /* die Leiste ist zwischen left und right mittig – rechts doppelt so viel Platz lassen, wie sie nach links soll */
+    if (over > 0) t.style.right = `${Math.ceil(over * 2)}px`;
   };
   addEventListener("resize", fit);
   setInterval(fit, 1500);

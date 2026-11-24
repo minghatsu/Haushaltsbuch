@@ -240,6 +240,16 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.49.4",
+    "24. November 2026",
+    [
+      "Für Entwickler: „Ansehen als …“ schaltet die ganze App auf ein anderes Profil um – Schule, Ausbildung, Studium, Arbeitslosengeld, Bürgergeld, Elternzeit, Rente und alle anderen, auf Wunsch mit Kindern, Partner oder Nebenjob.",
+      "Nur zum Anschauen: Solange die Vorschau läuft, wird nichts gespeichert und nichts abgeglichen. Der runde orange Werkzeug-Knopf zeigt, dass die Vorschau läuft – darüber wechselst du oder tippst „Beenden“, dann ist alles wie vorher. Am PC öffnet Strg + Umschalt + P die Auswahl.",
+      "Behoben: Unten in den Einstellungen am Handy fehlte seit 0.49.2 die Versionsnummer – damit ließen sich die Entwickler-Werkzeuge nicht mehr öffnen.",
+      "Behoben: Am PC mit Werkzeug-Knopf war seit 0.49.1 der grüne Plus-Knopf unten rechts verschwunden – er rutschte nach oben aus dem Bild.",
+    ],
+  ],
+  [
     "0.49.3",
     "24. November 2026",
     ["Die untere Leiste am Handy ist wieder wie früher: nur Symbole, die offene Seite steht als grüner Knopf mit Namen da."],

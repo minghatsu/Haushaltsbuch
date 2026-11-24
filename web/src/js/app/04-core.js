@@ -186,7 +186,7 @@ const freshKey = () =>
 const FRESH = {};
 function persistLocal() {
   DREV++;
-  if (!LOCAL) return;
+  if (!LOCAL || PV) return; /* Profil-Vorschau speichert nichts */
   try {
     localStorage.setItem(
       LS_KEY,

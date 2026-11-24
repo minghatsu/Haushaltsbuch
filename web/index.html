@@ -10616,12 +10616,6 @@ tfoot td {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.phfoot {
-  margin: 24px 0 8px;
-  text-align: center;
-  font-size: 12.5px;
-  color: var(--faint);
-}
 
 /* Farbwahl, Budgets, Plus und Leiste */
 .pkr {
@@ -25821,6 +25815,197 @@ html.pc .pctpane .ayblk {
 .ersum small.ercnt {
   margin-top: 2px;
   font-weight: 600;
+}
+
+/* Entwickler: Profil-Vorschau („Ansehen als …“) */
+:root {
+  --pv: #b35c00;
+  --pv-soft: #fbe6cf;
+  --pv-ink: #7a3e00;
+}
+:root[data-theme="dark"] {
+  --pv: #d9822b;
+  --pv-soft: #3b2614;
+  --pv-ink: #ffd2a3;
+}
+#pvBg .pvs {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+#pvBg .pvg {
+  margin: 14px 2px 6px;
+  font: 700 11.5px var(--f-body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+#pvBg .pvgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+#pvBg .pvgrid button {
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--sunk);
+  color: var(--fg);
+  font: 700 14px var(--f-body);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s;
+}
+#pvBg .pvgrid button.on {
+  background: var(--pv-soft);
+  color: var(--pv-ink);
+  box-shadow: inset 0 0 0 2px var(--pv);
+}
+#pvBg .pvex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#pvBg .pvex button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 38px;
+  padding: 7px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--sunk);
+  color: var(--fg);
+  font: 600 13.5px var(--f-body);
+  cursor: pointer;
+}
+#pvBg .pvex button.on {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+#pvBg .pvbtns {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+}
+#pvBg .pvbtns .btn {
+  flex: 1;
+  justify-content: center;
+}
+#pvBg .pvgo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  font-weight: 800;
+}
+#pvBg .pvgo svg,
+.pvdevbtn .pvwr svg,
+.pvtool svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#pvBg button:focus-visible,
+.pvdevbtn:focus-visible {
+  outline: 2px solid var(--pv);
+  outline-offset: 2px;
+}
+/* Runder Knopf, solange die Vorschau läuft */
+#pvBg .pvgo {
+  background: var(--pv);
+  color: #fff;
+}
+.pvfab {
+  position: fixed;
+  z-index: 950;
+  right: 16px;
+  bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--pv);
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(80, 40, 0, 0.32);
+  cursor: pointer;
+  animation: pvin 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.pvfab svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pvfab:focus-visible {
+  outline: 2px solid var(--pv);
+  outline-offset: 3px;
+}
+@keyframes pvin {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+html.pc .pvfab {
+  right: 46px;
+  bottom: 156px;
+}
+/* Knopf in den Entwickler-Werkzeugen */
+.pvdevbtn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 12px 0 4px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--pv);
+  color: #fff;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.pvdevbtn .pvwr {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+.pvdevbtn b {
+  display: block;
+  font-size: 15px;
+}
+.pvdevbtn small {
+  display: block;
+  font-size: 12.5px;
+  opacity: 0.9;
+}
+html.pc .pcdptool.pvtool {
+  justify-content: flex-start;
+  background: var(--pv);
+  color: #fff;
+}
+/* solange ein Fenster offen ist, verdeckt der Knopf nichts */
+body.locked .pvfab {
+  opacity: 0;
+  pointer-events: none;
 }
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
@@ -48070,7 +48255,7 @@ const freshKey = () =>
 const FRESH = {};
 function persistLocal() {
   DREV++;
-  if (!LOCAL) return;
+  if (!LOCAL || PV) return; /* Profil-Vorschau speichert nichts */
   try {
     localStorage.setItem(
       LS_KEY,
@@ -51382,6 +51567,16 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.49.4",
+    "24. November 2026",
+    [
+      "Für Entwickler: „Ansehen als …“ schaltet die ganze App auf ein anderes Profil um – Schule, Ausbildung, Studium, Arbeitslosengeld, Bürgergeld, Elternzeit, Rente und alle anderen, auf Wunsch mit Kindern, Partner oder Nebenjob.",
+      "Nur zum Anschauen: Solange die Vorschau läuft, wird nichts gespeichert und nichts abgeglichen. Der runde orange Werkzeug-Knopf zeigt, dass die Vorschau läuft – darüber wechselst du oder tippst „Beenden“, dann ist alles wie vorher. Am PC öffnet Strg + Umschalt + P die Auswahl.",
+      "Behoben: Unten in den Einstellungen am Handy fehlte seit 0.49.2 die Versionsnummer – damit ließen sich die Entwickler-Werkzeuge nicht mehr öffnen.",
+      "Behoben: Am PC mit Werkzeug-Knopf war seit 0.49.1 der grüne Plus-Knopf unten rechts verschwunden – er rutschte nach oben aus dem Bild.",
+    ],
+  ],
+  [
     "0.49.3",
     "24. November 2026",
     ["Die untere Leiste am Handy ist wieder wie früher: nur Symbole, die offene Seite steht als grüner Knopf mit Namen da."],
@@ -53929,6 +54124,20 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.49.4",
+    s: () =>
+      IS_DESK && updKey()
+        ? [
+            {
+              sel: "#pcDev",
+              ic: "sliders",
+              t: uiText("nw_pv_t"),
+              p: [uiText("nw_pv_p")],
+            },
+          ]
+        : [],
+  },
   {
     v: "0.49.2",
     s: () => [
@@ -59727,6 +59936,7 @@ function devHtml() {
     `<label class="devsw" style="--i:${i}"><span class="devswt"><b>${t}</b><small>${s}</small></span><input type="checkbox" data-devsw="${k}" ${on ? "checked" : ""}><span class="devtg" aria-hidden="true"></span></label>`;
   return `<div class="devwrap">
     <div class="devh" style="--i:0">${uiText("dev_info")}</div><div class="devkv" style="--i:1">${kv.map(([k, v]) => `<div><small>${escHtml(k)}</small><b>${escHtml(v)}</b></div>`).join("")}</div>
+    <button class="pvdevbtn" data-pvopen="1" style="--i:2"><span class="pvwr" aria-hidden="true">${PV_WR}</span><span><b>${escHtml(uiText("pv_t"))}</b><small>${escHtml(uiText("pv_btn_s"))}</small></span></button>
     <div class="devh" style="--i:2">${uiText("dev_show")}</div>
     ${sw("touch", DBG.touch, uiText("dev_touch"), uiText("dev_touch_s"), 3)}${sw("fps", DBG.fps, uiText("dev_fps"), uiText("dev_fps_s"), 4)}
     <div class="devh" style="--i:5">${uiText("dev_act")}</div>
@@ -59952,6 +60162,128 @@ function verPing() {
 }
 setTimeout(verPing, 15000);
 setInterval(verPing, 6 * 3600e3);
+
+/* Entwickler: die App als anderes Profil ansehen (Schule, Bürgergeld, Rente …).
+   Nur Vorschau – solange sie läuft, wird nichts gespeichert und nichts abgeglichen.
+   „Beenden“ lädt die App neu, dann ist alles wie vorher. */
+var PV = null;
+const PV_WR = `<svg class="i" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L4 16.7 7.3 20l5.3-5.3a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.4-.6-.6-2.4z"/></svg>`;
+const pvDev = () => !!((typeof DBG !== "undefined" && DBG.on) || (IS_DESK && updKey()));
+const pvTr = (s) => (I18N.tr ? I18N.tr(s) : s);
+const pvName = (w) => pvTr((WORK.find((x) => x[0] === w) || [, w])[1]);
+function pvPaint() {
+  const body = document.querySelector("#pvBg .hobody");
+  if (!body) return;
+  const sel = ui.pvSel,
+    ex = ui.pvEx || [];
+  const groups = WGROUPS.map(([g, t]) => {
+    const ks = WORK.filter((w) => w[3] === g);
+    return `<div class="pvg">${escHtml(pvTr(t))}</div><div class="pvgrid">${ks
+      .map(
+        ([k, l]) =>
+          `<button type="button" class="${k === sel ? "on" : ""}" data-pvw="${k}" aria-pressed="${k === sel}">${escHtml(pvTr(l))}</button>`
+      )
+      .join("")}</div>`;
+  }).join("");
+  const extra = extraFor(sel)
+    .map(
+      ([k, l]) =>
+        `<button type="button" class="${ex.includes(k) ? "on" : ""}" data-pvx="${k}" aria-pressed="${ex.includes(k)}">${ex.includes(k) ? svgIcon("check", 14) : ""}${escHtml(pvTr(l))}</button>`
+    )
+    .join("");
+  body.innerHTML = `<p class="pvs">${escHtml(uiText("pv_s"))}</p>${groups}<div class="pvg">${escHtml(uiText("pv_extra"))}</div><div class="pvex">${extra}</div>
+    <div class="pvbtns">${PV ? `<button type="button" class="btn" data-pvend="1">${escHtml(uiText("pv_end"))}</button>` : `<button type="button" class="btn" data-hbclose="pvBg">${escHtml(pvTr("Abbrechen"))}</button>`}<button type="button" class="btn pvgo" data-pvgo="1">${PV_WR}${escHtml(uiText("pv_go"))}</button></div>`;
+}
+function pvOpen() {
+  if (!pvDev()) return;
+  const cur = PV ? PV.base : store.settings;
+  ui.pvSel = PV ? PV.work : store.settings.work || "beides";
+  ui.pvEx = PV ? [...PV.extra] : [...(cur.extra || [])];
+  try {
+    hbSheetClose("devBg");
+  } catch (_) {}
+  hbSheet("pvBg", uiText("pv_t"));
+  pvPaint();
+}
+async function pvApply(w, ex) {
+  if (!PV) PV = { base: clone(store.settings) };
+  PV.work = w;
+  PV.extra = ex.filter((k) => extraFor(w).some((x) => x[0] === k));
+  store.settings = clone(PV.base);
+  await setWork(w);
+  await setExtra(PV.extra);
+  pvBar();
+  render();
+}
+/* Während der Vorschau: nur ein runder Knopf mit dem Werkzeug – Tippen öffnet die Auswahl mit „Beenden“ */
+function pvBar() {
+  let el = $("pvFab");
+  if (!PV) {
+    if (el) el.remove();
+    document.documentElement.classList.remove("pvon");
+    return;
+  }
+  if (!el) {
+    el = document.createElement("button");
+    el.type = "button";
+    el.id = "pvFab";
+    el.className = "pvfab";
+    el.dataset.pvopen = "1";
+    el.dataset.noi18n = "";
+    el.innerHTML = PV_WR;
+    document.body.appendChild(el);
+  }
+  document.documentElement.classList.add("pvon");
+  const ex = PV.extra.map((k) => pvTr((EXTRA.find((x) => x[0] === k) || [, k])[1]));
+  const t = uiText("pv_on", { n: [pvName(PV.work), ...ex].join(" + ") });
+  el.title = t;
+  el.setAttribute("aria-label", t);
+}
+function pvEnd() {
+  PV = null;
+  try {
+    location.reload();
+  } catch (_) {}
+}
+document.addEventListener("click", (e) => {
+  const o = e.target.closest("[data-pvopen]");
+  if (o) {
+    pvOpen();
+    return;
+  }
+  if (e.target.closest("[data-pvend]")) {
+    pvEnd();
+    return;
+  }
+  const w = e.target.closest("[data-pvw]");
+  if (w) {
+    ui.pvSel = w.dataset.pvw;
+    ui.pvEx = (ui.pvEx || []).filter((k) => extraFor(ui.pvSel).some((x) => x[0] === k));
+    SND.play("tick");
+    pvPaint();
+    return;
+  }
+  const x = e.target.closest("[data-pvx]");
+  if (x) {
+    const k = x.dataset.pvx,
+      cur = ui.pvEx || [];
+    ui.pvEx = cur.includes(k) ? cur.filter((y) => y !== k) : [...cur, k];
+    SND.play("tick");
+    pvPaint();
+    return;
+  }
+  if (e.target.closest("[data-pvgo]")) {
+    hbSheetClose("pvBg");
+    pvApply(ui.pvSel, ui.pvEx || []);
+    toast(uiText("pv_on", { n: pvName(ui.pvSel) }));
+  }
+});
+/* Am PC: Strg + Umschalt + P */
+document.addEventListener("keydown", (e) => {
+  if (!(e.ctrlKey || e.metaKey) || !e.shiftKey || (e.key || "").toLowerCase() !== "p" || !pvDev()) return;
+  e.preventDefault();
+  pvOpen();
+});
 
 /* Einladungen */
 const INV_PAGE = "https://miracleframe.synology.me/haushaltsbuch/i.html";
@@ -62401,6 +62733,10 @@ async function deleteDoc(col, id) {
   await db.collection(col).doc(id).delete();
 }
 async function saveSettings() {
+  if (PV) {
+    render();
+    return;
+  }
   if (mem) {
     persistLocal();
     enqueue("app", "settings", store.settings);
@@ -73122,6 +73458,7 @@ function abSave(c) {
   } catch (e) {}
 }
 function autoBackupRun(manual) {
+  if (PV) return false;
   const c = abCfg();
   if (!CAN_AUTOBK) return false;
   if (!store.tx.length && !store.fixed.length) return false;
@@ -75671,7 +76008,7 @@ function phHomeHtml() {
     ${setGroups(false)
       .map(([t, ks]) => `<h3 class="phgl">${escHtml(tabLabel(t))}</h3><div class="card phg">${ks.map(phRow).join("")}</div>`)
       .join("")}
-    <p class="phfoot">Finanz MAMI · ${escHtml(verFull())}</p>`;
+    <div class="appfoot"><b>Finanz MAMI</b><span>Die App, die sich um dich kümmert</span><small>${escHtml(verFull())}</small></div>`;
 }
 function phSetRender(el) {
   if (ACC.page) {
@@ -89624,6 +89961,96 @@ const TEXTS = {
     "Konfigurację znajdziesz w Ustawienia › Pomoc › Konfiguracja i przewodnik",
     "تجد الإعداد في الإعدادات › المساعدة › الإعداد والجولة",
     "Configurarea o găsești în Setări › Ajutor › Configurare și tur",
+  ],
+  pv_t: [
+    "Ansehen als …",
+    "View as …",
+    "Farklı görüntüle …",
+    "Посмотреть как …",
+    "Переглянути як …",
+    "Zobacz jako …",
+    "العرض بصفة …",
+    "Vezi ca …",
+  ],
+  pv_s: [
+    "Nur zum Anschauen – deine Daten bleiben, wie sie sind. „Beenden“ bringt alles zurück.",
+    "Just for looking – your data stays as it is. “End” brings everything back.",
+    "Sadece bakmak için – verilerin olduğu gibi kalır. “Bitir” her şeyi geri getirir.",
+    "Только для просмотра – твои данные не меняются. «Завершить» всё вернёт.",
+    "Лише для перегляду – твої дані не змінюються. «Завершити» все поверне.",
+    "Tylko do podglądu – twoje dane zostają bez zmian. „Zakończ” przywraca wszystko.",
+    "للمشاهدة فقط – تبقى بياناتك كما هي. «إنهاء» يعيد كل شيء.",
+    "Doar pentru vizualizare – datele tale rămân neschimbate. „Încheie” readuce totul.",
+  ],
+  pv_extra: [
+    "Dazu",
+    "On top",
+    "Ek olarak",
+    "Дополнительно",
+    "Додатково",
+    "Do tego",
+    "بالإضافة",
+    "În plus",
+  ],
+  pv_go: [
+    "Ansehen",
+    "View",
+    "Görüntüle",
+    "Смотреть",
+    "Переглянути",
+    "Zobacz",
+    "عرض",
+    "Vezi",
+  ],
+  pv_end: [
+    "Beenden",
+    "End",
+    "Bitir",
+    "Завершить",
+    "Завершити",
+    "Zakończ",
+    "إنهاء",
+    "Încheie",
+  ],
+  pv_btn_s: [
+    "Die App als Schule, Bürgergeld, Rente … anschauen – ohne etwas zu ändern",
+    "See the app as school, citizen's income, pension … – without changing anything",
+    "Uygulamayı okul, vatandaşlık geliri, emeklilik … olarak gör – hiçbir şeyi değiştirmeden",
+    "Посмотреть приложение как школа, пособие, пенсия … – ничего не меняя",
+    "Переглянути застосунок як школа, допомога, пенсія … – нічого не змінюючи",
+    "Zobacz aplikację jako szkoła, zasiłek, emerytura … – bez zmian",
+    "شاهد التطبيق كمدرسة، إعانة، تقاعد … – دون تغيير أي شيء",
+    "Vezi aplicația ca școală, ajutor social, pensie … – fără să schimbi nimic",
+  ],
+  pv_on: [
+    "Vorschau als {n} – nichts wird gespeichert",
+    "Preview as {n} – nothing is saved",
+    "{n} olarak önizleme – hiçbir şey kaydedilmez",
+    "Просмотр как {n} – ничего не сохраняется",
+    "Перегляд як {n} – нічого не зберігається",
+    "Podgląd jako {n} – nic nie jest zapisywane",
+    "معاينة بصفة {n} – لا يُحفظ شيء",
+    "Previzualizare ca {n} – nu se salvează nimic",
+  ],
+  nw_pv_t: [
+    "Ansehen als …",
+    "View as …",
+    "Farklı görüntüle …",
+    "Посмотреть как …",
+    "Переглянути як …",
+    "Zobacz jako …",
+    "العرض بصفة …",
+    "Vezi ca …",
+  ],
+  nw_pv_p: [
+    "Für dich als Entwickler: In den Werkzeugen schaltest du die ganze App auf Schule, Bürgergeld, Rente und alle anderen Profile um – nur zum Anschauen. Am PC geht es auch mit Strg + Umschalt + P.",
+    "For you as developer: in the tools you switch the whole app to school, citizen's income, pension and every other profile – just to look. On the PC also with Ctrl + Shift + P.",
+    "Geliştirici olarak senin için: Araçlarda tüm uygulamayı okul, vatandaşlık geliri, emeklilik ve diğer profillere geçirirsin – sadece bakmak için. Bilgisayarda Ctrl + Shift + P ile de olur.",
+    "Для тебя как разработчика: в инструментах ты переключаешь всё приложение на школу, пособие, пенсию и другие профили – только для просмотра. На ПК также Ctrl + Shift + P.",
+    "Для тебе як розробника: в інструментах ти перемикаєш увесь застосунок на школу, допомогу, пенсію й інші профілі – лише для перегляду. На ПК також Ctrl + Shift + P.",
+    "Dla ciebie jako dewelopera: w narzędziach przełączasz całą aplikację na szkołę, zasiłek, emeryturę i inne profile – tylko do podglądu. Na komputerze także Ctrl + Shift + P.",
+    "لك كمطوّر: في الأدوات تحوّل التطبيق كله إلى مدرسة أو إعانة أو تقاعد وكل الملفات الأخرى – للمشاهدة فقط. على الكمبيوتر أيضًا Ctrl + Shift + P.",
+    "Pentru tine ca dezvoltator: în unelte comuți toată aplicația pe școală, ajutor social, pensie și celelalte profiluri – doar de privit. Pe PC și cu Ctrl + Shift + P.",
   ],
 };
 
@@ -115233,7 +115660,7 @@ function rqAdd(id) {
   flushSoon();
 }
 function enqueue(col, id, data) {
-  if (!SERVER || !SYNC.token) return;
+  if (!SERVER || !SYNC.token || PV) return;
   SYNC.queue = SYNC.queue.filter((o) => !(o.col === col && o.id === id));
   SYNC.queue.push({
     col,

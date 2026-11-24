@@ -1648,6 +1648,20 @@ function ptourOpen(v) {
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
   {
+    v: "0.49.4",
+    s: () =>
+      IS_DESK && updKey()
+        ? [
+            {
+              sel: "#pcDev",
+              ic: "sliders",
+              t: uiText("nw_pv_t"),
+              p: [uiText("nw_pv_p")],
+            },
+          ]
+        : [],
+  },
+  {
     v: "0.49.2",
     s: () => [
       {

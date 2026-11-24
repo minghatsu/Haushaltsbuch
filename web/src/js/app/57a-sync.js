@@ -41,7 +41,7 @@ function rqAdd(id) {
   flushSoon();
 }
 function enqueue(col, id, data) {
-  if (!SERVER || !SYNC.token) return;
+  if (!SERVER || !SYNC.token || PV) return;
   SYNC.queue = SYNC.queue.filter((o) => !(o.col === col && o.id === id));
   SYNC.queue.push({
     col,

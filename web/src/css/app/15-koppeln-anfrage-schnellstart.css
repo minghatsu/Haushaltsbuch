@@ -972,9 +972,3 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.phfoot {
-  margin: 24px 0 8px;
-  text-align: center;
-  font-size: 12.5px;
-  color: var(--faint);
-}

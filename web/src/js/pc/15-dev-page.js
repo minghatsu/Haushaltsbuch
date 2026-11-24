@@ -91,7 +91,7 @@ const pcDevPage = (() => {
     return `${band}<div class="pcdpgrid">${card("stat", T("dp_stat"), tl + `<button class="pcdprow add" data-invopen="1"><span class="pcdpav">+</span>${T("dp_invite")}</button>`, true)}<div class="pcdpcol">${card("fb", T("dp_fb"), ml, true)}${card(
       "dbg",
       T("dp_dbg"),
-      `<div class="pcdptools">${sw("touch", DBG.touch, T("dev_touch"))}${sw("fps", DBG.fps, T("dev_fps"))}<button class="pcdptool" data-devact="tours">${T("dev_tours")}</button><button class="pcdptool" data-devact="test">${T("dev_test")}</button></div>`,
+      `<div class="pcdptools">${sw("touch", DBG.touch, T("dev_touch"))}${sw("fps", DBG.fps, T("dev_fps"))}<button class="pcdptool pvtool" data-pvopen="1">${PV_WR}${escHtml(uiText("pv_t"))}</button><button class="pcdptool" data-devact="tours">${T("dev_tours")}</button><button class="pcdptool" data-devact="test">${T("dev_test")}</button></div>`,
       true
     )}</div></div>`;
   }

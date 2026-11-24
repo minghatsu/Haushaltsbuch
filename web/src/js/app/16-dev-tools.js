@@ -405,6 +405,7 @@ function devHtml() {
     `<label class="devsw" style="--i:${i}"><span class="devswt"><b>${t}</b><small>${s}</small></span><input type="checkbox" data-devsw="${k}" ${on ? "checked" : ""}><span class="devtg" aria-hidden="true"></span></label>`;
   return `<div class="devwrap">
     <div class="devh" style="--i:0">${uiText("dev_info")}</div><div class="devkv" style="--i:1">${kv.map(([k, v]) => `<div><small>${escHtml(k)}</small><b>${escHtml(v)}</b></div>`).join("")}</div>
+    <button class="pvdevbtn" data-pvopen="1" style="--i:2"><span class="pvwr" aria-hidden="true">${PV_WR}</span><span><b>${escHtml(uiText("pv_t"))}</b><small>${escHtml(uiText("pv_btn_s"))}</small></span></button>
     <div class="devh" style="--i:2">${uiText("dev_show")}</div>
     ${sw("touch", DBG.touch, uiText("dev_touch"), uiText("dev_touch_s"), 3)}${sw("fps", DBG.fps, uiText("dev_fps"), uiText("dev_fps_s"), 4)}
     <div class="devh" style="--i:5">${uiText("dev_act")}</div>

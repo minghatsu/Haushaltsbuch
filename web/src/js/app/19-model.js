@@ -95,6 +95,10 @@ async function deleteDoc(col, id) {
   await db.collection(col).doc(id).delete();
 }
 async function saveSettings() {
+  if (PV) {
+    render();
+    return;
+  }
   if (mem) {
     persistLocal();
     enqueue("app", "settings", store.settings);

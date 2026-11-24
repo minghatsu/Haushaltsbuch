@@ -724,6 +724,7 @@ function abSave(c) {
   } catch (e) {}
 }
 function autoBackupRun(manual) {
+  if (PV) return false;
   const c = abCfg();
   if (!CAN_AUTOBK) return false;
   if (!store.tx.length && !store.fixed.length) return false;

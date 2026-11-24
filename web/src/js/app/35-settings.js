@@ -545,7 +545,7 @@ function phHomeHtml() {
     ${setGroups(false)
       .map(([t, ks]) => `<h3 class="phgl">${escHtml(tabLabel(t))}</h3><div class="card phg">${ks.map(phRow).join("")}</div>`)
       .join("")}
-    <p class="phfoot">Finanz MAMI · ${escHtml(verFull())}</p>`;
+    <div class="appfoot"><b>Finanz MAMI</b><span>Die App, die sich um dich kümmert</span><small>${escHtml(verFull())}</small></div>`;
 }
 function phSetRender(el) {
   if (ACC.page) {

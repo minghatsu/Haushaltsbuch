@@ -1229,9 +1229,11 @@ if (IS_PC) {
     const t = document.querySelector(".tabs"),
       m = $("monthpill");
     if (!t || !m) return;
-    t.style.translate = "";
+    /* nicht mit translate verschieben: das macht die Leiste zum Bezugsrahmen, und der +-Knopf (position: fixed) rutscht nach oben */
+    t.style.right = "";
     const over = t.getBoundingClientRect().right + 12 - m.getBoundingClientRect().left;
-    if (over > 0) t.style.translate = `-${Math.ceil(over)}px 0`;
+    /* die Leiste ist zwischen left und right mittig – rechts doppelt so viel Platz lassen, wie sie nach links soll */
+    if (over > 0) t.style.right = `${Math.ceil(over * 2)}px`;
   };
   addEventListener("resize", fit);
   setInterval(fit, 1500);
@@ -8732,7 +8734,7 @@ const pcDevPage = (() => {
     return `${band}<div class="pcdpgrid">${card("stat", T("dp_stat"), tl + `<button class="pcdprow add" data-invopen="1"><span class="pcdpav">+</span>${T("dp_invite")}</button>`, true)}<div class="pcdpcol">${card("fb", T("dp_fb"), ml, true)}${card(
       "dbg",
       T("dp_dbg"),
-      `<div class="pcdptools">${sw("touch", DBG.touch, T("dev_touch"))}${sw("fps", DBG.fps, T("dev_fps"))}<button class="pcdptool" data-devact="tours">${T("dev_tours")}</button><button class="pcdptool" data-devact="test">${T("dev_test")}</button></div>`,
+      `<div class="pcdptools">${sw("touch", DBG.touch, T("dev_touch"))}${sw("fps", DBG.fps, T("dev_fps"))}<button class="pcdptool pvtool" data-pvopen="1">${PV_WR}${escHtml(uiText("pv_t"))}</button><button class="pcdptool" data-devact="tours">${T("dev_tours")}</button><button class="pcdptool" data-devact="test">${T("dev_test")}</button></div>`,
       true
     )}</div></div>`;
   }
