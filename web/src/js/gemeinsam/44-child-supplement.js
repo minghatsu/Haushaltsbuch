@@ -272,7 +272,9 @@ document.addEventListener("change", async (e) => {
     const fs = [...(e.target.files || [])];
     const fl = e.target.id === "rchFile";
     e.target.value = "";
-    if (fs.length > 1 && fl)
+    /* mehrere PDFs: jede Datei ist eine eigene Rechnung */
+    if (fs.length > 1 && fl && fs.every(isPdfF)) rchBatch(fs);
+    else if (fs.length > 1 && fl)
       inbOpen(fs, {
         type: "rch",
       });

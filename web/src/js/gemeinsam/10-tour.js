@@ -1648,6 +1648,20 @@ function ptourOpen(v) {
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
   {
+    v: "0.49.8",
+    s: () =>
+      hasSelf()
+        ? [
+            {
+              sel: '[data-view="beruf"] [data-rchopen]',
+              ic: "docout",
+              t: uiText("nw_rb_t"),
+              p: [uiText("nw_rb_p")],
+            },
+          ]
+        : [],
+  },
+  {
     v: "0.49.4",
     s: () =>
       IS_DESK && updKey()

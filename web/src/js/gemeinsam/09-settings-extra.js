@@ -240,6 +240,14 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.49.8",
+    "24. November 2026",
+    [
+      "Rechnungen nach Jahr: Das Fenster zeigt die Rechnungen des Jahres, das oben in der Kopfzeile eingestellt ist – neueste zuerst, mit dem Umsatz des Jahres. Offene Rechnungen aus früheren Jahren stehen weiter oben, damit nichts untergeht.",
+      "Viele alte Rechnungen auf einmal hochladen: Unter „Importieren“ mehrere PDFs wählen – jede wird eine eigene Rechnung mit Kunde, Nummer, Datum und Betrag und landet im richtigen Jahr. Eine Prüfliste zeigt, was sicher erkannt ist; Fehlendes trägst du dort direkt nach. Doppelte Rechnungsnummern werden nicht zweimal übernommen.",
+    ],
+  ],
+  [
     "0.49.7",
     "24. November 2026",
     [

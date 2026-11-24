@@ -518,15 +518,25 @@ const RCHU = {
   edit: null,
 };
 function rchOpen2(focus) {
-  const b = hbSheet("rchBg", uiText("rch_h"));
+  /* Das Jahr kommt aus der Kopfzeile (Monatsauswahl oben) – das Fenster zeigt die Rechnungen dieses Jahres */
+  const Y = String(ui.ym || isoToday()).slice(0, 4),
+    b = hbSheet("rchBg", uiText("rch_year_h", { y: Y }));
+  if (RCHU.batch) {
+    b.innerHTML = rchBatchHtml();
+    return;
+  }
   if (RCHU.scan) {
     b.innerHTML = `<div class="bsscan">${RCHU.scan.img ? `<img src="${RCHU.scan.img}" alt="">` : `<div class="stbpdf">${svgIcon("docout", 70)}</div>`}<i class="bsbeam"></i><span class="bscorner"></span></div><p class="bsstat"><span class="dots3"><i></i><i></i><i></i></span> ${escHtml(uiText("rch_reading"))}</p>`;
     return;
   }
-  const L = rchList()
-    .slice()
-    .sort((a, c) => (a.paid ? 1 : 0) - (c.paid ? 1 : 0) || (a.due || "").localeCompare(c.due || ""));
-  const open = L.filter((i) => !i.paid && !i.storno),
+  const all = rchList(),
+    ofY = (i) => String(i.date || "").slice(0, 4) === Y,
+    /* offene Rechnungen aus früheren Jahren bleiben oben sichtbar, damit nichts untergeht */
+    older = all.filter((i) => !ofY(i) && !i.paid && !i.storno && String(i.date || "") < Y).sort((a, c) => (c.date || "").localeCompare(a.date || "")),
+    L = older.concat(all.filter(ofY).sort((a, c) => (c.date || "").localeCompare(a.date || "") || String(c.nr || "").localeCompare(String(a.nr || ""))));
+  const yrSum = all.filter((i) => ofY(i) && !i.storno).reduce((t, i) => t + (Number(i.amt) || 0), 0),
+    yrN = all.filter((i) => ofY(i) && !i.storno).length;
+  const open = all.filter((i) => !i.paid && !i.storno),
     sumO = open.reduce((s, i) => s + rchRest(i), 0);
   b.innerHTML = `${pmBanner()}<div class="ahero beruf" style="margin-bottom:10px"><small>${escHtml(uiText("rch_open"))}</small><b>${escHtml(fmtEur(sumO))}</b><span>${open.length} ${escHtml(uiText("br_open"))}${
     rchOver().length
@@ -538,10 +548,10 @@ function rchOpen2(focus) {
         )
       : ""
   }</span></div>
-    ${RCHU.edit ? rchForm() : `<button type="button" class="rvwrite" data-rvnew><span class="rwi">${svgIcon("docout", 24)}</span><span class="rwt"><b>${escHtml(uiText("rv_write"))}</b><small>${escHtml(uiText("rch_w_s"))}</small></span><span class="rwgo">${svgIcon("right", 18)}</span></button><div class="rchacts"><button type="button" class="rcha cam" data-rchpick="cam"><span class="rai">${svgIcon("camera", 20)}</span><b>${escHtml(uiText("bs_photo"))}</b><small>${escHtml(uiText("rch_a_cam"))}</small></button><button type="button" class="rcha" data-rchpick="file"><span class="rai">${svgIcon("doc", 20)}</span><b>${escHtml(uiText("stb_import"))}</b><small>${escHtml(uiText("rch_a_imp"))}</small></button><button type="button" class="rcha" data-rchnew><span class="rai">${svgIcon("pen", 20)}</span><b>${escHtml(uiText("stb_manual"))}</b><small>${escHtml(uiText("rch_a_man"))}</small></button></div>${rchList().length ? `<div class="rchsec">${escHtml(uiText("rch_list_h"))}</div>` : ""}`}
+    ${RCHU.edit ? rchForm() : `<button type="button" class="rvwrite" data-rvnew><span class="rwi">${svgIcon("docout", 24)}</span><span class="rwt"><b>${escHtml(uiText("rv_write"))}</b><small>${escHtml(uiText("rch_w_s"))}</small></span><span class="rwgo">${svgIcon("right", 18)}</span></button><div class="rchacts"><button type="button" class="rcha cam" data-rchpick="cam"><span class="rai">${svgIcon("camera", 20)}</span><b>${escHtml(uiText("bs_photo"))}</b><small>${escHtml(uiText("rch_a_cam"))}</small></button><button type="button" class="rcha" data-rchpick="file"><span class="rai">${svgIcon("doc", 20)}</span><b>${escHtml(uiText("stb_import"))}</b><small>${escHtml(uiText("rch_a_imp"))}</small></button><button type="button" class="rcha" data-rchnew><span class="rai">${svgIcon("pen", 20)}</span><b>${escHtml(uiText("stb_manual"))}</b><small>${escHtml(uiText("rch_a_man"))}</small></button></div><div class="rchyr"><span><small>${escHtml(uiText("rch_year_sum", { y: Y }))}</small><b>${escHtml(fmtEur(yrSum))}</b></span><small>${escHtml(uiText(yrN === 1 ? "rch_year_n1" : "rch_year_n", { n: String(yrN) }))}</small></div>`}
     <input type="file" id="rchCam" accept="image/*" capture="environment" multiple hidden><input type="file" id="rchFile" accept="image/*,application/pdf,.pdf" multiple hidden>
     <div class="rchl">${
-      L.map((i) => {
+      L.map((i, ix) => {
         const st = !!i.storno,
           od = !i.paid && !st && i.due && daysTo(i.due) < 0,
           rest = rchRest(i),
@@ -581,7 +591,13 @@ function rchOpen2(focus) {
                     }),
                   })
                 );
-        return `<div class="rchr ${i.paid || st ? "paid" : od ? "over" : ""} ${st ? "storno" : ""} ${focus === i.id ? "focus" : ""}"><div class="grow"><b>${escHtml(i.kunde || "–")}${TYP ? ` <span class="rchtag">${escHtml(uiText(TYP))}</span>` : ""}${lk ? ` <span class="rchlock" title="${escHtml(uiText("rch_locked"))}">${svgIcon("lock", 11)}</span>` : ""}</b><small>#${escHtml(i.nr || "")} · ${escHtml(
+        const sec =
+          older.length && ix === 0
+            ? `<div class="rchsec">${escHtml(uiText("rch_older_open"))}</div>`
+            : older.length && ix === older.length
+              ? `<div class="rchsec">${escHtml(uiText("rch_year_h", { y: Y }))}</div>`
+              : "";
+        return `${sec}<div class="rchr ${i.paid || st ? "paid" : od ? "over" : ""} ${st ? "storno" : ""} ${focus === i.id ? "focus" : ""}"><div class="grow"><b>${escHtml(i.kunde || "–")}${TYP ? ` <span class="rchtag">${escHtml(uiText(TYP))}</span>` : ""}${lk ? ` <span class="rchlock" title="${escHtml(uiText("rch_locked"))}">${svgIcon("lock", 11)}</span>` : ""}</b><small>#${escHtml(i.nr || "")} · ${escHtml(
           fxDate(i.date, {
             day: "numeric",
             month: "short",
@@ -598,8 +614,8 @@ function rchOpen2(focus) {
         }</div><b class="amt">${escHtml(fmtEur(part ? rest : i.amt))}</b>
       <div class="rchb">${!i.paid && !st ? `${od || dnHist(i).length ? dnRowBtn(i) : ""}<button class="btn sm" data-rchpaid="${escHtml(i.id)}">✓ ${escHtml(uiText("rch_mark"))}</button><button class="btn sm" data-rchpart="${escHtml(i.id)}">${escHtml(uiText("rch_part"))}</button>` : ""}${i.doc ? `<button class="btn sm" data-rvpdfid="${escHtml(i.id)}" aria-label="PDF">${svgIcon("dl", 14)}</button><button class="btn sm" data-rvcopy="${escHtml(i.id)}">${escHtml(uiText("rv_copy"))}</button>${!lk && !i.paid ? `<button class="btn sm" data-rvedit="${escHtml(i.id)}" aria-label="${escHtml(uiText("rv_edit"))}">${svgIcon("pen", 14)}</button>` : ""}${lk && !st && i.typ !== "s" && i.typ !== "g" ? `<button class="btn sm ghost" data-rvstorno="${escHtml(i.id)}">${escHtml(uiText("rch_storno"))}</button>` : ""}` : ""}${i.img ? `<button class="btn sm" data-rchview="${escHtml(i.id)}" aria-label="${escHtml(uiText("scan_view"))}">${svgIcon("doc", 14)}</button>` : ""}${lk ? "" : `<button class="btn sm ghost" data-rchdel="${escHtml(i.id)}" aria-label="${escHtml(uiText("tm_del"))}">${svgIcon("ban", 14)}</button>`}</div></div>`;
       }).join("") ||
-      `<p class="small muted" style="text-align:center;margin:16px 0">${escHtml(uiText("rch_empty"))}</p>`
-    }</div>
+      `<p class="small muted" style="text-align:center;margin:16px 0">${escHtml(all.length ? uiText("rch_year_none", { y: Y }) : uiText("rch_empty"))}</p>`
+    }${older.length && !all.some(ofY) ? `<p class="small muted" style="text-align:center;margin:16px 0">${escHtml(uiText("rch_year_none", { y: Y }))}</p>` : ""}</div>
     ${rvRecList()}
     ${rchList().some((i) => i.locked) ? `<div class="rchsec">${escHtml(uiText("rch_gobd_h"))}</div><div class="rcharch"><div class="rcseal" id="rcSeal">${svgIcon("shield", 18)}<span>${escHtml(uiText("rch_seal_chk"))}</span></div><div class="rcab"><button type="button" class="btn" data-rvarch>${svgIcon("dl", 16)} ${escHtml(uiText("rch_arch"))}</button><button type="button" class="btn ghost" data-rvlogv>${svgIcon("list", 16)} ${escHtml(uiText("rch_log"))}</button></div><div class="rclog" id="rcLog" hidden></div><small class="rvhint">${escHtml(uiText("rch_gobd_s"))}</small></div>` : ""}
     <p class="small muted" style="margin-top:10px">${escHtml(uiText("rch_auto"))}</p>`;
