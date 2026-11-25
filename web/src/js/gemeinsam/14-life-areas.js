@@ -107,6 +107,10 @@ function homeHub(ym, c) {
       )
     );
   }
+  {
+    const dn = (store.settings.docs || []).filter((d) => d.year === ym.slice(0, 4)).length;
+    t.push(areaTile(svgIcon("doc", 22), uiText("dk_tile"), dn ? uiText("dk_tile_n", { n: String(dn) }) : uiText("dk_tile_0"), "data-dkopen"));
+  }
   return `<div class="card areacard">${areaHead("Alles im Haushalt", "konten", "Einstellungen Haushalt")}<div class="agrid">${t.join("")}</div></div>`;
 }
 /* ===== Beruf: Job und Geschäft getrennt (wer angestellt UND selbstständig ist) =====

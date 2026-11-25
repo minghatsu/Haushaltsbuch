@@ -109,6 +109,13 @@ function inbKinds() {
     k === "konto" ? pdf && !img : k === "bon" || k === "beleg" || k === "bs" ? !pdf : true
   );
 }
+/* Geteilt, hereingezogen oder eingefügt: Die App erkennt selbst, was es ist (Dokumenten-Ablage).
+   CSV-Umsätze und E-Rechnungen (XML) gehen weiter den bekannten Weg. */
+function inbAuto(fs) {
+  const a = [...fs];
+  if (a.some((f) => /csv|xml/i.test(f.type || "") || /\.(csv|xml)$/i.test(f.name || ""))) return inbOpen(a);
+  return dokUpload(a);
+}
 function inbOpen(files, o) {
   o = o || {};
   if (!o.checked && hasSelf() && [...files].some((f) => isXmlF(f) || isPdfF(f))) {
@@ -386,7 +393,7 @@ window.hbShared = async () => {
   try {
     B.sharedClear();
   } catch (_) {}
-  if (fs.length) inbOpen(fs);
+  if (fs.length) inbAuto(fs);
 };
 setTimeout(() => {
   try {
@@ -450,7 +457,7 @@ setTimeout(() => {
     const fs = [...(e.dataTransfer.files || [])].filter(
       (f) => /^image\/|pdf|csv/i.test(f.type || "") || /\.(pdf|csv|jpe?g|png|heic|webp)$/i.test(f.name || "")
     );
-    if (fs.length) inbOpen(fs);
+    if (fs.length) inbAuto(fs);
   });
   window.addEventListener("paste", (e) => {
     const a = document.activeElement;
@@ -460,7 +467,7 @@ setTimeout(() => {
     );
     if (fs.length) {
       e.preventDefault();
-      inbOpen(fs);
+      inbAuto(fs);
     }
   });
 })();

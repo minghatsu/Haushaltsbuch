@@ -25964,6 +25964,228 @@ body.locked .pvfab {
   flex: 1;
   justify-content: center;
 }
+
+/* Dokumenten-Ablage: Jahr aus der Kopfzeile, Art und Jahr erkannt */
+.agrid > .atile[data-dkopen]:last-child:nth-child(3n + 1) {
+  grid-column: 1/-1;
+}
+html.pc #v-home .agrid > .atile[data-dkopen]:last-child:nth-child(3n + 1) {
+  min-height: 84px;
+  flex-direction: row;
+  gap: 12px;
+}
+.dkup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 72px;
+  padding: 14px 16px;
+  border: 1.5px dashed color-mix(in srgb, var(--accent) 55%, var(--line));
+  border-radius: 18px;
+  background: var(--accent-soft);
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.2s var(--ease-pop, cubic-bezier(0.3, 1.6, 0.5, 1)),
+    background 0.2s;
+}
+.dkup:active {
+  transform: scale(0.97);
+}
+.dkup b {
+  display: block;
+  font-size: 16px;
+}
+.dkup small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.dkupi {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+}
+.dkempty {
+  margin: 18px 4px 6px;
+  text-align: center;
+}
+.dkgrp {
+  margin-top: 8px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--line);
+  overflow: hidden;
+}
+.dkgrp:first-of-type {
+  margin-top: 14px;
+}
+.dkgh,
+.dkbh {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 14px 10px 12px;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.dkgh b {
+  flex: 1;
+  font-size: 15px;
+}
+.dkgh:focus-visible,
+.dkbh:focus-visible,
+.dkup:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.dkic {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.dkn {
+  min-width: 26px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: var(--sunk);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.dkl {
+  border-top: 1px solid var(--line);
+}
+.dkrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 4px;
+}
+.dkrow + .dkrow {
+  border-top: 1px solid var(--line);
+}
+.dkrv {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  padding: 10px 10px 10px 14px;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.dkrv .grow,
+.dkbh .grow {
+  flex: 1;
+  min-width: 0;
+}
+.dkrv b,
+.dkbh b {
+  display: block;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dkrv small,
+.dkbh small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dkrow .btn.sm {
+  flex: none;
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+.dksay {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--accent-soft);
+  margin-bottom: 10px;
+}
+.dksay .mav {
+  width: 44px;
+  height: 44px;
+  flex: none;
+}
+.dksay b {
+  display: block;
+  font-size: 16px;
+}
+.dksay small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.dkbl {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 4px;
+}
+.dkbr {
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--line);
+  overflow: hidden;
+}
+.dkbr.q .dkic {
+  background: color-mix(in srgb, var(--warn, #c27c0e) 18%, var(--surface));
+  color: var(--warn, #b35c00);
+}
+.dkbr.q small {
+  color: var(--warn, #b35c00);
+}
+.dkbr.skip {
+  opacity: 0.55;
+}
+.dkyr {
+  flex: none;
+  padding: 3px 10px;
+  border-radius: 99px;
+  background: var(--sunk);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.dkbe {
+  padding: 4px 14px 14px;
+  border-top: 1px solid var(--line);
+}
 </style>
 <style id="pcCss" media="not all">/*PC-CSS*/</style>
 
@@ -51576,6 +51798,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.49.9",
+    "24. November 2026",
+    [
+      "Dokumenten-Ablage: Neue Kachel „Dokumente“ im Haushalt. Lade Briefe, Bescheide, Verträge, Abrechnungen oder Kassenbons als PDF oder Foto hoch – einzeln oder viele auf einmal. Die App erkennt, was es ist (vom Jobcenter-Bescheid über Lohnabrechnung, Steuerbescheid, BAföG, Rente, Kindergeld bis zur Nebenkostenabrechnung) und zu welchem Jahr es gehört.",
+      "Die Ablage zeigt immer das Jahr aus der Kopfzeile, sortiert nach Art. Wo die App mit einem Dokument mehr anfangen kann – Bescheid prüfen, Steuerbescheid, Kassenbon, Ausgabe, Rechnung –, gibt es dafür einen Knopf.",
+      "Geteilte, hereingezogene oder eingefügte Dateien landen jetzt direkt in der Erkennung, statt dass du erst die Art wählen musst.",
+    ],
+  ],
+  [
     "0.49.8",
     "24. November 2026",
     [
@@ -54165,6 +54396,17 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.49.9",
+    s: () => [
+      {
+        sel: '[data-view="home"] [data-dkopen]',
+        ic: "doc",
+        t: uiText("nw_dk_t"),
+        p: [uiText("nw_dk_p")],
+      },
+    ],
+  },
   {
     v: "0.49.8",
     s: () =>
@@ -58182,6 +58424,10 @@ function homeHub(ym, c) {
         "data-kidsopen"
       )
     );
+  }
+  {
+    const dn = (store.settings.docs || []).filter((d) => d.year === ym.slice(0, 4)).length;
+    t.push(areaTile(svgIcon("doc", 22), uiText("dk_tile"), dn ? uiText("dk_tile_n", { n: String(dn) }) : uiText("dk_tile_0"), "data-dkopen"));
   }
   return `<div class="card areacard">${areaHead("Alles im Haushalt", "konten", "Einstellungen Haushalt")}<div class="agrid">${t.join("")}</div></div>`;
 }
@@ -90290,6 +90536,67 @@ const TEXTS = {
     "تعرض الفواتير الآن السنة المحددة في الشريط العلوي – الأحدث أولًا مع إيرادات السنة. ارفع عدة فواتير قديمة دفعة واحدة عبر «استيراد».",
     "Facturile arată acum anul din antet – cele mai noi întâi, cu cifra de afaceri a anului. Încarci mai multe facturi vechi deodată prin „Importă”.",
   ],
+  dk_konto: ["Kontoauszug", "Bank statement", "Hesap özeti", "Выписка по счёту", "Виписка з рахунку", "Wyciąg bankowy", "كشف حساب", "Extras de cont"],
+  dk_lohn: ["Lohnabrechnung", "Payslip", "Maaş bordrosu", "Расчётный лист", "Розрахунковий лист", "Pasek wynagrodzenia", "قسيمة الراتب", "Fluturaș de salariu"],
+  dk_lstb: ["Lohnsteuerbescheinigung", "Annual wage tax certificate", "Yıllık ücret vergisi belgesi", "Справка о налоге на зарплату", "Довідка про податок на зарплату", "Zaświadczenie o podatku od wynagrodzeń", "شهادة ضريبة الأجور", "Certificat impozit pe salariu"],
+  dk_stb: ["Steuerbescheid", "Tax assessment", "Vergi tebliği", "Налоговое уведомление", "Податкове повідомлення", "Decyzja podatkowa", "إشعار ضريبي", "Decizie de impunere"],
+  dk_rch: ["Eigene Rechnung", "My invoice", "Kendi faturam", "Мой счёт", "Мій рахунок", "Moja faktura", "فاتورتي", "Factura mea"],
+  dk_erch: ["Rechnung an mich", "Bill to me", "Bana gelen fatura", "Счёт мне", "Рахунок мені", "Rachunek dla mnie", "فاتورة موجهة إليّ", "Factură către mine"],
+  dk_bon: ["Kassenbon", "Receipt", "Fiş", "Чек", "Чек", "Paragon", "إيصال", "Bon fiscal"],
+  dk_jc: ["Jobcenter / Bürgergeld", "Jobcenter / citizen's income", "Jobcenter / vatandaşlık parası", "Джобцентр / Bürgergeld", "Джобцентр / Bürgergeld", "Jobcenter / Bürgergeld", "جوب سنتر / Bürgergeld", "Jobcenter / Bürgergeld"],
+  dk_aa: ["Agentur für Arbeit", "Employment agency", "İş ajansı", "Агентство по труду", "Агентство праці", "Agencja pracy", "وكالة العمل", "Agenția de muncă"],
+  dk_termin: ["Einladung / Termin", "Invitation / appointment", "Davet / randevu", "Приглашение / приём", "Запрошення / прийом", "Zaproszenie / termin", "دعوة / موعد", "Invitație / programare"],
+  dk_fam: ["Kindergeld & Familie", "Child benefit & family", "Çocuk parası & aile", "Детские пособия и семья", "Дитячі виплати й сім'я", "Zasiłek na dziecko i rodzina", "إعانة الأطفال والأسرة", "Alocație & familie"],
+  dk_bafoeg: ["BAföG", "Student grant (BAföG)", "Öğrenim bursu (BAföG)", "BAföG (стипендия)", "BAföG (стипендія)", "BAföG (stypendium)", "منحة الدراسة (BAföG)", "Bursă (BAföG)"],
+  dk_rente: ["Rente", "Pension", "Emeklilik", "Пенсия", "Пенсія", "Emerytura", "التقاعد", "Pensie"],
+  dk_kk: ["Krankenkasse & Pflege", "Health insurance & care", "Sağlık sigortası & bakım", "Медстраховка и уход", "Медстрахування й догляд", "Kasa chorych i opieka", "التأمين الصحي والرعاية", "Casa de sănătate & îngrijire"],
+  dk_wohngeld: ["Wohngeld", "Housing benefit", "Konut yardımı", "Жилищное пособие", "Житлова допомога", "Dodatek mieszkaniowy", "إعانة السكن", "Ajutor pentru locuință"],
+  dk_nk: ["Nebenkostenabrechnung", "Utility cost statement", "Yan gider hesabı", "Расчёт коммунальных", "Розрахунок комунальних", "Rozliczenie mediów", "تسوية تكاليف السكن", "Decont utilități"],
+  dk_miete: ["Miete & Wohnung", "Rent & flat", "Kira & daire", "Аренда и квартира", "Оренда й квартира", "Czynsz i mieszkanie", "الإيجار والشقة", "Chirie & locuință"],
+  dk_energie: ["Strom, Gas, Wasser", "Power, gas, water", "Elektrik, gaz, su", "Свет, газ, вода", "Світло, газ, вода", "Prąd, gaz, woda", "الكهرباء والغاز والماء", "Curent, gaz, apă"],
+  dk_vertrag: ["Vertrag & Kündigung", "Contract & cancellation", "Sözleşme & fesih", "Договор и расторжение", "Договір і розірвання", "Umowa i wypowiedzenie", "عقد وإلغاء", "Contract & reziliere"],
+  dk_vers: ["Versicherung", "Insurance", "Sigorta", "Страховка", "Страховка", "Ubezpieczenie", "تأمين", "Asigurare"],
+  dk_arzt: ["Arzt & Apotheke", "Doctor & pharmacy", "Doktor & eczane", "Врач и аптека", "Лікар і аптека", "Lekarz i apteka", "الطبيب والصيدلية", "Medic & farmacie"],
+  dk_rundfunk: ["Rundfunkbeitrag", "Broadcasting fee", "Yayın ücreti", "Взнос за ТВ и радио", "Внесок за ТБ і радіо", "Opłata RTV", "رسوم البث", "Taxa radio-TV"],
+  dk_schule: ["Schule & Studium", "School & university", "Okul & üniversite", "Школа и учёба", "Школа й навчання", "Szkoła i studia", "المدرسة والجامعة", "Școală & studii"],
+  dk_ksk: ["Künstlersozialkasse", "Artists' social fund (KSK)", "Sanatçı sosyal kasası (KSK)", "Касса художников (KSK)", "Каса митців (KSK)", "Kasa artystów (KSK)", "صندوق الفنانين (KSK)", "Casa artiștilor (KSK)"],
+  dk_avertrag: ["Arbeitsvertrag", "Employment contract", "İş sözleşmesi", "Трудовой договор", "Трудовий договір", "Umowa o pracę", "عقد العمل", "Contract de muncă"],
+  dk_amt: ["Brief vom Amt", "Letter from an authority", "Resmi daire mektubu", "Письмо из ведомства", "Лист від установи", "Pismo z urzędu", "رسالة من جهة رسمية", "Scrisoare de la autorități"],
+  dk_sonst: ["Sonstiges", "Other", "Diğer", "Прочее", "Інше", "Inne", "أخرى", "Altele"],
+  dk_h: ["Dokumente {y}", "Documents {y}", "Belgeler {y}", "Документы {y}", "Документи {y}", "Dokumenty {y}", "مستندات {y}", "Documente {y}"],
+  dk_tile: ["Dokumente", "Documents", "Belgeler", "Документы", "Документи", "Dokumenty", "المستندات", "Documente"],
+  dk_tile_n: ["{n} abgelegt", "{n} filed", "{n} dosyalandı", "{n} в архиве", "{n} в архіві", "{n} w archiwum", "{n} محفوظة", "{n} arhivate"],
+  dk_tile_0: ["hochladen", "upload", "yükle", "загрузить", "завантажити", "prześlij", "رفع", "încarcă"],
+  dk_up: ["Dokumente hochladen", "Upload documents", "Belge yükle", "Загрузить документы", "Завантажити документи", "Prześlij dokumenty", "رفع مستندات", "Încarcă documente"],
+  dk_up_s: ["PDF oder Foto, auch mehrere – Art und Jahr erkenne ich selbst", "PDF or photo, several at once – I'll spot the type and year", "PDF veya fotoğraf, birden fazla da olur – türü ve yılı ben bulurum", "PDF или фото, можно несколько – тип и год определю сама", "PDF чи фото, можна кілька – тип і рік визначу сама", "PDF lub zdjęcie, także kilka – rodzaj i rok rozpoznam sama", "PDF أو صورة، ويمكن عدة ملفات – سأتعرف على النوع والسنة", "PDF sau poză, și mai multe – recunosc singură tipul și anul"],
+  dk_reading: ["Lese Dokument {i} von {n} …", "Reading document {i} of {n} …", "Belge {i}/{n} okunuyor …", "Читаю документ {i} из {n} …", "Читаю документ {i} з {n} …", "Czytam dokument {i} z {n} …", "أقرأ المستند {i} من {n} …", "Citesc documentul {i} din {n} …"],
+  dk_pages: ["{n} Seiten", "{n} pages", "{n} sayfa", "{n} стр.", "{n} стор.", "{n} str.", "{n} صفحات", "{n} pagini"],
+  dk_del: ["Löschen", "Delete", "Sil", "Удалить", "Видалити", "Usuń", "حذف", "Șterge"],
+  dk_deleted: ["Dokument gelöscht", "Document deleted", "Belge silindi", "Документ удалён", "Документ видалено", "Dokument usunięty", "تم حذف المستند", "Document șters"],
+  dk_none: ["Noch keine Dokumente. Lade Briefe, Bescheide, Verträge oder Rechnungen hoch – ich sortiere sie nach Art und Jahr.", "No documents yet. Upload letters, notices, contracts or bills – I'll sort them by type and year.", "Henüz belge yok. Mektup, tebliğ, sözleşme veya fatura yükle – türe ve yıla göre sıralarım.", "Пока нет документов. Загрузи письма, уведомления, договоры или счета – я разложу их по типу и году.", "Поки немає документів. Завантаж листи, повідомлення, договори чи рахунки – я розкладу їх за типом і роком.", "Brak dokumentów. Prześlij listy, decyzje, umowy lub rachunki – posortuję je według rodzaju i roku.", "لا توجد مستندات بعد. ارفع الرسائل أو الإشعارات أو العقود أو الفواتير – سأرتبها حسب النوع والسنة.", "Încă nu ai documente. Încarcă scrisori, decizii, contracte sau facturi – le sortez după tip și an."],
+  dk_none_y: ["Für {y} ist noch nichts abgelegt. Andere Jahre wählst du oben in der Kopfzeile.", "Nothing filed for {y} yet. Pick other years in the header.", "{y} için henüz bir şey yok. Diğer yılları üst çubuktan seç.", "За {y} пока ничего нет. Другие годы – в верхней строке.", "За {y} поки нічого немає. Інші роки – у верхньому рядку.", "Na {y} nic jeszcze nie ma. Inne lata wybierzesz w nagłówku.", "لا شيء محفوظ لعام {y} بعد. اختر سنوات أخرى من الشريط العلوي.", "Nimic arhivat pentru {y}. Alți ani alegi din antet."],
+  dk_q_kind: ["Art nicht erkannt – bitte antippen", "Type not recognised – tap to choose", "Tür tanınmadı – seçmek için dokun", "Тип не распознан – нажми, чтобы выбрать", "Тип не розпізнано – натисни, щоб вибрати", "Nie rozpoznano rodzaju – dotknij, by wybrać", "لم يُعرف النوع – اضغط للاختيار", "Tip nerecunoscut – atinge pentru a alege"],
+  dk_q_check: ["Nicht ganz sicher – bitte kurz prüfen", "Not quite sure – please check", "Tam emin değilim – lütfen kontrol et", "Не совсем уверена – проверь", "Не зовсім впевнена – перевір", "Nie do końca pewne – sprawdź", "لست متأكدة تمامًا – يرجى التحقق", "Nu sunt sigură – verifică te rog"],
+  dk_kind: ["Art", "Type", "Tür", "Тип", "Тип", "Rodzaj", "النوع", "Tip"],
+  dk_year: ["Jahr", "Year", "Yıl", "Год", "Рік", "Rok", "السنة", "An"],
+  dk_say: ["Erkannt: {k} aus {y}.", "Recognised: {k} from {y}.", "Tanındı: {y} – {k}.", "Распознано: {k}, {y}.", "Розпізнано: {k}, {y}.", "Rozpoznano: {k} z {y}.", "تم التعرف: {k} من {y}.", "Recunoscut: {k} din {y}."],
+  dk_say_q: ["Was ist das für ein Dokument? Ich lege es unter {y} ab.", "What kind of document is this? I'll file it under {y}.", "Bu ne tür bir belge? {y} altına koyuyorum.", "Что это за документ? Положу его в {y}.", "Що це за документ? Покладу його в {y}.", "Co to za dokument? Odłożę go do {y}.", "ما نوع هذا المستند؟ سأحفظه ضمن {y}.", "Ce fel de document e? Îl pun la {y}."],
+  dk_found: ["{n} Dokumente erkannt", "{n} documents recognised", "{n} belge tanındı", "Распознано документов: {n}", "Розпізнано документів: {n}", "Rozpoznano dokumentów: {n}", "تم التعرف على {n} مستندات", "{n} documente recunoscute"],
+  dk_found_s: ["Tippe eine Zeile an, um Art oder Jahr zu ändern", "Tap a row to change type or year", "Tür veya yılı değiştirmek için satıra dokun", "Нажми на строку, чтобы изменить тип или год", "Натисни рядок, щоб змінити тип чи рік", "Dotknij wiersza, aby zmienić rodzaj lub rok", "اضغط على سطر لتغيير النوع أو السنة", "Atinge un rând pentru a schimba tipul sau anul"],
+  dk_file: ["Ablegen", "File it", "Kaydet", "В архив", "В архів", "Odłóż", "احفظ", "Arhivează"],
+  dk_file_n: ["{n} ablegen", "File {n}", "{n} kaydet", "В архив: {n}", "В архів: {n}", "Odłóż {n}", "احفظ {n}", "Arhivează {n}"],
+  dk_saved1: ["Dokument abgelegt", "Document filed", "Belge kaydedildi", "Документ в архиве", "Документ в архіві", "Dokument odłożony", "تم حفظ المستند", "Document arhivat"],
+  dk_saved: ["{n} Dokumente abgelegt", "{n} documents filed", "{n} belge kaydedildi", "В архиве документов: {n}", "В архіві документів: {n}", "Odłożono dokumentów: {n}", "تم حفظ {n} مستندات", "{n} documente arhivate"],
+  dk_noimg: ["Zu diesem Dokument ist kein Bild gespeichert", "No image saved for this document", "Bu belge için resim kayıtlı değil", "Для этого документа нет изображения", "Для цього документа немає зображення", "Brak obrazu dla tego dokumentu", "لا توجد صورة محفوظة لهذا المستند", "Nu există imagine pentru acest document"],
+  dk_use_stb: ["Bescheid prüfen", "Check notice", "Tebliği kontrol et", "Проверить", "Перевірити", "Sprawdź decyzję", "تحقق من الإشعار", "Verifică decizia"],
+  dk_use_bs: ["Bescheid prüfen", "Check notice", "Tebliği kontrol et", "Проверить", "Перевірити", "Sprawdź decyzję", "تحقق من الإشعار", "Verifică decizia"],
+  dk_use_br: ["Termin & Frist", "Date & deadline", "Randevu & süre", "Срок и приём", "Термін і прийом", "Termin i ostateczny", "الموعد والمهلة", "Termen & dată"],
+  dk_use_rch: ["Als Rechnung", "As invoice", "Fatura olarak", "Как счёт", "Як рахунок", "Jako faktura", "كفاتورة", "Ca factură"],
+  dk_use_bon: ["Bon buchen", "Book receipt", "Fişi kaydet", "Внести чек", "Внести чек", "Zaksięguj paragon", "سجّل الإيصال", "Înregistrează bonul"],
+  dk_use_beleg: ["Als Ausgabe", "As expense", "Gider olarak", "Как расход", "Як витрата", "Jako wydatek", "كمصروف", "Ca cheltuială"],
+  dk_use_konto: ["Umsätze holen", "Import transactions", "Hareketleri al", "Загрузить операции", "Завантажити операції", "Pobierz transakcje", "استيراد الحركات", "Importă tranzacții"],
+  nw_dk_t: ["Dokumente ablegen", "File your documents", "Belgelerini dosyala", "Архив документов", "Архів документів", "Archiwum dokumentów", "احفظ مستنداتك", "Arhivează documentele"],
+  nw_dk_p: ["Lade Briefe, Bescheide, Verträge oder Abrechnungen hoch – ich erkenne Art und Jahr und lege sie unter dem Jahr aus der Kopfzeile ab. Wo die App mehr damit kann, biete ich es an.", "Upload letters, notices, contracts or statements – I spot the type and year and file them under the year in the header. Where the app can do more with one, I'll offer it.", "Mektup, tebliğ, sözleşme veya hesap dökümü yükle – türü ve yılı bulup üst çubuktaki yıla koyarım. Uygulama daha fazlasını yapabiliyorsa önereceğim.", "Загрузи письма, уведомления, договоры или расчёты – я определю тип и год и положу их под годом из верхней строки. Если приложение может больше, предложу.", "Завантаж листи, повідомлення, договори чи розрахунки – я визначу тип і рік і покладу їх під роком з верхнього рядка. Якщо застосунок може більше, запропоную.", "Prześlij listy, decyzje, umowy lub rozliczenia – rozpoznam rodzaj i rok i odłożę je pod rokiem z nagłówka. Gdy aplikacja może więcej, zaproponuję.", "ارفع الرسائل أو الإشعارات أو العقود أو الكشوف – أتعرف على النوع والسنة وأحفظها تحت السنة في الشريط العلوي. وإن أمكن للتطبيق فعل المزيد سأقترحه.", "Încarcă scrisori, decizii, contracte sau deconturi – recunosc tipul și anul și le pun la anul din antet. Unde aplicația poate mai mult, îți propun."],
 };
 
 /* Texte aus TEXTS in der aktuellen Sprache, Monatsnamen und das Zählwerk für Beträge */
@@ -105836,6 +106143,13 @@ function inbKinds() {
     k === "konto" ? pdf && !img : k === "bon" || k === "beleg" || k === "bs" ? !pdf : true
   );
 }
+/* Geteilt, hereingezogen oder eingefügt: Die App erkennt selbst, was es ist (Dokumenten-Ablage).
+   CSV-Umsätze und E-Rechnungen (XML) gehen weiter den bekannten Weg. */
+function inbAuto(fs) {
+  const a = [...fs];
+  if (a.some((f) => /csv|xml/i.test(f.type || "") || /\.(csv|xml)$/i.test(f.name || ""))) return inbOpen(a);
+  return dokUpload(a);
+}
 function inbOpen(files, o) {
   o = o || {};
   if (!o.checked && hasSelf() && [...files].some((f) => isXmlF(f) || isPdfF(f))) {
@@ -106113,7 +106427,7 @@ window.hbShared = async () => {
   try {
     B.sharedClear();
   } catch (_) {}
-  if (fs.length) inbOpen(fs);
+  if (fs.length) inbAuto(fs);
 };
 setTimeout(() => {
   try {
@@ -106177,7 +106491,7 @@ setTimeout(() => {
     const fs = [...(e.dataTransfer.files || [])].filter(
       (f) => /^image\/|pdf|csv/i.test(f.type || "") || /\.(pdf|csv|jpe?g|png|heic|webp)$/i.test(f.name || "")
     );
-    if (fs.length) inbOpen(fs);
+    if (fs.length) inbAuto(fs);
   });
   window.addEventListener("paste", (e) => {
     const a = document.activeElement;
@@ -106187,7 +106501,7 @@ setTimeout(() => {
     );
     if (fs.length) {
       e.preventDefault();
-      inbOpen(fs);
+      inbAuto(fs);
     }
   });
 })();
@@ -106659,6 +106973,427 @@ document.addEventListener("change", (e) => {
         .map((t) => `<p>${escHtml(t)}</p>`)
         .join("");
   }
+});
+
+/* ===== Dokumenten-Ablage =====
+   Dokumente hochladen (einzeln oder als Stapel), die App erkennt Art und Jahr und legt sie ab.
+   Die Ablage zeigt immer das Jahr aus der Kopfzeile. Wo die App mit einem Dokument mehr anfangen kann
+   (Bescheid-Check, Steuerbescheid, Rechnung, Kassenbon, Kontoauszug, Briefe vom Amt), bietet sie das an.
+
+   Erkennung: Jede Art hat Merkmale (Wörter, die fast nur in diesem Dokument stehen) mit Gewicht. Die Art mit
+   den meisten Punkten gewinnt; liegt sie zu knapp oder zu niedrig, fragt die Prüfliste nach. Das Profil
+   (Schule, Bürgergeld, Rente …) entscheidet nur, welche Arten in der Auswahl oben stehen – erkannt wird alles. */
+
+/* [id, Text-Schlüssel, Symbol, Profil-Gruppen, Weiterleitung, Merkmale] – Gruppen wie WGROUPS: job, edu, staat, rente */
+const DOK_ARTEN = [
+  ["konto", "dk_konto", "bank", [], "konto", [[/kontoauszug/, 6], [/alter kontostand|neuer kontostand/, 6], [/\biban\b/, 1], [/buchungstag|wertstellung|valuta/, 3]]],
+  ["lohn", "dk_lohn", "wallet", ["job", "edu"], "", [[/(lohn|gehalts|entgelt|bezüge|verdienst)abrechnung/, 8], [/auszahlungsbetrag|nettobezug|nettoverdienst/, 4], [/gesamtbrutto|steuer-brutto|sv-brutto/, 4], [/personalnummer|personal-nr/, 2]]],
+  ["lstb", "dk_lstb", "doctax", ["job"], "", [[/lohnsteuerbescheinigung/, 10], [/elektronischen lohnsteuerbescheinigung/, 4]]],
+  ["stb", "dk_stb", "doctax", [], "stb", [[/bescheid für (19|20)\d\d über/, 9], [/einkommensteuerbescheid|einkommensteuer und solidaritätszuschlag/, 7], [/festgesetzt werden|festsetzung/, 3], [/finanzamt/, 3], [/steuernummer/, 1], [/veranlagungszeitraum/, 3]]],
+  ["rch", "dk_rch", "docout", ["job"], "rch", [[/\brechnung\b/, 2], [/rechnungs-?\s?(nr|nummer)/, 3], [/zahlbar bis|zahlungsziel|bitte überweisen/, 2]]],
+  ["erch", "dk_erch", "docin", [], "beleg", [[/\brechnung\b/, 2], [/rechnungs-?\s?(nr|nummer)/, 3], [/kunden-?\s?(nr|nummer)/, 2], [/zahlbar bis|wird .* abgebucht|lastschrift/, 2]]],
+  ["bon", "dk_bon", "receipt", [], "bon", [[/\bsumme\b|\bzu zahlen\b/, 3], [/kartenzahlung|ec-karte|girocard|\bbar\b|rückgeld/, 3], [/mwst|ust\.?\s?\d/, 1], [/bon-?nr|kasse \d|beleg-?nr/, 3]]],
+  ["jc", "dk_jc", "doccheck", ["staat"], "bs", [[/jobcenter/, 5], [/bürgergeld|grundsicherung für arbeitsuchende|sgb ii/, 6], [/bewilligungsbescheid|änderungsbescheid|weiterbewilligung/, 4], [/bedarfsgemeinschaft|regelbedarf|kosten der unterkunft/, 4]]],
+  ["aa", "dk_aa", "doccheck", ["staat"], "bs", [[/agentur für arbeit|bundesagentur für arbeit/, 5], [/arbeitslosengeld(?! ii)|sgb iii/, 5], [/bewilligung|anspruchsdauer|leistungssatz/, 3]]],
+  ["termin", "dk_termin", "mail", ["staat"], "br", [[/einladung/, 4], [/meldetermin|termin am|bitte kommen sie|persönlich vorsprechen/, 5], [/jobcenter|agentur für arbeit|sozialamt/, 2]]],
+  ["fam", "dk_fam", "kids", [], "bs", [[/familienkasse/, 7], [/kindergeld|kinderzuschlag/, 6], [/elterngeld|elterngeldstelle/, 7], [/unterhaltsvorschuss/, 6]]],
+  ["bafoeg", "dk_bafoeg", "book", ["edu"], "bs", [[/bafög|ausbildungsförderung/, 8], [/studierendenwerk|amt für ausbildungsförderung/, 5], [/bewilligungszeitraum/, 2]]],
+  ["rente", "dk_rente", "doccheck", ["rente"], "bs", [[/deutsche rentenversicherung/, 6], [/rentenbescheid|renteninformation|rentenauskunft/, 7], [/erwerbsminderung|altersrente|rentenanpassung/, 5]]],
+  ["kk", "dk_kk", "health", [], "", [[/krankenkasse|krankenversicherung/, 4], [/\baok\b|techniker krankenkasse|barmer|\bdak\b|\bikk\b|\bbkk\b/, 4], [/krankengeld|pflegegrad|pflegekasse|mitgliedsbescheinigung/, 5]]],
+  ["wohngeld", "dk_wohngeld", "home", [], "bs", [[/wohngeld/, 9], [/wohngeldstelle/, 4]]],
+  ["nk", "dk_nk", "home", [], "", [[/nebenkostenabrechnung|betriebskostenabrechnung|heizkostenabrechnung/, 9], [/abrechnungszeitraum/, 2], [/umlageschlüssel|wohnfläche|vorauszahlung/, 2]]],
+  ["miete", "dk_miete", "home", [], "", [[/mietvertrag/, 8], [/mieterhöhung|mietanpassung|vergleichsmiete/, 7], [/vermieter(in)?\b|mieter(in)?\b/, 2], [/kaltmiete|warmmiete|kaution/, 3]]],
+  ["energie", "dk_energie", "bolt", [], "", [[/stromrechnung|jahresabrechnung|verbrauchsabrechnung/, 5], [/\bkwh\b|zählerstand|zählernummer/, 4], [/abschlag|stadtwerke|grundversorgung/, 3], [/\bgas\b|\bstrom\b|wasser/, 1]]],
+  ["vertrag", "dk_vertrag", "repeat", [], "", [[/vertragsbestätigung|auftragsbestätigung|ihre bestellung/, 5], [/kündigung|kündigungsbestätigung/, 5], [/mindestlaufzeit|vertragslaufzeit|tarif/, 3], [/mobilfunk|internet|dsl|glasfaser|streaming/, 2]]],
+  ["vers", "dk_vers", "shield", [], "", [[/versicherungsschein|versicherungsnummer|police/, 5], [/haftpflicht|hausrat|kfz-versicherung|berufsunfähigkeit|rechtsschutz/, 4], [/beitragsrechnung|versicherungsbeitrag/, 3]]],
+  ["arzt", "dk_arzt", "health", [], "beleg", [[/privatrechnung|privatliquidation|\bgoä\b|\bgoz\b/, 7], [/apotheke|zuzahlung|rezept/, 4], [/diagnose|behandlung|arztpraxis|zahnarzt/, 3]]],
+  ["rundfunk", "dk_rundfunk", "tv", [], "", [[/rundfunkbeitrag|beitragsservice/, 9]]],
+  ["schule", "dk_schule", "book", ["edu"], "", [[/schulbescheinigung|immatrikulationsbescheinigung|studienbescheinigung/, 9], [/semesterbeitrag|rückmeldung/, 5], [/ausbildungsvertrag|berufsschule/, 4]]],
+  ["ksk", "dk_ksk", "doccheck", ["job"], "", [[/künstlersozialkasse/, 9], [/künstlersozialversicherung/, 6]]],
+  ["avertrag", "dk_avertrag", "case", ["job", "edu"], "", [[/arbeitsvertrag/, 9], [/arbeitgeber|arbeitnehmer/, 2], [/probezeit|wöchentliche arbeitszeit|urlaubsanspruch/, 3]]],
+  ["amt", "dk_amt", "mail", ["staat"], "br", [[/rechtsbehelfsbelehrung|widerspruch/, 4], [/bescheid\b/, 3], [/aktenzeichen|geschäftszeichen|kundennummer bei/, 2], [/landratsamt|bürgeramt|sozialamt|ordnungsamt|stadtverwaltung|rathaus|behörde/, 4]]],
+  ["sonst", "dk_sonst", "doc", [], "", []],
+];
+const DOK = (id) => DOK_ARTEN.find((a) => a[0] === id) || DOK_ARTEN[DOK_ARTEN.length - 1];
+/* Die Weiterleitung muss zur Situation passen: eigene Rechnungen nur bei Selbstständigen */
+const dokRoute = (id) => {
+  const r = DOK(id)[4];
+  if (r === "rch" && !hasSelf()) return "";
+  return r;
+};
+const dokList = () => (store.settings.docs = store.settings.docs || []);
+const DOKU = { batch: null, open: null };
+
+function dokText(lines) {
+  return (lines || [])
+    .map((l) => (typeof l === "string" ? l : (l && (l.text || l.t)) || ""))
+    .join("\n");
+}
+
+/* Datum aus Textstellen wie 12.03.2025, 12.3.25 oder „12. März 2025“ */
+const DOK_MON = ["januar", "februar", "märz", "april", "mai", "juni", "juli", "august", "september", "oktober", "november", "dezember"];
+function dokDates(t) {
+  const out = [];
+  for (const m of t.matchAll(/\b(\d{1,2})\.\s?(\d{1,2})\.\s?((?:19|20)?\d\d)\b/g)) {
+    let y = +m[3];
+    if (y < 100) y += 2000;
+    const mo = +m[2],
+      d = +m[1];
+    if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31 && y >= 1990 && y <= 2100) out.push({ iso: `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`, at: m.index });
+  }
+  for (const m of t.matchAll(/\b(\d{1,2})\.?\s+(januar|februar|märz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+((?:19|20)\d\d)\b/g)) {
+    const mo = DOK_MON.indexOf(m[2]) + 1;
+    out.push({ iso: `${m[3]}-${String(mo).padStart(2, "0")}-${String(+m[1]).padStart(2, "0")}`, at: m.index });
+  }
+  return out.sort((a, b) => a.at - b.at);
+}
+
+/* Zu welchem Jahr gehört das Dokument? Je Art die Stelle, die das Jahr wirklich festlegt. */
+function dokYear(kind, t, dates) {
+  const yr = (re) => {
+    const m = t.match(re);
+    return m ? m[1] : "";
+  };
+  let y = "";
+  if (kind === "stb" || kind === "lstb")
+    y = yr(/(?:bescheid für|veranlagungszeitraum|kalenderjahr|für das jahr|bescheinigung für)\s*((?:19|20)\d\d)/) || yr(/\bfür\s+((?:19|20)\d\d)\b/);
+  else if (["jc", "aa", "bafoeg", "wohngeld", "fam", "rente"].includes(kind))
+    y = yr(/(?:bewilligungszeitraum|zeitraum|für die zeit|vom)\s*:?\s*\d{1,2}\.\d{1,2}\.((?:19|20)\d\d)/);
+  else if (kind === "nk" || kind === "energie")
+    y = yr(/abrechnungs(?:zeitraum|jahr)\s*:?\s*(?:\d{1,2}\.\d{1,2}\.)?((?:19|20)\d\d)/) || yr(/abrechnung\s+((?:19|20)\d\d)/);
+  else if (kind === "lohn")
+    y = yr(/(?:januar|februar|märz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+((?:19|20)\d\d)/) || yr(/abrechnungs(?:monat|zeitraum)\s*:?\s*\d{1,2}[./]((?:19|20)\d\d)/);
+  if (y) return { year: y, sure: true };
+  /* sonst: das Datum, das bei „Datum“ steht, oder das erste Datum oben auf der Seite */
+  const lab = t.match(/(?:datum|ausgestellt am|stand|vom)\s*:?\s*(\d{1,2}\.\s?\d{1,2}\.\s?(?:19|20)?\d\d)/);
+  if (lab) {
+    const d = dokDates(lab[1])[0];
+    if (d) return { year: d.iso.slice(0, 4), date: d.iso, sure: true };
+  }
+  if (dates.length) return { year: dates[0].iso.slice(0, 4), date: dates[0].iso, sure: dates.length > 0 };
+  const any = t.match(/\b(20[0-4]\d)\b/);
+  return { year: any ? any[1] : String(ui.ym || isoToday()).slice(0, 4), sure: false };
+}
+
+/* Art erkennen. Eigene Rechnung vs. Rechnung an mich: Steht mein Name oben als Absender, ist es meine. */
+function dokClassify(lines) {
+  const raw = dokText(lines),
+    t = raw.toLowerCase(),
+    top = t.slice(0, 600);
+  const b = typeof rvBiz === "function" ? rvBiz() : {},
+    mine = [b.name, b.owner, store.settings.name].filter((x) => x && x.length > 3).map((x) => x.toLowerCase());
+  const score = {};
+  for (const [id, , , , , rules] of DOK_ARTEN) {
+    let s = 0;
+    for (const [re, w] of rules) if (re.test(t)) s += w;
+    score[id] = s;
+  }
+  const fromMe = mine.some((m) => top.includes(m));
+  if (fromMe) score.erch = 0;
+  else score.rch = 0;
+  /* Kassenbons sind kurz – lange Dokumente mit „Summe“ sind fast nie ein Bon */
+  if (t.length > 2500) score.bon = Math.max(0, score.bon - 4);
+  /* ein Termin ist ein Brief vom Amt, aber genauer – ein Bescheid mit Leistung ist mehr als ein Brief */
+  if (score.termin >= 7) score.amt = Math.max(0, score.amt - 3);
+  const ranked = Object.entries(score)
+    .filter(([id]) => id !== "sonst")
+    .sort((a, c) => c[1] - a[1]);
+  const [best, s1] = ranked[0] || ["sonst", 0],
+    s2 = (ranked[1] || [0, 0])[1];
+  const kind = s1 >= 5 ? best : "sonst",
+    sure = s1 >= 6 && s1 - s2 >= 2;
+  const dates = dokDates(t),
+    Y = dokYear(kind, t, dates);
+  /* Absender: erste kurze Zeile oben, die nicht ich bin */
+  const L = raw
+    .split("\n")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 2 && s.length < 60);
+  const from = L.slice(0, 8).find((s) => !mine.some((m) => s.toLowerCase().includes(m)) && !/\d{5}|\d{1,2}\.\d{1,2}\.\d{2}|@|www\.|tel|fax|seite|datum|^den\b/i.test(s)) || "";
+  const amt = (() => {
+    const m = raw.match(/(?:gesamtbetrag|endbetrag|zu zahlen|auszahlungsbetrag|erstattung|nachzahlung|summe)[^\d-]{0,30}(-?\d{1,3}(?:\.\d{3})*,\d{2})/i);
+    return m ? parseAmt(m[1]) : 0;
+  })();
+  return { kind, sure: sure && Y.sure, year: Y.year, date: Y.date || (dates[0] && dates[0].iso) || "", from, amt, score: s1 };
+}
+
+/* Arten in der Auswahl: zum Profil passende zuerst */
+function dokKindsOrdered() {
+  const w = (WORK.find((x) => x[0] === (store.settings.work || "beides")) || [])[3] || "job";
+  return DOK_ARTEN.slice().sort((a, c) => (c[3].includes(w) ? 1 : 0) - (a[3].includes(w) ? 1 : 0));
+}
+const dokName = (id) => uiText(DOK(id)[1]);
+
+/* ---------- Hochladen ---------- */
+function dokPick() {
+  const inp = document.createElement("input");
+  inp.type = "file";
+  inp.accept = "application/pdf,image/*";
+  inp.multiple = true;
+  inp.onchange = () => {
+    const fs = [...(inp.files || [])];
+    if (fs.length) dokUpload(fs);
+  };
+  inp.click();
+}
+async function dokUpload(files) {
+  const fs = [...files].slice(0, 40);
+  DOKU.batch = { items: [], n: fs.length, i: 0, busy: true, open: null };
+  dokOpen();
+  for (const f of fs) {
+    if (!DOKU.batch) return;
+    DOKU.batch.i++;
+    dokRender();
+    let R = { lines: [], img: null, pages: 0 };
+    try {
+      R = await readPages([f]);
+    } catch (_) {}
+    let lines = R.lines || [];
+    if (!dokText(lines).trim() && window.HB_OCRTXT) lines = String(window.HB_OCRTXT).split("\n");
+    const c = dokClassify(lines);
+    if (!DOKU.batch) return;
+    DOKU.batch.items.push({ f, img: R.img, pages: R.pages || 1, ...c });
+  }
+  if (!DOKU.batch) return;
+  DOKU.batch.busy = false;
+  dokRender(true);
+}
+async function dokSaveBatch(routeOne) {
+  const B = DOKU.batch;
+  if (!B) return;
+  const keep = B.items.filter((it) => !it.skip);
+  let n = 0;
+  for (const it of keep) {
+    const id = "d" + Date.now().toString(36) + (n++).toString(36);
+    if (it.img)
+      try {
+        await rcptPut("doc-" + id, it.img);
+      } catch (_) {}
+    dokList().push({
+      id,
+      kind: it.kind,
+      year: it.year,
+      date: it.date || "",
+      from: it.from || "",
+      amt: it.amt || 0,
+      name: it.f.name || "",
+      pages: it.pages || 1,
+      img: it.img ? 1 : 0,
+      added: isoToday(),
+    });
+  }
+  await saveSettings();
+  const ys = [...new Set(keep.map((it) => it.year))].sort();
+  DOKU.batch = null;
+  if (ys.length && !ys.includes(String(ui.ym || "").slice(0, 4))) ui.ym = ys[ys.length - 1] + "-12";
+  toast(uiText(keep.length === 1 ? "dk_saved1" : "dk_saved", { n: String(keep.length) }));
+  SND.play("done");
+  if (routeOne && keep.length === 1 && dokRoute(keep[0].kind)) {
+    const r = dokRoute(keep[0].kind);
+    let f = keep[0].f;
+    /* Bon und Ausgabe lesen nur Bilder – aus einem PDF nehmen wir das Seitenbild */
+    if ((r === "bon" || r === "beleg") && isPdfF(f) && keep[0].img) f = await dokImgFile(keep[0].img, f.name);
+    hbSheetClose("dokBg");
+    return inbRun(r, f, 0, 1);
+  }
+  dokRender(true);
+  try {
+    render();
+  } catch (_) {}
+}
+
+/* ---------- Ansicht ---------- */
+function dokOpen() {
+  hbSheet("dokBg", uiText("dk_h", { y: String(ui.ym || isoToday()).slice(0, 4) }));
+  dokRender(true);
+}
+function dokRender(fresh) {
+  const bg = $("dokBg");
+  if (!bg || bg.hidden) return;
+  const Y = String(ui.ym || isoToday()).slice(0, 4),
+    b = bg.querySelector(".hobody"),
+    E = escHtml;
+  bg.querySelector(".hbst").textContent = uiText("dk_h", { y: Y });
+  const B = DOKU.batch;
+  if (B && B.busy) {
+    b.innerHTML = `<div class="bsscan"><div class="stbpdf">${svgIcon("doc", 70)}</div><i class="bsbeam"></i><span class="bscorner"></span></div><p class="bsstat"><span class="dots3"><i></i><i></i><i></i></span> ${E(
+      uiText("dk_reading", { i: String(B.i), n: String(B.n) })
+    )}</p>`;
+    return;
+  }
+  if (B) {
+    b.innerHTML = dokBatchHtml();
+    if (fresh) b.scrollTop = b.parentElement.scrollTop = 0;
+    return;
+  }
+  const mine = dokList().filter((d) => d.year === Y);
+  const groups = DOK_ARTEN.map((a) => [a, mine.filter((d) => d.kind === a[0]).sort((x, z) => (z.date || "").localeCompare(x.date || ""))]).filter(
+    ([, l]) => l.length
+  );
+  b.innerHTML = `<button type="button" class="dkup" data-dkpick><span class="dkupi">${svgIcon("docin", 22)}</span><span><b>${E(uiText("dk_up"))}</b><small>${E(uiText("dk_up_s"))}</small></span></button>
+    ${
+      groups.length
+        ? groups
+            .map(
+              ([a, l]) =>
+                `<div class="dkgrp ${DOKU.open === a[0] ? "open" : ""}"><button type="button" class="dkgh" data-dkgrp="${a[0]}" aria-expanded="${DOKU.open === a[0]}"><span class="dkic">${svgIcon(a[2], 20)}</span><b>${E(
+                  uiText(a[1])
+                )}</b><span class="dkn">${l.length}</span>${svgIcon(DOKU.open === a[0] ? "up" : "down", 18)}</button>${
+                  DOKU.open === a[0]
+                    ? `<div class="dkl">${l
+                        .map(
+                          (d) =>
+                            `<div class="dkrow"><button type="button" class="dkrv" data-dkview="${E(d.id)}"><span class="grow"><b>${E(d.from || d.name || uiText(a[1]))}</b><small>${E(
+                              [d.date ? fxDate(d.date, { day: "numeric", month: "short", year: "numeric" }) : "", d.amt ? fmtEur(d.amt) : "", d.pages > 1 ? uiText("dk_pages", { n: String(d.pages) }) : ""]
+                                .filter(Boolean)
+                                .join(" · ")
+                            )}</small></span></button>${
+                              dokRoute(d.kind) && d.kind !== "konto" && d.img
+                                ? `<button type="button" class="btn sm" data-dkuse="${E(d.id)}">${E(uiText("dk_use_" + dokRoute(d.kind)))}</button>`
+                                : ""
+                            }<button type="button" class="iconbtn" data-dkdel="${E(d.id)}" aria-label="${E(uiText("dk_del"))}">${svgIcon("trash", 16)}</button></div>`
+                        )
+                        .join("")}</div>`
+                    : ""
+                }</div>`
+            )
+            .join("")
+        : `<p class="small muted dkempty">${E(uiText(dokList().length ? "dk_none_y" : "dk_none", { y: Y }))}</p>`
+    }`;
+  if (fresh) b.scrollTop = b.parentElement.scrollTop = 0;
+  if (fresh && !reducedMotion()) try {
+    stbAnim(b, ".dkup,.dkgrp");
+  } catch (_) {}
+}
+function dokBatchHtml() {
+  const B = DOKU.batch,
+    E = escHtml,
+    keep = B.items.filter((it) => !it.skip).length;
+  const row = (it, k) => {
+    const a = DOK(it.kind),
+      open = B.open === k,
+      q = !it.sure && !it.ok;
+    const sub = q
+      ? uiText(it.kind === "sonst" ? "dk_q_kind" : "dk_q_check")
+      : [it.from, it.date ? fxDate(it.date, { day: "numeric", month: "short", year: "numeric" }) : "", it.amt ? fmtEur(it.amt) : ""].filter(Boolean).join(" · ");
+    return `<div class="dkbr ${q ? "q" : ""} ${it.skip ? "skip" : ""} ${open ? "open" : ""}"><button type="button" class="dkbh" data-dkbopen="${k}" aria-expanded="${open}"><span class="dkic">${svgIcon(q ? "alert" : a[2], 18)}</span><span class="grow"><b>${E(
+      uiText(a[1])
+    )}</b><small>${E(sub || it.f.name)}</small></span><span class="dkyr">${E(it.year)}</span></button>${
+      open
+        ? `<div class="dkbe"><label class="hlf"><span>${E(uiText("dk_kind"))}</span><select class="in" id="dkK">${dokKindsOrdered()
+            .map((x) => `<option value="${x[0]}" ${x[0] === it.kind ? "selected" : ""}>${E(uiText(x[1]))}</option>`)
+            .join("")}</select></label><label class="hlf"><span>${E(uiText("dk_year"))}</span><input class="in" id="dkY" inputmode="numeric" maxlength="4" value="${E(it.year)}"></label><div class="rbedb"><button type="button" class="btn" data-dkbskip="${k}">${E(
+            uiText(it.skip ? "rb_unskip" : "rb_skip")
+          )}</button><button type="button" class="btn primary" data-dkbok="${k}">${E(uiText("rb_ok"))}</button></div></div>`
+        : ""
+    }</div>`;
+  };
+  const one = B.items.length === 1 && B.items[0],
+    r1 = one && dokRoute(one.kind);
+  return `${
+    one
+      ? `<div class="dksay">${mamiAvatar()}<span><b>${E(uiText(one.kind === "sonst" ? "dk_say_q" : "dk_say", { k: dokName(one.kind), y: one.year }))}</b><small>${E(
+          [one.from, one.amt ? fmtEur(one.amt) : ""].filter(Boolean).join(" · ")
+        )}</small></span></div>`
+      : `<div class="rbsum"><small>${E(uiText("dk_found_s"))}</small><b>${E(uiText("dk_found", { n: String(B.items.length) }))}</b></div>`
+  }
+    <div class="dkbl">${B.items.map(row).join("")}</div>
+    <div class="vabtns"><button type="button" class="btn" data-dkbcancel>${E(uiText("tm_cancel"))}</button>${
+      r1 ? `<button type="button" class="btn" data-dkbsave>${E(uiText("dk_file"))}</button><button type="button" class="btn primary" data-dkbroute>${E(uiText("dk_use_" + r1))}</button>` : `<button type="button" class="btn primary" data-dkbsave ${keep ? "" : "disabled"}>${E(uiText(keep === 1 ? "dk_file" : "dk_file_n", { n: String(keep) }))}</button>`
+    }</div>`;
+}
+
+async function dokImgFile(img, name) {
+  const bl = await (await fetch(img)).blob();
+  return new File([bl], (name || "dokument").replace(/\.pdf$/i, "") + ".jpg", { type: bl.type || "image/jpeg" });
+}
+async function dokFileFrom(d) {
+  const img = await rcptGet("doc-" + d.id);
+  return img ? dokImgFile(img, d.name) : null;
+}
+
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  if (t.closest("[data-dkopen]")) {
+    DOKU.open = null;
+    dokOpen();
+    return;
+  }
+  if (!t.closest("#dokBg")) return;
+  if (t.closest("[data-dkpick]")) return dokPick();
+  const g = t.closest("[data-dkgrp]");
+  if (g) {
+    DOKU.open = DOKU.open === g.dataset.dkgrp ? null : g.dataset.dkgrp;
+    return dokRender();
+  }
+  const v = t.closest("[data-dkview]");
+  if (v) {
+    const img = await rcptGet("doc-" + v.dataset.dkview);
+    if (img) tmShow(img);
+    else toast(uiText("dk_noimg"));
+    return;
+  }
+  const u = t.closest("[data-dkuse]");
+  if (u) {
+    const d = dokList().find((x) => x.id === u.dataset.dkuse),
+      f = d && (await dokFileFrom(d));
+    if (!f) return toast(uiText("dk_noimg"));
+    hbSheetClose("dokBg");
+    return inbRun(dokRoute(d.kind), f, 0, 1);
+  }
+  const del = t.closest("[data-dkdel]");
+  if (del) {
+    const id = del.dataset.dkdel,
+      L = dokList(),
+      i = L.findIndex((x) => x.id === id);
+    if (i < 0) return;
+    const [gone] = L.splice(i, 1);
+    await saveSettings();
+    dokRender();
+    let undone = false;
+    toast(uiText("dk_deleted"), async () => {
+      undone = true;
+      L.splice(i, 0, gone);
+      await saveSettings();
+      dokRender();
+    });
+    setTimeout(() => {
+      if (!undone && !dokList().some((x) => x.id === id)) rcptDel("doc-" + id).catch(() => {});
+    }, 6000);
+    return;
+  }
+  const B = DOKU.batch;
+  if (!B) return;
+  const bo = t.closest("[data-dkbopen]");
+  if (bo) {
+    const k = Number(bo.dataset.dkbopen);
+    B.open = B.open === k ? null : k;
+    return dokRender();
+  }
+  const ok = t.closest("[data-dkbok]");
+  if (ok) {
+    const it = B.items[Number(ok.dataset.dkbok)];
+    it.kind = $("dkK").value;
+    const y = ($("dkY").value || "").trim();
+    if (/^(19|20)\d\d$/.test(y)) it.year = y;
+    it.ok = true;
+    it.skip = false;
+    B.open = null;
+    return dokRender();
+  }
+  const sk = t.closest("[data-dkbskip]");
+  if (sk) {
+    const it = B.items[Number(sk.dataset.dkbskip)];
+    it.skip = !it.skip;
+    B.open = null;
+    return dokRender();
+  }
+  if (t.closest("[data-dkbcancel]")) {
+    DOKU.batch = null;
+    return dokRender();
+  }
+  if (t.closest("[data-dkbsave]")) return dokSaveBatch(false);
+  if (t.closest("[data-dkbroute]")) return dokSaveBatch(true);
 });
 
 /* ===== Konto / Space bei der Buchung ===== */

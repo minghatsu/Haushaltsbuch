@@ -1648,6 +1648,17 @@ function ptourOpen(v) {
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
   {
+    v: "0.49.9",
+    s: () => [
+      {
+        sel: '[data-view="home"] [data-dkopen]',
+        ic: "doc",
+        t: uiText("nw_dk_t"),
+        p: [uiText("nw_dk_p")],
+      },
+    ],
+  },
+  {
     v: "0.49.8",
     s: () =>
       hasSelf()

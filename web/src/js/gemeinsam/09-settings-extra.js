@@ -240,6 +240,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.49.9",
+    "24. November 2026",
+    [
+      "Dokumenten-Ablage: Neue Kachel „Dokumente“ im Haushalt. Lade Briefe, Bescheide, Verträge, Abrechnungen oder Kassenbons als PDF oder Foto hoch – einzeln oder viele auf einmal. Die App erkennt, was es ist (vom Jobcenter-Bescheid über Lohnabrechnung, Steuerbescheid, BAföG, Rente, Kindergeld bis zur Nebenkostenabrechnung) und zu welchem Jahr es gehört.",
+      "Die Ablage zeigt immer das Jahr aus der Kopfzeile, sortiert nach Art. Wo die App mit einem Dokument mehr anfangen kann – Bescheid prüfen, Steuerbescheid, Kassenbon, Ausgabe, Rechnung –, gibt es dafür einen Knopf.",
+      "Geteilte, hereingezogene oder eingefügte Dateien landen jetzt direkt in der Erkennung, statt dass du erst die Art wählen musst.",
+    ],
+  ],
+  [
     "0.49.8",
     "24. November 2026",
     [
