@@ -38,6 +38,10 @@ async function pairKeys() {
   if (PAIR_K) return PAIR_K;
   const p = pairState();
   if (!p) throw new Error("nicht gekoppelt");
+  return (PAIR_K = await pairKeysOf(p));
+}
+/* Schlüssel zu einer beliebigen Kopplung (auch einer neuen, beim Entfernen eines Geräts) */
+async function pairKeysOf(p) {
   const base = await crypto.subtle.importKey("raw", fromB64u(p.k), "HKDF", false, ["deriveKey", "deriveBits"]);
   const prm = (info) => ({
     name: "HKDF",
@@ -67,12 +71,12 @@ async function pairKeys() {
     ["sign"]
   );
   const auth = toHex(await crypto.subtle.deriveBits(prm("auth"), base, 256));
-  return (PAIR_K = {
+  return {
     enc,
     mac,
     auth,
     vault: toHex(fromB64u(p.v)),
-  });
+  };
 }
 async function pairHid(col, id) {
   const K = await pairKeys();

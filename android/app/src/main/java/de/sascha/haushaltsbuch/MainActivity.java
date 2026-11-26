@@ -110,6 +110,16 @@ public class MainActivity extends Activity {
         // Test-Version (nur Debug-Build "MAMI Test"): Fernsteuerung für automatische Tests, keine Bildschirmsperre für Screenshots
         testBuild = (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         if (testBuild) WebView.setWebContentsDebuggingEnabled(true);
+        // Echtheitsprüfung: Eine umgebaute (neu signierte) App startet nicht mit deinen Daten
+        if (!testBuild && !signedByUs()) {
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("Diese App ist verändert")
+                .setMessage("Diese Finanz MAMI ist nicht mit dem echten Schlüssel signiert – jemand hat sie umgebaut. Zu deinem Schutz startet sie nicht. Lade die App nur über die offizielle Seite.")
+                .setCancelable(false)
+                .setPositiveButton("Schließen", (d, w) -> finish())
+                .show();
+            return;
+        }
         if (!testBuild && getSharedPreferences("hb-native", MODE_PRIVATE).getBoolean("secure", true))
             getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
         web = new WebView(this);
@@ -323,6 +333,7 @@ public class MainActivity extends Activity {
     @Override
     @SuppressWarnings("deprecation")
     public void onBackPressed() {
+        if (web == null) { finish(); return; }
         web.evaluateJavascript("(window.hbBack && window.hbBack()) ? 'yes' : 'no'", value -> {
             if (value == null || !value.contains("yes")) finish();
         });
@@ -650,6 +661,36 @@ public class MainActivity extends Activity {
         return new Object[]{code, text};
     }
 
+    /* SHA-256 des echten Signier-Zertifikats (öffentlich, steht auch in der Build-Prüfung) */
+    private static final String SIGN_FP = "49c1cb354a39f64972cce694034d6b68e977ff6f90423604d33fbabab8ded971";
+    private boolean signedByUs() {
+        try {
+            android.content.pm.PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES);
+            android.content.pm.SigningInfo si = pi.signingInfo;
+            if (si == null) return false;
+            android.content.pm.Signature[] sigs = si.hasMultipleSigners() ? si.getApkContentsSigners() : si.getSigningCertificateHistory();
+            if (sigs == null) return false;
+            for (android.content.pm.Signature sg : sigs) {
+                byte[] d = java.security.MessageDigest.getInstance("SHA-256").digest(sg.toByteArray());
+                StringBuilder h = new StringBuilder();
+                for (byte b : d) h.append(String.format("%02x", b));
+                if (SIGN_FP.equals(h.toString())) return true;
+            }
+        } catch (Throwable e) { }
+        return false;
+    }
+    /* Hinweis für die Sicherheits-Einstellungen: gerootet oder Debugger dran? (nur ein Hinweis, keine Sperre) */
+    static String deviceRiskOf(android.content.Context ctx) {
+        StringBuilder r = new StringBuilder();
+        try {
+            for (String p : new String[]{"/system/bin/su", "/system/xbin/su", "/sbin/su", "/system/sbin/su", "/vendor/bin/su", "/su/bin/su", "/data/adb/magisk", "/system/app/Superuser.apk"})
+                if (new File(p).exists()) { r.append("root,"); break; }
+            String tags = android.os.Build.TAGS;
+            if (tags != null && tags.contains("test-keys") && r.indexOf("root") < 0) r.append("root,");
+        } catch (Throwable e) { }
+        if (android.os.Debug.isDebuggerConnected()) r.append("debug,");
+        return r.toString();
+    }
     private class Bridge {
         @JavascriptInterface public String lastCrash() {
             try {
@@ -990,6 +1031,8 @@ public class MainActivity extends Activity {
             });
         }
 
+        @JavascriptInterface
+        public String deviceRisk() { return testBuild ? "" : deviceRiskOf(MainActivity.this); }
         @JavascriptInterface
         public boolean deviceSecure() {
             try {

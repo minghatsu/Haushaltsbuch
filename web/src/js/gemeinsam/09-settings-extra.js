@@ -240,6 +240,19 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.50.0",
+    "25. November 2026",
+    [
+      "Tresor: Mit App-Sperre sind deine Daten auf PC, iPhone und im Browser jetzt mit einem Schlüssel aus deiner PIN verschlüsselt (310.000 Runden PBKDF2, AES-256). Ohne PIN oder Wiederherstellungscode kann sie niemand lesen – auch nicht, wer die Festplatte ausliest. Bestehende Sperren ziehen beim nächsten Entsperren um und bekommen einen neuen Wiederherstellungscode.",
+      "Auf Wunsch löscht die App nach 10 falschen PINs alle Daten auf dem Gerät (unter Sicherheit, Standard aus).",
+      "Gerät entfernen mit Schlüsselwechsel: Der Abgleich bekommt einen neuen Schlüssel, die anderen Geräte ziehen automatisch mit. Das entfernte Gerät kommt an keine neuen Daten mehr und löscht seine Daten, sobald es online ist (braucht die neue pair.php auf dem Server).",
+      "Warnungen: Die App meldet sofort, wenn ein neues Gerät im Abgleich auftaucht oder es falsche Anmeldeversuche an deinem Server gab.",
+      "Verbindung: PC und Android akzeptieren für den Kopplungs-Server nur noch Let's-Encrypt-Zertifikate – ein Mann in der Mitte kommt nicht rein. Android überträgt beim Handywechsel keine App-Daten mehr automatisch.",
+      "Android: Eine umgebaute App mit fremder Signatur startet nicht mehr. Hinweis unter Sicherheit, wenn das Handy gerootet ist oder ein Debugger dranhängt.",
+      "Server: strengere Sicherheitsregeln auf allen Seiten, PHP-Version wird nicht mehr verraten. Jeder Build prüft jetzt auf Geheimnisse im Code und greift eine Server-Kopie gezielt an.",
+    ],
+  ],
+  [
     "0.49.9",
     "24. November 2026",
     [

@@ -26511,8 +26511,531 @@ html.pc #v-home .agrid > .atile[data-dkopen]:last-child:nth-child(3n + 1) {
   } catch (e) {}
   document.documentElement.dataset.theme = t;
 })();
-(() => {
+(async () => {
 "use strict";
+
+/* ===== Tresor =====
+   Auf PC, iPhone und im Browser verschlüsselt die App-Sperre die Daten mit einem Schlüssel, der aus der PIN entsteht.
+   Ohne PIN (oder Wiederherstellungscode) sind die gespeicherten Daten nur Datensalat – auch wenn jemand die Festplatte ausliest
+   oder den Eintrag für die App-Sperre löscht. Android braucht das nicht: dort schützt der Schlüsselspeicher des Handys.
+
+   Aufbau: Ein zufälliger Datenschlüssel (AES-256-GCM) verschlüsselt die Daten. Er liegt in „hb-tresor“ zweimal verpackt:
+   mit einem Schlüssel aus der PIN und mit einem aus dem Wiederherstellungscode (beide PBKDF2-SHA-256, 310.000 Runden).
+   Eine PIN-Prüfsumme gibt es nicht mehr – ob die PIN stimmt, zeigt nur das Auspacken.
+
+   Diese Datei läuft vor allem anderen. Ist ein Tresor da, wartet die App, bis er geöffnet ist (das „await“ unten). */
+const TRESOR_META = "hb-tresor",
+  TRESOR_ITER = 310000,
+  TRESOR_TRIES = "hb-lock-tries",
+  TRESOR = { on: false, key: null, raw: null, meta: null, cache: new Map(), pend: new Set(), busy: false, opened: false, recUsed: false, err: false };
+const TR_P = Storage.prototype,
+  TR_G = TR_P.getItem,
+  TR_S = TR_P.setItem,
+  TR_R = TR_P.removeItem,
+  TR_C = TR_P.clear;
+const tresorKey = (k) =>
+  k === "haushaltsbuch-v1" || k === "haushaltsbuch-sync-v1" || k === "hb-pair" || k === "haushaltsbuch-cloud" || String(k).startsWith("hb-sp-");
+/* Android hat den Schlüsselspeicher; der Tresor ist für PC, iPhone und Browser */
+const TRESOR_CAN = !!(window.crypto && crypto.subtle) && !(window.AndroidBridge && !window.AndroidBridge.desktop);
+
+const trEnc8 = (s) => new TextEncoder().encode(s),
+  trDec8 = (b) => new TextDecoder().decode(b);
+function trB64(u8) {
+  let s = "";
+  for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+function trUnB64(s) {
+  const b = atob(s),
+    u = new Uint8Array(b.length);
+  for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
+  return u;
+}
+const trRand = (n) => crypto.getRandomValues(new Uint8Array(n));
+async function trPipe(u8, Stream) {
+  const r = new Blob([u8]).stream().pipeThrough(new Stream("deflate-raw"));
+  return new Uint8Array(await new Response(r).arrayBuffer());
+}
+const TR_ZIP = typeof CompressionStream === "function" && typeof DecompressionStream === "function";
+
+/* Schlüssel aus PIN oder Code */
+async function trKek(secret, salt, iter) {
+  const base = await crypto.subtle.importKey("raw", trEnc8(String(secret)), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", hash: "SHA-256", salt: trUnB64(salt), iterations: iter || TRESOR_ITER },
+    base,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
+  );
+}
+async function trWrap(secret) {
+  const salt = trB64(trRand(16)),
+    kek = await trKek(secret, salt),
+    iv = trRand(12),
+    ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv, additionalData: trEnc8("hb-tresor") }, kek, TRESOR.raw));
+  const out = new Uint8Array(12 + ct.length);
+  out.set(iv);
+  out.set(ct, 12);
+  return { s: salt, w: trB64(out) };
+}
+async function trUnwrap(secret, box, iter) {
+  if (!box || !box.s || !box.w) return null;
+  try {
+    const kek = await trKek(secret, box.s, iter),
+      u = trUnB64(box.w);
+    return new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: u.subarray(0, 12), additionalData: trEnc8("hb-tresor") }, kek, u.subarray(12)));
+  } catch (_) {
+    return null;
+  }
+}
+async function trUse(raw) {
+  TRESOR.raw = raw;
+  TRESOR.key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt", "decrypt"]);
+}
+/* Werte ver- und entschlüsseln; der Name des Eintrags ist mit eingebunden, damit niemand Einträge vertauschen kann */
+async function trSealVal(k, v) {
+  let data = trEnc8(String(v)),
+    tag = "w1:";
+  if (TR_ZIP && data.length > 512) {
+    data = await trPipe(data, CompressionStream);
+    tag = "w2:";
+  }
+  const iv = trRand(12),
+    ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv, additionalData: trEnc8(k) }, TRESOR.key, data));
+  const out = new Uint8Array(12 + ct.length);
+  out.set(iv);
+  out.set(ct, 12);
+  return tag + trB64(out);
+}
+async function trOpenVal(k, s) {
+  const tag = String(s).slice(0, 3),
+    u = trUnB64(String(s).slice(3));
+  let pt = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: u.subarray(0, 12), additionalData: trEnc8(k) }, TRESOR.key, u.subarray(12)));
+  if (tag === "w2:") pt = await trPipe(pt, DecompressionStream);
+  return trDec8(pt);
+}
+const trSealed = (v) => typeof v === "string" && (v.startsWith("w1:") || v.startsWith("w2:"));
+
+/* localStorage: Tresor-Einträge liegen entschlüsselt nur im Speicher, auf der Platte verschlüsselt */
+function trRawKeys() {
+  const out = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (tresorKey(k)) out.push(k);
+    }
+  } catch (_) {}
+  return out;
+}
+TR_P.getItem = function (k) {
+  if (!TRESOR.on || this !== window.localStorage || !tresorKey(k)) return TR_G.call(this, k);
+  return TRESOR.cache.has(k) ? TRESOR.cache.get(k) : null;
+};
+TR_P.setItem = function (k, v) {
+  if (!TRESOR.on || this !== window.localStorage || !tresorKey(k)) return TR_S.call(this, k, v);
+  TRESOR.cache.set(k, String(v));
+  trQueue(k);
+};
+TR_P.removeItem = function (k) {
+  if (TRESOR.on && this === window.localStorage && tresorKey(k)) {
+    TRESOR.cache.delete(k);
+    TRESOR.pend.delete(k);
+  }
+  return TR_R.call(this, k);
+};
+TR_P.clear = function () {
+  if (this === window.localStorage) {
+    TRESOR.cache.clear();
+    TRESOR.pend.clear();
+    TRESOR.on = false;
+  }
+  return TR_C.call(this);
+};
+function trQueue(k) {
+  TRESOR.pend.add(k);
+  if (!TRESOR.busy) trFlush();
+}
+async function trFlush() {
+  TRESOR.busy = true;
+  try {
+    while (TRESOR.pend.size) {
+      const k = TRESOR.pend.values().next().value;
+      TRESOR.pend.delete(k);
+      if (!TRESOR.on || !TRESOR.cache.has(k)) continue;
+      const v = TRESOR.cache.get(k);
+      let e;
+      try {
+        e = await trSealVal(k, v);
+      } catch (_) {
+        TRESOR.err = true;
+        continue;
+      }
+      if (!TRESOR.on || !TRESOR.cache.has(k)) continue;
+      try {
+        TR_S.call(window.localStorage, k, e);
+        TRESOR.err = false;
+      } catch (_) {
+        TRESOR.err = true;
+        try {
+          toast(uiText("tr_save_fail"));
+        } catch (__) {}
+      }
+    }
+  } finally {
+    TRESOR.busy = false;
+  }
+}
+/* Wartet, bis alles verschlüsselt auf der Platte liegt (vor dem Neuladen, Abschalten usw.) */
+async function tresorFlushed() {
+  for (let i = 0; i < 200 && (TRESOR.busy || TRESOR.pend.size); i++) {
+    if (!TRESOR.busy && TRESOR.pend.size) trFlush();
+    await new Promise((r) => setTimeout(r, 15));
+  }
+}
+const trMetaSave = () => TR_S.call(window.localStorage, TRESOR_META, JSON.stringify(TRESOR.meta));
+
+/* Tresor einrichten: alle Einträge verschlüsseln */
+async function tresorEnable(pin, code, opts) {
+  if (!TRESOR_CAN) return false;
+  if (!TRESOR.key) await trUse(trRand(32));
+  const meta = { v: 1, iter: TRESOR_ITER, len: String(pin).length, p: await trWrap(pin), wipe: (opts && opts.wipe) || 0 };
+  if (code) meta.r = await trWrap(recNormT(code));
+  else if (TRESOR.meta && TRESOR.meta.r) meta.r = TRESOR.meta.r;
+  const vals = new Map();
+  for (const k of trRawKeys()) {
+    const v = TRESOR.on ? TRESOR.cache.get(k) : TR_G.call(window.localStorage, k);
+    if (v != null) vals.set(k, v);
+  }
+  /* erst alles verschlüsseln, dann schreiben – so bleibt bei einem Fehler der alte Stand */
+  const enc = new Map();
+  for (const [k, v] of vals) enc.set(k, await trSealVal(k, v));
+  TRESOR.meta = meta;
+  trMetaSave();
+  for (const [k, e] of enc) TR_S.call(window.localStorage, k, e);
+  for (const [k, v] of vals) TRESOR.cache.set(k, v);
+  TRESOR.on = true;
+  trRcptMigrate();
+  return true;
+}
+async function tresorSetPin(pin) {
+  TRESOR.meta.p = await trWrap(pin);
+  TRESOR.meta.len = String(pin).length;
+  trMetaSave();
+}
+async function tresorSetRec(code) {
+  TRESOR.meta.r = await trWrap(recNormT(code));
+  trMetaSave();
+}
+async function tresorCheckPin(pin) {
+  if (!TRESOR.meta) return false;
+  return !!(await trUnwrap(pin, TRESOR.meta.p, TRESOR.meta.iter));
+}
+async function tresorCheckRec(code) {
+  if (!TRESOR.meta || !TRESOR.meta.r) return false;
+  return !!(await trUnwrap(recNormT(code), TRESOR.meta.r, TRESOR.meta.iter));
+}
+/* Sperre aus: alles wieder unverschlüsselt (bzw. nur mit dem Geräteschlüssel) ablegen */
+async function tresorDisable() {
+  if (!TRESOR.on) return;
+  await tresorFlushed();
+  const vals = [...TRESOR.cache];
+  TRESOR.on = false;
+  for (const [k, v] of vals) TR_S.call(window.localStorage, k, v);
+  TR_R.call(window.localStorage, TRESOR_META);
+  TRESOR.cache.clear();
+  TRESOR.meta = null;
+  await trRcptMigrate(true);
+  TRESOR.key = null;
+  TRESOR.raw = null;
+}
+function tresorSetWipe(n) {
+  if (!TRESOR.meta) return;
+  TRESOR.meta.wipe = n || 0;
+  trMetaSave();
+}
+const recNormT = (c) =>
+  String(c || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .replace(/O/g, "0")
+    .replace(/I/g, "1");
+
+/* Belegfotos (IndexedDB) */
+async function tresorImgSeal(img) {
+  return TRESOR.on && TRESOR.key ? await trSealVal("rcpt", img) : null;
+}
+async function tresorImgOpen(s) {
+  try {
+    return await trOpenVal("rcpt", s);
+  } catch (_) {
+    return null;
+  }
+}
+async function trRcptMigrate(back) {
+  try {
+    if (typeof rcptOp !== "function") return;
+    const ids = await rcptOp("readonly", (st) => st.getAllKeys());
+    for (const id of ids || []) {
+      const v = await rcptOp("readonly", (st) => st.get(id));
+      if (!v || !v.img) continue;
+      if (!back && v.s) continue;
+      if (back && v.s !== 2) continue;
+      const img = back ? await tresorImgOpen(v.img) : v.img;
+      if (!img) continue;
+      const nv = back ? { ...rcptSeal(img), ts: v.ts } : { img: await trSealVal("rcpt", img), s: 2, ts: v.ts };
+      await rcptOp("readwrite", (st) => st.put(nv, id));
+      await new Promise((r) => setTimeout(r, 10));
+    }
+  } catch (_) {}
+}
+
+/* Fehlversuche – auf dem PC liegen sie mit dem Geräteschlüssel versiegelt */
+function trTries() {
+  try {
+    let v = TR_G.call(window.localStorage, TRESOR_TRIES) || "{}";
+    if (v.startsWith("v1:") && window.AndroidBridge && window.AndroidBridge.unseal) v = window.AndroidBridge.unseal(v);
+    const t = JSON.parse(v) || {};
+    return { f: +t.f || 0, u: +t.u || 0, r: +t.r || 0, t: +t.t || 0 };
+  } catch (_) {
+    return { f: 0, u: 0, r: 0, t: 0 };
+  }
+}
+function trTriesSet(t) {
+  try {
+    let v = JSON.stringify(t);
+    const B = window.AndroidBridge;
+    if (B && B.seal) {
+      const e = B.seal(v);
+      if (e && e.startsWith("v1:")) v = e;
+    }
+    TR_S.call(window.localStorage, TRESOR_TRIES, v);
+  } catch (_) {}
+}
+/* Nach zu vielen Fehlversuchen alles auf diesem Gerät löschen (nur wenn eingeschaltet) */
+async function tresorWipeAll() {
+  try {
+    TR_C.call(window.localStorage);
+  } catch (_) {}
+  try {
+    sessionStorage.clear();
+  } catch (_) {}
+  for (const n of ["haushaltsbuch-belege", "haushaltsbuch-logos"]) {
+    try {
+      await new Promise((ok) => {
+        const r = indexedDB.deleteDatabase(n);
+        r.onsuccess = r.onerror = r.onblocked = () => ok();
+      });
+    } catch (_) {}
+  }
+}
+
+/* ---------- Beim Start: Tresor öffnen ---------- */
+const TR_T = {
+  de: ["Finanz MAMI gesperrt", "Gib deine PIN ein.", "Falsche PIN", "Zu viele Versuche – warte {s} Sekunden.", "PIN vergessen?", "Wiederherstellungscode", "Entsperren", "Der Code stimmt nicht.", "Zurück zur PIN", "Alles auf diesem Gerät löschen", "Wirklich alles löschen? Was nicht abgeglichen oder gesichert ist, ist dann weg.", "Ja, löschen", "Öffne den Tresor …", "Noch {n} Versuche, dann werden alle Daten auf diesem Gerät gelöscht.", "Öffne die App über HTTPS, um deine verschlüsselten Daten zu entsperren."],
+  en: ["Finanz MAMI locked", "Enter your PIN.", "Wrong PIN", "Too many attempts – wait {s} seconds.", "Forgot PIN?", "Recovery code", "Unlock", "That code is wrong.", "Back to PIN", "Delete everything on this device", "Really delete everything? Anything not synced or backed up will be gone.", "Yes, delete", "Opening the vault …", "{n} attempts left, then all data on this device is deleted.", "Open the app over HTTPS to unlock your encrypted data."],
+  tr: ["Finanz MAMI kilitli", "PIN'ini gir.", "Yanlış PIN", "Çok fazla deneme – {s} saniye bekle.", "PIN'i mi unuttun?", "Kurtarma kodu", "Kilidi aç", "Kod yanlış.", "PIN'e dön", "Bu cihazdaki her şeyi sil", "Gerçekten her şey silinsin mi? Eşitlenmemiş veya yedeklenmemiş her şey gider.", "Evet, sil", "Kasa açılıyor …", "{n} deneme kaldı, sonra bu cihazdaki tüm veriler silinir.", "Şifreli verilerinin kilidini açmak için uygulamayı HTTPS üzerinden aç."],
+  ru: ["Finanz MAMI заблокирован", "Введи PIN.", "Неверный PIN", "Слишком много попыток – подожди {s} с.", "Забыл PIN?", "Код восстановления", "Разблокировать", "Код неверный.", "Назад к PIN", "Удалить всё на этом устройстве", "Точно удалить всё? Всё, что не синхронизировано и не сохранено, пропадёт.", "Да, удалить", "Открываю сейф …", "Осталось попыток: {n}, затем все данные на устройстве удалятся.", "Открой приложение через HTTPS, чтобы разблокировать зашифрованные данные."],
+  uk: ["Finanz MAMI заблоковано", "Введи PIN.", "Неправильний PIN", "Забагато спроб – зачекай {s} с.", "Забув PIN?", "Код відновлення", "Розблокувати", "Код неправильний.", "Назад до PIN", "Видалити все на цьому пристрої", "Справді видалити все? Усе, що не синхронізовано й не збережено, зникне.", "Так, видалити", "Відкриваю сейф …", "Залишилось спроб: {n}, потім усі дані на пристрої видаляться.", "Відкрий застосунок через HTTPS, щоб розблокувати зашифровані дані."],
+  pl: ["Finanz MAMI zablokowane", "Wpisz PIN.", "Zły PIN", "Za dużo prób – odczekaj {s} s.", "Nie pamiętasz PIN-u?", "Kod odzyskiwania", "Odblokuj", "Kod jest błędny.", "Wróć do PIN-u", "Usuń wszystko na tym urządzeniu", "Na pewno usunąć wszystko? Co nie jest zsynchronizowane ani zapisane, zniknie.", "Tak, usuń", "Otwieram sejf …", "Zostało prób: {n}, potem wszystkie dane na tym urządzeniu zostaną usunięte.", "Otwórz aplikację przez HTTPS, aby odblokować zaszyfrowane dane."],
+  ar: ["Finanz MAMI مقفل", "أدخل رمز PIN.", "رمز PIN خاطئ", "محاولات كثيرة – انتظر {s} ثانية.", "نسيت رمز PIN؟", "رمز الاسترداد", "فتح القفل", "الرمز غير صحيح.", "العودة إلى PIN", "حذف كل شيء على هذا الجهاز", "هل تريد حذف كل شيء فعلًا؟ ما لم تتم مزامنته أو نسخه احتياطيًا سيضيع.", "نعم، احذف", "جارٍ فتح الخزنة …", "تبقّى {n} محاولات، ثم تُحذف كل البيانات على هذا الجهاز.", "افتح التطبيق عبر HTTPS لفتح بياناتك المشفّرة."],
+  ro: ["Finanz MAMI blocat", "Introdu PIN-ul.", "PIN greșit", "Prea multe încercări – așteaptă {s} secunde.", "Ai uitat PIN-ul?", "Cod de recuperare", "Deblochează", "Codul este greșit.", "Înapoi la PIN", "Șterge tot de pe acest dispozitiv", "Sigur ștergi tot? Ce nu e sincronizat sau salvat se pierde.", "Da, șterge", "Deschid seiful …", "Mai ai {n} încercări, apoi toate datele de pe dispozitiv se șterg.", "Deschide aplicația prin HTTPS ca să-ți deblochezi datele criptate."],
+};
+function trT(i, o) {
+  let l = "de";
+  try {
+    l = TR_G.call(window.localStorage, "hb-lang") || "de";
+  } catch (_) {}
+  let s = (TR_T[l] || TR_T.de)[i];
+  for (const k in o || {}) s = s.replace("{" + k + "}", o[k]);
+  return s;
+}
+function tresorAsk() {
+  return new Promise((done) => {
+    const $t = (id) => document.getElementById(id),
+      m = TRESOR.meta,
+      len = Math.min(6, Math.max(4, +m.len || 4));
+    let pin = "",
+      busy = false;
+    const T = trTries();
+    $t("lockTitle").textContent = trT(0);
+    $t("lockText").textContent = trT(1);
+    ["lockCancel", "lockNext"].forEach((id) => ($t(id).hidden = true));
+    $t("bioKey").classList.add("off");
+    $t("lockForgot").hidden = false;
+    $t("lockForgot").textContent = trT(4);
+    $t("lockAlt").hidden = true;
+    const dots = () =>
+      ($t("pinDots").innerHTML = Array.from({ length: len }, (_, i) => `<span class="${i < pin.length ? "on" : ""}"></span>`).join(""));
+    const err = (s) => ($t("lockErr").textContent = s || "");
+    const shake = () => {
+      const el = $t("pinDots");
+      el.classList.remove("shake");
+      void el.offsetWidth;
+      el.classList.add("shake");
+    };
+    const waitMsg = () => (Date.now() < T.u ? trT(3, { s: Math.ceil((T.u - Date.now()) / 1000) }) : "");
+    const fail = async (msg) => {
+      T.f++;
+      T.t++;
+      if (m.wipe && T.t >= m.wipe) {
+        await tresorWipeAll();
+        location.reload();
+        return;
+      }
+      if (T.f >= 5) {
+        T.r++;
+        T.u = Date.now() + [30, 120, 600, 3600][Math.min(3, T.r - 1)] * 1000;
+        T.f = 0;
+      }
+      trTriesSet(T);
+      err(waitMsg() || (m.wipe && m.wipe - T.t <= 5 ? msg + " · " + trT(13, { n: m.wipe - T.t }) : msg));
+    };
+    const ok = async (raw, viaRec) => {
+      await trUse(raw);
+      for (const k of trRawKeys()) {
+        const v = TR_G.call(window.localStorage, k);
+        if (trSealed(v)) {
+          try {
+            TRESOR.cache.set(k, await trOpenVal(k, v));
+          } catch (_) {
+            /* Eintrag lässt sich nicht öffnen (beschädigt): Kopie beiseitelegen, bevor die App ihn neu schreibt */
+            try {
+              TR_S.call(window.localStorage, "hb-tr-bad:" + k, v);
+            } catch (__) {}
+          }
+        } else if (v != null) {
+          TRESOR.cache.set(k, v);
+          TRESOR.pend.add(k);
+        }
+      }
+      TRESOR.on = true;
+      TRESOR.opened = true;
+      TRESOR.recUsed = !!viaRec;
+      trTriesSet({ f: 0, u: 0, r: 0, t: 0 });
+      document.removeEventListener("keydown", onKey, true);
+      $t("keypad").removeEventListener("click", onPad, true);
+      $t("lockForgot").removeEventListener("click", onForgot, true);
+      $t("lockAlt").removeEventListener("click", onAlt, true);
+      $t("lockAlt").hidden = true;
+      ["pinDots", "keypad"].forEach((id) => ($t(id).hidden = false));
+      if (!viaRec) $t("lockBg").hidden = true;
+      if (TRESOR.pend.size) trFlush();
+      done();
+    };
+    const tryPin = async () => {
+      busy = true;
+      err(trT(12));
+      const raw = await trUnwrap(pin, m.p, m.iter);
+      busy = false;
+      if (raw) return ok(raw, false);
+      pin = "";
+      dots();
+      shake();
+      await fail(trT(2));
+    };
+    const key = (k) => {
+      if (busy) return;
+      if (k === "del") {
+        pin = pin.slice(0, -1);
+        return dots();
+      }
+      if (!/^\d$/.test(k)) return;
+      const w = waitMsg();
+      if (w) return err(w);
+      if (pin.length >= len) return;
+      pin += k;
+      err("");
+      dots();
+      if (pin.length === len) tryPin();
+    };
+    const onPad = (e) => {
+      const b = e.target.closest("[data-k]");
+      if (!b) return;
+      e.stopImmediatePropagation();
+      key(b.dataset.k);
+    };
+    const onKey = (e) => {
+      if (!$t("lockAlt").hidden) return;
+      if (/^\d$/.test(e.key)) key(e.key);
+      else if (e.key === "Backspace") key("del");
+      else return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    };
+    const E = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+    const panel = (html) => {
+      $t("lockAlt").innerHTML = html || "";
+      $t("lockAlt").hidden = !html;
+      ["pinDots", "keypad", "lockForgot"].forEach((id) => ($t(id).hidden = !!html));
+      err("");
+    };
+    const onForgot = (e) => {
+      e.stopImmediatePropagation();
+      panel(
+        `${m.r ? `<input class="in" id="trRecIn" placeholder="${E(trT(5))}" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-align:center;letter-spacing:.08em"><button class="btn primary block" id="trRecGo">${E(trT(6))}</button>` : ""}<button class="btn block" id="trWipe">${E(trT(9))}</button><button class="link small" id="trBack">${E(trT(8))}</button>`
+      );
+      setTimeout(() => $t("trRecIn") && $t("trRecIn").focus(), 30);
+    };
+    const onAlt = async (e) => {
+      const t = e.target;
+      if (t.closest("#trBack")) {
+        e.stopImmediatePropagation();
+        panel("");
+        $t("lockForgot").hidden = false;
+        return;
+      }
+      if (t.closest("#trRecGo")) {
+        e.stopImmediatePropagation();
+        const w = waitMsg();
+        if (w) return err(w);
+        t.disabled = true;
+        err(trT(12));
+        const raw = await trUnwrap(recNormT($t("trRecIn").value), m.r, m.iter);
+        t.disabled = false;
+        if (raw) return ok(raw, true);
+        await fail(trT(7));
+        return;
+      }
+      if (t.closest("#trWipe")) {
+        e.stopImmediatePropagation();
+        panel(`<span class="small">${E(trT(10))}</span><button class="btn block" id="trWipeYes" style="color:var(--bad,#c0392b)">${E(trT(11))}</button><button class="link small" id="trBack">${E(trT(8))}</button>`);
+        return;
+      }
+      if (t.closest("#trWipeYes")) {
+        e.stopImmediatePropagation();
+        await tresorWipeAll();
+        location.reload();
+      }
+    };
+    document.addEventListener("keydown", onKey, true);
+    $t("keypad").addEventListener("click", onPad, true);
+    $t("lockForgot").addEventListener("click", onForgot, true);
+    $t("lockAlt").addEventListener("click", onAlt, true);
+    dots();
+    err(waitMsg());
+    $t("lockBg").hidden = false;
+  });
+}
+async function tresorGate() {
+  let m = null;
+  try {
+    m = JSON.parse(TR_G.call(window.localStorage, TRESOR_META) || "null");
+  } catch (_) {}
+  if (!m || !m.p) return;
+  /* Tresor da, aber dieses Fenster kann nicht entschlüsseln (z. B. ohne HTTPS): nicht starten, sonst würde die App
+     die verschlüsselten Daten für leer halten und überschreiben */
+  if (!TRESOR_CAN) {
+    document.getElementById("lockTitle").textContent = trT(0);
+    document.getElementById("lockText").textContent = trT(14);
+    ["pinDots", "keypad", "lockForgot", "lockNext", "lockCancel"].forEach((id) => (document.getElementById(id).hidden = true));
+    document.getElementById("lockBg").hidden = false;
+    await new Promise(() => {});
+  }
+  TRESOR.meta = m;
+  await tresorAsk();
+}
+await tresorGate();
 
 /* Welches Gerät? – einmal hier entschieden, überall gleich.
      handy   Android-Handy oder Browser
@@ -51798,6 +52321,19 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.50.0",
+    "25. November 2026",
+    [
+      "Tresor: Mit App-Sperre sind deine Daten auf PC, iPhone und im Browser jetzt mit einem Schlüssel aus deiner PIN verschlüsselt (310.000 Runden PBKDF2, AES-256). Ohne PIN oder Wiederherstellungscode kann sie niemand lesen – auch nicht, wer die Festplatte ausliest. Bestehende Sperren ziehen beim nächsten Entsperren um und bekommen einen neuen Wiederherstellungscode.",
+      "Auf Wunsch löscht die App nach 10 falschen PINs alle Daten auf dem Gerät (unter Sicherheit, Standard aus).",
+      "Gerät entfernen mit Schlüsselwechsel: Der Abgleich bekommt einen neuen Schlüssel, die anderen Geräte ziehen automatisch mit. Das entfernte Gerät kommt an keine neuen Daten mehr und löscht seine Daten, sobald es online ist (braucht die neue pair.php auf dem Server).",
+      "Warnungen: Die App meldet sofort, wenn ein neues Gerät im Abgleich auftaucht oder es falsche Anmeldeversuche an deinem Server gab.",
+      "Verbindung: PC und Android akzeptieren für den Kopplungs-Server nur noch Let's-Encrypt-Zertifikate – ein Mann in der Mitte kommt nicht rein. Android überträgt beim Handywechsel keine App-Daten mehr automatisch.",
+      "Android: Eine umgebaute App mit fremder Signatur startet nicht mehr. Hinweis unter Sicherheit, wenn das Handy gerootet ist oder ein Debugger dranhängt.",
+      "Server: strengere Sicherheitsregeln auf allen Seiten, PHP-Version wird nicht mehr verraten. Jeder Build prüft jetzt auf Geheimnisse im Code und greift eine Server-Kopie gezielt an.",
+    ],
+  ],
+  [
     "0.49.9",
     "24. November 2026",
     [
@@ -54397,6 +54933,17 @@ function ptourOpen(v) {
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
   {
+    v: "0.50.0",
+    s: () => [
+      {
+        sel: "#topAv",
+        ic: "shield",
+        t: uiText("nw_sec_t"),
+        p: [uiText("nw_sec_p")],
+      },
+    ],
+  },
+  {
     v: "0.49.9",
     s: () => [
       {
@@ -54928,7 +55475,7 @@ const ntBlocked = () =>
   wizShould() ||
   ui.wiz ||
   !!document.querySelector(
-    ".backdrop:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden]),#actBg:not([hidden]),#mvBg:not([hidden]),#loginBg:not([hidden]),#langBg,#mvSheet:not([hidden])"
+    ".backdrop:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden]),#actBg:not([hidden]),#mvBg:not([hidden]),#loginBg:not([hidden]),#langBg,#mvSheet:not([hidden]),#lockBg:not([hidden])"
   );
 function ntAuto() {
   if (ntAuto.off) return false;
@@ -54968,14 +55515,15 @@ function ptourAuto() {
     wizShould() ||
     !PTOUR[ui.view] ||
     ptSeen()[ui.view] ||
-    document.querySelector(".backdrop:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden])")
+    /* nie über der App-Sperre – die Tour würde sonst Inhalte hinter der Sperre zeigen */
+    document.querySelector(".backdrop:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden]),#lockBg:not([hidden])")
   )
     return;
   if (ui.view === "home" && !store.tx.length) return;
   clearTimeout(ptourAuto.t);
   const v = ui.view;
   ptourAuto.t = setTimeout(() => {
-    if (ui.view === v && TOUR.i < 0 && !document.querySelector(".backdrop:not([hidden]),.hobg:not([hidden])"))
+    if (ui.view === v && TOUR.i < 0 && !document.querySelector(".backdrop:not([hidden]),.hobg:not([hidden]),#lockBg:not([hidden])"))
       ptourOpen(v);
   }, 900);
 }
@@ -56967,7 +57515,9 @@ new MutationObserver((ms) => {
   childList: true,
   subtree: true,
 });
-document.addEventListener("DOMContentLoaded", () => calScan());
+/* Der Tresor kann den Start verzögern – dann ist DOMContentLoaded schon vorbei */
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => calScan());
+else setTimeout(calScan, 0);
 const CAL = {
   el: null,
   s: null,
@@ -62675,6 +63225,8 @@ function devMe() {
     type: devType(),
     ver: curVerShort(),
     seen: Date.now(),
+    /* öffentlicher Geräteschlüssel: damit kann ein anderes Gerät beim Entfernen eines Geräts die neue Kopplung nur für dieses Gerät verschlüsseln */
+    ...(pairPub() ? { pk: pairPub() } : {}),
     ...(isMain()
       ? {
           main: true,
@@ -62730,10 +63282,11 @@ function renderGeraete() {
             return pn || ph
               ? `<span class="exi devi">${ph ? `<img src="${escHtml(ph)}" alt="" class="devph">` : `<b>${escHtml(pn[0].toUpperCase())}</b>`}<span class="avdev">${devIc(f, 10)}</span></span><span class="n"><b>${escHtml(pn || devShown(d))}${d.main ? " " + svgIcon("crown", 14) : ""}</b><small>${pn ? escHtml(devShown(d)) + " · " : ""}`
               : `<span class="exi">${devIc(f, 20)}</span><span class="n"><b>${escHtml(devShown(d))}${d.main ? " " + svgIcon("crown", 14) : ""}</b><small>`;
-          })()}${d.main ? "Hauptgerät · " : ""}${id === me ? "Dieses Gerät · " : ""}v${escHtml(String(d.ver || "?").replace(/^[vV] ?/, ""))} · ${id === me ? "jetzt aktiv" : "zuletzt " + ago(d.seen || 0)}</small></span>${id === me ? "" : ui.devDelArm === id ? `<button class="btn danger" data-devdel="${escHtml(id)}" style="padding:8px 12px">Wirklich entfernen?</button>` : `<button class="btn" data-devdel="${escHtml(id)}" style="padding:8px 12px">Entfernen</button>`}</div>`
+          })()}${d.main ? "Hauptgerät · " : ""}${id === me ? "Dieses Gerät · " : ""}v${escHtml(String(d.ver || "?").replace(/^[vV] ?/, ""))} · ${id === me ? "jetzt aktiv" : "zuletzt " + ago(d.seen || 0)}</small></span>${id === me ? "" : ui.devDelArm === id ? `<button class="btn danger" data-devdel="${escHtml(id)}" style="padding:8px 12px" title="${escHtml(MODE === "pair" ? uiText("rm_note") : "")}">Wirklich entfernen?</button>` : `<button class="btn" data-devdel="${escHtml(id)}" style="padding:8px 12px">Entfernen</button>`}</div>`
       )
       .join("")}
     <div class="small muted" style="margin:8px 2px 0">${L.length} von höchstens 10 Geräten gekoppelt.</div>
+    ${MODE === "pair" && SYNC.token && L.length > 1 ? `<div class="small muted" style="margin:6px 2px 0">${escHtml(uiText("rm_note"))}</div>` : ""}
     ${
       SYNCABLE && (!SYNC.token || MODE === "pair")
         ? SYNC.token
@@ -62800,6 +63353,21 @@ document.addEventListener("click", (e) => {
     return;
   }
   ui.devDelArm = null;
+  devRemove(id);
+});
+/* Entfernen: bei der Kopplung mit Schlüsselwechsel (57m), sonst wie bisher nur abmelden */
+async function devRemove(id) {
+  const name = zDevName(id);
+  let r = { ok: false, soft: true };
+  if (MODE === "pair" && SYNC.token) {
+    toast(uiText("rm_busy"), null, null, 20000);
+    try {
+      r = await pairRemoveDev(id);
+    } catch (e) {
+      toast(uiText("rm_fail"), null, null, 8000);
+      return;
+    }
+  }
   store.settings.devOut = {
     ...(store.settings.devOut || {}),
     [id]: Date.now(),
@@ -62808,8 +63376,16 @@ document.addEventListener("click", (e) => {
   devStore(id, null);
   if (SYNC.token) enqueue("app", "dev-" + id, null);
   renderGeraete();
-  toast(`${zDevName(id)} entfernt – es gleicht nicht mehr ab`);
-});
+  if (r.ok)
+    toast(
+      uiText("rm_done", { n: name }) + (r.left && r.left.length ? " " + uiText("rm_left", { n: r.left.join(", ") }) : ""),
+      null,
+      null,
+      r.left && r.left.length ? 12000 : 6000
+    );
+  else if (r.old) toast(uiText("rm_old", { n: name }), null, null, 10000);
+  else toast(`${name} entfernt – es gleicht nicht mehr ab`);
+}
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-qsw]");
   if (!b) return;
@@ -90597,6 +91173,35 @@ const TEXTS = {
   dk_use_konto: ["Umsätze holen", "Import transactions", "Hareketleri al", "Загрузить операции", "Завантажити операції", "Pobierz transakcje", "استيراد الحركات", "Importă tranzacții"],
   nw_dk_t: ["Dokumente ablegen", "File your documents", "Belgelerini dosyala", "Архив документов", "Архів документів", "Archiwum dokumentów", "احفظ مستنداتك", "Arhivează documentele"],
   nw_dk_p: ["Lade Briefe, Bescheide, Verträge oder Abrechnungen hoch – ich erkenne Art und Jahr und lege sie unter dem Jahr aus der Kopfzeile ab. Wo die App mehr damit kann, biete ich es an.", "Upload letters, notices, contracts or statements – I spot the type and year and file them under the year in the header. Where the app can do more with one, I'll offer it.", "Mektup, tebliğ, sözleşme veya hesap dökümü yükle – türü ve yılı bulup üst çubuktaki yıla koyarım. Uygulama daha fazlasını yapabiliyorsa önereceğim.", "Загрузи письма, уведомления, договоры или расчёты – я определю тип и год и положу их под годом из верхней строки. Если приложение может больше, предложу.", "Завантаж листи, повідомлення, договори чи розрахунки – я визначу тип і рік і покладу їх під роком з верхнього рядка. Якщо застосунок може більше, запропоную.", "Prześlij listy, decyzje, umowy lub rozliczenia – rozpoznam rodzaj i rok i odłożę je pod rokiem z nagłówka. Gdy aplikacja może więcej, zaproponuję.", "ارفع الرسائل أو الإشعارات أو العقود أو الكشوف – أتعرف على النوع والسنة وأحفظها تحت السنة في الشريط العلوي. وإن أمكن للتطبيق فعل المزيد سأقترحه.", "Încarcă scrisori, decizii, contracte sau deconturi – recunosc tipul și anul și le pun la anul din antet. Unde aplicația poate mai mult, îți propun."],
+  tr_save_fail: ["Speichern fehlgeschlagen – der Speicher ist voll.", "Saving failed – storage is full.", "Kaydedilemedi – depolama dolu.", "Не удалось сохранить – память заполнена.", "Не вдалося зберегти – пам'ять заповнена.", "Nie udało się zapisać – pamięć jest pełna.", "فشل الحفظ – مساحة التخزين ممتلئة.", "Salvarea a eșuat – memoria e plină."],
+  tr_left: ["noch {n} Versuche, dann wird alles gelöscht", "{n} attempts left, then everything is deleted", "{n} deneme kaldı, sonra her şey silinir", "осталось попыток: {n}, затем всё удалится", "залишилось спроб: {n}, потім усе видалиться", "zostało prób: {n}, potem wszystko zostanie usunięte", "تبقّى {n} محاولات، ثم يُحذف كل شيء", "mai ai {n} încercări, apoi se șterge tot"],
+  tr_opening: ["Prüfe PIN …", "Checking PIN …", "PIN kontrol ediliyor …", "Проверяю PIN …", "Перевіряю PIN …", "Sprawdzam PIN …", "جارٍ التحقق من PIN …", "Verific PIN-ul …"],
+  tr_moving: ["Verschlüssele deine Daten …", "Encrypting your data …", "Verilerin şifreleniyor …", "Шифрую твои данные …", "Шифрую твої дані …", "Szyfruję twoje dane …", "جارٍ تشفير بياناتك …", "Îți criptez datele …"],
+  tr_up_t: ["Dein Schutz ist jetzt stärker", "Your protection is now stronger", "Korumanız artık daha güçlü", "Защита стала сильнее", "Захист став сильнішим", "Twoja ochrona jest teraz silniejsza", "حمايتك أصبحت أقوى", "Protecția ta e acum mai puternică"],
+  tr_up_p: ["Deine Daten sind jetzt mit deiner PIN verschlüsselt. Dafür gibt es einen neuen Wiederherstellungscode – der alte gilt nicht mehr. Schreib ihn auf.", "Your data is now encrypted with your PIN. That comes with a new recovery code – the old one no longer works. Write it down.", "Verilerin artık PIN'inle şifreli. Bunun için yeni bir kurtarma kodu var – eskisi artık geçmiyor. Not al.", "Теперь твои данные зашифрованы PIN-кодом. Для этого есть новый код восстановления – старый больше не действует. Запиши его.", "Тепер твої дані зашифровані PIN-кодом. Для цього є новий код відновлення – старий більше не діє. Запиши його.", "Twoje dane są teraz szyfrowane PIN-em. Do tego jest nowy kod odzyskiwania – stary już nie działa. Zapisz go.", "بياناتك الآن مشفّرة برمز PIN. ولهذا يوجد رمز استرداد جديد – القديم لم يعد صالحًا. دوّنه.", "Datele tale sunt acum criptate cu PIN-ul. Pentru asta ai un nou cod de recuperare – cel vechi nu mai merge. Notează-l."],
+  tr_on_info: ["Deine Daten auf diesem Gerät sind mit der PIN verschlüsselt. Ohne PIN oder Wiederherstellungscode kann sie niemand lesen.", "Your data on this device is encrypted with your PIN. Without the PIN or recovery code nobody can read it.", "Bu cihazdaki verilerin PIN ile şifreli. PIN veya kurtarma kodu olmadan kimse okuyamaz.", "Данные на этом устройстве зашифрованы PIN-кодом. Без PIN или кода восстановления их никто не прочитает.", "Дані на цьому пристрої зашифровані PIN-кодом. Без PIN чи коду відновлення їх ніхто не прочитає.", "Dane na tym urządzeniu są szyfrowane PIN-em. Bez PIN-u lub kodu odzyskiwania nikt ich nie odczyta.", "بياناتك على هذا الجهاز مشفّرة برمز PIN. بدون PIN أو رمز الاسترداد لا يستطيع أحد قراءتها.", "Datele de pe acest dispozitiv sunt criptate cu PIN-ul. Fără PIN sau cod de recuperare nimeni nu le poate citi."],
+  tr_wipe_t: ["Nach 10 falschen Versuchen alles löschen", "Delete everything after 10 wrong attempts", "10 yanlış denemeden sonra her şeyi sil", "Удалить всё после 10 неверных попыток", "Видалити все після 10 невдалих спроб", "Usuń wszystko po 10 błędnych próbach", "حذف كل شيء بعد 10 محاولات خاطئة", "Șterge tot după 10 încercări greșite"],
+  tr_wipe_p: ["Für den Fall, dass jemand dein Gerät klaut. Was nicht abgeglichen oder gesichert ist, ist dann weg.", "In case someone steals your device. Anything not synced or backed up will be gone.", "Biri cihazını çalarsa diye. Eşitlenmemiş veya yedeklenmemiş her şey gider.", "На случай кражи устройства. Всё, что не синхронизировано и не сохранено, пропадёт.", "На випадок крадіжки пристрою. Усе, що не синхронізовано й не збережено, зникне.", "Na wypadek kradzieży urządzenia. Co nie jest zsynchronizowane ani zapisane, zniknie.", "في حال سرق أحدٌ جهازك. ما لم تتم مزامنته أو نسخه احتياطيًا سيضيع.", "În caz că cineva îți fură dispozitivul. Ce nu e sincronizat sau salvat se pierde."],
+  tr_wipe_on: ["Nach 10 falschen Versuchen wird alles gelöscht", "Everything is deleted after 10 wrong attempts", "10 yanlış denemeden sonra her şey silinir", "После 10 неверных попыток всё удалится", "Після 10 невдалих спроб усе видалиться", "Po 10 błędnych próbach wszystko zostanie usunięte", "يُحذف كل شيء بعد 10 محاولات خاطئة", "După 10 încercări greșite se șterge tot"],
+  tr_wipe_off: ["Löschen nach Fehlversuchen ist aus", "Delete after failed attempts is off", "Hatalı denemelerden sonra silme kapalı", "Удаление после неудачных попыток выключено", "Видалення після невдалих спроб вимкнено", "Usuwanie po błędnych próbach wyłączone", "الحذف بعد المحاولات الخاطئة متوقف", "Ștergerea după încercări greșite e oprită"],
+  sec_title: ["Sicherheit", "Security", "Güvenlik", "Безопасность", "Безпека", "Bezpieczeństwo", "الأمان", "Securitate"],
+  sec_newdev: ["Neues Gerät im Abgleich: {n}. Warst du das nicht? Entferne es unter Geräte & Abgleich.", "New device in sync: {n}. Wasn't you? Remove it under Devices & sync.", "Eşitlemede yeni cihaz: {n}. Sen değil misin? Cihazlar ve eşitleme altında kaldır.", "Новое устройство в синхронизации: {n}. Это не ты? Удали его в «Устройства и синхронизация».", "Новий пристрій у синхронізації: {n}. Це не ти? Видали його в «Пристрої та синхронізація».", "Nowe urządzenie w synchronizacji: {n}. To nie ty? Usuń je w Urządzenia i synchronizacja.", "جهاز جديد في المزامنة: {n}. لم تكن أنت؟ أزِله من «الأجهزة والمزامنة».", "Dispozitiv nou în sincronizare: {n}. Nu ai fost tu? Elimină-l la Dispozitive și sincronizare."],
+  sec_bad1: ["Es gab 1 falschen Anmeldeversuch an deinem Server ({d}).", "There was 1 failed sign-in attempt on your server ({d}).", "Sunucunda 1 hatalı giriş denemesi oldu ({d}).", "На твоём сервере была 1 неудачная попытка входа ({d}).", "На твоєму сервері була 1 невдала спроба входу ({d}).", "Na twoim serwerze była 1 nieudana próba logowania ({d}).", "حدثت محاولة دخول خاطئة واحدة على خادمك ({d}).", "A fost 1 încercare greșită de conectare pe serverul tău ({d})."],
+  sec_bad: ["Es gab {n} falsche Anmeldeversuche an deinem Server (zuletzt {d}). Ein starkes Passwort und Zwei-Faktor schützen dich.", "There were {n} failed sign-in attempts on your server (last {d}). A strong password and two-factor protect you.", "Sunucunda {n} hatalı giriş denemesi oldu (son {d}). Güçlü bir şifre ve iki adımlı doğrulama seni korur.", "На твоём сервере было {n} неудачных попыток входа (последняя {d}). Сильный пароль и двухфакторная защита помогут.", "На твоєму сервері було {n} невдалих спроб входу (остання {d}). Надійний пароль і двофакторний захист допоможуть.", "Na twoim serwerze było {n} nieudanych prób logowania (ostatnia {d}). Silne hasło i dwuetapowa weryfikacja cię chronią.", "حدثت {n} محاولات دخول خاطئة على خادمك (آخرها {d}). كلمة مرور قوية والتحقق بخطوتين يحميانك.", "Au fost {n} încercări greșite de conectare pe serverul tău (ultima {d}). O parolă puternică și verificarea în doi pași te protejează."],
+  sec_root: ["Dieses Handy ist gerootet. Andere Apps könnten dann an deine Daten kommen – nutze für Geld lieber ein Handy ohne Root.", "This phone is rooted. Other apps could then reach your data – better use a non-rooted phone for money.", "Bu telefon rootlu. Diğer uygulamalar verilerine ulaşabilir – para işleri için rootsuz bir telefon kullan.", "Этот телефон с root-доступом. Другие приложения могут добраться до твоих данных – для денег лучше телефон без root.", "Цей телефон має root-доступ. Інші застосунки можуть дістатися до твоїх даних – для грошей краще телефон без root.", "Ten telefon ma roota. Inne aplikacje mogą dostać się do twoich danych – do finansów lepiej używaj telefonu bez roota.", "هذا الهاتف مُروَّت (Root). قد تصل تطبيقات أخرى إلى بياناتك – استخدم للمال هاتفًا بلا روت.", "Acest telefon are root. Alte aplicații ar putea ajunge la datele tale – pentru bani folosește un telefon fără root."],
+  sec_debug: ["An dieser App hängt gerade ein Debugger. Wenn du das nicht selbst bist, trenn das Handy vom Computer.", "A debugger is attached to this app. If that's not you, disconnect the phone from the computer.", "Bu uygulamaya şu an bir hata ayıklayıcı bağlı. Sen değilsen telefonu bilgisayardan ayır.", "К приложению подключён отладчик. Если это не ты, отключи телефон от компьютера.", "До застосунку під'єднано налагоджувач. Якщо це не ти, від'єднай телефон від комп'ютера.", "Do aplikacji podłączony jest debugger. Jeśli to nie ty, odłącz telefon od komputera.", "مُصحّح أخطاء متصل بهذا التطبيق الآن. إن لم تكن أنت، افصل الهاتف عن الكمبيوتر.", "Un depanator e conectat la aplicație. Dacă nu ești tu, deconectează telefonul de la calculator."],
+  rm_note: ["Beim Entfernen bekommt der Abgleich einen neuen Schlüssel. Das entfernte Gerät kommt an keine neuen Daten mehr und löscht seine Daten, sobald es online ist.", "Removing a device gives sync a new key. The removed device gets no new data and deletes its data as soon as it's online.", "Cihaz kaldırılınca eşitleme yeni bir anahtar alır. Kaldırılan cihaz yeni veri alamaz ve çevrimiçi olunca verilerini siler.", "При удалении синхронизация получает новый ключ. Удалённое устройство больше не получит данных и удалит свои, как только будет онлайн.", "Під час видалення синхронізація отримує новий ключ. Видалений пристрій більше не отримає даних і видалить свої, щойно буде онлайн.", "Przy usuwaniu synchronizacja dostaje nowy klucz. Usunięte urządzenie nie dostanie nowych danych i usunie swoje, gdy tylko będzie online.", "عند الإزالة تحصل المزامنة على مفتاح جديد. الجهاز المُزال لن يصل إلى بيانات جديدة ويحذف بياناته فور اتصاله.", "La eliminare, sincronizarea primește o cheie nouă. Dispozitivul eliminat nu mai primește date și își șterge datele când e online."],
+  rm_busy: ["Neuer Schlüssel für den Abgleich …", "New key for sync …", "Eşitleme için yeni anahtar …", "Новый ключ для синхронизации …", "Новий ключ для синхронізації …", "Nowy klucz do synchronizacji …", "مفتاح جديد للمزامنة …", "Cheie nouă pentru sincronizare …"],
+  rm_fail: ["Entfernen ging nicht – bist du online? Es hat sich nichts geändert.", "Removing didn't work – are you online? Nothing has changed.", "Kaldırılamadı – çevrimiçi misin? Hiçbir şey değişmedi.", "Удалить не удалось – ты в сети? Ничего не изменилось.", "Видалити не вдалося – ти в мережі? Нічого не змінилося.", "Nie udało się usunąć – jesteś online? Nic się nie zmieniło.", "لم تنجح الإزالة – هل أنت متصل؟ لم يتغير شيء.", "Eliminarea n-a mers – ești online? Nu s-a schimbat nimic."],
+  rm_done: ["{n} entfernt – der Abgleich hat einen neuen Schlüssel.", "{n} removed – sync has a new key.", "{n} kaldırıldı – eşitlemenin yeni bir anahtarı var.", "{n} удалено – у синхронизации новый ключ.", "{n} видалено – синхронізація має новий ключ.", "Usunięto {n} – synchronizacja ma nowy klucz.", "تمت إزالة {n} – للمزامنة مفتاح جديد.", "{n} eliminat – sincronizarea are o cheie nouă."],
+  rm_left: ["Diese Geräte musst du neu koppeln, weil sie noch eine alte Version hatten: {n}.", "You need to pair these devices again because they had an old version: {n}.", "Eski sürümde oldukları için bu cihazları yeniden eşleştirmen gerekiyor: {n}.", "Эти устройства нужно связать заново, у них была старая версия: {n}.", "Ці пристрої треба з'єднати заново, у них була стара версія: {n}.", "Te urządzenia trzeba sparować ponownie, bo miały starą wersję: {n}.", "يجب إقران هذه الأجهزة من جديد لأنها كانت بإصدار قديم: {n}.", "Trebuie să cuplezi din nou aceste dispozitive, aveau o versiune veche: {n}."],
+  rm_old: ["{n} entfernt – für den sicheren Schlüsselwechsel braucht dein Server die neue pair.php.", "{n} removed – for the secure key change your server needs the new pair.php.", "{n} kaldırıldı – güvenli anahtar değişimi için sunucunun yeni pair.php'ye ihtiyacı var.", "{n} удалено – для безопасной смены ключа серверу нужен новый pair.php.", "{n} видалено – для безпечної зміни ключа серверу потрібен новий pair.php.", "Usunięto {n} – do bezpiecznej zmiany klucza serwer potrzebuje nowego pair.php.", "تمت إزالة {n} – لتغيير المفتاح بأمان يحتاج خادمك إلى pair.php الجديد.", "{n} eliminat – pentru schimbarea sigură a cheii serverul are nevoie de noul pair.php."],
+  rm_moved: ["Ein Gerät wurde entfernt – dieses Gerät hat den neuen Schlüssel bekommen.", "A device was removed – this device got the new key.", "Bir cihaz kaldırıldı – bu cihaz yeni anahtarı aldı.", "Одно устройство удалено – это устройство получило новый ключ.", "Один пристрій видалено – цей пристрій отримав новий ключ.", "Usunięto urządzenie – to urządzenie dostało nowy klucz.", "تمت إزالة جهاز – حصل هذا الجهاز على المفتاح الجديد.", "Un dispozitiv a fost eliminat – acesta a primit cheia nouă."],
+  rm_kicked: ["Dieses Gerät wurde aus dem Abgleich entfernt.", "This device was removed from sync.", "Bu cihaz eşitlemeden kaldırıldı.", "Это устройство удалено из синхронизации.", "Цей пристрій видалено із синхронізації.", "To urządzenie usunięto z synchronizacji.", "تمت إزالة هذا الجهاز من المزامنة.", "Acest dispozitiv a fost eliminat din sincronizare."],
+  rm_repair: ["Der Abgleich hat einen neuen Schlüssel. Koppel dieses Gerät neu, dann ist alles wieder da.", "Sync has a new key. Pair this device again and everything is back.", "Eşitlemenin yeni bir anahtarı var. Bu cihazı yeniden eşleştir, her şey geri gelir.", "У синхронизации новый ключ. Свяжи это устройство заново – и всё вернётся.", "Синхронізація має новий ключ. З'єднай цей пристрій заново – і все повернеться.", "Synchronizacja ma nowy klucz. Sparuj to urządzenie ponownie, a wszystko wróci.", "للمزامنة مفتاح جديد. أقرن هذا الجهاز من جديد وسيعود كل شيء.", "Sincronizarea are o cheie nouă. Cuplează din nou acest dispozitiv și totul revine."],
+  rm_repair_b: ["Koppeln", "Pair", "Eşleştir", "Связать", "З'єднати", "Sparuj", "إقران", "Cuplează"],
+  nw_sec_t: ["Mehr Schutz für deine Daten", "More protection for your data", "Verilerin için daha fazla koruma", "Больше защиты для твоих данных", "Більше захисту для твоїх даних", "Więcej ochrony dla twoich danych", "حماية أكبر لبياناتك", "Mai multă protecție pentru datele tale"],
+  nw_sec_p: ["Mit App-Sperre sind deine Daten auf PC, iPhone und im Browser jetzt mit der PIN verschlüsselt. Entfernst du ein Gerät, bekommt der Abgleich einen neuen Schlüssel – und ein neues Gerät meldet die App dir sofort.", "With the app lock your data on PC, iPhone and in the browser is now encrypted with your PIN. Remove a device and sync gets a new key – and the app tells you right away about any new device.", "Uygulama kilidiyle verilerin PC'de, iPhone'da ve tarayıcıda artık PIN ile şifreli. Bir cihazı kaldırınca eşitleme yeni anahtar alır – yeni bir cihazı uygulama hemen bildirir.", "С блокировкой приложения твои данные на ПК, iPhone и в браузере теперь зашифрованы PIN-кодом. Удалишь устройство – синхронизация получит новый ключ, а о новом устройстве приложение сразу сообщит.", "З блокуванням застосунку твої дані на ПК, iPhone і в браузері тепер зашифровані PIN-кодом. Видалиш пристрій – синхронізація отримає новий ключ, а про новий пристрій застосунок одразу повідомить.", "Z blokadą aplikacji twoje dane na PC, iPhonie i w przeglądarce są teraz szyfrowane PIN-em. Usuniesz urządzenie – synchronizacja dostanie nowy klucz, a o nowym urządzeniu aplikacja od razu powie.", "مع قفل التطبيق صارت بياناتك على الكمبيوتر وiPhone والمتصفح مشفّرة برمز PIN. إذا أزلت جهازًا تحصل المزامنة على مفتاح جديد – ويخبرك التطبيق فورًا بأي جهاز جديد.", "Cu blocarea aplicației, datele tale pe PC, iPhone și în browser sunt acum criptate cu PIN-ul. Elimini un dispozitiv și sincronizarea primește o cheie nouă – iar despre orice dispozitiv nou aplicația îți spune imediat."],
 };
 
 /* Texte aus TEXTS in der aktuellen Sprache, Monatsnamen und das Zählwerk für Beträge */
@@ -109879,6 +110484,7 @@ function lockTriesSave() {
         f: LOCK.fails || 0,
         u: LOCK.until || 0,
         r: LOCK.rounds || 0,
+        t: LOCK.total || 0,
       })
     );
   } catch (e) {}
@@ -109889,6 +110495,7 @@ function lockTriesLoad() {
     LOCK.fails = Number(t.f) || 0;
     LOCK.until = Number(t.u) || 0;
     LOCK.rounds = Number(t.r) || 0;
+    LOCK.total = Number(t.t) || 0;
   } catch (e) {}
 }
 function lockCfg() {
@@ -109933,6 +110540,35 @@ const LOCK = {
 lockTriesLoad();
 
 /* PIN vergessen */
+/* Mit Tresor (PC, iPhone, Browser) gibt es keine PIN-Prüfsumme mehr: geprüft wird durch Auspacken des Datenschlüssels */
+const lockTresor = () => TRESOR_CAN;
+const lockWipeAt = () => {
+  const c = lockCfg() || {};
+  return Number((TRESOR.meta && TRESOR.meta.wipe) || c.wipe) || 0;
+};
+/* Ein Fehlversuch: Wartezeiten wie bisher, auf Wunsch nach zu vielen Versuchen alles löschen */
+async function lockFail() {
+  LOCK.fails++;
+  LOCK.total = (LOCK.total || 0) + 1;
+  const w = lockWipeAt();
+  if (w && LOCK.total >= w) {
+    await tresorWipeAll();
+    location.reload();
+    return true;
+  }
+  if (LOCK.fails >= 5) {
+    LOCK.rounds = (LOCK.rounds || 0) + 1;
+    LOCK.until = Date.now() + [30, 120, 600, 3600][Math.min(3, LOCK.rounds - 1)] * 1000;
+    LOCK.fails = 0;
+  }
+  lockTriesSave();
+  return false;
+}
+const lockLeftMsg = () => {
+  const w = lockWipeAt(),
+    left = w - (LOCK.total || 0);
+  return w && left <= 5 ? " · " + uiText("tr_left", { n: String(left) }) : "";
+};
 function recoveryCode() {
   const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789",
     r = crypto.getRandomValues(new Uint8Array(12));
@@ -109995,10 +110631,10 @@ function bioOffer(done) {
     }
   };
 }
-function showRecovery(code, done) {
-  $("lockTitle").textContent = "Dein Wiederherstellungscode";
+function showRecovery(code, done, text) {
+  if (!text) $("lockTitle").textContent = "Dein Wiederherstellungscode";
   $("lockText").textContent =
-    "Schreib ihn auf und bewahr ihn sicher auf. Damit entsperrst du die App, falls du die PIN vergisst.";
+    text || "Schreib ihn auf und bewahr ihn sicher auf. Damit entsperrst du die App, falls du die PIN vergisst.";
   lockPanel(
     `<div class="reccode">${escHtml(code)}</div><span class="small muted">Er wird nur dieses eine Mal angezeigt.</span><button class="btn primary" id="recDone">Ich habe ihn aufgeschrieben</button>`
   );
@@ -110113,20 +110749,22 @@ document.addEventListener("click", async (e) => {
       $("lockErr").textContent = `Zu viele Versuche – warte ${Math.ceil((LOCK.until - Date.now()) / 1000)} Sekunden.`;
       return;
     }
-    if (cfg.rec && pinCheck(recNorm($("lfRecIn").value), cfg.rec.salt, cfg.rec.hash)) lockForgotOk();
+    const code = recNorm($("lfRecIn").value);
+    const good = cfg.rec && (cfg.rec.w ? await tresorCheckRec(code) : pinCheck(code, cfg.rec.salt, cfg.rec.hash));
+    if (good) lockForgotOk();
     else {
-      LOCK.fails++;
-      if (LOCK.fails >= 5) {
-        LOCK.rounds = (LOCK.rounds || 0) + 1;
-        LOCK.until = Date.now() + [30, 120, 600, 3600][Math.min(3, LOCK.rounds - 1)] * 1000;
-        LOCK.fails = 0;
-      }
-      lockTriesSave();
-      $("lockErr").textContent = "Der Code stimmt nicht.";
+      if (await lockFail()) return;
+      $("lockErr").textContent = "Der Code stimmt nicht." + lockLeftMsg();
     }
   }
 });
 function lockShow(mode, done) {
+  /* Eine offene Tour liegt über allem – beim Sperren schließen, sonst wäre die App dahinter sichtbar */
+  if (mode === "unlock")
+    try {
+      if (TOUR.i >= 0 || !$("tourBg").hidden) tourCloseNow();
+    } catch (_) {}
+  LOCK.busy = false;
   LOCK.mode = mode;
   LOCK.pin = "";
   LOCK.first = "";
@@ -110161,6 +110799,12 @@ function lockClose(ok) {
   LOCK.mode = null;
   LOCK.pin = "";
   if (d) d(ok);
+  /* Touren warten, solange die Sperre zu ist */
+  setTimeout(() => {
+    try {
+      ptourAuto();
+    } catch (_) {}
+  }, 700);
 }
 function lockWrong(msg) {
   LOCK.pin = "";
@@ -110172,7 +110816,7 @@ function lockWrong(msg) {
   el.classList.add("shake");
 }
 function lockKey(k) {
-  if (!LOCK.mode) return;
+  if (!LOCK.mode || LOCK.busy) return;
   if (k === "bio") {
     lockBio();
     return;
@@ -110202,85 +110846,120 @@ function lockKey(k) {
         lockWrong("Die PINs stimmen nicht überein. Nochmal von vorn.");
         return;
       }
-      const salt = newId();
-      const old = lockCfg();
-      const keepRec = old && old.rec && !LOCK.recUsed,
-        code = keepRec ? null : recoveryCode();
-      const rec = keepRec
-        ? old.rec
-        : (() => {
-            const s2 = newId();
-            return {
-              salt: s2,
-              hash: pinHash(recNorm(code), s2),
-            };
-          })();
-      try {
-        localStorage.setItem(
-          LOCK_KEY,
-          JSON.stringify({
-            salt,
-            hash: pinHash(LOCK.pin, salt),
-            len: LOCK.pin.length,
-            bio: old ? !!old.bio : false,
-            rec,
-          })
-        );
-      } catch (e) {
-        lockWrong("PIN konnte nicht gespeichert werden.");
-        return;
-      }
-      LOCK.recUsed = false;
-      const finish = () => {
-        lockClose(true);
-        toast("App-Sperre ist an");
-      };
-      const askBio = () => {
-        if (BIO && !(old && old.bio)) bioOffer(finish);
-        else finish();
-      };
-      if (code) {
-        showRecovery(code, askBio);
-        return;
-      }
-      askBio();
+      lockSetPin(LOCK.pin);
       return;
     }
     if (!LOCK.first && LOCK.pin.length === 6) lockSetNext();
     return;
   }
-  if (cfg && LOCK.pin.length === cfg.len) {
-    if (pinCheck(LOCK.pin, cfg.salt, cfg.hash)) {
-      if (pinVer(cfg.hash) < 2 && pinV2()) {
-        const h = pinHash(LOCK.pin, cfg.salt);
-        if (pinVer(h) === 2) {
-          cfg.hash = h;
-          try {
-            localStorage.setItem(LOCK_KEY, JSON.stringify(cfg));
-          } catch (_) {}
-        }
+  if (cfg && LOCK.pin.length === cfg.len) lockTry(LOCK.pin, cfg);
+}
+/* PIN prüfen (mit Tresor asynchron) */
+async function lockTry(pin, cfg) {
+  LOCK.busy = true;
+  if (cfg.w) $("lockErr").textContent = uiText("tr_opening");
+  let good = false;
+  try {
+    good = cfg.w ? await tresorCheckPin(pin) : pinCheck(pin, cfg.salt, cfg.hash);
+  } catch (_) {}
+  LOCK.busy = false;
+  if (!LOCK.mode) return;
+  if (!good) {
+    if (await lockFail()) return;
+    lockWrong(
+      LOCK.until > Date.now()
+        ? `Zu viele Versuche – warte ${Math.ceil((LOCK.until - Date.now()) / 1000)} Sekunden.`
+        : "Falsche PIN" + lockLeftMsg()
+    );
+    return;
+  }
+  LOCK.fails = 0;
+  LOCK.rounds = 0;
+  LOCK.until = 0;
+  LOCK.total = 0;
+  lockTriesSave();
+  /* Bestehende Sperre auf PC/iPhone/Browser: jetzt in den Tresor umziehen, mit neuem Wiederherstellungscode */
+  if (!cfg.w && lockTresor() && LOCK.mode === "unlock") {
+    const code = recoveryCode();
+    try {
+      LOCK.busy = true;
+      $("lockErr").textContent = uiText("tr_moving");
+      const okT = await tresorEnable(pin, code, { wipe: cfg.wipe || 0 });
+      LOCK.busy = false;
+      $("lockErr").textContent = "";
+      if (okT) {
+        localStorage.setItem(LOCK_KEY, JSON.stringify({ salt: "", len: pin.length, bio: false, w: 1, rec: { w: 1 } }));
+        $("lockTitle").textContent = uiText("tr_up_t");
+        showRecovery(code, () => lockClose(true), uiText("tr_up_p"));
+        return;
       }
-      LOCK.fails = 0;
-      LOCK.rounds = 0;
-      LOCK.until = 0;
-      lockTriesSave();
-      lockClose(true);
-    } else {
-      LOCK.fails++;
-      if (LOCK.fails >= 5) {
-        LOCK.rounds = (LOCK.rounds || 0) + 1;
-        const w = [30, 120, 600, 3600][Math.min(3, LOCK.rounds - 1)];
-        LOCK.until = Date.now() + w * 1000;
-        LOCK.fails = 0;
-      }
-      lockTriesSave();
-      lockWrong(
-        LOCK.until > Date.now()
-          ? `Zu viele Versuche – warte ${Math.ceil((LOCK.until - Date.now()) / 1000)} Sekunden.`
-          : "Falsche PIN"
-      );
+    } catch (_) {
+      LOCK.busy = false;
+      $("lockErr").textContent = "";
     }
   }
+  if (!cfg.w && pinVer(cfg.hash) < 2 && pinV2()) {
+    const h = pinHash(pin, cfg.salt);
+    if (pinVer(h) === 2) {
+      cfg.hash = h;
+      try {
+        localStorage.setItem(LOCK_KEY, JSON.stringify(cfg));
+      } catch (_) {}
+    }
+  }
+  lockClose(true);
+}
+/* Neue PIN speichern */
+async function lockSetPin(pin) {
+  const old = lockCfg();
+  const keepRec = old && old.rec && !LOCK.recUsed,
+    inTresor = lockTresor() && TRESOR.on && old && old.w;
+  /* Wer neu in den Tresor kommt, bekommt immer einen neuen Code (der alte lässt sich nicht übernehmen) */
+  const code = keepRec && (inTresor || !lockTresor()) ? null : recoveryCode();
+  LOCK.busy = true;
+  try {
+    if (lockTresor()) {
+      $("lockErr").textContent = uiText(TRESOR.on ? "tr_opening" : "tr_moving");
+      if (inTresor) {
+        await tresorSetPin(pin);
+        if (code) await tresorSetRec(code);
+      } else if (!(await tresorEnable(pin, code, { wipe: (old && old.wipe) || 0 }))) throw new Error("tresor");
+      localStorage.setItem(LOCK_KEY, JSON.stringify({ salt: "", len: pin.length, bio: false, w: 1, rec: { w: 1 }, wipe: (old && old.wipe) || 0 }));
+      $("lockErr").textContent = "";
+    } else {
+      const salt = newId();
+      const rec = keepRec
+        ? old.rec
+        : (() => {
+            const s2 = newId();
+            return { salt: s2, hash: pinHash(recNorm(code), s2) };
+          })();
+      localStorage.setItem(
+        LOCK_KEY,
+        JSON.stringify({ salt, hash: pinHash(pin, salt), len: pin.length, bio: old ? !!old.bio : false, rec, wipe: (old && old.wipe) || 0 })
+      );
+    }
+  } catch (e) {
+    LOCK.busy = false;
+    $("lockErr").textContent = "";
+    lockWrong("PIN konnte nicht gespeichert werden.");
+    return;
+  }
+  LOCK.busy = false;
+  LOCK.recUsed = false;
+  const finish = () => {
+    lockClose(true);
+    toast("App-Sperre ist an");
+  };
+  const askBio = () => {
+    if (BIO && !(old && old.bio)) bioOffer(finish);
+    else finish();
+  };
+  if (code) {
+    showRecovery(code, askBio);
+    return;
+  }
+  askBio();
 }
 function lockSetNext() {
   if (LOCK.pin.length < 4) {
@@ -110348,7 +111027,12 @@ window.hbResumed = () => {
     if ($("notifyEd") && $("notifyEd").offsetParent) renderNotifyEd();
   } catch (_) {}
 };
-if (lockCfg()) lockShow("unlock");
+/* Hat der Tresor beim Start schon entsperrt, nicht noch einmal fragen; mit dem Code entsperrt: gleich neue PIN */
+if (TRESOR.recUsed) {
+  LOCK.recUsed = true;
+  lockShow("set", () => renderLockEd());
+  toast("Entsperrt – leg jetzt eine neue PIN fest");
+} else if (lockCfg() && !TRESOR.opened) lockShow("unlock");
 function renderLockEd() {
   const el = $("lockEd");
   if (!el) return;
@@ -110358,8 +111042,16 @@ function renderLockEd() {
        ${BIO ? `<div class="switch"><label for="lockBioChk"><b>Fingerabdruck</b><br><span class="small muted">Statt PIN mit Fingerabdruck entsperren</span></label><input type="checkbox" id="lockBioChk" ${cfg.bio ? "checked" : ""}></div>` : ""}
        <div class="row-btns"><button class="btn" id="lockChange">PIN ändern</button><button class="btn" id="lockOff">Sperre ausschalten</button></div>
        <div class="meta-row"><span class="small muted">${cfg.rec ? "Wiederherstellungscode ist eingerichtet – damit entsperrst du die App, falls du die PIN vergisst." : "Noch kein Wiederherstellungscode – leg einen an, falls du die PIN mal vergisst."}</span></div>
-       <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="lockRecNew">${cfg.rec ? "Neuen Wiederherstellungscode" : "Wiederherstellungscode anlegen"}</button></div>`
+       <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="lockRecNew">${cfg.rec ? "Neuen Wiederherstellungscode" : "Wiederherstellungscode anlegen"}</button></div>
+       ${cfg.w ? `<div class="meta-row"><span class="small muted">${escHtml(uiText("tr_on_info"))}</span></div>` : ""}
+       <div class="switch" style="margin-top:12px"><label for="lockWipeChk"><b>${escHtml(uiText("tr_wipe_t"))}</b><br><span class="small muted">${escHtml(uiText("tr_wipe_p"))}</span></label><input type="checkbox" id="lockWipeChk" ${lockWipeAt() ? "checked" : ""}></div>`
     : `<div class="meta-row"><span>Schützt deine Finanzen mit einer PIN${BIO ? " oder deinem Fingerabdruck" : ""}, wenn jemand anderes dein ${NATIVE && !(window.AndroidBridge || {}).desktop ? (IS_TAB ? "Tablet" : "Handy") : "Gerät"} benutzt.</span></div><div class="row-btns"><button class="btn primary" id="lockOn">App-Sperre einrichten</button></div>`;
+  /* Hinweis bei gerootetem Handy oder angeschlossenem Debugger */
+  let risk = "";
+  try {
+    risk = window.AndroidBridge && window.AndroidBridge.deviceRisk ? String(window.AndroidBridge.deviceRisk() || "") : "";
+  } catch (_) {}
+  if (risk) el.innerHTML = `<div class="notice warn" style="margin-bottom:12px"><span>${escHtml(uiText(/root/.test(risk) ? "sec_root" : "sec_debug"))}</span></div>` + el.innerHTML;
   if (window.AndroidBridge && typeof window.AndroidBridge.setSecure === "function")
     el.innerHTML += `<div class="switch" style="margin-top:12px"><label for="scrSecChk"><b>Bildschirmschutz</b><br><span class="small muted">Keine Screenshots, keine Bildschirmaufnahmen und kein Vorschaubild in der App-Übersicht. Für einen Screenshot kurz ausschalten.</span></label><input type="checkbox" id="scrSecChk" ${lsGet("hb-scrsec") === "0" ? "" : "checked"}></div>`;
 }
@@ -110384,16 +111076,20 @@ document.addEventListener("click", (e) => {
       if (ok) lockShow("set", () => renderLockEd());
     });
   else if (e.target.closest("#lockRecNew"))
-    lockShow("check", (ok) => {
+    lockShow("check", async (ok) => {
       if (!ok) return;
       const cfg = lockCfg();
       if (!cfg) return;
       const code = recoveryCode(),
         s2 = newId();
-      cfg.rec = {
-        salt: s2,
-        hash: pinHash(recNorm(code), s2),
-      };
+      if (cfg.w) {
+        await tresorSetRec(code);
+        cfg.rec = { w: 1 };
+      } else
+        cfg.rec = {
+          salt: s2,
+          hash: pinHash(recNorm(code), s2),
+        };
       try {
         localStorage.setItem(LOCK_KEY, JSON.stringify(cfg));
       } catch (_) {}
@@ -110407,15 +111103,29 @@ document.addEventListener("click", (e) => {
       });
     });
   else if (e.target.closest("#lockOff"))
-    lockShow("check", (ok) => {
+    lockShow("check", async (ok) => {
       if (ok) {
         try {
+          if (TRESOR.on) await tresorDisable();
           localStorage.removeItem(LOCK_KEY);
         } catch (err) {}
         toast("App-Sperre ist aus");
       }
       renderLockEd();
     });
+});
+document.addEventListener("change", (e) => {
+  if (e.target.id !== "lockWipeChk") return;
+  const n = e.target.checked ? 10 : 0,
+    cfg = lockCfg();
+  if (cfg) {
+    cfg.wipe = n;
+    try {
+      localStorage.setItem(LOCK_KEY, JSON.stringify(cfg));
+    } catch (_) {}
+  }
+  tresorSetWipe(n);
+  toast(uiText(n ? "tr_wipe_on" : "tr_wipe_off"));
 });
 document.addEventListener("change", (e) => {
   if (e.target.id !== "lockBioChk") return;
@@ -110480,16 +111190,20 @@ const rcptOpen = (v) => {
 };
 async function rcptGet(id) {
   try {
-    return rcptOpen(await rcptOp("readonly", (st) => st.get(id)));
+    const v = await rcptOp("readonly", (st) => st.get(id));
+    /* s: 2 = mit dem Tresor (PIN) verschlüsselt */
+    if (v && v.s === 2) return await tresorImgOpen(v.img);
+    return rcptOpen(v);
   } catch (e) {
     return null;
   }
 }
 async function rcptPut(id, img, fromSync) {
+  const t = img ? await tresorImgSeal(String(img)) : null;
   await rcptOp("readwrite", (st) =>
     st.put(
       {
-        ...rcptSeal(img),
+        ...(t ? { img: t, s: 2 } : rcptSeal(img)),
         ts: Date.now(),
       },
       id
@@ -116831,6 +117545,7 @@ function saveSync() {
         skipped: SYNC.skipped,
         asked: !!SYNC.asked,
         email: SYNC.email || "",
+        ...(typeof SYNC.bad === "number" ? { bad: SYNC.bad } : {}),
       })
     );
   } catch (e) {}
@@ -117062,6 +117777,11 @@ async function syncNow() {
     const res = await api("pull", {
       qs: "&since=" + SYNC.rev,
     });
+    /* Alter Speicher eingefroren (ein Gerät wurde entfernt): umziehen */
+    if (MODE === "pair" && res.moved) {
+      SYNC.busy = false;
+      return pairMovedCheck();
+    }
     if (MODE === "pair") res.docs = await pairDecDocs(res.docs);
     const pending = new Set([
       ...SYNC.queue.map((o) => o.col + "/" + o.id),
@@ -117080,6 +117800,9 @@ async function syncNow() {
         continue;
       }
       if (d.col === "app" && d.id.startsWith("dev-")) {
+        try {
+          secDevSeen(d.id.slice(4), d.data);
+        } catch (_) {}
         devStore(d.id.slice(4), d.data);
         continue;
       }
@@ -117111,6 +117834,9 @@ async function syncNow() {
       if (d.data === null) delete memStore[d.col][d.id];
       else memStore[d.col][d.id] = d.data;
     }
+    try {
+      secBadSeen(res);
+    } catch (_) {}
     SYNC.rev = res.rev || SYNC.rev;
     SYNC.last = Date.now();
     SYNC.err = "";
@@ -117140,6 +117866,10 @@ async function syncNow() {
     checkUpdate();
   } catch (e) {
     let healed = false;
+    if (e.status === 409 && e.data && e.data.moved && MODE === "pair") {
+      SYNC.busy = false;
+      return pairMovedCheck();
+    }
     if (e.status === 401 && MODE === "pair" && pairState()) {
       try {
         const K = await pairKeys();
@@ -119118,6 +119848,10 @@ async function pairKeys() {
   if (PAIR_K) return PAIR_K;
   const p = pairState();
   if (!p) throw new Error("nicht gekoppelt");
+  return (PAIR_K = await pairKeysOf(p));
+}
+/* Schlüssel zu einer beliebigen Kopplung (auch einer neuen, beim Entfernen eines Geräts) */
+async function pairKeysOf(p) {
   const base = await crypto.subtle.importKey("raw", fromB64u(p.k), "HKDF", false, ["deriveKey", "deriveBits"]);
   const prm = (info) => ({
     name: "HKDF",
@@ -119147,12 +119881,12 @@ async function pairKeys() {
     ["sign"]
   );
   const auth = toHex(await crypto.subtle.deriveBits(prm("auth"), base, 256));
-  return (PAIR_K = {
+  return {
     enc,
     mac,
     auth,
     vault: toHex(fromB64u(p.v)),
-  });
+  };
 }
 async function pairHid(col, id) {
   const K = await pairKeys();
@@ -119456,6 +120190,7 @@ async function pairStart() {
   try {
     localStorage.setItem("hb-main", "1");
   } catch (_) {}
+  await pairDevKeys().catch(() => {});
   loginDone(await pairToken(), true, "Gekoppelt – Daten werden verschlüsselt hochgeladen");
 }
 const SC_ABC = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
@@ -119982,6 +120717,7 @@ async function pairJoin(code) {
   MODE = "pair";
   SERVER = pairUrl();
   SYNC.token = await pairToken();
+  pairDevKeys().catch(() => {});
   try {
     await api("pull", {
       qs: "&since=999999999",
@@ -121624,6 +122360,245 @@ document.addEventListener("keydown", (e) => {
     if (b) b.click();
   }
 });
+
+/* ===== Gerät aus dem Abgleich entfernen – mit Schlüsselwechsel =====
+   Bisher hat „Entfernen“ das Gerät nur gebeten, nicht mehr mitzumachen; es kannte den Schlüssel aber weiter.
+   Jetzt bekommt die Kopplung einen neuen Schlüssel und einen neuen Speicherplatz auf dem Server:
+   1. Jedes Gerät hat ein eigenes Schlüsselpaar (ECDH P-256); den öffentlichen Teil kennen die anderen Geräte.
+   2. Das entfernende Gerät legt eine neue Kopplung an, verschlüsselt den neuen Code einzeln für jedes Gerät, das bleiben
+      soll, legt ihn im alten Speicher ab und friert den alten Speicher in derselben Anfrage ein (der Server nimmt danach
+      nichts mehr an). Das entfernte Gerät kann diese Nachrichten nicht lesen.
+   3. Die anderen Geräte merken beim nächsten Abgleich, dass der alte Speicher eingefroren ist, holen sich ihren Code und
+      ziehen um. Das entfernte Gerät findet stattdessen „kick-…“ und löscht seine Daten.
+   Der alte Speicher wird nach 30 Tagen vom Server gelöscht. */
+
+function pairPub() {
+  const p = pairState();
+  return p && p.dk && p.dk.pub ? p.dk.pub : null;
+}
+/* eigenes Schlüsselpaar anlegen (einmal je Gerät und Kopplung) */
+async function pairDevKeys() {
+  const p = pairState();
+  if (!p || !cryptoCan()) return null;
+  if (p.dk && p.dk.pub && p.dk.priv) return p.dk;
+  const kp = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+  const pub = await crypto.subtle.exportKey("jwk", kp.publicKey),
+    priv = await crypto.subtle.exportKey("jwk", kp.privateKey);
+  const dk = { pub: { x: pub.x, y: pub.y }, priv };
+  pairSave({ ...pairState(), dk });
+  return dk;
+}
+async function pairBoxKey(privKey, pub, salt) {
+  const pk = await crypto.subtle.importKey("jwk", { kty: "EC", crv: "P-256", x: pub.x, y: pub.y, ext: true }, { name: "ECDH", namedCurve: "P-256" }, false, []);
+  const bits = await crypto.subtle.deriveBits({ name: "ECDH", public: pk }, privKey, 256);
+  const base = await crypto.subtle.importKey("raw", bits, "HKDF", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name: "HKDF", hash: "SHA-256", salt, info: new TextEncoder().encode("finanz-mami-umzug") },
+    base,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
+  );
+}
+/* Text nur für ein bestimmtes Gerät verschlüsseln */
+async function pairSealFor(pub, text, to) {
+  const eph = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+  const salt = crypto.getRandomValues(new Uint8Array(16)),
+    iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await pairBoxKey(eph.privateKey, pub, salt);
+  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv, additionalData: new TextEncoder().encode("umzug:" + to) }, key, new TextEncoder().encode(text));
+  const e = await crypto.subtle.exportKey("jwk", eph.publicKey);
+  return { e: { x: e.x, y: e.y }, s: b64u(salt), iv: b64u(iv), c: b64u(new Uint8Array(ct)) };
+}
+async function pairOpenMine(box) {
+  const dk = pairState() && pairState().dk;
+  if (!dk || !dk.priv || !box || !box.e) return null;
+  try {
+    const priv = await crypto.subtle.importKey("jwk", dk.priv, { name: "ECDH", namedCurve: "P-256" }, false, ["deriveBits"]);
+    const key = await pairBoxKey(priv, box.e, fromB64u(box.s));
+    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64u(box.iv), additionalData: new TextEncoder().encode("umzug:" + devId()) }, key, fromB64u(box.c));
+    return new TextDecoder().decode(pt);
+  } catch (_) {
+    return null;
+  }
+}
+const pairCodeOf = (p) => "HBP1." + p.v + "." + p.k + (p.s && p.s !== META_PAIR ? "." + b64u(new TextEncoder().encode(p.s)) : "");
+
+/* Gerät entfernen. Gibt zurück: { ok, soft, left: [Geräte ohne Schlüssel, die neu gekoppelt werden müssen] } */
+async function pairRemoveDev(rid) {
+  const p = pairState();
+  if (MODE !== "pair" || !p || !SYNC.token || !cryptoCan()) return { ok: false, soft: true };
+  await pairDevKeys();
+  const me = devId(),
+    out = store.settings.devOut || {};
+  const stay = Object.entries(devList()).filter(([id]) => id !== me && id !== rid && !out[id]);
+  const left = stay.filter(([, d]) => !(d && d.pk && d.pk.x)).map(([id]) => zDevName(id));
+  /* 1. neue Kopplung auf dem Server anlegen */
+  const np = { v: b64u(crypto.getRandomValues(new Uint8Array(16))), k: b64u(crypto.getRandomValues(new Uint8Array(32))), s: p.s || "", dk: p.dk };
+  const NK = await pairKeysOf(np);
+  await api("create", { body: { vault: NK.vault, auth: NK.auth } });
+  /* 2. neuen Code für jedes bleibende Gerät einzeln verschlüsseln, entferntes Gerät rauswerfen – und den alten Speicher einfrieren */
+  const code = pairCodeOf(np),
+    ops = [];
+  for (const [id, d] of stay)
+    if (d && d.pk && d.pk.x) ops.push({ col: "app", id: "move-" + id, data: { box: await pairSealFor(d.pk, code, id), by: me, t: Date.now() } });
+  ops.push({ col: "app", id: "kick-" + rid, data: { by: me, t: Date.now(), wipe: true } });
+  try {
+    await api("freeze", { body: { ops: await pairEncOps(ops) } });
+  } catch (e) {
+    /* Server kennt das noch nicht (alte pair.php): neue Kopplung wieder verwerfen und nur wie bisher abmelden */
+    if (e.status === 404 || e.status === 400) {
+      try {
+        const keep = SYNC.token;
+        SYNC.token = NK.vault + "." + NK.auth;
+        await api("wipe", { body: {} });
+        SYNC.token = keep;
+      } catch (_) {}
+      return { ok: false, soft: true, old: true };
+    }
+    throw e;
+  }
+  /* 3. selbst umziehen und alles in den neuen Speicher laden */
+  pairSave(np);
+  SYNC.token = await pairToken();
+  SYNC.rev = 0;
+  syncQueueAll();
+  SYNC.state = "pending";
+  saveSync();
+  flushSoon(300);
+  return { ok: true, left };
+}
+
+/* Alter Speicher eingefroren: Gehöre ich noch dazu? Dann umziehen, sonst Daten löschen. */
+let PAIR_MOVING = false;
+async function pairMovedCheck() {
+  if (PAIR_MOVING || MODE !== "pair" || !pairState()) return;
+  PAIR_MOVING = true;
+  try {
+    const res = await api("pull", { qs: "&since=0" });
+    const me = devId(),
+      wantMove = await pairHid("app", "move-" + me),
+      wantKick = await pairHid("app", "kick-" + me);
+    let move = null,
+      kick = null;
+    for (const d of res.docs || []) {
+      if (!d.b || (d.h !== wantMove && d.h !== wantKick)) continue;
+      try {
+        const o = await pairDec(d.b);
+        if (o.c === "app" && o.i === "move-" + me && d.h === wantMove) move = o.d;
+        if (o.c === "app" && o.i === "kick-" + me && d.h === wantKick) kick = o.d;
+      } catch (_) {}
+    }
+    if (move && move.box) {
+      const code = await pairOpenMine(move.box),
+        np = code && pairParse(code);
+      if (np) {
+        const dk = pairState().dk;
+        pairSave({ ...np, dk });
+        SYNC.token = await pairToken();
+        SYNC.rev = 0;
+        syncQueueAll();
+        SYNC.state = "pending";
+        saveSync();
+        flushSoon(300);
+        toast(uiText("rm_moved"), null, null, 6000);
+        setTimeout(() => devPing(true), 3000);
+        return;
+      }
+    }
+    if (kick) {
+      pairSave(null);
+      SYNC.token = "";
+      SYNC.queue = [];
+      SYNC.state = "off";
+      saveSync();
+      if (kick.wipe) {
+        await tresorWipeAll();
+        location.reload();
+        return;
+      }
+      toast(uiText("rm_kicked"), null, null, 10000);
+      return;
+    }
+    /* weder noch: dieses Gerät hatte noch keinen Schlüssel – muss neu gekoppelt werden */
+    pairSave(null);
+    SYNC.token = "";
+    SYNC.state = "login";
+    saveSync();
+    toast(uiText("rm_repair"), () => showLogin(), uiText("rm_repair_b"), 12000);
+  } catch (_) {
+  } finally {
+    PAIR_MOVING = false;
+    try {
+      renderSyncDot();
+      renderGeraete();
+    } catch (_) {}
+  }
+}
+/* Schlüsselpaar beim Start sicherstellen und den anderen Geräten mitteilen */
+async function pairKeysEnsure() {
+  try {
+    if (MODE === "pair" && pairState() && !pairPub()) {
+      await pairDevKeys();
+      devPing(true);
+    }
+  } catch (_) {}
+}
+setTimeout(pairKeysEnsure, 6000);
+setInterval(pairKeysEnsure, 10 * 60e3);
+
+/* ===== Sicherheits-Hinweise =====
+   Meldet sich ein neues Gerät im Abgleich an oder gab es falsche Passwort-Versuche am Server,
+   sagt die App Bescheid – als Hinweis in der App und, wo möglich, als Benachrichtigung. */
+function secAlert(msg) {
+  try {
+    toast(msg, null, null, 10000);
+  } catch (_) {}
+  try {
+    const B = window.AndroidBridge;
+    if (B && B.notifyNow) B.notifyNow(900077, uiText("sec_title"), msg, "hinweise");
+  } catch (_) {}
+}
+/* Neues Gerät: nur melden, wenn wir die Liste schon kannten (nicht beim ersten Abgleich) */
+function secDevSeen(id, d) {
+  if (!d || id === devId()) return;
+  let known = null;
+  try {
+    known = JSON.parse(localStorage.getItem("hb-devs-known") || "null");
+  } catch (_) {}
+  const first = !known;
+  known = known || {};
+  if (known[id]) return;
+  known[id] = Date.now();
+  try {
+    localStorage.setItem("hb-devs-known", JSON.stringify(known));
+  } catch (_) {}
+  if (!first && SYNC.rev > 0) secAlert(uiText("sec_newdev", { n: devShown(d) }));
+}
+/* Falsche Anmeldeversuche am Server (eigener Server oder Konto) */
+function secBadSeen(res) {
+  if (!res || typeof res.bad !== "number") return;
+  if (typeof SYNC.bad !== "number") {
+    SYNC.bad = res.bad;
+    return;
+  }
+  if (res.bad > SYNC.bad) {
+    const n = res.bad - SYNC.bad,
+      when = res.bad_t ? fxDate(new Date(res.bad_t * 1000).toISOString().slice(0, 10), { day: "numeric", month: "short" }) : "";
+    secAlert(uiText(n === 1 ? "sec_bad1" : "sec_bad", { n: String(n), d: when }));
+  }
+  SYNC.bad = res.bad;
+}
+/* Beim ersten Start mit dieser Version: alle schon bekannten Geräte merken, damit nichts Altes gemeldet wird */
+(() => {
+  try {
+    if (!localStorage.getItem("hb-devs-known")) {
+      const k = {};
+      for (const id of Object.keys(devList())) k[id] = Date.now();
+      if (Object.keys(k).length) localStorage.setItem("hb-devs-known", JSON.stringify(k));
+    }
+  } catch (_) {}
+})();
 
 /* Start */
 render();

@@ -1,5 +1,6 @@
 <?php
 
+header_remove('X-Powered-By'); /* PHP-Version nicht verraten */
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Authorization, Content-Type');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -9,6 +10,9 @@ header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
 header('X-Frame-Options: DENY');
+header("Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+header('X-Permitted-Cross-Domain-Policies: none');
+if (($_SERVER['HTTPS'] ?? '') !== '' && $_SERVER['HTTPS'] !== 'off') header('Strict-Transport-Security: max-age=31536000');
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
 define('DATA_DIR', (function (): string {
@@ -151,6 +155,8 @@ function loginFailed(): void {
     $n = (int)($f['n'] ?? 0) + 1; $r = (int)($f['r'] ?? 0); $until = 0;
     if ($n >= 5) { $r++; $until = time() + [60, 300, 900, 3600][min(3, $r - 1)]; $n = 0; }
     setMeta('fails', json_encode(['n' => $n, 'r' => $r, 'until' => $until]));
+    /* Gesamtzahl falscher Versuche: die App warnt, wenn sie seit dem letzten Abgleich gestiegen ist */
+    setMeta('bad', (string)((int)(meta('bad') ?? 0) + 1)); setMeta('bad_t', (string)time());
 }
 function loginOk(): void { setMeta('fails', '{}'); }
 function fromHomeNetwork(): bool {
@@ -219,6 +225,8 @@ try {
             $html = preg_replace('/<meta name="hb-server" content="[^"]*">/', '<meta name="hb-server" content="api.php">', $html, 1);
             $html = preg_replace('/<meta charset="utf-8">/', '<meta charset="utf-8"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#147A5B">', $html, 1);
         }
+        /* Die App bringt ihre eigenen Sicherheitsregeln mit (CSP im <meta>); hier nur das Einbetten verbieten */
+        header("Content-Security-Policy: frame-ancestors 'none'");
         header('Content-Type: text/html; charset=utf-8');
         echo $html;
         exit;
@@ -279,7 +287,7 @@ try {
         foreach ($s as $r) {
             $docs[] = ['col' => $r['col'], 'id' => $r['id'], 'data' => $r['data'] === null ? null : json_decode($r['data'], true), 'rev' => (int)$r['rev']];
         }
-        out(['rev' => (int)(meta('rev') ?? 0), 'docs' => $docs]);
+        out(['rev' => (int)(meta('rev') ?? 0), 'docs' => $docs, 'bad' => (int)(meta('bad') ?? 0), 'bad_t' => (int)(meta('bad_t') ?? 0)]);
     }
 
     if ($a === 'push') {

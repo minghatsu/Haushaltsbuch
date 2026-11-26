@@ -39,3 +39,15 @@ SMS, Teilen, Update-Dateien) sowie die Mami-Tour, die für jedes Gerät die pass
 Alle JS-Dateien teilen sich einen Gültigkeitsbereich. Die Dateien aller Ordner einer Ausgabe werden
 zusammen nach Dateinamen sortiert – die Nummer vorne bestimmt die Reihenfolge, egal in welchem Ordner die
 Datei liegt. Dateinamen müssen deshalb über alle Ordner einer Ausgabe eindeutig sein (der Bau prüft das).
+
+## Sicherheit
+
+- `js/gemeinsam/00-0-tresor.js` läuft vor allem anderen (deshalb ist der App-Code in `(async () => { … })()` verpackt).
+  Mit App-Sperre auf PC, iPhone und im Browser verschlüsselt er `haushaltsbuch-v1`, `haushaltsbuch-sync-v1`, `hb-pair`,
+  `haushaltsbuch-cloud`, `hb-sp-*` und die Belegfotos mit einem Schlüssel aus der PIN. Android nutzt stattdessen den
+  Schlüsselspeicher des Handys (`Vault.java`, `04-core.js`).
+- `js/gemeinsam/51-lock.js`: PIN, Wiederherstellungscode, Löschen nach Fehlversuchen.
+- `js/gemeinsam/57m-geraet-entfernen.js`: Gerät entfernen mit Schlüsselwechsel (braucht `freeze` in `server/pair.php`).
+- `js/gemeinsam/57n-sicherheit-hinweise.js`: Warnung bei neuem Gerät und falschen Anmeldeversuchen.
+- Server: `tools/csp-static.py` setzt die Sicherheitsregeln der statischen Seiten, `tools/test/angriff.cjs` greift eine
+  lokale Server-Kopie an (läuft in jedem Build).

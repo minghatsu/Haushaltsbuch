@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unverschlüsseltes HTTP bleibt für den eigenen Server zuhause erlaubt (die App lässt es nur zu Heimadressen zu).
+     Der Kopplungs-Server ist auf Let's Encrypt (X1/X2 und die neuen Wurzeln YR/YE) festgenagelt: Ein fremdes Zertifikat (Firmen-Proxy, gefälschte Stelle)
+     wird abgelehnt. Die Pins laufen 2030 ab – danach gilt wieder die normale Prüfung, damit die App nie hart ausgesperrt wird. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="false">miracleframe.synology.me</domain>
+        <pin-set expiration="2030-01-01">
+            <!-- ISRG Root X1 -->
+            <pin digest="SHA-256">C5+lpZ7tcVwmwQIMcRtPbsQtWLABXhQzejna0wHFr8M=</pin>
+            <!-- ISRG Root X2 -->
+            <pin digest="SHA-256">diGVwiVYbubAI3RW4hB9xU8e/CH2GnkuvVFZE8zmgzI=</pin>
+            <!-- Root YR / YE (neue Let's-Encrypt-Wurzeln; Synology-DDNS-Zertifikate kommen von YR2) -->
+            <pin digest="SHA-256">fk6IOKit1ild5647BH06ujSIq5XbCgqlbYl6ANhhi88=</pin>
+            <pin digest="SHA-256">sCkq5UWXjg+7mKu9lMhhYF5bGLsy7VI/UNW3tccdR7w=</pin>
+        </pin-set>
+    </domain-config>
+</network-security-config>

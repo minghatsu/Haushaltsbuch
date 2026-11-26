@@ -1648,6 +1648,17 @@ function ptourOpen(v) {
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
   {
+    v: "0.50.0",
+    s: () => [
+      {
+        sel: "#topAv",
+        ic: "shield",
+        t: uiText("nw_sec_t"),
+        p: [uiText("nw_sec_p")],
+      },
+    ],
+  },
+  {
     v: "0.49.9",
     s: () => [
       {
@@ -2179,7 +2190,7 @@ const ntBlocked = () =>
   wizShould() ||
   ui.wiz ||
   !!document.querySelector(
-    ".backdrop:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden]),#actBg:not([hidden]),#mvBg:not([hidden]),#loginBg:not([hidden]),#langBg,#mvSheet:not([hidden])"
+    ".backdrop:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden]),#actBg:not([hidden]),#mvBg:not([hidden]),#loginBg:not([hidden]),#langBg,#mvSheet:not([hidden]),#lockBg:not([hidden])"
   );
 function ntAuto() {
   if (ntAuto.off) return false;
@@ -2219,14 +2230,15 @@ function ptourAuto() {
     wizShould() ||
     !PTOUR[ui.view] ||
     ptSeen()[ui.view] ||
-    document.querySelector(".backdrop:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden])")
+    /* nie über der App-Sperre – die Tour würde sonst Inhalte hinter der Sperre zeigen */
+    document.querySelector(".backdrop:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden]),#lockBg:not([hidden])")
   )
     return;
   if (ui.view === "home" && !store.tx.length) return;
   clearTimeout(ptourAuto.t);
   const v = ui.view;
   ptourAuto.t = setTimeout(() => {
-    if (ui.view === v && TOUR.i < 0 && !document.querySelector(".backdrop:not([hidden]),.hobg:not([hidden])"))
+    if (ui.view === v && TOUR.i < 0 && !document.querySelector(".backdrop:not([hidden]),.hobg:not([hidden]),#lockBg:not([hidden])"))
       ptourOpen(v);
   }, 900);
 }

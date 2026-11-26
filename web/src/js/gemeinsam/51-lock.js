@@ -70,6 +70,7 @@ function lockTriesSave() {
         f: LOCK.fails || 0,
         u: LOCK.until || 0,
         r: LOCK.rounds || 0,
+        t: LOCK.total || 0,
       })
     );
   } catch (e) {}
@@ -80,6 +81,7 @@ function lockTriesLoad() {
     LOCK.fails = Number(t.f) || 0;
     LOCK.until = Number(t.u) || 0;
     LOCK.rounds = Number(t.r) || 0;
+    LOCK.total = Number(t.t) || 0;
   } catch (e) {}
 }
 function lockCfg() {
@@ -124,6 +126,35 @@ const LOCK = {
 lockTriesLoad();
 
 /* PIN vergessen */
+/* Mit Tresor (PC, iPhone, Browser) gibt es keine PIN-Prüfsumme mehr: geprüft wird durch Auspacken des Datenschlüssels */
+const lockTresor = () => TRESOR_CAN;
+const lockWipeAt = () => {
+  const c = lockCfg() || {};
+  return Number((TRESOR.meta && TRESOR.meta.wipe) || c.wipe) || 0;
+};
+/* Ein Fehlversuch: Wartezeiten wie bisher, auf Wunsch nach zu vielen Versuchen alles löschen */
+async function lockFail() {
+  LOCK.fails++;
+  LOCK.total = (LOCK.total || 0) + 1;
+  const w = lockWipeAt();
+  if (w && LOCK.total >= w) {
+    await tresorWipeAll();
+    location.reload();
+    return true;
+  }
+  if (LOCK.fails >= 5) {
+    LOCK.rounds = (LOCK.rounds || 0) + 1;
+    LOCK.until = Date.now() + [30, 120, 600, 3600][Math.min(3, LOCK.rounds - 1)] * 1000;
+    LOCK.fails = 0;
+  }
+  lockTriesSave();
+  return false;
+}
+const lockLeftMsg = () => {
+  const w = lockWipeAt(),
+    left = w - (LOCK.total || 0);
+  return w && left <= 5 ? " · " + uiText("tr_left", { n: String(left) }) : "";
+};
 function recoveryCode() {
   const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789",
     r = crypto.getRandomValues(new Uint8Array(12));
@@ -186,10 +217,10 @@ function bioOffer(done) {
     }
   };
 }
-function showRecovery(code, done) {
-  $("lockTitle").textContent = "Dein Wiederherstellungscode";
+function showRecovery(code, done, text) {
+  if (!text) $("lockTitle").textContent = "Dein Wiederherstellungscode";
   $("lockText").textContent =
-    "Schreib ihn auf und bewahr ihn sicher auf. Damit entsperrst du die App, falls du die PIN vergisst.";
+    text || "Schreib ihn auf und bewahr ihn sicher auf. Damit entsperrst du die App, falls du die PIN vergisst.";
   lockPanel(
     `<div class="reccode">${escHtml(code)}</div><span class="small muted">Er wird nur dieses eine Mal angezeigt.</span><button class="btn primary" id="recDone">Ich habe ihn aufgeschrieben</button>`
   );
@@ -304,20 +335,22 @@ document.addEventListener("click", async (e) => {
       $("lockErr").textContent = `Zu viele Versuche – warte ${Math.ceil((LOCK.until - Date.now()) / 1000)} Sekunden.`;
       return;
     }
-    if (cfg.rec && pinCheck(recNorm($("lfRecIn").value), cfg.rec.salt, cfg.rec.hash)) lockForgotOk();
+    const code = recNorm($("lfRecIn").value);
+    const good = cfg.rec && (cfg.rec.w ? await tresorCheckRec(code) : pinCheck(code, cfg.rec.salt, cfg.rec.hash));
+    if (good) lockForgotOk();
     else {
-      LOCK.fails++;
-      if (LOCK.fails >= 5) {
-        LOCK.rounds = (LOCK.rounds || 0) + 1;
-        LOCK.until = Date.now() + [30, 120, 600, 3600][Math.min(3, LOCK.rounds - 1)] * 1000;
-        LOCK.fails = 0;
-      }
-      lockTriesSave();
-      $("lockErr").textContent = "Der Code stimmt nicht.";
+      if (await lockFail()) return;
+      $("lockErr").textContent = "Der Code stimmt nicht." + lockLeftMsg();
     }
   }
 });
 function lockShow(mode, done) {
+  /* Eine offene Tour liegt über allem – beim Sperren schließen, sonst wäre die App dahinter sichtbar */
+  if (mode === "unlock")
+    try {
+      if (TOUR.i >= 0 || !$("tourBg").hidden) tourCloseNow();
+    } catch (_) {}
+  LOCK.busy = false;
   LOCK.mode = mode;
   LOCK.pin = "";
   LOCK.first = "";
@@ -352,6 +385,12 @@ function lockClose(ok) {
   LOCK.mode = null;
   LOCK.pin = "";
   if (d) d(ok);
+  /* Touren warten, solange die Sperre zu ist */
+  setTimeout(() => {
+    try {
+      ptourAuto();
+    } catch (_) {}
+  }, 700);
 }
 function lockWrong(msg) {
   LOCK.pin = "";
@@ -363,7 +402,7 @@ function lockWrong(msg) {
   el.classList.add("shake");
 }
 function lockKey(k) {
-  if (!LOCK.mode) return;
+  if (!LOCK.mode || LOCK.busy) return;
   if (k === "bio") {
     lockBio();
     return;
@@ -393,85 +432,120 @@ function lockKey(k) {
         lockWrong("Die PINs stimmen nicht überein. Nochmal von vorn.");
         return;
       }
-      const salt = newId();
-      const old = lockCfg();
-      const keepRec = old && old.rec && !LOCK.recUsed,
-        code = keepRec ? null : recoveryCode();
-      const rec = keepRec
-        ? old.rec
-        : (() => {
-            const s2 = newId();
-            return {
-              salt: s2,
-              hash: pinHash(recNorm(code), s2),
-            };
-          })();
-      try {
-        localStorage.setItem(
-          LOCK_KEY,
-          JSON.stringify({
-            salt,
-            hash: pinHash(LOCK.pin, salt),
-            len: LOCK.pin.length,
-            bio: old ? !!old.bio : false,
-            rec,
-          })
-        );
-      } catch (e) {
-        lockWrong("PIN konnte nicht gespeichert werden.");
-        return;
-      }
-      LOCK.recUsed = false;
-      const finish = () => {
-        lockClose(true);
-        toast("App-Sperre ist an");
-      };
-      const askBio = () => {
-        if (BIO && !(old && old.bio)) bioOffer(finish);
-        else finish();
-      };
-      if (code) {
-        showRecovery(code, askBio);
-        return;
-      }
-      askBio();
+      lockSetPin(LOCK.pin);
       return;
     }
     if (!LOCK.first && LOCK.pin.length === 6) lockSetNext();
     return;
   }
-  if (cfg && LOCK.pin.length === cfg.len) {
-    if (pinCheck(LOCK.pin, cfg.salt, cfg.hash)) {
-      if (pinVer(cfg.hash) < 2 && pinV2()) {
-        const h = pinHash(LOCK.pin, cfg.salt);
-        if (pinVer(h) === 2) {
-          cfg.hash = h;
-          try {
-            localStorage.setItem(LOCK_KEY, JSON.stringify(cfg));
-          } catch (_) {}
-        }
+  if (cfg && LOCK.pin.length === cfg.len) lockTry(LOCK.pin, cfg);
+}
+/* PIN prüfen (mit Tresor asynchron) */
+async function lockTry(pin, cfg) {
+  LOCK.busy = true;
+  if (cfg.w) $("lockErr").textContent = uiText("tr_opening");
+  let good = false;
+  try {
+    good = cfg.w ? await tresorCheckPin(pin) : pinCheck(pin, cfg.salt, cfg.hash);
+  } catch (_) {}
+  LOCK.busy = false;
+  if (!LOCK.mode) return;
+  if (!good) {
+    if (await lockFail()) return;
+    lockWrong(
+      LOCK.until > Date.now()
+        ? `Zu viele Versuche – warte ${Math.ceil((LOCK.until - Date.now()) / 1000)} Sekunden.`
+        : "Falsche PIN" + lockLeftMsg()
+    );
+    return;
+  }
+  LOCK.fails = 0;
+  LOCK.rounds = 0;
+  LOCK.until = 0;
+  LOCK.total = 0;
+  lockTriesSave();
+  /* Bestehende Sperre auf PC/iPhone/Browser: jetzt in den Tresor umziehen, mit neuem Wiederherstellungscode */
+  if (!cfg.w && lockTresor() && LOCK.mode === "unlock") {
+    const code = recoveryCode();
+    try {
+      LOCK.busy = true;
+      $("lockErr").textContent = uiText("tr_moving");
+      const okT = await tresorEnable(pin, code, { wipe: cfg.wipe || 0 });
+      LOCK.busy = false;
+      $("lockErr").textContent = "";
+      if (okT) {
+        localStorage.setItem(LOCK_KEY, JSON.stringify({ salt: "", len: pin.length, bio: false, w: 1, rec: { w: 1 } }));
+        $("lockTitle").textContent = uiText("tr_up_t");
+        showRecovery(code, () => lockClose(true), uiText("tr_up_p"));
+        return;
       }
-      LOCK.fails = 0;
-      LOCK.rounds = 0;
-      LOCK.until = 0;
-      lockTriesSave();
-      lockClose(true);
-    } else {
-      LOCK.fails++;
-      if (LOCK.fails >= 5) {
-        LOCK.rounds = (LOCK.rounds || 0) + 1;
-        const w = [30, 120, 600, 3600][Math.min(3, LOCK.rounds - 1)];
-        LOCK.until = Date.now() + w * 1000;
-        LOCK.fails = 0;
-      }
-      lockTriesSave();
-      lockWrong(
-        LOCK.until > Date.now()
-          ? `Zu viele Versuche – warte ${Math.ceil((LOCK.until - Date.now()) / 1000)} Sekunden.`
-          : "Falsche PIN"
-      );
+    } catch (_) {
+      LOCK.busy = false;
+      $("lockErr").textContent = "";
     }
   }
+  if (!cfg.w && pinVer(cfg.hash) < 2 && pinV2()) {
+    const h = pinHash(pin, cfg.salt);
+    if (pinVer(h) === 2) {
+      cfg.hash = h;
+      try {
+        localStorage.setItem(LOCK_KEY, JSON.stringify(cfg));
+      } catch (_) {}
+    }
+  }
+  lockClose(true);
+}
+/* Neue PIN speichern */
+async function lockSetPin(pin) {
+  const old = lockCfg();
+  const keepRec = old && old.rec && !LOCK.recUsed,
+    inTresor = lockTresor() && TRESOR.on && old && old.w;
+  /* Wer neu in den Tresor kommt, bekommt immer einen neuen Code (der alte lässt sich nicht übernehmen) */
+  const code = keepRec && (inTresor || !lockTresor()) ? null : recoveryCode();
+  LOCK.busy = true;
+  try {
+    if (lockTresor()) {
+      $("lockErr").textContent = uiText(TRESOR.on ? "tr_opening" : "tr_moving");
+      if (inTresor) {
+        await tresorSetPin(pin);
+        if (code) await tresorSetRec(code);
+      } else if (!(await tresorEnable(pin, code, { wipe: (old && old.wipe) || 0 }))) throw new Error("tresor");
+      localStorage.setItem(LOCK_KEY, JSON.stringify({ salt: "", len: pin.length, bio: false, w: 1, rec: { w: 1 }, wipe: (old && old.wipe) || 0 }));
+      $("lockErr").textContent = "";
+    } else {
+      const salt = newId();
+      const rec = keepRec
+        ? old.rec
+        : (() => {
+            const s2 = newId();
+            return { salt: s2, hash: pinHash(recNorm(code), s2) };
+          })();
+      localStorage.setItem(
+        LOCK_KEY,
+        JSON.stringify({ salt, hash: pinHash(pin, salt), len: pin.length, bio: old ? !!old.bio : false, rec, wipe: (old && old.wipe) || 0 })
+      );
+    }
+  } catch (e) {
+    LOCK.busy = false;
+    $("lockErr").textContent = "";
+    lockWrong("PIN konnte nicht gespeichert werden.");
+    return;
+  }
+  LOCK.busy = false;
+  LOCK.recUsed = false;
+  const finish = () => {
+    lockClose(true);
+    toast("App-Sperre ist an");
+  };
+  const askBio = () => {
+    if (BIO && !(old && old.bio)) bioOffer(finish);
+    else finish();
+  };
+  if (code) {
+    showRecovery(code, askBio);
+    return;
+  }
+  askBio();
 }
 function lockSetNext() {
   if (LOCK.pin.length < 4) {
@@ -539,7 +613,12 @@ window.hbResumed = () => {
     if ($("notifyEd") && $("notifyEd").offsetParent) renderNotifyEd();
   } catch (_) {}
 };
-if (lockCfg()) lockShow("unlock");
+/* Hat der Tresor beim Start schon entsperrt, nicht noch einmal fragen; mit dem Code entsperrt: gleich neue PIN */
+if (TRESOR.recUsed) {
+  LOCK.recUsed = true;
+  lockShow("set", () => renderLockEd());
+  toast("Entsperrt – leg jetzt eine neue PIN fest");
+} else if (lockCfg() && !TRESOR.opened) lockShow("unlock");
 function renderLockEd() {
   const el = $("lockEd");
   if (!el) return;
@@ -549,8 +628,16 @@ function renderLockEd() {
        ${BIO ? `<div class="switch"><label for="lockBioChk"><b>Fingerabdruck</b><br><span class="small muted">Statt PIN mit Fingerabdruck entsperren</span></label><input type="checkbox" id="lockBioChk" ${cfg.bio ? "checked" : ""}></div>` : ""}
        <div class="row-btns"><button class="btn" id="lockChange">PIN ändern</button><button class="btn" id="lockOff">Sperre ausschalten</button></div>
        <div class="meta-row"><span class="small muted">${cfg.rec ? "Wiederherstellungscode ist eingerichtet – damit entsperrst du die App, falls du die PIN vergisst." : "Noch kein Wiederherstellungscode – leg einen an, falls du die PIN mal vergisst."}</span></div>
-       <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="lockRecNew">${cfg.rec ? "Neuen Wiederherstellungscode" : "Wiederherstellungscode anlegen"}</button></div>`
+       <div class="row-btns" style="justify-content:flex-start"><button class="btn" id="lockRecNew">${cfg.rec ? "Neuen Wiederherstellungscode" : "Wiederherstellungscode anlegen"}</button></div>
+       ${cfg.w ? `<div class="meta-row"><span class="small muted">${escHtml(uiText("tr_on_info"))}</span></div>` : ""}
+       <div class="switch" style="margin-top:12px"><label for="lockWipeChk"><b>${escHtml(uiText("tr_wipe_t"))}</b><br><span class="small muted">${escHtml(uiText("tr_wipe_p"))}</span></label><input type="checkbox" id="lockWipeChk" ${lockWipeAt() ? "checked" : ""}></div>`
     : `<div class="meta-row"><span>Schützt deine Finanzen mit einer PIN${BIO ? " oder deinem Fingerabdruck" : ""}, wenn jemand anderes dein ${NATIVE && !(window.AndroidBridge || {}).desktop ? (IS_TAB ? "Tablet" : "Handy") : "Gerät"} benutzt.</span></div><div class="row-btns"><button class="btn primary" id="lockOn">App-Sperre einrichten</button></div>`;
+  /* Hinweis bei gerootetem Handy oder angeschlossenem Debugger */
+  let risk = "";
+  try {
+    risk = window.AndroidBridge && window.AndroidBridge.deviceRisk ? String(window.AndroidBridge.deviceRisk() || "") : "";
+  } catch (_) {}
+  if (risk) el.innerHTML = `<div class="notice warn" style="margin-bottom:12px"><span>${escHtml(uiText(/root/.test(risk) ? "sec_root" : "sec_debug"))}</span></div>` + el.innerHTML;
   if (window.AndroidBridge && typeof window.AndroidBridge.setSecure === "function")
     el.innerHTML += `<div class="switch" style="margin-top:12px"><label for="scrSecChk"><b>Bildschirmschutz</b><br><span class="small muted">Keine Screenshots, keine Bildschirmaufnahmen und kein Vorschaubild in der App-Übersicht. Für einen Screenshot kurz ausschalten.</span></label><input type="checkbox" id="scrSecChk" ${lsGet("hb-scrsec") === "0" ? "" : "checked"}></div>`;
 }
@@ -575,16 +662,20 @@ document.addEventListener("click", (e) => {
       if (ok) lockShow("set", () => renderLockEd());
     });
   else if (e.target.closest("#lockRecNew"))
-    lockShow("check", (ok) => {
+    lockShow("check", async (ok) => {
       if (!ok) return;
       const cfg = lockCfg();
       if (!cfg) return;
       const code = recoveryCode(),
         s2 = newId();
-      cfg.rec = {
-        salt: s2,
-        hash: pinHash(recNorm(code), s2),
-      };
+      if (cfg.w) {
+        await tresorSetRec(code);
+        cfg.rec = { w: 1 };
+      } else
+        cfg.rec = {
+          salt: s2,
+          hash: pinHash(recNorm(code), s2),
+        };
       try {
         localStorage.setItem(LOCK_KEY, JSON.stringify(cfg));
       } catch (_) {}
@@ -598,15 +689,29 @@ document.addEventListener("click", (e) => {
       });
     });
   else if (e.target.closest("#lockOff"))
-    lockShow("check", (ok) => {
+    lockShow("check", async (ok) => {
       if (ok) {
         try {
+          if (TRESOR.on) await tresorDisable();
           localStorage.removeItem(LOCK_KEY);
         } catch (err) {}
         toast("App-Sperre ist aus");
       }
       renderLockEd();
     });
+});
+document.addEventListener("change", (e) => {
+  if (e.target.id !== "lockWipeChk") return;
+  const n = e.target.checked ? 10 : 0,
+    cfg = lockCfg();
+  if (cfg) {
+    cfg.wipe = n;
+    try {
+      localStorage.setItem(LOCK_KEY, JSON.stringify(cfg));
+    } catch (_) {}
+  }
+  tresorSetWipe(n);
+  toast(uiText(n ? "tr_wipe_on" : "tr_wipe_off"));
 });
 document.addEventListener("change", (e) => {
   if (e.target.id !== "lockBioChk") return;

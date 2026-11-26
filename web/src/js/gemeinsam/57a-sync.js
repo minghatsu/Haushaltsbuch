@@ -29,6 +29,7 @@ function saveSync() {
         skipped: SYNC.skipped,
         asked: !!SYNC.asked,
         email: SYNC.email || "",
+        ...(typeof SYNC.bad === "number" ? { bad: SYNC.bad } : {}),
       })
     );
   } catch (e) {}
@@ -260,6 +261,11 @@ async function syncNow() {
     const res = await api("pull", {
       qs: "&since=" + SYNC.rev,
     });
+    /* Alter Speicher eingefroren (ein Gerät wurde entfernt): umziehen */
+    if (MODE === "pair" && res.moved) {
+      SYNC.busy = false;
+      return pairMovedCheck();
+    }
     if (MODE === "pair") res.docs = await pairDecDocs(res.docs);
     const pending = new Set([
       ...SYNC.queue.map((o) => o.col + "/" + o.id),
@@ -278,6 +284,9 @@ async function syncNow() {
         continue;
       }
       if (d.col === "app" && d.id.startsWith("dev-")) {
+        try {
+          secDevSeen(d.id.slice(4), d.data);
+        } catch (_) {}
         devStore(d.id.slice(4), d.data);
         continue;
       }
@@ -309,6 +318,9 @@ async function syncNow() {
       if (d.data === null) delete memStore[d.col][d.id];
       else memStore[d.col][d.id] = d.data;
     }
+    try {
+      secBadSeen(res);
+    } catch (_) {}
     SYNC.rev = res.rev || SYNC.rev;
     SYNC.last = Date.now();
     SYNC.err = "";
@@ -338,6 +350,10 @@ async function syncNow() {
     checkUpdate();
   } catch (e) {
     let healed = false;
+    if (e.status === 409 && e.data && e.data.moved && MODE === "pair") {
+      SYNC.busy = false;
+      return pairMovedCheck();
+    }
     if (e.status === 401 && MODE === "pair" && pairState()) {
       try {
         const K = await pairKeys();

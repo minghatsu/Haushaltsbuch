@@ -70,7 +70,8 @@ def build_index():
         elif m.group(1) == "css":
             out.append(concat(m.group(2), "css").rstrip("\n"))
         else:
-            out.append('(() => {\n"use strict";\n\n' + concat(m.group(2)) + "/*PC-JS*/\n})();")
+            # async: der Tresor (00-0-tresor.js) wartet vor allem anderen, bis die Daten entschlüsselt sind
+            out.append('(async () => {\n"use strict";\n\n' + concat(m.group(2)) + "/*PC-JS*/\n})();")
     return "\n".join(out)
 
 

@@ -120,6 +120,46 @@ jobs:
           path: app.html
           retention-days: 1
 
+  sicherheit:
+    name: Sicherheits-Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 30
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Werkzeuge
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq php-cli php-sqlite3 >/dev/null
+      - name: Keine Geheimnisse im Code (gitleaks)
+        run: |
+          curl -fsSL -o /tmp/gl.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz
+          echo "ba6dbb656933921c775ee5a2d1c13a91046e7952e9d919f9bac4cec61d628e7d  /tmp/gl.tgz" | sha256sum -c - || { echo "::error::gitleaks-Download hat eine falsche Prüfsumme"; exit 1; }
+          tar xzf /tmp/gl.tgz -C /tmp gitleaks
+          /tmp/gitleaks detect --no-git --source . --no-banner --redact
+          /tmp/gitleaks detect --source . --log-opts="-n 30" --no-banner --redact
+      - name: Server-Skripte fehlerfrei und Sicherheitsregeln aktuell
+        run: |
+          for f in server/*.php; do php -l "$f"; done
+          python3 tools/csp-static.py --check
+          python3 tools/build-web.py --check
+      - name: Angriffstest gegen eine lokale Server-Kopie
+        run: |
+          mkdir -p /tmp/srv/haushaltsbuch
+          cp server/pair.php /tmp/srv/haushaltsbuch/
+          sed 's/__DATA_SUFFIX__/test/' server/api.php > /tmp/srv/haushaltsbuch/api.php
+          (cd /tmp/srv && nohup php -S 127.0.0.1:8099 >/tmp/php.log 2>&1 &)
+          sleep 1
+          node tools/test/angriff.cjs http://127.0.0.1:8099/haushaltsbuch
+      - name: Bekannte Lücken in PC-Bausteinen (nur Hinweis)
+        continue-on-error: true
+        working-directory: desktop
+        run: |
+          npm install --package-lock-only --no-fund --ignore-scripts >/dev/null
+          npm audit --audit-level=high
+
   gesten:
     name: Gesten-Test (Handy + Tablet)
     needs: web
@@ -296,7 +336,7 @@ jobs:
 
   web-release:
     name: Veröffentlichen (nur App-Inhalt)
-    needs: [web, gesten, android-test]
+    needs: [web, gesten, android-test, sicherheit]
     if: ${{ needs.web.outputs.native == 'false' }}
     runs-on: ubuntu-latest
     env:
@@ -464,8 +504,8 @@ jobs:
 
   release:
     name: Veröffentlichen
-    needs: [web, android, windows, windows-test, gesten, android-test]
-    if: ${{ always() && needs.web.result == 'success' && needs.web.outputs.native == 'true' && needs.gesten.result == 'success' && needs.android-test.result == 'success' }}
+    needs: [web, android, windows, windows-test, gesten, android-test, sicherheit]
+    if: ${{ always() && needs.web.result == 'success' && needs.web.outputs.native == 'true' && needs.gesten.result == 'success' && needs.android-test.result == 'success' && needs.sicherheit.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

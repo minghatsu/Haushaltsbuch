@@ -384,6 +384,7 @@ async function pairJoin(code) {
   MODE = "pair";
   SERVER = pairUrl();
   SYNC.token = await pairToken();
+  pairDevKeys().catch(() => {});
   try {
     await api("pull", {
       qs: "&since=999999999",

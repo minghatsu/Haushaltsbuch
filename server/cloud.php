@@ -1,5 +1,6 @@
 <?php
 
+header_remove('X-Powered-By'); /* PHP-Version nicht verraten */
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Authorization, Content-Type');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -8,6 +9,8 @@ header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
 header('X-Frame-Options: DENY');
+header("Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+header('X-Permitted-Cross-Domain-Policies: none');
 header('Strict-Transport-Security: max-age=31536000');
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
@@ -46,6 +49,8 @@ function db(): PDO {
     $pdo->exec('CREATE TABLE IF NOT EXISTS tokens (hash TEXT PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, created INTEGER, used INTEGER)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS docs (user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, col TEXT NOT NULL, id TEXT NOT NULL, data TEXT, rev INTEGER NOT NULL, PRIMARY KEY (user_id, col, id))');
     $pdo->exec('CREATE INDEX IF NOT EXISTS docs_rev ON docs(user_id, rev)');
+    try { $pdo->exec('ALTER TABLE users ADD COLUMN bad INTEGER DEFAULT 0'); } catch (Throwable $e) { }
+    try { $pdo->exec('ALTER TABLE users ADD COLUMN bad_t INTEGER DEFAULT 0'); } catch (Throwable $e) { }
     $pdo->exec('CREATE TABLE IF NOT EXISTS ipfails (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)');
     return $pdo;
@@ -68,7 +73,7 @@ function ipFail(): void {
 function userFail(array $u): void {
     $n = (int)$u['fails'] + 1; $r = (int)$u['rounds']; $until = 0;
     if ($n >= 5) { $r++; $until = time() + [60, 300, 900, 3600][min(3, $r - 1)]; $n = 0; }
-    q('UPDATE users SET fails = ?, rounds = ?, locked_until = ? WHERE id = ?', [$n, $r, $until, $u['id']]);
+    q('UPDATE users SET fails = ?, rounds = ?, locked_until = ?, bad = COALESCE(bad, 0) + 1, bad_t = ? WHERE id = ?', [$n, $r, $until, time(), $u['id']]);
     ipFail();
 }
 function userOk(array $u): void { q('UPDATE users SET fails = 0, rounds = 0, locked_until = 0 WHERE id = ?', [$u['id']]); }
@@ -315,8 +320,8 @@ Warst du das nicht? Dann antworte bitte sofort auf diese E-Mail.
         $s = q('SELECT col, id, data, rev FROM docs WHERE user_id = ? AND rev > ? ORDER BY rev', [$uid, $since]);
         $docs = [];
         foreach ($s as $r) $docs[] = ['col' => $r['col'], 'id' => $r['id'], 'data' => $r['data'] === null ? null : json_decode($r['data'], true), 'rev' => (int)$r['rev']];
-        $rev = (int)q('SELECT rev FROM users WHERE id = ?', [$uid])->fetchColumn();
-        out(['rev' => $rev, 'docs' => $docs]);
+        $ur = q('SELECT rev, COALESCE(bad, 0) AS bad, COALESCE(bad_t, 0) AS bad_t FROM users WHERE id = ?', [$uid])->fetch();
+        out(['rev' => (int)$ur['rev'], 'docs' => $docs, 'bad' => (int)$ur['bad'], 'bad_t' => (int)$ur['bad_t']]);
     }
 
     if ($a === 'push') {

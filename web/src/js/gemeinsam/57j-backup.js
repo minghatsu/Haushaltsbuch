@@ -210,6 +210,7 @@ async function pairStart() {
   try {
     localStorage.setItem("hb-main", "1");
   } catch (_) {}
+  await pairDevKeys().catch(() => {});
   loginDone(await pairToken(), true, "Gekoppelt – Daten werden verschlüsselt hochgeladen");
 }
 const SC_ABC = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";

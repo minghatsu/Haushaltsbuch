@@ -434,6 +434,8 @@ function devMe() {
     type: devType(),
     ver: curVerShort(),
     seen: Date.now(),
+    /* öffentlicher Geräteschlüssel: damit kann ein anderes Gerät beim Entfernen eines Geräts die neue Kopplung nur für dieses Gerät verschlüsseln */
+    ...(pairPub() ? { pk: pairPub() } : {}),
     ...(isMain()
       ? {
           main: true,
@@ -489,10 +491,11 @@ function renderGeraete() {
             return pn || ph
               ? `<span class="exi devi">${ph ? `<img src="${escHtml(ph)}" alt="" class="devph">` : `<b>${escHtml(pn[0].toUpperCase())}</b>`}<span class="avdev">${devIc(f, 10)}</span></span><span class="n"><b>${escHtml(pn || devShown(d))}${d.main ? " " + svgIcon("crown", 14) : ""}</b><small>${pn ? escHtml(devShown(d)) + " · " : ""}`
               : `<span class="exi">${devIc(f, 20)}</span><span class="n"><b>${escHtml(devShown(d))}${d.main ? " " + svgIcon("crown", 14) : ""}</b><small>`;
-          })()}${d.main ? "Hauptgerät · " : ""}${id === me ? "Dieses Gerät · " : ""}v${escHtml(String(d.ver || "?").replace(/^[vV] ?/, ""))} · ${id === me ? "jetzt aktiv" : "zuletzt " + ago(d.seen || 0)}</small></span>${id === me ? "" : ui.devDelArm === id ? `<button class="btn danger" data-devdel="${escHtml(id)}" style="padding:8px 12px">Wirklich entfernen?</button>` : `<button class="btn" data-devdel="${escHtml(id)}" style="padding:8px 12px">Entfernen</button>`}</div>`
+          })()}${d.main ? "Hauptgerät · " : ""}${id === me ? "Dieses Gerät · " : ""}v${escHtml(String(d.ver || "?").replace(/^[vV] ?/, ""))} · ${id === me ? "jetzt aktiv" : "zuletzt " + ago(d.seen || 0)}</small></span>${id === me ? "" : ui.devDelArm === id ? `<button class="btn danger" data-devdel="${escHtml(id)}" style="padding:8px 12px" title="${escHtml(MODE === "pair" ? uiText("rm_note") : "")}">Wirklich entfernen?</button>` : `<button class="btn" data-devdel="${escHtml(id)}" style="padding:8px 12px">Entfernen</button>`}</div>`
       )
       .join("")}
     <div class="small muted" style="margin:8px 2px 0">${L.length} von höchstens 10 Geräten gekoppelt.</div>
+    ${MODE === "pair" && SYNC.token && L.length > 1 ? `<div class="small muted" style="margin:6px 2px 0">${escHtml(uiText("rm_note"))}</div>` : ""}
     ${
       SYNCABLE && (!SYNC.token || MODE === "pair")
         ? SYNC.token
@@ -559,6 +562,21 @@ document.addEventListener("click", (e) => {
     return;
   }
   ui.devDelArm = null;
+  devRemove(id);
+});
+/* Entfernen: bei der Kopplung mit Schlüsselwechsel (57m), sonst wie bisher nur abmelden */
+async function devRemove(id) {
+  const name = zDevName(id);
+  let r = { ok: false, soft: true };
+  if (MODE === "pair" && SYNC.token) {
+    toast(uiText("rm_busy"), null, null, 20000);
+    try {
+      r = await pairRemoveDev(id);
+    } catch (e) {
+      toast(uiText("rm_fail"), null, null, 8000);
+      return;
+    }
+  }
   store.settings.devOut = {
     ...(store.settings.devOut || {}),
     [id]: Date.now(),
@@ -567,8 +585,16 @@ document.addEventListener("click", (e) => {
   devStore(id, null);
   if (SYNC.token) enqueue("app", "dev-" + id, null);
   renderGeraete();
-  toast(`${zDevName(id)} entfernt – es gleicht nicht mehr ab`);
-});
+  if (r.ok)
+    toast(
+      uiText("rm_done", { n: name }) + (r.left && r.left.length ? " " + uiText("rm_left", { n: r.left.join(", ") }) : ""),
+      null,
+      null,
+      r.left && r.left.length ? 12000 : 6000
+    );
+  else if (r.old) toast(uiText("rm_old", { n: name }), null, null, 10000);
+  else toast(`${name} entfernt – es gleicht nicht mehr ab`);
+}
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-qsw]");
   if (!b) return;

@@ -51,16 +51,20 @@ const rcptOpen = (v) => {
 };
 async function rcptGet(id) {
   try {
-    return rcptOpen(await rcptOp("readonly", (st) => st.get(id)));
+    const v = await rcptOp("readonly", (st) => st.get(id));
+    /* s: 2 = mit dem Tresor (PIN) verschlüsselt */
+    if (v && v.s === 2) return await tresorImgOpen(v.img);
+    return rcptOpen(v);
   } catch (e) {
     return null;
   }
 }
 async function rcptPut(id, img, fromSync) {
+  const t = img ? await tresorImgSeal(String(img)) : null;
   await rcptOp("readwrite", (st) =>
     st.put(
       {
-        ...rcptSeal(img),
+        ...(t ? { img: t, s: 2 } : rcptSeal(img)),
         ts: Date.now(),
       },
       id

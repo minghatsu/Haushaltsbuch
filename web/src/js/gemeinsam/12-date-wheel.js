@@ -234,7 +234,9 @@ new MutationObserver((ms) => {
   childList: true,
   subtree: true,
 });
-document.addEventListener("DOMContentLoaded", () => calScan());
+/* Der Tresor kann den Start verzögern – dann ist DOMContentLoaded schon vorbei */
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => calScan());
+else setTimeout(calScan, 0);
 const CAL = {
   el: null,
   s: null,

@@ -1,5 +1,6 @@
 <?php
 
+header_remove('X-Powered-By'); /* PHP-Version nicht verraten */
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Authorization, Content-Type');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
@@ -8,6 +9,9 @@ header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
 header('X-Frame-Options: DENY');
+header("Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+header('X-Permitted-Cross-Domain-Policies: none');
+if (($_SERVER['HTTPS'] ?? '') !== '' && $_SERVER['HTTPS'] !== 'off') header('Strict-Transport-Security: max-age=31536000');
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
 const MAX_BLOB = 6000000;
@@ -70,6 +74,8 @@ function db(): PDO {
     $pdo->exec('CREATE TABLE IF NOT EXISTS vaults (id TEXT PRIMARY KEY, auth TEXT NOT NULL, created INTEGER, used INTEGER, rev INTEGER NOT NULL DEFAULT 0, size INTEGER NOT NULL DEFAULT 0)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS docs (vault TEXT NOT NULL, h TEXT NOT NULL, b TEXT, rev INTEGER NOT NULL, PRIMARY KEY (vault, h))');
     $pdo->exec('CREATE INDEX IF NOT EXISTS docs_rev ON docs(vault, rev)');
+    /* moved: Zeitpunkt, ab dem der Speicher eingefroren ist (ein Gerät wurde mit Schlüsselwechsel entfernt) */
+    try { $pdo->exec('ALTER TABLE vaults ADD COLUMN moved INTEGER'); } catch (Throwable $e) { }
     $pdo->exec('CREATE TABLE IF NOT EXISTS ipcreate (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS ipfails (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS ipfeed (ip TEXT PRIMARY KEY, n INTEGER, since INTEGER)');
@@ -547,6 +553,7 @@ try {
         else q('INSERT INTO ipcreate (ip, n, since) VALUES (?, 1, ?) ON CONFLICT(ip) DO UPDATE SET n = 1, since = excluded.since', ['*', time()]);
         ipBump('ipcreate');
         if (random_int(1, 20) === 1) q('DELETE FROM vaults WHERE size = 0 AND rev = 0 AND created < ?', [time() - 7 * 86400]);
+        if (random_int(1, 20) === 1) { $old = time() - 30 * 86400; q('DELETE FROM docs WHERE vault IN (SELECT id FROM vaults WHERE moved IS NOT NULL AND moved < ?)', [$old]); q('DELETE FROM vaults WHERE moved IS NOT NULL AND moved < ?', [$old]); }
         q('INSERT INTO vaults (id, auth, created, used) VALUES (?, ?, ?, ?)', [$id, hash('sha256', $auth), time(), time()]);
         out(['ok' => true]);
     }
@@ -562,16 +569,18 @@ try {
             $docs[] = ['h' => $r['h'], 'b' => $r['b'], 'rev' => (int)$r['rev']]; $last = (int)$r['rev']; $bytes += $n;
         }
         $more = $cut || count($docs) === 2000;
-        out(['rev' => $more ? $last : (int)$v['rev'], 'docs' => $docs, 'more' => $more]);
+        out(['rev' => $more ? $last : (int)$v['rev'], 'docs' => $docs, 'more' => $more] + (!empty($v['moved']) ? ['moved' => true] : []));
     }
 
-    if ($a === 'push') {
+    if ($a === 'push' || $a === 'freeze') {
         $v = authVault();
+        if (!empty($v['moved'])) out(['error' => 'Diese Kopplung ist umgezogen', 'moved' => true], 409);
         if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 40000000) fail('Zu viele Daten auf einmal', 413);
         $ops = body()['ops'] ?? null;
-        if (!is_array($ops) || count($ops) > 5000) fail('Ungültige Anfrage', 400);
+        if (!is_array($ops) || count($ops) > ($a === 'freeze' ? 50 : 5000)) fail('Ungültige Anfrage', 400);
         $pdo = db(); $pdo->exec('BEGIN IMMEDIATE');
-        $cur = q('SELECT rev, size FROM vaults WHERE id = ?', [$v['id']])->fetch();
+        $cur = q('SELECT rev, size, moved FROM vaults WHERE id = ?', [$v['id']])->fetch();
+        if (!empty($cur['moved'])) { $pdo->exec('ROLLBACK'); out(['error' => 'Diese Kopplung ist umgezogen', 'moved' => true], 409); }
         $rev = (int)$cur['rev']; $size = (int)$cur['size']; $start = $size;
         $others = (int)(q('SELECT COALESCE(SUM(size), 0) FROM vaults WHERE id <> ?', [$v['id']])->fetchColumn() ?: 0);
         $free = false; try { if (function_exists('disk_free_space')) $free = @disk_free_space(DATA_DIR); } catch (\Throwable $e) { $free = false; }
@@ -589,6 +598,8 @@ try {
             $put->execute([$v['id'], $h, $b, $rev]);
         }
         q('UPDATE vaults SET rev = ?, size = ? WHERE id = ?', [$rev, max(0, $size), $v['id']]);
+        /* Einfrieren in derselben Transaktion: danach kann niemand mehr etwas in den alten Speicher schreiben */
+        if ($a === 'freeze') q('UPDATE vaults SET moved = ? WHERE id = ?', [time(), $v['id']]);
         $pdo->exec('COMMIT');
         out(['rev' => $rev]);
     }

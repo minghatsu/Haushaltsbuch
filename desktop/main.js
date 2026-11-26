@@ -326,6 +326,40 @@ function httpsPinned(req) {
     r.on("timeout", () => r.destroy(new Error("timeout"))); r.on("error", bad); if (body) r.write(body); r.end();
   });
 }
+/* Zertifikats-Pinning für den Kopplungs-Server: Die Kette muss bei Let's Encrypt enden – ISRG Root X1/X2 oder die
+   neuen Wurzeln YR/YE (Synology-DDNS-Zertifikate kommen von YR2). Verglichen wird der öffentliche Schlüssel (SPKI),
+   so passt auch die über X1/X2 quer-signierte Fassung von YR/YE. Ein fremdes Zertifikat (z. B. von einem Firmen-Proxy
+   oder einer gefälschten Zertifizierungsstelle) wird abgelehnt. */
+const PIN_HOSTS = new Set(["miracleframe.synology.me"]);
+const PIN_SPKI = [
+  "C5+lpZ7tcVwmwQIMcRtPbsQtWLABXhQzejna0wHFr8M=", // ISRG Root X1
+  "diGVwiVYbubAI3RW4hB9xU8e/CH2GnkuvVFZE8zmgzI=", // ISRG Root X2
+  "fk6IOKit1ild5647BH06ujSIq5XbCgqlbYl6ANhhi88=", // Root YR
+  "sCkq5UWXjg+7mKu9lMhhYF5bGLsy7VI/UNW3tccdR7w=", // Root YE
+];
+function pinOk(host, cert) {
+  const err = require("tls").checkServerIdentity(host, cert);
+  if (err) return err;
+  const seen = new Set();
+  for (let c = cert; c && c.fingerprint256 && !seen.has(c.fingerprint256); c = c.issuerCertificate) {
+    try {
+      if (c.pubkey && PIN_SPKI.includes(require("crypto").createHash("sha256").update(c.pubkey).digest("base64"))) return undefined;
+    } catch (_) {}
+    seen.add(c.fingerprint256);
+  }
+  return new Error("Zertifikat passt nicht zum Server");
+}
+function httpsPinnedRoot(url, req) {
+  return new Promise((ok, bad) => {
+    const u = new URL(url);
+    const headers = { "Content-Type": "application/json" }; if (req.auth) headers.Authorization = req.auth;
+    const post = req.method === "POST", body = post ? Buffer.from(req.body || "", "utf8") : null; if (body) headers["Content-Length"] = body.length;
+    const r = require("https").request(u, { method: post ? "POST" : "GET", headers, timeout: 30000, agent: false, checkServerIdentity: pinOk }, (res) => {
+      const chunks = []; res.on("data", (c) => chunks.push(c)); res.on("end", () => ok({ status: res.statusCode, text: Buffer.concat(chunks).toString("utf8") }));
+    });
+    r.on("timeout", () => r.destroy(new Error("timeout"))); r.on("error", bad); if (body) r.write(body); r.end();
+  });
+}
 function homeHost(h) { return /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|127\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)[0-9.]+$/.test(h) || /^localhost$|\.local$|\.fritz\.box$|\.ts\.net$/i.test(h); }
 ipcMain.on("copySecret", (e, text, sec) => {
   const { clipboard } = require("electron"); const t = String(text); clipboard.writeText(t);
@@ -340,6 +374,7 @@ ipcMain.on("http", async (e, req) => {
     if (req.auth) headers.Authorization = req.auth;
     const post = req.method === "POST";
     if (req.certHost) { const p = await httpsPinned(req); status = p.status; text = p.text; }
+    else if (/^https:/i.test(req.url) && PIN_HOSTS.has(new URL(req.url).hostname)) { const p = await httpsPinnedRoot(req.url, req); status = p.status; text = p.text; }
     else {
       const r = await fetch(req.url, { method: post ? "POST" : "GET", headers, body: post ? req.body : undefined, signal: AbortSignal.timeout(30000) });
       status = r.status;
