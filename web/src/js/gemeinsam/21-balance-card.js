@@ -777,6 +777,7 @@ function renderHome() {
   const openFx = [];
   $("v-home").innerHTML = `
     ${ym === cur ? hlCard() : ""}
+    ${ym === cur ? wbCard() : ""}
     ${store.settings.work === undefined ? `<div class="card workq"><b>Wie verdienst du dein Geld?</b><span class="small muted">Dann zeigt die App nur, was zu dir passt.</span>${workPicker("", ui.workGrp || "", "setwork")}</div>` : store.settings.extra === undefined && store.settings.work !== undefined && ui.askExtra ? `<div class="card workq"><b>Verdienst du noch etwas dazu?</b><span class="small muted">Du kannst mehreres anhaken.</span>${extraPicker(store.settings.work, ui.exSel || [], "homeextra")}<button class="btn primary" data-homeexok="1" style="margin-top:10px">Fertig</button></div>` : ""}
     ${
       needStart

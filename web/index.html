@@ -24407,6 +24407,177 @@ html.pc:not(.istab) .mvopen {
   }
 }
 
+/* Dranbleiben: Wiedereinstieg, Monats-Check, gelernte Uhrzeit */
+.wbcard {
+  background: var(--accent-soft);
+  box-shadow: none;
+  display: grid;
+  gap: 8px;
+  animation: wbIn 0.42s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1)) both;
+}
+.wbcard.out {
+  animation: wbOut 0.26s ease-in both;
+}
+@keyframes wbIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+@keyframes wbOut {
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+.wbtop {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.wbtop .mav {
+  width: 46px;
+  height: 46px;
+  flex: none;
+}
+.wbtop b {
+  display: block;
+  font-size: 17px;
+}
+.wbtop span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.wbcard .btn.block {
+  width: 100%;
+  min-height: 46px;
+}
+.wbcard .wbhand {
+  background: var(--surface);
+}
+.wbcard .wbok {
+  justify-self: center;
+  min-height: 40px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.mcwrap {
+  display: grid;
+  gap: 10px;
+}
+.mctag {
+  justify-self: start;
+  padding: 3px 10px;
+  border-radius: 99px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.mch {
+  margin: 2px 0 0;
+  font-size: 26px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.mcf {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--line);
+}
+.mci {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--sunk);
+  color: var(--fg);
+}
+.mcf.good .mci {
+  background: color-mix(in srgb, var(--good) 15%, var(--surface));
+  color: var(--good);
+}
+.mcf.warn .mci {
+  background: color-mix(in srgb, var(--warn) 15%, var(--surface));
+  color: var(--warn);
+}
+.mcf b {
+  display: block;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.mcf small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.mcbar {
+  height: 8px;
+  margin-top: 8px;
+  border-radius: 9px;
+  background: var(--sunk);
+  overflow: hidden;
+}
+.mcbar i {
+  display: block;
+  height: 100%;
+  border-radius: 9px;
+  background: var(--accent);
+  transform-origin: left;
+  animation: mcBar 0.9s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes mcBar {
+  from {
+    transform: scaleX(0);
+  }
+}
+.mchl {
+  justify-self: center;
+  min-height: 40px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.dbinfo {
+  margin: 2px 0 10px 46px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--sunk);
+}
+.dbinfo > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 14px;
+}
+.dbinfo > div span {
+  color: var(--muted);
+}
+.dbinfo p {
+  margin: 6px 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wbcard,
+  .wbcard.out,
+  .mcbar i {
+    animation: none;
+  }
+}
+
 /* Konten je Jahr */
 .ayblk {
   margin-top: 16px;
@@ -52321,6 +52492,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.50.1",
+    "26. November 2026",
+    [
+      "Dranbleiben – fair statt Druck: Nach ein paar Tagen ohne Eintrag zeigt Haushalt eine freundliche Karte. Du holst die Lücke aus dem Kontoauszug oder von Hand nach – oder machst einfach weiter.",
+      "Monats-Check: Am Monatsanfang drei ehrliche Punkte zum vergangenen Monat – was sich bei deinen Ausgaben am meisten verändert hat, welche größere Zahlung bald kommt (und wie viel du dafür pro Monat zurücklegen solltest) und wie weit dein Sparziel ist. Keine Serien, keine Ranglisten.",
+      "Erinnerung „Zur passenden Zeit“: Die tägliche Erinnerung kann zur Uhrzeit kommen, zu der du sonst einträgst. Mami erkennt sie nur aus deinen eigenen Einträgen, speichert nichts zusätzlich und erinnert nicht, wenn du heute schon eingetragen hast.",
+    ],
+  ],
+  [
     "0.50.0",
     "25. November 2026",
     [
@@ -54932,6 +55112,17 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.50.1",
+    s: () => [
+      {
+        sel: '[data-view="home"]',
+        ic: "heart",
+        t: uiText("nw_db_t"),
+        p: [uiText("nw_db_p")],
+      },
+    ],
+  },
   {
     v: "0.50.0",
     s: () => [
@@ -65841,6 +66032,7 @@ function renderHome() {
   const openFx = [];
   $("v-home").innerHTML = `
     ${ym === cur ? hlCard() : ""}
+    ${ym === cur ? wbCard() : ""}
     ${store.settings.work === undefined ? `<div class="card workq"><b>Wie verdienst du dein Geld?</b><span class="small muted">Dann zeigt die App nur, was zu dir passt.</span>${workPicker("", ui.workGrp || "", "setwork")}</div>` : store.settings.extra === undefined && store.settings.work !== undefined && ui.askExtra ? `<div class="card workq"><b>Verdienst du noch etwas dazu?</b><span class="small muted">Du kannst mehreres anhaken.</span>${extraPicker(store.settings.work, ui.exSel || [], "homeextra")}<button class="btn primary" data-homeexok="1" style="margin-top:10px">Fertig</button></div>` : ""}
     ${
       needStart
@@ -73174,15 +73366,18 @@ function notifyPlan() {
       }
     }
     if (c.daily) {
-      const [hh, mm] = c.daily.split(":").map(Number);
-      for (let k = 0; k < 14; k++) {
+      /* „auto“: Uhrzeit aus deinen eigenen Einträgen (40g-dranbleiben.js), sonst die feste Zeit */
+      const auto = c.daily === "auto",
+        T = auto ? dbDailyAt() : null,
+        [hh, mm] = auto ? [T.h, T.m] : c.daily.split(":").map(Number);
+      for (let k = auto && dbDoneToday() ? 1 : 0; k < 14; k++) {
         const d = new Date(now);
         d.setDate(d.getDate() + k);
         add(
           "daily:" + isoOf(d),
           at(d, hh, mm),
-          "Schon alles eingetragen?",
-          "Kurz die Ausgaben von heute nachtragen – dann stimmen deine Budgets."
+          auto ? uiText("db_n_t") : "Schon alles eingetragen?",
+          auto ? uiText("db_n_s") : "Kurz die Ausgaben von heute nachtragen – dann stimmen deine Budgets."
         );
       }
     }
@@ -73488,12 +73683,14 @@ function renderNotifyEd() {
     ])}
     ${sel("daily", "Ausgaben eintragen", "Jeden Tag eine kurze Erinnerung.", [
       ["", "Aus"],
+      ["auto", escHtml(uiText("db_opt"))],
       ["18:00", "Täglich um 18 Uhr"],
       ["19:00", "Täglich um 19 Uhr"],
       ["20:00", "Täglich um 20 Uhr"],
       ["21:00", "Täglich um 21 Uhr"],
       ["22:00", "Täglich um 22 Uhr"],
     ])}
+    ${c.daily === "auto" ? dbLearnInfo() : ""}
     ${sel("imp", "Kontoauszug importieren", "Wenn so lange kein neuer Auszug importiert wurde.", [
       ["", "Aus"],
       ["7", "Nach 7 Tagen"],
@@ -91202,6 +91399,44 @@ const TEXTS = {
   rm_repair_b: ["Koppeln", "Pair", "Eşleştir", "Связать", "З'єднати", "Sparuj", "إقران", "Cuplează"],
   nw_sec_t: ["Mehr Schutz für deine Daten", "More protection for your data", "Verilerin için daha fazla koruma", "Больше защиты для твоих данных", "Більше захисту для твоїх даних", "Więcej ochrony dla twoich danych", "حماية أكبر لبياناتك", "Mai multă protecție pentru datele tale"],
   nw_sec_p: ["Mit App-Sperre sind deine Daten auf PC, iPhone und im Browser jetzt mit der PIN verschlüsselt. Entfernst du ein Gerät, bekommt der Abgleich einen neuen Schlüssel – und ein neues Gerät meldet die App dir sofort.", "With the app lock your data on PC, iPhone and in the browser is now encrypted with your PIN. Remove a device and sync gets a new key – and the app tells you right away about any new device.", "Uygulama kilidiyle verilerin PC'de, iPhone'da ve tarayıcıda artık PIN ile şifreli. Bir cihazı kaldırınca eşitleme yeni anahtar alır – yeni bir cihazı uygulama hemen bildirir.", "С блокировкой приложения твои данные на ПК, iPhone и в браузере теперь зашифрованы PIN-кодом. Удалишь устройство – синхронизация получит новый ключ, а о новом устройстве приложение сразу сообщит.", "З блокуванням застосунку твої дані на ПК, iPhone і в браузері тепер зашифровані PIN-кодом. Видалиш пристрій – синхронізація отримає новий ключ, а про новий пристрій застосунок одразу повідомить.", "Z blokadą aplikacji twoje dane na PC, iPhonie i w przeglądarce są teraz szyfrowane PIN-em. Usuniesz urządzenie – synchronizacja dostanie nowy klucz, a o nowym urządzeniu aplikacja od razu powie.", "مع قفل التطبيق صارت بياناتك على الكمبيوتر وiPhone والمتصفح مشفّرة برمز PIN. إذا أزلت جهازًا تحصل المزامنة على مفتاح جديد – ويخبرك التطبيق فورًا بأي جهاز جديد.", "Cu blocarea aplicației, datele tale pe PC, iPhone și în browser sunt acum criptate cu PIN-ul. Elimini un dispozitiv și sincronizarea primește o cheie nouă – iar despre orice dispozitiv nou aplicația îți spune imediat."],
+  db_opt: ["Zur passenden Zeit", "At the right time", "Uygun saatte", "В удобное время", "У зручний час", "O dobrej porze", "في الوقت المناسب", "La ora potrivită"],
+  db_l_time: ["Gelernte Zeit", "Learned time", "Öğrenilen saat", "Выученное время", "Вивчений час", "Wyuczona pora", "الوقت المُتعلَّم", "Ora învățată"],
+  db_l_ca: ["ca. {t} Uhr", "around {t}", "yaklaşık {t}", "около {t}", "близько {t}", "ok. {t}", "حوالي {t}", "în jur de {t}"],
+  db_l_none: ["noch 19:00 Uhr", "19:00 for now", "şimdilik 19:00", "пока 19:00", "поки 19:00", "na razie 19:00", "حاليًا 19:00", "deocamdată 19:00"],
+  db_l_to: ["Wird gesendet an", "Sent to", "Gönderildiği yer", "Отправляется", "Надсилається", "Wysyłane do", "يُرسل إلى", "Trimis către"],
+  db_l_nobody: ["niemanden", "nobody", "hiç kimse", "никому", "нікому", "nikogo", "لا أحد", "nimeni"],
+  db_l_how: ["Ergibt sich nur aus der Uhrzeit deiner letzten {n} Einträge – es wird nichts zusätzlich gespeichert. Hast du heute schon eingetragen, kommt keine Erinnerung.", "Based only on the time of your last {n} entries – nothing extra is stored. If you already added something today, there's no reminder.", "Yalnızca son {n} kaydının saatine dayanır – ek bir şey saklanmaz. Bugün zaten kayıt yaptıysan hatırlatma gelmez.", "Только по времени твоих последних {n} записей – ничего дополнительно не сохраняется. Если сегодня уже вносил, напоминания не будет.", "Лише за часом твоїх останніх {n} записів – нічого додатково не зберігається. Якщо сьогодні вже вносив, нагадування не буде.", "Wynika tylko z godzin twoich ostatnich {n} wpisów – nic dodatkowego nie jest zapisywane. Jeśli dziś już coś wpisałeś, przypomnienia nie będzie.", "تعتمد فقط على وقت آخر {n} إدخالات لك – لا يُحفظ شيء إضافي. إن أدخلت شيئًا اليوم فلن يصلك تذكير.", "Reiese doar din ora ultimelor {n} înregistrări – nu se salvează nimic în plus. Dacă ai notat deja azi, nu primești memento."],
+  db_l_how0: ["Nach {n} eigenen Einträgen weiß Mami, wann es dir passt. Bis dahin erinnert sie um 19 Uhr.", "After {n} entries of your own Mami knows what suits you. Until then she reminds you at 19:00.", "{n} kendi kaydından sonra Mami sana uyan saati bilir. O zamana kadar 19:00'da hatırlatır.", "После {n} твоих записей Мами поймёт, когда тебе удобно. До тех пор напоминает в 19:00.", "Після {n} твоїх записів Мамі зрозуміє, коли тобі зручно. До того нагадує о 19:00.", "Po {n} własnych wpisach Mami wie, kiedy ci pasuje. Do tego czasu przypomina o 19:00.", "بعد {n} إدخالات منك تعرف ماما الوقت المناسب لك. حتى ذلك الحين تذكّرك الساعة 19:00.", "După {n} înregistrări proprii Mami știe ce oră ți se potrivește. Până atunci îți amintește la 19:00."],
+  db_n_t: ["Feierabend?", "Done for the day?", "Gün bitti mi?", "Рабочий день позади?", "Робочий день позаду?", "Fajrant?", "انتهى يومك؟", "Gata ziua?"],
+  db_n_s: ["Trag kurz ein, was heute anfiel – dauert eine Minute.", "Quickly add what came up today – takes a minute.", "Bugün olanları kısaca gir – bir dakika sürer.", "Быстро внеси, что было сегодня – займёт минуту.", "Швидко внеси, що було сьогодні – займе хвилину.", "Wpisz szybko, co dziś wydałeś – zajmie minutę.", "سجّل بسرعة ما حدث اليوم – يستغرق دقيقة.", "Notează repede ce a fost azi – durează un minut."],
+  wb_t: ["Schön, dass du wieder da bist!", "Nice to have you back!", "Tekrar burada olman çok güzel!", "Здорово, что ты вернулся!", "Чудово, що ти повернувся!", "Fajnie, że wróciłeś!", "يسعدنا عودتك!", "Ce bine că te-ai întors!"],
+  wb_p: ["{n} Tage nichts eingetragen – ganz normal. Sollen wir das schnell nachholen?", "{n} days without entries – totally normal. Shall we catch up quickly?", "{n} gündür kayıt yok – gayet normal. Hızlıca telafi edelim mi?", "{n} дней без записей – это нормально. Быстро наверстаем?", "{n} днів без записів – це нормально. Швидко надолужимо?", "{n} dni bez wpisów – to normalne. Nadrobimy szybko?", "{n} أيام بلا إدخالات – أمر طبيعي تمامًا. هل نعوّضها بسرعة؟", "{n} zile fără înregistrări – e normal. Recuperăm repede?"],
+  wb_p_long: ["{n} Tage Pause – kein Problem. Mit dem Kontoauszug ist alles in ein paar Minuten nachgeholt.", "{n} days off – no problem. With your bank statement you'll catch up in a few minutes.", "{n} günlük ara – sorun değil. Hesap özetiyle birkaç dakikada her şey tamam.", "Перерыв {n} дней – не страшно. С выпиской всё наверстаешь за пару минут.", "Перерва {n} днів – не страшно. З випискою все надолужиш за кілька хвилин.", "{n} dni przerwy – nic się nie stało. Z wyciągiem nadrobisz wszystko w kilka minut.", "استراحة {n} أيام – لا مشكلة. مع كشف الحساب تعوّض كل شيء في دقائق.", "{n} zile de pauză – nicio problemă. Cu extrasul recuperezi totul în câteva minute."],
+  wb_imp: ["Aus dem Kontoauszug nachholen", "Catch up from bank statement", "Hesap özetinden tamamla", "Наверстать по выписке", "Надолужити з виписки", "Nadrób z wyciągu", "عوّض من كشف الحساب", "Recuperează din extras"],
+  wb_hand: ["Von Hand nachtragen", "Add by hand", "Elle ekle", "Внести вручную", "Внести вручну", "Dopisz ręcznie", "أضف يدويًا", "Adaugă manual"],
+  wb_ok: ["Passt schon, weiter", "All good, carry on", "Sorun yok, devam", "Всё нормально, дальше", "Усе гаразд, далі", "W porządku, dalej", "لا بأس، تابع", "E în regulă, mai departe"],
+  mc_title: ["Monats-Check {m}", "Monthly check {m}", "Aylık kontrol {m}", "Итоги месяца: {m}", "Підсумки місяця: {m}", "Podsumowanie: {m}", "مراجعة الشهر {m}", "Bilanțul lunii {m}"],
+  mc_tag: ["Monats-Check · {m}", "Monthly check · {m}", "Aylık kontrol · {m}", "Итоги · {m}", "Підсумки · {m}", "Podsumowanie · {m}", "مراجعة · {m}", "Bilanț · {m}"],
+  mc_h_good: ["Guter Monat.", "A good month.", "İyi bir ay.", "Хороший месяц.", "Гарний місяць.", "Dobry miesiąc.", "شهر جيد.", "O lună bună."],
+  mc_h_good_n: ["Guter Monat, {n}.", "A good month, {n}.", "İyi bir ay, {n}.", "Хороший месяц, {n}.", "Гарний місяць, {n}.", "Dobry miesiąc, {n}.", "شهر جيد يا {n}.", "O lună bună, {n}."],
+  mc_h_bad: ["Ein teurer Monat – passiert.", "An expensive month – it happens.", "Pahalı bir ay – olur böyle.", "Дорогой месяц – бывает.", "Дорогий місяць – буває.", "Drogi miesiąc – zdarza się.", "شهر مكلف – يحدث ذلك.", "O lună scumpă – se întâmplă."],
+  mc_h_bad_n: ["Ein teurer Monat, {n} – passiert.", "An expensive month, {n} – it happens.", "Pahalı bir ay, {n} – olur böyle.", "Дорогой месяц, {n} – бывает.", "Дорогий місяць, {n} – буває.", "Drogi miesiąc, {n} – zdarza się.", "شهر مكلف يا {n} – يحدث ذلك.", "O lună scumpă, {n} – se întâmplă."],
+  mc_sub: ["Drei Dinge, die sich lohnen – kein Druck, keine Serie.", "Three things worth knowing – no pressure, no streak.", "Bilmeye değer üç şey – baskı yok, seri yok.", "Три полезные вещи – без давления и серий.", "Три корисні речі – без тиску й серій.", "Trzy rzeczy warte uwagi – bez presji, bez serii.", "ثلاثة أمور مفيدة – بلا ضغط وبلا سلاسل.", "Trei lucruri utile – fără presiune, fără serii."],
+  mc_less: ["{c}: {a} weniger", "{c}: {a} less", "{c}: {a} daha az", "{c}: на {a} меньше", "{c}: на {a} менше", "{c}: o {a} mniej", "{c}: أقل بـ {a}", "{c}: cu {a} mai puțin"],
+  mc_more: ["{c}: {a} mehr", "{c}: {a} more", "{c}: {a} daha fazla", "{c}: на {a} больше", "{c}: на {a} більше", "{c}: o {a} więcej", "{c}: أكثر بـ {a}", "{c}: cu {a} mai mult"],
+  mc_vs: ["als im {m}.", "than in {m}.", "{m} ayına göre.", "чем в {m}.", "ніж у {m}.", "niż w {m}.", "مقارنة بـ {m}.", "decât în {m}."],
+  mc_due: ["{n} im {m}: {a}", "{n} in {m}: {a}", "{m} ayında {n}: {a}", "{n} в {m}: {a}", "{n} у {m}: {a}", "{n} w {m}: {a}", "{n} في {m}: {a}", "{n} în {m}: {a}"],
+  mc_due_now: ["Ist diesen Monat fällig.", "Due this month.", "Bu ay ödenecek.", "Нужно оплатить в этом месяце.", "Треба сплатити цього місяця.", "Do zapłaty w tym miesiącu.", "مستحق هذا الشهر.", "Scadent luna aceasta."],
+  mc_due_plan: ["Leg dafür ab jetzt etwa {a} pro Monat zur Seite.", "Put aside about {a} a month for it from now on.", "Bundan sonra ayda yaklaşık {a} ayır.", "Откладывай на это примерно {a} в месяц.", "Відкладай на це приблизно {a} на місяць.", "Odkładaj na to od teraz ok. {a} miesięcznie.", "ادّخر لذلك من الآن نحو {a} شهريًا.", "Pune deoparte de acum circa {a} pe lună."],
+  mc_goal: ["Sparziel {n}: {v} von {z}", "Savings goal {n}: {v} of {z}", "Birikim hedefi {n}: {z} içinden {v}", "Цель {n}: {v} из {z}", "Ціль {n}: {v} з {z}", "Cel {n}: {v} z {z}", "هدف الادخار {n}: {v} من {z}", "Obiectiv {n}: {v} din {z}"],
+  mc_left: ["Übrig geblieben: {a}", "Left over: {a}", "Kalan: {a}", "Осталось: {a}", "Залишилося: {a}", "Zostało: {a}", "المتبقي: {a}", "Rămas: {a}"],
+  mc_minus: ["Mehr ausgegeben als eingenommen: {a}", "Spent more than you earned: {a}", "Gelirden fazla harcandı: {a}", "Потрачено больше, чем получено: {a}", "Витрачено більше, ніж отримано: {a}", "Wydano więcej niż zarobiono: {a}", "أنفقت أكثر مما دخل: {a}", "Ai cheltuit mai mult decât ai câștigat: {a}"],
+  mc_left_s: ["Einnahmen minus Ausgaben im Monat.", "Income minus spending for the month.", "Aylık gelir eksi giderler.", "Доходы минус расходы за месяц.", "Доходи мінус витрати за місяць.", "Przychody minus wydatki w miesiącu.", "الدخل ناقص المصروف في الشهر.", "Venituri minus cheltuieli în lună."],
+  mc_thanks: ["Danke, Mami", "Thanks, Mami", "Teşekkürler Mami", "Спасибо, Мами", "Дякую, Мамі", "Dzięki, Mami", "شكرًا يا ماما", "Mulțumesc, Mami"],
+  mc_hl: ["Highlights ansehen", "See highlights", "Öne çıkanları gör", "Смотреть яркие моменты", "Переглянути яскраве", "Zobacz najciekawsze", "عرض أبرز اللحظات", "Vezi momentele cheie"],
+  nw_db_t: ["Dranbleiben – fair statt Druck", "Keep going – fair, no pressure", "Devam et – baskısız, adil", "Не бросать – честно, без давления", "Не кидати – чесно, без тиску", "Trzymaj się – uczciwie, bez presji", "استمرّ – بإنصاف وبلا ضغط", "Continuă – corect, fără presiune"],
+  nw_db_p: ["Nach einer Pause hilft dir Mami beim Nachholen, am Monatsanfang gibt es einen ehrlichen Monats-Check, und die tägliche Erinnerung kann zur Uhrzeit kommen, zu der du sonst einträgst. Kein Tracking – alles nur aus deinen eigenen Einträgen.", "After a break Mami helps you catch up, each month starts with an honest monthly check, and the daily reminder can come at the time you usually add entries. No tracking – everything comes only from your own entries.", "Bir aradan sonra Mami telafi etmene yardım eder, her ay dürüst bir aylık kontrol gelir ve günlük hatırlatma genelde kayıt yaptığın saatte gelebilir. İzleme yok – her şey yalnızca kendi kayıtlarından.", "После перерыва Мами поможет наверстать, в начале месяца – честные итоги, а ежедневное напоминание может приходить в то время, когда ты обычно вносишь записи. Без слежки – только по твоим записям.", "Після перерви Мамі допоможе надолужити, на початку місяця – чесні підсумки, а щоденне нагадування може приходити тоді, коли ти зазвичай вносиш записи. Без стеження – лише з твоїх записів.", "Po przerwie Mami pomoże nadrobić, na początku miesiąca jest uczciwe podsumowanie, a codzienne przypomnienie może przychodzić o porze, o której zwykle wpisujesz. Bez śledzenia – wszystko tylko z twoich wpisów.", "بعد الاستراحة تساعدك ماما على التعويض، وفي بداية كل شهر مراجعة صادقة، ويمكن أن يأتي التذكير اليومي في الوقت الذي تدخل فيه عادةً. بلا تتبّع – كل شيء من إدخالاتك فقط.", "După o pauză Mami te ajută să recuperezi, la început de lună primești un bilanț sincer, iar mementoul zilnic poate veni la ora la care notezi de obicei. Fără urmărire – totul doar din înregistrările tale."],
+  mc_due_next: ["Kommt nächsten Monat – am besten jetzt schon einplanen.", "Comes next month – best to plan for it now.", "Gelecek ay geliyor – şimdiden plan yap.", "Будет в следующем месяце – лучше заложить уже сейчас.", "Буде наступного місяця – краще закласти вже зараз.", "Przyjdzie w przyszłym miesiącu – zaplanuj to już teraz.", "يأتي الشهر القادم – الأفضل التخطيط له الآن.", "Vine luna viitoare – cel mai bine plănuiește-o de acum."],
 };
 
 /* Texte aus TEXTS in der aktuellen Sprache, Monatsnamen und das Zählwerk für Beträge */
@@ -94851,6 +95086,217 @@ Object.assign(TEXTS, {
     "تم ملء الطلب",
     "Cerere completată",
   ],
+});
+
+/* ===== Dranbleiben – fair statt Druck =====
+   Drei kleine Helfer, damit man mit dem Haushaltsbuch dranbleibt, ohne Tracking und ohne Schuldgefühle:
+   1. Erinnerung zur passenden Zeit: Die Uhrzeit ergibt sich nur aus deinen eigenen Einträgen (wann du sie angelegt hast).
+      Es wird nichts zusätzlich gespeichert oder verschickt.
+   2. Sanfter Wiedereinstieg: Nach ein paar Tagen ohne Eintrag eine freundliche Karte – nachholen oder einfach weiter.
+   3. Ehrlicher Monats-Check: Am Monatsanfang drei nützliche Punkte zum vergangenen Monat. Keine Serien, keine Ranglisten. */
+
+/* ---------- 1. Gelernte Uhrzeit ---------- */
+/* Median der Uhrzeiten, zu denen du zuletzt von Hand eingetragen hast (auf 15 Minuten gerundet). Ab 5 Einträgen. */
+function dbLearned() {
+  const mins = store.tx
+    .filter((t) => t.ts && !t.source && !t.importKey && !t._b)
+    .sort((a, b) => b.ts - a.ts)
+    .slice(0, 40)
+    .map((t) => {
+      const d = new Date(t.ts);
+      return d.getHours() * 60 + d.getMinutes();
+    })
+    /* Einträge mitten in der Nacht nicht als Gewohnheit lernen */
+    .filter((m) => m >= 6 * 60 && m <= 23 * 60);
+  if (mins.length < 5) return null;
+  mins.sort((a, b) => a - b);
+  const mid = mins[Math.floor(mins.length / 2)],
+    r = Math.round(mid / 15) * 15;
+  return { h: Math.floor(r / 60), m: r % 60, n: mins.length };
+}
+const dbHm = (x) => String(x.h).padStart(2, "0") + ":" + String(x.m).padStart(2, "0");
+/* Zeit für die tägliche Erinnerung: gelernt, sonst 19 Uhr */
+function dbDailyAt() {
+  return dbLearned() || { h: 19, m: 0 };
+}
+/* Heute schon etwas eingetragen? Dann heute nicht erinnern */
+function dbDoneToday() {
+  const d = isoToday();
+  return store.tx.some((t) => t.ts && isoOf(new Date(t.ts)) === d && !t.source && !t.importKey);
+}
+function dbLearnInfo() {
+  const L = dbLearned();
+  return `<div class="dbinfo">
+    <div><span>${escHtml(uiText("db_l_time"))}</span><b>${escHtml(L ? uiText("db_l_ca", { t: dbHm(L) }) : uiText("db_l_none"))}</b></div>
+    <div><span>${escHtml(uiText("db_l_to"))}</span><b>${escHtml(uiText("db_l_nobody"))}</b></div>
+    <p class="small muted">${escHtml(uiText(L ? "db_l_how" : "db_l_how0", { n: String(L ? L.n : 5) }))}</p>
+  </div>`;
+}
+
+/* ---------- 2. Sanfter Wiedereinstieg ---------- */
+/* Letzter Eintrag liegt mindestens 5 Tage zurück (und nicht in der Zukunft) */
+function dbGap() {
+  const today = isoToday();
+  let last = "";
+  for (const t of store.tx) if (t.date && t.date <= today && t.date > last) last = t.date;
+  if (!last) return null;
+  const days = Math.round((new Date(today + "T12:00").getTime() - new Date(last + "T12:00").getTime()) / 864e5);
+  if (days < 5 || store.settings.wbSkip === last) return null;
+  return { last, days };
+}
+function wbCard() {
+  const g = dbGap();
+  if (!g) return "";
+  const E = escHtml;
+  return `<div class="card wbcard" data-noi18n>
+    <div class="wbtop">${mamiAvatar()}<div><b>${E(uiText("wb_t"))}</b><span>${E(uiText(g.days >= 14 ? "wb_p_long" : "wb_p", { n: String(g.days) }))}</span></div></div>
+    <button class="btn primary block" data-go="import" data-wbskip="${E(g.last)}">${E(uiText("wb_imp"))}</button>
+    <button class="btn block wbhand" data-add="ausgabe" data-wbskip="${E(g.last)}">${E(uiText("wb_hand"))}</button>
+    <button class="link wbok" data-wbskip="${E(g.last)}">${E(uiText("wb_ok"))}</button>
+  </div>`;
+}
+document.addEventListener(
+  "click",
+  (e) => {
+    const b = e.target.closest("[data-wbskip]");
+    if (!b) return;
+    store.settings.wbSkip = b.dataset.wbskip;
+    try {
+      saveSettings();
+    } catch (_) {}
+    if (!b.dataset.go && !b.dataset.add)
+      try {
+        const c = b.closest(".wbcard");
+        if (c && !reducedMotion()) {
+          c.classList.add("out");
+          setTimeout(() => renderHome(), 260);
+        } else renderHome();
+      } catch (_) {}
+  },
+  true
+);
+
+/* ---------- 3. Ehrlicher Monats-Check ---------- */
+function mcFacts(ym) {
+  const prev = shiftYm(ym, -1),
+    c = monthCalc(ym),
+    pc = monthCalc(prev),
+    facts = [];
+  const byCat = (tx) => {
+    const o = {};
+    for (const t of tx) if (t.kind === "ausgabe" || t.kind === "betrieb") o[t.cat || "Sonstiges"] = (o[t.cat || "Sonstiges"] || 0) + t.amount;
+    return o;
+  };
+  /* a) größte Veränderung einer Kategorie zum Vormonat – ehrlich in beide Richtungen */
+  if (pc.tx.length >= 5) {
+    const a = byCat(c.tx),
+      b = byCat(pc.tx);
+    let best = null;
+    for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) {
+      const d = (a[k] || 0) - (b[k] || 0);
+      if (Math.abs(d) < 20 || Math.abs(d) < (b[k] || 0) * 0.1) continue;
+      /* Weniger ausgegeben zählt mehr als mehr ausgegeben – aber beides wird gesagt */
+      const w = d < 0 ? -d * 1.5 : d;
+      if (!best || w > best.w) best = { k, d, w };
+    }
+    if (best)
+      facts.push({
+        ic: best.d < 0 ? "check" : "alert",
+        good: best.d < 0,
+        t: uiText(best.d < 0 ? "mc_less" : "mc_more", { c: best.k, a: fmtEur0(Math.abs(best.d)) }),
+        s: uiText("mc_vs", { m: monName(prev) }),
+      });
+  }
+  /* b) nächste größere Zahlung, die nicht jeden Monat kommt (Versicherung, Kfz-Steuer …) */
+  const now = ymOf(new Date());
+  outer: for (let k = 0; k <= 3; k++) {
+    const m = shiftYm(now, k);
+    for (const f of store.fixed) {
+      if (!Array.isArray(f.months) || !f.months.length || f.months.length >= 12 || !dueIn(f, m)) continue;
+      const paid = (store.months[m] && store.months[m].paid) || {};
+      if (f.id in paid) continue;
+      const amt = listAmt(f, m);
+      if (!(amt >= 50)) continue;
+      const left = Math.max(1, k),
+        per = Math.ceil(amt / left);
+      facts.push({
+        ic: "cal",
+        t: uiText("mc_due", { n: f.name || uiText("dk_sonst"), m: monName(m), a: fmtEur0(amt) }),
+        s: k <= 0 ? uiText("mc_due_now") : k === 1 ? uiText("mc_due_next") : uiText("mc_due_plan", { a: fmtEur0(per) }),
+      });
+      break outer;
+    }
+  }
+  /* c) Sparziel */
+  const goal = (store.settings.goals || []).find((g) => Number(g.target) > 0);
+  if (goal) {
+    const v = Math.max(0, goalSaved(goal).v || 0),
+      p = Math.min(1, v / Number(goal.target));
+    facts.push({
+      ic: "piggy",
+      t: uiText("mc_goal", { n: goal.name || "", v: fmtEur0(v), z: fmtEur0(Number(goal.target)) }),
+      bar: p,
+    });
+  }
+  /* sonst: was übrig blieb */
+  if (facts.length < 3) {
+    const net = c.income - c.expenses;
+    if (c.income > 0)
+      facts.push({
+        ic: net >= 0 ? "check" : "alert",
+        good: net >= 0,
+        t: uiText(net >= 0 ? "mc_left" : "mc_minus", { a: fmtEur0(Math.abs(net)) }),
+        s: uiText("mc_left_s"),
+      });
+  }
+  return { facts: facts.slice(0, 3), net: c.income - c.expenses, c };
+}
+function mcOpen(ym) {
+  const F = mcFacts(ym),
+    E = escHtml,
+    nm = (store.settings.name || "").trim();
+  const head = uiText(F.net >= 0 ? (nm ? "mc_h_good_n" : "mc_h_good") : nm ? "mc_h_bad_n" : "mc_h_bad", { n: nm });
+  const b = hbSheet("mcBg", uiText("mc_title", { m: monName(ym) }));
+  b.innerHTML = `<div class="mcwrap">
+    <h3 class="mch">${E(head)}</h3>
+    <p class="small muted">${E(uiText("mc_sub"))}</p>
+    ${F.facts
+      .map(
+        (f) => `<div class="mcf ${f.good === true ? "good" : f.good === false ? "warn" : ""}"><span class="mci">${svgIcon(f.ic, 18)}</span><div class="grow"><b>${E(f.t)}</b>${f.s ? `<small>${E(f.s)}</small>` : ""}${
+          f.bar != null ? `<div class="mcbar"><i style="width:${Math.round(f.bar * 100)}%"></i></div>` : ""
+        }</div></div>`
+      )
+      .join("")}
+    <button class="btn primary block" data-hbclose="mcBg" style="margin-top:14px">${E(uiText("mc_thanks"))}</button>
+    ${hlShould() === ym ? `<button class="link mchl" data-mchl="${E(ym)}">${E(uiText("mc_hl"))}</button>` : ""}
+  </div>`;
+  if (!reducedMotion())
+    try {
+      stbAnim(b, ".mcf");
+    } catch (_) {}
+}
+/* Einmal am Monatsanfang von selbst – nur wenn der Vormonat genug Einträge hat und nichts anderes offen ist */
+function mcMaybe() {
+  try {
+    const p = hlShould();
+    if (!p || store.settings.mcSeen === p || ui.view !== "home") return;
+    if (document.querySelector(".backdrop:not([hidden]),#tourBg:not([hidden]),.hobg:not([hidden]),#lockBg:not([hidden]),#actBg:not([hidden])") || TOUR.i >= 0)
+      return;
+    if (mcFacts(p).facts.length < 2) return;
+    store.settings.mcSeen = p;
+    saveSettings();
+    mcOpen(p);
+  } catch (_) {}
+}
+document.addEventListener("click", (e) => {
+  const h = e.target.closest("[data-mchl]");
+  if (!h) return;
+  hbSheetClose("mcBg");
+  setTimeout(() => hlOpen(h.dataset.mchl), 260);
+});
+setTimeout(mcMaybe, 4000);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) setTimeout(mcMaybe, 2500);
 });
 
 /* ===== Amt: gemeinsame Helfer und Termin-Wecker ===== */

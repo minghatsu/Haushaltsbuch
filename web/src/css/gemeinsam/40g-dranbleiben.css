@@ -1,0 +1,170 @@
+/* Dranbleiben: Wiedereinstieg, Monats-Check, gelernte Uhrzeit */
+.wbcard {
+  background: var(--accent-soft);
+  box-shadow: none;
+  display: grid;
+  gap: 8px;
+  animation: wbIn 0.42s var(--ease-pop, cubic-bezier(0.3, 1.4, 0.5, 1)) both;
+}
+.wbcard.out {
+  animation: wbOut 0.26s ease-in both;
+}
+@keyframes wbIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+@keyframes wbOut {
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+.wbtop {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.wbtop .mav {
+  width: 46px;
+  height: 46px;
+  flex: none;
+}
+.wbtop b {
+  display: block;
+  font-size: 17px;
+}
+.wbtop span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.wbcard .btn.block {
+  width: 100%;
+  min-height: 46px;
+}
+.wbcard .wbhand {
+  background: var(--surface);
+}
+.wbcard .wbok {
+  justify-self: center;
+  min-height: 40px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.mcwrap {
+  display: grid;
+  gap: 10px;
+}
+.mctag {
+  justify-self: start;
+  padding: 3px 10px;
+  border-radius: 99px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.mch {
+  margin: 2px 0 0;
+  font-size: 26px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.mcf {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--line);
+}
+.mci {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--sunk);
+  color: var(--fg);
+}
+.mcf.good .mci {
+  background: color-mix(in srgb, var(--good) 15%, var(--surface));
+  color: var(--good);
+}
+.mcf.warn .mci {
+  background: color-mix(in srgb, var(--warn) 15%, var(--surface));
+  color: var(--warn);
+}
+.mcf b {
+  display: block;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.mcf small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.mcbar {
+  height: 8px;
+  margin-top: 8px;
+  border-radius: 9px;
+  background: var(--sunk);
+  overflow: hidden;
+}
+.mcbar i {
+  display: block;
+  height: 100%;
+  border-radius: 9px;
+  background: var(--accent);
+  transform-origin: left;
+  animation: mcBar 0.9s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes mcBar {
+  from {
+    transform: scaleX(0);
+  }
+}
+.mchl {
+  justify-self: center;
+  min-height: 40px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.dbinfo {
+  margin: 2px 0 10px 46px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--sunk);
+}
+.dbinfo > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 14px;
+}
+.dbinfo > div span {
+  color: var(--muted);
+}
+.dbinfo p {
+  margin: 6px 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wbcard,
+  .wbcard.out,
+  .mcbar i {
+    animation: none;
+  }
+}

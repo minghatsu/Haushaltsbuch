@@ -175,15 +175,18 @@ function notifyPlan() {
       }
     }
     if (c.daily) {
-      const [hh, mm] = c.daily.split(":").map(Number);
-      for (let k = 0; k < 14; k++) {
+      /* „auto“: Uhrzeit aus deinen eigenen Einträgen (40g-dranbleiben.js), sonst die feste Zeit */
+      const auto = c.daily === "auto",
+        T = auto ? dbDailyAt() : null,
+        [hh, mm] = auto ? [T.h, T.m] : c.daily.split(":").map(Number);
+      for (let k = auto && dbDoneToday() ? 1 : 0; k < 14; k++) {
         const d = new Date(now);
         d.setDate(d.getDate() + k);
         add(
           "daily:" + isoOf(d),
           at(d, hh, mm),
-          "Schon alles eingetragen?",
-          "Kurz die Ausgaben von heute nachtragen – dann stimmen deine Budgets."
+          auto ? uiText("db_n_t") : "Schon alles eingetragen?",
+          auto ? uiText("db_n_s") : "Kurz die Ausgaben von heute nachtragen – dann stimmen deine Budgets."
         );
       }
     }
@@ -489,12 +492,14 @@ function renderNotifyEd() {
     ])}
     ${sel("daily", "Ausgaben eintragen", "Jeden Tag eine kurze Erinnerung.", [
       ["", "Aus"],
+      ["auto", escHtml(uiText("db_opt"))],
       ["18:00", "Täglich um 18 Uhr"],
       ["19:00", "Täglich um 19 Uhr"],
       ["20:00", "Täglich um 20 Uhr"],
       ["21:00", "Täglich um 21 Uhr"],
       ["22:00", "Täglich um 22 Uhr"],
     ])}
+    ${c.daily === "auto" ? dbLearnInfo() : ""}
     ${sel("imp", "Kontoauszug importieren", "Wenn so lange kein neuer Auszug importiert wurde.", [
       ["", "Aus"],
       ["7", "Nach 7 Tagen"],

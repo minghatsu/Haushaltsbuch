@@ -240,6 +240,15 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.50.1",
+    "26. November 2026",
+    [
+      "Dranbleiben – fair statt Druck: Nach ein paar Tagen ohne Eintrag zeigt Haushalt eine freundliche Karte. Du holst die Lücke aus dem Kontoauszug oder von Hand nach – oder machst einfach weiter.",
+      "Monats-Check: Am Monatsanfang drei ehrliche Punkte zum vergangenen Monat – was sich bei deinen Ausgaben am meisten verändert hat, welche größere Zahlung bald kommt (und wie viel du dafür pro Monat zurücklegen solltest) und wie weit dein Sparziel ist. Keine Serien, keine Ranglisten.",
+      "Erinnerung „Zur passenden Zeit“: Die tägliche Erinnerung kann zur Uhrzeit kommen, zu der du sonst einträgst. Mami erkennt sie nur aus deinen eigenen Einträgen, speichert nichts zusätzlich und erinnert nicht, wenn du heute schon eingetragen hast.",
+    ],
+  ],
+  [
     "0.50.0",
     "25. November 2026",
     [

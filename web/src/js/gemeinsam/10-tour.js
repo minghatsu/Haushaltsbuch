@@ -1648,6 +1648,17 @@ function ptourOpen(v) {
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
   {
+    v: "0.50.1",
+    s: () => [
+      {
+        sel: '[data-view="home"]',
+        ic: "heart",
+        t: uiText("nw_db_t"),
+        p: [uiText("nw_db_p")],
+      },
+    ],
+  },
+  {
     v: "0.50.0",
     s: () => [
       {
