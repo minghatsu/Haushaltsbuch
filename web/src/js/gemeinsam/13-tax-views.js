@@ -120,7 +120,8 @@ function hoWohn(y) {
 }
 function hoCalc(y) {
   const c = hoCfg(y),
-    days = Object.keys(c.days || {}).length,
+    /* Homeoffice-Tage aus dem Arbeitszeit-Kalender kommen dazu (ohne doppelt zu zählen) */
+    days = new Set([...Object.keys(c.days || {}), ...(typeof agHomeDays === "function" ? agHomeDays(y) : [])]).size,
     tag = Math.min(HO_MAX, Math.min(days, HO_DMAX) * HO_DAY);
   const full = !!(c.on && c.room && c.center),
     cost = Number(c.cost) > 0 ? Number(c.cost) : 0,

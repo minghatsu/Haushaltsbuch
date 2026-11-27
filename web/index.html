@@ -3217,6 +3217,82 @@ html.touch .kpad {
   box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.5);
   margin: auto 0 0;
 }
+/* Kundenliste sortieren */
+.kdsort {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 4px 8px;
+}
+.kdsort small {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.kdschip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 99px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.2s;
+}
+.kdschip:hover {
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+}
+.kdschip:active {
+  transform: scale(0.96);
+}
+.kdsmenu {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 6px);
+  z-index: 6;
+  min-width: 220px;
+  padding: 6px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18), 0 0 0 1px var(--line);
+  display: grid;
+  gap: 2px;
+  transform-origin: top right;
+}
+.kdsmenu button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 11px;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+.kdsmenu button:hover,
+.kdsmenu button:focus-visible {
+  background: var(--sunk);
+  outline: none;
+}
+.kdsmenu button.on {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
 
 /* Freischalten, Einladungscode, Einladungen */
 /* Einladungscode: sechs Kästchen, die sich beim Tippen von unten mit Farbe füllen */
@@ -16298,6 +16374,826 @@ body.subview .top #topAv {
 .bfrow > svg:last-child {
   flex: none;
   color: var(--faint);
+}
+/* Mein Geschäft: Rechnungen raus (grün) und rein (orange) klar getrennt */
+.bzout {
+  --bz: var(--accent);
+}
+.bzin {
+  --bz: var(--warn);
+}
+.bzw {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  margin: 2px 0 12px;
+}
+.bzwmain {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--f-body);
+  text-align: start;
+  cursor: pointer;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 32%, transparent);
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+.bzwmain:hover {
+  box-shadow: 0 9px 24px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.bzwmain:active {
+  transform: scale(0.98);
+}
+.bzwi {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.bzwmain .grow {
+  flex: 1;
+  min-width: 0;
+}
+.bzwmain b {
+  display: block;
+  font-size: 16px;
+}
+.bzwmain small {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+.bzwsub {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.bzwsub button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--sunk);
+  color: var(--fg);
+  font-family: var(--f-body);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.bzwsub button:hover {
+  background: var(--accent-soft);
+}
+.bzwsub button.bzwin {
+  color: var(--warn);
+}
+.bzwsub button.bzwin:hover {
+  background: color-mix(in srgb, var(--warn) 13%, var(--surface));
+}
+.bzwsub button:active {
+  transform: scale(0.97);
+}
+.atile.bzout,
+.atile.bzin {
+  position: relative;
+  background: color-mix(in srgb, var(--bz) 14%, var(--surface));
+}
+.atile.bzin .aic {
+  color: var(--warn);
+}
+.atile.bzout:hover,
+.atile.bzin:hover {
+  background: color-mix(in srgb, var(--bz) 22%, var(--surface));
+}
+.bzbadge {
+  position: absolute;
+  top: 8px;
+  inset-inline-end: 8px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 99px;
+  background: var(--bz);
+  color: var(--surface);
+}
+.bzflow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bz) 12%, var(--surface));
+  color: var(--bz);
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.bzflow svg {
+  flex: none;
+}
+
+/* Angestellt: Lohnabrechnung-Knopf, Mami-Steuerhinweis, gemeinsamer Bereich, Arbeitszeit, Arbeitsweg, Netto, Extras */
+.agslip,
+.agtax,
+.agask {
+  grid-column: 1 / -1;
+}
+.agslip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 62px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--bf-job, #3b5ba5);
+  color: #fff;
+  font-family: var(--f-body);
+  text-align: start;
+  cursor: pointer;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--bf-job, #3b5ba5) 30%, transparent);
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+.agslip:hover {
+  box-shadow: 0 9px 24px color-mix(in srgb, var(--bf-job, #3b5ba5) 38%, transparent);
+}
+.agslip:active {
+  transform: scale(0.98);
+}
+.agsi {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.agslip .grow,
+.agtax .grow {
+  flex: 1;
+  min-width: 0;
+}
+.agslip b {
+  display: block;
+  font-size: 16px;
+}
+.agslip small {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.88;
+}
+.agtax {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bf-job, #3b5ba5) 9%, var(--surface));
+  color: var(--fg);
+  font-family: var(--f-body);
+  text-align: start;
+  cursor: pointer;
+  animation: agIn 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+.agtm .mav {
+  width: 44px;
+  height: 44px;
+  flex: none;
+}
+.agtax b {
+  display: block;
+  font-size: 15.5px;
+  margin-bottom: 3px;
+}
+.agtax small {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.agbar {
+  position: relative;
+  display: block;
+  height: 9px;
+  margin: 9px 0 6px;
+  border-radius: 9px;
+  background: var(--sunk);
+}
+.agbar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 9px;
+  background: var(--bf-job, #3b5ba5);
+  transform-origin: left;
+  animation: agBar 0.9s 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.agbar em {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--fg);
+}
+@keyframes agBar {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes agIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.agshared {
+  margin-top: 16px;
+}
+.agsh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 4px 10px;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.agsh::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.agshared .agrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+html.tabp .agshared .agrid,
+html.pc .agshared .agrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+/* Seite, die gerade hinten liegt, nimmt keinen Platz weg – sonst klafft unter „Angestellt“ eine Lücke */
+html:not(.pc) .bfsw.sj .bfgb:not([style*="visible"]),
+html:not(.pc) .bfsw.sb .bfgj:not([style*="visible"]),
+html.pc.tabp .bfsw.sj .bfgb:not([style*="visible"]),
+html.pc.tabp .bfsw.sb .bfgj:not([style*="visible"]) {
+  max-height: 0;
+  overflow: hidden;
+}
+
+/* Fenster */
+.agcard {
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.agct {
+  display: block;
+  font-size: 17px;
+  margin-bottom: 10px;
+}
+.agk {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.agbig {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--bf-job, #3b5ba5);
+  margin: 2px 0;
+}
+.agpos {
+  color: var(--good);
+}
+.agneg {
+  color: var(--warn);
+}
+.btn.agj,
+.agj {
+  background: var(--bf-job, #3b5ba5);
+  color: #fff;
+  border-color: transparent;
+}
+.agnote {
+  margin: 0 4px 10px;
+  line-height: 1.5;
+}
+.agsetl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto 6px;
+  min-height: 40px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.agacc {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.agacc > div {
+  padding: 12px 8px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.agacc b {
+  display: block;
+  font-size: 19px;
+  font-weight: 800;
+}
+.agacc small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.agedit {
+  text-align: center;
+}
+.agstep {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 10px 0 12px;
+}
+.agstep button {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border: 0;
+  border-radius: 99px;
+  background: var(--sunk);
+  color: var(--fg);
+  font-size: 26px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.agstep button:active {
+  transform: scale(0.92);
+}
+.agstep button:disabled {
+  opacity: 0.35;
+}
+.agstep b {
+  min-width: 140px;
+  font-size: 36px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.agchips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.agchip {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 99px;
+  background: var(--sunk);
+  color: var(--fg);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.12s;
+}
+.agchip.on {
+  background: var(--bf-job, #3b5ba5);
+  color: #fff;
+}
+.agchip:active {
+  transform: scale(0.95);
+}
+.agedit .btn.block {
+  width: 100%;
+  margin-top: 6px;
+  min-height: 46px;
+}
+.agtabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 3px;
+  margin: 0 0 12px;
+  border-radius: 12px;
+  background: var(--sunk);
+}
+.agtabs button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.agtabs button.on {
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+.agwh {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.agwh b {
+  font-size: 14.5px;
+}
+.agnav {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 99px;
+  background: var(--sunk);
+  color: var(--fg);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transform: rotate(90deg);
+}
+.agnav.r {
+  transform: rotate(-90deg);
+}
+.agdays {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  height: 150px;
+}
+.agdays button {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  padding: 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.agdays button.sel span {
+  color: var(--fg);
+}
+.agdays i {
+  width: 100%;
+  max-height: calc(100% - 22px);
+  border-radius: 8px 8px 4px 4px;
+  background: linear-gradient(var(--warn) 0 var(--o, 0%), var(--bf-job, #3b5ba5) 0);
+  transform-origin: bottom;
+  animation: agGrow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.agdays i.u {
+  background: color-mix(in srgb, var(--warn) 35%, var(--surface));
+}
+.agdays i.k {
+  background: color-mix(in srgb, var(--bad, #c0392b) 25%, var(--surface));
+}
+.agdays button.sel i {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+@keyframes agGrow {
+  from {
+    transform: scaleY(0);
+  }
+}
+.agsoll {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 2px dashed color-mix(in srgb, var(--fg) 35%, transparent);
+  pointer-events: none;
+}
+.aglg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.aglg i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-inline-end: 5px;
+  border-radius: 3px;
+  vertical-align: -1px;
+}
+.aglg i.j {
+  background: var(--bf-job, #3b5ba5);
+}
+.aglg i.o {
+  background: var(--warn);
+}
+.aglg i.h {
+  background: color-mix(in srgb, var(--accent) 35%, var(--surface));
+}
+.aglg i.u {
+  background: color-mix(in srgb, var(--warn) 35%, var(--surface));
+}
+.aglg i.k {
+  background: color-mix(in srgb, var(--bad, #c0392b) 25%, var(--surface));
+}
+.agcal {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+.aghd {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 2px 0 4px;
+}
+.agc {
+  position: relative;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 10px;
+  background: var(--sunk);
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.12s, background 0.2s;
+}
+.agc:active {
+  transform: scale(0.92);
+}
+.agc small {
+  margin-top: 2px;
+  font-size: 9.5px;
+  opacity: 0.9;
+}
+.agc.tb {
+  background: var(--bf-job, #3b5ba5);
+  color: #fff;
+}
+.agc.th {
+  background: color-mix(in srgb, var(--accent) 35%, var(--surface));
+  color: var(--fg);
+}
+.agc.tu {
+  background: color-mix(in srgb, var(--warn) 35%, var(--surface));
+  color: var(--fg);
+}
+.agc.tk {
+  background: color-mix(in srgb, var(--bad, #c0392b) 25%, var(--surface));
+  color: var(--fg);
+}
+.agc.now {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--fg) 45%, transparent);
+}
+.agc.sel {
+  outline: 3px solid var(--fg);
+  outline-offset: 1px;
+}
+.agrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  font-size: 14.5px;
+}
+.agrow:first-child {
+  border-top: 0;
+}
+.agrow span {
+  color: var(--muted);
+  font-weight: 600;
+}
+.agrow b {
+  text-align: end;
+}
+.agrow.tot b {
+  color: var(--bf-job, #3b5ba5);
+  font-size: 16px;
+}
+.agspark {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 120px;
+  margin: 14px 0 20px;
+}
+.agspark i {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  border-radius: 6px 6px 3px 3px;
+  background: color-mix(in srgb, var(--bf-job, #3b5ba5) 50%, var(--surface));
+  transform-origin: bottom;
+  animation: agGrow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.agspark i.cur {
+  background: var(--bf-job, #3b5ba5);
+}
+.agspark i.dip {
+  background: var(--warn);
+}
+.agspark i.up {
+  background: var(--good);
+}
+.agspark em {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.agof {
+  text-align: center;
+  margin: 0 0 6px;
+}
+.agstack {
+  position: relative;
+  min-height: 270px;
+  margin: 6px 0 14px;
+}
+.agcd {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 20px;
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.13);
+}
+.agcd.back {
+  transform: translateY(14px) scale(0.94);
+  opacity: 0.55;
+}
+.agcd b {
+  font-size: 20px;
+}
+.agcd p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.agci {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--bf-job, #3b5ba5) 12%, var(--surface));
+  color: var(--bf-job, #3b5ba5);
+  flex: none;
+}
+.agci.s {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+}
+.agyn {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.agyn .btn {
+  min-height: 48px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.agexr {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.agexr:first-child {
+  border-top: 0;
+}
+.agexr b {
+  display: block;
+  font-size: 14.5px;
+}
+.agexr small {
+  display: block;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.agseg {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  padding: 3px;
+  border-radius: 11px;
+  background: var(--sunk);
+}
+.agseg button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.agseg button.on {
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.agseg button.on.ja {
+  color: var(--good);
+}
+.agseg button.on.frag {
+  color: var(--warn);
+}
+.agdone b {
+  display: block;
+  font-size: 16px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .agtax,
+  .agbar i,
+  .agdays i,
+  .agspark i {
+    animation: none;
+  }
 }
 
 /* Rechnung schreiben */
@@ -48478,6 +49374,10 @@ const ICON_PATHS = {
   dumbbell: '<path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/>',
   paw: '<circle cx="7" cy="9.5" r="1.8"/><circle cx="17" cy="9.5" r="1.8"/><circle cx="10" cy="5.5" r="1.8"/><circle cx="14" cy="5.5" r="1.8"/><path d="M12 12c-3 0-5.5 3.5-5.5 5.5 0 2 2 2.5 5.5 2.5s5.5-.5 5.5-2.5c0-2-2.5-5.5-5.5-5.5z"/>',
   target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>',
+  sort: '<path d="M7 4v16M3.5 7.5 7 4l3.5 3.5M17 20V4M13.5 16.5 17 20l3.5-3.5"/>',
+  tick: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  goOut: '<path d="M7 17 17 7M9 7h8v8"/>',
+  goIn: '<path d="M17 7 7 17M15 17H7V9"/>',
   up: '<path d="M6 14.5 12 8.5l6 6"/>',
   down: '<path d="M6 9.5l6 6 6-6"/>',
   sliders: '<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
@@ -52507,6 +53407,25 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.50.3",
+    "27. November 2026",
+    [
+      "Mein Geschäft aufgeräumt: Oben gibt es jetzt einen großen Knopf „Neue Rechnung schreiben“, darunter „Angebot schreiben“ und „Rechnung erhalten“.",
+      "Ausgangs- und Eingangsrechnungen sind klar getrennt: grün mit Pfeil raus für Rechnungen an deine Kunden (Geld kommt rein), orange mit Pfeil rein für Rechnungen von Lieferanten (Geld geht raus). Beide stehen jetzt ganz vorne, und auch in den Fenstern steht oben, worum es geht.",
+      "Kunden sortieren: Über der Kundenliste wählst du jetzt Name A–Z, Name Z–A oder Kundennummer auf- oder absteigend. Die Wahl bleibt gespeichert – auf allen Geräten.",
+      "Nummern werden als Zahlen sortiert (999 vor 1004). Änderst du Name oder Nummer, gleitet der Kunde nach dem Speichern von selbst an seinen neuen Platz.",
+      "Rechnungen sortieren: Genauso wählst du bei deinen Rechnungen Neueste oder Älteste zuerst, Nummer auf- oder absteigend, Kunde A–Z oder höchster Betrag zuerst. Neue und geänderte Rechnungen landen automatisch an der richtigen Stelle.",
+      "Behoben: Bei Rechnungen vom selben Tag stand RE-10 vor RE-9, weil Nummern wie Text verglichen wurden.",
+      "Beruf heißt jetzt klar „Angestellt“ und „Selbstständig“. „Steuer & Ämter“ steht fest darunter und gilt für beide Seiten, egal wie du umschaltest. Die Liste fürs Geschäft heißt jetzt „Abgaben fürs Geschäft“.",
+      "Angestellt: Ein großer Knopf lädt deine Lohnabrechnung (PDF) hoch. Darunter siehst du Gehalt und Arbeitskosten auf einen Blick.",
+      "Mami schätzt, ob sich die Steuererklärung lohnt – mit einem Balken, der deine Arbeitskosten mit der Pauschale von 1.230 € vergleicht.",
+      "Neu: Arbeitszeit & Überstunden. Stunden schnell eintragen, dazu Wochen- und Monatsansicht, Urlaubstage und Überstunden-Konto.",
+      "Neu: Arbeitsweg im Kalender. Tippe Tage an (Betrieb, Homeoffice, Urlaub, Krank) – Pendlerpauschale und Homeoffice-Tage werden automatisch gezählt. Tage aus der Arbeitszeit zählen gleich mit.",
+      "Neu: Netto-Verlauf. Sieh dein Netto Monat für Monat; Mami markiert Ausreißer und sagt, woran es liegt.",
+      "Neu: Extras vom Arbeitgeber. Karte für Karte prüfen, ob du z. B. Jobticket, Sachbezug oder Dienstrad schon bekommst – was du nachfragen willst, merkt sich Mami.",
+    ],
+  ],
+  [
     "0.50.2",
     "26. November 2026",
     [
@@ -53823,6 +54742,8 @@ function tourGo(i) {
     ui.view = tv;
     render();
   }
+  /* Beruf: Schritt gehört zu „Angestellt“ (j) oder „Selbstständig“ (b) – erst umschalten, dann zeigen */
+  if (TOUR.steps[i].side && typeof bfSwap === "function") bfSwap(TOUR.steps[i].side);
   const first = TOUR.i < 0 || !el.querySelector(".tmami");
   TOUR.i = i;
   const s = TOUR.steps[i],
@@ -54971,6 +55892,45 @@ const PTOUR_FN = () => ({
         p: [uiText("trb_tiles_p")],
       },
       {
+        sel: '[data-view="beruf"] .agslip',
+        side: "j",
+        raw: 1,
+        ic: "docin",
+        t: uiText("tr_ag_slip_t"),
+        p: [uiText("tr_ag_slip_p")],
+      },
+      {
+        sel: '[data-view="beruf"] .bfgj [data-agaz]',
+        side: "j",
+        raw: 1,
+        ic: "clock",
+        t: uiText("tr_ag_az_t"),
+        p: [uiText("tr_ag_az_p")],
+      },
+      {
+        sel: '[data-view="beruf"] .bfgj [data-agex].atile',
+        side: "j",
+        raw: 1,
+        ic: "gift",
+        t: uiText("tr_ag_ex_t"),
+        p: [uiText("tr_ag_ex_p")],
+      },
+      {
+        sel: '[data-view="beruf"] .bzwmain',
+        side: "b",
+        raw: 1,
+        ic: "docout",
+        t: uiText("tr_bzw_t"),
+        p: [uiText("tr_bzw_p")],
+      },
+      {
+        sel: '[data-view="beruf"] .agshared',
+        raw: 1,
+        ic: "bank",
+        t: uiText("tr_ag_sh_t"),
+        p: [uiText("tr_ag_sh_p")],
+      },
+      {
         sel: '[data-view="beruf"] [data-stbopen].atile',
         raw: 1,
         ic: "doc",
@@ -55006,6 +55966,7 @@ const PTOUR_FN = () => ({
           ]),
       {
         sel: '[data-view="beruf"] .bfnext',
+        side: "b",
         raw: 1,
         ic: "bell",
         t: uiText("nw_bn_t"),
@@ -55013,6 +55974,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] .bflist',
+        side: "b",
         raw: 1,
         ic: "bank",
         t: uiText("bn_tax"),
@@ -55020,6 +55982,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] [data-rchopen].atile',
+        side: "b",
         raw: 1,
         ic: "docout",
         t: uiText("trb_rch_t"),
@@ -55027,6 +55990,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] [data-eropen].atile',
+        side: "b",
         raw: 1,
         ic: "docin",
         t: uiText("trb_er_t"),
@@ -55034,6 +55998,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] [data-wbopen].atile',
+        side: "b",
         raw: 1,
         ic: "repeat",
         t: uiText("trb_wb_t"),
@@ -55041,6 +56006,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] [data-tmopen].atile',
+        side: "b",
         raw: 1,
         ic: "cal",
         t: uiText("trb_tm_t"),
@@ -55048,6 +56014,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] [data-zvopen].atile',
+        side: "b",
         raw: 1,
         ic: "cash",
         t: uiText("trb_zv_t"),
@@ -55055,6 +56022,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] [data-bsopen].atile',
+        side: "b",
         raw: 1,
         ic: "doc",
         t: uiText("trb_bs_t"),
@@ -55182,6 +56150,33 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.50.3",
+    s: () => [
+      ...(hasJob()
+        ? [
+            {
+              sel: '[data-view="beruf"] .agslip',
+              side: "j",
+              ic: "case",
+              t: uiText("nw_ag_t"),
+              p: [uiText("nw_ag_p")],
+            },
+          ]
+        : []),
+      ...(hasSelf()
+        ? [
+            {
+              sel: '[data-view="beruf"] .bzw',
+              side: "b",
+              ic: "docout",
+              t: uiText("nw_bz_t"),
+              p: [uiText("nw_bz_p")],
+            },
+          ]
+        : []),
+    ],
+  },
   {
     v: "0.50.1",
     s: () => [
@@ -58291,7 +59286,8 @@ function hoWohn(y) {
 }
 function hoCalc(y) {
   const c = hoCfg(y),
-    days = Object.keys(c.days || {}).length,
+    /* Homeoffice-Tage aus dem Arbeitszeit-Kalender kommen dazu (ohne doppelt zu zählen) */
+    days = new Set([...Object.keys(c.days || {}), ...(typeof agHomeDays === "function" ? agHomeDays(y) : [])]).size,
     tag = Math.min(HO_MAX, Math.min(days, HO_DMAX) * HO_DAY);
   const full = !!(c.on && c.room && c.center),
     cost = Number(c.cost) > 0 ? Number(c.cost) : 0,
@@ -59343,6 +60339,55 @@ function bizNext() {
     .join("")}</div>`;
 }
 const BF_MAIN = /data-(rchopen|anopen|eropen|kdopen)\b/;
+/* Kachel für Rechnungen mit Richtungs-Abzeichen (raus/rein) */
+function bzTile(dir, icn, title, sub, attr) {
+  return areaTile(svgIcon(icn, 22), escHtml(title), escHtml(sub), attr)
+    .replace('class="atile"', `class="atile bz${dir}"`)
+    .replace(/<\/button>$/, `<span class="bzbadge" aria-hidden="true">${svgIcon(dir === "out" ? "goOut" : "goIn", 13)}</span></button>`);
+}
+/* Großer Schreiben-Knopf oben in „Mein Geschäft“, dazu Angebot und erhaltene Rechnung */
+function bzWrite() {
+  return `<div class="bzw"><button type="button" class="bzwmain" data-rvnew><span class="bzwi">${svgIcon("docout", 22)}</span><span class="grow"><b>${escHtml(uiText("bz_write"))}</b><small>${escHtml(uiText("bz_write_s"))}</small></span>${svgIcon("plus", 20)}</button><div class="bzwsub"><button type="button" data-bzan>${svgIcon("doc", 17)} ${escHtml(uiText("an_new"))}</button><button type="button" class="bzwin" data-eropen>${svgIcon("docin", 17)} ${escHtml(uiText("bz_got"))}</button></div></div>`;
+}
+/* Rechnungen raus, Rechnungen rein, Angebote, Kunden – immer zuerst */
+const BZ_ORDER = [/data-rchopen\b/, /data-eropen\b/, /data-anopen\b/, /data-kdopen\b/];
+const bzRank = (h) => {
+  const i = BZ_ORDER.findIndex((r) => r.test(h));
+  return i < 0 ? 99 : i;
+};
+const bzSort = (L) => L.map((h, i) => [h, i]).sort((a, b) => bzRank(a[0]) - bzRank(b[0]) || a[1] - b[1]).map((x) => x[0]);
+document.addEventListener("click", (e) => {
+  if (!e.target.closest || !e.target.closest("[data-bzan]")) return;
+  try {
+    rvOpen(anNew());
+    SND.play("tick");
+  } catch (_) {}
+});
+/* Nur angestellt ODER nur selbstständig: ein Bereich, darunter „Steuer & Ämter“ */
+function berufSingle(g, tiles, extra, staat) {
+  let all = tiles
+    .map((t) =>
+      t.k === "kunden"
+        ? kdTile()
+        : areaTile(
+            svgIcon(t.icon, 22),
+            typeof TL_ !== "undefined" && TL_[t.k] ? TL_[t.k][0] : t.title,
+            t.short ? escHtml(String(t.short)) : "",
+            `data-anaopen="${escHtml(t.k)}"`
+          )
+    )
+    .concat(extra);
+  const split = !staat && (hasJob() || hasSelf()),
+    SH = split ? all.filter((h) => AG_SHARED.test(h)) : [];
+  if (split) all = all.filter((h) => !AG_SHARED.test(h));
+  let head = hasSelf() ? bzWrite() : "";
+  if (split && hasJob() && !hasSelf()) {
+    const JP = agJobParts(Number(ui.ym.slice(0, 4)));
+    head = JP[0];
+    all = JP[1].concat(all.filter((h) => !/data-anaopen="(lohn|wk)"/.test(h)));
+  }
+  return `<div class="card areacard">${areaHead(g[0], hasJob() || hasSelf() ? "steuer" : "amt", "Einstellungen")}${head}<div class="agrid">${(hasSelf() ? bzSort : (x) => x)(all).join("")}</div></div>${agShared(SH, false)}`;
+}
 function berufDuo(el, tiles, T, exJ, exB, hints) {
   const tl = (t) =>
     t.k === "kunden"
@@ -59354,10 +60399,14 @@ function berufDuo(el, tiles, T, exJ, exB, hints) {
           `data-anaopen="${escHtml(t.k)}"`
         );
   const keysB = new Set(BF_BIZ),
-    J = tiles
+    Jall = tiles
       .filter((t) => !keysB.has(t.k))
       .map(tl)
       .concat(exJ),
+    /* Steuer & Ämter gilt für beides – steht fest unter beiden Seiten */
+    SH = Jall.filter((h) => AG_SHARED.test(h)),
+    JP = agJobParts(Number(ui.ym.slice(0, 4))),
+    J = [JP[0], ...JP[1], ...Jall.filter((h) => !AG_SHARED.test(h) && !/data-anaopen="(lohn|wk)"/.test(h))],
     Bk = [...BF_BIZ]
       .map((k) => T.find((t) => t.k === k))
       .filter(Boolean)
@@ -59365,8 +60414,9 @@ function berufDuo(el, tiles, T, exJ, exB, hints) {
   const all = exB.concat(Bk),
     rest = all.filter((h) => !BF_MAIN.test(h)),
     B = [
+      bzWrite(),
       bizNext(),
-      ...all.filter((h) => BF_MAIN.test(h)),
+      ...bzSort(all.filter((h) => BF_MAIN.test(h))),
       rest.length
         ? `<div class="bflist"><h3 class="bflh">${uiText("bn_tax")}</h3>${rest.map((h) => h.replace('class="atile"', 'class="bfrow"').replace(/<\/button>$/, `${svgIcon("right", 16)}</button>`)).join("")}</div>`
         : "",
@@ -59410,7 +60460,7 @@ function berufDuo(el, tiles, T, exJ, exB, hints) {
     <div class="bfleg" data-noi18n><span><i class="j"></i>${escHtml(uiText("bf_inc_job"))} <b>${E(M.job)}</b></span><span><i class="b"></i>${escHtml(uiText("bf_inc_biz"))} <b>${E(M.biz)}</b></span></div>${hints.length ? `<div class="bfhl" role="list" aria-label="${escHtml(uiText("bf_todo"))}">${hints.slice(0, 3).join("")}</div>` : ""}</div></div>
   <div class="bfsw ${side === "b" ? "sb" : "sj"}" id="bfsw"><div class="bfbands">${bJ}${bB}</div><div class="bfhint" aria-hidden="true">${svgIcon("chev", 14)}<span data-noi18n>${escHtml(uiText("bf_swipe"))}</span></div>
    <div class="bfgrids"><div class="agrid bfg bfgj">${J.join("")}</div><div class="agrid bfg bfgb">${B.join("")}</div></div></div>
-`;
+  ${agShared(SH, true)}`;
   try {
     if (localStorage.getItem("hb-bfside")) $("bfsw").classList.add("known");
   } catch (_) {}
@@ -59743,19 +60793,18 @@ function renderBeruf() {
   if (hasSelf()) {
     const io = rchList().filter((i) => !i.paid),
       od = rchOver().length;
+    /* Ausgangs- und Eingangsrechnungen klar getrennt: grün = Geld kommt rein, orange = Geld geht raus */
     (duo ? exB : extra).push(
-      areaTile(
-        svgIcon("docout", 22),
-        escHtml(uiText("rch_h")),
-        od
-          ? escHtml(
-              uiText("rch_over_n", {
-                n: String(od),
-              })
-            )
-          : io.length
-            ? `${io.length} · ${escHtml(fmtEur0(io.reduce((s, i) => s + i.amt, 0)))}`
-            : escHtml(uiText("rch_new")),
+      bzTile(
+        "out",
+        "docout",
+        uiText("bz_out"),
+        uiText("bz_out_s") +
+          (od
+            ? " · " + uiText("rch_over_n", { n: String(od) })
+            : io.length
+              ? ` · ${io.length} · ${fmtEur0(io.reduce((s, i) => s + i.amt, 0))}`
+              : ""),
         "data-rchopen"
       )
     );
@@ -59771,14 +60820,16 @@ function renderBeruf() {
     const eo = erOpenList(),
       eod = eo.filter((i) => i.due && daysTo(i.due) < 0).length;
     (duo ? exB : extra).push(
-      areaTile(
-        svgIcon("docin", 22),
-        escHtml(uiText("er_h")),
-        eod
-          ? escHtml(uiText("rch_over_n", { n: String(eod) }))
-          : eo.length
-            ? `${eo.length} · ${escHtml(fmtEur0(eo.reduce((s, i) => s + i.pay, 0)))}`
-            : escHtml(uiText("er_tile_s0")),
+      bzTile(
+        "in",
+        "docin",
+        uiText("bz_in"),
+        uiText("bz_in_s") +
+          (eod
+            ? " · " + uiText("rch_over_n", { n: String(eod) })
+            : eo.length
+              ? ` · ${eo.length} · ${fmtEur0(eo.reduce((s, i) => s + i.pay, 0))}`
+              : ""),
         "data-eropen"
       )
     );
@@ -59869,19 +60920,7 @@ function renderBeruf() {
   }
   if (duo) return berufDuo(el, tiles, T, exJ, exB, hints);
   el.innerHTML = `${hero}${hints.length ? `<div class="ahints">${hints.slice(0, 3).join("")}</div>` : ""}
-    <div class="card areacard">${areaHead(g[0], hasJob() || hasSelf() ? "steuer" : "amt", "Einstellungen")}<div class="agrid">${tiles
-      .filter((t) => !(tax && t.k === "tax" && false))
-      .map((t) =>
-        t.k === "kunden"
-          ? kdTile()
-          : areaTile(
-              svgIcon(t.icon, 22),
-              typeof TL_ !== "undefined" && TL_[t.k] ? TL_[t.k][0] : t.title,
-              t.short ? escHtml(String(t.short)) : "",
-              `data-anaopen="${escHtml(t.k)}"`
-            )
-      )
-      .join("")}${extra.join("")}</div></div>`;
+    ${berufSingle(g, tiles, extra, staat)}`;
 }
 function zukSaved() {
   const goals = store.settings.goals || [],
@@ -60258,6 +61297,587 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
     const b = document.querySelector("[data-bwadd]");
     if (b) b.click();
+  }
+});
+
+/* ===== Angestellt: Helfer für alle, die ein Gehalt bekommen =====
+   - Lohnabrechnung hochladen (ein Knopf)
+   - Mami schätzt, ob sich die Steuererklärung lohnt
+   - Arbeitszeit & Überstunden und Arbeitsweg teilen sich EINE Tages-Liste:
+     store.settings.az = { soll: Stunden/Woche, url: Urlaubstage/Jahr, ot0: Überstunden-Übertrag,
+                           d: { "JJJJ-MM-TT": { h: Stunden, t: "b" Betrieb | "h" Homeoffice | "u" Urlaub | "k" krank } } }
+     Wer Stunden einträgt, hat damit auch die Arbeitstage für die Pendlerpauschale.
+   - Netto-Verlauf aus Lohnabrechnungen oder Gehaltseingängen
+   - Extras vom Arbeitgeber, eine Karte nach der anderen */
+
+/* ---------- Tages-Liste ---------- */
+function agAz() {
+  const a = (store.settings.az = store.settings.az || {});
+  a.d = a.d || {};
+  return a;
+}
+const agSoll = () => Number(agAz().soll) || 0;
+const agDayTarget = () => agSoll() / 5;
+function agSet(iso, v) {
+  const d = agAz().d;
+  if (!v || (!v.t && !(v.h > 0))) delete d[iso];
+  else d[iso] = { ...(v.h > 0 ? { h: round2(v.h) } : {}), t: v.t || "b" };
+  clearTimeout(agSet._t);
+  agSet._t = setTimeout(() => saveSettings(), 400);
+}
+function agCount(y, t) {
+  let n = 0;
+  for (const [iso, v] of Object.entries(agAz().d)) if (iso.startsWith(y + "-") && v.t === t) n++;
+  return n;
+}
+/* Wurden für dieses Jahr schon Tage eingetragen? Dann zählt der Kalender statt der Hand-Zahl */
+const agUsed = (y) => Object.keys(agAz().d).some((k) => k.startsWith(y + "-"));
+const agHomeDays = (y) =>
+  Object.entries(agAz().d)
+    .filter(([k, v]) => k.startsWith(y + "-") && v.t === "h")
+    .map(([k]) => k);
+const agMon = (iso) => {
+  const d = new Date(iso + "T12:00"),
+    wd = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - wd);
+  return isoOf(d);
+};
+const agWd = (iso) => (new Date(iso + "T12:00").getDay() + 6) % 7;
+/* Überstunden-Konto: nur Wochen, in denen etwas eingetragen ist; die laufende Woche anteilig bis heute.
+   Urlaub und Krankheit an Werktagen zählen wie ein normaler Arbeitstag. */
+function agSaldo() {
+  const A = agAz(),
+    soll = agSoll();
+  if (!soll) return 0;
+  const today = isoToday(),
+    weeks = {};
+  for (const [iso, v] of Object.entries(A.d)) {
+    if (iso > today) continue;
+    const w = agMon(iso);
+    const x = (weeks[w] = weeks[w] || { ist: 0 });
+    if (v.t === "u" || v.t === "k") x.ist += agWd(iso) < 5 ? soll / 5 : 0;
+    else x.ist += Number(v.h) || 0;
+  }
+  let s = Number(A.ot0) || 0;
+  const curW = agMon(today);
+  for (const [w, x] of Object.entries(weeks)) {
+    const due = w === curW ? (soll * Math.min(5, agWd(today) + 1)) / 5 : soll;
+    s += x.ist - due;
+  }
+  return round2(s);
+}
+function agWeekIst(mon) {
+  let s = 0;
+  for (let i = 0; i < 7; i++) {
+    const iso = addDays(mon, i),
+      v = agAz().d[iso];
+    if (v && v.t !== "u" && v.t !== "k") s += Number(v.h) || 0;
+  }
+  return round2(s);
+}
+const agUrlLeft = (y) => (Number(agAz().url) || 0) - agCount(y, "u");
+const agH = (h) => {
+  const m = Math.round((Number(h) || 0) * 60),
+    s = m < 0 ? "−" : "";
+  const a = Math.abs(m);
+  return "\u2066" + s + Math.floor(a / 60) + ":" + String(a % 60).padStart(2, "0") + " h\u2069";
+};
+/* Zahl + „h“ als ein Block (sonst springt das Vorzeichen im Arabischen nach hinten) */
+const agHd = (h) => "\u2066" + (Math.round((Number(h) || 0) * 10) / 10).toLocaleString(cLoc(), { maximumFractionDigits: 1 }) + " h\u2069";
+const agSg = (h) => (h > 0 ? "\u2066+" + agHd(h).slice(1) : agHd(h));
+
+/* ---------- Kacheln und Bereiche auf „Beruf“ ---------- */
+const AG_SHARED = /data-anaopen="tax"|data-stbopen|data-bropen|data-hoopen/;
+function agTile(icn, title, sub, attr, cls) {
+  return areaTile(svgIcon(icn, 22), escHtml(title), escHtml(sub), attr).replace('class="atile"', `class="atile ${cls || ""}"`);
+}
+function agSlipBtn() {
+  return `<button type="button" class="agslip" data-slipup><span class="agsi">${svgIcon("docin", 21)}</span><span class="grow"><b>${escHtml(uiText("ag_slip"))}</b><small>${escHtml(uiText("ag_slip_s"))}</small></span>${svgIcon("plus", 20)}</button>`;
+}
+/* 1B: Lohnt sich die Steuererklärung? */
+function agTaxHint(y) {
+  try {
+    const T = taxCalc(y),
+      W = wkCalc(y),
+      P = TAX26.anPausch,
+      back = -T.due,
+      over = W.total > P;
+    if (!(back >= 25) && !over) return "";
+    const mx = Math.max(P * 1.35, W.total * 1.05),
+      pct = Math.min(100, (W.total / mx) * 100),
+      mk = (P / mx) * 100;
+    return `<button type="button" class="agtax" data-anaopen="tax"><span class="agtm">${mamiAvatar ? mamiAvatar(null) : ""}</span><span class="grow"><b>${escHtml(
+      back >= 25 ? uiText("ag_tx_t", { a: fmtEur0(back) }) : uiText("ag_tx_t2")
+    )}</b><small>${escHtml(uiText(over ? "ag_tx_over" : "ag_tx_lst"))}</small><span class="agbar" aria-hidden="true"><i style="width:${pct.toFixed(1)}%"></i><em style="left:${mk.toFixed(1)}%"></em></span><small>${escHtml(
+      uiText("ag_tx_bar", { a: fmtEur0(W.total), p: fmtEur0(P) })
+    )} · ${escHtml(hasSelf() ? uiText("ag_tx_due", { y: String(Number(y) + 1) }) : uiText("ag_tx_free"))}</small></span></button>`;
+  } catch (_) {
+    return "";
+  }
+}
+/* Job-Seite: Knopf, Mami-Hinweis, Kacheln. Gibt [Kopf, Kacheln] zurück */
+function agJobParts(y) {
+  const sl = slipsOf(y).length,
+    W = wkCalc(y),
+    sal = agSaldo(),
+    A = agAz(),
+    ex = agExState(),
+    nt = agNetSeries(y),
+    last = [...nt].reverse().find((x) => x.v > 0),
+    tiles = [
+      agTile("wallet", uiText("ag_lohn_t"), sl ? uiText("ag_lohn_n", { n: String(sl) }) : uiText("ag_lohn_0"), 'data-anaopen="lohn"'),
+      agTile("doc", uiText("ag_wk_t"), uiText("ag_wk_s", { a: fmtEur0(W.total) }), 'data-anaopen="wk"'),
+      agTile("clock", uiText("ag_az"), A.soll ? uiText("ag_az_s", { a: agSg(sal) }) : uiText("ag_az_s0"), "data-agaz"),
+      agTile("car", uiText("ag_aw"), W.km ? uiText("ag_aw_s", { k: String(W.km), n: String(W.days) }) : uiText("ag_aw_s0"), "data-agaw"),
+      agTile("chart", uiText("ag_nt"), last ? uiText("ag_nt_s", { a: fmtEur0(last.v) }) : uiText("ag_nt_s0"), "data-agnt"),
+      agTile("gift", uiText("ag_ex"), ex.yes ? uiText("ag_ex_s", { n: String(ex.yes), m: String(AG_EX.length) }) : uiText("ag_ex_s0", { m: String(AG_EX.length) }), "data-agex"),
+    ];
+  const ask = AG_EX.filter((x) => ex.a[x.k] === "frag");
+  const head =
+    agSlipBtn() +
+    agTaxHint(y) +
+    (ask.length
+      ? `<button type="button" class="ahint agask" data-agex>${svgIcon("bell", 16)} <span data-noi18n>${escHtml(uiText("ag_ex_ask", { n: ask.map((x) => uiText(x.t)).join(", ") }))}</span></button>`
+      : "");
+  return [head, tiles];
+}
+function agShared(list, both) {
+  if (!list.length) return "";
+  return `<section class="agshared"><h3 class="agsh">${escHtml(uiText(both ? "ag_shared" : "ag_shared1"))}</h3><div class="agrid">${list.join("")}</div></section>`;
+}
+document.addEventListener("click", (e) => {
+  const t = e.target.closest && e.target.closest("[data-slipup],[data-agaz],[data-agaw],[data-agnt],[data-agex]");
+  if (!t) return;
+  if (t.hasAttribute("data-slipup")) {
+    const i = $("slipFile");
+    if (i) {
+      i.value = "";
+      i.click();
+    }
+  } else if (t.hasAttribute("data-agaz")) agAzOpen();
+  else if (t.hasAttribute("data-agaw")) agAwOpen();
+  else if (t.hasAttribute("data-agnt")) agNtOpen();
+  else if (t.hasAttribute("data-agex")) agExOpen();
+  try {
+    SND.play("tick");
+  } catch (_) {}
+});
+
+/* ---------- 5: Arbeitszeit (schnell eintragen + Woche + Monat) ---------- */
+const AGZ = { sel: "", tab: "w", h: null, t: null };
+function agAzOpen(iso) {
+  AGZ.sel = iso || AGZ.sel || isoToday();
+  const v = agAz().d[AGZ.sel];
+  AGZ.h = v && v.h != null ? v.h : agDayTarget() || 8;
+  AGZ.t = v ? v.t : "b";
+  agAzRender(true);
+}
+function agAzSetup() {
+  const A = agAz();
+  return `<div class="card agcard"><b class="agct">${escHtml(uiText("ag_az_set_t"))}</b>
+    <label class="hlf"><span>${escHtml(uiText("ag_az_set_soll"))}</span><input class="in" id="agSoll" inputmode="decimal" value="${A.soll ? escHtml(numStr(A.soll)) : ""}" placeholder="40"></label>
+    <label class="hlf"><span>${escHtml(uiText("ag_az_set_url"))}</span><input class="in" id="agUrl" inputmode="numeric" value="${A.url ? escHtml(String(A.url)) : ""}" placeholder="30"></label>
+    <label class="hlf"><span>${escHtml(uiText("ag_az_set_ot"))}</span><input class="in" id="agOt0" inputmode="decimal" value="${A.ot0 ? escHtml(numStr(A.ot0)) : ""}" placeholder="0"></label>
+    <button type="button" class="btn primary block agj" data-agsetup>${escHtml(uiText("ag_az_set_go"))}</button></div>`;
+}
+function agAzRender(first) {
+  const A = agAz(),
+    E = escHtml,
+    b = hbSheet("agAzBg", uiText("ag_az_h"));
+  if (!A.soll || AGZ.setup) {
+    b.innerHTML = agAzSetup();
+    return;
+  }
+  const y = AGZ.sel.slice(0, 4),
+    sal = agSaldo(),
+    mon = agMon(isoToday()),
+    wk = agWeekIst(mon),
+    isToday = AGZ.sel === isoToday(),
+    lab = fxDate(AGZ.sel, { weekday: "long", day: "numeric", month: "short" });
+  const tgt = agDayTarget(),
+    presets = [...new Set([tgt, 4, 6, 8].map((x) => round2(x)).filter((x) => x > 0))].slice(0, 4);
+  const chip = (attr, txt, on) => `<button type="button" class="agchip ${on ? "on" : ""}" ${attr}>${E(txt)}</button>`;
+  const work = AGZ.t === "b" || AGZ.t === "h";
+  const editor = `<div class="card agcard agedit"><span class="agk">${E(isToday ? uiText("ag_az_today", { d: lab }) : lab)}</span>
+    <div class="agstep"><button type="button" data-agstep="-0.5" aria-label="−30 min" ${work ? "" : "disabled"}>−</button><b>${work ? E(agH(AGZ.h)) : E(uiText(AGZ.t === "u" ? "ag_az_u" : "ag_az_k"))}</b><button type="button" data-agstep="0.5" aria-label="+30 min" ${work ? "" : "disabled"}>+</button></div>
+    <div class="agchips">${presets.map((p) => chip(`data-agh="${p}"`, agH(p), work && Math.abs(AGZ.h - p) < 0.01)).join("")}</div>
+    <div class="agchips">${chip('data-agt="b"', uiText("ag_az_b"), AGZ.t === "b")}${chip('data-agt="h"', uiText("ag_az_ho"), AGZ.t === "h")}${chip('data-agt="u"', uiText("ag_az_u"), AGZ.t === "u")}${chip('data-agt="k"', uiText("ag_az_k"), AGZ.t === "k")}${
+      A.d[AGZ.sel] ? chip("data-agdel", uiText("ag_az_free"), false) : ""
+    }</div>
+    <button type="button" class="btn primary block agj" data-agsave>${E(uiText("ag_az_save"))}</button></div>`;
+  const tabs = `<div class="agtabs" role="tablist"><button type="button" role="tab" aria-selected="${AGZ.tab === "w"}" class="${AGZ.tab === "w" ? "on" : ""}" data-agtab="w">${E(uiText("ag_az_tw"))}</button><button type="button" role="tab" aria-selected="${AGZ.tab === "m"}" class="${AGZ.tab === "m" ? "on" : ""}" data-agtab="m">${E(uiText("ag_az_tm"))}</button></div>`;
+  b.innerHTML = `<div class="agacc"><div><b class="${sal >= 0 ? "agpos" : "agneg"}">${E(agSg(sal))}</b><small>${E(uiText("ag_az_over"))}</small></div><div><b>${E(String(agUrlLeft(isoToday().slice(0, 4))))}</b><small>${E(uiText("ag_az_url"))}</small></div><div><b>${E(agHd(wk))}</b><small>${E(uiText("ag_az_week", { s: agHd(A.soll) }))}</small></div></div>
+    ${editor}${tabs}<div class="card agcard">${AGZ.tab === "w" ? agWeekHtml(agMon(AGZ.sel)) : agMonthHtml(AGZ.sel.slice(0, 7), "az")}</div>
+    <p class="small muted agnote">${E(uiText(AGZ.tab === "m" ? "ag_az_tap" : "ag_az_link"))}</p>
+    <button type="button" class="link agsetl" data-agsetupopen>${svgIcon("sliders", 15)} ${E(uiText("ag_az_set_edit"))}</button>`;
+  if (first && !reducedMotion())
+    try {
+      stbAnim(b, ".agacc>div,.agcard,.agtabs");
+    } catch (_) {}
+}
+function agWeekHtml(mon) {
+  const tgt = agDayTarget(),
+    dn = Array.from({ length: 7 }, (_, i) => fxDate(addDays(mon, i), { weekday: "short" }));
+  let max = Math.max(8, tgt * 1.6);
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const iso = addDays(mon, i),
+      v = agAz().d[iso] || {};
+    const h = v.t === "u" || v.t === "k" ? 0 : Number(v.h) || 0;
+    max = Math.max(max, h);
+    return { iso, h, t: v.t };
+  });
+  const wl = fxDate(mon, { day: "numeric", month: "short" }) + " – " + fxDate(addDays(mon, 6), { day: "numeric", month: "short" });
+  return `<div class="agwh"><button type="button" class="agnav" data-agwk="-7" aria-label="‹">${svgIcon("chevron", 16)}</button><b>${escHtml(wl)}</b><button type="button" class="agnav r" data-agwk="7" aria-label="›">${svgIcon("chevron", 16)}</button></div>
+  <div class="agdays">${days
+    .map((d, i) => {
+      const over = tgt && d.h > tgt ? ((d.h - tgt) / d.h) * 100 : 0;
+      return `<button type="button" class="${d.iso === AGZ.sel ? "sel" : ""}" data-agday="${d.iso}" aria-label="${escHtml(dn[i] + " " + agH(d.h))}"><i class="${d.t === "u" ? "u" : d.t === "k" ? "k" : ""}" style="height:${d.t === "u" || d.t === "k" ? 22 : (d.h / max) * 100}%;--o:${over.toFixed(0)}%"></i><span>${escHtml(dn[i])}</span></button>`;
+    })
+    .join("")}${tgt ? `<em class="agsoll" style="bottom:calc(22px + ${((tgt / max) * 100 * 0.78).toFixed(1)}%)"></em>` : ""}</div>
+  <div class="aglg"><span><i class="j"></i>${escHtml(uiText("ag_az_hrs"))}</span><span><i class="o"></i>${escHtml(uiText("ag_az_ot"))}</span><span><i class="u"></i>${escHtml(uiText("ag_az_u"))}</span></div>`;
+}
+/* Monatskalender – für Arbeitszeit (Stunden) und Arbeitsweg (Art des Tages) */
+function agMonthHtml(ym, mode) {
+  const [Y, M] = ym.split("-").map(Number),
+    first = new Date(Y, M - 1, 1),
+    lead = (first.getDay() + 6) % 7,
+    n = new Date(Y, M, 0).getDate(),
+    hd = Array.from({ length: 7 }, (_, i) => fxDate(addDays("2026-11-02", i), { weekday: "narrow" }));
+  let cells = hd.map((x) => `<span class="aghd">${escHtml(x)}</span>`).join("") + '<span class="agpad"></span>'.repeat(lead);
+  for (let d = 1; d <= n; d++) {
+    const iso = ym + "-" + pad(d),
+      v = agAz().d[iso],
+      t = v ? v.t : "",
+      sub = !v ? "" : t === "u" ? "U" : t === "k" ? "K" : mode === "az" ? (Math.round((v.h || 0) * 10) / 10).toLocaleString(cLoc()) : t === "h" ? "⌂" : "";
+    cells += `<button type="button" class="agc ${t ? "t" + t : ""} ${mode === "az" && iso === AGZ.sel ? "sel" : ""} ${iso === isoToday() ? "now" : ""}" data-${mode === "az" ? "agday" : "agcyc"}="${iso}" aria-label="${escHtml(fxDate(iso, { day: "numeric", month: "long" }))}">${d}${sub ? `<small>${escHtml(sub)}</small>` : ""}</button>`;
+  }
+  const ml = fxDate(ym + "-01", { month: "long", year: "numeric" });
+  return `<div class="agwh"><button type="button" class="agnav" data-agmo="-1" data-mode="${mode}" aria-label="‹">${svgIcon("chevron", 16)}</button><b>${escHtml(ml)}</b><button type="button" class="agnav r" data-agmo="1" data-mode="${mode}" aria-label="›">${svgIcon("chevron", 16)}</button></div><div class="agcal">${cells}</div>`;
+}
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  if (!t.closest || !t.closest("#agAzBg,#agAwBg")) return;
+  const q = (s) => t.closest(s);
+  let x;
+  if (q("[data-agsetupopen]")) {
+    AGZ.setup = 1;
+    agAzRender();
+    return;
+  }
+  if (q("[data-agsetup]")) {
+    const A = agAz(),
+      soll = parseAmt($("agSoll").value);
+    if (!(soll > 0 && soll <= 80)) {
+      toast(uiText("ag_az_set_soll"));
+      return;
+    }
+    A.soll = round2(soll);
+    A.url = Math.max(0, Math.round(parseAmt($("agUrl").value) || 0));
+    A.ot0 = round2(parseAmt($("agOt0").value) || 0);
+    AGZ.setup = 0;
+    saveSettings();
+    agAzOpen();
+    return;
+  }
+  if ((x = q("[data-agstep]"))) {
+    AGZ.h = Math.max(0, Math.min(24, round2((AGZ.h || 0) + Number(x.dataset.agstep))));
+    if (AGZ.t !== "h") AGZ.t = "b";
+    agAzRender();
+    return;
+  }
+  if ((x = q("[data-agh]"))) {
+    AGZ.h = Number(x.dataset.agh);
+    if (AGZ.t !== "h") AGZ.t = "b";
+    agAzRender();
+    return;
+  }
+  if ((x = q("[data-agt]"))) {
+    AGZ.t = x.dataset.agt;
+    if ((AGZ.t === "b" || AGZ.t === "h") && !(AGZ.h > 0)) AGZ.h = agDayTarget() || 8;
+    agAzRender();
+    return;
+  }
+  if (q("[data-agdel]")) {
+    agSet(AGZ.sel, null);
+    AGZ.h = agDayTarget() || 8;
+    AGZ.t = "b";
+    agAzRender();
+    agRefresh();
+    return;
+  }
+  if (q("[data-agsave]")) {
+    agSet(AGZ.sel, AGZ.t === "u" || AGZ.t === "k" ? { t: AGZ.t } : { h: AGZ.h, t: AGZ.t });
+    toast(uiText("ag_az_saved"));
+    try {
+      SND.play("save");
+    } catch (_) {}
+    agAzRender();
+    agRefresh();
+    return;
+  }
+  if ((x = q("[data-agtab]"))) {
+    AGZ.tab = x.dataset.agtab;
+    agAzRender();
+    return;
+  }
+  if ((x = q("[data-agwk]"))) {
+    agAzOpen(addDays(AGZ.sel, Number(x.dataset.agwk)));
+    return;
+  }
+  if ((x = q("[data-agmo]"))) {
+    const base = x.dataset.mode === "aw" ? AGW.ym + "-01" : AGZ.sel.slice(0, 7) + "-01",
+      d = new Date(base + "T12:00");
+    d.setMonth(d.getMonth() + Number(x.dataset.agmo));
+    if (x.dataset.mode === "aw") {
+      AGW.ym = isoOf(d).slice(0, 7);
+      agAwRender();
+    } else agAzOpen(isoOf(d));
+    return;
+  }
+  if ((x = q("[data-agday]"))) {
+    agAzOpen(x.dataset.agday);
+    const s = document.querySelector("#agAzBg .hobody");
+    if (s) s.scrollTo({ top: 0, behavior: reducedMotion() ? "auto" : "smooth" });
+    return;
+  }
+  /* Arbeitsweg: Tag antippen = Betrieb → Homeoffice → Urlaub → Krank → frei */
+  if ((x = q("[data-agcyc]"))) {
+    const iso = x.dataset.agcyc,
+      v = agAz().d[iso],
+      order = ["", "b", "h", "u", "k"],
+      nx = order[(order.indexOf(v ? v.t : "") + 1) % order.length];
+    agSet(iso, nx ? { t: nx, h: nx === "b" || nx === "h" ? (v && v.h) || agDayTarget() || 0 : 0 } : null);
+    agAwRender();
+    agRefresh();
+    try {
+      SND.play("tick");
+    } catch (_) {}
+  }
+});
+/* Seite „Beruf“ im Hintergrund auffrischen */
+function agRefresh() {
+  try {
+    if (ui.view === "beruf") {
+      BG_RENDER = true;
+      render();
+    }
+  } catch (_) {
+  } finally {
+    BG_RENDER = false;
+  }
+}
+
+/* ---------- 2C: Arbeitsweg mit Kalender ---------- */
+const AGW = { ym: "" };
+function agAwOpen() {
+  AGW.ym = AGW.ym || String(ui.ym || isoToday()).slice(0, 7);
+  agAwRender(true);
+}
+function agAwRender(first) {
+  const ym = AGW.ym,
+    y = ym.slice(0, 4),
+    W = wkCalc(y),
+    E = escHtml,
+    b = hbSheet("agAwBg", uiText("ag_aw_h", { y }));
+  const cnt = { b: 0, h: 0, u: 0, k: 0 };
+  for (const [iso, v] of Object.entries(agAz().d)) if (iso.startsWith(ym + "-") && cnt[v.t] != null) cnt[v.t]++;
+  const km = Number(W.km) || 0,
+    perDay = Number(y) >= 2026 ? km * 0.38 : Math.min(km, 20) * 0.3 + Math.max(0, km - 20) * 0.38,
+    mn = fxDate(ym + "-01", { month: "long" });
+  b.innerHTML = `<div class="card agcard"><label class="hlf"><span>${E(uiText("ag_aw_km"))}</span><input class="in" id="agKm" inputmode="decimal" value="${km ? E(numStr(km)) : ""}" placeholder="0"></label></div>
+    <div class="card agcard">${agMonthHtml(ym, "aw")}<div class="aglg"><span><i class="j"></i>${E(uiText("ag_aw_lb", { n: String(cnt.b) }))}</span><span><i class="h"></i>${E(uiText("ag_aw_lh", { n: String(cnt.h) }))}</span><span><i class="u"></i>${E(uiText("ag_aw_lu", { n: String(cnt.u) }))}</span>${
+      cnt.k ? `<span><i class="k"></i>${E(uiText("ag_aw_lk", { n: String(cnt.k) }))}</span>` : ""
+    }</div></div>
+    <div class="card agcard"><div class="agrow"><span>${E(uiText("ag_aw_trips", { m: mn }))}</span><b>${E(cnt.b + " × " + numStr(km) + " km")}</b></div><div class="agrow"><span>${E(uiText("ag_aw_pend"))}</span><b>${E(fmtEur(round2(perDay * cnt.b)))}</b></div><div class="agrow"><span>${E(uiText("ag_aw_ho"))}</span><b>${E(fmtEur(round2(cnt.h * 6)))}</b></div><div class="agrow tot"><span>${E(uiText("ag_aw_year", { y }))}</span><b>${E(fmtEur(W.fahrt))}</b></div></div>
+    <p class="small muted agnote">${E(uiText("ag_aw_tap"))}</p><p class="small muted agnote">${E(uiText("ag_aw_rule"))}</p>`;
+  if (first && !reducedMotion())
+    try {
+      stbAnim(b, ".agcard");
+    } catch (_) {}
+}
+document.addEventListener("change", (e) => {
+  if (e.target.id !== "agKm") return;
+  const y = AGW.ym.slice(0, 4),
+    v = parseAmt(e.target.value);
+  wkSet(y, { km: v > 0 ? round2(v) : 0 }).then(() => {
+    agAwRender();
+    agRefresh();
+  });
+});
+
+/* ---------- 3C: Netto im Jahresverlauf ---------- */
+function agNetSeries(y) {
+  const sl = Object.fromEntries(slipsOf(y).map((s) => [s.ym, s])),
+    lc = new Set(
+      incCats()
+        .filter((c) => c.art === "lohn")
+        .map((c) => c.name)
+    ),
+    cur = ymOf(new Date()),
+    out = [];
+  for (let m = 1; m <= 12; m++) {
+    const ym = y + "-" + pad(m);
+    if (ym > cur) break;
+    const s = sl[ym];
+    let v = 0,
+      src = "";
+    if (s) {
+      v = Number(s.netto) > 0 ? Number(s.netto) : Math.max(0, (Number(s.brutto) || 0) - ["lst", "soli", "kist", "kv", "rv"].reduce((a, k) => a + (Number(s[k]) || 0), 0));
+      src = "slip";
+    }
+    if (!(v > 0)) {
+      v = sum(
+        store.tx.filter((t) => t.kind === "einnahme" && lc.has(t.cat) && (t.date || "").startsWith(ym)),
+        (t) => t.amount
+      );
+      src = v > 0 ? "tx" : "";
+    }
+    out.push({ ym, v: round2(v), src, s });
+  }
+  return out;
+}
+function agNetFlags(L) {
+  const vals = L.filter((x) => x.v > 0)
+    .map((x) => x.v)
+    .sort((a, b) => a - b);
+  if (vals.length < 3) return { med: vals[Math.floor(vals.length / 2)] || 0, f: {} };
+  const med = vals[Math.floor(vals.length / 2)],
+    lim = Math.max(25, med * 0.02),
+    f = {};
+  let prev = null;
+  for (const x of L) {
+    if (x.v > 0 && Math.abs(x.v - med) >= lim) {
+      let r = "ag_nt_r_tx";
+      if (x.s && prev && prev.s) {
+        const d = (k) => (Number(x.s[k]) || 0) - (Number(prev.s[k]) || 0);
+        if (Math.abs(d("brutto")) > (Number(prev.s.brutto) || 0) * 0.01) r = d("brutto") > 0 ? "ag_nt_r_bplus" : "ag_nt_r_bminus";
+        else if (Math.abs(d("lst")) >= 5) r = "ag_nt_r_lst";
+        else if (Math.abs(d("kv") + d("rv")) >= 5) r = "ag_nt_r_sv";
+      } else if (x.s) r = x.v > med ? "ag_nt_r_bplus" : "ag_nt_r_lst";
+      f[x.ym] = { d: round2(x.v - med), r };
+    }
+    if (x.v > 0) prev = x;
+  }
+  return { med, f };
+}
+function agNtOpen() {
+  const y = String(ui.ym || isoToday()).slice(0, 4),
+    L = agNetSeries(y),
+    F = agNetFlags(L),
+    E = escHtml,
+    b = hbSheet("agNtBg", uiText("ag_nt_h", { y })),
+    last = [...L].reverse().find((x) => x.v > 0);
+  if (!last) {
+    b.innerHTML = `<div class="card agcard"><p class="small muted" style="margin:0 0 12px">${E(uiText("ag_nt_empty"))}</p>${agSlipBtn()}</div>`;
+    return;
+  }
+  const max = Math.max(...L.map((x) => x.v)) * 1.08,
+    lf = F.f[last.ym];
+  b.innerHTML = `<div class="card agcard"><span class="agk">${E(uiText("ag_nt_k"))}</span><div class="agbig">${E(fmtEur0(last.v))}</div><small class="${lf ? (lf.d < 0 ? "agneg" : "agpos") : "muted"}">${E(
+    lf ? uiText(lf.d < 0 ? "ag_nt_less" : "ag_nt_more", { a: fmtEur0(Math.abs(lf.d)) }) : uiText("ag_nt_same")
+  )} · ${E(fxDate(last.ym + "-01", { month: "long" }))}</small>
+    <div class="agspark" role="img" aria-label="${E(uiText("ag_nt_h", { y }))}">${L.map((x) => {
+      const fl = F.f[x.ym];
+      return `<i class="${fl ? (fl.d < 0 ? "dip" : "up") : ""} ${x === last ? "cur" : ""}" style="height:${x.v > 0 ? Math.max(4, (x.v / max) * 100) : 2}%"><em>${E(fxDate(x.ym + "-01", { month: "short" }).replace(".", ""))}</em></i>`;
+    }).join("")}</div></div>
+    ${
+      Object.keys(F.f).length
+        ? `<div class="card agcard">${Object.entries(F.f)
+            .map(([ym, fl]) => `<div class="agrow"><span>${E(fxDate(ym + "-01", { month: "long" }))}</span><b class="${fl.d < 0 ? "agneg" : "agpos"}">${E((fl.d > 0 ? "+" : "−") + fmtEur0(Math.abs(fl.d)))} · ${E(uiText(fl.r))}</b></div>`)
+            .join("")}</div>`
+        : ""
+    }<p class="small muted agnote">${E(uiText("ag_nt_src"))}</p>${agSlipBtn()}`;
+  if (!reducedMotion())
+    try {
+      stbAnim(b, ".agcard,.agspark i");
+    } catch (_) {}
+}
+
+/* ---------- 4B: Extras vom Arbeitgeber ---------- */
+const AG_EX = [
+  { k: "vl", ic: "piggy", t: "ag_x_vl", p: "ag_x_vl_p" },
+  { k: "jt", ic: "card", t: "ag_x_jt", p: "ag_x_jt_p" },
+  { k: "sb", ic: "gift", t: "ag_x_sb", p: "ag_x_sb_p" },
+  { k: "bav", ic: "shield", t: "ag_x_bav", p: "ag_x_bav_p" },
+  { k: "rad", ic: "bolt", t: "ag_x_rad", p: "ag_x_rad_p" },
+  { k: "ess", ic: "food", t: "ag_x_ess", p: "ag_x_ess_p" },
+  { k: "tel", ic: "phone", t: "ag_x_tel", p: "ag_x_tel_p" },
+];
+function agExState() {
+  const a = (store.settings.agEx = store.settings.agEx || {});
+  return { a, yes: AG_EX.filter((x) => a[x.k] === "ja").length, done: AG_EX.filter((x) => a[x.k]).length };
+}
+const AGX = { all: 0 };
+function agExOpen() {
+  AGX.all = 0;
+  agExRender(true);
+}
+function agExRender(first) {
+  const S = agExState(),
+    E = escHtml,
+    b = hbSheet("agExBg", uiText("ag_ex_h")),
+    next = AG_EX.find((x) => !S.a[x.k]);
+  if (next && !AGX.all) {
+    const i = AG_EX.indexOf(next);
+    b.innerHTML = `<p class="small muted agof">${E(uiText("ag_ex_of", { n: String(i + 1), m: String(AG_EX.length) }))}</p>
+      <div class="agstack">${i < AG_EX.length - 1 ? '<div class="agcd back"></div>' : ""}<div class="agcd" data-k="${next.k}"><span class="agci">${svgIcon(next.ic, 30)}</span><b>${E(uiText(next.t))}</b><p>${E(uiText(next.p))}</p></div></div>
+      <div class="agyn"><button type="button" class="btn" data-agans="nein">${E(uiText("ag_ex_no"))}</button><button type="button" class="btn" data-agans="frag">${svgIcon("bell", 15)} ${E(uiText("ag_ex_ask_b"))}</button><button type="button" class="btn primary agj" data-agans="ja">${E(uiText("ag_ex_yes"))}</button></div>
+      ${S.done ? `<button type="button" class="link agsetl" data-agexall>${E(uiText("ag_ex_list"))}</button>` : ""}`;
+    if (!reducedMotion()) {
+      const c = b.querySelector(".agcd:not(.back)");
+      c && c.animate([{ opacity: 0, transform: "translateY(16px) scale(.97)" }, { opacity: 1, transform: "none" }], { duration: 340, easing: "cubic-bezier(.2,.9,.3,1)" });
+    }
+    return;
+  }
+  const lbl = { ja: "ag_ex_yes", frag: "ag_ex_ask_b", nein: "ag_ex_no" };
+  b.innerHTML = `${next ? "" : `<div class="card agcard agdone"><b>${E(uiText("ag_ex_done_t"))}</b><p class="small muted">${E(uiText("ag_ex_done_p"))}</p></div>`}<div class="card agcard">${AG_EX.map(
+    (x) =>
+      `<div class="agexr"><span class="agci s">${svgIcon(x.ic, 18)}</span><span class="grow"><b>${E(uiText(x.t))}</b><small>${E(uiText(x.p))}</small></span><span class="agseg">${["ja", "frag", "nein"]
+        .map((v) => `<button type="button" class="${S.a[x.k] === v ? "on " + v : ""}" data-agset="${x.k}:${v}">${E(uiText(lbl[v]))}</button>`)
+        .join("")}</span></div>`
+  ).join("")}</div>`;
+  if (first && !reducedMotion())
+    try {
+      stbAnim(b, ".agcard,.agexr");
+    } catch (_) {}
+}
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  if (!t.closest || !t.closest("#agExBg")) return;
+  let x;
+  if ((x = t.closest("[data-agans]"))) {
+    const c = document.querySelector("#agExBg .agcd:not(.back)");
+    if (!c) return;
+    agExState().a[c.dataset.k] = x.dataset.agans;
+    saveSettings();
+    const go = () => {
+      agExRender();
+      agRefresh();
+    };
+    if (reducedMotion()) go();
+    else {
+      const dir = x.dataset.agans === "ja" ? 1 : x.dataset.agans === "nein" ? -1 : 0;
+      c.animate([{ transform: "none", opacity: 1 }, { transform: `translate(${dir * 120}%, ${dir ? 0 : -30}px) rotate(${dir * 8}deg)`, opacity: 0 }], { duration: 260, easing: "ease-in", fill: "forwards" }).finished.then(go, go);
+    }
+    try {
+      SND.play(x.dataset.agans === "ja" ? "done" : "tick");
+    } catch (_) {}
+    return;
+  }
+  if (t.closest("[data-agexall]")) {
+    AGX.all = 1;
+    agExRender(true);
+    return;
+  }
+  if ((x = t.closest("[data-agset]"))) {
+    const [k, v] = x.dataset.agset.split(":"),
+      a = agExState().a;
+    a[k] = a[k] === v ? undefined : v;
+    if (!a[k]) delete a[k];
+    saveSettings();
+    AGX.all = 1;
+    agExRender();
+    agRefresh();
   }
 });
 
@@ -64831,9 +66451,12 @@ function wkCfg(year) {
 function wkCalc(year) {
   const c = wkCfg(year),
     HO = hoCalc(year),
-    home = HO.on ? (hasSelf() ? 0 : HO.amt) : Math.min(1260, (Number(c.home) || 0) * 6),
+    /* Tage aus dem Arbeitszeit-Kalender zählen, sobald dort für dieses Jahr etwas eingetragen ist */
+    cal = typeof agUsed === "function" && agUsed(year),
+    homeN = cal ? agCount(year, "h") : Number(c.home) || 0,
+    home = HO.on ? (hasSelf() ? 0 : HO.amt) : Math.min(1260, homeN * 6),
     km = Number(c.km) || 0,
-    days = Number(c.days) || 0;
+    days = cal ? agCount(year, "b") : Number(c.days) || 0;
   const perDay = Number(year) >= 2026 ? km * 0.38 : Math.min(km, 20) * 0.3 + Math.max(0, km - 20) * 0.38;
   const fahrt = round2(perDay * days);
   const txs = store.tx.filter((t) => t.wk && (t.date || "").startsWith(year + "-"));
@@ -64844,7 +66467,8 @@ function wkCalc(year) {
   return {
     HO,
     home,
-    homeDays: HO.on ? HO.days : Number(c.home) || 0,
+    homeDays: HO.on ? HO.days : homeN,
+    cal,
     km,
     days,
     fahrt,
@@ -74442,9 +76066,10 @@ function wkSection(y) {
       <div class="progress-big" style="margin:8px 0 4px"><div class="fill" style="width:${Math.min(100, (w.total / P) * 100)}%"></div></div>
       <span class="small muted">${w.total > P ? `Alles über der Pauschale von ${escHtml(fmtEur0(P))} senkt deine Steuer – hier etwa um ${escHtml(fmtEur0(over * rate))}.` : `Bis ${escHtml(fmtEur0(P))} rechnet das Finanzamt sowieso pauschal. Noch ${escHtml(fmtEur0(P - w.total))}, dann lohnt sich das Sammeln.`}</span>
       <div class="wkl">
-        ${w.HO.on ? `<button type="button" class="wkr wkho" data-hoopen><span class="ic">${svgIcon("home", 18)}</span><span class="n"><b>Homeoffice</b><small>${w.HO.amt && hasSelf() ? "Zählt bei der Selbstständigkeit" : escHtml(hoLine(w.HO))}</small></span><b>${escHtml(fmtEur0(w.home))} ›</b></button>` : `<div class="wkr"><span class="ic">${svgIcon("home", 18)}</span><span class="n"><b>Homeoffice</b><small>${plural(w.homeDays, "Tag", "Tage")} × 6 € · höchstens 1.260 € · <button type="button" class="linkbtn" data-hoopen>Mehr Möglichkeiten</button></small></span><span class="stp"><button data-wkhome="-1" aria-label="Ein Tag weniger">−</button><b>${escHtml(fmtEur0(w.home))}</b><button class="p" data-wkhome="1" aria-label="Ein Homeoffice-Tag mehr">+</button></span></div>`}
+        ${w.HO.on ? `<button type="button" class="wkr wkho" data-hoopen><span class="ic">${svgIcon("home", 18)}</span><span class="n"><b>Homeoffice</b><small>${w.HO.amt && hasSelf() ? "Zählt bei der Selbstständigkeit" : escHtml(hoLine(w.HO))}</small></span><b>${escHtml(fmtEur0(w.home))} ›</b></button>` : `<div class="wkr"><span class="ic">${svgIcon("home", 18)}</span><span class="n"><b>Homeoffice</b><small>${plural(w.homeDays, "Tag", "Tage")} × 6 € · höchstens 1.260 € · <button type="button" class="linkbtn" data-hoopen>Mehr Möglichkeiten</button></small></span>${w.cal ? `<b>${escHtml(fmtEur0(w.home))}</b>` : `<span class="stp"><button data-wkhome="-1" aria-label="Ein Tag weniger">−</button><b>${escHtml(fmtEur0(w.home))}</b><button class="p" data-wkhome="1" aria-label="Ein Homeoffice-Tag mehr">+</button></span>`}</div>`}
         <div class="wkr"><span class="ic">${svgIcon("car", 18)}</span><span class="n"><b>Fahrten zur Arbeit</b><small>${plural(w.days, "Tag", "Tage")} × ${w.km} km × ${Number(y) >= 2026 ? "0,38 €" : "0,30/0,38 €"}</small></span><b>${escHtml(fmtEur0(w.fahrt))}</b></div>
-        <div class="grid2" style="margin:0 0 6px 48px"><div class="field"><label for="wkKm">Entfernung (km, einfach)</label><input class="in" id="wkKm" inputmode="decimal" value="${w.km || ""}" placeholder="0"></div><div class="field"><label for="wkDays">Tage im Betrieb</label><input class="in" id="wkDays" inputmode="numeric" value="${w.days || ""}" placeholder="0"></div></div>
+        <div class="grid2" style="margin:0 0 6px 48px"><div class="field"><label for="wkKm">Entfernung (km, einfach)</label><input class="in" id="wkKm" inputmode="decimal" value="${w.km || ""}" placeholder="0"></div><div class="field"><label for="wkDays">Tage im Betrieb</label><input class="in" id="wkDays" inputmode="numeric" value="${w.days || ""}" placeholder="0"${w.cal ? " disabled" : ""}></div></div>
+        <div style="margin:0 0 6px 48px"><button type="button" class="chip" data-agaw>${svgIcon("cal", 14)} ${escHtml(uiText(w.cal ? "ag_wk_cal" : "ag_wk_cal0"))}</button></div>
         <div class="wkr"><span class="ic">${svgIcon("tag", 18)}</span><span class="n"><b>Arbeitsmittel aus Buchungen</b><small>${
           w.txs.length
             ? escHtml(
@@ -83838,17 +85463,8 @@ const TEXTS = {
     "جديد في الدعوات: «رابط للمنشورات». رابط واحد لفيسبوك وغيره – كل من يفتحه يحصل على رمزه الخاص. حتى 20 رمزًا جديدًا يوميًا، ويمكن إيقافه وتجديده.",
     "Nou la invitații: „Link pentru postări”. Un singur link pentru Facebook etc. – oricine îl deschide primește propriul cod. Cel mult 20 noi pe zi, se poate opri și reînnoi.",
   ],
-  bf_job: ["Mein Job", "My job", "İşim", "Моя работа", "Моя робота", "Moja praca", "وظيفتي", "Jobul meu"],
-  bf_biz: [
-    "Mein Geschäft",
-    "My business",
-    "İşletmem",
-    "Мой бизнес",
-    "Мій бізнес",
-    "Moja firma",
-    "عملي الخاص",
-    "Afacerea mea",
-  ],
+  bf_job: ["Angestellt", "Employed", "Çalışan", "По найму", "Найманий працівник", "Etat", "موظف", "Angajat"],
+  bf_biz: ["Selbstständig", "Self-employed", "Serbest çalışan", "Самозанятость", "Самозайнятість", "Działalność", "عمل حر", "Independent"],
   bf_job_s: [
     "Gehalt {n} im {m}",
     "Salary {n} in {m}",
@@ -83881,17 +85497,8 @@ const TEXTS = {
     "دخلك في {m}",
     "Venitul tău în {m}",
   ],
-  bf_inc_job: ["Job", "Job", "İş", "Работа", "Робота", "Praca", "الوظيفة", "Job"],
-  bf_inc_biz: [
-    "Geschäft (Gewinn)",
-    "Business (profit)",
-    "İşletme (kâr)",
-    "Бизнес (прибыль)",
-    "Бізнес (прибуток)",
-    "Firma (zysk)",
-    "العمل الخاص (الربح)",
-    "Afacere (profit)",
-  ],
+  bf_inc_job: ["Angestellt", "Employed", "Çalışan", "По найму", "Найм", "Etat", "موظف", "Angajat"],
+  bf_inc_biz: ["Selbstständig (Gewinn)", "Self-employed (profit)", "Serbest (kâr)", "Самозанятость (прибыль)", "Самозайнятість (прибуток)", "Działalność (zysk)", "عمل حر (الربح)", "Independent (profit)"],
   bf_todo: [
     "Jetzt zu tun",
     "To do now",
@@ -83932,16 +85539,7 @@ const TEXTS = {
     "الوظيفة والعمل الخاص منفصلان",
     "Job și afacere separat",
   ],
-  nw_bf_p: [
-    "Bist du angestellt und selbstständig? Auf „Beruf“ stehen jetzt „Mein Job“ und „Mein Geschäft“ getrennt. Am Handy liegt das Geschäft hinter dem Job – nach unten wischen oder antippen, dann wechseln die Kacheln.",
-    "Employed and self-employed? “Work” now shows “My job” and “My business” separately. On your phone the business sits behind the job – swipe down or tap it and the tiles switch.",
-    "Hem çalışan hem serbest misin? „İş“ sayfasında artık „İşim“ ve „İşletmem“ ayrı. Telefonda işletme işin arkasında – aşağı kaydır ya da dokun, kutucuklar değişir.",
-    "Работаешь по найму и на себя? На странице «Работа» теперь отдельно «Моя работа» и «Мой бизнес». На телефоне бизнес лежит за работой – смахни вниз или нажми, и плитки сменятся.",
-    "Працюєш найманим і на себе? На сторінці «Робота» тепер окремо «Моя робота» і «Мій бізнес». На телефоні бізнес лежить за роботою – проведи вниз або торкнись, і плитки зміняться.",
-    "Pracujesz na etacie i na swoim? Na stronie „Praca” są teraz osobno „Moja praca” i „Moja firma”. Na telefonie firma leży za pracą – przesuń w dół albo dotknij, a kafelki się zmienią.",
-    "موظف وتعمل لحسابك؟ في صفحة „العمل“ تظهر الآن „وظيفتي“ و„عملي الخاص“ منفصلين. على الهاتف يكون العمل الخاص خلف الوظيفة – اسحب للأسفل أو انقر فتتبدل البطاقات.",
-    "Ești angajat și pe cont propriu? Pe „Muncă” apar acum separat „Jobul meu” și „Afacerea mea”. Pe telefon afacerea stă în spatele jobului – glisează în jos sau atinge și plăcile se schimbă.",
-  ],
+  nw_bf_p: ["Bist du angestellt und selbstständig? Auf „Beruf“ stehen „Angestellt“ und „Selbstständig“ getrennt. Am Handy liegt die eine Seite hinter der anderen – nach unten wischen oder antippen, dann wechseln die Kacheln. „Steuer & Ämter“ darunter gilt immer für beides.", "Employed and self-employed? “Work” shows “Employed” and “Self-employed” separately. On your phone one sits behind the other – swipe down or tap it and the tiles switch. “Tax & authorities” below always covers both.", "Hem çalışan hem serbest misin? „İş“ sayfasında „Çalışan“ ve „Serbest çalışan“ ayrı. Telefonda biri diğerinin arkasında – aşağı kaydır ya da dokun, kutucuklar değişir. Altındaki „Vergi ve resmi işler“ ikisi için de geçerli.", "Работаешь по найму и на себя? На странице «Работа» отдельно «По найму» и «Самозанятость». На телефоне одна лежит за другой – смахни вниз или нажми, и плитки сменятся. «Налоги и ведомства» ниже относятся к обоим.", "Працюєш найманим і на себе? На сторінці «Робота» окремо «Найманий працівник» і «Самозайнятість». На телефоні одна лежить за іншою – проведи вниз або торкнись, і плитки зміняться. «Податки й установи» нижче стосуються обох.", "Pracujesz na etacie i na swoim? Na stronie „Praca” są osobno „Etat” i „Działalność”. Na telefonie jedno leży za drugim – przesuń w dół albo dotknij, a kafelki się zmienią. „Podatki i urzędy” poniżej dotyczą obu.", "موظف وتعمل لحسابك؟ في صفحة „العمل“ يظهر „موظف“ و„عمل حر“ منفصلين. على الهاتف يكون أحدهما خلف الآخر – اسحب للأسفل أو انقر فتتبدل البطاقات. قسم „الضرائب والجهات الرسمية“ بالأسفل يخص الاثنين.", "Ești angajat și pe cont propriu? Pe „Muncă” apar separat „Angajat” și „Independent”. Pe telefon una stă în spatele celeilalte – glisează în jos sau atinge și plăcile se schimbă. „Taxe și autorități” de dedesubt e valabil pentru ambele."],
   rv_title: [
     "Neue Rechnung",
     "New invoice",
@@ -90521,16 +92119,7 @@ const TEXTS = {
     "تحقق",
     "Verifică",
   ],
-  bn_tax: [
-    "Steuer & Abgaben",
-    "Tax & dues",
-    "Vergi ve kesintiler",
-    "Налоги и взносы",
-    "Податки та внески",
-    "Podatki i opłaty",
-    "الضرائب والرسوم",
-    "Taxe și contribuții",
-  ],
+  bn_tax: ["Abgaben fürs Geschäft", "Business taxes & dues", "İşletme vergileri", "Налоги бизнеса", "Податки бізнесу", "Opłaty firmowe", "ضرائب العمل الحر", "Taxe pentru afacere"],
   nw_bn_t: [
     "Als Nächstes",
     "Up next",
@@ -91549,6 +93138,140 @@ const TEXTS = {
   nw_db_t: ["Dranbleiben – fair statt Druck", "Keep going – fair, no pressure", "Devam et – baskısız, adil", "Не бросать – честно, без давления", "Не кидати – чесно, без тиску", "Trzymaj się – uczciwie, bez presji", "استمرّ – بإنصاف وبلا ضغط", "Continuă – corect, fără presiune"],
   nw_db_p: ["Nach einer Pause hilft dir Mami beim Nachholen, am Monatsanfang gibt es einen ehrlichen Monats-Check, und die tägliche Erinnerung kann zur Uhrzeit kommen, zu der du sonst einträgst. Kein Tracking – alles nur aus deinen eigenen Einträgen.", "After a break Mami helps you catch up, each month starts with an honest monthly check, and the daily reminder can come at the time you usually add entries. No tracking – everything comes only from your own entries.", "Bir aradan sonra Mami telafi etmene yardım eder, her ay dürüst bir aylık kontrol gelir ve günlük hatırlatma genelde kayıt yaptığın saatte gelebilir. İzleme yok – her şey yalnızca kendi kayıtlarından.", "После перерыва Мами поможет наверстать, в начале месяца – честные итоги, а ежедневное напоминание может приходить в то время, когда ты обычно вносишь записи. Без слежки – только по твоим записям.", "Після перерви Мамі допоможе надолужити, на початку місяця – чесні підсумки, а щоденне нагадування може приходити тоді, коли ти зазвичай вносиш записи. Без стеження – лише з твоїх записів.", "Po przerwie Mami pomoże nadrobić, na początku miesiąca jest uczciwe podsumowanie, a codzienne przypomnienie może przychodzić o porze, o której zwykle wpisujesz. Bez śledzenia – wszystko tylko z twoich wpisów.", "بعد الاستراحة تساعدك ماما على التعويض، وفي بداية كل شهر مراجعة صادقة، ويمكن أن يأتي التذكير اليومي في الوقت الذي تدخل فيه عادةً. بلا تتبّع – كل شيء من إدخالاتك فقط.", "După o pauză Mami te ajută să recuperezi, la început de lună primești un bilanț sincer, iar mementoul zilnic poate veni la ora la care notezi de obicei. Fără urmărire – totul doar din înregistrările tale."],
   mc_due_next: ["Kommt nächsten Monat – am besten jetzt schon einplanen.", "Comes next month – best to plan for it now.", "Gelecek ay geliyor – şimdiden plan yap.", "Будет в следующем месяце – лучше заложить уже сейчас.", "Буде наступного місяця – краще закласти вже зараз.", "Przyjdzie w przyszłym miesiącu – zaplanuj to już teraz.", "يأتي الشهر القادم – الأفضل التخطيط له الآن.", "Vine luna viitoare – cel mai bine plănuiește-o de acum."],
+  kd_s_name: ["Name A–Z", "Name A–Z", "Ad A–Z", "Имя А–Я", "Назва А–Я", "Nazwa A–Z", "الاسم أ–ي", "Nume A–Z"],
+  kd_s_name_d: ["Name Z–A", "Name Z–A", "Ad Z–A", "Имя Я–А", "Назва Я–А", "Nazwa Z–A", "الاسم ي–أ", "Nume Z–A"],
+  kd_s_nr: ["Nummer aufsteigend", "Number ascending", "Numara artan", "Номер по возрастанию", "Номер за зростанням", "Numer rosnąco", "الرقم تصاعديًا", "Număr crescător"],
+  kd_s_nr_d: ["Nummer absteigend", "Number descending", "Numara azalan", "Номер по убыванию", "Номер за спаданням", "Numer malejąco", "الرقم تنازليًا", "Număr descrescător"],
+  rch_s_date_d: ["Neueste zuerst", "Newest first", "En yeni önce", "Сначала новые", "Спершу нові", "Najnowsze najpierw", "الأحدث أولًا", "Cele mai noi întâi"],
+  rch_s_date: ["Älteste zuerst", "Oldest first", "En eski önce", "Сначала старые", "Спершу старі", "Najstarsze najpierw", "الأقدم أولًا", "Cele mai vechi întâi"],
+  rch_s_nr_d: ["Nummer absteigend", "Number descending", "Numara azalan", "Номер по убыванию", "Номер за спаданням", "Numer malejąco", "الرقم تنازليًا", "Număr descrescător"],
+  rch_s_nr: ["Nummer aufsteigend", "Number ascending", "Numara artan", "Номер по возрастанию", "Номер за зростанням", "Numer rosnąco", "الرقم تصاعديًا", "Număr crescător"],
+  rch_s_kunde: ["Kunde A–Z", "Customer A–Z", "Müşteri A–Z", "Клиент А–Я", "Клієнт А–Я", "Klient A–Z", "العميل أ–ي", "Client A–Z"],
+  rch_s_amt_d: ["Höchster Betrag zuerst", "Highest amount first", "En yüksek tutar önce", "Сначала крупные суммы", "Спершу найбільші суми", "Najwyższa kwota najpierw", "الأعلى مبلغًا أولًا", "Cea mai mare sumă întâi"],
+  bz_write: ["Neue Rechnung schreiben", "Write a new invoice", "Yeni fatura yaz", "Новый счёт", "Новий рахунок", "Nowa faktura", "كتابة فاتورة جديدة", "Factură nouă"],
+  bz_write_s: ["An einen Kunden – in 4 kleinen Schritten", "To a customer – in 4 small steps", "Bir müşteriye – 4 küçük adımda", "Клиенту – за 4 простых шага", "Клієнту – за 4 прості кроки", "Do klienta – w 4 krokach", "إلى عميل – في 4 خطوات صغيرة", "Către un client – în 4 pași mici"],
+  bz_got: ["Rechnung erhalten", "Got an invoice", "Fatura aldım", "Получен счёт", "Отримано рахунок", "Otrzymana faktura", "استلمت فاتورة", "Factură primită"],
+  bz_out: ["Ausgangs­rechnungen", "Invoices sent", "Giden faturalar", "Исходящие счета", "Вихідні рахунки", "Faktury wystawione", "الفواتير الصادرة", "Facturi emise"],
+  bz_out_s: ["an Kunden", "to customers", "müşterilere", "клиентам", "клієнтам", "do klientów", "إلى العملاء", "către clienți"],
+  bz_in_s: ["von Lieferanten", "from suppliers", "tedarikçilerden", "от поставщиков", "від постачальників", "od dostawców", "من الموردين", "de la furnizori"],
+  bz_flow_out: ["Geld kommt rein – Rechnungen, die du an Kunden schreibst", "Money in – invoices you send to customers", "Para giriyor – müşterilere kestiğin faturalar", "Деньги приходят – счета, которые ты выставляешь клиентам", "Гроші надходять – рахунки, які ти виставляєш клієнтам", "Pieniądze wpływają – faktury, które wystawiasz klientom", "أموال واردة – فواتير ترسلها إلى العملاء", "Bani care intră – facturi pe care le trimiți clienților"],
+  bz_flow_in: ["Geld geht raus – Rechnungen, die du von Lieferanten bekommst", "Money out – invoices you receive from suppliers", "Para çıkıyor – tedarikçilerden aldığın faturalar", "Деньги уходят – счета, которые ты получаешь от поставщиков", "Гроші йдуть – рахунки, які ти отримуєш від постачальників", "Pieniądze wychodzą – faktury od dostawców", "أموال صادرة – فواتير تستلمها من الموردين", "Bani care ies – facturi primite de la furnizori"],
+  bz_in: ["Eingangs­rechnungen", "Incoming invoices", "Gelen faturalar", "Входящие счета", "Вхідні рахунки", "Faktury przychodzące", "الفواتير الواردة", "Facturi primite"],
+  tr_bzw_t: ["Neue Rechnung schreiben", "Write a new invoice", "Yeni fatura yaz", "Новый счёт", "Новий рахунок", "Nowa faktura", "كتابة فاتورة جديدة", "Factură nouă"],
+  tr_bzw_p: ["Hier schreibst du mit einem Tipp eine Rechnung an einen Kunden. Darunter geht’s zum Angebot oder zu einer Rechnung, die du selbst bekommen hast.", "Tap here to write an invoice to a customer. Below you can write a quote or add an invoice you received yourself.", "Buraya dokunarak bir müşteriye fatura yazarsın. Altında teklif yazabilir veya sana gelen bir faturayı ekleyebilirsin.", "Нажми здесь, чтобы выставить счёт клиенту. Ниже – предложение или счёт, который получил ты сам.", "Натисни тут, щоб виставити рахунок клієнту. Нижче – пропозиція або рахунок, який отримав ти сам.", "Tutaj jednym dotknięciem wystawisz fakturę klientowi. Niżej napiszesz ofertę lub dodasz fakturę, którą sam otrzymałeś.", "اضغط هنا لكتابة فاتورة لعميل. وفي الأسفل يمكنك كتابة عرض سعر أو إضافة فاتورة استلمتها أنت.", "Atinge aici ca să scrii o factură către un client. Mai jos poți scrie o ofertă sau adăuga o factură primită."],
+  nw_bz_t: ["Rechnungen klar getrennt", "Invoices clearly separated", "Faturalar net ayrıldı", "Счета чётко разделены", "Рахунки чітко розділені", "Faktury wyraźnie rozdzielone", "فصل واضح للفواتير", "Facturi clar separate"],
+  nw_bz_p: ["Oben schreibst du mit einem Tipp eine neue Rechnung. Grün mit Pfeil raus: deine Ausgangsrechnungen an Kunden – da kommt Geld rein. Orange mit Pfeil rein: Eingangsrechnungen von Lieferanten – da geht Geld raus. Kunden und Rechnungen kannst du jetzt auch sortieren.", "Write a new invoice with one tap at the top. Green with an outgoing arrow: invoices you send to customers – money comes in. Orange with an incoming arrow: invoices from suppliers – money goes out. You can now also sort customers and invoices.", "Üstte tek dokunuşla yeni fatura yazarsın. Yeşil, dışa ok: müşterilere giden faturaların – para giriyor. Turuncu, içe ok: tedarikçilerden gelen faturalar – para çıkıyor. Müşterileri ve faturaları artık sıralayabilirsin.", "Вверху одним касанием – новый счёт. Зелёные со стрелкой наружу: твои счета клиентам – деньги приходят. Оранжевые со стрелкой внутрь: счета от поставщиков – деньги уходят. Клиентов и счета теперь можно сортировать.", "Угорі одним дотиком – новий рахунок. Зелені зі стрілкою назовні: твої рахунки клієнтам – гроші надходять. Помаранчеві зі стрілкою всередину: рахунки від постачальників – гроші йдуть. Клієнтів і рахунки тепер можна сортувати.", "U góry jednym dotknięciem napiszesz nową fakturę. Zielone ze strzałką na zewnątrz: faktury do klientów – pieniądze wpływają. Pomarańczowe ze strzałką do środka: faktury od dostawców – pieniądze wychodzą. Klientów i faktury możesz teraz sortować.", "في الأعلى تكتب فاتورة جديدة بلمسة واحدة. الأخضر بسهم للخارج: فواتيرك إلى العملاء – أموال واردة. البرتقالي بسهم للداخل: فواتير من الموردين – أموال صادرة. ويمكنك الآن أيضًا ترتيب العملاء والفواتير.", "Sus scrii o factură nouă dintr-o atingere. Verde cu săgeată în afară: facturile tale către clienți – intră bani. Portocaliu cu săgeată înăuntru: facturi de la furnizori – ies bani. Acum poți sorta și clienții și facturile."],
+  ag_slip: ["Lohnabrechnung hochladen", "Upload payslip", "Bordro yükle", "Загрузить расчётный лист", "Завантажити розрахунковий лист", "Wgraj pasek wypłaty", "رفع كشف الراتب", "Încarcă fluturașul de salariu"],
+  ag_slip_s: ["PDF – Mami liest Brutto, Netto und Steuern aus", "PDF – Mami reads gross, net and taxes", "PDF – Mami brüt, net ve vergileri okur", "PDF – Мами считает брутто, нетто и налоги", "PDF – Мамі зчитає брутто, нетто й податки", "PDF – Mami odczyta brutto, netto i podatki", "PDF – تقرأ ماما الإجمالي والصافي والضرائب", "PDF – Mami citește brut, net și impozite"],
+  ag_tx_t: ["Mami schätzt: ca. {a} zurück", "Mami estimates: about {a} back", "Mami tahmini: yaklaşık {a} iade", "Мами считает: около {a} вернут", "Мамі рахує: близько {a} повернуть", "Mami szacuje: ok. {a} zwrotu", "تقدير ماما: حوالي {a} استرداد", "Mami estimează: cca {a} înapoi"],
+  ag_tx_t2: ["Die Steuererklärung kann sich lohnen", "Filing a tax return may pay off", "Vergi beyannamesi işe yarayabilir", "Декларация может окупиться", "Декларація може окупитися", "Zeznanie podatkowe może się opłacić", "قد يكون الإقرار الضريبي مجديًا", "Declarația fiscală poate merita"],
+  ag_tx_lst: ["Laut deinen Lohnabrechnungen wurde mehr Lohnsteuer abgezogen als nötig.", "Your payslips show more wage tax was withheld than needed.", "Bordrolarına göre gerekenden fazla gelir vergisi kesilmiş.", "По расчётным листам удержано больше налога, чем нужно.", "За розрахунковими листами утримано більше податку, ніж треба.", "Z pasków wynika, że pobrano więcej podatku niż trzeba.", "تُظهر كشوف رواتبك أنه تم خصم ضريبة أكثر من اللازم.", "Fluturașii arată că s-a reținut mai mult impozit decât trebuia."],
+  ag_tx_over: ["Deine Arbeitskosten liegen über der Pauschale – das zählt extra.", "Your work expenses are above the flat allowance – that counts extra.", "İş giderlerin götürü payın üstünde – bu ekstra sayılır.", "Твои расходы на работу выше паушала – это засчитывается.", "Твої витрати на роботу вищі за паушал – це зараховується.", "Koszty pracy są wyższe niż ryczałt – to się liczy dodatkowo.", "نفقات عملك أعلى من المبلغ المقطوع – وهذا يُحتسب إضافيًا.", "Cheltuielile de muncă depășesc forfetul – asta contează în plus."],
+  ag_tx_bar: ["Arbeitskosten {a} · Pauschale {p}", "Work expenses {a} · allowance {p}", "İş giderleri {a} · götürü {p}", "Расходы {a} · паушал {p}", "Витрати {a} · паушал {p}", "Koszty {a} · ryczałt {p}", "نفقات العمل {a} · المقطوع {p}", "Cheltuieli {a} · forfet {p}"],
+  ag_tx_due: ["Pflicht – Abgabe bis 31. Juli {y}", "Required – due 31 July {y}", "Zorunlu – son tarih 31 Temmuz {y}", "Обязательно – до 31 июля {y}", "Обов'язково – до 31 липня {y}", "Obowiązkowo – do 31 lipca {y}", "إلزامي – حتى 31 يوليو {y}", "Obligatoriu – până la 31 iulie {y}"],
+  ag_tx_free: ["Freiwillig – bis zu 4 Jahre rückwirkend", "Voluntary – up to 4 years back", "İsteğe bağlı – 4 yıl geriye kadar", "Добровольно – до 4 лет назад", "Добровільно – до 4 років назад", "Dobrowolnie – do 4 lat wstecz", "اختياري – حتى 4 سنوات بأثر رجعي", "Voluntar – până la 4 ani în urmă"],
+  ag_lohn_t: ["Gehalt", "Salary", "Maaş", "Зарплата", "Зарплата", "Pensja", "الراتب", "Salariu"],
+  ag_lohn_0: ["Noch keine Lohnabrechnung", "No payslip yet", "Henüz bordro yok", "Расчётных листов пока нет", "Розрахункових листів поки немає", "Brak pasków wypłaty", "لا يوجد كشف راتب بعد", "Niciun fluturaș încă"],
+  ag_lohn_n: ["{n} Lohnabrechnungen", "{n} payslips", "{n} bordro", "Расчётных листов: {n}", "Розрахункових листів: {n}", "Paski wypłat: {n}", "كشوف الرواتب: {n}", "{n} fluturași"],
+  ag_wk_t: ["Arbeitskosten", "Work expenses", "İş giderleri", "Расходы на работу", "Витрати на роботу", "Koszty pracy", "نفقات العمل", "Cheltuieli de muncă"],
+  ag_wk_s: ["{a} dieses Jahr", "{a} this year", "Bu yıl {a}", "{a} в этом году", "{a} цього року", "{a} w tym roku", "{a} هذا العام", "{a} anul acesta"],
+  ag_az: ["Arbeitszeit", "Working time", "Çalışma süresi", "Рабочее время", "Робочий час", "Czas pracy", "وقت العمل", "Timp de lucru"],
+  ag_az_s: ["Überstunden {a}", "Overtime {a}", "Fazla mesai {a}", "Переработка {a}", "Понаднормові {a}", "Nadgodziny {a}", "ساعات إضافية {a}", "Ore suplimentare {a}"],
+  ag_az_s0: ["Stunden & Urlaub eintragen", "Log hours & leave", "Saat ve izin gir", "Часы и отпуск", "Години й відпустка", "Godziny i urlop", "سجّل الساعات والإجازة", "Ore și concediu"],
+  ag_aw: ["Arbeitsweg", "Commute", "İşe gidiş yolu", "Дорога на работу", "Дорога на роботу", "Dojazd do pracy", "طريق العمل", "Drumul la muncă"],
+  ag_aw_s: ["{k} km · {n} Tage", "{k} km · {n} days", "{k} km · {n} gün", "{k} км · {n} дн.", "{k} км · {n} дн.", "{k} km · {n} dni", "{k} كم · {n} يوم", "{k} km · {n} zile"],
+  ag_aw_s0: ["Kilometer & Tage im Kalender", "Distance & days in a calendar", "Takvimde km ve günler", "Км и дни в календаре", "Км і дні в календарі", "Kilometry i dni w kalendarzu", "الكيلومترات والأيام في التقويم", "Km și zile în calendar"],
+  ag_nt: ["Netto-Verlauf", "Net pay trend", "Net maaş seyri", "Динамика нетто", "Динаміка нетто", "Netto w czasie", "تطور الصافي", "Evoluția netului"],
+  ag_nt_s: ["Zuletzt {a}", "Latest {a}", "Son {a}", "Последний {a}", "Останній {a}", "Ostatnio {a}", "آخر صافي {a}", "Ultimul {a}"],
+  ag_nt_s0: ["Sieh, wie sich dein Netto ändert", "See how your net pay changes", "Net maaşının nasıl değiştiğini gör", "Как меняется твоё нетто", "Як змінюється твоє нетто", "Zobacz, jak zmienia się netto", "شاهد كيف يتغير صافي راتبك", "Vezi cum se schimbă netul"],
+  ag_ex: ["Extras vom Arbeitgeber", "Employer extras", "İşverenden ekstralar", "Бонусы от работодателя", "Бонуси від роботодавця", "Dodatki od pracodawcy", "مزايا من صاحب العمل", "Extra de la angajator"],
+  ag_ex_s: ["{n} von {m} genutzt", "{n} of {m} used", "{m} içinden {n} kullanılıyor", "Используешь {n} из {m}", "Використовуєш {n} з {m}", "Korzystasz z {n} z {m}", "تستخدم {n} من {m}", "Folosești {n} din {m}"],
+  ag_ex_s0: ["{m} Dinge, die dir zustehen könnten", "{m} things you might be entitled to", "Hakkın olabilecek {m} şey", "{m} вещей, которые тебе могут полагаться", "{m} речей, які тобі можуть належати", "{m} rzeczy, które mogą ci przysługiwać", "{m} أشياء قد تستحقها", "{m} lucruri care ți s-ar putea cuveni"],
+  ag_ex_ask: ["Beim Chef nachfragen: {n}", "Ask your boss about: {n}", "Patrona sor: {n}", "Спросить у начальника: {n}", "Запитати в керівника: {n}", "Zapytaj szefa o: {n}", "اسأل مديرك عن: {n}", "Întreabă-l pe șef de: {n}"],
+  ag_shared: ["Steuer & Ämter – für beides", "Tax & authorities – for both", "Vergi ve resmi daireler – ikisi için", "Налоги и ведомства – для обоих", "Податки й установи – для обох", "Podatki i urzędy – dla obu", "الضرائب والجهات الرسمية – للاثنين", "Impozite și autorități – pentru ambele"],
+  ag_shared1: ["Steuer & Ämter", "Tax & authorities", "Vergi ve resmi daireler", "Налоги и ведомства", "Податки й установи", "Podatki i urzędy", "الضرائب والجهات الرسمية", "Impozite și autorități"],
+  ag_az_h: ["Arbeitszeit & Überstunden", "Working time & overtime", "Çalışma süresi ve fazla mesai", "Рабочее время и переработка", "Робочий час і понаднормові", "Czas pracy i nadgodziny", "وقت العمل والساعات الإضافية", "Timp de lucru și ore suplimentare"],
+  ag_az_set_t: ["Erst kurz einrichten", "Quick setup first", "Önce kısa kurulum", "Сначала короткая настройка", "Спершу коротке налаштування", "Najpierw krótka konfiguracja", "إعداد سريع أولًا", "Mai întâi o configurare scurtă"],
+  ag_az_set_soll: ["Stunden pro Woche laut Vertrag", "Contract hours per week", "Sözleşmeye göre haftalık saat", "Часов в неделю по договору", "Годин на тиждень за договором", "Godziny tygodniowo wg umowy", "ساعات أسبوعيًا حسب العقد", "Ore pe săptămână conform contractului"],
+  ag_az_set_url: ["Urlaubstage pro Jahr", "Leave days per year", "Yıllık izin günü", "Дней отпуска в год", "Днів відпустки на рік", "Dni urlopu rocznie", "أيام الإجازة سنويًا", "Zile de concediu pe an"],
+  ag_az_set_ot: ["Überstunden, die du schon hast", "Overtime you already have", "Mevcut fazla mesain", "Уже накопленная переработка", "Уже накопичені понаднормові", "Nadgodziny, które już masz", "الساعات الإضافية المتراكمة لديك", "Ore suplimentare pe care le ai deja"],
+  ag_az_set_go: ["Los geht's", "Let's go", "Başlayalım", "Поехали", "Поїхали", "Zaczynamy", "لنبدأ", "Să începem"],
+  ag_az_set_edit: ["Wochenstunden & Urlaub ändern", "Change weekly hours & leave", "Haftalık saat ve izni değiştir", "Изменить часы и отпуск", "Змінити години й відпустку", "Zmień godziny i urlop", "تغيير الساعات والإجازة", "Schimbă orele și concediul"],
+  ag_az_today: ["Heute, {d}", "Today, {d}", "Bugün, {d}", "Сегодня, {d}", "Сьогодні, {d}", "Dziś, {d}", "اليوم، {d}", "Azi, {d}"],
+  ag_az_b: ["Im Betrieb", "At work", "İş yerinde", "На работе", "На роботі", "W firmie", "في مكان العمل", "La serviciu"],
+  ag_az_ho: ["Homeoffice", "Home office", "Evden çalışma", "Из дома", "Вдома", "Praca zdalna", "من المنزل", "De acasă"],
+  ag_az_u: ["Urlaub", "Leave", "İzin", "Отпуск", "Відпустка", "Urlop", "إجازة", "Concediu"],
+  ag_az_k: ["Krank", "Sick", "Hasta", "Болен", "Хворію", "Chory", "مريض", "Bolnav"],
+  ag_az_free: ["Eintrag löschen", "Clear entry", "Kaydı sil", "Удалить запись", "Видалити запис", "Usuń wpis", "حذف الإدخال", "Șterge intrarea"],
+  ag_az_save: ["Speichern", "Save", "Kaydet", "Сохранить", "Зберегти", "Zapisz", "حفظ", "Salvează"],
+  ag_az_saved: ["Eingetragen", "Saved", "Kaydedildi", "Записано", "Записано", "Zapisano", "تم الحفظ", "Salvat"],
+  ag_az_tw: ["Woche", "Week", "Hafta", "Неделя", "Тиждень", "Tydzień", "الأسبوع", "Săptămână"],
+  ag_az_tm: ["Monat", "Month", "Ay", "Месяц", "Місяць", "Miesiąc", "الشهر", "Lună"],
+  ag_az_over: ["Überstunden", "Overtime", "Fazla mesai", "Переработка", "Понаднормові", "Nadgodziny", "ساعات إضافية", "Ore suplimentare"],
+  ag_az_url: ["Urlaubstage übrig", "Leave days left", "Kalan izin günü", "Осталось дней отпуска", "Залишилось днів відпустки", "Pozostały urlop", "أيام إجازة متبقية", "Zile de concediu rămase"],
+  ag_az_week: ["diese Woche · Soll {s}", "this week · target {s}", "bu hafta · hedef {s}", "на этой неделе · норма {s}", "цього тижня · норма {s}", "w tym tygodniu · norma {s}", "هذا الأسبوع · المطلوب {s}", "săptămâna asta · normă {s}"],
+  ag_az_hrs: ["Stunden", "Hours", "Saat", "Часы", "Години", "Godziny", "ساعات", "Ore"],
+  ag_az_ot: ["Über Soll", "Above target", "Hedefin üstü", "Сверх нормы", "Понад норму", "Ponad normę", "فوق المطلوب", "Peste normă"],
+  ag_az_tap: ["Tippe einen Tag an, um ihn oben zu bearbeiten.", "Tap a day to edit it above.", "Yukarıda düzenlemek için bir güne dokun.", "Нажми на день, чтобы изменить его выше.", "Торкнися дня, щоб змінити його вгорі.", "Dotknij dnia, aby edytować go wyżej.", "اضغط على يوم لتعديله في الأعلى.", "Atinge o zi ca s-o editezi mai sus."],
+  ag_az_link: ["Deine Tage im Betrieb zählen automatisch für den Arbeitsweg.", "Your days at work count automatically for the commute.", "İş yerindeki günlerin işe gidiş yolu için otomatik sayılır.", "Дни на работе автоматически идут в дорогу на работу.", "Дні на роботі автоматично йдуть у дорогу на роботу.", "Dni w firmie liczą się automatycznie do dojazdu.", "تُحتسب أيام العمل في المقر تلقائيًا لطريق العمل.", "Zilele la serviciu contează automat pentru navetă."],
+  ag_aw_h: ["Arbeitsweg {y}", "Commute {y}", "İşe gidiş yolu {y}", "Дорога на работу {y}", "Дорога на роботу {y}", "Dojazd do pracy {y}", "طريق العمل {y}", "Drumul la muncă {y}"],
+  ag_aw_km: ["Einfache Strecke in km", "One-way distance in km", "Tek yön mesafe (km)", "В одну сторону, км", "В один бік, км", "W jedną stronę, km", "المسافة باتجاه واحد (كم)", "Distanța dus, km"],
+  ag_aw_lb: ["Betrieb {n}", "At work {n}", "İş yeri {n}", "Работа {n}", "Робота {n}", "Firma {n}", "العمل {n}", "Serviciu {n}"],
+  ag_aw_lh: ["Homeoffice {n}", "Home office {n}", "Evden {n}", "Дом {n}", "Вдома {n}", "Zdalnie {n}", "من المنزل {n}", "Acasă {n}"],
+  ag_aw_lu: ["Urlaub {n}", "Leave {n}", "İzin {n}", "Отпуск {n}", "Відпустка {n}", "Urlop {n}", "إجازة {n}", "Concediu {n}"],
+  ag_aw_lk: ["Krank {n}", "Sick {n}", "Hasta {n}", "Болен {n}", "Хворів {n}", "Chory {n}", "مريض {n}", "Bolnav {n}"],
+  ag_aw_trips: ["Fahrten im {m}", "Trips in {m}", "{m} ayındaki yolculuklar", "Поездки в {m}", "Поїздки у {m}", "Dojazdy w {m}", "رحلات في {m}", "Drumuri în {m}"],
+  ag_aw_pend: ["Pendlerpauschale", "Commuter allowance", "Yol götürü payı", "Паушал за дорогу", "Паушал за дорогу", "Ryczałt za dojazdy", "بدل التنقل", "Forfet de navetă"],
+  ag_aw_ho: ["Homeoffice-Pauschale (6 € pro Tag)", "Home office allowance (€6 a day)", "Evden çalışma götürüsü (günlük 6 €)", "Паушал за работу из дома (6 € в день)", "Паушал за роботу вдома (6 € на день)", "Ryczałt za pracę zdalną (6 € dziennie)", "بدل العمل من المنزل (6 € يوميًا)", "Forfet de lucru acasă (6 € pe zi)"],
+  ag_aw_year: ["Arbeitsweg {y} gesamt", "Commute {y} total", "{y} toplam yol", "Всего за {y}", "Усього за {y}", "Razem {y}", "إجمالي {y}", "Total {y}"],
+  ag_aw_tap: ["Tippe einen Tag an: Betrieb → Homeoffice → Urlaub → Krank → frei.", "Tap a day: at work → home office → leave → sick → off.", "Bir güne dokun: iş yeri → evden → izin → hasta → boş.", "Нажми на день: работа → дом → отпуск → болен → выходной.", "Торкнися дня: робота → вдома → відпустка → хворів → вихідний.", "Dotknij dnia: firma → zdalnie → urlop → chory → wolne.", "اضغط على يوم: العمل ← المنزل ← إجازة ← مريض ← عطلة.", "Atinge o zi: serviciu → acasă → concediu → bolnav → liber."],
+  ag_aw_rule: ["Gezählt wird pro Arbeitstag nur die einfache Strecke, ab 2026 mit 38 Cent je km. An Homeoffice-Tagen gibt es stattdessen 6 €.", "Only the one-way distance counts per working day, from 2026 at 38 cents per km. Home office days get €6 instead.", "Her iş günü için sadece tek yön sayılır, 2026'dan itibaren km başına 38 sent. Evden çalışılan günlerde bunun yerine 6 €.", "За рабочий день считается только путь в одну сторону, с 2026 года 38 центов за км. За день из дома – 6 € вместо этого.", "За робочий день рахується лише шлях в один бік, з 2026 року 38 центів за км. За день удома – 6 € замість цього.", "Za dzień pracy liczy się tylko droga w jedną stronę, od 2026 r. 38 centów za km. Za dzień zdalny zamiast tego 6 €.", "يُحتسب لكل يوم عمل اتجاه واحد فقط، ومن 2026 بمبلغ 38 سنتًا لكل كم. وفي أيام العمل من المنزل 6 € بدلًا من ذلك.", "Pe zi de lucru contează doar drumul dus, din 2026 cu 38 de cenți pe km. Pentru zilele de acasă primești în schimb 6 €."],
+  ag_nt_h: ["Netto {y}", "Net pay {y}", "Net maaş {y}", "Нетто {y}", "Нетто {y}", "Netto {y}", "الصافي {y}", "Net {y}"],
+  ag_nt_k: ["Zuletzt ausgezahlt", "Last paid out", "Son ödenen", "Последняя выплата", "Остання виплата", "Ostatnia wypłata", "آخر دفعة", "Ultima plată"],
+  ag_nt_same: ["wie üblich", "as usual", "her zamanki gibi", "как обычно", "як зазвичай", "jak zwykle", "كالمعتاد", "ca de obicei"],
+  ag_nt_less: ["{a} weniger als üblich", "{a} less than usual", "Normalden {a} az", "на {a} меньше обычного", "на {a} менше, ніж зазвичай", "{a} mniej niż zwykle", "أقل من المعتاد بـ {a}", "cu {a} mai puțin ca de obicei"],
+  ag_nt_more: ["{a} mehr als üblich", "{a} more than usual", "Normalden {a} fazla", "на {a} больше обычного", "на {a} більше, ніж зазвичай", "{a} więcej niż zwykle", "أكثر من المعتاد بـ {a}", "cu {a} mai mult ca de obicei"],
+  ag_nt_r_bplus: ["mehr Brutto", "higher gross", "brüt arttı", "брутто выше", "брутто вище", "wyższe brutto", "إجمالي أعلى", "brut mai mare"],
+  ag_nt_r_bminus: ["weniger Brutto", "lower gross", "brüt azaldı", "брутто ниже", "брутто нижче", "niższe brutto", "إجمالي أقل", "brut mai mic"],
+  ag_nt_r_lst: ["andere Lohnsteuer", "different wage tax", "farklı gelir vergisi", "другой налог", "інший податок", "inny podatek", "ضريبة مختلفة", "alt impozit"],
+  ag_nt_r_sv: ["andere Sozialabgaben", "different social contributions", "farklı sosyal kesintiler", "другие соцвзносы", "інші соцвнески", "inne składki", "اشتراكات اجتماعية مختلفة", "alte contribuții sociale"],
+  ag_nt_r_tx: ["laut Kontoeingang", "per bank deposit", "hesaba gelene göre", "по поступлению на счёт", "за надходженням на рахунок", "wg wpływu na konto", "حسب الإيداع في الحساب", "conform încasării în cont"],
+  ag_nt_src: ["Mami nimmt das Netto aus deinen Lohnabrechnungen, sonst aus den Gehaltseingängen auf dem Konto.", "Mami takes the net pay from your payslips, otherwise from salary deposits in your account.", "Mami net maaşı bordrolarından, yoksa hesabına gelen maaşlardan alır.", "Мами берёт нетто из расчётных листов, иначе из поступлений зарплаты на счёт.", "Мамі бере нетто з розрахункових листів, інакше з надходжень зарплати на рахунок.", "Mami bierze netto z pasków wypłaty, a jeśli ich brak – z wpływów pensji na konto.", "تأخذ ماما الصافي من كشوف رواتبك، وإلا من إيداعات الراتب في حسابك.", "Mami ia netul din fluturași, altfel din încasările de salariu în cont."],
+  ag_nt_empty: ["Noch kein Gehalt da. Lade eine Lohnabrechnung hoch oder ordne Gehaltseingänge der Kategorie Lohn zu.", "No salary yet. Upload a payslip or assign salary deposits to the salary category.", "Henüz maaş yok. Bir bordro yükle veya maaş girişlerini maaş kategorisine ata.", "Зарплаты пока нет. Загрузи расчётный лист или отнеси поступления к категории «Зарплата».", "Зарплати поки немає. Завантаж розрахунковий лист або віднеси надходження до категорії «Зарплата».", "Brak pensji. Wgraj pasek wypłaty albo przypisz wpływy do kategorii pensja.", "لا يوجد راتب بعد. ارفع كشف راتب أو صنّف إيداعات الراتب ضمن فئة الراتب.", "Încă niciun salariu. Încarcă un fluturaș sau atribuie încasările categoriei salariu."],
+  ag_ex_h: ["Extras vom Arbeitgeber", "Employer extras", "İşverenden ekstralar", "Бонусы от работодателя", "Бонуси від роботодавця", "Dodatki od pracodawcy", "مزايا من صاحب العمل", "Extra de la angajator"],
+  ag_ex_of: ["{n} von {m} – bekommst du das schon?", "{n} of {m} – do you already get this?", "{n} / {m} – bunu zaten alıyor musun?", "{n} из {m} – ты это уже получаешь?", "{n} з {m} – ти це вже отримуєш?", "{n} z {m} – czy już to dostajesz?", "{n} من {m} – هل تحصل على هذا بالفعل؟", "{n} din {m} – primești deja asta?"],
+  ag_ex_yes: ["Hab ich", "Got it", "Var", "Есть", "Маю", "Mam", "لدي", "Am"],
+  ag_ex_no: ["Nein", "No", "Hayır", "Нет", "Ні", "Nie", "لا", "Nu"],
+  ag_ex_ask_b: ["Nachfragen", "Ask", "Sor", "Спросить", "Запитати", "Zapytać", "اسأل", "Întreb"],
+  ag_ex_list: ["Alle Antworten ansehen", "See all answers", "Tüm yanıtları gör", "Все ответы", "Усі відповіді", "Zobacz wszystkie odpowiedzi", "عرض كل الإجابات", "Vezi toate răspunsurile"],
+  ag_ex_done_t: ["Alles durchgesehen", "All checked", "Hepsine bakıldı", "Всё просмотрено", "Усе переглянуто", "Wszystko sprawdzone", "تمت مراجعة الكل", "Totul verificat"],
+  ag_ex_done_p: ["Was du nachfragen willst, zeigt Mami dir auf der Seite Beruf. Antworten kannst du hier jederzeit ändern.", "Mami shows what you want to ask about on the Work page. You can change your answers here anytime.", "Sormak istediklerini Mami İş sayfasında gösterir. Yanıtları burada istediğin zaman değiştirebilirsin.", "Что ты хочешь спросить, Мами покажет на странице «Работа». Ответы можно менять здесь в любое время.", "Що ти хочеш запитати, Мамі покаже на сторінці «Робота». Відповіді можна змінити тут будь-коли.", "To, o co chcesz zapytać, Mami pokaże na stronie Praca. Odpowiedzi możesz tu zmienić w każdej chwili.", "ستعرض لك ماما ما تريد السؤال عنه في صفحة العمل. يمكنك تغيير إجاباتك هنا في أي وقت.", "Ce vrei să întrebi îți arată Mami pe pagina Muncă. Poți schimba oricând răspunsurile aici."],
+  ag_x_vl: ["Vermögenswirksame Leistungen", "Capital-forming benefits (VL)", "Varlık oluşturan ödemeler (VL)", "Взносы на накопления (VL)", "Внески на накопичення (VL)", "Świadczenia oszczędnościowe (VL)", "مساهمات تكوين الأصول (VL)", "Contribuții de economisire (VL)"],
+  ag_x_vl_p: ["Bis zu 40 € im Monat zahlt der Chef in einen Sparvertrag – oft steht's im Tarifvertrag.", "Your employer pays up to €40 a month into a savings plan – often in the collective agreement.", "İşveren ayda 40 €'ya kadar bir birikim sözleşmesine öder – çoğu zaman toplu sözleşmede yazar.", "Работодатель платит до 40 € в месяц на сберегательный договор – часто это в тарифном договоре.", "Роботодавець платить до 40 € на місяць на ощадний договір – часто це в тарифному договорі.", "Pracodawca wpłaca do 40 € miesięcznie na umowę oszczędnościową – często wynika to z układu zbiorowego.", "يدفع صاحب العمل حتى 40 € شهريًا في عقد ادخار – غالبًا ما يرد ذلك في الاتفاقية الجماعية.", "Angajatorul plătește până la 40 € pe lună într-un plan de economii – des e în contractul colectiv."],
+  ag_x_jt: ["Jobticket / Deutschlandticket", "Job ticket / Deutschlandticket", "İş bileti / Deutschlandticket", "Проездной от работы / Deutschlandticket", "Проїзний від роботи / Deutschlandticket", "Bilet pracowniczy / Deutschlandticket", "تذكرة العمل / Deutschlandticket", "Abonament de serviciu / Deutschlandticket"],
+  ag_x_jt_p: ["Ein Zuschuss zum Ticket ist für dich steuerfrei.", "A ticket subsidy is tax-free for you.", "Bilete katkı senin için vergisizdir.", "Доплата к проездному для тебя не облагается налогом.", "Доплата до проїзного для тебе не оподатковується.", "Dopłata do biletu jest dla ciebie wolna od podatku.", "دعم التذكرة معفى من الضريبة بالنسبة لك.", "O subvenție la abonament e scutită de impozit pentru tine."],
+  ag_x_sb: ["Sachbezug (bis 50 € im Monat)", "Benefit in kind (up to €50/month)", "Ayni yardım (ayda 50 €'ya kadar)", "Натуральная выплата (до 50 € в месяц)", "Натуральна виплата (до 50 € на місяць)", "Świadczenie rzeczowe (do 50 € miesięcznie)", "ميزة عينية (حتى 50 € شهريًا)", "Beneficiu în natură (până la 50 €/lună)"],
+  ag_x_sb_p: ["Gutscheinkarte oder Tankkarte – bis 50 € im Monat ohne Steuer und Abgaben.", "Voucher or fuel card – up to €50 a month without tax or contributions.", "Hediye ya da yakıt kartı – ayda 50 €'ya kadar vergisiz ve kesintisiz.", "Подарочная или топливная карта – до 50 € в месяц без налогов и взносов.", "Подарункова чи паливна картка – до 50 € на місяць без податків і внесків.", "Karta podarunkowa lub paliwowa – do 50 € miesięcznie bez podatku i składek.", "بطاقة قسائم أو وقود – حتى 50 € شهريًا دون ضرائب أو اشتراكات.", "Card de cumpărături sau de carburant – până la 50 € pe lună fără impozit și contribuții."],
+  ag_x_bav: ["Betriebsrente-Zuschuss", "Company pension subsidy", "İşyeri emeklilik katkısı", "Доплата к корпоративной пенсии", "Доплата до корпоративної пенсії", "Dopłata do emerytury pracowniczej", "دعم معاش الشركة", "Contribuție la pensia ocupațională"],
+  ag_x_bav_p: ["Wandelst du Gehalt in Betriebsrente um, muss der Chef meist 15 % dazugeben.", "If you convert salary into a company pension, your employer usually has to add 15 %.", "Maaşını işyeri emekliliğine dönüştürürsen işveren genelde %15 eklemek zorunda.", "Если переводишь часть зарплаты в корпоративную пенсию, работодатель обычно добавляет 15 %.", "Якщо переводиш частину зарплати в корпоративну пенсію, роботодавець зазвичай додає 15 %.", "Jeśli zamieniasz część pensji na emeryturę pracowniczą, pracodawca zwykle musi dołożyć 15 %.", "إذا حوّلت جزءًا من راتبك إلى معاش الشركة، فعلى صاحب العمل عادةً إضافة 15 %.", "Dacă transformi salariu în pensie ocupațională, angajatorul trebuie de obicei să adauge 15 %."],
+  ag_x_rad: ["Dienstrad", "Company bike", "Şirket bisikleti", "Служебный велосипед", "Службовий велосипед", "Rower służbowy", "دراجة الشركة", "Bicicletă de serviciu"],
+  ag_x_rad_p: ["E-Bike über den Job leasen – oft günstiger als selbst kaufen.", "Lease an e-bike through work – often cheaper than buying it yourself.", "İş üzerinden e-bisiklet kirala – çoğu zaman kendin almaktan ucuz.", "Лизинг электровелосипеда через работу – часто дешевле, чем покупать самому.", "Лізинг електровелосипеда через роботу – часто дешевше, ніж купувати самому.", "Leasing e-roweru przez pracę – często taniej niż zakup samemu.", "استئجار دراجة كهربائية عبر العمل – غالبًا أرخص من الشراء بنفسك.", "Leasing de e-bike prin serviciu – adesea mai ieftin decât să-l cumperi singur."],
+  ag_x_ess: ["Essenszuschuss", "Meal allowance", "Yemek yardımı", "Доплата на питание", "Доплата на харчування", "Dopłata do posiłków", "بدل الطعام", "Tichete de masă"],
+  ag_x_ess_p: ["Zuschuss fürs Mittagessen – bis zu einem festen Betrag pro Arbeitstag steuerlich begünstigt.", "Lunch subsidy – tax-favoured up to a fixed amount per working day.", "Öğle yemeği katkısı – iş günü başına belli bir tutara kadar vergi avantajlı.", "Доплата на обед – до фиксированной суммы за рабочий день с налоговой льготой.", "Доплата на обід – до фіксованої суми за робочий день з податковою пільгою.", "Dopłata do obiadu – do stałej kwoty za dzień pracy z ulgą podatkową.", "دعم وجبة الغداء – بمزايا ضريبية حتى مبلغ ثابت لكل يوم عمل.", "Subvenție pentru prânz – avantajată fiscal până la o sumă fixă pe zi lucrătoare."],
+  ag_x_tel: ["Handy & Internet", "Phone & internet", "Telefon ve internet", "Телефон и интернет", "Телефон та інтернет", "Telefon i internet", "الهاتف والإنترنت", "Telefon și internet"],
+  ag_x_tel_p: ["Ein Diensthandy darfst du privat nutzen – ohne Steuer. Auch ein Internet-Zuschuss geht.", "You may use a work phone privately – tax-free. An internet subsidy works too.", "İş telefonunu özel olarak vergisiz kullanabilirsin. İnternet katkısı da mümkün.", "Служебный телефон можно использовать лично – без налога. Доплата за интернет тоже возможна.", "Службовий телефон можна використовувати особисто – без податку. Доплата за інтернет теж можлива.", "Telefon służbowy możesz używać prywatnie – bez podatku. Możliwa też dopłata do internetu.", "يمكنك استخدام هاتف العمل لأغراض شخصية – دون ضريبة. ودعم الإنترنت ممكن أيضًا.", "Poți folosi telefonul de serviciu și privat – fără impozit. Merge și o subvenție la internet."],
+  ag_wk_cal: ["Tage aus dem Kalender", "Days from the calendar", "Günler takvimden", "Дни из календаря", "Дні з календаря", "Dni z kalendarza", "الأيام من التقويم", "Zile din calendar"],
+  ag_wk_cal0: ["Tage im Kalender antippen", "Tap days in the calendar", "Günleri takvimde işaretle", "Отметить дни в календаре", "Позначити дні в календарі", "Zaznacz dni w kalendarzu", "حدّد الأيام في التقويم", "Marchează zilele în calendar"],
+  tr_ag_slip_t: ["Lohnabrechnung hochladen", "Upload a payslip", "Bordro yükle", "Загрузить расчётный лист", "Завантажити розрахунковий лист", "Wgraj pasek wypłaty", "رفع كشف الراتب", "Încarcă fluturașul"],
+  tr_ag_slip_p: ["Tippe hier und wähle die PDF deiner Lohnabrechnung. Mami liest Brutto, Netto und Steuern aus – und rechnet damit deine Steuer.", "Tap here and pick your payslip PDF. Mami reads gross, net and taxes – and uses them for your tax estimate.", "Buraya dokun ve bordronun PDF'ini seç. Mami brüt, net ve vergileri okur – vergini bununla hesaplar.", "Нажми и выбери PDF расчётного листа. Мами считает брутто, нетто и налоги – и рассчитает по ним твой налог.", "Торкнися й вибери PDF розрахункового листа. Мамі зчитає брутто, нетто й податки – і порахує твій податок.", "Dotknij i wybierz PDF paska wypłaty. Mami odczyta brutto, netto i podatki – i policzy na tej podstawie twój podatek.", "اضغط هنا واختر ملف PDF لكشف راتبك. تقرأ ماما الإجمالي والصافي والضرائب – وتحسب بها ضريبتك.", "Atinge aici și alege PDF-ul fluturașului. Mami citește brut, net și impozite – și calculează cu ele impozitul tău."],
+  tr_ag_az_t: ["Arbeitszeit & Arbeitsweg", "Working time & commute", "Çalışma süresi ve işe gidiş", "Рабочее время и дорога", "Робочий час і дорога", "Czas pracy i dojazd", "وقت العمل وطريق العمل", "Timp de lucru și navetă"],
+  tr_ag_az_p: ["Trag Stunden, Urlaub und Kranktage ein – Mami zählt deine Überstunden. Jeder Tag im Betrieb zählt gleich für die Pendlerpauschale.", "Log hours, leave and sick days – Mami counts your overtime. Every day at work also counts for the commuter allowance.", "Saatleri, izni ve hastalık günlerini gir – Mami fazla mesaini sayar. İş yerindeki her gün yol götürüsüne de sayılır.", "Вноси часы, отпуск и больничные – Мами посчитает переработку. Каждый день на работе сразу идёт в паушал за дорогу.", "Вноси години, відпустку й лікарняні – Мамі порахує понаднормові. Кожен день на роботі одразу йде в паушал за дорогу.", "Wpisuj godziny, urlop i chorobowe – Mami policzy nadgodziny. Każdy dzień w firmie liczy się też do ryczałtu za dojazdy.", "سجّل الساعات والإجازات وأيام المرض – تحسب ماما ساعاتك الإضافية. وكل يوم في مقر العمل يُحتسب أيضًا لبدل التنقل.", "Notează ore, concediu și zile de boală – Mami îți numără orele suplimentare. Fiecare zi la serviciu contează și pentru forfetul de navetă."],
+  tr_ag_ex_t: ["Extras vom Arbeitgeber", "Employer extras", "İşverenden ekstralar", "Бонусы от работодателя", "Бонуси від роботодавця", "Dodatki od pracodawcy", "مزايا من صاحب العمل", "Extra de la angajator"],
+  tr_ag_ex_p: ["Karte für Karte: Bekommst du das schon? Was du nachfragen willst, merkt sich Mami für dich.", "Card by card: do you already get this? Mami remembers what you want to ask about.", "Kart kart: bunu zaten alıyor musun? Sormak istediklerini Mami senin için hatırlar.", "Карточка за карточкой: ты это уже получаешь? Мами запомнит, о чём ты хочешь спросить.", "Картка за карткою: ти це вже отримуєш? Мамі запам'ятає, про що ти хочеш запитати.", "Karta po karcie: czy już to dostajesz? Mami zapamięta, o co chcesz zapytać.", "بطاقة تلو الأخرى: هل تحصل على هذا؟ تتذكر ماما ما تريد السؤال عنه.", "Card cu card: primești deja asta? Mami ține minte ce vrei să întrebi."],
+  tr_ag_sh_t: ["Steuer & Ämter für beides", "Tax & authorities for both", "İkisi için vergi ve daireler", "Налоги и ведомства для обоих", "Податки й установи для обох", "Podatki i urzędy dla obu", "الضرائب والجهات للاثنين", "Impozite și autorități pentru ambele"],
+  tr_ag_sh_p: ["Steuer, Briefe und Homeoffice bleiben hier unten – egal ob du oben Angestellt oder Selbstständig gewählt hast.", "Tax, letters and home office stay down here – whether you chose employed or self-employed above.", "Vergi, mektuplar ve evden çalışma burada kalır – yukarıda çalışan ya da serbest seçmiş olsan da.", "Налоги, письма и работа из дома остаются здесь – неважно, что выбрано вверху.", "Податки, листи й робота вдома лишаються тут – неважливо, що вибрано вгорі.", "Podatki, listy i praca zdalna zostają tu na dole – niezależnie od wyboru u góry.", "تبقى الضرائب والرسائل والعمل من المنزل هنا في الأسفل – سواء اخترت موظفًا أو مستقلًا في الأعلى.", "Impozitele, scrisorile și lucrul de acasă rămân aici jos – indiferent ce ai ales sus."],
+  nw_ag_t: ["Neu für Angestellte", "New for employees", "Çalışanlar için yeni", "Новое для работающих по найму", "Нове для найманих працівників", "Nowość dla pracowników", "جديد للموظفين", "Nou pentru angajați"],
+  nw_ag_p: ["Lohnabrechnung mit einem Tipp hochladen, Arbeitszeit und Überstunden, Arbeitsweg im Kalender, Netto-Verlauf und Extras vom Arbeitgeber. Mami sagt dir auch, ob sich die Steuererklärung lohnt.", "Upload a payslip with one tap, working time and overtime, commute in a calendar, net pay trend and employer extras. Mami also tells you whether a tax return pays off.", "Tek dokunuşla bordro yükle, çalışma süresi ve fazla mesai, takvimde işe gidiş, net maaş seyri ve işveren ekstraları. Mami vergi beyannamesinin işe yarayıp yaramadığını da söyler.", "Загрузка расчётного листа одним касанием, рабочее время и переработка, дорога в календаре, динамика нетто и бонусы от работодателя. Мами подскажет, стоит ли подавать декларацию.", "Завантаження розрахункового листа одним дотиком, робочий час і понаднормові, дорога в календарі, динаміка нетто й бонуси від роботодавця. Мамі підкаже, чи варто подавати декларацію.", "Pasek wypłaty jednym dotknięciem, czas pracy i nadgodziny, dojazd w kalendarzu, netto w czasie i dodatki od pracodawcy. Mami powie też, czy opłaca się zeznanie podatkowe.", "رفع كشف الراتب بلمسة، ووقت العمل والساعات الإضافية، وطريق العمل في التقويم، وتطور الصافي، ومزايا صاحب العمل. وتخبرك ماما أيضًا إن كان الإقرار الضريبي مجديًا.", "Fluturaș încărcat dintr-o atingere, timp de lucru și ore suplimentare, navetă în calendar, evoluția netului și extra de la angajator. Mami îți spune și dacă merită declarația fiscală."],
 };
 
 /* Texte aus TEXTS in der aktuellen Sprache, Monatsnamen und das Zählwerk für Beträge */
@@ -100185,11 +101908,104 @@ function wbOpen() {
 /* --- Rechnungen Fenster --- */
 const RCHU = {
   edit: null,
+  menu: 0,
 };
+/* Sortierung der Rechnungsliste (bleibt gespeichert). Nummern werden als Zahlen verglichen: RE-9 vor RE-10. */
+const RCH_SORTS = ["date-d", "date", "nr-d", "nr", "kunde", "amt-d"];
+const rchSortNow = () => (RCH_SORTS.includes(store.settings.rchSort) ? store.settings.rchSort : "date-d");
+const rchNrCmp = (a, c) => String(a.nr || "").localeCompare(String(c.nr || ""), "de", { numeric: true, sensitivity: "base" });
+function rchSorted(L) {
+  const s = rchSortNow(),
+    byDate = (a, c) => String(a.date || "").localeCompare(String(c.date || "")) || rchNrCmp(a, c);
+  const f = {
+    "date-d": (a, c) => byDate(c, a),
+    date: byDate,
+    "nr-d": (a, c) => rchNrCmp(c, a) || byDate(c, a),
+    nr: (a, c) => rchNrCmp(a, c) || byDate(a, c),
+    kunde: (a, c) => String(a.kunde || "").localeCompare(String(c.kunde || ""), "de", { sensitivity: "base", numeric: true }) || byDate(c, a),
+    "amt-d": (a, c) => (Number(c.amt) || 0) - (Number(a.amt) || 0) || byDate(c, a),
+  }[s];
+  return L.slice().sort(f);
+}
+function rchSortUi() {
+  const cur = rchSortNow();
+  return `<div class="kdsort rchsort" data-noi18n><span></span><button type="button" class="kdschip" data-rchsort aria-haspopup="menu" aria-expanded="${RCHU.menu ? "true" : "false"}">${svgIcon("sort", 15)} ${escHtml(uiText("rch_s_" + cur.replace("-", "_")))}</button>${
+    RCHU.menu
+      ? `<div class="kdsmenu" role="menu">${RCH_SORTS.map(
+          (k) => `<button type="button" role="menuitemradio" aria-checked="${k === cur}" class="${k === cur ? "on" : ""}" data-rchsortset="${k}">${escHtml(uiText("rch_s_" + k.replace("-", "_")))}${k === cur ? svgIcon("tick", 16) : ""}</button>`
+        ).join("")}</div>`
+      : ""
+  }</div>`;
+}
+/* Neu zeichnen und Rechnungen, die ihren Platz wechseln, an die neue Stelle gleiten lassen */
+function rchFlip(focus) {
+  const pos = new Map();
+  document.querySelectorAll("#rchBg [data-rchid]").forEach((r) => pos.set(r.dataset.rchid, r.getBoundingClientRect().top));
+  RCHU.noAnim = 1;
+  try {
+    rchOpen2(focus);
+  } finally {
+    RCHU.noAnim = 0;
+  }
+  if (reducedMotion()) return;
+  document.querySelectorAll("#rchBg [data-rchid]").forEach((r) => {
+    const old = pos.get(r.dataset.rchid),
+      now = r.getBoundingClientRect().top;
+    if (old == null) r.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260 });
+    else if (Math.abs(old - now) > 2)
+      r.animate([{ transform: `translateY(${old - now}px)` }, { transform: "none" }], { duration: 440, easing: "cubic-bezier(.2,.9,.25,1)" });
+  });
+  const m = document.querySelector("#rchBg .kdsmenu");
+  if (m && RCHU.menu) {
+    m.animate([{ opacity: 0, transform: "translateY(-6px) scale(.97)" }, { opacity: 1, transform: "none" }], { duration: 200, easing: "cubic-bezier(.2,.9,.3,1)" });
+    (m.querySelector(".on") || m.querySelector("button")).focus({ preventScroll: true });
+  }
+}
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  if (!t.closest || !t.closest("#rchBg")) return;
+  if (t.closest("[data-rchsort]")) {
+    RCHU.menu = RCHU.menu ? 0 : 1;
+    rchFlip();
+    SND.play("tick");
+    return;
+  }
+  const ss = t.closest("[data-rchsortset]");
+  if (ss) {
+    RCHU.menu = 0;
+    if (ss.dataset.rchsortset !== rchSortNow()) {
+      store.settings.rchSort = ss.dataset.rchsortset;
+      saveSettings();
+    }
+    rchFlip();
+    SND.play("tick");
+    return;
+  }
+  if (RCHU.menu && !t.closest(".kdsmenu")) {
+    RCHU.menu = 0;
+    rchFlip();
+  }
+});
+document.addEventListener(
+  "keydown",
+  (e) => {
+    if (e.key !== "Escape" || !RCHU.menu || !$("rchBg") || $("rchBg").hidden) return;
+    e.stopPropagation();
+    RCHU.menu = 0;
+    rchFlip();
+    const c = document.querySelector("#rchBg [data-rchsort]");
+    c && c.focus();
+  },
+  true
+);
+/* Kleiner Hinweis oben im Fenster: Geld kommt rein (Ausgangsrechnungen) oder geht raus (Eingangsrechnungen) */
+function bzFlow(dir) {
+  return `<div class="bzflow bz${dir}">${svgIcon(dir === "out" ? "goOut" : "goIn", 15)}<span>${escHtml(uiText(dir === "out" ? "bz_flow_out" : "bz_flow_in"))}</span></div>`;
+}
 function rchOpen2(focus) {
   /* Das Jahr kommt aus der Kopfzeile (Monatsauswahl oben) – das Fenster zeigt die Rechnungen dieses Jahres */
   const Y = String(ui.ym || isoToday()).slice(0, 4),
-    b = hbSheet("rchBg", uiText("rch_year_h", { y: Y }));
+    b = hbSheet("rchBg", uiText("bz_out").replace(/\u00ad/g, "") + " " + Y);
   if (RCHU.batch) {
     b.innerHTML = rchBatchHtml();
     return;
@@ -100201,13 +102017,13 @@ function rchOpen2(focus) {
   const all = rchList(),
     ofY = (i) => String(i.date || "").slice(0, 4) === Y,
     /* offene Rechnungen aus früheren Jahren bleiben oben sichtbar, damit nichts untergeht */
-    older = all.filter((i) => !ofY(i) && !i.paid && !i.storno && String(i.date || "") < Y).sort((a, c) => (c.date || "").localeCompare(a.date || "")),
-    L = older.concat(all.filter(ofY).sort((a, c) => (c.date || "").localeCompare(a.date || "") || String(c.nr || "").localeCompare(String(a.nr || ""))));
+    older = rchSorted(all.filter((i) => !ofY(i) && !i.paid && !i.storno && String(i.date || "") < Y)),
+    L = older.concat(rchSorted(all.filter(ofY)));
   const yrSum = all.filter((i) => ofY(i) && !i.storno).reduce((t, i) => t + (Number(i.amt) || 0), 0),
     yrN = all.filter((i) => ofY(i) && !i.storno).length;
   const open = all.filter((i) => !i.paid && !i.storno),
     sumO = open.reduce((s, i) => s + rchRest(i), 0);
-  b.innerHTML = `${pmBanner()}<div class="ahero beruf" style="margin-bottom:10px"><small>${escHtml(uiText("rch_open"))}</small><b>${escHtml(fmtEur(sumO))}</b><span>${open.length} ${escHtml(uiText("br_open"))}${
+  b.innerHTML = `${pmBanner()}${bzFlow("out")}<div class="ahero beruf" style="margin-bottom:10px"><small>${escHtml(uiText("rch_open"))}</small><b>${escHtml(fmtEur(sumO))}</b><span>${open.length} ${escHtml(uiText("br_open"))}${
     rchOver().length
       ? " · " +
         escHtml(
@@ -100218,6 +102034,7 @@ function rchOpen2(focus) {
       : ""
   }</span></div>
     ${RCHU.edit ? rchForm() : `<button type="button" class="rvwrite" data-rvnew><span class="rwi">${svgIcon("docout", 24)}</span><span class="rwt"><b>${escHtml(uiText("rv_write"))}</b><small>${escHtml(uiText("rch_w_s"))}</small></span><span class="rwgo">${svgIcon("right", 18)}</span></button><div class="rchacts"><button type="button" class="rcha cam" data-rchpick="cam"><span class="rai">${svgIcon("camera", 20)}</span><b>${escHtml(uiText("bs_photo"))}</b><small>${escHtml(uiText("rch_a_cam"))}</small></button><button type="button" class="rcha" data-rchpick="file"><span class="rai">${svgIcon("doc", 20)}</span><b>${escHtml(uiText("stb_import"))}</b><small>${escHtml(uiText("rch_a_imp"))}</small></button><button type="button" class="rcha" data-rchnew><span class="rai">${svgIcon("pen", 20)}</span><b>${escHtml(uiText("stb_manual"))}</b><small>${escHtml(uiText("rch_a_man"))}</small></button></div><div class="rchyr"><span><small>${escHtml(uiText("rch_year_sum", { y: Y }))}</small><b>${escHtml(fmtEur(yrSum))}</b></span><small>${escHtml(uiText(yrN === 1 ? "rch_year_n1" : "rch_year_n", { n: String(yrN) }))}</small></div>`}
+    ${L.length > 1 && !RCHU.edit ? rchSortUi() : ""}
     <input type="file" id="rchCam" accept="image/*" capture="environment" multiple hidden><input type="file" id="rchFile" accept="image/*,application/pdf,.pdf" multiple hidden>
     <div class="rchl">${
       L.map((i, ix) => {
@@ -100266,7 +102083,7 @@ function rchOpen2(focus) {
             : older.length && ix === older.length
               ? `<div class="rchsec">${escHtml(uiText("rch_year_h", { y: Y }))}</div>`
               : "";
-        return `${sec}<div class="rchr ${i.paid || st ? "paid" : od ? "over" : ""} ${st ? "storno" : ""} ${focus === i.id ? "focus" : ""}"><div class="grow"><b>${escHtml(i.kunde || "–")}${TYP ? ` <span class="rchtag">${escHtml(uiText(TYP))}</span>` : ""}${lk ? ` <span class="rchlock" title="${escHtml(uiText("rch_locked"))}">${svgIcon("lock", 11)}</span>` : ""}</b><small>#${escHtml(i.nr || "")} · ${escHtml(
+        return `${sec}<div data-rchid="${escHtml(i.id || "")}" class="rchr ${i.paid || st ? "paid" : od ? "over" : ""} ${st ? "storno" : ""} ${focus === i.id ? "focus" : ""}"><div class="grow"><b>${escHtml(i.kunde || "–")}${TYP ? ` <span class="rchtag">${escHtml(uiText(TYP))}</span>` : ""}${lk ? ` <span class="rchlock" title="${escHtml(uiText("rch_locked"))}">${svgIcon("lock", 11)}</span>` : ""}</b><small>#${escHtml(i.nr || "")} · ${escHtml(
           fxDate(i.date, {
             day: "numeric",
             month: "short",
@@ -100288,7 +102105,7 @@ function rchOpen2(focus) {
     ${rvRecList()}
     ${rchList().some((i) => i.locked) ? `<div class="rchsec">${escHtml(uiText("rch_gobd_h"))}</div><div class="rcharch"><div class="rcseal" id="rcSeal">${svgIcon("shield", 18)}<span>${escHtml(uiText("rch_seal_chk"))}</span></div><div class="rcab"><button type="button" class="btn" data-rvarch>${svgIcon("dl", 16)} ${escHtml(uiText("rch_arch"))}</button><button type="button" class="btn ghost" data-rvlogv>${svgIcon("list", 16)} ${escHtml(uiText("rch_log"))}</button></div><div class="rclog" id="rcLog" hidden></div><small class="rvhint">${escHtml(uiText("rch_gobd_s"))}</small></div>` : ""}
     <p class="small muted" style="margin-top:10px">${escHtml(uiText("rch_auto"))}</p>`;
-  if (!reducedMotion()) stbAnim(b, ".ahero,.rvwrite,.rcha,.rchsec,.rchr,.rvrecr,.rcharch");
+  if (!reducedMotion() && !RCHU.noAnim) stbAnim(b, ".ahero,.rvwrite,.rcha,.rchsec,.rchr,.rvrecr,.rcharch");
   if (rchList().some((i) => i.locked))
     rvVerify().then((r) => {
       const e = $("rcSeal");
@@ -102623,11 +104440,49 @@ const KD = {
   id: null,
   q: "",
   nw: 0,
+  menu: 0,
 };
+/* Sortierung der Kundenliste: Name oder Kundennummer, jeweils auf- oder absteigend (bleibt gespeichert) */
+const KD_SORTS = ["name", "name-d", "nr", "nr-d"];
+const kdSortNow = () => (KD_SORTS.includes(store.settings.kdSort) ? store.settings.kdSort : "name");
+function kdSorted(L) {
+  const s = kdSortNow(),
+    dir = s.endsWith("-d") ? -1 : 1,
+    byName = (a, c) => String(a.name || "").localeCompare(String(c.name || ""), "de", { sensitivity: "base", numeric: true }),
+    /* Nummern als Zahlen vergleichen: 999 vor 1004, „K-12“ vor „K-100“; ohne Nummer ans Ende */
+    byNr = (a, c) => {
+      const x = String(a.nr || "").trim(),
+        y = String(c.nr || "").trim();
+      if (!x || !y) return x ? -1 : y ? 1 : 0;
+      return dir * x.localeCompare(y, "de", { numeric: true, sensitivity: "base" });
+    };
+  return L.slice().sort((a, c) => (s.startsWith("nr") ? byNr(a, c) || byName(a, c) : dir * byName(a, c) || byNr(a, c)));
+}
+/* Liste neu zeichnen und Zeilen, die ihren Platz wechseln, sanft dorthin gleiten lassen */
+function kdRenderFlip() {
+  const pos = new Map();
+  document.querySelectorAll("#kdL [data-kdsel]").forEach((r) => pos.set(r.dataset.kdsel, r.getBoundingClientRect().top));
+  kdRender();
+  if (reducedMotion() || !pos.size) return;
+  document.querySelectorAll("#kdL [data-kdsel]").forEach((r) => {
+    const old = pos.get(r.dataset.kdsel),
+      now = r.getBoundingClientRect().top;
+    if (old == null) {
+      r.animate([{ opacity: 0, transform: "scale(.97)" }, { opacity: 1, transform: "none" }], { duration: 300, easing: "ease-out" });
+      return;
+    }
+    if (Math.abs(old - now) < 2) return;
+    r.animate([{ transform: `translateY(${old - now}px)` }, { transform: "none" }], {
+      duration: 420,
+      easing: "cubic-bezier(.2,.9,.25,1)",
+    });
+  });
+}
 function kdOpen(id) {
   KD.id = id === undefined ? null : id;
   KD.q = "";
   KD.nw = 0;
+  KD.menu = 0;
   hbSheet("kdBg", uiText("kd_h"));
   kdRender(true);
 }
@@ -102668,9 +104523,7 @@ function kdRender(first) {
   if (!bg || bg.hidden) return;
   const b = bg.querySelector(".hobody"),
     f = KD.q.toLowerCase().trim(),
-    L = rvKunden()
-      .slice()
-      .sort((a, c) => String(a.name || "").localeCompare(String(c.name || ""), "de")),
+    L = kdSorted(rvKunden()),
     F = L.filter((c) => !f || [c.name, c.nr, c.person, c.city, c.email].join(" ").toLowerCase().includes(f));
   const nw = {
     id: "",
@@ -102679,6 +104532,17 @@ function kdRender(first) {
   };
   b.innerHTML = `${rvLearnUi()}<div class="kdtop"><input class="in" id="kdQ" type="search" value="${escHtml(KD.q)}" placeholder="${escHtml(uiText("kd_search"))}" aria-label="${escHtml(uiText("kd_search"))}"><button type="button" class="btn primary" data-kdnew>${svgIcon("plus", 16)} ${escHtml(uiText("rv_k_newrow"))}</button></div><button type="button" class="kffrom" data-kfopen>${svgIcon("camera", 18)}<span class="grow"><b>${escHtml(uiText("kf_btn"))}</b><small>${escHtml(uiText("kf_btn_s"))}</small></span>${svgIcon("right", 16)}</button>
     ${KD.nw ? `<div class="vacard kdnew"><b class="rvsub">${escHtml(uiText("rv_k_new"))}</b>${kdForm(nw)}</div>` : ""}
+    ${
+      L.length > 1
+        ? `<div class="kdsort" data-noi18n><small>${escHtml(uiText(F.length === 1 ? "kd_n1" : "kd_n", { n: String(F.length) }))}</small><button type="button" class="kdschip" data-kdsort aria-haspopup="menu" aria-expanded="${KD.menu ? "true" : "false"}">${svgIcon("sort", 15)} ${escHtml(uiText("kd_s_" + kdSortNow().replace("-", "_")))}</button>${
+            KD.menu
+              ? `<div class="kdsmenu" role="menu">${KD_SORTS.map(
+                  (k) => `<button type="button" role="menuitemradio" aria-checked="${k === kdSortNow()}" class="${k === kdSortNow() ? "on" : ""}" data-kdsortset="${k}">${escHtml(uiText("kd_s_" + k.replace("-", "_")))}${k === kdSortNow() ? svgIcon("tick", 16) : ""}</button>`
+                ).join("")}</div>`
+              : ""
+          }</div>`
+        : ""
+    }
     <div class="vacard kdl" id="kdL">${F.map((c) => kdRow(c) + (KD.id === c.id ? kdForm(c) : "")).join("") || `<p class="rvempty">${escHtml(uiText(L.length ? "rv_it_nohit" : "kd_empty"))}</p>`}</div>`;
   if (first && !reducedMotion())
     b.querySelectorAll(".kdr").forEach((r, i) =>
@@ -102729,6 +104593,18 @@ function kdRender(first) {
           }
         });
 }
+document.addEventListener(
+  "keydown",
+  (e) => {
+    if (e.key !== "Escape" || !KD.menu || !$("kdBg") || $("kdBg").hidden) return;
+    e.stopPropagation();
+    KD.menu = 0;
+    kdRender();
+    const c = document.querySelector("#kdBg [data-kdsort]");
+    c && c.focus();
+  },
+  true
+);
 function kdVals() {
   const v = (id) => {
     const e = $(id);
@@ -102773,6 +104649,31 @@ document.addEventListener("click", async (e) => {
     return;
   }
   if (!t.closest || !t.closest("#kdBg")) return;
+  if (t.closest("[data-kdsort]")) {
+    KD.menu = KD.menu ? 0 : 1;
+    kdRender();
+    const m = document.querySelector("#kdBg .kdsmenu");
+    if (m && !reducedMotion())
+      m.animate([{ opacity: 0, transform: "translateY(-6px) scale(.97)" }, { opacity: 1, transform: "none" }], { duration: 200, easing: "cubic-bezier(.2,.9,.3,1)" });
+    if (m) (m.querySelector(".on") || m.querySelector("button")).focus({ preventScroll: true });
+    SND.play("tick");
+    return;
+  }
+  const ss = t.closest("[data-kdsortset]");
+  if (ss) {
+    KD.menu = 0;
+    if (ss.dataset.kdsortset !== kdSortNow()) {
+      store.settings.kdSort = ss.dataset.kdsortset;
+      saveSettings();
+    }
+    kdRenderFlip();
+    SND.play("tick");
+    return;
+  }
+  if (KD.menu && !t.closest(".kdsmenu")) {
+    KD.menu = 0;
+    kdRender();
+  }
   const sel = t.closest("[data-kdsel]");
   if (sel) {
     KD.id = KD.id === sel.dataset.kdsel ? null : sel.dataset.kdsel;
@@ -102820,7 +104721,7 @@ document.addEventListener("click", async (e) => {
     await saveSettings();
     KD.id = null;
     KD.nw = 0;
-    kdRender();
+    kdRenderFlip();
     toast(uiText("kd_saved"));
     if (store.settings.logos === true)
       rvKLogo(c).then((ok) => {
@@ -104910,7 +106811,7 @@ function erListHtml() {
       ),
     tab = (k, t) =>
       `<button type="button" class="${ER.tab === k ? "on" : ""}" data-ertab="${k}">${escHtml(uiText(t))}</button>`;
-  return `${pmBanner()}<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${escHtml(fmtEur(open.reduce((s, i) => s + i.pay, 0)))}</b><small class="ercnt">${escHtml(cntTxt(open.length, "re"))}</small></div><div><small>${escHtml(uiText("er_sum_paid"))}</small><b>${escHtml(fmtEur(paidM.reduce((s, i) => s + i.pay, 0)))}</b><small class="ercnt">${escHtml(cntTxt(paidM.length, "re"))}</small></div></div>
+  return `${pmBanner()}${bzFlow("in")}<div class="ersum"><div><small>${escHtml(uiText("er_open"))}</small><b>${escHtml(fmtEur(open.reduce((s, i) => s + i.pay, 0)))}</b><small class="ercnt">${escHtml(cntTxt(open.length, "re"))}</small></div><div><small>${escHtml(uiText("er_sum_paid"))}</small><b>${escHtml(fmtEur(paidM.reduce((s, i) => s + i.pay, 0)))}</b><small class="ercnt">${escHtml(cntTxt(paidM.length, "re"))}</small></div></div>
     <div class="erseg" role="tablist">${tab("open", "er_open")}${tab("paid", "er_paid")}${tab("all", "er_all")}</div>
     <div class="erl">${
       L.map((i) => {

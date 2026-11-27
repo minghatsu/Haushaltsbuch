@@ -210,6 +210,55 @@ function bizNext() {
     .join("")}</div>`;
 }
 const BF_MAIN = /data-(rchopen|anopen|eropen|kdopen)\b/;
+/* Kachel für Rechnungen mit Richtungs-Abzeichen (raus/rein) */
+function bzTile(dir, icn, title, sub, attr) {
+  return areaTile(svgIcon(icn, 22), escHtml(title), escHtml(sub), attr)
+    .replace('class="atile"', `class="atile bz${dir}"`)
+    .replace(/<\/button>$/, `<span class="bzbadge" aria-hidden="true">${svgIcon(dir === "out" ? "goOut" : "goIn", 13)}</span></button>`);
+}
+/* Großer Schreiben-Knopf oben in „Mein Geschäft“, dazu Angebot und erhaltene Rechnung */
+function bzWrite() {
+  return `<div class="bzw"><button type="button" class="bzwmain" data-rvnew><span class="bzwi">${svgIcon("docout", 22)}</span><span class="grow"><b>${escHtml(uiText("bz_write"))}</b><small>${escHtml(uiText("bz_write_s"))}</small></span>${svgIcon("plus", 20)}</button><div class="bzwsub"><button type="button" data-bzan>${svgIcon("doc", 17)} ${escHtml(uiText("an_new"))}</button><button type="button" class="bzwin" data-eropen>${svgIcon("docin", 17)} ${escHtml(uiText("bz_got"))}</button></div></div>`;
+}
+/* Rechnungen raus, Rechnungen rein, Angebote, Kunden – immer zuerst */
+const BZ_ORDER = [/data-rchopen\b/, /data-eropen\b/, /data-anopen\b/, /data-kdopen\b/];
+const bzRank = (h) => {
+  const i = BZ_ORDER.findIndex((r) => r.test(h));
+  return i < 0 ? 99 : i;
+};
+const bzSort = (L) => L.map((h, i) => [h, i]).sort((a, b) => bzRank(a[0]) - bzRank(b[0]) || a[1] - b[1]).map((x) => x[0]);
+document.addEventListener("click", (e) => {
+  if (!e.target.closest || !e.target.closest("[data-bzan]")) return;
+  try {
+    rvOpen(anNew());
+    SND.play("tick");
+  } catch (_) {}
+});
+/* Nur angestellt ODER nur selbstständig: ein Bereich, darunter „Steuer & Ämter“ */
+function berufSingle(g, tiles, extra, staat) {
+  let all = tiles
+    .map((t) =>
+      t.k === "kunden"
+        ? kdTile()
+        : areaTile(
+            svgIcon(t.icon, 22),
+            typeof TL_ !== "undefined" && TL_[t.k] ? TL_[t.k][0] : t.title,
+            t.short ? escHtml(String(t.short)) : "",
+            `data-anaopen="${escHtml(t.k)}"`
+          )
+    )
+    .concat(extra);
+  const split = !staat && (hasJob() || hasSelf()),
+    SH = split ? all.filter((h) => AG_SHARED.test(h)) : [];
+  if (split) all = all.filter((h) => !AG_SHARED.test(h));
+  let head = hasSelf() ? bzWrite() : "";
+  if (split && hasJob() && !hasSelf()) {
+    const JP = agJobParts(Number(ui.ym.slice(0, 4)));
+    head = JP[0];
+    all = JP[1].concat(all.filter((h) => !/data-anaopen="(lohn|wk)"/.test(h)));
+  }
+  return `<div class="card areacard">${areaHead(g[0], hasJob() || hasSelf() ? "steuer" : "amt", "Einstellungen")}${head}<div class="agrid">${(hasSelf() ? bzSort : (x) => x)(all).join("")}</div></div>${agShared(SH, false)}`;
+}
 function berufDuo(el, tiles, T, exJ, exB, hints) {
   const tl = (t) =>
     t.k === "kunden"
@@ -221,10 +270,14 @@ function berufDuo(el, tiles, T, exJ, exB, hints) {
           `data-anaopen="${escHtml(t.k)}"`
         );
   const keysB = new Set(BF_BIZ),
-    J = tiles
+    Jall = tiles
       .filter((t) => !keysB.has(t.k))
       .map(tl)
       .concat(exJ),
+    /* Steuer & Ämter gilt für beides – steht fest unter beiden Seiten */
+    SH = Jall.filter((h) => AG_SHARED.test(h)),
+    JP = agJobParts(Number(ui.ym.slice(0, 4))),
+    J = [JP[0], ...JP[1], ...Jall.filter((h) => !AG_SHARED.test(h) && !/data-anaopen="(lohn|wk)"/.test(h))],
     Bk = [...BF_BIZ]
       .map((k) => T.find((t) => t.k === k))
       .filter(Boolean)
@@ -232,8 +285,9 @@ function berufDuo(el, tiles, T, exJ, exB, hints) {
   const all = exB.concat(Bk),
     rest = all.filter((h) => !BF_MAIN.test(h)),
     B = [
+      bzWrite(),
       bizNext(),
-      ...all.filter((h) => BF_MAIN.test(h)),
+      ...bzSort(all.filter((h) => BF_MAIN.test(h))),
       rest.length
         ? `<div class="bflist"><h3 class="bflh">${uiText("bn_tax")}</h3>${rest.map((h) => h.replace('class="atile"', 'class="bfrow"').replace(/<\/button>$/, `${svgIcon("right", 16)}</button>`)).join("")}</div>`
         : "",
@@ -277,7 +331,7 @@ function berufDuo(el, tiles, T, exJ, exB, hints) {
     <div class="bfleg" data-noi18n><span><i class="j"></i>${escHtml(uiText("bf_inc_job"))} <b>${E(M.job)}</b></span><span><i class="b"></i>${escHtml(uiText("bf_inc_biz"))} <b>${E(M.biz)}</b></span></div>${hints.length ? `<div class="bfhl" role="list" aria-label="${escHtml(uiText("bf_todo"))}">${hints.slice(0, 3).join("")}</div>` : ""}</div></div>
   <div class="bfsw ${side === "b" ? "sb" : "sj"}" id="bfsw"><div class="bfbands">${bJ}${bB}</div><div class="bfhint" aria-hidden="true">${svgIcon("chev", 14)}<span data-noi18n>${escHtml(uiText("bf_swipe"))}</span></div>
    <div class="bfgrids"><div class="agrid bfg bfgj">${J.join("")}</div><div class="agrid bfg bfgb">${B.join("")}</div></div></div>
-`;
+  ${agShared(SH, true)}`;
   try {
     if (localStorage.getItem("hb-bfside")) $("bfsw").classList.add("known");
   } catch (_) {}
@@ -610,19 +664,18 @@ function renderBeruf() {
   if (hasSelf()) {
     const io = rchList().filter((i) => !i.paid),
       od = rchOver().length;
+    /* Ausgangs- und Eingangsrechnungen klar getrennt: grün = Geld kommt rein, orange = Geld geht raus */
     (duo ? exB : extra).push(
-      areaTile(
-        svgIcon("docout", 22),
-        escHtml(uiText("rch_h")),
-        od
-          ? escHtml(
-              uiText("rch_over_n", {
-                n: String(od),
-              })
-            )
-          : io.length
-            ? `${io.length} · ${escHtml(fmtEur0(io.reduce((s, i) => s + i.amt, 0)))}`
-            : escHtml(uiText("rch_new")),
+      bzTile(
+        "out",
+        "docout",
+        uiText("bz_out"),
+        uiText("bz_out_s") +
+          (od
+            ? " · " + uiText("rch_over_n", { n: String(od) })
+            : io.length
+              ? ` · ${io.length} · ${fmtEur0(io.reduce((s, i) => s + i.amt, 0))}`
+              : ""),
         "data-rchopen"
       )
     );
@@ -638,14 +691,16 @@ function renderBeruf() {
     const eo = erOpenList(),
       eod = eo.filter((i) => i.due && daysTo(i.due) < 0).length;
     (duo ? exB : extra).push(
-      areaTile(
-        svgIcon("docin", 22),
-        escHtml(uiText("er_h")),
-        eod
-          ? escHtml(uiText("rch_over_n", { n: String(eod) }))
-          : eo.length
-            ? `${eo.length} · ${escHtml(fmtEur0(eo.reduce((s, i) => s + i.pay, 0)))}`
-            : escHtml(uiText("er_tile_s0")),
+      bzTile(
+        "in",
+        "docin",
+        uiText("bz_in"),
+        uiText("bz_in_s") +
+          (eod
+            ? " · " + uiText("rch_over_n", { n: String(eod) })
+            : eo.length
+              ? ` · ${eo.length} · ${fmtEur0(eo.reduce((s, i) => s + i.pay, 0))}`
+              : ""),
         "data-eropen"
       )
     );
@@ -736,19 +791,7 @@ function renderBeruf() {
   }
   if (duo) return berufDuo(el, tiles, T, exJ, exB, hints);
   el.innerHTML = `${hero}${hints.length ? `<div class="ahints">${hints.slice(0, 3).join("")}</div>` : ""}
-    <div class="card areacard">${areaHead(g[0], hasJob() || hasSelf() ? "steuer" : "amt", "Einstellungen")}<div class="agrid">${tiles
-      .filter((t) => !(tax && t.k === "tax" && false))
-      .map((t) =>
-        t.k === "kunden"
-          ? kdTile()
-          : areaTile(
-              svgIcon(t.icon, 22),
-              typeof TL_ !== "undefined" && TL_[t.k] ? TL_[t.k][0] : t.title,
-              t.short ? escHtml(String(t.short)) : "",
-              `data-anaopen="${escHtml(t.k)}"`
-            )
-      )
-      .join("")}${extra.join("")}</div></div>`;
+    ${berufSingle(g, tiles, extra, staat)}`;
 }
 function zukSaved() {
   const goals = store.settings.goals || [],

@@ -534,11 +534,49 @@ const KD = {
   id: null,
   q: "",
   nw: 0,
+  menu: 0,
 };
+/* Sortierung der Kundenliste: Name oder Kundennummer, jeweils auf- oder absteigend (bleibt gespeichert) */
+const KD_SORTS = ["name", "name-d", "nr", "nr-d"];
+const kdSortNow = () => (KD_SORTS.includes(store.settings.kdSort) ? store.settings.kdSort : "name");
+function kdSorted(L) {
+  const s = kdSortNow(),
+    dir = s.endsWith("-d") ? -1 : 1,
+    byName = (a, c) => String(a.name || "").localeCompare(String(c.name || ""), "de", { sensitivity: "base", numeric: true }),
+    /* Nummern als Zahlen vergleichen: 999 vor 1004, „K-12“ vor „K-100“; ohne Nummer ans Ende */
+    byNr = (a, c) => {
+      const x = String(a.nr || "").trim(),
+        y = String(c.nr || "").trim();
+      if (!x || !y) return x ? -1 : y ? 1 : 0;
+      return dir * x.localeCompare(y, "de", { numeric: true, sensitivity: "base" });
+    };
+  return L.slice().sort((a, c) => (s.startsWith("nr") ? byNr(a, c) || byName(a, c) : dir * byName(a, c) || byNr(a, c)));
+}
+/* Liste neu zeichnen und Zeilen, die ihren Platz wechseln, sanft dorthin gleiten lassen */
+function kdRenderFlip() {
+  const pos = new Map();
+  document.querySelectorAll("#kdL [data-kdsel]").forEach((r) => pos.set(r.dataset.kdsel, r.getBoundingClientRect().top));
+  kdRender();
+  if (reducedMotion() || !pos.size) return;
+  document.querySelectorAll("#kdL [data-kdsel]").forEach((r) => {
+    const old = pos.get(r.dataset.kdsel),
+      now = r.getBoundingClientRect().top;
+    if (old == null) {
+      r.animate([{ opacity: 0, transform: "scale(.97)" }, { opacity: 1, transform: "none" }], { duration: 300, easing: "ease-out" });
+      return;
+    }
+    if (Math.abs(old - now) < 2) return;
+    r.animate([{ transform: `translateY(${old - now}px)` }, { transform: "none" }], {
+      duration: 420,
+      easing: "cubic-bezier(.2,.9,.25,1)",
+    });
+  });
+}
 function kdOpen(id) {
   KD.id = id === undefined ? null : id;
   KD.q = "";
   KD.nw = 0;
+  KD.menu = 0;
   hbSheet("kdBg", uiText("kd_h"));
   kdRender(true);
 }
@@ -579,9 +617,7 @@ function kdRender(first) {
   if (!bg || bg.hidden) return;
   const b = bg.querySelector(".hobody"),
     f = KD.q.toLowerCase().trim(),
-    L = rvKunden()
-      .slice()
-      .sort((a, c) => String(a.name || "").localeCompare(String(c.name || ""), "de")),
+    L = kdSorted(rvKunden()),
     F = L.filter((c) => !f || [c.name, c.nr, c.person, c.city, c.email].join(" ").toLowerCase().includes(f));
   const nw = {
     id: "",
@@ -590,6 +626,17 @@ function kdRender(first) {
   };
   b.innerHTML = `${rvLearnUi()}<div class="kdtop"><input class="in" id="kdQ" type="search" value="${escHtml(KD.q)}" placeholder="${escHtml(uiText("kd_search"))}" aria-label="${escHtml(uiText("kd_search"))}"><button type="button" class="btn primary" data-kdnew>${svgIcon("plus", 16)} ${escHtml(uiText("rv_k_newrow"))}</button></div><button type="button" class="kffrom" data-kfopen>${svgIcon("camera", 18)}<span class="grow"><b>${escHtml(uiText("kf_btn"))}</b><small>${escHtml(uiText("kf_btn_s"))}</small></span>${svgIcon("right", 16)}</button>
     ${KD.nw ? `<div class="vacard kdnew"><b class="rvsub">${escHtml(uiText("rv_k_new"))}</b>${kdForm(nw)}</div>` : ""}
+    ${
+      L.length > 1
+        ? `<div class="kdsort" data-noi18n><small>${escHtml(uiText(F.length === 1 ? "kd_n1" : "kd_n", { n: String(F.length) }))}</small><button type="button" class="kdschip" data-kdsort aria-haspopup="menu" aria-expanded="${KD.menu ? "true" : "false"}">${svgIcon("sort", 15)} ${escHtml(uiText("kd_s_" + kdSortNow().replace("-", "_")))}</button>${
+            KD.menu
+              ? `<div class="kdsmenu" role="menu">${KD_SORTS.map(
+                  (k) => `<button type="button" role="menuitemradio" aria-checked="${k === kdSortNow()}" class="${k === kdSortNow() ? "on" : ""}" data-kdsortset="${k}">${escHtml(uiText("kd_s_" + k.replace("-", "_")))}${k === kdSortNow() ? svgIcon("tick", 16) : ""}</button>`
+                ).join("")}</div>`
+              : ""
+          }</div>`
+        : ""
+    }
     <div class="vacard kdl" id="kdL">${F.map((c) => kdRow(c) + (KD.id === c.id ? kdForm(c) : "")).join("") || `<p class="rvempty">${escHtml(uiText(L.length ? "rv_it_nohit" : "kd_empty"))}</p>`}</div>`;
   if (first && !reducedMotion())
     b.querySelectorAll(".kdr").forEach((r, i) =>
@@ -640,6 +687,18 @@ function kdRender(first) {
           }
         });
 }
+document.addEventListener(
+  "keydown",
+  (e) => {
+    if (e.key !== "Escape" || !KD.menu || !$("kdBg") || $("kdBg").hidden) return;
+    e.stopPropagation();
+    KD.menu = 0;
+    kdRender();
+    const c = document.querySelector("#kdBg [data-kdsort]");
+    c && c.focus();
+  },
+  true
+);
 function kdVals() {
   const v = (id) => {
     const e = $(id);
@@ -684,6 +743,31 @@ document.addEventListener("click", async (e) => {
     return;
   }
   if (!t.closest || !t.closest("#kdBg")) return;
+  if (t.closest("[data-kdsort]")) {
+    KD.menu = KD.menu ? 0 : 1;
+    kdRender();
+    const m = document.querySelector("#kdBg .kdsmenu");
+    if (m && !reducedMotion())
+      m.animate([{ opacity: 0, transform: "translateY(-6px) scale(.97)" }, { opacity: 1, transform: "none" }], { duration: 200, easing: "cubic-bezier(.2,.9,.3,1)" });
+    if (m) (m.querySelector(".on") || m.querySelector("button")).focus({ preventScroll: true });
+    SND.play("tick");
+    return;
+  }
+  const ss = t.closest("[data-kdsortset]");
+  if (ss) {
+    KD.menu = 0;
+    if (ss.dataset.kdsortset !== kdSortNow()) {
+      store.settings.kdSort = ss.dataset.kdsortset;
+      saveSettings();
+    }
+    kdRenderFlip();
+    SND.play("tick");
+    return;
+  }
+  if (KD.menu && !t.closest(".kdsmenu")) {
+    KD.menu = 0;
+    kdRender();
+  }
   const sel = t.closest("[data-kdsel]");
   if (sel) {
     KD.id = KD.id === sel.dataset.kdsel ? null : sel.dataset.kdsel;
@@ -731,7 +815,7 @@ document.addEventListener("click", async (e) => {
     await saveSettings();
     KD.id = null;
     KD.nw = 0;
-    kdRender();
+    kdRenderFlip();
     toast(uiText("kd_saved"));
     if (store.settings.logos === true)
       rvKLogo(c).then((ok) => {

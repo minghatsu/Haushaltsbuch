@@ -1046,9 +1046,12 @@ function wkCfg(year) {
 function wkCalc(year) {
   const c = wkCfg(year),
     HO = hoCalc(year),
-    home = HO.on ? (hasSelf() ? 0 : HO.amt) : Math.min(1260, (Number(c.home) || 0) * 6),
+    /* Tage aus dem Arbeitszeit-Kalender zählen, sobald dort für dieses Jahr etwas eingetragen ist */
+    cal = typeof agUsed === "function" && agUsed(year),
+    homeN = cal ? agCount(year, "h") : Number(c.home) || 0,
+    home = HO.on ? (hasSelf() ? 0 : HO.amt) : Math.min(1260, homeN * 6),
     km = Number(c.km) || 0,
-    days = Number(c.days) || 0;
+    days = cal ? agCount(year, "b") : Number(c.days) || 0;
   const perDay = Number(year) >= 2026 ? km * 0.38 : Math.min(km, 20) * 0.3 + Math.max(0, km - 20) * 0.38;
   const fahrt = round2(perDay * days);
   const txs = store.tx.filter((t) => t.wk && (t.date || "").startsWith(year + "-"));
@@ -1059,7 +1062,8 @@ function wkCalc(year) {
   return {
     HO,
     home,
-    homeDays: HO.on ? HO.days : Number(c.home) || 0,
+    homeDays: HO.on ? HO.days : homeN,
+    cal,
     km,
     days,
     fahrt,

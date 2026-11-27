@@ -535,3 +535,79 @@
   box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.5);
   margin: auto 0 0;
 }
+/* Kundenliste sortieren */
+.kdsort {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 4px 8px;
+}
+.kdsort small {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.kdschip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 99px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.2s;
+}
+.kdschip:hover {
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+}
+.kdschip:active {
+  transform: scale(0.96);
+}
+.kdsmenu {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 6px);
+  z-index: 6;
+  min-width: 220px;
+  padding: 6px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18), 0 0 0 1px var(--line);
+  display: grid;
+  gap: 2px;
+  transform-origin: top right;
+}
+.kdsmenu button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 11px;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+.kdsmenu button:hover,
+.kdsmenu button:focus-visible {
+  background: var(--sunk);
+  outline: none;
+}
+.kdsmenu button.on {
+  background: var(--accent-soft);
+  color: var(--accent);
+}

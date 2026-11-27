@@ -516,11 +516,104 @@ function wbOpen() {
 /* --- Rechnungen Fenster --- */
 const RCHU = {
   edit: null,
+  menu: 0,
 };
+/* Sortierung der Rechnungsliste (bleibt gespeichert). Nummern werden als Zahlen verglichen: RE-9 vor RE-10. */
+const RCH_SORTS = ["date-d", "date", "nr-d", "nr", "kunde", "amt-d"];
+const rchSortNow = () => (RCH_SORTS.includes(store.settings.rchSort) ? store.settings.rchSort : "date-d");
+const rchNrCmp = (a, c) => String(a.nr || "").localeCompare(String(c.nr || ""), "de", { numeric: true, sensitivity: "base" });
+function rchSorted(L) {
+  const s = rchSortNow(),
+    byDate = (a, c) => String(a.date || "").localeCompare(String(c.date || "")) || rchNrCmp(a, c);
+  const f = {
+    "date-d": (a, c) => byDate(c, a),
+    date: byDate,
+    "nr-d": (a, c) => rchNrCmp(c, a) || byDate(c, a),
+    nr: (a, c) => rchNrCmp(a, c) || byDate(a, c),
+    kunde: (a, c) => String(a.kunde || "").localeCompare(String(c.kunde || ""), "de", { sensitivity: "base", numeric: true }) || byDate(c, a),
+    "amt-d": (a, c) => (Number(c.amt) || 0) - (Number(a.amt) || 0) || byDate(c, a),
+  }[s];
+  return L.slice().sort(f);
+}
+function rchSortUi() {
+  const cur = rchSortNow();
+  return `<div class="kdsort rchsort" data-noi18n><span></span><button type="button" class="kdschip" data-rchsort aria-haspopup="menu" aria-expanded="${RCHU.menu ? "true" : "false"}">${svgIcon("sort", 15)} ${escHtml(uiText("rch_s_" + cur.replace("-", "_")))}</button>${
+    RCHU.menu
+      ? `<div class="kdsmenu" role="menu">${RCH_SORTS.map(
+          (k) => `<button type="button" role="menuitemradio" aria-checked="${k === cur}" class="${k === cur ? "on" : ""}" data-rchsortset="${k}">${escHtml(uiText("rch_s_" + k.replace("-", "_")))}${k === cur ? svgIcon("tick", 16) : ""}</button>`
+        ).join("")}</div>`
+      : ""
+  }</div>`;
+}
+/* Neu zeichnen und Rechnungen, die ihren Platz wechseln, an die neue Stelle gleiten lassen */
+function rchFlip(focus) {
+  const pos = new Map();
+  document.querySelectorAll("#rchBg [data-rchid]").forEach((r) => pos.set(r.dataset.rchid, r.getBoundingClientRect().top));
+  RCHU.noAnim = 1;
+  try {
+    rchOpen2(focus);
+  } finally {
+    RCHU.noAnim = 0;
+  }
+  if (reducedMotion()) return;
+  document.querySelectorAll("#rchBg [data-rchid]").forEach((r) => {
+    const old = pos.get(r.dataset.rchid),
+      now = r.getBoundingClientRect().top;
+    if (old == null) r.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260 });
+    else if (Math.abs(old - now) > 2)
+      r.animate([{ transform: `translateY(${old - now}px)` }, { transform: "none" }], { duration: 440, easing: "cubic-bezier(.2,.9,.25,1)" });
+  });
+  const m = document.querySelector("#rchBg .kdsmenu");
+  if (m && RCHU.menu) {
+    m.animate([{ opacity: 0, transform: "translateY(-6px) scale(.97)" }, { opacity: 1, transform: "none" }], { duration: 200, easing: "cubic-bezier(.2,.9,.3,1)" });
+    (m.querySelector(".on") || m.querySelector("button")).focus({ preventScroll: true });
+  }
+}
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  if (!t.closest || !t.closest("#rchBg")) return;
+  if (t.closest("[data-rchsort]")) {
+    RCHU.menu = RCHU.menu ? 0 : 1;
+    rchFlip();
+    SND.play("tick");
+    return;
+  }
+  const ss = t.closest("[data-rchsortset]");
+  if (ss) {
+    RCHU.menu = 0;
+    if (ss.dataset.rchsortset !== rchSortNow()) {
+      store.settings.rchSort = ss.dataset.rchsortset;
+      saveSettings();
+    }
+    rchFlip();
+    SND.play("tick");
+    return;
+  }
+  if (RCHU.menu && !t.closest(".kdsmenu")) {
+    RCHU.menu = 0;
+    rchFlip();
+  }
+});
+document.addEventListener(
+  "keydown",
+  (e) => {
+    if (e.key !== "Escape" || !RCHU.menu || !$("rchBg") || $("rchBg").hidden) return;
+    e.stopPropagation();
+    RCHU.menu = 0;
+    rchFlip();
+    const c = document.querySelector("#rchBg [data-rchsort]");
+    c && c.focus();
+  },
+  true
+);
+/* Kleiner Hinweis oben im Fenster: Geld kommt rein (Ausgangsrechnungen) oder geht raus (Eingangsrechnungen) */
+function bzFlow(dir) {
+  return `<div class="bzflow bz${dir}">${svgIcon(dir === "out" ? "goOut" : "goIn", 15)}<span>${escHtml(uiText(dir === "out" ? "bz_flow_out" : "bz_flow_in"))}</span></div>`;
+}
 function rchOpen2(focus) {
   /* Das Jahr kommt aus der Kopfzeile (Monatsauswahl oben) – das Fenster zeigt die Rechnungen dieses Jahres */
   const Y = String(ui.ym || isoToday()).slice(0, 4),
-    b = hbSheet("rchBg", uiText("rch_year_h", { y: Y }));
+    b = hbSheet("rchBg", uiText("bz_out").replace(/\u00ad/g, "") + " " + Y);
   if (RCHU.batch) {
     b.innerHTML = rchBatchHtml();
     return;
@@ -532,13 +625,13 @@ function rchOpen2(focus) {
   const all = rchList(),
     ofY = (i) => String(i.date || "").slice(0, 4) === Y,
     /* offene Rechnungen aus früheren Jahren bleiben oben sichtbar, damit nichts untergeht */
-    older = all.filter((i) => !ofY(i) && !i.paid && !i.storno && String(i.date || "") < Y).sort((a, c) => (c.date || "").localeCompare(a.date || "")),
-    L = older.concat(all.filter(ofY).sort((a, c) => (c.date || "").localeCompare(a.date || "") || String(c.nr || "").localeCompare(String(a.nr || ""))));
+    older = rchSorted(all.filter((i) => !ofY(i) && !i.paid && !i.storno && String(i.date || "") < Y)),
+    L = older.concat(rchSorted(all.filter(ofY)));
   const yrSum = all.filter((i) => ofY(i) && !i.storno).reduce((t, i) => t + (Number(i.amt) || 0), 0),
     yrN = all.filter((i) => ofY(i) && !i.storno).length;
   const open = all.filter((i) => !i.paid && !i.storno),
     sumO = open.reduce((s, i) => s + rchRest(i), 0);
-  b.innerHTML = `${pmBanner()}<div class="ahero beruf" style="margin-bottom:10px"><small>${escHtml(uiText("rch_open"))}</small><b>${escHtml(fmtEur(sumO))}</b><span>${open.length} ${escHtml(uiText("br_open"))}${
+  b.innerHTML = `${pmBanner()}${bzFlow("out")}<div class="ahero beruf" style="margin-bottom:10px"><small>${escHtml(uiText("rch_open"))}</small><b>${escHtml(fmtEur(sumO))}</b><span>${open.length} ${escHtml(uiText("br_open"))}${
     rchOver().length
       ? " · " +
         escHtml(
@@ -549,6 +642,7 @@ function rchOpen2(focus) {
       : ""
   }</span></div>
     ${RCHU.edit ? rchForm() : `<button type="button" class="rvwrite" data-rvnew><span class="rwi">${svgIcon("docout", 24)}</span><span class="rwt"><b>${escHtml(uiText("rv_write"))}</b><small>${escHtml(uiText("rch_w_s"))}</small></span><span class="rwgo">${svgIcon("right", 18)}</span></button><div class="rchacts"><button type="button" class="rcha cam" data-rchpick="cam"><span class="rai">${svgIcon("camera", 20)}</span><b>${escHtml(uiText("bs_photo"))}</b><small>${escHtml(uiText("rch_a_cam"))}</small></button><button type="button" class="rcha" data-rchpick="file"><span class="rai">${svgIcon("doc", 20)}</span><b>${escHtml(uiText("stb_import"))}</b><small>${escHtml(uiText("rch_a_imp"))}</small></button><button type="button" class="rcha" data-rchnew><span class="rai">${svgIcon("pen", 20)}</span><b>${escHtml(uiText("stb_manual"))}</b><small>${escHtml(uiText("rch_a_man"))}</small></button></div><div class="rchyr"><span><small>${escHtml(uiText("rch_year_sum", { y: Y }))}</small><b>${escHtml(fmtEur(yrSum))}</b></span><small>${escHtml(uiText(yrN === 1 ? "rch_year_n1" : "rch_year_n", { n: String(yrN) }))}</small></div>`}
+    ${L.length > 1 && !RCHU.edit ? rchSortUi() : ""}
     <input type="file" id="rchCam" accept="image/*" capture="environment" multiple hidden><input type="file" id="rchFile" accept="image/*,application/pdf,.pdf" multiple hidden>
     <div class="rchl">${
       L.map((i, ix) => {
@@ -597,7 +691,7 @@ function rchOpen2(focus) {
             : older.length && ix === older.length
               ? `<div class="rchsec">${escHtml(uiText("rch_year_h", { y: Y }))}</div>`
               : "";
-        return `${sec}<div class="rchr ${i.paid || st ? "paid" : od ? "over" : ""} ${st ? "storno" : ""} ${focus === i.id ? "focus" : ""}"><div class="grow"><b>${escHtml(i.kunde || "–")}${TYP ? ` <span class="rchtag">${escHtml(uiText(TYP))}</span>` : ""}${lk ? ` <span class="rchlock" title="${escHtml(uiText("rch_locked"))}">${svgIcon("lock", 11)}</span>` : ""}</b><small>#${escHtml(i.nr || "")} · ${escHtml(
+        return `${sec}<div data-rchid="${escHtml(i.id || "")}" class="rchr ${i.paid || st ? "paid" : od ? "over" : ""} ${st ? "storno" : ""} ${focus === i.id ? "focus" : ""}"><div class="grow"><b>${escHtml(i.kunde || "–")}${TYP ? ` <span class="rchtag">${escHtml(uiText(TYP))}</span>` : ""}${lk ? ` <span class="rchlock" title="${escHtml(uiText("rch_locked"))}">${svgIcon("lock", 11)}</span>` : ""}</b><small>#${escHtml(i.nr || "")} · ${escHtml(
           fxDate(i.date, {
             day: "numeric",
             month: "short",
@@ -619,7 +713,7 @@ function rchOpen2(focus) {
     ${rvRecList()}
     ${rchList().some((i) => i.locked) ? `<div class="rchsec">${escHtml(uiText("rch_gobd_h"))}</div><div class="rcharch"><div class="rcseal" id="rcSeal">${svgIcon("shield", 18)}<span>${escHtml(uiText("rch_seal_chk"))}</span></div><div class="rcab"><button type="button" class="btn" data-rvarch>${svgIcon("dl", 16)} ${escHtml(uiText("rch_arch"))}</button><button type="button" class="btn ghost" data-rvlogv>${svgIcon("list", 16)} ${escHtml(uiText("rch_log"))}</button></div><div class="rclog" id="rcLog" hidden></div><small class="rvhint">${escHtml(uiText("rch_gobd_s"))}</small></div>` : ""}
     <p class="small muted" style="margin-top:10px">${escHtml(uiText("rch_auto"))}</p>`;
-  if (!reducedMotion()) stbAnim(b, ".ahero,.rvwrite,.rcha,.rchsec,.rchr,.rvrecr,.rcharch");
+  if (!reducedMotion() && !RCHU.noAnim) stbAnim(b, ".ahero,.rvwrite,.rcha,.rchsec,.rchr,.rvrecr,.rcharch");
   if (rchList().some((i) => i.locked))
     rvVerify().then((r) => {
       const e = $("rcSeal");

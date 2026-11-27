@@ -240,6 +240,25 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.50.3",
+    "27. November 2026",
+    [
+      "Mein Geschäft aufgeräumt: Oben gibt es jetzt einen großen Knopf „Neue Rechnung schreiben“, darunter „Angebot schreiben“ und „Rechnung erhalten“.",
+      "Ausgangs- und Eingangsrechnungen sind klar getrennt: grün mit Pfeil raus für Rechnungen an deine Kunden (Geld kommt rein), orange mit Pfeil rein für Rechnungen von Lieferanten (Geld geht raus). Beide stehen jetzt ganz vorne, und auch in den Fenstern steht oben, worum es geht.",
+      "Kunden sortieren: Über der Kundenliste wählst du jetzt Name A–Z, Name Z–A oder Kundennummer auf- oder absteigend. Die Wahl bleibt gespeichert – auf allen Geräten.",
+      "Nummern werden als Zahlen sortiert (999 vor 1004). Änderst du Name oder Nummer, gleitet der Kunde nach dem Speichern von selbst an seinen neuen Platz.",
+      "Rechnungen sortieren: Genauso wählst du bei deinen Rechnungen Neueste oder Älteste zuerst, Nummer auf- oder absteigend, Kunde A–Z oder höchster Betrag zuerst. Neue und geänderte Rechnungen landen automatisch an der richtigen Stelle.",
+      "Behoben: Bei Rechnungen vom selben Tag stand RE-10 vor RE-9, weil Nummern wie Text verglichen wurden.",
+      "Beruf heißt jetzt klar „Angestellt“ und „Selbstständig“. „Steuer & Ämter“ steht fest darunter und gilt für beide Seiten, egal wie du umschaltest. Die Liste fürs Geschäft heißt jetzt „Abgaben fürs Geschäft“.",
+      "Angestellt: Ein großer Knopf lädt deine Lohnabrechnung (PDF) hoch. Darunter siehst du Gehalt und Arbeitskosten auf einen Blick.",
+      "Mami schätzt, ob sich die Steuererklärung lohnt – mit einem Balken, der deine Arbeitskosten mit der Pauschale von 1.230 € vergleicht.",
+      "Neu: Arbeitszeit & Überstunden. Stunden schnell eintragen, dazu Wochen- und Monatsansicht, Urlaubstage und Überstunden-Konto.",
+      "Neu: Arbeitsweg im Kalender. Tippe Tage an (Betrieb, Homeoffice, Urlaub, Krank) – Pendlerpauschale und Homeoffice-Tage werden automatisch gezählt. Tage aus der Arbeitszeit zählen gleich mit.",
+      "Neu: Netto-Verlauf. Sieh dein Netto Monat für Monat; Mami markiert Ausreißer und sagt, woran es liegt.",
+      "Neu: Extras vom Arbeitgeber. Karte für Karte prüfen, ob du z. B. Jobticket, Sachbezug oder Dienstrad schon bekommst – was du nachfragen willst, merkt sich Mami.",
+    ],
+  ],
+  [
     "0.50.2",
     "26. November 2026",
     [

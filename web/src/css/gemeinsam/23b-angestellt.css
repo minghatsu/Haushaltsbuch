@@ -1,0 +1,685 @@
+/* Angestellt: Lohnabrechnung-Knopf, Mami-Steuerhinweis, gemeinsamer Bereich, Arbeitszeit, Arbeitsweg, Netto, Extras */
+.agslip,
+.agtax,
+.agask {
+  grid-column: 1 / -1;
+}
+.agslip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 62px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--bf-job, #3b5ba5);
+  color: #fff;
+  font-family: var(--f-body);
+  text-align: start;
+  cursor: pointer;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--bf-job, #3b5ba5) 30%, transparent);
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+.agslip:hover {
+  box-shadow: 0 9px 24px color-mix(in srgb, var(--bf-job, #3b5ba5) 38%, transparent);
+}
+.agslip:active {
+  transform: scale(0.98);
+}
+.agsi {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.agslip .grow,
+.agtax .grow {
+  flex: 1;
+  min-width: 0;
+}
+.agslip b {
+  display: block;
+  font-size: 16px;
+}
+.agslip small {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.88;
+}
+.agtax {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bf-job, #3b5ba5) 9%, var(--surface));
+  color: var(--fg);
+  font-family: var(--f-body);
+  text-align: start;
+  cursor: pointer;
+  animation: agIn 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+.agtm .mav {
+  width: 44px;
+  height: 44px;
+  flex: none;
+}
+.agtax b {
+  display: block;
+  font-size: 15.5px;
+  margin-bottom: 3px;
+}
+.agtax small {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.agbar {
+  position: relative;
+  display: block;
+  height: 9px;
+  margin: 9px 0 6px;
+  border-radius: 9px;
+  background: var(--sunk);
+}
+.agbar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 9px;
+  background: var(--bf-job, #3b5ba5);
+  transform-origin: left;
+  animation: agBar 0.9s 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.agbar em {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--fg);
+}
+@keyframes agBar {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes agIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.agshared {
+  margin-top: 16px;
+}
+.agsh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 4px 10px;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.agsh::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.agshared .agrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+html.tabp .agshared .agrid,
+html.pc .agshared .agrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+/* Seite, die gerade hinten liegt, nimmt keinen Platz weg – sonst klafft unter „Angestellt“ eine Lücke */
+html:not(.pc) .bfsw.sj .bfgb:not([style*="visible"]),
+html:not(.pc) .bfsw.sb .bfgj:not([style*="visible"]),
+html.pc.tabp .bfsw.sj .bfgb:not([style*="visible"]),
+html.pc.tabp .bfsw.sb .bfgj:not([style*="visible"]) {
+  max-height: 0;
+  overflow: hidden;
+}
+
+/* Fenster */
+.agcard {
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.agct {
+  display: block;
+  font-size: 17px;
+  margin-bottom: 10px;
+}
+.agk {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.agbig {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--bf-job, #3b5ba5);
+  margin: 2px 0;
+}
+.agpos {
+  color: var(--good);
+}
+.agneg {
+  color: var(--warn);
+}
+.btn.agj,
+.agj {
+  background: var(--bf-job, #3b5ba5);
+  color: #fff;
+  border-color: transparent;
+}
+.agnote {
+  margin: 0 4px 10px;
+  line-height: 1.5;
+}
+.agsetl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto 6px;
+  min-height: 40px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.agacc {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.agacc > div {
+  padding: 12px 8px;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.agacc b {
+  display: block;
+  font-size: 19px;
+  font-weight: 800;
+}
+.agacc small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.agedit {
+  text-align: center;
+}
+.agstep {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 10px 0 12px;
+}
+.agstep button {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border: 0;
+  border-radius: 99px;
+  background: var(--sunk);
+  color: var(--fg);
+  font-size: 26px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.agstep button:active {
+  transform: scale(0.92);
+}
+.agstep button:disabled {
+  opacity: 0.35;
+}
+.agstep b {
+  min-width: 140px;
+  font-size: 36px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.agchips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.agchip {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 99px;
+  background: var(--sunk);
+  color: var(--fg);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.12s;
+}
+.agchip.on {
+  background: var(--bf-job, #3b5ba5);
+  color: #fff;
+}
+.agchip:active {
+  transform: scale(0.95);
+}
+.agedit .btn.block {
+  width: 100%;
+  margin-top: 6px;
+  min-height: 46px;
+}
+.agtabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 3px;
+  margin: 0 0 12px;
+  border-radius: 12px;
+  background: var(--sunk);
+}
+.agtabs button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.agtabs button.on {
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+.agwh {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.agwh b {
+  font-size: 14.5px;
+}
+.agnav {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 99px;
+  background: var(--sunk);
+  color: var(--fg);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transform: rotate(90deg);
+}
+.agnav.r {
+  transform: rotate(-90deg);
+}
+.agdays {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  height: 150px;
+}
+.agdays button {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  padding: 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.agdays button.sel span {
+  color: var(--fg);
+}
+.agdays i {
+  width: 100%;
+  max-height: calc(100% - 22px);
+  border-radius: 8px 8px 4px 4px;
+  background: linear-gradient(var(--warn) 0 var(--o, 0%), var(--bf-job, #3b5ba5) 0);
+  transform-origin: bottom;
+  animation: agGrow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.agdays i.u {
+  background: color-mix(in srgb, var(--warn) 35%, var(--surface));
+}
+.agdays i.k {
+  background: color-mix(in srgb, var(--bad, #c0392b) 25%, var(--surface));
+}
+.agdays button.sel i {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+@keyframes agGrow {
+  from {
+    transform: scaleY(0);
+  }
+}
+.agsoll {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 2px dashed color-mix(in srgb, var(--fg) 35%, transparent);
+  pointer-events: none;
+}
+.aglg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.aglg i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-inline-end: 5px;
+  border-radius: 3px;
+  vertical-align: -1px;
+}
+.aglg i.j {
+  background: var(--bf-job, #3b5ba5);
+}
+.aglg i.o {
+  background: var(--warn);
+}
+.aglg i.h {
+  background: color-mix(in srgb, var(--accent) 35%, var(--surface));
+}
+.aglg i.u {
+  background: color-mix(in srgb, var(--warn) 35%, var(--surface));
+}
+.aglg i.k {
+  background: color-mix(in srgb, var(--bad, #c0392b) 25%, var(--surface));
+}
+.agcal {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+.aghd {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 2px 0 4px;
+}
+.agc {
+  position: relative;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 10px;
+  background: var(--sunk);
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.12s, background 0.2s;
+}
+.agc:active {
+  transform: scale(0.92);
+}
+.agc small {
+  margin-top: 2px;
+  font-size: 9.5px;
+  opacity: 0.9;
+}
+.agc.tb {
+  background: var(--bf-job, #3b5ba5);
+  color: #fff;
+}
+.agc.th {
+  background: color-mix(in srgb, var(--accent) 35%, var(--surface));
+  color: var(--fg);
+}
+.agc.tu {
+  background: color-mix(in srgb, var(--warn) 35%, var(--surface));
+  color: var(--fg);
+}
+.agc.tk {
+  background: color-mix(in srgb, var(--bad, #c0392b) 25%, var(--surface));
+  color: var(--fg);
+}
+.agc.now {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--fg) 45%, transparent);
+}
+.agc.sel {
+  outline: 3px solid var(--fg);
+  outline-offset: 1px;
+}
+.agrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  font-size: 14.5px;
+}
+.agrow:first-child {
+  border-top: 0;
+}
+.agrow span {
+  color: var(--muted);
+  font-weight: 600;
+}
+.agrow b {
+  text-align: end;
+}
+.agrow.tot b {
+  color: var(--bf-job, #3b5ba5);
+  font-size: 16px;
+}
+.agspark {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 120px;
+  margin: 14px 0 20px;
+}
+.agspark i {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  border-radius: 6px 6px 3px 3px;
+  background: color-mix(in srgb, var(--bf-job, #3b5ba5) 50%, var(--surface));
+  transform-origin: bottom;
+  animation: agGrow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.agspark i.cur {
+  background: var(--bf-job, #3b5ba5);
+}
+.agspark i.dip {
+  background: var(--warn);
+}
+.agspark i.up {
+  background: var(--good);
+}
+.agspark em {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.agof {
+  text-align: center;
+  margin: 0 0 6px;
+}
+.agstack {
+  position: relative;
+  min-height: 270px;
+  margin: 6px 0 14px;
+}
+.agcd {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 20px;
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.13);
+}
+.agcd.back {
+  transform: translateY(14px) scale(0.94);
+  opacity: 0.55;
+}
+.agcd b {
+  font-size: 20px;
+}
+.agcd p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.agci {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--bf-job, #3b5ba5) 12%, var(--surface));
+  color: var(--bf-job, #3b5ba5);
+  flex: none;
+}
+.agci.s {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+}
+.agyn {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+.agyn .btn {
+  min-height: 48px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.agexr {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.agexr:first-child {
+  border-top: 0;
+}
+.agexr b {
+  display: block;
+  font-size: 14.5px;
+}
+.agexr small {
+  display: block;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.agseg {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  padding: 3px;
+  border-radius: 11px;
+  background: var(--sunk);
+}
+.agseg button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.agseg button.on {
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.agseg button.on.ja {
+  color: var(--good);
+}
+.agseg button.on.frag {
+  color: var(--warn);
+}
+.agdone b {
+  display: block;
+  font-size: 16px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .agtax,
+  .agbar i,
+  .agdays i,
+  .agspark i {
+    animation: none;
+  }
+}

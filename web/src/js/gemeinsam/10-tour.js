@@ -322,6 +322,8 @@ function tourGo(i) {
     ui.view = tv;
     render();
   }
+  /* Beruf: Schritt gehört zu „Angestellt“ (j) oder „Selbstständig“ (b) – erst umschalten, dann zeigen */
+  if (TOUR.steps[i].side && typeof bfSwap === "function") bfSwap(TOUR.steps[i].side);
   const first = TOUR.i < 0 || !el.querySelector(".tmami");
   TOUR.i = i;
   const s = TOUR.steps[i],
@@ -1470,6 +1472,45 @@ const PTOUR_FN = () => ({
         p: [uiText("trb_tiles_p")],
       },
       {
+        sel: '[data-view="beruf"] .agslip',
+        side: "j",
+        raw: 1,
+        ic: "docin",
+        t: uiText("tr_ag_slip_t"),
+        p: [uiText("tr_ag_slip_p")],
+      },
+      {
+        sel: '[data-view="beruf"] .bfgj [data-agaz]',
+        side: "j",
+        raw: 1,
+        ic: "clock",
+        t: uiText("tr_ag_az_t"),
+        p: [uiText("tr_ag_az_p")],
+      },
+      {
+        sel: '[data-view="beruf"] .bfgj [data-agex].atile',
+        side: "j",
+        raw: 1,
+        ic: "gift",
+        t: uiText("tr_ag_ex_t"),
+        p: [uiText("tr_ag_ex_p")],
+      },
+      {
+        sel: '[data-view="beruf"] .bzwmain',
+        side: "b",
+        raw: 1,
+        ic: "docout",
+        t: uiText("tr_bzw_t"),
+        p: [uiText("tr_bzw_p")],
+      },
+      {
+        sel: '[data-view="beruf"] .agshared',
+        raw: 1,
+        ic: "bank",
+        t: uiText("tr_ag_sh_t"),
+        p: [uiText("tr_ag_sh_p")],
+      },
+      {
         sel: '[data-view="beruf"] [data-stbopen].atile',
         raw: 1,
         ic: "doc",
@@ -1505,6 +1546,7 @@ const PTOUR_FN = () => ({
           ]),
       {
         sel: '[data-view="beruf"] .bfnext',
+        side: "b",
         raw: 1,
         ic: "bell",
         t: uiText("nw_bn_t"),
@@ -1512,6 +1554,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] .bflist',
+        side: "b",
         raw: 1,
         ic: "bank",
         t: uiText("bn_tax"),
@@ -1519,6 +1562,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] [data-rchopen].atile',
+        side: "b",
         raw: 1,
         ic: "docout",
         t: uiText("trb_rch_t"),
@@ -1526,6 +1570,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] [data-eropen].atile',
+        side: "b",
         raw: 1,
         ic: "docin",
         t: uiText("trb_er_t"),
@@ -1533,6 +1578,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] [data-wbopen].atile',
+        side: "b",
         raw: 1,
         ic: "repeat",
         t: uiText("trb_wb_t"),
@@ -1540,6 +1586,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] [data-tmopen].atile',
+        side: "b",
         raw: 1,
         ic: "cal",
         t: uiText("trb_tm_t"),
@@ -1547,6 +1594,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] [data-zvopen].atile',
+        side: "b",
         raw: 1,
         ic: "cash",
         t: uiText("trb_zv_t"),
@@ -1554,6 +1602,7 @@ const PTOUR_FN = () => ({
       },
       {
         sel: '[data-view="beruf"] [data-bsopen].atile',
+        side: "b",
         raw: 1,
         ic: "doc",
         t: uiText("trb_bs_t"),
@@ -1681,6 +1730,33 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.50.3",
+    s: () => [
+      ...(hasJob()
+        ? [
+            {
+              sel: '[data-view="beruf"] .agslip',
+              side: "j",
+              ic: "case",
+              t: uiText("nw_ag_t"),
+              p: [uiText("nw_ag_p")],
+            },
+          ]
+        : []),
+      ...(hasSelf()
+        ? [
+            {
+              sel: '[data-view="beruf"] .bzw',
+              side: "b",
+              ic: "docout",
+              t: uiText("nw_bz_t"),
+              p: [uiText("nw_bz_p")],
+            },
+          ]
+        : []),
+    ],
+  },
   {
     v: "0.50.1",
     s: () => [
