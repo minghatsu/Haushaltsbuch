@@ -240,6 +240,27 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.50.2",
+    "26. November 2026",
+    [
+      "Behoben: Auf schmalen Handys (z. B. 360 px breit) und bei langen Wörtern (Russisch, Polnisch, Rumänisch, Ukrainisch) ragte der Name in der unteren Leiste aus dem grünen Knopf über das Nachbar-Symbol. Jetzt wird der Knopf enger, und wenn es gar nicht passt, zeigt er nur das Symbol.",
+      "Behoben: Am 1. Januar stand der Kontostand plötzlich bei 0 € und die App warnte, das Geld werde knapp. Jetzt übernimmt sie den Stand vom 31. Dezember automatisch. Du kannst ihn in den Einstellungen weiter selbst eintragen.",
+      "Genauer: „Noch pro Tag“ zieht jetzt die Fixkosten ab, die in diesem Monat noch kommen (z. B. Miete). Vorher sah der Betrag größer aus, als er ist.",
+      "Behoben: Beträge in englischer Schreibweise wie 1,234.56 wurden zu 1,23 €. Jetzt wird daraus richtig 1.234,56 € – auch beim Import.",
+      "Import: Englische PayPal-Exporte (Spalte „Gross“, Datum wie 11/26/2026) werden jetzt erkannt. Vorher kam keine einzige Buchung an. Auch Daten wie 20261126 und Beträge in Klammern (12,34) = −12,34 € gehen jetzt.",
+      "Rundgang mit Mami: Am Handy und Tablet verschwanden Mami und die Sprechblase bei den letzten Schritten (Erinnerungen, Fehler melden, Einstellungen) oben aus dem Bild, weil die Kopfzeile weggescrollt war – man sah nur noch eine dunkle Fläche. Jetzt scrollt die Tour dorthin zurück.",
+      "Rundgang: Der Rahmen saß manchmal ein Stück neben dem gezeigten Bereich (z. B. bei der Suche in den Buchungen), weil er gesetzt wurde, bevor das Scrollen fertig war. Nach dem Drehen von Handy oder Tablet rutscht er jetzt auch wieder an die richtige Stelle.",
+      "Rundgang: Kein leerer weißer Kreis mehr um den Mami-Knopf, während Mami gerade selbst herumfliegt. Und die Begrüßung nennt die richtige Zahl an Schritten.",
+      "Erklärung zu „Noch pro Tag“ in allen Sprachen richtig: Hauptkonto minus offene Fixkosten und Steuer-Rücklage, geteilt durch die restlichen Tage.",
+      "Abgleich: Wenn du auf zwei Geräten etwas an den Einstellungen änderst, bevor sie sich abgleichen (z. B. am Handy ein Budget, am PC ein Sparziel), bleibt jetzt beides erhalten. Vorher gewann das Gerät, das zuletzt hochgeladen hat – die andere Änderung war weg.",
+      "Sicherer: Auch der Rechnungs-Export für die Aufbewahrung schützt jetzt vor Formeln in Kundennamen, die Excel beim Öffnen sonst ausführen würde.",
+      "Behoben: Wer in den Einstellungen 0 % Umsatzsteuer eingetragen hat (z. B. für steuerfreie Leistungen), bekam in der Umsatzsteuer-Übersicht und im DATEV-Export trotzdem 19 % berechnet.",
+      "Schneller: Haushalt und Jahresübersicht bauen sich bei vielen Buchungen etwa doppelt so schnell auf.",
+      "Behoben: Fälligkeitsdaten aus Rechnungen und beim Arbeitslosengeld-Ende konnten in manchen Zeitzonen einen Tag zu früh angezeigt werden.",
+      "Aufgeräumt: doppelt vorhandener Code entfernt (gleiche Datumsfunktion zweimal, ein Symbol zweimal, eine Zeile, die nie lief).",
+    ],
+  ],
+  [
     "0.50.1",
     "26. November 2026",
     [

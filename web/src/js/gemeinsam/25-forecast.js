@@ -42,12 +42,20 @@ function dayAvg(from, to, days) {
   }
   return v / Math.max(1, days);
 }
-/* „Noch pro Tag“: Hauptkonto geteilt durch die restlichen Tage (inkl. heute) */
+/* „Noch pro Tag“: Hauptkonto minus offene Fixkosten und Steuer-Rücklage, geteilt durch die restlichen Tage (inkl. heute) */
 function freePerDay(ym, mainBal) {
   const left = Math.max(1, daysIn(ym) - new Date().getDate() + 1);
+  /* Noch offene Fixkosten dieses Monats (vom Hauptkonto) sind schon verplant – nicht als „pro Tag frei“ zeigen */
+  let open = 0;
+  try {
+    const paid = (store.months[ym] && store.months[ym].paid) || {};
+    for (const f of fixedForMonth(ym, true)) if (!(f.id in paid) && fxAcct(f) === "Hauptkonto") open += Number(planAmt(f, ym)) || 0;
+    /* Steuer-Rücklage, die noch auf dem Konto liegt, gehört dir auch nicht zum Ausgeben */
+    open += Math.max(0, Number(yearCum(ym).reserveAcc) || 0);
+  } catch (_) {}
   return {
     left,
-    v: Math.max(0, Number(mainBal) || 0) / left,
+    v: Math.max(0, (Number(mainBal) || 0) - open) / left,
   };
 }
 function shopAvg() {

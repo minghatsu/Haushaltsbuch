@@ -1525,7 +1525,7 @@ async function rvArchive() {
       .sort((a, b) => String(a.date).localeCompare(String(b.date))),
     files = [],
     enc = new TextEncoder(),
-    q = (v) => '"' + String(v ?? "").replace(/"/g, '""') + '"',
+    q = (v) => '"' + csvSafe(v ?? "").replace(/"/g, '""') + '"',
     n2 = (v) =>
       round2(Number(v) || 0)
         .toFixed(2)

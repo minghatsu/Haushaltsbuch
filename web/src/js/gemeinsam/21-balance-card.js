@@ -366,7 +366,7 @@ function renderHome() {
     dayNote = `${days} Tage`;
   }
   const y = ym.slice(0, 4);
-  const needStart = !(store.settings.startBalance && y in store.settings.startBalance);
+  const needStart = !startBalSet(y) && !startCarry(y);
   const groups = {};
   for (const t of c.tx) {
     if (t.kind === "ausgabe" || t.kind === "betrieb") {

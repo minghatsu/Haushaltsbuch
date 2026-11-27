@@ -497,9 +497,33 @@ function resAway() {
     where: String(o.where || ""),
   };
 }
+/* Kontostand am 1.1.: eingetragen – sonst automatisch der Stand vom 31.12. des Vorjahres,
+   sobald ein früheres Jahr bekannt ist. Sonst stünde im Januar plötzlich 0 € da. */
+function startBalSet(y) {
+  const s = store.settings.startBalance;
+  return !!(s && Object.prototype.hasOwnProperty.call(s, String(y)));
+}
+function startCarry(y) {
+  y = Number(y);
+  for (let k = 1; k <= 10; k++) if (startBalSet(y - k)) return true;
+  return false;
+}
+/* Übertrag merken, solange sich an den Daten nichts ändert (sonst rechnet jede Ansicht alle Vorjahre neu) */
+const SB_C = { k: "", tx: null, mo: null, fx: null, v: {} };
 function startBal(y) {
-  const v = store.settings.startBalance && store.settings.startBalance[String(y)];
-  return Number(v) || 0;
+  y = Number(y);
+  if (startBalSet(y)) return Number(store.settings.startBalance[String(y)]) || 0;
+  if (!startCarry(y)) return 0;
+  const k = DREV + "|" + JSON.stringify(store.settings.startBalance || {}) + "|" + store.tx.length;
+  if (SB_C.k !== k || SB_C.tx !== store.tx || SB_C.mo !== store.months || SB_C.fx !== store.fixed) {
+    SB_C.k = k;
+    SB_C.tx = store.tx;
+    SB_C.mo = store.months;
+    SB_C.fx = store.fixed;
+    SB_C.v = {};
+  }
+  if (!(y in SB_C.v)) SB_C.v[y] = round2(yearCum(y - 1 + "-12").balance);
+  return SB_C.v[y];
 }
 function yearCum(ym) {
   const [y, m] = ymParts(ym);

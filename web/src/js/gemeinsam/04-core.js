@@ -467,7 +467,10 @@ function parseAmt(s) {
     .replace(/^\+/, "")
     .replace(/^[−–]/, "-");
   if (!s) return NaN;
-  if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+  /* „1,234.56“ (englische Schreibweise): der letzte Trenner ist das Komma für Cent */
+  if (s.includes(",") && s.lastIndexOf(".") > s.lastIndexOf(",")) s = s.replace(/,/g, "");
+  else if (/^-?\d{1,3}(,\d{3}){2,}$/.test(s)) s = s.replace(/,/g, ""); /* „1,234,567“ */
+  else if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
   else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, ""); /* „1.234“ = tausendzweihundertvierunddreißig */
   const v = Number(s);
   return isFinite(v) ? v : NaN;

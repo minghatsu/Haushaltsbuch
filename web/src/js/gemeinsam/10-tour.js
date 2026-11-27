@@ -191,7 +191,7 @@ function tourOpen() {
     sel: "#ptourQ",
     raw: 1,
     t: mFill(nm ? mamiText("tr_hi").replace("{n}", nm) : mamiText("tr_hi0")),
-    p: [mamiText("tr_hi2").replace("{n}", TOUR.steps.length + 1)],
+    p: [mamiText("tr_hi2").replace("{n}", TOUR.steps.length + 2)],
   });
   TOUR.steps.push({
     sel: "#ptourQ",
@@ -202,7 +202,28 @@ function tourOpen() {
   TOUR.i = -1;
   tourGo(0);
 }
+/* Ring bleibt am Ziel, auch wenn sich darüber etwas nachträglich verschiebt (Drehen, Zahlen, die sich aufbauen) */
+function tourWatch(on) {
+  clearInterval(tourWatch.t);
+  if (!on) return;
+  tourWatch.t = setInterval(() => {
+    if (TOUR.i < 0) return tourWatch(false);
+    const el = $("tourBg"),
+      ring = el && el.querySelector(".tring"),
+      bub = el && el.querySelector(".tbub");
+    if (!ring || !bub || !bub.classList.contains("on") || TOUR_MAMI.anim) return;
+    const t = tmTarget(TOUR.steps[TOUR.i]);
+    if (!t) return;
+    const a = t.getBoundingClientRect();
+    /* Seite hat sich von selbst weggescrollt: Schritt neu anfahren */
+    if (a.bottom < 0 || a.top > innerHeight) return tourGo(TOUR.i);
+    if (ring.classList.contains("none")) return;
+    const b = ring.getBoundingClientRect();
+    if (Math.abs(a.left - 8 - b.left) + Math.abs(a.top - 8 - b.top) + Math.abs(a.width + 16 - b.width) > 4) tourPlace();
+  }, 600);
+}
 function tourCloseNow() {
+  tourWatch(false);
   try {
     mHeadIn();
   } catch (_) {}
@@ -279,6 +300,8 @@ function tmEls() {
 function tmTarget(s) {
   return s ? [...document.querySelectorAll(s.sel)].find((n) => tourVis(n) && !n.closest(".cubestage")) : null;
 }
+/* Schritte am Mami-Knopf: Mami ist gerade selbst herausgeflogen – ein Ring um den leeren Knopf sähe aus wie ein Fehler */
+const tmNoRing = (s) => !!s && s.sel === "#ptourQ";
 function tmFixed(t) {
   for (let n = t; n && n !== document.body; n = n.parentElement) {
     const p = getComputedStyle(n).position;
@@ -325,17 +348,24 @@ function tourGo(i) {
   };
   const t = tmTarget(s);
   let dy = 0;
-  if (t && !tmFixed(t) && !t.closest(".tabs,.pchero,.top")) {
+  const tr0 = t && t.getBoundingClientRect(),
+    navEl = document.querySelector(".tabs"),
+    nb0 = navEl ? navEl.getBoundingClientRect().height : 0,
+    head = t && t.closest(".tabs,.pchero,.top"),
+    /* Kopfzeile/Leiste: nur scrollen, wenn sie gerade aus dem Bild gescrollt ist (am Handy scrollt die Kopfzeile mit) */
+    offView = tr0 && (tr0.bottom < 8 || tr0.top > innerHeight - nb0 - 8);
+  if (t && (offView || (!tmFixed(t) && !head))) {
     const r = t.getBoundingClientRect(),
-      nav = document.querySelector(".tabs"),
-      nb = nav ? nav.getBoundingClientRect().height : 0;
+      nb = nb0;
     const max = Math.max(0, document.documentElement.scrollHeight - innerHeight),
-      want =
-        scrollY +
-        r.top -
-        Math.max(IS_PC ? (innerWidth <= 1420 ? 190 : 112) : 80, (innerHeight - nb - r.height) / 2 - 90);
+      want = head
+        ? scrollY + r.top - 16
+        : scrollY +
+          r.top -
+          Math.max(IS_PC ? (innerWidth <= 1420 ? 190 : 112) : 80, (innerHeight - nb - r.height) / 2 - 90);
     const ns = Math.round(Math.max(0, Math.min(max, want)));
     dy = ns - scrollY;
+    TOUR.to = ns;
     if (Math.abs(dy) > 2)
       window.scrollTo({
         top: ns,
@@ -347,21 +377,24 @@ function tourGo(i) {
     if (tok !== TOUR_MAMI.tok) return;
     if (dy) {
       dy = 0;
-      tmSettle().then(go);
+      tmSettle(TOUR.to).then(go);
       return;
     }
     fill();
     const L = tmLayout(t, 0, bub);
-    tmRing(ring, L.ring, first);
+    tmRing(ring, tmNoRing(s) ? null : L.ring, first);
     const fly = first && TOUR_MAMI.x == null ? tmStart(mami, L.m) : tmFly(mami, L.m.x, L.m.y);
     fly.then(() => {
       if (tok !== TOUR_MAMI.tok) return;
       tmBub(bub, L);
+      tourWatch(true);
     });
   };
   setTimeout(go, first ? 60 : 150);
 }
-function tmSettle() {
+/* Warten, bis das Scrollen fertig ist. Mit Ziel: erst wenn es erreicht ist – sanftes Scrollen startet oft
+   ein paar Bilder verzögert, sonst stünde der Ring an der alten Stelle. */
+function tmSettle(to) {
   return new Promise((res) => {
     let last = scrollY,
       same = 0,
@@ -371,7 +404,8 @@ function tmSettle() {
       if (Math.abs(scrollY - last) < 0.5) same++;
       else same = 0;
       last = scrollY;
-      if (same >= 3 || n > 60) res();
+      const there = to == null || Math.abs(scrollY - to) < 1.5;
+      if ((same >= 3 && there) || n > 90) res();
       else requestAnimationFrame(f);
     };
     requestAnimationFrame(f);
@@ -1044,7 +1078,7 @@ function tourPlace() {
   if (!el.querySelector(".tmami")) return;
   const { ring, bub, mami } = tmEls();
   const L = tmLayout(tmTarget(s), 0, bub);
-  tmRing(ring, L.ring, false);
+  tmRing(ring, tmNoRing(s) ? null : L.ring, false);
   if (TOUR_MAMI.anim) {
     TOUR_MAMI.anim.cancel();
     TOUR_MAMI.anim = null;

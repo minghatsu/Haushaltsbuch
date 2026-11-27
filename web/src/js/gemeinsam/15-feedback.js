@@ -182,7 +182,11 @@ document.addEventListener("click", (e) => {
   }
 });
 addEventListener("resize", () => {
-  if (TOUR.i >= 0) tourPlace();
+  if (TOUR.i < 0) return;
+  tourPlace();
+  /* Nach dem Drehen ordnen sich Leiste und Karten noch kurz neu – dann den Ring nachziehen */
+  (tourPlace.t || []).forEach(clearTimeout);
+  tourPlace.t = [450, 1000].map((ms) => setTimeout(() => TOUR.i >= 0 && tourPlace(), ms));
 });
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-tour]");

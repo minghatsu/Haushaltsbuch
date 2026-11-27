@@ -197,11 +197,7 @@ function erUsedTx() {
       .map((x) => x.tx)
   );
 }
-function addDays(iso, n) {
-  const d = new Date(iso + "T12:00");
-  d.setDate(d.getDate() + n);
-  return isoOf(d);
-}
+/* addDays: siehe 41a-office-reminders.js */
 const erOpenList = () => erList().filter((i) => !i.paid && i.typ !== "g");
 function erState(i) {
   if (i.paid)

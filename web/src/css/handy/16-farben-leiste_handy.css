@@ -52,6 +52,19 @@ html:not(.pc) .tabs.navx .tab[aria-selected="true"]:not(.plus) .tname {
     transition-delay: 0s, 0.12s, 0s;
   }
 
+/* Wenig Platz: enger (cmp) oder nur das Symbol (nolbl) – siehe navLayout */
+html:not(.pc) .tabs.navx .tab.cmp:not(.plus) {
+    padding: 0 8px;
+  }
+html:not(.pc) .tabs.navx .tab.cmp[aria-selected="true"]:not(.plus) .tname {
+    margin-left: 5px;
+  }
+html:not(.pc) .tabs.navx .tab.nolbl[aria-selected="true"]:not(.plus) .tname {
+    max-width: 0;
+    margin-left: 0;
+    opacity: 0;
+  }
+
 html:not(.pc) .tabs.navx .tab:not(.plus) .tname.sm {
     font-size: 13px;
     letter-spacing: -0.015em;

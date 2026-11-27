@@ -43,7 +43,7 @@ const COLS = {
     "buchungstext",
     "hinweis",
   ],
-  amount: ["amount (eur)", "betrag (eur)", "betrag (€)", "amount", "betrag", "umsatz in eur", "umsatz", "brutto"],
+  amount: ["amount (eur)", "betrag (eur)", "betrag (€)", "amount", "betrag", "umsatz in eur", "umsatz", "brutto", "gross"],
   type: [
     "type",
     "transaction type",
@@ -151,8 +151,14 @@ function parseDate(s) {
   if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return m[1] + "-" + pad(m[2]) + "-" + pad(m[3]);
   if ((m = s.match(/^(\d{1,2})[./](\d{1,2})[./](\d{2,4})/))) {
     const y = m[3].length === 2 ? "20" + m[3] : m[3];
-    return y + "-" + pad(m[2]) + "-" + pad(m[1]);
+    let d = +m[1],
+      mo = +m[2];
+    /* US-Schreibweise 11/26/2026 (z. B. englische PayPal-Exporte): Monat steht vorne */
+    if (mo > 12 && d <= 12) [d, mo] = [mo, d];
+    if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+    return y + "-" + pad(mo) + "-" + pad(d);
   }
+  if ((m = s.match(/^(20\d\d)(\d\d)(\d\d)$/)) && +m[2] >= 1 && +m[2] <= 12 && +m[3] >= 1 && +m[3] <= 31) return m[1] + "-" + m[2] + "-" + m[3];
   return null;
 }
 function parseBankAmt(s) {
@@ -161,6 +167,8 @@ function parseBankAmt(s) {
     .replace(/^\+/, "")
     .replace(/^[−–]/, "-");
   if (/^[\d.,]+[-−]$/.test(s)) s = "-" + s.slice(0, -1);
+  /* Buchhaltungs-Schreibweise: (12,34) = -12,34 */
+  if (/^\([\d.,]+\)$/.test(s)) s = "-" + s.slice(1, -1);
   if (!s) return NaN;
   /* „2.350“ ist bei Euro-Beträgen immer Tausender (drei Nachkommastellen gibt es nicht) */
   if (/,\d{1,2}$/.test(s)) s = s.replace(/\./g, "").replace(",", ".");

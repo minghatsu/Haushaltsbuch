@@ -11307,6 +11307,19 @@ html:not(.pc) .tabs.navx .tab[aria-selected="true"]:not(.plus) .tname {
     transition-delay: 0s, 0.12s, 0s;
   }
 
+/* Wenig Platz: enger (cmp) oder nur das Symbol (nolbl) – siehe navLayout */
+html:not(.pc) .tabs.navx .tab.cmp:not(.plus) {
+    padding: 0 8px;
+  }
+html:not(.pc) .tabs.navx .tab.cmp[aria-selected="true"]:not(.plus) .tname {
+    margin-left: 5px;
+  }
+html:not(.pc) .tabs.navx .tab.nolbl[aria-selected="true"]:not(.plus) .tname {
+    max-width: 0;
+    margin-left: 0;
+    opacity: 0;
+  }
+
 html:not(.pc) .tabs.navx .tab:not(.plus) .tname.sm {
     font-size: 13px;
     letter-spacing: -0.015em;
@@ -31391,7 +31404,7 @@ const I18N_T = {
     "Enter plan yourself",
     "Instalment from fixed costs",
     "Count instalments even without ticking off",
-    "This is how much you can spend each day until month end – your main account divided by the remaining days.",
+    "This is how much you can spend each day until month end – your main account minus open fixed costs and tax reserve, divided by the remaining days.",
     "Extra repayments",
     "Save up for something – emergency fund, holiday, driving licence – and see how much you need to put aside each month.",
     "Balance (€)",
@@ -33982,7 +33995,7 @@ const I18N_T = {
     "Planı kendin gir",
     "Sabit giderlerden taksit",
     "Taksitleri işaretlemeden de say",
-    "Ay sonuna kadar her gün bu kadar harcayabilirsin – ana hesabın kalan günlere bölünmüş hali.",
+    "Ay sonuna kadar her gün bu kadar harcayabilirsin – ana hesabın, açık sabit giderler ve vergi rezervi düşüldükten sonra kalan günlere bölünür.",
     "Ek ödemeler",
     "Bir şey için biriktir – acil durum fonu, tatil, ehliyet – ve her ay ne kadar ayırman gerektiğini gör.",
     "Bakiye (€)",
@@ -36573,7 +36586,7 @@ const I18N_T = {
     "Внести план вручную",
     "Платёж из постоянных расходов",
     "Учитывать платежи и без отметки",
-    "Столько можно тратить каждый день до конца месяца – основной счёт, делённый на оставшиеся дни.",
+    "Столько можно тратить каждый день до конца месяца – основной счёт минус оставшиеся постоянные расходы и налоговый резерв, делённый на оставшиеся дни.",
     "Досрочные погашения",
     "Копи на что-то – подушка, отпуск, права – и смотри, сколько откладывать в месяц.",
     "Остаток (€)",
@@ -39164,7 +39177,7 @@ const I18N_T = {
     "Внести план вручну",
     "Платіж із постійних витрат",
     "Враховувати платежі й без позначки",
-    "Стільки можна витрачати щодня до кінця місяця – основний рахунок, поділений на решту днів.",
+    "Стільки можна витрачати щодня до кінця місяця – основний рахунок мінус ще не сплачені постійні витрати й податковий резерв, поділений на решту днів.",
     "Дострокові погашення",
     "Заощаджуй на щось – подушка, відпустка, права – і дивись, скільки відкладати щомісяця.",
     "Залишок (€)",
@@ -41755,7 +41768,7 @@ const I18N_T = {
     "Wpisz plan samodzielnie",
     "Rata z kosztów stałych",
     "Licz raty także bez odhaczania",
-    "Tyle możesz wydawać dziennie do końca miesiąca – konto główne podzielone przez pozostałe dni.",
+    "Tyle możesz wydawać dziennie do końca miesiąca – konto główne minus otwarte koszty stałe i rezerwa na podatek, podzielone przez pozostałe dni.",
     "Nadpłaty",
     "Oszczędzaj na coś – poduszka finansowa, urlop, prawo jazdy – i zobacz, ile odkładać co miesiąc.",
     "Stan (€)",
@@ -44346,7 +44359,7 @@ const I18N_T = {
     "أدخل الخطة بنفسك",
     "القسط من التكاليف الثابتة",
     "احتساب الأقساط حتى دون تأشير",
-    "هذا ما يمكنك إنفاقه يوميًا حتى نهاية الشهر – حسابك الرئيسي مقسومًا على الأيام المتبقية.",
+    "هذا ما يمكنك إنفاقه يوميًا حتى نهاية الشهر – حسابك الرئيسي ناقص التكاليف الثابتة المتبقية واحتياطي الضرائب، مقسومًا على الأيام المتبقية.",
     "سدادات إضافية",
     "ادّخر لشيء ما – صندوق طوارئ، عطلة، رخصة قيادة – وانظر كم تحتاج أن تدّخر شهريًا.",
     "الرصيد (€)",
@@ -46937,7 +46950,7 @@ const I18N_T = {
     "Introdu planul singur",
     "Rata din costurile fixe",
     "Numără ratele și fără bifare",
-    "Atât poți cheltui zilnic până la sfârșitul lunii – contul principal împărțit la zilele rămase.",
+    "Atât poți cheltui zilnic până la sfârșitul lunii – contul principal minus costurile fixe rămase și rezerva de impozit, împărțit la zilele rămase.",
     "Rambursări suplimentare",
     "Economisește pentru ceva – fond de urgență, vacanță, permis – și vezi cât trebuie să pui deoparte lunar.",
     "Sold (€)",
@@ -48423,7 +48436,6 @@ const ICON_PATHS = {
   user: `<circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5a7 7 0 0 1 14 0"/>`,
   save: `<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>`,
   basket: '<path d="M5 9h14l-1.4 9.2a2 2 0 0 1-2 1.8H8.4a2 2 0 0 1-2-1.8z"/><path d="M9 9l3-5 3 5"/>',
-  spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
   fuel: '<path d="M5 20V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v14M4 20h12M7.5 9h5"/><path d="M15 10h2a1.5 1.5 0 0 1 1.5 1.5V16a1.5 1.5 0 0 0 3 0V9l-3-3"/>',
   cash: '<rect x="3" y="6.5" width="18" height="11" rx="2.5"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 10v4M17.5 10v4"/>',
   case: '<rect x="3.5" y="7" width="17" height="12" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3.5 12.5h17"/>',
@@ -49461,7 +49473,10 @@ function parseAmt(s) {
     .replace(/^\+/, "")
     .replace(/^[−–]/, "-");
   if (!s) return NaN;
-  if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+  /* „1,234.56“ (englische Schreibweise): der letzte Trenner ist das Komma für Cent */
+  if (s.includes(",") && s.lastIndexOf(".") > s.lastIndexOf(",")) s = s.replace(/,/g, "");
+  else if (/^-?\d{1,3}(,\d{3}){2,}$/.test(s)) s = s.replace(/,/g, ""); /* „1,234,567“ */
+  else if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
   else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, ""); /* „1.234“ = tausendzweihundertvierunddreißig */
   const v = Number(s);
   return isFinite(v) ? v : NaN;
@@ -51852,7 +51867,7 @@ function profEnd() {
     if (!j.since) return null;
     const d = new Date(j.since + "T12:00");
     d.setDate(d.getDate() + 546);
-    return d.toISOString().slice(0, 10);
+    return isoOf(d);
   }
   return j.until || null;
 }
@@ -52491,6 +52506,27 @@ document.addEventListener("click", (e) => {
 
 /* Einstellungen extra */
 const CHANGELOG = [
+  [
+    "0.50.2",
+    "26. November 2026",
+    [
+      "Behoben: Auf schmalen Handys (z. B. 360 px breit) und bei langen Wörtern (Russisch, Polnisch, Rumänisch, Ukrainisch) ragte der Name in der unteren Leiste aus dem grünen Knopf über das Nachbar-Symbol. Jetzt wird der Knopf enger, und wenn es gar nicht passt, zeigt er nur das Symbol.",
+      "Behoben: Am 1. Januar stand der Kontostand plötzlich bei 0 € und die App warnte, das Geld werde knapp. Jetzt übernimmt sie den Stand vom 31. Dezember automatisch. Du kannst ihn in den Einstellungen weiter selbst eintragen.",
+      "Genauer: „Noch pro Tag“ zieht jetzt die Fixkosten ab, die in diesem Monat noch kommen (z. B. Miete). Vorher sah der Betrag größer aus, als er ist.",
+      "Behoben: Beträge in englischer Schreibweise wie 1,234.56 wurden zu 1,23 €. Jetzt wird daraus richtig 1.234,56 € – auch beim Import.",
+      "Import: Englische PayPal-Exporte (Spalte „Gross“, Datum wie 11/26/2026) werden jetzt erkannt. Vorher kam keine einzige Buchung an. Auch Daten wie 20261126 und Beträge in Klammern (12,34) = −12,34 € gehen jetzt.",
+      "Rundgang mit Mami: Am Handy und Tablet verschwanden Mami und die Sprechblase bei den letzten Schritten (Erinnerungen, Fehler melden, Einstellungen) oben aus dem Bild, weil die Kopfzeile weggescrollt war – man sah nur noch eine dunkle Fläche. Jetzt scrollt die Tour dorthin zurück.",
+      "Rundgang: Der Rahmen saß manchmal ein Stück neben dem gezeigten Bereich (z. B. bei der Suche in den Buchungen), weil er gesetzt wurde, bevor das Scrollen fertig war. Nach dem Drehen von Handy oder Tablet rutscht er jetzt auch wieder an die richtige Stelle.",
+      "Rundgang: Kein leerer weißer Kreis mehr um den Mami-Knopf, während Mami gerade selbst herumfliegt. Und die Begrüßung nennt die richtige Zahl an Schritten.",
+      "Erklärung zu „Noch pro Tag“ in allen Sprachen richtig: Hauptkonto minus offene Fixkosten und Steuer-Rücklage, geteilt durch die restlichen Tage.",
+      "Abgleich: Wenn du auf zwei Geräten etwas an den Einstellungen änderst, bevor sie sich abgleichen (z. B. am Handy ein Budget, am PC ein Sparziel), bleibt jetzt beides erhalten. Vorher gewann das Gerät, das zuletzt hochgeladen hat – die andere Änderung war weg.",
+      "Sicherer: Auch der Rechnungs-Export für die Aufbewahrung schützt jetzt vor Formeln in Kundennamen, die Excel beim Öffnen sonst ausführen würde.",
+      "Behoben: Wer in den Einstellungen 0 % Umsatzsteuer eingetragen hat (z. B. für steuerfreie Leistungen), bekam in der Umsatzsteuer-Übersicht und im DATEV-Export trotzdem 19 % berechnet.",
+      "Schneller: Haushalt und Jahresübersicht bauen sich bei vielen Buchungen etwa doppelt so schnell auf.",
+      "Behoben: Fälligkeitsdaten aus Rechnungen und beim Arbeitslosengeld-Ende konnten in manchen Zeitzonen einen Tag zu früh angezeigt werden.",
+      "Aufgeräumt: doppelt vorhandener Code entfernt (gleiche Datumsfunktion zweimal, ein Symbol zweimal, eine Zeile, die nie lief).",
+    ],
+  ],
   [
     "0.50.1",
     "26. November 2026",
@@ -53656,7 +53692,7 @@ function tourOpen() {
     sel: "#ptourQ",
     raw: 1,
     t: mFill(nm ? mamiText("tr_hi").replace("{n}", nm) : mamiText("tr_hi0")),
-    p: [mamiText("tr_hi2").replace("{n}", TOUR.steps.length + 1)],
+    p: [mamiText("tr_hi2").replace("{n}", TOUR.steps.length + 2)],
   });
   TOUR.steps.push({
     sel: "#ptourQ",
@@ -53667,7 +53703,28 @@ function tourOpen() {
   TOUR.i = -1;
   tourGo(0);
 }
+/* Ring bleibt am Ziel, auch wenn sich darüber etwas nachträglich verschiebt (Drehen, Zahlen, die sich aufbauen) */
+function tourWatch(on) {
+  clearInterval(tourWatch.t);
+  if (!on) return;
+  tourWatch.t = setInterval(() => {
+    if (TOUR.i < 0) return tourWatch(false);
+    const el = $("tourBg"),
+      ring = el && el.querySelector(".tring"),
+      bub = el && el.querySelector(".tbub");
+    if (!ring || !bub || !bub.classList.contains("on") || TOUR_MAMI.anim) return;
+    const t = tmTarget(TOUR.steps[TOUR.i]);
+    if (!t) return;
+    const a = t.getBoundingClientRect();
+    /* Seite hat sich von selbst weggescrollt: Schritt neu anfahren */
+    if (a.bottom < 0 || a.top > innerHeight) return tourGo(TOUR.i);
+    if (ring.classList.contains("none")) return;
+    const b = ring.getBoundingClientRect();
+    if (Math.abs(a.left - 8 - b.left) + Math.abs(a.top - 8 - b.top) + Math.abs(a.width + 16 - b.width) > 4) tourPlace();
+  }, 600);
+}
 function tourCloseNow() {
+  tourWatch(false);
   try {
     mHeadIn();
   } catch (_) {}
@@ -53744,6 +53801,8 @@ function tmEls() {
 function tmTarget(s) {
   return s ? [...document.querySelectorAll(s.sel)].find((n) => tourVis(n) && !n.closest(".cubestage")) : null;
 }
+/* Schritte am Mami-Knopf: Mami ist gerade selbst herausgeflogen – ein Ring um den leeren Knopf sähe aus wie ein Fehler */
+const tmNoRing = (s) => !!s && s.sel === "#ptourQ";
 function tmFixed(t) {
   for (let n = t; n && n !== document.body; n = n.parentElement) {
     const p = getComputedStyle(n).position;
@@ -53790,17 +53849,24 @@ function tourGo(i) {
   };
   const t = tmTarget(s);
   let dy = 0;
-  if (t && !tmFixed(t) && !t.closest(".tabs,.pchero,.top")) {
+  const tr0 = t && t.getBoundingClientRect(),
+    navEl = document.querySelector(".tabs"),
+    nb0 = navEl ? navEl.getBoundingClientRect().height : 0,
+    head = t && t.closest(".tabs,.pchero,.top"),
+    /* Kopfzeile/Leiste: nur scrollen, wenn sie gerade aus dem Bild gescrollt ist (am Handy scrollt die Kopfzeile mit) */
+    offView = tr0 && (tr0.bottom < 8 || tr0.top > innerHeight - nb0 - 8);
+  if (t && (offView || (!tmFixed(t) && !head))) {
     const r = t.getBoundingClientRect(),
-      nav = document.querySelector(".tabs"),
-      nb = nav ? nav.getBoundingClientRect().height : 0;
+      nb = nb0;
     const max = Math.max(0, document.documentElement.scrollHeight - innerHeight),
-      want =
-        scrollY +
-        r.top -
-        Math.max(IS_PC ? (innerWidth <= 1420 ? 190 : 112) : 80, (innerHeight - nb - r.height) / 2 - 90);
+      want = head
+        ? scrollY + r.top - 16
+        : scrollY +
+          r.top -
+          Math.max(IS_PC ? (innerWidth <= 1420 ? 190 : 112) : 80, (innerHeight - nb - r.height) / 2 - 90);
     const ns = Math.round(Math.max(0, Math.min(max, want)));
     dy = ns - scrollY;
+    TOUR.to = ns;
     if (Math.abs(dy) > 2)
       window.scrollTo({
         top: ns,
@@ -53812,21 +53878,24 @@ function tourGo(i) {
     if (tok !== TOUR_MAMI.tok) return;
     if (dy) {
       dy = 0;
-      tmSettle().then(go);
+      tmSettle(TOUR.to).then(go);
       return;
     }
     fill();
     const L = tmLayout(t, 0, bub);
-    tmRing(ring, L.ring, first);
+    tmRing(ring, tmNoRing(s) ? null : L.ring, first);
     const fly = first && TOUR_MAMI.x == null ? tmStart(mami, L.m) : tmFly(mami, L.m.x, L.m.y);
     fly.then(() => {
       if (tok !== TOUR_MAMI.tok) return;
       tmBub(bub, L);
+      tourWatch(true);
     });
   };
   setTimeout(go, first ? 60 : 150);
 }
-function tmSettle() {
+/* Warten, bis das Scrollen fertig ist. Mit Ziel: erst wenn es erreicht ist – sanftes Scrollen startet oft
+   ein paar Bilder verzögert, sonst stünde der Ring an der alten Stelle. */
+function tmSettle(to) {
   return new Promise((res) => {
     let last = scrollY,
       same = 0,
@@ -53836,7 +53905,8 @@ function tmSettle() {
       if (Math.abs(scrollY - last) < 0.5) same++;
       else same = 0;
       last = scrollY;
-      if (same >= 3 || n > 60) res();
+      const there = to == null || Math.abs(scrollY - to) < 1.5;
+      if ((same >= 3 && there) || n > 90) res();
       else requestAnimationFrame(f);
     };
     requestAnimationFrame(f);
@@ -54509,7 +54579,7 @@ function tourPlace() {
   if (!el.querySelector(".tmami")) return;
   const { ring, bub, mami } = tmEls();
   const L = tmLayout(tmTarget(s), 0, bub);
-  tmRing(ring, L.ring, false);
+  tmRing(ring, tmNoRing(s) ? null : L.ring, false);
   if (TOUR_MAMI.anim) {
     TOUR_MAMI.anim.cancel();
     TOUR_MAMI.anim = null;
@@ -57160,7 +57230,6 @@ function mFind(q) {
     .sort((a, b) => b.sc - a.sc);
   const top = res.length ? res[0].sc : 0;
   return res.filter((x) => x.sc >= top * 0.5);
-  return res;
 }
 function mamiAsk(q) {
   q = String(q || "").trim();
@@ -58847,6 +58916,10 @@ function ustLabel(key, long) {
   if (M.length === 3) return `Q${Math.ceil(m / 3)}${long ? " " + y : ""}`;
   return fxDate(M[0] + "-15", long ? { month: "long", year: "numeric" } : { month: "short" });
 }
+function vatOwn() {
+  const v = store.settings.vatRate;
+  return v === 0 || v === "0" ? 0 : Number(v) || 19;
+}
 function ustGuessRate(name) {
   const def = Number(store.settings.vatRate) || 19;
   if (UST_ZERO.test(name || "")) return 0;
@@ -58859,7 +58932,8 @@ const ustVat = (gross, r) => round2(gross - gross / (1 + r / 100));
 function ustCalc(key) {
   const M = ustMonths(key),
     inP = (d) => M.includes(String(d || "").slice(0, 7)),
-    def = Number(store.settings.vatRate) || 19,
+    /* eigener Steuersatz für Einnahmen – auch 0 % (z. B. steuerfreie Leistungen), nur ohne Angabe 19 % */
+    def = vatOwn(),
     out = {},
     vst = [];
   const addOut = (r, net, vat) => {
@@ -60371,7 +60445,11 @@ document.addEventListener("click", (e) => {
   }
 });
 addEventListener("resize", () => {
-  if (TOUR.i >= 0) tourPlace();
+  if (TOUR.i < 0) return;
+  tourPlace();
+  /* Nach dem Drehen ordnen sich Leiste und Karten noch kurz neu – dann den Ring nachziehen */
+  (tourPlace.t || []).forEach(clearTimeout);
+  tourPlace.t = [450, 1000].map((ms) => setTimeout(() => TOUR.i >= 0 && tourPlace(), ms));
 });
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-tour]");
@@ -64204,9 +64282,33 @@ function resAway() {
     where: String(o.where || ""),
   };
 }
+/* Kontostand am 1.1.: eingetragen – sonst automatisch der Stand vom 31.12. des Vorjahres,
+   sobald ein früheres Jahr bekannt ist. Sonst stünde im Januar plötzlich 0 € da. */
+function startBalSet(y) {
+  const s = store.settings.startBalance;
+  return !!(s && Object.prototype.hasOwnProperty.call(s, String(y)));
+}
+function startCarry(y) {
+  y = Number(y);
+  for (let k = 1; k <= 10; k++) if (startBalSet(y - k)) return true;
+  return false;
+}
+/* Übertrag merken, solange sich an den Daten nichts ändert (sonst rechnet jede Ansicht alle Vorjahre neu) */
+const SB_C = { k: "", tx: null, mo: null, fx: null, v: {} };
 function startBal(y) {
-  const v = store.settings.startBalance && store.settings.startBalance[String(y)];
-  return Number(v) || 0;
+  y = Number(y);
+  if (startBalSet(y)) return Number(store.settings.startBalance[String(y)]) || 0;
+  if (!startCarry(y)) return 0;
+  const k = DREV + "|" + JSON.stringify(store.settings.startBalance || {}) + "|" + store.tx.length;
+  if (SB_C.k !== k || SB_C.tx !== store.tx || SB_C.mo !== store.months || SB_C.fx !== store.fixed) {
+    SB_C.k = k;
+    SB_C.tx = store.tx;
+    SB_C.mo = store.months;
+    SB_C.fx = store.fixed;
+    SB_C.v = {};
+  }
+  if (!(y in SB_C.v)) SB_C.v[y] = round2(yearCum(y - 1 + "-12").balance);
+  return SB_C.v[y];
 }
 function yearCum(ym) {
   const [y, m] = ymParts(ym);
@@ -65621,7 +65723,7 @@ function renderHome() {
     dayNote = `${days} Tage`;
   }
   const y = ym.slice(0, 4);
-  const needStart = !(store.settings.startBalance && y in store.settings.startBalance);
+  const needStart = !startBalSet(y) && !startCarry(y);
   const groups = {};
   for (const t of c.tx) {
     if (t.kind === "ausgabe" || t.kind === "betrieb") {
@@ -68778,12 +68880,20 @@ function dayAvg(from, to, days) {
   }
   return v / Math.max(1, days);
 }
-/* „Noch pro Tag“: Hauptkonto geteilt durch die restlichen Tage (inkl. heute) */
+/* „Noch pro Tag“: Hauptkonto minus offene Fixkosten und Steuer-Rücklage, geteilt durch die restlichen Tage (inkl. heute) */
 function freePerDay(ym, mainBal) {
   const left = Math.max(1, daysIn(ym) - new Date().getDate() + 1);
+  /* Noch offene Fixkosten dieses Monats (vom Hauptkonto) sind schon verplant – nicht als „pro Tag frei“ zeigen */
+  let open = 0;
+  try {
+    const paid = (store.months[ym] && store.months[ym].paid) || {};
+    for (const f of fixedForMonth(ym, true)) if (!(f.id in paid) && fxAcct(f) === "Hauptkonto") open += Number(planAmt(f, ym)) || 0;
+    /* Steuer-Rücklage, die noch auf dem Konto liegt, gehört dir auch nicht zum Ausgeben */
+    open += Math.max(0, Number(yearCum(ym).reserveAcc) || 0);
+  } catch (_) {}
   return {
     left,
-    v: Math.max(0, Number(mainBal) || 0) / left,
+    v: Math.max(0, (Number(mainBal) || 0) - open) / left,
   };
 }
 function shopAvg() {
@@ -72506,7 +72616,7 @@ function loanCands() {
     if (p.kind !== "einnahme" || p.um || seen.has(p.id) || !(p.amount >= 500)) continue;
     const txt = (p.note || "") + " " + (p.ref || "") + " " + (p.cat || "");
     if (!(LOAN_WORD.test(txt) || (LOAN_BANK.test(txt) && p.amount >= 1000))) continue;
-    const lim = isoOf(new Date(new Date(p.date).getTime() + 21 * 864e5)),
+    const lim = isoOf(new Date(new Date(p.date + "T12:00").getTime() + 21 * 864e5)),
       key = loanKey(p.note);
     const off =
       store.tx
@@ -77704,7 +77814,9 @@ function renderMore() {
   const st = store.settings,
     y = ui.ym.slice(0, 4);
   $("sStartYear").textContent = y;
-  setVal("sStart", st.startBalance && y in st.startBalance ? numStr(st.startBalance[y]) : "");
+  setVal("sStart", startBalSet(y) ? numStr(st.startBalance[y]) : "");
+  /* nicht eingetragen: der übernommene Stand vom 31.12. steht als Vorschlag im Feld */
+  $("sStart").placeholder = !startBalSet(y) && startCarry(y) ? numStr(startBal(y)) : "0,00";
   setVal("sRate", numStr(st.reserveRate));
   setVal("sKUlimit", numStr(st.kuLimit));
   setVal("sVat", numStr(st.vatRate));
@@ -95595,15 +95707,25 @@ function navLayout(nav, act) {
     H = (inner - PW) / 2;
   /* Symbol über dem Namen: alle Spalten gleich breit, die Pille umschließt nur den gewählten Reiter */
   const stacked = !!act && getComputedStyle(act).flexDirection === "column";
+  /* Platz für die Pille: Passt der Name nicht ganz hinein, erst enger (weniger Rand), sonst nur das Symbol –
+     nie ein Name, der über die Pille hinaus auf das Nachbar-Symbol ragt (schmale Handys, lange Wörter) */
+  const room = (g) => H - 30 * (g.length - 1);
+  let fit = "";
   const tw = (t) => {
     const n = t.querySelector(".tname");
     if (stacked) return Math.max(24, n ? Math.min(96, n.scrollWidth) : 0) + 20;
-    return 26 + 24 + (n ? Math.min(112, n.scrollWidth) + 7 : 0);
+    const lw = n ? Math.min(112, n.scrollWidth) : 0;
+    if (t !== act || !lw) return 26 + 24 + (lw ? lw + 7 : 0);
+    const g = left.includes(t) ? left : right,
+      max = room(g);
+    if (26 + 24 + lw + 7 <= max) return (fit = ""), 26 + 24 + lw + 7;
+    if (16 + 24 + lw + 5 <= max) return (fit = "cmp"), 16 + 24 + lw + 5;
+    return (fit = "nolbl"), 26 + 24;
   };
   const cols = (g) => {
     if (!g.length) return [];
     if (!act || stacked || !g.includes(act)) return g.map(() => H / g.length);
-    const w = Math.min(H - 34 * (g.length - 1), tw(act)),
+    const w = Math.min(room(g), tw(act)),
       r = (H - w) / Math.max(1, g.length - 1);
     return g.map((t) => (t === act ? w : r));
   };
@@ -95611,12 +95733,13 @@ function navLayout(nav, act) {
     cr = cols(right),
     all = [...cl, ...(pi < 0 ? [] : [PW]), ...cr];
   if (!(inner > 200) || all.some((v) => !(v > 0))) return null;
-  const L = { cl, cr, all, PW, pi, inner, x: 0, w: 0 };
+  const L = { cl, cr, all, PW, pi, inner, x: 0, w: 0, fit };
   if (!act) return L;
   const idx = kids.indexOf(act);
   let x = parseFloat(cs.paddingLeft);
   for (let i = 0; i < idx; i++) x += all[i];
   L.w = Math.min(all[idx], tw(act));
+  L.fit = fit;
   L.x = x + (all[idx] - L.w) / 2;
   return L;
 }
@@ -95649,6 +95772,10 @@ function navPill(anim) {
     NAVX.k = null;
     NAVX.L = null;
     return;
+  }
+  for (const t of nav.querySelectorAll(".tab")) {
+    t.classList.toggle("cmp", t === act && L.fit === "cmp");
+    t.classList.toggle("nolbl", t === act && L.fit === "nolbl");
   }
   const { x, w } = L,
     y = (nav.clientHeight - 48) / 2,
@@ -103487,7 +103614,7 @@ async function rvArchive() {
       .sort((a, b) => String(a.date).localeCompare(String(b.date))),
     files = [],
     enc = new TextEncoder(),
-    q = (v) => '"' + String(v ?? "").replace(/"/g, '""') + '"',
+    q = (v) => '"' + csvSafe(v ?? "").replace(/"/g, '""') + '"',
     n2 = (v) =>
       round2(Number(v) || 0)
         .toFixed(2)
@@ -104740,11 +104867,7 @@ function erUsedTx() {
       .map((x) => x.tx)
   );
 }
-function addDays(iso, n) {
-  const d = new Date(iso + "T12:00");
-  d.setDate(d.getDate() + n);
-  return isoOf(d);
-}
+/* addDays: siehe 41a-office-reminders.js */
 const erOpenList = () => erList().filter((i) => !i.paid && i.typ !== "g");
 function erState(i) {
   if (i.paid)
@@ -106189,7 +106312,7 @@ function dvShift(n) {
 function dvRows() {
   const [from, to] = dvRange(),
     inP = (d) => d && d >= from && d <= to,
-    def = Number(store.settings.vatRate) || 19,
+    def = vatOwn(),
     klein = !!store.settings.kleinunternehmer,
     R = [];
   const short = (id) => String(id || "").slice(-6).toUpperCase();
@@ -114026,7 +114149,7 @@ const COLS = {
     "buchungstext",
     "hinweis",
   ],
-  amount: ["amount (eur)", "betrag (eur)", "betrag (€)", "amount", "betrag", "umsatz in eur", "umsatz", "brutto"],
+  amount: ["amount (eur)", "betrag (eur)", "betrag (€)", "amount", "betrag", "umsatz in eur", "umsatz", "brutto", "gross"],
   type: [
     "type",
     "transaction type",
@@ -114134,8 +114257,14 @@ function parseDate(s) {
   if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return m[1] + "-" + pad(m[2]) + "-" + pad(m[3]);
   if ((m = s.match(/^(\d{1,2})[./](\d{1,2})[./](\d{2,4})/))) {
     const y = m[3].length === 2 ? "20" + m[3] : m[3];
-    return y + "-" + pad(m[2]) + "-" + pad(m[1]);
+    let d = +m[1],
+      mo = +m[2];
+    /* US-Schreibweise 11/26/2026 (z. B. englische PayPal-Exporte): Monat steht vorne */
+    if (mo > 12 && d <= 12) [d, mo] = [mo, d];
+    if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+    return y + "-" + pad(mo) + "-" + pad(d);
   }
+  if ((m = s.match(/^(20\d\d)(\d\d)(\d\d)$/)) && +m[2] >= 1 && +m[2] <= 12 && +m[3] >= 1 && +m[3] <= 31) return m[1] + "-" + m[2] + "-" + m[3];
   return null;
 }
 function parseBankAmt(s) {
@@ -114144,6 +114273,8 @@ function parseBankAmt(s) {
     .replace(/^\+/, "")
     .replace(/^[−–]/, "-");
   if (/^[\d.,]+[-−]$/.test(s)) s = "-" + s.slice(0, -1);
+  /* Buchhaltungs-Schreibweise: (12,34) = -12,34 */
+  if (/^\([\d.,]+\)$/.test(s)) s = "-" + s.slice(1, -1);
   if (!s) return NaN;
   /* „2.350“ ist bei Euro-Beträgen immer Tausender (drei Nachkommastellen gibt es nicht) */
   if (/,\d{1,2}$/.test(s)) s = s.replace(/\./g, "").replace(",", ".");
@@ -115528,7 +115659,7 @@ function parseInvoice(lines) {
       if (m && date) {
         const d = new Date(date + "T12:00");
         d.setDate(d.getDate() + Number(m[1]));
-        due = d.toISOString().slice(0, 10);
+        due = isoOf(d);
       }
     }
     if (!due) dui = -1;
@@ -117991,10 +118122,84 @@ function saveSync() {
         skipped: SYNC.skipped,
         asked: !!SYNC.asked,
         email: SYNC.email || "",
+        ...(SYNC.sBase ? { sBase: SYNC.sBase } : {}),
         ...(typeof SYNC.bad === "number" ? { bad: SYNC.bad } : {}),
       })
     );
   } catch (e) {}
+}
+/* Einstellungen sind ein einziges Dokument. Ändern zwei Geräte vor dem Abgleich verschiedene Dinge
+   (z. B. Handy das Budget, PC den Namen), gewann bisher das zuletzt hochgeladene – das andere war weg.
+   Jetzt: Vor dem Hochladen wird der Stand vom Server geholt und zusammengeführt. Es zählt jeweils,
+   was auf diesem Gerät seit dem letzten Abgleich (SYNC.sBase) wirklich geändert wurde. */
+const setJ = (v) => JSON.stringify(v === undefined ? null : v);
+const setObj = (v) => v && typeof v === "object" && !Array.isArray(v);
+const setCl = (v) => (v === undefined ? undefined : clone(v));
+const setIdList = (a) => Array.isArray(a) && a.length > 0 && a.every((x) => x && typeof x === "object" && x.id != null);
+function setMerge3(base, loc, rem, depth) {
+  if (setJ(loc) === setJ(base)) return setCl(rem);
+  if (setJ(rem) === setJ(base) || setJ(rem) === setJ(loc)) return setCl(loc);
+  if (depth < 3 && setObj(base) && setObj(loc) && setObj(rem)) {
+    const out = {};
+    for (const k of new Set([...Object.keys(base), ...Object.keys(loc), ...Object.keys(rem)])) {
+      const v = setMerge3(base[k], loc[k], rem[k], depth + 1);
+      if (v !== undefined) out[k] = v;
+    }
+    return out;
+  }
+  /* Listen mit id (Sparziele, Konten …): je Eintrag zusammenführen */
+  if (depth < 3 && Array.isArray(base) && (setIdList(loc) || setIdList(rem)) && (Array.isArray(loc) || loc == null) && (Array.isArray(rem) || rem == null)) {
+    const by = (a) => new Map((a || []).filter((x) => x && x.id != null).map((x) => [String(x.id), x])),
+      B = by(base),
+      L = by(loc),
+      R = by(rem),
+      out = [];
+    const order = [...(rem || []), ...(loc || [])].map((x) => x && x.id != null && String(x.id)).filter(Boolean);
+    for (const id of [...new Set(order)]) {
+      const inB = B.has(id),
+        inL = L.has(id),
+        inR = R.has(id);
+      if (inB && !inL && (!inR || setJ(R.get(id)) === setJ(B.get(id)))) continue; /* hier gelöscht */
+      if (inB && !inR && (!inL || setJ(L.get(id)) === setJ(B.get(id)))) continue; /* dort gelöscht */
+      const v = setMerge3(B.get(id), L.get(id), R.get(id), depth + 1);
+      if (v) out.push(v);
+    }
+    return out;
+  }
+  return setCl(loc); /* beide haben dasselbe geändert: dieses Gerät gewinnt (wie bisher) */
+}
+async function syncSetPre() {
+  const op = SYNC.queue.find((o) => o.col === "app" && o.id === "settings");
+  if (!op || !SYNC.sBase || !op.data) return;
+  let since = SYNC.rev,
+    remote = null;
+  for (let n = 0; n < 8; n++) {
+    const res = await api("pull", { qs: "&since=" + since });
+    if (MODE === "pair" && res.moved) return;
+    const docs = MODE === "pair" ? await pairDecDocs(res.docs) : res.docs || [];
+    for (const d of docs) if (d.col === "app" && d.id === "settings" && d.data) remote = d.data;
+    if (!res.more || !res.rev || res.rev === since) break;
+    since = res.rev;
+  }
+  if (!remote || setJ(remote) === setJ(SYNC.sBase)) return;
+  const m = setMerge3(SYNC.sBase, store.settings, remote, 0);
+  m.cats = { ...clone(DEFAULT_SETTINGS.cats), ...(m.cats || {}) };
+  try {
+    zMerge(store.settings, m);
+  } catch (_) {}
+  if (!m.updKey && store.settings && store.settings.updKey) m.updKey = store.settings.updKey;
+  store.settings = m;
+  op.data = clone(m);
+  SYNC.sBase = clone(remote);
+  persistLocal();
+  saveSync();
+  try {
+    BG_RENDER = true;
+    render();
+  } catch (_) {
+  } finally {
+    BG_RENDER = false;
+  }
 }
 function rqAdd(id) {
   if (!SERVER || !SYNC.token) return;
@@ -118187,6 +118392,11 @@ async function syncNow() {
     renderHero();
   } catch (e) {}
   try {
+    try {
+      await syncSetPre();
+    } catch (e) {
+      if (e && e.status) throw e;
+    }
     if (SYNC.queue.length) {
       const ops = SYNC.queue.slice(0, MODE === "pair" ? 150 : 400);
       await api("push", {
@@ -118195,6 +118405,8 @@ async function syncNow() {
         },
       });
       SYNC.queue = SYNC.queue.filter((o) => !ops.includes(o));
+      const so = ops.find((o) => o.col === "app" && o.id === "settings");
+      if (so && so.data) SYNC.sBase = clone(so.data);
       saveSync();
     }
     if (SYNC.rq && SYNC.rq.length) {
@@ -118260,6 +118472,7 @@ async function syncNow() {
       }
       if (d.col === "app") {
         if (d.id === "settings" && d.data) {
+          SYNC.sBase = clone(d.data);
           const m = {
             ...clone(DEFAULT_SETTINGS),
             ...d.data,

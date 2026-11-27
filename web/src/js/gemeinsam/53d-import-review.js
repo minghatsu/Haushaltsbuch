@@ -76,7 +76,7 @@ function parseInvoice(lines) {
       if (m && date) {
         const d = new Date(date + "T12:00");
         d.setDate(d.getDate() + Number(m[1]));
-        due = d.toISOString().slice(0, 10);
+        due = isoOf(d);
       }
     }
     if (!due) dui = -1;

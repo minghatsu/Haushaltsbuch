@@ -118,7 +118,7 @@ function profEnd() {
     if (!j.since) return null;
     const d = new Date(j.since + "T12:00");
     d.setDate(d.getDate() + 546);
-    return d.toISOString().slice(0, 10);
+    return isoOf(d);
   }
   return j.until || null;
 }

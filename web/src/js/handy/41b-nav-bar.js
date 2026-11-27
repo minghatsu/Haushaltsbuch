@@ -16,15 +16,25 @@ function navLayout(nav, act) {
     H = (inner - PW) / 2;
   /* Symbol über dem Namen: alle Spalten gleich breit, die Pille umschließt nur den gewählten Reiter */
   const stacked = !!act && getComputedStyle(act).flexDirection === "column";
+  /* Platz für die Pille: Passt der Name nicht ganz hinein, erst enger (weniger Rand), sonst nur das Symbol –
+     nie ein Name, der über die Pille hinaus auf das Nachbar-Symbol ragt (schmale Handys, lange Wörter) */
+  const room = (g) => H - 30 * (g.length - 1);
+  let fit = "";
   const tw = (t) => {
     const n = t.querySelector(".tname");
     if (stacked) return Math.max(24, n ? Math.min(96, n.scrollWidth) : 0) + 20;
-    return 26 + 24 + (n ? Math.min(112, n.scrollWidth) + 7 : 0);
+    const lw = n ? Math.min(112, n.scrollWidth) : 0;
+    if (t !== act || !lw) return 26 + 24 + (lw ? lw + 7 : 0);
+    const g = left.includes(t) ? left : right,
+      max = room(g);
+    if (26 + 24 + lw + 7 <= max) return (fit = ""), 26 + 24 + lw + 7;
+    if (16 + 24 + lw + 5 <= max) return (fit = "cmp"), 16 + 24 + lw + 5;
+    return (fit = "nolbl"), 26 + 24;
   };
   const cols = (g) => {
     if (!g.length) return [];
     if (!act || stacked || !g.includes(act)) return g.map(() => H / g.length);
-    const w = Math.min(H - 34 * (g.length - 1), tw(act)),
+    const w = Math.min(room(g), tw(act)),
       r = (H - w) / Math.max(1, g.length - 1);
     return g.map((t) => (t === act ? w : r));
   };
@@ -32,12 +42,13 @@ function navLayout(nav, act) {
     cr = cols(right),
     all = [...cl, ...(pi < 0 ? [] : [PW]), ...cr];
   if (!(inner > 200) || all.some((v) => !(v > 0))) return null;
-  const L = { cl, cr, all, PW, pi, inner, x: 0, w: 0 };
+  const L = { cl, cr, all, PW, pi, inner, x: 0, w: 0, fit };
   if (!act) return L;
   const idx = kids.indexOf(act);
   let x = parseFloat(cs.paddingLeft);
   for (let i = 0; i < idx; i++) x += all[i];
   L.w = Math.min(all[idx], tw(act));
+  L.fit = fit;
   L.x = x + (all[idx] - L.w) / 2;
   return L;
 }
@@ -70,6 +81,10 @@ function navPill(anim) {
     NAVX.k = null;
     NAVX.L = null;
     return;
+  }
+  for (const t of nav.querySelectorAll(".tab")) {
+    t.classList.toggle("cmp", t === act && L.fit === "cmp");
+    t.classList.toggle("nolbl", t === act && L.fit === "nolbl");
   }
   const { x, w } = L,
     y = (nav.clientHeight - 48) / 2,

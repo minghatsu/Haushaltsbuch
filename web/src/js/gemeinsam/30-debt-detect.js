@@ -79,7 +79,7 @@ function loanCands() {
     if (p.kind !== "einnahme" || p.um || seen.has(p.id) || !(p.amount >= 500)) continue;
     const txt = (p.note || "") + " " + (p.ref || "") + " " + (p.cat || "");
     if (!(LOAN_WORD.test(txt) || (LOAN_BANK.test(txt) && p.amount >= 1000))) continue;
-    const lim = isoOf(new Date(new Date(p.date).getTime() + 21 * 864e5)),
+    const lim = isoOf(new Date(new Date(p.date + "T12:00").getTime() + 21 * 864e5)),
       key = loanKey(p.note);
     const off =
       store.tx

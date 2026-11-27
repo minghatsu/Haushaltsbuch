@@ -29,10 +29,84 @@ function saveSync() {
         skipped: SYNC.skipped,
         asked: !!SYNC.asked,
         email: SYNC.email || "",
+        ...(SYNC.sBase ? { sBase: SYNC.sBase } : {}),
         ...(typeof SYNC.bad === "number" ? { bad: SYNC.bad } : {}),
       })
     );
   } catch (e) {}
+}
+/* Einstellungen sind ein einziges Dokument. Ändern zwei Geräte vor dem Abgleich verschiedene Dinge
+   (z. B. Handy das Budget, PC den Namen), gewann bisher das zuletzt hochgeladene – das andere war weg.
+   Jetzt: Vor dem Hochladen wird der Stand vom Server geholt und zusammengeführt. Es zählt jeweils,
+   was auf diesem Gerät seit dem letzten Abgleich (SYNC.sBase) wirklich geändert wurde. */
+const setJ = (v) => JSON.stringify(v === undefined ? null : v);
+const setObj = (v) => v && typeof v === "object" && !Array.isArray(v);
+const setCl = (v) => (v === undefined ? undefined : clone(v));
+const setIdList = (a) => Array.isArray(a) && a.length > 0 && a.every((x) => x && typeof x === "object" && x.id != null);
+function setMerge3(base, loc, rem, depth) {
+  if (setJ(loc) === setJ(base)) return setCl(rem);
+  if (setJ(rem) === setJ(base) || setJ(rem) === setJ(loc)) return setCl(loc);
+  if (depth < 3 && setObj(base) && setObj(loc) && setObj(rem)) {
+    const out = {};
+    for (const k of new Set([...Object.keys(base), ...Object.keys(loc), ...Object.keys(rem)])) {
+      const v = setMerge3(base[k], loc[k], rem[k], depth + 1);
+      if (v !== undefined) out[k] = v;
+    }
+    return out;
+  }
+  /* Listen mit id (Sparziele, Konten …): je Eintrag zusammenführen */
+  if (depth < 3 && Array.isArray(base) && (setIdList(loc) || setIdList(rem)) && (Array.isArray(loc) || loc == null) && (Array.isArray(rem) || rem == null)) {
+    const by = (a) => new Map((a || []).filter((x) => x && x.id != null).map((x) => [String(x.id), x])),
+      B = by(base),
+      L = by(loc),
+      R = by(rem),
+      out = [];
+    const order = [...(rem || []), ...(loc || [])].map((x) => x && x.id != null && String(x.id)).filter(Boolean);
+    for (const id of [...new Set(order)]) {
+      const inB = B.has(id),
+        inL = L.has(id),
+        inR = R.has(id);
+      if (inB && !inL && (!inR || setJ(R.get(id)) === setJ(B.get(id)))) continue; /* hier gelöscht */
+      if (inB && !inR && (!inL || setJ(L.get(id)) === setJ(B.get(id)))) continue; /* dort gelöscht */
+      const v = setMerge3(B.get(id), L.get(id), R.get(id), depth + 1);
+      if (v) out.push(v);
+    }
+    return out;
+  }
+  return setCl(loc); /* beide haben dasselbe geändert: dieses Gerät gewinnt (wie bisher) */
+}
+async function syncSetPre() {
+  const op = SYNC.queue.find((o) => o.col === "app" && o.id === "settings");
+  if (!op || !SYNC.sBase || !op.data) return;
+  let since = SYNC.rev,
+    remote = null;
+  for (let n = 0; n < 8; n++) {
+    const res = await api("pull", { qs: "&since=" + since });
+    if (MODE === "pair" && res.moved) return;
+    const docs = MODE === "pair" ? await pairDecDocs(res.docs) : res.docs || [];
+    for (const d of docs) if (d.col === "app" && d.id === "settings" && d.data) remote = d.data;
+    if (!res.more || !res.rev || res.rev === since) break;
+    since = res.rev;
+  }
+  if (!remote || setJ(remote) === setJ(SYNC.sBase)) return;
+  const m = setMerge3(SYNC.sBase, store.settings, remote, 0);
+  m.cats = { ...clone(DEFAULT_SETTINGS.cats), ...(m.cats || {}) };
+  try {
+    zMerge(store.settings, m);
+  } catch (_) {}
+  if (!m.updKey && store.settings && store.settings.updKey) m.updKey = store.settings.updKey;
+  store.settings = m;
+  op.data = clone(m);
+  SYNC.sBase = clone(remote);
+  persistLocal();
+  saveSync();
+  try {
+    BG_RENDER = true;
+    render();
+  } catch (_) {
+  } finally {
+    BG_RENDER = false;
+  }
 }
 function rqAdd(id) {
   if (!SERVER || !SYNC.token) return;
@@ -225,6 +299,11 @@ async function syncNow() {
     renderHero();
   } catch (e) {}
   try {
+    try {
+      await syncSetPre();
+    } catch (e) {
+      if (e && e.status) throw e;
+    }
     if (SYNC.queue.length) {
       const ops = SYNC.queue.slice(0, MODE === "pair" ? 150 : 400);
       await api("push", {
@@ -233,6 +312,8 @@ async function syncNow() {
         },
       });
       SYNC.queue = SYNC.queue.filter((o) => !ops.includes(o));
+      const so = ops.find((o) => o.col === "app" && o.id === "settings");
+      if (so && so.data) SYNC.sBase = clone(so.data);
       saveSync();
     }
     if (SYNC.rq && SYNC.rq.length) {
@@ -298,6 +379,7 @@ async function syncNow() {
       }
       if (d.col === "app") {
         if (d.id === "settings" && d.data) {
+          SYNC.sBase = clone(d.data);
           const m = {
             ...clone(DEFAULT_SETTINGS),
             ...d.data,

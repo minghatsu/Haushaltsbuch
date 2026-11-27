@@ -40,6 +40,10 @@ function ustLabel(key, long) {
   if (M.length === 3) return `Q${Math.ceil(m / 3)}${long ? " " + y : ""}`;
   return fxDate(M[0] + "-15", long ? { month: "long", year: "numeric" } : { month: "short" });
 }
+function vatOwn() {
+  const v = store.settings.vatRate;
+  return v === 0 || v === "0" ? 0 : Number(v) || 19;
+}
 function ustGuessRate(name) {
   const def = Number(store.settings.vatRate) || 19;
   if (UST_ZERO.test(name || "")) return 0;
@@ -52,7 +56,8 @@ const ustVat = (gross, r) => round2(gross - gross / (1 + r / 100));
 function ustCalc(key) {
   const M = ustMonths(key),
     inP = (d) => M.includes(String(d || "").slice(0, 7)),
-    def = Number(store.settings.vatRate) || 19,
+    /* eigener Steuersatz für Einnahmen – auch 0 % (z. B. steuerfreie Leistungen), nur ohne Angabe 19 % */
+    def = vatOwn(),
     out = {},
     vst = [];
   const addOut = (r, net, vat) => {

@@ -1174,7 +1174,9 @@ function renderMore() {
   const st = store.settings,
     y = ui.ym.slice(0, 4);
   $("sStartYear").textContent = y;
-  setVal("sStart", st.startBalance && y in st.startBalance ? numStr(st.startBalance[y]) : "");
+  setVal("sStart", startBalSet(y) ? numStr(st.startBalance[y]) : "");
+  /* nicht eingetragen: der übernommene Stand vom 31.12. steht als Vorschlag im Feld */
+  $("sStart").placeholder = !startBalSet(y) && startCarry(y) ? numStr(startBal(y)) : "0,00";
   setVal("sRate", numStr(st.reserveRate));
   setVal("sKUlimit", numStr(st.kuLimit));
   setVal("sVat", numStr(st.vatRate));

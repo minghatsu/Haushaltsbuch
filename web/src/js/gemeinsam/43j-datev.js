@@ -91,7 +91,7 @@ function dvShift(n) {
 function dvRows() {
   const [from, to] = dvRange(),
     inP = (d) => d && d >= from && d <= to,
-    def = Number(store.settings.vatRate) || 19,
+    def = vatOwn(),
     klein = !!store.settings.kleinunternehmer,
     R = [];
   const short = (id) => String(id || "").slice(-6).toUpperCase();

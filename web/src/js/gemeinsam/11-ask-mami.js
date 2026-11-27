@@ -1396,7 +1396,6 @@ function mFind(q) {
     .sort((a, b) => b.sc - a.sc);
   const top = res.length ? res[0].sc : 0;
   return res.filter((x) => x.sc >= top * 0.5);
-  return res;
 }
 function mamiAsk(q) {
   q = String(q || "").trim();
