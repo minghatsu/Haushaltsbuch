@@ -122,17 +122,28 @@ function agJobParts(y) {
     ex = agExState(),
     nt = agNetSeries(y),
     last = [...nt].reverse().find((x) => x.v > 0),
+    vt = store.settings.vt,
+    vb = vt && vt.f && vt.f.brutto,
+    fl = (k) => (typeof AGF !== "undefined" && AGF.keys.has(k) ? "agflash" : ""),
     tiles = [
-      agTile("wallet", uiText("ag_lohn_t"), sl ? uiText("ag_lohn_n", { n: String(sl) }) : uiText("ag_lohn_0"), 'data-anaopen="lohn"'),
+      agTile(
+        "wallet",
+        uiText("ag_lohn_t"),
+        sl ? (sl === 1 ? uiText("ag_lohn_1") : uiText("ag_lohn_n", { n: String(sl) })) : vb ? uiText("ag_lohn_vt", { a: fmtEur0(vb) }) : last ? uiText("ag_nt_s", { a: fmtEur0(last.v) }) : uiText("ag_lohn_0"),
+        'data-anaopen="lohn"',
+        fl("lohn")
+      ),
       agTile("doc", uiText("ag_wk_t"), uiText("ag_wk_s", { a: fmtEur0(W.total) }), 'data-anaopen="wk"'),
-      agTile("clock", uiText("ag_az"), A.soll ? uiText("ag_az_s", { a: agSg(sal) }) : uiText("ag_az_s0"), "data-agaz"),
+      agTile("clock", uiText("ag_az"), A.soll ? uiText("ag_az_s", { a: agSg(sal) }) : uiText("ag_az_s0"), "data-agaz", fl("az")),
       agTile("car", uiText("ag_aw"), W.km ? uiText("ag_aw_s", { k: String(W.km), n: String(W.days) }) : uiText("ag_aw_s0"), "data-agaw"),
       agTile("chart", uiText("ag_nt"), last ? uiText("ag_nt_s", { a: fmtEur0(last.v) }) : uiText("ag_nt_s0"), "data-agnt"),
-      agTile("gift", uiText("ag_ex"), ex.yes ? uiText("ag_ex_s", { n: String(ex.yes), m: String(AG_EX.length) }) : uiText("ag_ex_s0", { m: String(AG_EX.length) }), "data-agex"),
+      agTile("gift", uiText("ag_ex"), ex.yes ? uiText("ag_ex_s", { n: String(ex.yes), m: String(AG_EX.length) }) : uiText("ag_ex_s0", { m: String(AG_EX.length) }), "data-agex", fl("ex")),
     ];
   const ask = AG_EX.filter((x) => ex.a[x.k] === "frag");
   const head =
     agSlipBtn() +
+    vtBtn() +
+    vtHint() +
     agTaxHint(y) +
     (ask.length
       ? `<button type="button" class="ahint agask" data-agex>${svgIcon("bell", 16)} <span data-noi18n>${escHtml(uiText("ag_ex_ask", { n: ask.map((x) => uiText(x.t)).join(", ") }))}</span></button>`
@@ -386,7 +397,7 @@ function agAwRender(first) {
     <div class="card agcard">${agMonthHtml(ym, "aw")}<div class="aglg"><span><i class="j"></i>${E(uiText("ag_aw_lb", { n: String(cnt.b) }))}</span><span><i class="h"></i>${E(uiText("ag_aw_lh", { n: String(cnt.h) }))}</span><span><i class="u"></i>${E(uiText("ag_aw_lu", { n: String(cnt.u) }))}</span>${
       cnt.k ? `<span><i class="k"></i>${E(uiText("ag_aw_lk", { n: String(cnt.k) }))}</span>` : ""
     }</div></div>
-    <div class="card agcard"><div class="agrow"><span>${E(uiText("ag_aw_trips", { m: mn }))}</span><b>${E(cnt.b + " × " + numStr(km) + " km")}</b></div><div class="agrow"><span>${E(uiText("ag_aw_pend"))}</span><b>${E(fmtEur(round2(perDay * cnt.b)))}</b></div><div class="agrow"><span>${E(uiText("ag_aw_ho"))}</span><b>${E(fmtEur(round2(cnt.h * 6)))}</b></div><div class="agrow tot"><span>${E(uiText("ag_aw_year", { y }))}</span><b>${E(fmtEur(W.fahrt))}</b></div></div>
+    <div class="card agcard"><div class="agrow"><span>${E(uiText("ag_aw_trips", { m: mn }))}</span><b>${E(cnt.b + " × " + numStr(km) + " km")}</b></div><div class="agrow"><span>${E(uiText("ag_aw_pend"))}</span><b>${E(fmtEur(round2(perDay * cnt.b)))}</b></div><div class="agrow"><span>${E(uiText("ag_aw_ho"))}</span><b>${E(fmtEur(round2(cnt.h * 6)))}</b></div><div class="agrow tot"><span>${E(uiText("ag_aw_year", { y }))}</span><b>${E(fmtEur(round2((Number(W.fahrt) || 0) + (Number(W.home) || 0))))}</b></div></div>
     <p class="small muted agnote">${E(uiText("ag_aw_tap"))}</p><p class="small muted agnote">${E(uiText("ag_aw_rule"))}</p>`;
   if (first && !reducedMotion())
     try {

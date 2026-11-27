@@ -258,7 +258,7 @@ function spPubData(v) {
       out.budgets.push({
         c,
         b: Number(store.settings.budgets[c]) || 0,
-        s: round2(spent[c] || 0),
+        s: budSpent(monthCalc(ym).tx, c),
       });
   for (const g of store.settings.goals || [])
     if ((sel.goal || {})[g.id])

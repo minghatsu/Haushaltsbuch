@@ -418,6 +418,7 @@ function bankAskShould() {
     store.settings &&
     store.settings.wizDone &&
     !store.settings.bank &&
+    !store.settings.simple &&
     !ui.wiz &&
     (!$("legalBg") || $("legalBg").hidden) &&
     (!$("bankBg") || $("bankBg").hidden) &&
@@ -596,6 +597,10 @@ function wizBackOne() {
     }
   }
   if (w.step === 0) return false;
+  if (w.step === 7) {
+    wizNav(() => (w.step = 0), -1);
+    return true;
+  }
   wizNav(() => {
     w.step--;
     if (w.step === 1 && w.work) w.exAsk = true;
@@ -612,27 +617,42 @@ function wizRender() {
   const w = ui.wiz,
     el = $("wizBg");
   if (!w || !el) return;
-  const N = 7,
+  /* Einfach-Modus: nur Name + Monatsgeld (Schritt 7 = Monatsgeld) */
+  const simple = w.mode === "simple",
+    N = simple ? 2 : 7,
     st = w.step,
     y = ymOf(new Date()).slice(0, 4);
   const g1 = st === 1 ? (w.grp === undefined ? workGroup(w.work) : w.grp) : "";
   const crumb =
     st === 1 && (g1 || w.exAsk)
       ? `<div class="wcrumb"><button data-wzcrumb="0">Schritt 2</button>${g1 ? `<i>›</i><button data-wzcrumb="1">${escHtml((WGROUPS.find((x) => x[0] === g1) || [, ""])[1])}</button>` : ""}${w.exAsk && w.work ? `<i>›</i><span>${escHtml((WORK.find((x) => x[0] === w.work) || [, ""])[1])}</span>` : ""}</div>`
-      : `<small class="wk">Schritt ${st + 1} von ${N}</small>`;
+      : `<small class="wk">Schritt ${st === 7 ? 2 : st + 1} von ${N}</small>`;
   const head = (t, sub) =>
     `<div class="wsteps">${Array.from(
       {
         length: N,
       },
-      (_, i) => `<i class="${i <= st ? "on" : ""}"></i>`
+      (_, i) => `<i class="${i <= (st === 7 ? 1 : st) ? "on" : ""}"></i>`
     ).join("")}</div>${crumb}<h2 class="wt">${t}</h2><p class="ws">${sub}</p>`;
   let body = "";
   if (st === 0)
     body =
       head("Willkommen! Wie heißt du?", "Name und Foto sind freiwillig – für die Begrüßung oben links.") +
       `<div class="wname"><button class="wav" id="wzAv" aria-label="Profilfoto">${store.settings.photo ? `<img src="${escHtml(store.settings.photo)}" alt="">` : `<span>${escHtml(((w.name || "").trim()[0] || "?").toUpperCase())}</span>`}</button><input class="in wbig" id="wzName" value="${escHtml(w.name)}" placeholder="Dein Vorname" maxlength="30" autocomplete="given-name"></div>
-    <div class="wphoto">${phoneCam() ? `<button class="btn" id="wzCam">${svgIcon("camera", 18)} Foto machen</button>` : ""}<button class="btn" id="wzPick">${svgIcon("user", 18)} ${phoneCam() ? "Aus Galerie" : "Foto wählen"}</button>${store.settings.photo ? `<button class="btn" id="wzPhDel" aria-label="Foto entfernen"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M6 6l12 12M18 6 6 18"/></svg></button>` : ""}</div>`;
+    <div class="wphoto">${phoneCam() ? `<button class="btn" id="wzCam">${svgIcon("camera", 18)} Foto machen</button>` : ""}<button class="btn" id="wzPick">${svgIcon("user", 18)} ${phoneCam() ? "Aus Galerie" : "Foto wählen"}</button>${store.settings.photo ? `<button class="btn" id="wzPhDel" aria-label="Foto entfernen"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M6 6l12 12M18 6 6 18"/></svg></button>` : ""}</div>
+    <div class="wmode" data-noi18n><b class="wmh">${escHtml(uiText("sm_wz_q"))}</b>${[
+      ["simple", "✍️", "sm_wz_a", "sm_wz_as"],
+      ["full", "📊", "sm_wz_b", "sm_wz_bs"],
+    ]
+      .map(
+        ([k, e, t, s]) =>
+          `<button type="button" class="wmopt ${(w.mode || "full") === k ? "on" : ""}" data-wzmode="${k}" aria-pressed="${(w.mode || "full") === k}"><span class="e">${e}</span><span><b>${escHtml(uiText(t))}</b><small>${escHtml(uiText(s))}</small></span></button>`
+      )
+      .join("")}</div>`;
+  if (st === 7)
+    body =
+      head(escHtml(uiText("sm_wz_mt")), escHtml(uiText("sm_wz_ms"))) +
+      `<div class="wamt"><input class="in wbig" id="wzMoney" inputmode="decimal" value="${escHtml(w.money || "")}" placeholder="0,00"><span>€</span></div>`;
   if (st === 1)
     body =
       w.exAsk && w.work
@@ -699,7 +719,7 @@ function wizRender() {
         .join("")}</div>
       ${SYNCABLE && !(SYNC && SYNC.token) ? `<div class="notice info" style="margin-top:14px"><span>Handy und PC abgleichen? Das geht jederzeit unter Einstellungen › Abgleich & Backup.</span></div>` : ""}`;
   el.innerHTML = `<div class="wiz" role="dialog" aria-label="Einrichtung">${body}
-    <div class="wfoot ${!st && w.forced ? "solo" : ""}">${st ? `<button class="btn" id="wzBack">Zurück</button>` : w.forced ? "" : `<button class="btn" id="wzSkipAll">Später</button>`}<button class="btn primary" id="wzNext" ${st === 3 && (!w.bank || (w.bank === "andere" && !(w.bankName || "").trim())) ? "disabled" : ""}>${st === N - 1 ? "Fertig" : (st === 4 && !Object.keys(w.fix).length && !w.own.length) || (st === 5 && !w.debts.some((x) => x.n || parseAmt(x.r) > 0)) ? "Überspringen" : "Weiter"}</button></div></div>`;
+    <div class="wfoot ${!st && w.forced ? "solo" : ""}">${st ? `<button class="btn" id="wzBack">Zurück</button>` : w.forced ? "" : `<button class="btn" id="wzSkipAll">Später</button>`}<button class="btn primary" id="wzNext" ${st === 3 && (!w.bank || (w.bank === "andere" && !(w.bankName || "").trim())) ? "disabled" : ""}>${st === 7 || st === N - 1 ? "Fertig" : (st === 4 && !Object.keys(w.fix).length && !w.own.length) || (st === 5 && !w.debts.some((x) => x.n || parseAmt(x.r) > 0)) ? "Überspringen" : "Weiter"}</button></div></div>`;
   const f = el.querySelector("input");
   if (f && st !== 3 && st !== 4 && st !== 5 && st !== 6)
     setTimeout(
@@ -715,6 +735,7 @@ function wizRead() {
   if (!w) return;
   if ($("wzName")) w.name = $("wzName").value.trim();
   if ($("wzBal")) w.bal = $("wzBal").value.trim();
+  if ($("wzMoney")) w.money = $("wzMoney").value.trim();
   document.querySelectorAll("[data-wzfixamt]").forEach((i) => (w.fix[i.dataset.wzfixamt] = i.value.trim()));
   document.querySelectorAll("[data-wzownn]").forEach((i) => (w.own[Number(i.dataset.wzownn)].n = i.value.trim()));
   document.querySelectorAll("[data-wzowna]").forEach((i) => (w.own[Number(i.dataset.wzowna)].a = i.value.trim()));
@@ -742,6 +763,11 @@ async function wizFinish() {
     y = ymOf(new Date()).slice(0, 4),
     today = isoToday();
   if (w.name) st.name = w.name;
+  if (w.mode === "simple") {
+    st.simple = 1;
+    const mm = parseAmt(w.money);
+    if (mm > 0) st.monthMoney = round2(mm);
+  }
   if (w.bank)
     st.bank = {
       id: w.bank,
@@ -962,6 +988,13 @@ document.addEventListener("click", async (e) => {
     if (i) i.focus();
     return;
   }
+  const wm = t.closest("[data-wzmode]");
+  if (wm) {
+    wizRead();
+    w.mode = wm.dataset.wzmode;
+    wizRender();
+    return;
+  }
   if (t.closest("#wzBack")) {
     wizBackOne();
     return;
@@ -996,6 +1029,10 @@ document.addEventListener("click", async (e) => {
     }
     if (w.step === 3 && w.bank === "andere" && !(w.bankName || "").trim()) {
       toast("Bitte den Namen deiner Bank eintragen");
+      return;
+    }
+    if (w.step === 0 && w.mode === "simple") {
+      wizNav(() => (w.step = 7), 1);
       return;
     }
     if (w.step < 6) {

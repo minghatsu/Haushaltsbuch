@@ -1,0 +1,314 @@
+/* Brutto-Netto-Treppe und aufgeräumtes „Gehalt & Abrechnungen“ */
+.nrcard {
+  --nrj: var(--bf-job, #3b5ba5);
+}
+.nrnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.nrnav b {
+  font-size: 15px;
+}
+.nrkls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.nrkls .agk {
+  flex: 1 1 100%;
+  margin-bottom: 2px;
+}
+.nrkl {
+  flex: 1 1 0;
+  min-width: 40px;
+  min-height: 38px;
+  border: 0;
+  border-radius: 11px;
+  background: var(--sunk);
+  color: var(--fg);
+  font: 800 14px var(--f-body);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.12s;
+}
+.nrkl.on {
+  background: var(--nrj);
+  color: #fff;
+}
+.nrkl:active {
+  transform: scale(0.92);
+}
+.nropt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 4px;
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: 600 13px var(--f-body);
+  text-align: start;
+  cursor: pointer;
+}
+.nrform {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border-radius: 14px;
+  background: var(--sunk);
+  animation: agIn 0.3s ease-out both;
+}
+.nrf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.nrf .in {
+  width: 92px;
+  flex: none;
+  text-align: end;
+}
+.nrst {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0 6px;
+}
+.nrst .grow {
+  flex: 1;
+  min-width: 0;
+}
+.nrst b {
+  display: block;
+  font-size: 14.5px;
+}
+.nrst small {
+  display: block;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.nrv {
+  flex: none;
+  font-size: 15px !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.nrtop {
+  margin-top: 6px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.nrnet {
+  margin-top: 6px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.nrnet .nrv {
+  font-size: 20px !important;
+  color: var(--nrj);
+}
+.nrex,
+.nrsrc {
+  flex: none;
+  padding: 4px 9px;
+  border: 0;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--nrj) 12%, var(--surface));
+  color: var(--nrj);
+  font: 800 11.5px var(--f-body);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.nrex.on {
+  background: var(--nrj);
+  color: #fff;
+}
+.nrsrc {
+  background: color-mix(in srgb, var(--good) 14%, var(--surface));
+  color: var(--good);
+  cursor: default;
+}
+.nrbar {
+  position: relative;
+  height: 9px;
+  border-radius: 6px;
+  background: var(--sunk);
+  overflow: hidden;
+}
+.nrbar i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--nrj) 45%, var(--surface));
+  transform-origin: right;
+  animation: nrGrow 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.nrbar i.t {
+  background: var(--warn);
+}
+.nrbar i.b {
+  background: var(--nrj);
+  transform-origin: left;
+}
+.nrbar i.n {
+  background: var(--good);
+  transform-origin: left;
+}
+@keyframes nrGrow {
+  from {
+    transform: scaleX(0);
+  }
+}
+.nrnoanim .nrbar i,
+.nrnoanim .nrform {
+  animation: none;
+}
+.nredit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 2px;
+  animation: agIn 0.25s ease-out both;
+}
+.nredit .in {
+  flex: 1;
+  min-width: 0;
+}
+.nredit .btn {
+  flex: none;
+  min-height: 42px;
+}
+.nrnote {
+  margin: 10px 0 0;
+  line-height: 1.45;
+}
+/* Abrechnungen: kurze Monatsfelder */
+.lhab .smgrid .sm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 0;
+  overflow: hidden;
+}
+.lhab .smgrid .sm small {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: inherit;
+  opacity: 0.85;
+}
+.lhlg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+.lhlg i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-inline-end: 5px;
+  border-radius: 3px;
+  vertical-align: -1px;
+  background: var(--accent-soft);
+}
+.lhlg i.est {
+  background: var(--sunk);
+  box-shadow: inset 0 0 0 1.5px var(--accent-soft);
+}
+.lhbtns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+.lhbtns .btn {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+/* Klapp-Bereiche */
+.lhacc {
+  padding: 0 !important;
+}
+.lhacc summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 0;
+  list-style: none;
+  cursor: pointer;
+}
+.lhacc summary::-webkit-details-marker {
+  display: none;
+}
+.lhacc summary .grow {
+  flex: 1;
+  min-width: 0;
+}
+.lhacc summary b {
+  display: block;
+  font-size: 15.5px;
+}
+.lhacc summary small {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.lhacc summary svg {
+  flex: none;
+  color: var(--muted);
+  transition: transform 0.25s;
+}
+.lhacc[open] summary svg {
+  transform: rotate(180deg);
+}
+.lhaccb {
+  padding: 0 0 16px;
+  animation: agIn 0.3s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nrbar i,
+  .nrform,
+  .nredit,
+  .lhaccb {
+    animation: none;
+  }
+}
+.lhab,
+.lhacc {
+  margin-top: 0;
+  border-top: 1px solid var(--line);
+}
+.lhab {
+  padding-top: 18px !important;
+}
+.nrcard {
+  padding-bottom: 18px !important;
+}
+.lhhd {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-bottom: 10px;
+}
+.lhhd b {
+  font-size: 16px;
+}

@@ -406,7 +406,9 @@ function renderHome() {
     gMax = g.length && g[0].v ? g[0].v : 1;
   const budgetWarn =
     ym === cur
-      ? g.filter((x) => x.budget && x.v >= x.budget * 0.8).sort((a, b) => b.v / b.budget - a.v / a.budget)
+      ? budRows(c.tx)
+          .filter((x) => x.v >= x.budget * 0.8)
+          .sort((a, b) => b.v / b.budget - a.v / a.budget)
       : [];
   const bColor = (x) =>
     x.v > x.budget ? "var(--bad)" : x.v >= x.budget * 0.8 ? "var(--warn)" : catColor(x.kind, x.cat);
@@ -765,6 +767,7 @@ function renderHome() {
   try {
     brHints(hints);
   } catch (_) {}
+  if (simpleOn()) simpleHints(hints, ym, cur);
   ui.hints = hints;
   updateBell();
   if (ym === cur) notifyAlerts(hints);
@@ -789,7 +792,8 @@ function renderHome() {
         : ""
     }
     ${hasProfile() ? joblessTop(ym, free, c) : ""}
-    <div class="homeTop" style="display:flex;flex-direction:column;gap:10px" ${isJobless() ? "hidden" : ""}>
+    ${simpleOn() ? simpleHero(ym) : ""}
+    <div class="homeTop" style="display:flex;flex-direction:column;gap:10px" ${isJobless() || simpleOn() ? "hidden" : ""}>
       <div class="astack ${accts.length > 1 ? "" : "one"}" id="astack" ${accts.length > 1 ? `tabindex="0" aria-label="Konten – wischen zum Blättern"` : ""}>${acardHtml}</div>
       ${accts.length > 1 ? `<div class="adots" id="adots">${accts.map((_, i) => `<button data-cdot="${i}" aria-label="Karte ${i + 1}"><i></i></button>`).join("")}</div>` : ""}
       ${ym === cur && (ui.acctEd || []).filter(Boolean).length > 1 ? `<button class="mvopen" data-mvopen aria-label="${escHtml(uiText("mv_open"))}">${svgIcon("down", 18)}<span>${escHtml(uiText("mv_open"))}</span></button>` : ""}
@@ -804,6 +808,7 @@ function renderHome() {
         }
       </div>${ym === cur ? fcMini() : ""}`}
     </div>
+    ${ym === cur ? favCard() : ""}
     ${homeHub(ym, c)}
     ${homeBlocks({
       tip: `<div class="tipline ${tipCls}"><span class="e">${svgIcon(tipCls ? "alert" : "check", 19)}</span><span>${tip}</span></div>`,

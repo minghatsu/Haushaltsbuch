@@ -1,0 +1,200 @@
+/* Schnell buchen */
+.favgrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+html.pc .favgrid {
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+}
+.favt {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 92px;
+  padding: 10px 4px 8px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--sunk);
+  color: var(--fg);
+  font-family: var(--f-body);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition: transform 0.15s, background 0.2s;
+}
+.favt:hover {
+  background: color-mix(in srgb, var(--accent) 8%, var(--sunk));
+}
+.favt:active {
+  transform: scale(0.94);
+}
+.favt .ictile {
+  width: 34px;
+  height: 34px;
+}
+.favn {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.fava {
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+}
+.favt.add {
+  justify-content: center;
+  background: none;
+  box-shadow: inset 0 0 0 1.5px var(--line);
+  color: var(--muted);
+}
+.favh {
+  position: absolute;
+  top: 4px;
+  inset-inline-end: 6px;
+  color: var(--faint, #9aa5a0);
+}
+.favgrid.sorting .favt {
+  cursor: grab;
+  touch-action: none;
+  animation: favWig 0.32s ease-in-out infinite alternate;
+}
+.favgrid.sorting .favt:nth-child(2n) {
+  animation-delay: -0.16s;
+}
+@keyframes favWig {
+  from {
+    transform: rotate(-1.2deg);
+  }
+  to {
+    transform: rotate(1.2deg);
+  }
+}
+.favph {
+  opacity: 0.3;
+  animation: none !important;
+}
+.favghost {
+  position: fixed;
+  z-index: 9999;
+  margin: 0;
+  pointer-events: none;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
+  outline: 2px solid var(--accent);
+  transform: scale(1.06) rotate(-2deg);
+  animation: none !important;
+}
+.favhint {
+  margin: 10px 2px 0;
+}
+.favsug {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 10px;
+}
+.favsug .cgs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--sunk);
+}
+.favaddb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.favpay {
+  margin-top: 4px;
+}
+.favsave {
+  width: 100%;
+  min-height: 50px;
+}
+/* Vorschläge im Buchungsfenster */
+.sugwrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 2px 0 4px;
+  animation: cgIn 0.28s ease-out both;
+}
+.sugrow {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+.sugb {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  color: var(--fg);
+  font-family: var(--f-body);
+  text-align: start;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.sugb:active {
+  transform: scale(0.98);
+}
+.sugb .grow {
+  flex: 1;
+  min-width: 0;
+}
+.sugb b {
+  display: block;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sugb small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sugv {
+  flex: none;
+  font-size: 15px !important;
+}
+.sugrow.top .sugb {
+  background: var(--accent);
+  color: var(--accent-ink, #fff);
+}
+.sugrow.top .sugb small {
+  color: inherit;
+  opacity: 0.85;
+}
+.sugstar {
+  flex: none;
+  width: 42px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--sunk);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+@media (prefers-reduced-motion: reduce) {
+  .favgrid.sorting .favt,
+  .sugwrap {
+    animation: none;
+  }
+}

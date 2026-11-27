@@ -1,0 +1,173 @@
+/* Buchung aufteilen */
+.splhd {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.splhd .grow {
+  flex: 1;
+  min-width: 0;
+}
+.splhd b {
+  display: block;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.spltot {
+  flex: none;
+  font-size: 26px !important;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.splrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+.splrow:first-child {
+  border-top: 0;
+}
+.splrow .ictile {
+  flex: none;
+}
+.splcat {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+}
+.splamt {
+  width: 96px;
+  flex: none;
+  text-align: end;
+  font-weight: 800;
+}
+.spldel {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border: 0;
+  border-radius: 10px;
+  background: var(--sunk);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.spladd,
+.splrestb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 4px;
+  min-height: 40px;
+  font-weight: 800;
+}
+.splbar {
+  display: flex;
+  height: 12px;
+  margin: 8px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--sunk);
+}
+.splbar i {
+  display: block;
+  height: 100%;
+  transition: width 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.splrest {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+}
+.splrest span {
+  color: var(--muted);
+  font-weight: 700;
+}
+.splrest b {
+  color: var(--warn);
+}
+.splrest.ok b {
+  color: var(--good);
+}
+.splrest.over b {
+  color: var(--bad, #c0392b);
+}
+.splgo {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 4px;
+}
+.splgo:disabled {
+  opacity: 0.5;
+}
+#editBtns #splBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+#editBtns #splBtn[hidden] {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .splbar i {
+    transition: none;
+  }
+}
+/* gegen die allgemeine .in-Breite (100 %) */
+#splBg .splrow .splcat {
+  flex: 1 1 auto;
+  width: auto !important;
+  min-width: 0;
+}
+#splBg .splrow .splamt {
+  flex: 0 0 96px;
+  width: 96px !important;
+  min-width: 0;
+}
+#splBg .hobody {
+  overflow-x: hidden;
+}
+#splBg .splrow {
+  gap: 6px;
+}
+#splBg .splrow .ictile {
+  width: 32px;
+  height: 32px;
+}
+#splBg .splrow .splcat {
+  padding-inline: 10px 26px;
+  font-size: 14px;
+  text-overflow: ellipsis;
+}
+#splBg .splrow .splamt {
+  flex-basis: 84px;
+  width: 84px !important;
+  padding-inline: 8px 10px;
+}
+#splBg .spldel {
+  width: 30px;
+  height: 30px;
+}
+#splBg .splhd .splnote {
+  width: 100% !important;
+  margin-top: 4px;
+  font-weight: 700;
+}
+.splhd .splhr {
+  flex: none;
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+#splBg .splhd .spldate {
+  width: 172px !important;
+  padding: 6px 10px;
+  font-size: 13.5px;
+}

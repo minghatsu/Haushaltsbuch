@@ -935,6 +935,21 @@ function renderBudgetEd() {
   const el = $("budgetEd");
   if (!el || el.contains(document.activeElement)) return;
   const b = store.settings.budgets || {};
+  const row = (c, sub) =>
+    `<div class="edit-row acct-row budrow ${sub ? "cgbsub" : ""}"><span class="budn">${tile("ausgabe", c)}<b>${escHtml(c)}</b></span><input class="in" data-budget="${escHtml(c)}" inputmode="decimal" placeholder="kein Budget" aria-label="Monatsbudget ${escHtml(c)}" value="${b[c] ? escHtml(numStr(b[c])) : ""}"></div>`;
+  /* Mit Gruppen: Budget für die ganze Gruppe oder je Unterkategorie */
+  if (cgOn("ausgabe")) {
+    el.innerHTML = cgList("ausgabe")
+      .map((g) =>
+        cgSolo(g)
+          ? row(g.s[0] || g.n)
+          : `<div class="edit-row acct-row budrow cgbgrp"><span class="budn">${cgIcon("ausgabe", g)}<b>${escHtml(g.n)}</b> <small class="muted" data-noi18n>${escHtml(uiText("cg_bud_all"))}</small></span><input class="in" data-budget="${escHtml(g.n)}" inputmode="decimal" placeholder="kein Budget" aria-label="Monatsbudget ${escHtml(g.n)}" value="${b[g.n] ? escHtml(numStr(b[g.n])) : ""}"></div>${cgSubs(g)
+              .map((c) => row(c, 1))
+              .join("")}`
+      )
+      .join("");
+    return;
+  }
   el.innerHTML = cats("ausgabe")
     .map(
       (c) =>
@@ -1199,7 +1214,7 @@ function renderList() {
     return;
   }
   const days = {};
-  for (const t of sortTx(list)) (days[t.date] = days[t.date] || []).push(t);
+  for (const t of sortTx(splGroup(list))) (days[t.date] = days[t.date] || []).push(t);
   $("listCard").innerHTML = Object.entries(days)
     .map(([d, ts]) => {
       const net = sum(ts, (t) => (t.kind === "umbuchung" ? 0 : t.kind === "einnahme" ? t.amount : -t.amount));

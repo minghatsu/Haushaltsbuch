@@ -26,7 +26,7 @@ if (IS_PC) {
     return Math.max(1, Math.min(5, Math.floor(((w || 720) + 14) / (330 + 14))));
   }
   const isIn = (t) => t.kind === "einnahme" || (t.kind === "umbuchung" && t._k0 === "einnahme");
-  const ttl = (t) => t.note || t.cat || KIND_LABEL[t.kind];
+  const ttl = (t) => t.note || (t._spp ? uiText("sp_t0") : t.cat) || KIND_LABEL[t.kind];
   const amtTxt = (t, v) => (t.kind === "umbuchung" ? "" : isIn(t) ? "+ " : "− ") + fmtEur(v == null ? t.amount : v);
   const clip = `<svg class="i" viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-1px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3"/></svg>`;
   function shown() {
@@ -34,11 +34,12 @@ if (IS_PC) {
     const q = (ui.q || "").trim().toLowerCase();
     if (q)
       l = l.filter((t) => ((t.note || "") + " " + (t.cat || "") + " " + KIND_LABEL[t.kind]).toLowerCase().includes(q));
-    return sortTx(l);
+    return sortTx(splGroup(l));
   }
   function sub(t) {
+    const spc = t._spp ? [...new Set(t._spp.map((x) => x.cat))] : null;
     return [
-      t.note ? t.cat : "",
+      spc ? uiText("sp_row", { c: spc.slice(0, 2).join(", ") + (spc.length > 2 ? " +" + (spc.length - 2) : "") }) : t.note ? t.cat : "",
       t.kind === "betrieb"
         ? "Betrieblich"
         : t.kind === "vorauszahlung"
@@ -151,10 +152,10 @@ if (IS_PC) {
   }
   function detHtml(t) {
     const dt = new Date(t.date + "T12:00"),
-      same = monthCalc(ui.ym).tx.filter((x) => ttl(x) === ttl(t)),
+      same = splGroup(monthCalc(ui.ym).tx.filter((x) => ttl(x) === ttl(t))),
       rc = hasReceipt(t.id);
     const kv = [
-      ["Kategorie", t.cat || "–"],
+      ["Kategorie", t._spp ? t._spp.map((x) => x.cat + " " + fmtEur(x.amount)).join(" · ") : t.cat || "–"],
       ["Art", KIND_LABEL[t.kind] || t.kind],
       [
         "Bezahlt",
@@ -202,7 +203,9 @@ if (IS_PC) {
   async function det(anim) {
     const box = $("pcDet");
     if (!box) return;
-    const t = B.sel && store.tx.find((x) => x.id === B.sel);
+    let t = B.sel && store.tx.find((x) => x.id === B.sel);
+    /* aufgeteilte Buchung: als Ganzes zeigen */
+    if (t && t.sp && t.sp.g) t = splGroup(splParts(t.sp.g))[0] || t;
     const sig = t ? JSON.stringify([t, hasReceipt(t.id), RCPT.v[t.id] || 0, B.arm === t.id, LANG]) : "none|" + LANG;
     if (sig === B.sig && !anim) return;
     B.sig = sig;
@@ -323,7 +326,7 @@ if (IS_PC) {
       openSheet(t.kind === "umbuchung" ? t._k0 || "ausgabe" : t.kind === "abhebung" ? "ausgabe" : t.kind);
       ui.cat = t.cat;
       ui.pay = t.pay || "karte";
-      $("fAmount").value = numStr(t.amount);
+      $("fAmount").value = numStr(t.sp ? Number(t.sp.t) || t.amount : t.amount);
       $("fNote").value = t.note || "";
       $("fWk").checked = !!t.wk;
       renderSheet();
@@ -349,14 +352,20 @@ if (IS_PC) {
         i = l.findIndex((x) => x.id === id),
         next = l[i + 1] || l[i - 1];
       (async () => {
-        const img = hasReceipt(id) ? await rcptGet(id) : null;
-        if (await safe(() => delTxDoc(old))) {
+        const img = hasReceipt(id) ? await rcptGet(id) : null,
+          /* aufgeteilte Buchung: alle Teile zusammen löschen */
+          parts = old.sp && old.sp.g ? splParts(old.sp.g) : [old];
+        if (await safe(async () => {
+          for (const x of parts) await delTxDoc(x);
+        })) {
           if (img) await rcptDel(id);
           B.sel = next ? next.id : null;
           render();
           det(true);
           toast("Gelöscht", async () => {
-            await safe(() => restoreTx(old));
+            await safe(async () => {
+              for (const x of parts) await restoreTx(x);
+            });
             if (img) await rcptPut(id, img);
             B.sel = id;
             render();

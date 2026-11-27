@@ -24,6 +24,9 @@ function render() {
     ui.renderPending = true;
     return;
   }
+  try {
+    simpleApply();
+  } catch (_) {}
   if (SND._v && SND._v !== ui.view) SND.play("nav");
   SND._v = ui.view;
   $("greet").innerHTML = greetHTML();
@@ -130,10 +133,12 @@ function render() {
 }
 function tlRow(t, when) {
   const isIn = t.kind === "einnahme" || (t.kind === "umbuchung" && t._k0 === "einnahme"),
-    title = t.note || t.cat || KIND_LABEL[t.kind];
+    spc = t._spp ? [...new Set(t._spp.map((x) => x.cat))] : null,
+    title = t.note || (spc ? uiText("sp_t0") : t.cat) || KIND_LABEL[t.kind];
   const sub = [
     when || "",
-    t.note ? t.cat : "",
+    spc ? uiText("sp_row", { c: spc.slice(0, 2).join(", ") + (spc.length > 2 ? " +" + (spc.length - 2) : "") }) : t.note ? t.cat : "",
+    !spc && t.sp ? uiText("sp_part", { a: fmtEur(Number(t.sp.t) || 0) }) : "",
     t.kind === "betrieb"
       ? "Betrieblich"
       : t.kind === "vorauszahlung"
@@ -149,7 +154,7 @@ function tlRow(t, when) {
   ]
     .filter(Boolean)
     .join(" · ");
-  return `<button class="tlrow ${isIn ? "inc" : ""} k-${escHtml(t.kind)}" data-edit="${escHtml(t.id)}"><span class="grow"><b>${escHtml(title)}${t.nobon && !hasReceipt(t.id) ? ` <span class="nobon">BON FEHLT</span>` : ""}${hasReceipt(t.id) ? ` <svg class="i clip" viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-1px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3.5"/></svg>` : ""}</b>${sub ? `<span class="small muted">${escHtml(sub)}</span>` : ""}</span><span class="amt ${isIn ? "pos" : ""}">${isIn ? "+" : "−"} ${escHtml(fmtEur(t.amount))}</span></button>`;
+  return `<button class="tlrow ${isIn ? "inc" : ""} ${spc ? "tlsp" : ""} k-${escHtml(t.kind)}" data-edit="${escHtml(t.id)}"><span class="grow"><b>${escHtml(title)}${t.nobon && !hasReceipt(t.id) ? ` <span class="nobon">BON FEHLT</span>` : ""}${hasReceipt(t.id) ? ` <svg class="i clip" viewBox="0 0 24 24" style="width:13px;height:13px;vertical-align:-1px" aria-label="mit Beleg"><path d="M16.5 7.5 9 15a2.1 2.1 0 0 1-3-3l8-8a3.5 3.5 0 0 1 5 5l-8.5 8.5a5 5 0 0 1-7-7L11 3.5"/></svg>` : ""}</b>${sub ? `<span class="small muted">${escHtml(sub)}</span>` : ""}</span><span class="amt ${isIn ? "pos" : ""}">${isIn ? "+" : "−"} ${escHtml(fmtEur(t.amount))}</span></button>`;
 }
 function sortTx(list) {
   return list.slice().sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.ts || 0) - (a.ts || 0));
@@ -276,15 +281,16 @@ function sparkPath(name, asOf) {
 function budgetStreak(ym) {
   const budgets = store.settings.budgets || {},
     B = sum(
-      Object.entries(budgets).filter(([c, b]) => b > 0 && cats("ausgabe").includes(c)),
+      Object.entries(budgets).filter(([c, b]) => b > 0 && budValid(c)),
       (x) => Number(x[1])
-    );
+    ),
+    BC = new Set(Object.keys(budgets).filter((c) => budgets[c] > 0 && budValid(c)).flatMap(budCats));
   if (!(B > 0)) return null;
   const D = daysIn(ym),
     today = new Date().getDate(),
     per = new Array(D + 1).fill(0);
   for (const t of monthCalc(ym).tx)
-    if (t.kind === "ausgabe" && budgets[t.cat] > 0) per[Number(t.date.slice(8, 10))] += t.amount;
+    if (t.kind === "ausgabe" && BC.has(t.cat)) per[Number(t.date.slice(8, 10))] += t.amount;
   const ok = [];
   let cum = 0;
   for (let d = 1; d <= today; d++) {
@@ -313,16 +319,17 @@ function moneyFlowCard(ym) {
     gMax = g.length && g[0].v ? g[0].v : 1;
   const bColor = (x) => (x.v > x.budget ? "var(--bad)" : x.v >= x.budget * 0.8 ? "var(--warn)" : "var(--accent)");
   const days = ym === cur ? daysIn(ym) - new Date().getDate() + 1 : ym > cur ? daysIn(ym) : 1;
+  const ROWF = (x) => (x.budget ? `<div class="catrow">${tile(x.kind, x.cat)}<div class="grow"><div class="top-l"><span>${escHtml(x.label || x.cat)}</span><span>${escHtml(fmtEur(x.v))} <span class="small muted">von ${escHtml(fmtEur0(x.budget))}</span></span></div><div class="sub"><div class="track"><div class="fill" style="width:${Math.max(x.v ? 3 : 0, Math.min(100, (x.v / x.budget) * 100))}%;background:${bColor(x)}"></div></div><span class="pct" style="${x.v >= x.budget * 0.8 ? `color:${bColor(x)};font-weight:800` : ""}">${Math.round((x.v / x.budget) * 100)} %</span></div>${x.v > x.budget ? `<div class="small" style="color:var(--bad);margin-top:3px">${escHtml(fmtEur(x.v - x.budget))} über dem Budget</div>` : ym === cur && days ? `<div class="small muted" style="margin-top:3px">noch ${escHtml(fmtEur(x.budget - x.v))} · ${escHtml(fmtEur(Math.max(0, x.budget - x.v) / days))} pro Tag</div>` : ""}</div></div>` : `<div class="catrow">${tile(x.kind, x.cat)}<div class="grow"><div class="top-l"><span>${escHtml(x.label || x.cat)}${x.kind === "betrieb" ? ` <span class="small muted">· Betrieb</span>` : ""}</span><span>${escHtml(fmtEur(x.v))}</span></div><div class="sub"><div class="track"><div class="fill" style="width:${Math.max(3, (x.v / gMax) * 100)}%;background:${catColor(x.kind, x.cat)}"></div></div><span class="pct">${Math.round((x.v / gTot) * 100)} %</span></div></div></div>`);
   return `<div class="card">
       <div class="card-head"><h2>${headIcon("chart")}Wohin dein Geld fließt</h2><span class="small muted">${escHtml(monthName(ym))}</span></div>
       ${
         g.some((x) => x.v > 0)
           ? donut(
-              g.filter((x) => x.v > 0),
+              cgDonut(g.filter((x) => x.v > 0)),
               gTot
             )
           : ""
       }
-      ${g.length ? g.map((x) => (x.budget ? `<div class="catrow">${tile(x.kind, x.cat)}<div class="grow"><div class="top-l"><span>${escHtml(x.label || x.cat)}</span><span>${escHtml(fmtEur(x.v))} <span class="small muted">von ${escHtml(fmtEur0(x.budget))}</span></span></div><div class="sub"><div class="track"><div class="fill" style="width:${Math.max(x.v ? 3 : 0, Math.min(100, (x.v / x.budget) * 100))}%;background:${bColor(x)}"></div></div><span class="pct" style="${x.v >= x.budget * 0.8 ? `color:${bColor(x)};font-weight:800` : ""}">${Math.round((x.v / x.budget) * 100)} %</span></div>${x.v > x.budget ? `<div class="small" style="color:var(--bad);margin-top:3px">${escHtml(fmtEur(x.v - x.budget))} über dem Budget</div>` : ym === cur && days ? `<div class="small muted" style="margin-top:3px">noch ${escHtml(fmtEur(x.budget - x.v))} · ${escHtml(fmtEur(Math.max(0, x.budget - x.v) / days))} pro Tag</div>` : ""}</div></div>` : `<div class="catrow">${tile(x.kind, x.cat)}<div class="grow"><div class="top-l"><span>${escHtml(x.label || x.cat)}${x.kind === "betrieb" ? ` <span class="small muted">· Betrieb</span>` : ""}</span><span>${escHtml(fmtEur(x.v))}</span></div><div class="sub"><div class="track"><div class="fill" style="width:${Math.max(3, (x.v / gMax) * 100)}%;background:${catColor(x.kind, x.cat)}"></div></div><span class="pct">${Math.round((x.v / gTot) * 100)} %</span></div></div></div>`)).join("") : emptyState("basket", "Noch nichts ausgegeben", "Tipp auf das Plus, um deine erste Ausgabe einzutragen.")}
+      ${g.length ? (cgFlowRows(g, ROWF, gTot) || g.map(ROWF).join("")) : emptyState("basket", "Noch nichts ausgegeben", "Tipp auf das Plus, um deine erste Ausgabe einzutragen.")}
     </div>`;
 }

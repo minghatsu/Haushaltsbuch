@@ -240,6 +240,32 @@ document.addEventListener("click", (e) => {
 /* Einstellungen extra */
 const CHANGELOG = [
   [
+    "0.50.4",
+    "27. November 2026",
+    [
+      "Neu: Arbeitsvertrag hochladen. Wähle auf „Angestellt“ die PDF deines Vertrags – Mami findet Wochenstunden, Urlaubstage, Bruttogehalt, Befristung, Probezeit, Kündigungsfrist und Extras wie Jobticket oder Betriebsrente.",
+      "Du siehst alles als Prüfliste mit Häkchen und Ziel (Arbeitszeit, Urlaub, Gehalt, Erinnerung, Extras). Zahlen kannst du direkt ändern, dann trägt ein Tipp alles ein. Die ausgefüllten Kacheln leuchten kurz auf.",
+      "Ist der Vertrag befristet, erinnert dich Mami 4 Monate vor dem Ende auf der Seite Beruf. Auch das Ende der Probezeit zeigt sie dir.",
+      "Der Vertrag wird nur auf deinem Gerät gelesen. Gespeichert werden nur die Angaben, nicht die PDF.",
+      "Gehalt-Kachel: Ohne Lohnabrechnung zeigt sie jetzt das Brutto laut Vertrag oder das zuletzt eingegangene Gehalt statt „Noch keine Lohnabrechnung“.",
+      "„Gehalt & Abrechnungen“ aufgeräumt: Oben steht jetzt die Brutto-Netto-Treppe – vom Brutto Schritt für Schritt über Lohnsteuer, Rente, Krankenkasse sowie Pflege und Arbeitslosen bis zum Netto, mit Balken für jeden Abzug.",
+      "Steuerklasse I bis VI mit einem Tipp wählen. Kirchensteuer, Kinder und Zusatzbeitrag der Krankenkasse stellst du direkt darunter ein. Mit den Pfeilen wechselst du den Monat.",
+      "Kennst du die genauen Beträge? Tippe bei jedem Abzug auf „genau“ und trag die Zahl aus deiner Abrechnung ein. Monate mit Lohnabrechnung nehmen automatisch deren Zahlen.",
+      "Midijob (bis 2.000 €) und Minijob werden richtig mitgerechnet – im Übergangsbereich zahlst du weniger Sozialabgaben.",
+      "Neu: Buchung aufteilen. Öffne eine Ausgabe und tippe auf „Aufteilen“ – ein Einkauf lässt sich so auf mehrere Kategorien verteilen (z. B. Lebensmittel, Drogerie, Snacks). Ein Balken zeigt, wie viel schon verteilt ist; der erste Teil bekommt automatisch den Rest.",
+      "Aufgeteilte Buchungen stehen in der Liste weiter als eine Zeile mit dem ganzen Betrag. In Auswertungen und Budgets zählt jeder Teil in seiner Kategorie. „Aufteilung aufheben“ macht wieder eine Buchung daraus. Datum und Notiz änderst du direkt im Aufteilen-Fenster; der Kontostand bleibt dabei unverändert.",
+      "Neu: Ober- und Unterkategorien. Beim Eintragen wählst du erst die Gruppe (z. B. Mobilität), dann optional die Unterkategorie (Tanken, Parken …). Ohne Unterkategorie zählt es einfach unter der Gruppe. „Zuletzt“ zeigt deine häufigsten Kategorien für einen schnellen Tipp.",
+      "Mami sortiert deine bisherigen Kategorien beim ersten Mal automatisch in passende Gruppen. Unter Einstellungen → Kategorien ziehst du Gruppen am Griff in eine neue Reihenfolge und Kategorien in eine andere Gruppe – am Handy kurz gedrückt halten, dann ziehen. Gruppen lassen sich umbenennen und neu anlegen.",
+      "In „Wohin dein Geld fließt“ stehen jetzt die Gruppen mit ihrer Summe; ein Tipp klappt die Unterkategorien auf. Ein Budget mit dem Namen der Gruppe gilt für die ganze Gruppe – auch für die Warnung auf der Startseite, den Warnton beim Speichern und die Budget-Serie. Benennst du eine Gruppe um, ziehen Budget und Schnell-Knöpfe mit.",
+      "Neu: Schnell gebucht. Auf der Startseite legst du Knöpfe für Dinge an, die du oft kaufst. Mit festem Betrag bucht ein Tipp sofort (mit Rückgängig), mit „?“ tippst du nur noch den Betrag ein. Lange drücken = bearbeiten, „Sortieren“ = Knöpfe per Ziehen ordnen.",
+      "Neu: Wie letztes Mal. Im Fenster „Neue Buchung“ schlägt Mami oben vor, was zu Wochentag und Uhrzeit passt – z. B. „REWE · jeden Freitag · zuletzt 84,60 €“. Ein Tipp füllt Betrag, Kategorie und Notiz aus, der Stern macht daraus einen Favoriten.",
+      "Neu: Nur Ausgaben. Beim ersten Start fragt Mami: „Nur Ausgaben aufschreiben“ oder „Alles im Blick“. Unter Einstellungen → Startseite lässt sich das jederzeit umschalten – Einnahmen, Beruf und Sparen werden dann ausgeblendet, deine Daten bleiben.",
+      "Neu: Monatsgeld. Leg fest, wie viel Geld du im Monat hast (z. B. Haushaltsgeld). Die Startseite zeigt dann einen Ring „noch übrig“ und wie viel du pro Tag noch ausgeben kannst – ganz ohne Einnahmen einzutragen. Hinweise zu Kontostand, Einnahmen oder Beruf bleiben in diesem Modus aus; stattdessen meldet sich Mami, wenn das Monatsgeld überschritten ist.",
+      "Arbeitsweg: Die Jahressumme enthält jetzt Fahrten und Homeoffice-Pauschale zusammen.",
+      "Abrechnungen-Monate sind kürzer und passen auch bei großer Schrift. „Gehalt & Stunden“ und die Steuer-Hochrechnung lassen sich aufklappen, damit es übersichtlich bleibt.",
+    ],
+  ],
+  [
     "0.50.3",
     "27. November 2026",
     [

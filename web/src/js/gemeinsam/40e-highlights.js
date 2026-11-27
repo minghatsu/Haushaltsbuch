@@ -87,8 +87,8 @@ function hlData(ym) {
       })
     );
   const bud = store.settings.budgets || {},
-    budOk = Object.entries(bud).filter(([, v]) => +v > 0),
-    budHeld = budOk.length && budOk.every(([k, v]) => (by[k] || 0) <= +v);
+    budOk = budRows(c.tx),
+    budHeld = budOk.length && budOk.every((x) => x.v <= x.budget);
   const tDays = new Set(c.tx.map((t) => t.date)).size,
     rc = c.tx.filter((t) => hasReceipt(t.id)).length,
     badges = [];

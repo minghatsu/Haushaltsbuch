@@ -459,7 +459,8 @@ function lohnSection(y) {
         past = ym < cur,
         e = !has && ym <= cur ? mindestYm(ym) : 0,
         brk = !has && mindPer().length && ym <= cur && !e;
-      return `<button class="sm ${has ? "ok" : e ? "est" : brk ? "fut" : past && sl.length ? "miss" : "fut"}" data-slipm="${ym}" aria-label="${MONTHS[i]}${e ? `: geschätzt ${fmtEur0(e)} brutto` : ""}">${MONTHS[i].slice(0, 3)}${has ? " ✓" : e ? `<small>≈ ${escHtml(fmtEur0(e))}</small>` : brk ? "<small>–</small>" : past && sl.length ? " ?" : ""}</button>`;
+      /* kurz halten: Monat + Zeichen – passt auch bei großer Schrift; der Betrag steht im Vorlese-Text */
+      return `<button class="sm ${has ? "ok" : e ? "est" : brk ? "fut" : past && sl.length ? "miss" : "fut"}" data-slipm="${ym}" aria-label="${MONTHS[i]}${has ? ": " + fmtEur0(Number(has.brutto) || 0) + " brutto" : e ? `: geschätzt ${fmtEur0(e)} brutto` : ""}">${MONTHS[i].slice(0, 3)}<small>${has ? "✓" : e ? "≈" : brk ? "–" : past && sl.length ? "?" : "&nbsp;"}</small></button>`;
     }
   ).join("");
   const missing = Array.from(
@@ -472,7 +473,7 @@ function lohnSection(y) {
   const md = store.settings.mindest || {},
     v = yearLimits(y),
     nx = YV[Number(y) + 1];
-  const mindCard = `<div class="card flat mindc"><div class="switch" style="margin:0"><label for="aMind"><b>Ich bekomme Mindestlohn</b><br><span class="small muted">${md.on && md.h ? `${fmt2(v.ml)} € × ${numStr(md.h)} Std./Woche = <b>${escHtml(fmtEur0(mindestMonat(y)))}</b> brutto im Monat${nx ? ` · ab Januar ${Number(y) + 1}: ${fmt2(nx.ml)} € → ca. ${escHtml(fmtEur0(Math.round((nx.ml * md.h * 13) / 3)))}` : ""}` : `${y}: ${fmt2(v.ml)} € pro Stunde – dein Gehalt steigt dann jedes Jahr automatisch mit`}</span></label><input type="checkbox" id="aMind" ${md.on ? "checked" : ""}></div>
+  const mindCard = `<div class="mindc"><div class="switch" style="margin:0"><label for="aMind"><b>Ich bekomme Mindestlohn</b><br><span class="small muted">${md.on && md.h ? `${fmt2(v.ml)} € × ${numStr(md.h)} Std./Woche = <b>${escHtml(fmtEur0(mindestMonat(y)))}</b> brutto im Monat${nx ? ` · ab Januar ${Number(y) + 1}: ${fmt2(nx.ml)} € → ca. ${escHtml(fmtEur0(Math.round((nx.ml * md.h * 13) / 3)))}` : ""}` : `${y}: ${fmt2(v.ml)} € pro Stunde – dein Gehalt steigt dann jedes Jahr automatisch mit`}</span></label><input type="checkbox" id="aMind" ${md.on ? "checked" : ""}></div>
     ${
       md.on
         ? (mindPer().length
@@ -488,10 +489,13 @@ function lohnSection(y) {
           `<button class="link small" data-mperadd="1" style="margin-top:8px">＋ Stunden geändert oder Pause</button>`
         : ""
     }</div>`;
-  return `${slipEditor()}${mindCard}
-    <div class="kpis k3"><div class="kpi"><small>Brutto bisher</small><b>${escHtml(fmtEur0(b))}</b><span><span>${sl.length} ${sl.length === 1 ? "Abrechnung" : "Abrechnungen"}</span>${estYm.length ? ` · <span>${estYm.length} geschätzt</span>` : ""}</span></div><div class="kpi"><small>Lohnsteuer</small><b>${escHtml(fmtEur0(l))}</b><span>inkl. Soli/KiSt</span></div><div class="kpi"><small>Netto</small><b>${escHtml(fmtEur0(n))}</b><span>${sl.length && !estYm.length ? "ausgezahlt" : `${paidIn.length} Gehaltseingänge`}</span></div></div>
-    <div class="card flat"><div class="card-head"><h2>Abrechnungen ${y}</h2><span class="small muted">${sl.length} von 12 hochgeladen</span></div>
+  const est = Array.from({ length: 12 }, (_, i) => y + "-" + pad(i + 1)).filter((ym) => !map[ym] && ym <= cur && mindestYm(ym) > 0).length;
+  const acc = (id, title, sub, body) =>
+    `<details class="card flat lhacc" data-lhacc="${id}" ${LH_OPEN.has(id) ? "open" : ""}><summary><span class="grow"><b data-noi18n>${escHtml(title)}</b><small data-noi18n>${escHtml(sub)}</small></span>${svgIcon("chevron", 16)}</summary><div class="lhaccb">${body}</div></details>`;
+  return `${slipEditor()}${nrCard(y)}
+    <div class="card flat lhab"><div class="lhhd"><b>Abrechnungen ${y}</b><span class="small muted">${sl.length} von 12 hochgeladen</span></div>
       <div class="smgrid">${months}</div>
+      <div class="lhlg small muted" data-noi18n><span><i class="ok"></i>${escHtml(uiText("lh_lg_ok"))}</span>${est ? `<span><i class="est"></i>${escHtml(uiText("lh_lg_est"))}</span>` : ""}</div>
       ${
         sl.length && missing.length
           ? `<div class="notice warn" style="margin-top:12px"><span>Für ${missing
@@ -503,20 +507,37 @@ function lohnSection(y) {
           : ""
       }
       ${!sl.length ? `<p class="small muted" style="margin:10px 0 0">Lade deine Lohnabrechnungen als PDF hoch – dann rechnet die Steuerschätzung mit deinem echten Lohn und der echten Lohnsteuer statt mit Schätzwerten.</p>` : ""}
-      <div class="row-btns" style="justify-content:flex-start;margin-top:12px"><button class="btn primary" id="slipPdf">${svgIcon("doc", 16)} PDF hochladen</button><button class="btn" id="slipHand">Von Hand eintragen</button></div>
+      <div class="lhbtns"><button class="btn primary" id="slipPdf">${svgIcon("doc", 16)} PDF hochladen</button><button class="btn" id="slipHand">Von Hand eintragen</button></div>
     </div>
+    ${acc("std", uiText("lh_std"), md.on ? (md.h ? uiText("lh_std_on", { h: numStr(Number(mindH(cur)) || md.h) }) : uiText("lh_std_on0")) : uiText("lh_std_off"), mindCard)}
     ${
       sl.length
-        ? `<div class="card flat"><div class="card-head"><h2>Hochrechnung ${y}</h2><span class="pill">Schätzung</span></div><div class="kv">
+        ? acc(
+            "hr",
+            uiText("lh_hr", { y }),
+            uiText(tax.due >= 0 ? "lh_hr_nach" : "lh_hr_erst", { a: fmtEur0(Math.abs(tax.due)) }),
+            `<div class="kv">
       <span>Bruttolohn ${y}${sl.length < 12 ? " (voraussichtlich)" : ""}</span><span>${escHtml(fmtEur(L.brutto))}</span>
       <span>Lohnsteuer inkl. Soli/KiSt</span><span>${escHtml(fmtEur(L.slipLst + L.slipSoli + L.slipKist))}</span>
       ${hasSelf() ? `<span>+ Gewinn Selbstständigkeit</span><span>${escHtml(fmtEur(tax.gewinn))}</span>` : ""}
       <span class="sum">${tax.due >= 0 ? "Erwartete Nachzahlung" : "Erwartete Erstattung"}</span><span class="sum ${tax.due >= 0 ? "" : "pos"}">${escHtml(fmtEur(Math.abs(tax.due)))}</span></div>
-      ${L.slipSv > 0 && Math.abs((Number(store.settings.vorsorge) || 0) - L.slipSv) > 50 ? `<div class="notice info" style="margin-top:12px"><span>Laut Abrechnungen zahlst du ${y} etwa <b>${escHtml(fmtEur0(L.slipSv))}</b> Sozialversicherung (Vorsorge). In den Einstellungen stehen ${escHtml(fmtEur0(Number(store.settings.vorsorge) || 0))}.</span><button class="btn" id="slipVors" data-v="${L.slipSv}">Übernehmen</button></div>` : ""}
-    </div>`
+      ${L.slipSv > 0 && Math.abs((Number(store.settings.vorsorge) || 0) - L.slipSv) > 50 ? `<div class="notice info" style="margin-top:12px"><span>Laut Abrechnungen zahlst du ${y} etwa <b>${escHtml(fmtEur0(L.slipSv))}</b> Sozialversicherung (Vorsorge). In den Einstellungen stehen ${escHtml(fmtEur0(Number(store.settings.vorsorge) || 0))}.</span><button class="btn" id="slipVors" data-v="${L.slipSv}">Übernehmen</button></div>` : ""}`
+          )
         : ""
     }`;
 }
+/* Welche Klapp-Bereiche offen sind – bleibt beim Neuzeichnen erhalten */
+const LH_OPEN = new Set();
+document.addEventListener(
+  "toggle",
+  (e) => {
+    const d = e.target;
+    if (!d.dataset || !d.dataset.lhacc) return;
+    if (d.open) LH_OPEN.add(d.dataset.lhacc);
+    else LH_OPEN.delete(d.dataset.lhacc);
+  },
+  true
+);
 /* Werbungskosten */
 function wkSection(y) {
   const w = wkCalc(y),

@@ -174,9 +174,11 @@
     prepT = 0,
     dirty = true;
   const neighbour = (v, d) => {
-    const i = ORDER.indexOf(v),
-      n = ORDER.length;
-    return ORDER[(i + (d < 0 ? 1 : -1) + n) % n];
+    /* Nur-Ausgaben-Modus: Beruf und Sparen sind ausgeblendet, also nicht dorthin wischen */
+    const O = typeof simpleOn === "function" && simpleOn() ? ORDER.filter((k) => k !== "beruf" && k !== "zukunft") : ORDER,
+      i = O.indexOf(v),
+      n = O.length;
+    return O[(i + (d < 0 ? 1 : -1) + n) % n];
   };
   function headTop() {
     const hb = document.querySelector("header.top") || document.querySelector(".top"),

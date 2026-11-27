@@ -53,7 +53,13 @@ function dateFromSelects() {
 
 /* Sheet */
 function openSheet(kind, tx) {
+  /* Aufgeteilte Buchung: direkt die Aufteilung öffnen */
+  if (tx && tx.sp && tx.sp.g && typeof splOpen === "function" && splParts(tx.sp.g).length > 1) {
+    splOpen(tx.sp.g);
+    return;
+  }
   ui.scanItems = null;
+  ui.sugUsed = false;
   $("fWk").checked = !!(tx && tx.wk);
   ui.pay = tx ? tx.pay || "karte" : null;
   ui.acct = tx ? kaOf(tx) : null;
@@ -118,7 +124,8 @@ function renderSheet() {
   document.querySelectorAll("#kindSeg button").forEach((b) => {
     b.setAttribute("aria-pressed", String(b.dataset.kind === ui.kind));
     b.hidden =
-      !hasSelf() && (b.dataset.kind === "betrieb" || b.dataset.kind === "vorauszahlung") && ui.kind !== b.dataset.kind;
+      (!hasSelf() && (b.dataset.kind === "betrieb" || b.dataset.kind === "vorauszahlung") && ui.kind !== b.dataset.kind) ||
+      (simpleOn() && b.dataset.kind !== "ausgabe" && ui.kind !== b.dataset.kind);
   });
   const list =
     ui.kind === "einnahme"
@@ -128,7 +135,7 @@ function renderSheet() {
         : ui.kind === "anlage"
           ? [...invGoalNames(), INV_CAT]
           : cats(ui.kind);
-  if (ui.cat && !list.includes(ui.cat)) ui.cat = null;
+  if (ui.cat && !list.includes(ui.cat) && !(cgOn(ui.kind) && cgOf(ui.kind, ui.cat))) ui.cat = null;
   if (!ui.cat && list.length) ui.cat = list[0];
   $("catWrap").hidden = !list.length;
   $("catGrid").innerHTML = list
@@ -137,6 +144,24 @@ function renderSheet() {
         `<button class="cat" data-cat="${escHtml(n)}" aria-pressed="${n === ui.cat}">${ui.kind === "anlage" ? `<span class="ictile" style="background:color-mix(in srgb, var(--accent) 16%, transparent);color:var(--accent)">${svgIcon(n === INV_CAT ? "chart" : "piggy")}</span>` : tile(ui.kind, n)}${escHtml(n === INV_CAT && invGoalNames().length ? uiText("inv_nogoal") : n)}</button>`
     )
     .join("");
+  /* Private Ausgaben: Gruppen mit Unterkategorien */
+  {
+    let af = $("cgAfter");
+    if (!af) {
+      af = document.createElement("div");
+      af.id = "cgAfter";
+      $("catGrid").after(af);
+    }
+    if (cgOn(ui.kind) && list.length) {
+      const C = cgSheetGrid(ui.kind);
+      $("catGrid").innerHTML = C.tiles;
+      af.innerHTML = C.after;
+      af.hidden = !C.after;
+    } else {
+      af.innerHTML = "";
+      af.hidden = true;
+    }
+  }
   let hint = "";
   if (ui.kind === "einnahme" && incArt(ui.cat) === "selbst")
     hint =
@@ -151,12 +176,23 @@ function renderSheet() {
   $("sheetTitle").textContent = ui.editId ? "Buchung ändern" : "Neue Buchung";
   $("saveBtn").textContent = ui.editId ? "Änderung speichern" : "Speichern";
   $("editBtns").hidden = !ui.editId;
+  {
+    const sb = $("splBtn"),
+      et = ui.editId && store.tx.find((t) => t.id === ui.editId);
+    if (sb) {
+      sb.hidden = !(et && splCanSplit(et) && (ui.kind === "ausgabe" || ui.kind === "betrieb"));
+      sb.lastChild.textContent = " " + uiText("sp_btn");
+    }
+  }
   $("sheetImport").hidden = true;
   $("scanRow").hidden = !!ui.editId;
   $("scanPick").hidden = !NATIVE_SCAN;
   if (!NATIVE_SCAN) {
     $("scanTitle").textContent = "Quittung einlesen";
   }
+  try {
+    favSugRender();
+  } catch (_) {}
   const d = $("fDate").value;
   fillDateSelects();
   document

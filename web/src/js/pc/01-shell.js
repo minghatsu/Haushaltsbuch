@@ -343,7 +343,10 @@ function pcHome(o) {
       accts.findIndex((a) => a.total)
     ),
     heroCol = accts.length ? userCol("acct", accts[hi].name) : "";
-  const html = `<aside class="pchero" id="pcHero"${heroCol ? ` style="--herocol:${heroCol};--herocol2:color-mix(in srgb, ${heroCol} 78%, #000);--heroring:color-mix(in srgb, ${heroCol} 45%, #fff);background:linear-gradient(160deg, ${heroCol} 0%, color-mix(in srgb, ${heroCol} 62%, #000) 70%);box-shadow:0 18px 40px color-mix(in srgb, ${heroCol} 20%, transparent)"` : ""}>
+  /* Nur-Ausgaben-Modus: kein Kontostand, stattdessen „Ausgegeben“ bzw. Monatsgeld-Ring */
+  const html = simpleOn()
+    ? `<aside class="pchero pcsimple" id="pcHero"><small class="pchi"><span>${escHtml(greet)}</span>${first ? ", " + escHtml(first) : ""} · <span>${escHtml(MONTHS[m - 1])} ${y}</span></small>${simpleHero(ym)}</aside>`
+    : `<aside class="pchero" id="pcHero"${heroCol ? ` style="--herocol:${heroCol};--herocol2:color-mix(in srgb, ${heroCol} 78%, #000);--heroring:color-mix(in srgb, ${heroCol} 45%, #fff);background:linear-gradient(160deg, ${heroCol} 0%, color-mix(in srgb, ${heroCol} 62%, #000) 70%);box-shadow:0 18px 40px color-mix(in srgb, ${heroCol} 20%, transparent)"` : ""}>
     <small class="pchi"><span>${escHtml(greet)}</span>${first ? ", " + escHtml(first) : ""} · <span>${escHtml(MONTHS[m - 1])} ${y}</span></small>
     ${(() => {
       /* Groß oben: das Hauptkonto – „auf allen Konten“ steht klein bei den Konten */ const mA = many

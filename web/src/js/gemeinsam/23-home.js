@@ -8,7 +8,7 @@ function homeBlocks(html) {
 function renderHomeEd() {
   const el = $("homeEd");
   if (!el) return;
-  el.innerHTML = `<div class="card" data-noi18n><div class="switch"><label for="sCashHome"><b>${escHtml(uiText("hc_sw"))}</b><br><span class="small muted">${escHtml(uiText("hc_sw_s"))}</span></label><input type="checkbox" id="sCashHome" ${store.settings.cashHide ? "" : "checked"}></div></div>`;
+  el.innerHTML = `<div class="card" data-noi18n><div class="switch"><label for="sCashHome"><b>${escHtml(uiText("hc_sw"))}</b><br><span class="small muted">${escHtml(uiText("hc_sw_s"))}</span></label><input type="checkbox" id="sCashHome" ${store.settings.cashHide ? "" : "checked"}></div></div>${simpleEdHtml()}`;
 }
 function renderAvatar() {
   const p = store.settings && store.settings.photo,
@@ -387,7 +387,7 @@ function fixedAreas(ym) {
 /* Letzte Buchungen */
 function recentTimeline(c) {
   const f = ui.recentF || "alle";
-  let tx = sortTx(c.tx);
+  let tx = sortTx(splGroup(c.tx));
   if (f === "aus") tx = tx.filter((t) => t.kind !== "einnahme");
   else if (f === "ein") tx = tx.filter((t) => t.kind === "einnahme");
   tx = tx.slice(0, ui.wide ? 8 : 6);

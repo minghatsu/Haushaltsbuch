@@ -180,6 +180,9 @@ async function saveTx() {
     if (old && old.net != null && Math.abs(old.amount - doc.amount) < 0.005 && old.cat === doc.cat) doc.net = old.net;
     else if (!old || old.net != null) doc.net = round2(doc.amount / (1 + (Number(store.settings.vatRate) || 0) / 100));
   }
+  try {
+    cgEnsureCat(doc.kind, doc.cat);
+  } catch (_) {}
   const btn = $("saveBtn");
   btn.disabled = true;
   const ok = await safe(() => saveTxDoc(id, doc, old));
@@ -195,14 +198,8 @@ async function saveTx() {
   {
     let k = !editing && doc.kind === "einnahme" ? "income" : "save";
     try {
-      const b = Number((store.settings.budgets || {})[doc.cat]) || 0;
-      if (!editing && doc.kind === "ausgabe" && b > 0) {
-        const sp = sum(
-          monthCalc(date.slice(0, 7)).tx.filter((t) => t.kind === "ausgabe" && t.cat === doc.cat),
-          (t) => t.amount
-        );
-        if (sp > b && sp - doc.amount <= b) k = "warn";
-      }
+      /* Budget der Kategorie oder ihrer Gruppe gerade überschritten? */
+      if (!editing && budCrossed({ ...doc, date })) k = "warn";
     } catch (_) {}
     SND.play(k);
   }

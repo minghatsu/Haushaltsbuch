@@ -1248,6 +1248,11 @@ function renderMore() {
     `<button class="icon-btn" data-catdel="${k}|${escHtml(n)}" aria-label="${escHtml(n)} entfernen"><svg class="i" viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`;
   $("catMon").textContent = "Ausgaben im " + MONTHS[new Date().getMonth()];
   for (const k of ["ausgabe", "betrieb"]) {
+    /* Private Ausgaben: Gruppen zum Ziehen & Ablegen (nicht neu zeichnen, solange gezogen wird) */
+    if (cgOn(k)) {
+      if (!(typeof CGD !== "undefined" && CGD.on) && !$("catEd-" + k).contains(document.activeElement)) $("catEd-" + k).innerHTML = cgManager(k);
+      continue;
+    }
     const list = cats(k),
       vals = list.map((n) => spent(k, n)),
       max = Math.max(1, ...vals);

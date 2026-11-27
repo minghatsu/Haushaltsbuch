@@ -1480,6 +1480,14 @@ const PTOUR_FN = () => ({
         p: [uiText("tr_ag_slip_p")],
       },
       {
+        sel: '[data-view="beruf"] .agvt',
+        side: "j",
+        raw: 1,
+        ic: "doc",
+        t: uiText("tr_vt_t"),
+        p: [uiText("tr_vt_p")],
+      },
+      {
         sel: '[data-view="beruf"] .bfgj [data-agaz]',
         side: "j",
         raw: 1,
@@ -1730,6 +1738,21 @@ function ptourOpen(v) {
 }
 /* Große Updates: Mami zeigt Neues einmal von selbst (kleine Updates nur unter „Neu in dieser Version“) */
 const NEWTOUR = [
+  {
+    v: "0.50.4",
+    s: () =>
+      hasJob()
+        ? [
+            {
+              sel: '[data-view="beruf"] .agvt',
+              side: "j",
+              ic: "doc",
+              t: uiText("tr_vt_t"),
+              p: [uiText("tr_vt_p")],
+            },
+          ]
+        : [],
+  },
   {
     v: "0.50.3",
     s: () => [

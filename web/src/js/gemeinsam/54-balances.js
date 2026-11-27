@@ -47,7 +47,7 @@ function accountNames() {
 }
 /* Selbst eingetippte Buchungen (nicht aus dem Kontoauszug, nicht bar) verändern den Hauptkonto-Stand */
 function manualSign(t) {
-  if (!t || t.importKey || t.pay === "bar" || t.source === "bank") return 0;
+  if (!t || t.importKey || t.pay === "bar" || t.source === "bank" || (t.sp && t.sp.imp)) return 0;
   const k = t.kind;
   if (k === "einnahme") return 1;
   if (k === "ausgabe" || k === "betrieb" || k === "vorauszahlung") return -1;
